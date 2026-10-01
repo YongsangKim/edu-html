@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나만의 뉴스데스크 꾸미기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 16~25p. 가운데 Canva 화면은 img/p08_screen_{이름}.png(504x895), 템플릿 img/p08_tpl_{a|b|c}.png,
+           스티커 img/p08_sticker_{1|2}.png, 완성 img/p08_result_{a|b|c}{1|2}.png. 클릭 영역 좌표는 화면 이미지 나오면 조정 */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p08-screen{position:absolute;left:703px;top:21px;width:504px;height:895px;box-sizing:border-box;border:solid 8px #1b1738;border-radius:40px;background:#fff center / cover no-repeat;overflow:hidden}
+        .p08-canvas{position:absolute;left:720px;top:173px;width:472px;height:265px;border-radius:12px;background:#48159c center / cover no-repeat}
+
+        .p08-tpls{position:absolute;left:735px;top:287px;width:440px;height:542px;overflow-y:auto;display:flex;flex-direction:column;gap:20px}
+        .p08-stickers{position:absolute;left:801px;top:326px;width:315px;display:flex;flex-direction:column;gap:24px}
+        .p08-pick{flex:0 0 auto;width:100%;height:244px;padding:0;border:solid 6px #eae0fd;border-radius:20px;background:#48159c center / cover no-repeat;
+          font-family:'Cafe24 Ssurround';font-size:60px;color:#fff;cursor:pointer}
+        .p08-pick:hover{border-color:#8278ff}
+        .p08-pick.is-selected{border-color:#ff4ff9}
+
+        .p08-search-text{position:absolute;left:775px;top:94px;width:288px;height:54px;display:flex;align-items:center;padding-left:14px;box-sizing:border-box;
+          font-family:'Pretendard';font-size:32px;font-weight:600;color:#1b1738}
+        .p08-type-btn{position:absolute;left:1374px;top:392px;width:367px;height:161px;font-size:56px;line-height:1.15}
+
+        .p08-hit-template{left:740px;top:740px;width:430px;height:90px}
+        .p08-hit-elements{left:880px;top:770px;width:120px;height:110px}
+        .p08-hit-searchbar{left:730px;top:190px;width:450px;height:80px}
+        .p08-hit-search{left:1070px;top:94px;width:80px;height:54px}
+
+        /* 임시: Canva 화면 이미지가 없어서 클릭할 자리를 색으로 표시. 화면 이미지 넣으면 이 두 줄 삭제 */
+        .p08 .hit-area{background:rgba(255,79,139,.3);outline:5px dashed #ff4f8b;outline-offset:-5px;border-radius:14px;animation:p08-hit-blink 1.2s ease-in-out infinite}
+        @keyframes p08-hit-blink{50%{background:rgba(255,79,139,.55)}}
+
+        .p08 .is-off{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default p08">
+          <p class="guide-bubble" id="p08Bubble"></p>
+          <div class="guide-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+
+          <div class="p08-screen" id="p08Screen"></div>
+          <div class="p08-canvas is-off" id="p08Canvas"></div>
+
+          <div class="p08-tpls is-off" id="p08Tpls">
+            <button type="button" class="p08-pick" data-pick="a" style="background-image:url('img/p08_tpl_a.png')">A</button>
+            <button type="button" class="p08-pick" data-pick="b" style="background-image:url('img/p08_tpl_b.png')">B</button>
+            <button type="button" class="p08-pick" data-pick="c" style="background-image:url('img/p08_tpl_c.png')">C</button>
+          </div>
+          <div class="p08-stickers is-off" id="p08Stickers">
+            <button type="button" class="p08-pick" data-pick="1" style="background-image:url('img/p08_sticker_1.png')">1</button>
+            <button type="button" class="p08-pick" data-pick="2" style="background-image:url('img/p08_sticker_2.png')">2</button>
+          </div>
+
+          <span class="p08-search-text is-off" id="p08SearchText">아나운서</span>
+          <button type="button" class="card-btn p08-type-btn is-off" id="p08TypeBtn">아나운서<br>입력하기</button>
+
+          <button type="button" class="hit-area p08-hit-template is-off" data-hit="template" aria-label="추천 템플릿"></button>
+          <button type="button" class="hit-area p08-hit-elements is-off" data-hit="elements" aria-label="요소"></button>
+          <button type="button" class="hit-area p08-hit-searchbar is-off" data-hit="searchbar" aria-label="검색창"></button>
+          <button type="button" class="hit-area p08-hit-search is-off" data-hit="search" aria-label="검색"></button>
+
+          <a href="javascript:;" class="js-sfx next-btn is-off" id="p08Next" data-sound="sound/click.mp3">
+            <img src="../../img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" alt="다음">
+          </a>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="나만의 뉴스데스크 꾸미기" data-next="page09.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const TPL_FEEDBACK = {
+      a: '밝고 경쾌한 아침 뉴스<br>스타일을 선택할까요?',
+      b: '진지한 9시 뉴스<br>스타일을 선택할까요?',
+      c: '화려한 연예 뉴스<br>스타일을 선택할까요?'
+    };
+    const STEPS = [
+      { bubble: '먼저, 템플릿을 골라볼까요?<br>아래의 ‘추천 템플릿’을<br>클릭해요.', screen: 'home', hit: 'template' },
+      { bubble: '마음에 드는<br>템플릿을 선택해요.', screen: 'list', pick: 'tpl' },
+      { bubble: '뉴스 스타일을 선택했어요!<br>이제 아나운서 스티커를<br>붙여봐요.', screen: 'edit', canvas: true, next: true },
+      { bubble: '아래 편집 도구창에서<br>‘요소’를 클릭해요.', screen: 'edit', canvas: true, hit: 'elements' },
+      { bubble: '검색창을 클릭해요.', screen: 'elements', hit: 'searchbar' },
+      { bubble: '버튼을 눌러 ‘아나운서’를<br>입력하고 검색을 클릭해요.', screen: 'search', type: true },
+      { bubble: '버튼을 눌러 ‘아나운서’를<br>입력하고 검색을 클릭해요.', screen: 'search', typed: true, hit: 'search' },
+      { bubble: '넣고 싶은<br>아나운서 스티커를 선택해요.', screen: 'stickers', pick: 'sticker' },
+      { bubble: '뉴스 데스크를 모두 꾸몄어요!<br>이제 본격적으로 뉴스를<br>만들어볼까요?', screen: 'edit', canvas: true, result: true, next: true, href: 'page09.html' }
+    ];
+
+    const bubble = document.getElementById('p08Bubble');
+    const screen = document.getElementById('p08Screen');
+    const canvas = document.getElementById('p08Canvas');
+    const tpls = document.getElementById('p08Tpls');
+    const stickers = document.getElementById('p08Stickers');
+    const searchText = document.getElementById('p08SearchText');
+    const typeBtn = document.getElementById('p08TypeBtn');
+    const nextBtn = document.getElementById('p08Next');
+    const hits = Array.from(document.querySelectorAll('[data-hit]'));
+    const playClick = makeSfx('sound/click.mp3');
+
+    const chosen = { tpl: '', sticker: '' };
+    let index = 0;
+
+    function render() {
+      const step = STEPS[index];
+      bubble.innerHTML = step.bubble;
+      screen.style.backgroundImage = "url('img/p08_screen_" + step.screen + ".png')";
+
+      canvas.classList.toggle('is-off', !step.canvas);
+      canvas.style.backgroundImage = step.result
+        ? "url('img/p08_result_" + chosen.tpl + chosen.sticker + ".png'), url('img/p08_tpl_" + chosen.tpl + ".png')"
+        : "url('img/p08_tpl_" + chosen.tpl + ".png')";
+
+      tpls.classList.toggle('is-off', step.pick !== 'tpl');
+      stickers.classList.toggle('is-off', step.pick !== 'sticker');
+      typeBtn.classList.toggle('is-off', !step.type);
+      searchText.classList.toggle('is-off', !step.typed);
+      nextBtn.classList.toggle('is-off', !step.next);
+      resetImageSwap(nextBtn);
+
+      clearFingers();
+      hits.forEach((h) => {
+        const on = h.dataset.hit === step.hit;
+        h.classList.toggle('is-off', !on);
+        if (on) pointFingerAt(h);
+      });
+    }
+
+    function go() {
+      index += 1;
+      render();
+    }
+
+    hits.forEach((h) => h.addEventListener('click', () => { playClick(); go(); }));
+    typeBtn.addEventListener('click', () => { playClick(); go(); });
+
+    [[tpls, 'tpl'], [stickers, 'sticker']].forEach(([box, key]) => {
+      box.querySelectorAll('.p08-pick').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          playClick();
+          box.querySelectorAll('.p08-pick').forEach((b) => b.classList.toggle('is-selected', b === btn));
+          chosen[key] = btn.dataset.pick;
+          if (key === 'tpl') bubble.innerHTML = TPL_FEEDBACK[chosen.tpl];
+          nextBtn.classList.remove('is-off');
+        });
+      });
+    });
+
+    nextBtn.addEventListener('click', () => {
+      const step = STEPS[index];
+      if (step.href) {
+        try { sessionStorage.setItem('sa02_desk', chosen.tpl + chosen.sticker); } catch (e) {}
+        setTimeout(() => navigateTo(step.href), 300);
+        return;
+      }
+      setTimeout(go, 300);
+    });
+
+    render();
+  })();
+  </script>
+</body>
+</html>

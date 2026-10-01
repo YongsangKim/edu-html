@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마음 배달 작전</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 67~72p. 3라운드, 라운드마다 메시지 카드 10장(정답 5·오답 5, 같은 종류 3장 연속 없이 무작위)이 떨어짐.
+           좌우 방향키(터치 화면은 끌기)로 바구니를 옮겨 받음. 카드 폭 절반 이상이 바구니에 걸치면 받은 것으로 침.
+           정답 5장을 다 받아야 라운드 성공, 하나라도 놓치면 그 라운드 다시 시작(팝업 문구는 기획서에 없어 임의).
+           정답 한 장마다 마음 게이지 1/15씩. 친구 img/p12_guest1.png(모든 라운드 공통), 바구니 밑 캐릭터 img/p12_character.png */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px;overflow:hidden}
+
+        .p12-gauge-label{position:absolute;left:560px;top:40px;height:64px;padding:6px 30px 0;box-sizing:border-box;display:flex;align-items:center;border-radius:32px;background:#48159c;
+          font-family:'Cafe24 Ssurround';font-size:40px;color:#fff}
+        .p12-gauge{left:860px;top:40px;width:953px}
+        .p12-gauge:before{background-image:url('img/p12_star.png')}
+
+        .p12-student{position:absolute;left:81px;top:381px;width:377px;height:509px;background:center bottom / contain no-repeat}
+        .p12-student:after{content:'친구';position:absolute;left:70px;top:90px;width:240px;height:380px;border-radius:120px 120px 30px 30px;background:rgba(72,21,156,.2);
+          display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:44px;color:#48159c}
+        .p12-student.has-img:after{display:none}
+        .p12-bubble{left:37px;bottom:562px;width:434px;min-height:0;padding:28px 14px;display:flex;align-items:center;justify-content:center;font-size:40px;z-index:5}
+
+        .p12-card{position:absolute;top:0;left:0;width:395px;height:162px;box-sizing:border-box;padding:6px 24px 0;display:flex;align-items:center;justify-content:center;text-align:center;
+          font-size:34px;line-height:1.25;letter-spacing:-0.05em;word-break:keep-all;will-change:transform;z-index:6;pointer-events:none}
+        .p12-basket{position:absolute;left:906px;top:611px;width:533px;height:300px;z-index:7;touch-action:none;cursor:grab}
+        .p12-basket-bowl{position:absolute;left:0;top:0;width:533px;height:134px;box-sizing:border-box;border:solid 6px #48159c;border-radius:20px 20px 120px 120px;
+          background:#91b9e7 center / contain no-repeat}
+        .p12-basket-char{position:absolute;left:151px;top:112px;width:231px;height:240px;background:url('img/p12_character.png') center top / contain no-repeat;z-index:-1}
+        .p12-heart{position:absolute;left:199px;top:12px;width:135px;height:109px;display:flex;align-items:center;justify-content:center;font-size:96px;line-height:1;color:#fff;
+          text-shadow:0 0 0 #1b1738,0 4px 0 rgba(0,0,0,.2);transition:transform .2s}
+        .p12-heart.is-good{color:#ff4f8b;transform:scale(1.25)}
+        .p12-heart.is-bad{transform:scale(1.1) rotate(-10deg);opacity:.8}
+
+        .p12-banner{position:absolute;left:0;top:340px;width:1920px;margin:0;text-align:center;z-index:20}
+        .p12-banner span{display:inline-block;padding:14px 60px 8px;border-radius:50px;background:#48159c;font-family:'Cafe24 Ssurround';font-size:64px;color:#fff;letter-spacing:-0.04em}
+
+        #p12Retry{z-index:120}
+        .p12 .is-off{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default p12" id="p12Main">
+          <div class="p12-gauge-label">마음 게이지</div>
+          <div class="gauge is-thin p12-gauge"><div class="gauge-fill" id="p12Fill"></div></div>
+
+          <div class="p12-student" id="p12Student"></div>
+          <p class="guide-bubble p12-bubble" id="p12Bubble"></p>
+
+          <div id="p12Cards"></div>
+          <div class="p12-basket" id="p12Basket">
+            <div class="p12-basket-bowl"></div>
+            <span class="p12-heart" id="p12Heart">&#9829;</span>
+            <div class="p12-basket-char"></div>
+          </div>
+
+          <p class="p12-banner is-off" id="p12Banner"><span id="p12BannerText"></span></p>
+
+          <div class="avatar-modal is-off" id="p12Retry">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-medium">친구에게 힘이 되는 말을 모두 받지 못했어요.</p>
+                <button type="button" class="card-btn is-popup" id="p12RetryBtn" style="align-self:flex-end;margin-top:10px">다시 해보기</button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="마음 배달 작전" data-next="page13.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const ROUNDS = [
+      { say: '열심히 준비한 시험에서<br>생각보다 점수가<br>낮게 나왔어',
+        good: ['많이 속상했겠다.<br>정말 열심히 했잖아.', '다음에는 더 잘할 수<br>있을 거야. 힘내!', '열심히 준비한 거 알아.<br>너무 속상해하지 마!', '괜찮아 다음 시험에<br>다시 도전해보자!', '원하는 점수는 아니지만<br>끝까지 노력한 게 멋져!'],
+        bad: ['시험 잘 봤구나! 좋은<br>점수 받은 거 축하해!', '점수가 낮은 게 뭐 어때?<br>별일 아니잖아.', '그러게 공부를 더<br>열심히 했어야지.', '나는 시험 점수 잘 나왔어.<br>기분이 정말 좋아!', '시험은 이미 끝났으니까<br>이제 생각하지 마.'] },
+      { say: '열심히 노력해서<br>대회에서 상을 받았어!',
+        good: ['상 받은 거 정말 축하해!<br>열심히 노력했구나.', '그동안 열심히 연습했잖아.<br>정말 잘했어!', '좋은 결과가 나와서 기쁘겠다.<br>정말 축하해!', '끝까지 노력해서 상을 받았구나.<br>정말 멋지다!', '열심히 준비한 만큼 좋은<br>결과가 나왔네. 축하해!'],
+        bad: ['상을 못 받아서 속상하겠다.<br>다음에는 잘할 거야!', '상 하나 받은 게 뭐가 대단해?<br>별거 아니잖아.', '다음에는 더 열심히 해서<br>더 좋은 상을 받아야 해.', '나는 대회에서 상을<br>받지 못해서 속상해.', '그게 대단한 건가?<br>잘 모르겠어.'] },
+      { say: '내일은 내가 처음<br>발표하는 날이야.<br>너무 긴장돼!',
+        good: ['처음이라 긴장되겠다.<br>그래도 넌 잘할 수 있어!', '너무 걱정하지 마. 차분히<br>발표하면 괜찮을 거야.', '열심히 준비했잖아!<br>자신 있게 발표해 봐!', '긴장해도 괜찮아.<br>내가 옆에서 응원할게!', '조금 실수해도 괜찮아.<br>편하게 발표해 봐!'],
+        bad: ['발표를 정말 잘했구나!<br>멋진 발표였어.', '발표하는 게 뭐가 긴장돼?<br>하나도 어렵지 않잖아.', '사람들 앞에서 실수하면<br>정말 창피할 것 같아.', '나는 발표할 때<br>하나도 긴장하지 않아!', '긴장되면 그냥 발표하지<br>않는 게 좋을 것 같아.'] }
+    ];
+    const TOTAL_GOOD = 15;
+    const AREA = { left: 560, right: 1880, top: 120, catchY: 611 };
+    const FALL_SPEED = 130;
+    const SPAWN_GAP = 2400;
+    const BASKET_W = 533;
+
+    const $ = (id) => document.getElementById(id);
+    const main = $('p12Main');
+    const cardsBox = $('p12Cards');
+    const basket = $('p12Basket');
+    const heart = $('p12Heart');
+    const fill = $('p12Fill');
+    const stage = document.getElementById('stage');
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+
+    let round = 0;
+    let basketX = 906;
+    let caughtTotal = 0;
+    let roundGood = 0;
+    let running = false;
+    let queue = [];
+    let falling = [];
+    let lastSpawn = 0;
+    let lastT = 0;
+    const keys = { left: false, right: false };
+
+    function setBasket(x) {
+      basketX = Math.max(AREA.left, Math.min(AREA.right - BASKET_W, x));
+      basket.style.left = basketX + 'px';
+    }
+    function setGauge() { fill.style.width = (caughtTotal >= TOTAL_GOOD ? 100 : caughtTotal / TOTAL_GOOD * 100) + '%'; }
+
+    // 같은 종류(정답/오답)가 3장 이상 이어지지 않게 섞기
+    function makeQueue(r) {
+      const cards = r.good.map((t) => ({ t, good: true })).concat(r.bad.map((t) => ({ t, good: false })));
+      for (let tries = 0; tries < 200; tries++) {
+        const q = shuffleArray(cards);
+        if (!q.some((c, i) => i >= 2 && c.good === q[i - 1].good && c.good === q[i - 2].good)) return q;
+      }
+      return shuffleArray(cards);
+    }
+
+    function banner(text, ms, then) {
+      $('p12BannerText').textContent = text;
+      $('p12Banner').classList.remove('is-off');
+      setTimeout(() => { $('p12Banner').classList.add('is-off'); if (then) then(); }, ms);
+    }
+
+    function startRound() {
+      const r = ROUNDS[round];
+      $('p12Bubble').innerHTML = r.say;
+      const stu = $('p12Student');
+      const src = 'img/p12_guest1.png';
+      stu.classList.remove('has-img');
+      stu.style.backgroundImage = '';
+      const probe = new Image();
+      probe.onload = () => { stu.style.backgroundImage = "url('" + src + "')"; stu.classList.add('has-img'); };
+      probe.src = src;
+      cardsBox.innerHTML = '';
+      falling = [];
+      roundGood = 0;
+      queue = makeQueue(r);
+      banner((round + 1) + '라운드 시작!', 2000, () => {
+        running = true;
+        lastSpawn = 0;
+        lastT = performance.now();
+        requestAnimationFrame(tick);
+      });
+    }
+
+    function spawn() {
+      const c = queue.shift();
+      const el = document.createElement('div');
+      el.className = 'emotion-option p12-card';
+      el.innerHTML = c.t;
+      cardsBox.appendChild(el);
+      const x = AREA.left + Math.random() * (AREA.right - AREA.left - 395);
+      falling.push({ el, x, y: AREA.top - 162, good: c.good });
+    }
+
+    function flashHeart(cls) {
+      heart.classList.remove('is-good', 'is-bad');
+      heart.innerHTML = cls === 'is-bad' ? '&#128148;' : '&#9829;';
+      heart.classList.add(cls);
+      setTimeout(() => { heart.classList.remove(cls); heart.innerHTML = '&#9829;'; }, 600);
+    }
+
+    function tick(now) {
+      if (!running) return;
+      const dt = Math.min((now - lastT) / 1000, 0.05);
+      lastT = now;
+      if (keys.left) setBasket(basketX - 900 * dt);
+      if (keys.right) setBasket(basketX + 900 * dt);
+      if (queue.length && now - lastSpawn > SPAWN_GAP) { spawn(); lastSpawn = now; }
+
+      falling = falling.filter((f) => {
+        const prevBottom = f.y + 162;
+        f.y += FALL_SPEED * dt;
+        const bottom = f.y + 162;
+        if (prevBottom < AREA.catchY && bottom >= AREA.catchY) {
+          const overlap = Math.min(f.x + 395, basketX + BASKET_W) - Math.max(f.x, basketX);
+          if (overlap >= 395 / 2) {
+            f.el.remove();
+            if (f.good) {
+              roundGood += 1;
+              caughtTotal += 1;
+              setGauge();
+              playCorrect();
+              flashHeart('is-good');
+            } else {
+              playWrong();
+              flashHeart('is-bad');
+            }
+            return false;
+          }
+        }
+        if (f.y > 960) { f.el.remove(); return false; }
+        f.el.style.transform = 'translate(' + f.x + 'px,' + f.y + 'px)';
+        return true;
+      });
+
+      if (!queue.length && !falling.length) {
+        running = false;
+        endRound();
+        return;
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function endRound() {
+      if (roundGood < 5) {
+        caughtTotal -= roundGood;
+        setGauge();
+        $('p12Retry').classList.remove('is-off');
+        return;
+      }
+      banner((round + 1) + '라운드 종료!', 1000, () => {
+        round += 1;
+        if (round < ROUNDS.length) startRound();
+        else setTimeout(() => navigateTo('page13.html'), 300);
+      });
+    }
+
+    $('p12RetryBtn').addEventListener('click', () => {
+      $('p12Retry').classList.add('is-off');
+      startRound();
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') { keys.left = true; e.preventDefault(); }
+      if (e.key === 'ArrowRight') { keys.right = true; e.preventDefault(); }
+    });
+    window.addEventListener('keyup', (e) => {
+      if (e.key === 'ArrowLeft') keys.left = false;
+      if (e.key === 'ArrowRight') keys.right = false;
+    });
+    // 터치 화면용: 바구니를 끌어서 옮김(기획서는 방향키만 있음)
+    basket.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      const s = stage.getBoundingClientRect().width / 1920;
+      const sx = e.clientX;
+      const bx = basketX;
+      basket.setPointerCapture(e.pointerId);
+      const move = (ev) => setBasket(bx + (ev.clientX - sx) / s);
+      const up = () => { basket.removeEventListener('pointermove', move); basket.removeEventListener('pointerup', up); };
+      basket.addEventListener('pointermove', move);
+      basket.addEventListener('pointerup', up);
+    });
+
+    setGauge();
+    startRound();
+  })();
+  </script>
+</body>
+</html>

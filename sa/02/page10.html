@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나의 자랑거리를 소개하는 뉴스</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 27~41p(40~41p 개인정보 확인은 완성하기 뒤 모달). 가운데 Canva 화면은 img/p10_screen_{이름}.png(504x895), 꾸민 뉴스데스크는 page08 이미지(p08_result_*) 재사용.
+           앞 활동 결과는 sessionStorage(sa02_article, sa02_desk), 목차로 바로 들어오면 기획서 기본 조합. 음성 예시는 sound/p10_tts_{minjun|yuna}.mp3.
+           클릭 영역 좌표는 화면 이미지 나오면 조정 */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p10-screen{position:absolute;left:703px;top:21px;width:504px;height:895px;box-sizing:border-box;border:solid 8px #1b1738;border-radius:40px;background:#fff center / cover no-repeat;overflow:hidden}
+        .p10-canvas{position:absolute;left:720px;top:173px;width:472px;height:265px;border-radius:12px;background:#48159c center / cover no-repeat}
+        .p10-canvas-text{position:absolute;left:784px;top:375px;width:339px;height:52px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.85);border-radius:8px;
+          font-family:'Pretendard';font-size:28px;font-weight:600;color:#1b1738;white-space:nowrap;overflow:hidden}
+
+        .p10-voices{position:absolute;left:737px;top:437px;width:440px;display:flex;gap:30px}
+        .p10-voice{width:150px;height:170px;padding:0;border:solid 5px #eae0fd;border-radius:24px;background:#fefbf9;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+          font-family:'Cafe24 Ssurround';font-size:40px;color:#31248a}
+        .p10-voice span{font-size:56px;line-height:1}
+        .p10-voice:hover{border-color:#8278ff}
+        .p10-voice.is-selected{border-color:#ff4ff9}
+        .p10-voice-text{position:absolute;left:715px;top:640px;width:482px;height:170px;box-sizing:border-box;padding:16px 20px;border:solid 3px #b9b3dd;border-radius:14px;background:#fff;
+          font-family:'Pretendard';font-size:26px;line-height:1.4;font-weight:600;color:#1b1738;overflow:hidden}
+
+        .p10-load-btn{position:absolute;left:1302px;top:344px;width:515px;height:228px;font-size:56px;line-height:1.15}
+        .p10-finish-btn{position:absolute;right:90px;bottom:60px;display:flex;align-items:center;justify-content:center;text-decoration:none}
+
+        .p10-privacy{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:100;background:rgba(27,23,56,.5)}
+        .p10-privacy-panel{position:absolute;left:353px;top:80px;width:1214px;height:760px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:60px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';color:#48159c;letter-spacing:-0.04em}
+        .p10-privacy-title{position:absolute;left:0;top:-50px;width:100%;margin:0;text-align:center}
+        .p10-privacy-title span{display:inline-block;padding:8px 60px 14px;background:#48159c;border-radius:60px;font-size:60px;color:#fff}
+        .p10-privacy-sub{position:absolute;left:0;top:86px;width:100%;margin:0;text-align:center;font-size:48px;letter-spacing:-0.06em}
+        .p10-privacy-article{position:absolute;left:45px;top:170px;width:447px;height:420px;box-sizing:border-box;padding:24px 30px;background:#eef3fb;border:solid 4px #1b1738;border-radius:28px}
+        .p10-privacy-article b{display:block;margin-bottom:14px;font-weight:normal;font-size:44px;color:#48159c;text-align:center}
+        .p10-privacy-article p{margin:0;font-family:'Pretendard';font-size:35px;line-height:1.45;font-weight:600;color:#1b1738;letter-spacing:-0.02em}
+        .p10-checks{position:absolute;left:520px;top:180px;width:620px;display:flex;flex-direction:column;gap:22px}
+        .p10-check{display:flex;align-items:center;gap:22px;width:100%;height:84px;padding:0 24px;box-sizing:border-box;border:solid 4px #eae0fd;border-radius:22px;background:#fff;cursor:pointer;
+          font-family:'Cafe24 Ssurround';font-size:40px;color:#31248a;letter-spacing:-0.04em;text-align:left}
+        .p10-check:before{content:'';flex:0 0 auto;width:44px;height:44px;box-sizing:border-box;border:solid 5px #48159c;border-radius:10px;background:#fff center / 70% no-repeat}
+        .p10-check:hover{border-color:#8278ff}
+        .p10-check.is-checked{border-color:#ff4ff9}
+        .p10-check.is-checked:before{background-color:#48159c;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 12l5 5L20 6' fill='none' stroke='%23fff' stroke-width='4'/%3E%3C/svg%3E")}
+        .p10-privacy-ok{position:absolute;left:403px;top:610px;border:0;padding:0;background:none;cursor:pointer}
+        .p10-privacy-ok img{display:block}
+        .p10-em{color:#ff2f7b;white-space:nowrap}
+
+        /* 임시: Canva 화면 이미지가 없어서 클릭할 자리를 색으로 표시. 화면 이미지 넣으면 이 두 줄 삭제 */
+        .p10 .hit-area{background:rgba(255,79,139,.3);outline:5px dashed #ff4f8b;outline-offset:-5px;border-radius:14px;animation:p10-hit-blink 1.2s ease-in-out infinite}
+        @keyframes p10-hit-blink{50%{background:rgba(255,79,139,.55)}}
+
+        .p10 .is-off{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default p10">
+          <p class="guide-bubble" id="p10Bubble"></p>
+          <div class="guide-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+
+          <div class="p10-screen" id="p10Screen"></div>
+          <div class="p10-canvas is-off" id="p10Canvas"></div>
+          <span class="p10-canvas-text is-off" id="p10CanvasText"></span>
+
+          <div class="p10-voices is-off" id="p10Voices">
+            <button type="button" class="p10-voice" data-voice="minjun"><span>&#128266;</span>민준</button>
+            <button type="button" class="p10-voice" data-voice="yuna"><span>&#128266;</span>유나</button>
+          </div>
+          <div class="p10-voice-text is-off" id="p10VoiceText"></div>
+
+          <button type="button" class="card-btn p10-load-btn is-off" id="p10LoadBtn">나만의 기사문<br>텍스트 블록<br>불러오기</button>
+
+          <button type="button" class="hit-area is-off" id="p10Hit" aria-label="클릭"></button>
+
+          <a href="javascript:;" class="js-sfx next-btn is-off" id="p10Next" data-sound="sound/click.mp3">
+            <img src="../../img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" alt="다음">
+          </a>
+          <button type="button" class="card-btn is-popup p10-finish-btn is-off" id="p10Finish">완성하기</button>
+
+          <div class="p10-privacy is-off" id="p10Privacy">
+            <div class="p10-privacy-panel">
+              <p class="p10-privacy-title"><span>&#128269; 개인정보 탐지 중입니다</span></p>
+              <p class="p10-privacy-sub">조합한 블록 내용 중에 민감한 개인정보가 섞여 있지 않나요?</p>
+              <div class="p10-privacy-article"><b>기사문 내용</b><p id="p10PrivacyText"></p></div>
+              <div class="p10-checks">
+                <button type="button" class="p10-check">이름이 들어있지 않아요.</button>
+                <button type="button" class="p10-check">집 주소가 들어있지 않아요.</button>
+                <button type="button" class="p10-check">전화번호가 들어있지 않아요.</button>
+                <button type="button" class="p10-check">학교 이름이 들어있지 않아요.</button>
+              </div>
+              <button type="button" class="p10-privacy-ok js-sfx" id="p10PrivacyOk" data-sound="sound/click.mp3">
+                <img src="../../img/common/btn_confirm.png" class="js-img-swap" data-src-alt="../../img/common/btn_confirm_on.png" data-src-over="../../img/common/btn_confirm_over.png" alt="확인">
+              </button>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p10PrivacyWarn">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+              <p class="avatar-popup-text is-medium"><span>영상을 만들 때는 <span class="p10-em">이름, 집 주소, 전화번호, 학교 이름</span>과 같은<br>개인정보가 포함되어 있지 않은 지 확인해야 해요!</span></p>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="나의 자랑거리를 소개하는 뉴스" data-next="page11.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    // 기획서 28p: 앞 활동 없이 목차로 들어오면 기본 기사문 + 아침 뉴스 템플릿 조합
+    const DEFAULT_ARTICLE = '오늘의 주인공은 매일 꾸준히 노력하여 스스로 세운 목표를 이뤘다고 합니다. 매우 자랑스러운 기분이라고 전해왔습니다.';
+    const DEFAULT_DESK = 'a1';
+    const read = (k) => { try { return sessionStorage.getItem(k); } catch (e) { return null; } };
+    const article = read('sa02_article') || DEFAULT_ARTICLE;
+    const desk = read('sa02_desk') || DEFAULT_DESK;
+
+    const STEPS = [
+      { bubble: 'Canva를 클릭해요.', screen: 'home', hit: [868, 382, 174, 174] },
+      { bubble: '앞서 내가 만든<br>템플릿을 클릭해요.', screen: 'designs', hit: [723, 553, 473, 307] },
+      { bubble: '아래의 ‘텍스트’를<br>클릭해요.', screen: 'edit', canvas: true, hit: [900, 770, 130, 110] },
+      { bubble: '‘텍스트 상자 추가’<br>버튼을 클릭해요.', screen: 'text', hit: [730, 110, 450, 80] },
+      { bubble: '만들어 둔<br>나만의 기사문 블록을<br>입력해 볼까요?', screen: 'edit', canvas: true, load: true },
+      { bubble: '체크 버튼을 눌러<br>텍스트 작업을 마무리해요.', screen: 'edit', canvas: true, canvasText: true, hit: [1120, 360, 80, 80] },
+      { bubble: '좋아요!<br>이제 AI 음성 보이스를<br>골라봐요.', screen: 'edit', canvas: true, canvasText: true, next: true },
+      { bubble: '아래의 편집 도구창을<br>오른쪽으로 슬라이드 해요.', screen: 'edit', canvas: true, canvasText: true, hit: [720, 770, 470, 110], swipe: true },
+      { bubble: 'AI 음성 버튼을<br>클릭해요.', screen: 'tools', canvas: true, canvasText: true, hit: [1100, 740, 100, 120] },
+      { bubble: 'AI 음성 아이콘을 클릭하여<br>예시 음성을 들어보고<br>선택해요.', screen: 'voice', voice: true },
+      { bubble: '만들어 둔<br>나만의 기사문 블록을<br>다시 한 번 입력해요.', screen: 'voice', voice: true, load: true },
+      { bubble: '‘AI 음성 생성’<br>버튼을 클릭해요.', screen: 'voice', voice: true, voiceText: true, hit: [740, 830, 440, 70] },
+      { bubble: '좋아요!<br>‘완성하기’ 버튼을 눌러<br>뉴스 제작을 마무리해보세요.', screen: 'edit', canvas: true, canvasText: true, finish: true }
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const bubble = $('p10Bubble');
+    const screen = $('p10Screen');
+    const canvas = $('p10Canvas');
+    const canvasText = $('p10CanvasText');
+    const voices = $('p10Voices');
+    const voiceText = $('p10VoiceText');
+    const loadBtn = $('p10LoadBtn');
+    const hit = $('p10Hit');
+    const nextBtn = $('p10Next');
+    const finishBtn = $('p10Finish');
+    const playClick = makeSfx('sound/click.mp3');
+    const tts = {
+      minjun: new Audio('sound/p10_tts_minjun.mp3'),
+      yuna: new Audio('sound/p10_tts_yuna.mp3')
+    };
+
+    canvas.style.backgroundImage = "url('img/p08_result_" + desk + ".png'), url('img/p08_tpl_" + desk.charAt(0) + ".png')";
+    canvasText.textContent = article.split(' ').slice(0, 2).join(' ') + ' ···';
+    voiceText.textContent = article;
+
+    let index = 0;
+    let voicePicked = false;
+
+    function render() {
+      const step = STEPS[index];
+      bubble.innerHTML = step.bubble;
+      screen.style.backgroundImage = "url('img/p10_screen_" + step.screen + ".png')";
+      canvas.classList.toggle('is-off', !step.canvas);
+      canvasText.classList.toggle('is-off', !step.canvasText);
+      voices.classList.toggle('is-off', !step.voice);
+      voiceText.classList.toggle('is-off', !step.voiceText);
+      loadBtn.classList.toggle('is-off', !step.load);
+      nextBtn.classList.toggle('is-off', !step.next);
+      resetImageSwap(nextBtn);
+      finishBtn.classList.toggle('is-off', !step.finish);
+
+      clearFingers();
+      hit.classList.toggle('is-off', !step.hit);
+      if (step.hit) {
+        const [l, t, w, h] = step.hit;
+        hit.style.cssText = 'left:' + l + 'px;top:' + t + 'px;width:' + w + 'px;height:' + h + 'px';
+        pointFingerAt(hit);
+      }
+    }
+
+    function go() {
+      index += 1;
+      render();
+    }
+
+    let swipedAt = 0;
+    hit.addEventListener('click', () => {
+      if (STEPS[index].swipe || Date.now() - swipedAt < 500) return;
+      playClick();
+      go();
+    });
+
+    let dragX = null;
+    hit.addEventListener('pointerdown', (e) => { if (STEPS[index].swipe) dragX = e.clientX; });
+    window.addEventListener('pointerup', (e) => {
+      if (dragX === null) return;
+      const moved = e.clientX - dragX;
+      dragX = null;
+      if (STEPS[index].swipe && moved > 30) {
+        swipedAt = Date.now();
+        go();
+      }
+    });
+
+    loadBtn.addEventListener('click', () => {
+      playClick();
+      if (STEPS[index].voice && !voicePicked) return;
+      go();
+    });
+
+    voices.querySelectorAll('.p10-voice').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        Object.values(tts).forEach((a) => { a.pause(); a.currentTime = 0; });
+        tts[btn.dataset.voice].play().catch(() => {});
+        try { sessionStorage.setItem('sa02_voice', btn.dataset.voice); } catch (e) {}
+        voices.querySelectorAll('.p10-voice').forEach((b) => b.classList.toggle('is-selected', b === btn));
+        if (!voicePicked && STEPS[index].voice && !STEPS[index].load) {
+          voicePicked = true;
+          nextBtn.classList.remove('is-off');
+        }
+      });
+    });
+
+    nextBtn.addEventListener('click', () => setTimeout(go, 300));
+
+    const privacy = $('p10Privacy');
+    const checks = Array.from(privacy.querySelectorAll('.p10-check'));
+    $('p10PrivacyText').textContent = article;
+    finishBtn.addEventListener('click', () => {
+      playClick();
+      clearFingers();
+      privacy.classList.remove('is-off');
+    });
+    checks.forEach((c) => c.addEventListener('click', () => {
+      playClick();
+      c.classList.toggle('is-checked');
+    }));
+    $('p10PrivacyOk').addEventListener('click', () => {
+      if (checks.every((c) => c.classList.contains('is-checked'))) {
+        setTimeout(() => navigateTo('page11.html'), 300);
+      } else {
+        flashLayer($('p10PrivacyWarn'));
+        resetImageSwap($('p10PrivacyOk'));
+      }
+    });
+
+    render();
+  })();
+  </script>
+</body>
+</html>

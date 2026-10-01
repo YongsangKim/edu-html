@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나의 미래 모습 만들기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+        .p12-step{background-repeat:no-repeat}
+        .p12-step1{background-image:url('img/p12_bg_guide1.png')}
+        .p12-step2{background-image:url('img/p12_bg_guide2.png')}
+        .p12-step3{background-image:url('img/p12_bg_guide3.png')}
+        .p12-step4{background-image:url('img/p12_bg_guide4.png')}
+        .p12-step5{background-image:url('img/p12_bg_guide5.png')}
+        .p12-step7{background-image:url('img/p12_bg_guide6.png')}
+
+        .p12-choice{position:absolute;left:1251px;width:591px;height:160px}
+        .p12-choice1{top:245px}
+        .p12-choice2{top:449px}
+        .p12-actions{position:absolute;left:1370px;top:800px;width:530px}
+        .multi-option.is-selected{border-radius:43px}
+        .p12-phone-text{position:absolute;left:787px;top:520px;width:340px;font-family:'Pretendard';font-size:20px;line-height:1.5;color:#000;z-index:1}
+        .prompt-builder[data-current-step="2"] .p12-phone-text{top:490px}
+        .prompt-builder[data-current-step="3"] .p12-phone-text{top:464px}
+        .prompt-builder[data-current-step="4"] .p12-phone-text{top:400px}
+        .prompt-builder[data-current-step="5"] .p12-phone-text{top:400px}
+        .prompt-builder[data-current-step="6"] .p12-phone-text,
+        .prompt-builder[data-current-step="7"] .p12-phone-text{display:none}
+        .prompt-builder:has(.p12-step6:not(.is-hidden)) .p12-phone-text,
+        .prompt-builder:has(.p12-step7:not(.is-hidden)) .p12-phone-text{display:none}
+
+        .p12-send{position:absolute;left:1090px;top:518px;width:36px;height:36px;z-index:2}
+
+        .p12-loading{display:block;width:1920px;height:960px}
+
+        .p12-final-btn{position:absolute;left:730px;top:340px;width:340px;height:300px}
+
+        /* 화면(디자인 22p) — 이미지는 자리만 잡아둠, 실제 좌표는 이미지 넣고 조정 필요 */
+        .p12-opt{position:absolute;left:1251px;width:591px;height:160px}
+        .p12-opt1{top:66px}
+        .p12-opt2{top:235px}
+        .p12-opt3{top:404px}
+        .p12-opt4{top:573px}
+
+        /* 화면(기획서 23p) — 내가 잘하는 것 선택. 이미지는 자리만 잡아둠 */
+        .p12-skill{position:absolute;left:1251px;width:591px;height:160px}
+        .p12-skill1{top:66px}
+        .p12-skill2{top:235px}
+        .p12-skill3{top:404px}
+        .p12-skill4{top:573px}
+
+        /* 화면(기획서 24p) — 미래 모습(직업) 선택. TODO: 실제로는 앞선
+           "좋아하는 것" x "잘하는 것" 조합(총 16가지)에 따라 선택지 3개가
+           달라져야 함(기획서에서 별도 엑셀 파일 참고 언급) — 지금은 자리만
+           잡아두려고 대표 선택지 3개만 고정으로 넣어둠 */
+        .p12-job{position:absolute;left:1251px;width:591px;height:160px}
+        .p12-job1{top:129px}
+        .p12-job2{top:320px}
+        .p12-job3{top:511px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main>
+          <div class="prompt-builder">
+            <div class="prompt-preview p12-phone-text"></div>
+
+            <div class="step-flow">
+
+              <div class="step-panel p12-step p12-step1" data-step="1">
+                <div class="multi-select" data-single="true">
+                  <button class="multi-option pick-card p12-choice p12-choice1" data-clause="나는 남자이고" aria-label="나는 남자이고"></button>
+                  <button class="multi-option pick-card p12-choice p12-choice2" data-clause="나는 여자이고" aria-label="나는 여자이고"></button>
+                </div>
+                <div class="step-actions p12-actions">
+                  <a href="javascript:;" class="js-nav-effect js-sfx multi-next" data-warn-empty="true">
+                    <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+                <div class="select-warning hidden" data-sound="sound/incorrect.mp3">
+                  <div class="avatar-popup-panel">
+                    <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+                    <p class="avatar-popup-text is-pill">나와 맞는 선택지를 클릭해요.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 화면(디자인 22p 반영): 좋아하는 것 선택 — 1단계에서 고른 문구
+                   아래로 이어서 이 단계 문구가 쌓임(기능 S). TODO: 이미지 넣고
+                   좌표(.p12-opt*) 조정 -->
+              <div class="step-panel p12-step p12-step2" data-step="2">
+                <div class="multi-select" data-single="true">
+                  <button class="multi-option pick-card p12-opt p12-opt1" data-clause="그림 그리는 걸 좋아해요" aria-label="그림 그리기"></button>
+                  <button class="multi-option pick-card p12-opt p12-opt2" data-clause="동물 돌보는 걸 좋아해요" aria-label="동물 돌보기"></button>
+                  <button class="multi-option pick-card p12-opt p12-opt3" data-clause="음식이나 음료 만드는 걸 좋아해요" aria-label="음식이나 음료 만들기"></button>
+                  <button class="multi-option pick-card p12-opt p12-opt4" data-clause="노래하거나 춤추는 걸 좋아해요" aria-label="노래하거나 춤추기"></button>
+                </div>
+                <div class="step-actions p12-actions">
+                  <a href="javascript:;" class="js-nav-effect js-sfx multi-next" data-warn-empty="true">
+                    <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+                <div class="select-warning hidden" data-sound="sound/incorrect.mp3">
+                  <div class="avatar-popup-panel">
+                    <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+                    <p class="avatar-popup-text is-pill">나와 맞는 선택지를 클릭해요.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 화면(기획서 23p 반영): 내가 잘하는 것 선택 — 앞 단계 문구
+                   아래로 이어서 이 단계 문구가 쌓임(기능 S). TODO: 이미지 넣고
+                   좌표(.p12-skill*) 조정 -->
+              <div class="step-panel p12-step p12-step3" data-step="3">
+                <div class="multi-select" data-single="true">
+                  <button class="multi-option pick-card p12-skill p12-skill1" data-clause="그리고 정리정돈하는 것을 잘해" aria-label="정리정돈하기"></button>
+                  <button class="multi-option pick-card p12-skill p12-skill2" data-clause="그리고 다른 사람 돕는 것을 잘해" aria-label="다른 사람 돕기"></button>
+                  <button class="multi-option pick-card p12-skill p12-skill3" data-clause="그리고 블록 조립하는 것을 잘해" aria-label="블록 조립하기"></button>
+                  <button class="multi-option pick-card p12-skill p12-skill4" data-clause="그리고 물건 담고 포장하는 것을 잘해" aria-label="물건 담고 포장하기"></button>
+                </div>
+                <div class="step-actions p12-actions">
+                  <a href="javascript:;" class="js-nav-effect js-sfx multi-next" data-warn-empty="true">
+                    <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+                <div class="select-warning hidden" data-sound="sound/incorrect.mp3">
+                  <div class="avatar-popup-panel">
+                    <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+                    <p class="avatar-popup-text is-pill">나와 맞는 선택지를 클릭해요.</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 화면(기획서 24p 반영): 내가 되고 싶은 미래 모습(직업) 선택.
+                   TODO: 기획서상 "좋아하는 것" x "잘하는 것" 조합(총 16가지)에
+                   따라 선택지 3개가 달라져야 함(엑셀 파일 별도 필요) — 지금은
+                   자리만 잡아두려고 예시 선택지 3개만 고정으로 넣어둠.
+                   이미지 넣고 좌표(.p12-job*) 조정 필요 -->
+              <div class="step-panel p12-step p12-step4" data-step="4">
+                <div class="multi-select" data-single="true">
+                  <button class="multi-option pick-card p12-job p12-job1" data-clause="미래의 나는 매장 관리·안내원이 되어 있을 거야.
+나의 미래 모습을 사진으로 만들어줘." aria-label="매장 관리·안내원"></button>
+                  <button class="multi-option pick-card p12-job p12-job2" data-clause="미래의 나는 도서관 사서 보조가 되어 있을 거야.
+나의 미래 모습을 사진으로 만들어줘." aria-label="도서관 사서 보조"></button>
+                  <button class="multi-option pick-card p12-job p12-job3" data-clause="미래의 나는 일러스트 작가가 되어 있을 거야.
+나의 미래 모습을 사진으로 만들어줘." aria-label="일러스트 작가"></button>
+                </div>
+                <div class="step-actions p12-actions">
+                  <a href="javascript:;" class="js-nav-effect js-sfx multi-next" data-warn-empty="true">
+                    <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+                <div class="select-warning hidden" data-sound="sound/incorrect.mp3">
+                  <div class="avatar-popup-panel">
+                    <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+                    <p class="avatar-popup-text is-pill">나와 맞는 선택지를 클릭해요.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="step-panel p12-step p12-step5" data-step="5">
+                <a href="javascript:;" class="js-nav-effect p12-send">
+                  <img src="img/p12_btn_guide5.png" class="js-img-swap js-sfx" data-src-alt="img/p12_btn_guide5_on.png" data-sound="sound/click.mp3" alt="전송">
+                </a>
+              </div>
+
+              <div class="step-panel p12-step p12-step6" data-step="6">
+                <img class="loading-sequence p12-loading" src="img/p12_bg_ani1.png"
+                     data-frames="img/p12_bg_ani1.png,img/p12_bg_ani2.png,img/p12_bg_ani3.png,img/p12_bg_ani4.png"
+                     data-duration="2000" data-next="page13.html" alt="">
+              </div>
+
+              <div class="step-panel p12-step p12-step7" data-step="7">
+                <a href="page13.html" class="js-nav-effect js-sfx hit-area p12-final-btn" data-sound="sound/click.mp3" aria-label="다음"></a>
+              </div>
+
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="나의 미래 모습 만들기" data-next="page13.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+</body>
+</html>

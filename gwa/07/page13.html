@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내가 바로 스마트홈 AI!</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 54~60p. 미션 5개, 미션마다 15초 타임어택(배경 시계 소리 sound/p13_clock.mp3). 왼쪽 센서 대시보드를 보고 아래 5개 AI 실행 버튼 중 알맞은 것 누르기.
+           맞으면 집 그림이 작동 모습(img/p13_scene_m{n}_on.png)으로 바뀌고 미션 성공 팝업, 틀리거나 시간이 끝나면 오답 팝업 → 확인 시 그 미션 다시.
+           집 그림 img/p13_scene_m{1~5}.png, 버튼 그림 img/p13_btn_{key}.png */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p13-mission{position:absolute;margin:0;left:40px;top:20px;width:1440px;height:96px;box-sizing:border-box;padding:6px 50px 0;display:flex;align-items:center;gap:50px;
+          background:#fff;border:solid 6px #1b1738;border-radius:48px;box-shadow:0 10px 0 0 #becde7;font-family:'Cafe24 Ssurround';font-size:52px;color:#1b1738;letter-spacing:-0.04em}
+        .p13-mission b{font-weight:normal;color:#2f6fed}
+        .p13-timer{position:absolute;margin:0;left:1520px;top:20px;width:360px;height:96px;box-sizing:border-box;padding:6px 40px 0;display:flex;align-items:center;justify-content:space-between;
+          background:#fff;border:solid 6px #1b1738;border-radius:48px;box-shadow:0 10px 0 0 #becde7;font-family:'Cafe24 Ssurround';font-size:60px;color:#1b1738}
+        .p13-timer svg{width:62px;height:62px;margin-top:-6px}
+        .p13-timer.is-hurry{border-color:#e5484d;color:#e5484d;animation:p13-beat 1s ease infinite}
+        @keyframes p13-beat{50%{transform:scale(1.08)}}
+
+        .p13-dash{position:absolute;left:40px;top:140px;width:560px;height:520px;box-sizing:border-box;border:solid 6px #1b1738;border-radius:36px;background:#101a3a;overflow:hidden;
+          display:flex;flex-direction:column;align-items:center;font-family:'Cafe24 Ssurround';color:#fff;text-align:center}
+        .p13-dash-title{width:100%;height:84px;padding-top:6px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:#2f6fed;font-size:44px}
+        .p13-dash-sensor{margin:40px 0 0;font-size:40px;color:#9fc3ff}
+        .p13-dash-alert{flex:1 1 auto;margin:0;padding:0 30px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;font-size:56px;line-height:1.25;color:#ff6b6b;word-break:keep-all;animation:p13-blink 1s step-end infinite}
+        .p13-dash-alert img{width:120px}
+        .p13-dash.is-safe .p13-dash-alert{color:#6be39a;animation:none}
+        @keyframes p13-blink{50%{opacity:.45}}
+
+        .p13-scene{position:absolute;left:630px;top:140px;width:1250px;height:520px;box-sizing:border-box;border:solid 6px #48159c;border-radius:36px;background:#dfe7f5 center / cover no-repeat}
+
+        .p13-btns{position:absolute;left:40px;top:690px;width:1840px;display:flex;gap:24px}
+        .p13-btn{flex:1 1 0;height:240px;box-sizing:border-box;padding:12px 12px 14px;border:solid 5px #1b1738;border-radius:28px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;
+          font-family:'Cafe24 Ssurround';font-size:30px;line-height:1.2;color:#31248a;letter-spacing:-0.06em;word-break:keep-all;box-shadow:0 10px 0 0 #becde7;transition:transform .15s}
+        .p13-btn:hover{border-color:#2f6fed}
+        .p13-btn:active{transform:translateY(6px)}
+        .p13-btn i{flex:1 1 auto;width:100%;border-radius:18px;background:#eef3fb center / contain no-repeat}
+        .p13-btns.is-locked{pointer-events:none}
+
+        .p13-ok{padding:0;border:0;background:none;cursor:pointer}
+        .p13-ok img{display:block}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="p13-mission"><b id="p13Mission"></b><span id="p13Title"></span></p>
+          <p class="p13-timer" id="p13TimerBox">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13.5" r="8"/><path d="M12 13.5V9.5M9.5 2.5h5M12 2.5v3M18.5 6l1.5-1.5"/></svg>
+            <span id="p13Timer">15</span>
+          </p>
+
+          <div class="p13-dash" id="p13Dash">
+            <div class="p13-dash-title">AI 센서 대시보드</div>
+            <p class="p13-dash-sensor" id="p13Sensor"></p>
+            <p class="p13-dash-alert"><img src="../../img/common/icon_warning.png" alt=""><span id="p13Alert"></span></p>
+          </div>
+          <div class="p13-scene" id="p13Scene"></div>
+
+          <div class="p13-btns" id="p13Btns">
+            <button class="p13-btn" data-key="gas"><i style="background-image:url('img/p13_btn_gas.png')"></i>가스 밸브 자동 잠금 및 환기팬 가동</button>
+            <button class="p13-btn" data-key="cool"><i style="background-image:url('img/p13_btn_cool.png')"></i>스마트 에어컨 및 서큘레이터 가동</button>
+            <button class="p13-btn" data-key="alarm"><i style="background-image:url('img/p13_btn_alarm.png')"></i>경보음 울리기 및 스마트폰 알림 발송</button>
+            <button class="p13-btn" data-key="purifier"><i style="background-image:url('img/p13_btn_purifier.png')"></i>스마트 공기청정기 강풍 가동</button>
+            <button class="p13-btn" data-key="sleep"><i style="background-image:url('img/p13_btn_sleep.png')"></i>수면 조명 켜기</button>
+          </div>
+
+          <div class="avatar-modal is-off" id="p13Right">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct_gwa.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">미션성공!</p>
+                <p class="avatar-popup-sub" id="p13RightText"></p>
+                <button class="p13-ok avatar-popup-next" id="p13RightNext">
+                  <img src="../../img/common/btn_next_small.png" class="js-img-swap js-sfx" data-src-over="../../img/common/btn_next_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p13Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">땡-</p>
+                <p class="avatar-popup-sub">AI 판단 오류! 센서가 보낸 실시간 데이터를 <br>다시 분석해 보세요.</p>
+                <button class="p13-ok avatar-popup-next" id="p13WrongOk">
+                  <img src="../../img/common/btn_confirm.png" class="js-img-swap js-sfx" data-src-over="../../img/common/btn_confirm_over.png" data-sound="sound/click.mp3" alt="확인">
+                </button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="내가 바로 스마트홈 AI!" data-next="page14.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const LIMIT = 15;
+    const MISSIONS = [
+      { sensor: '가스 센서', alert: '가스 누출 감지!', key: 'gas',
+        right: '가스 센서가 가스 누출을 감지해서 가스 밸브가 잠기고 환기팬이 켜졌네. 이제 안전해!' },
+      { sensor: '거실 온도 센서', alert: '실내 온도 33도 돌파!', key: 'cool',
+        right: '온도 센서가 높은 온도를 감지해서 에어컨과 서큘레이터가 켜졌네. 거실이 시원해졌어!' },
+      { sensor: '현관 CCTV', alert: '외출 중 낯선 움직임 포착!', key: 'alarm',
+        right: '현관 CCTV가 낯선 움직임을 감지해서 경보음이 울리고 스마트폰 알림이 전송됐네. 이제 안심이야!' },
+      { sensor: '침실 미세먼지 센서', alert: '공기 오염도 ‘최악’!', key: 'purifier',
+        right: '미세먼지 센서가 나쁜 공기를 감지해서 공기청정기가 강하게 작동했네. 공기가 깨끗해졌어!' },
+      { sensor: '조도 센서', alert: '밤 10시, 주변 매우 어두움!', key: 'sleep',
+        right: '조도 센서가 어두운 방을 감지해서 수면 조명이 켜지고 커튼이 닫혔네. 편안한 잠자리가 되었어!' }
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const timerEl = $('p13Timer');
+    const timerBox = $('p13TimerBox');
+    const btns = $('p13Btns');
+    const scene = $('p13Scene');
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+    const clock = new Audio('sound/p13_clock.mp3');
+    clock.loop = true;
+
+    let index = 0;
+    let remain = LIMIT;
+    let tick = null;
+
+    function stopClock() {
+      clearInterval(tick);
+      clock.pause();
+    }
+
+    function start() {
+      const m = MISSIONS[index];
+      $('p13Mission').textContent = 'Mission ' + (index + 1);
+      $('p13Title').textContent = m.alert;
+      $('p13Sensor').textContent = m.sensor;
+      $('p13Alert').textContent = m.alert;
+      $('p13Dash').classList.remove('is-safe');
+      scene.style.backgroundImage = 'url(\'img/p13_scene_m' + (index + 1) + '.png\')';
+      btns.classList.remove('is-locked');
+      remain = LIMIT;
+      timerEl.textContent = remain;
+      timerBox.classList.remove('is-hurry');
+      clock.currentTime = 0;
+      clock.play().catch(() => {});
+      clearInterval(tick);
+      tick = setInterval(() => {
+        remain -= 1;
+        timerEl.textContent = remain;
+        timerBox.classList.toggle('is-hurry', remain <= 5);
+        if (remain <= 0) fail();
+      }, 1000);
+    }
+
+    function fail() {
+      stopClock();
+      btns.classList.add('is-locked');
+      playWrong();
+      $('p13Wrong').classList.remove('is-off');
+    }
+
+    btns.addEventListener('click', (e) => {
+      const btn = e.target.closest('.p13-btn');
+      if (!btn) return;
+      if (btn.dataset.key !== MISSIONS[index].key) {
+        fail();
+        return;
+      }
+      stopClock();
+      btns.classList.add('is-locked');
+      playCorrect();
+      $('p13Dash').classList.add('is-safe');
+      scene.style.backgroundImage = 'url(\'img/p13_scene_m' + (index + 1) + '_on.png\')';
+      $('p13RightText').textContent = MISSIONS[index].right;
+      setTimeout(() => $('p13Right').classList.remove('is-off'), 800);
+    });
+
+    $('p13WrongOk').addEventListener('click', () => {
+      $('p13Wrong').classList.add('is-off');
+      resetImageSwap($('p13WrongOk'));
+      start();
+    });
+
+    $('p13RightNext').addEventListener('click', () => {
+      if (index === MISSIONS.length - 1) {
+        navigateTo('page14.html');
+        return;
+      }
+      $('p13Right').classList.add('is-off');
+      resetImageSwap($('p13RightNext'));
+      index += 1;
+      start();
+    });
+
+    start();
+  })();
+  </script>
+</body>
+</html>

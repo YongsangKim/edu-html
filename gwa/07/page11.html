@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>퀴즈 풀기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 47~52p. Q1 3지선다, Q2·Q4 맞아요/아니에요, Q3 '중심 두뇌' 카드를 빈칸에 끌어 놓기, Q5 A/B/C. 오답은 문항별 힌트(data-wrong) */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+        .quiz-ask-box{padding:30px 60px 30px 30px}
+
+        .p11-opt{position:absolute;margin-left:10px}
+        .p11-q1-opt1{left:180px;top:600px}
+        .p11-q1-opt2{left:718px;top:600px}
+        .p11-q1-opt3{left:1256px;top:600px}
+
+        .p11-yes, .p11-no{position:absolute;top:600px}
+        .p11-yes{left:456px;}
+        .p11-no{left:1000px;}
+
+        .p11-flow{position:absolute;left:200px;top:470px;width:1520px;height:210px;box-sizing:border-box;padding:0 60px;display:flex;align-items:center;justify-content:space-between;
+          background:#fff;border:solid 5px #48159c;border-radius:50px}
+        .p11-slot{width:400px;height:130px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border:solid 5px #1b1738;border-radius:28px;background:#eef3fb;
+          font-family:'Cafe24 Ssurround';font-size:56px;color:#31248a;letter-spacing:-0.06em}
+        .p11-blank{position:relative;border:dashed 6px #8278ff;background:#fff;transition:transform .2s}
+        .p11-cards{position:absolute;left:0;top:740px;width:1920px;display:flex;justify-content:center;gap:120px}
+        .p11-card.multi-option{position:relative;width:400px;height:130px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:#fff padding-box;box-shadow:inset 0 0 0 4px #1b1738;border-radius:28px;
+          font-family:'Cafe24 Ssurround';font-size:56px;color:#31248a;letter-spacing:-0.06em;touch-action:none;cursor:grab;z-index:5}
+        .p11-card.is-dragging{cursor:grabbing;z-index:60}
+        .p11-card.is-wrong{animation:fix-word-shake .3s ease}
+        .p11-blank .p11-card{position:absolute;left:-6px;top:-6px;width:calc(100% + 12px);height:calc(100% + 12px);cursor:default}
+
+        .p11-q5 .p11-opt.card-btn{left:260px;width:1400px;height:100px;font-size:46px;text-align:left;padding:10px 50px 4px}
+        .p11-q5-opt1{top:470px}
+        .p11-q5-opt2{top:620px}
+        .p11-q5-opt3{top:770px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="quiz-stage">
+          <div class="step-flow">
+
+            <div class="step-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q1.</span>
+                  <p class="quiz-ask">사람이 피부나 눈으로 느끼듯, AI가 집 안의 온도나 미세먼지 정보를 알아채는 도구는 무엇일까요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz" data-wrong="온도를 재고 미세먼지를 느낄 수 있게 도와주는 AI의 '피부와 눈' 역할은 '센서'가 해요!">
+                <button class="answer-pick card-btn is-quiz p11-opt p11-q1-opt1" data-correct="true">센서</button>
+                <button class="answer-pick card-btn is-quiz p11-opt p11-q1-opt2" data-correct="false">마이크</button>
+                <button class="answer-pick card-btn is-quiz p11-opt p11-q1-opt3" data-correct="false">카메라</button>
+              </div>
+            </div>
+
+            <div class="step-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q2.</span>
+                  <p class="quiz-ask">센서나 카메라인 AI의 눈이 집 안 환경 정보를 컴퓨터 안으로 들어오게 하는 것을 '입력'이라고 부를까요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz" data-wrong="바깥에 있는 소리나 사진 정보를 컴퓨터 안으로 쏙 넣는 것을 '입력'이라고 불러요!">
+                <button class="answer-pick card-btn is-quiz p11-yes" data-correct="true">맞아요</button>
+                <button class="answer-pick card-btn is-quiz p11-no" data-correct="false">아니에요</button>
+              </div>
+            </div>
+
+            <div class="step-panel" id="p11Q3">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q3.</span>
+                  <p class="quiz-ask">센서가 보낸 정보를 모아서 상황을 판단하고 스마트 가전에 명령을 내리는 '중심 두뇌' 카드를 빈칸에 끌어다 놓아보세요!</p>
+                </div>
+              </div>
+              <div class="p11-flow">
+                <div class="p11-slot">센서</div>
+                <div class="p11-slot p11-blank drop-zone" id="p11Blank"></div>
+                <div class="p11-slot">스마트 가전</div>
+              </div>
+              <div class="p11-cards">
+                <div class="multi-option p11-card" data-correct="true">AI 허브</div>
+                <div class="multi-option p11-card">허브 화분</div>
+              </div>
+            </div>
+
+            <div class="step-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q4.</span>
+                  <p class="quiz-ask">"날씨가 어두워지면 ➔ 불을 켜라"처럼 AI 허브가 할 일을 미리 규칙으로 만들어주는 행동을 '코딩'이라고 할까요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz" data-wrong="AI가 정해진 순서대로 일을 처리할 수 있도록 규칙을 짜 주는 것을 '코딩'이라고 해요!">
+                <button class="answer-pick card-btn is-quiz p11-yes" data-correct="true">맞아요</button>
+                <button class="answer-pick card-btn is-quiz p11-no" data-correct="false">아니에요</button>
+              </div>
+            </div>
+
+            <div class="step-panel p11-q5">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q5.</span>
+                  <p class="quiz-ask">방 안이 더워졌을 때, AI 허브가 에어컨을 똑똑하게 틀도록 하려면 어떻게 규칙을 전달해야 할까요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz" data-next="page12.html" data-wrong="AI에게는 [언제(조건)]와 [무엇을 할지(동작)]를 구체적이고 명확하게 알려주어야 정확하게 움직여요!">
+                <button class="answer-pick card-btn p11-opt p11-q5-opt1" data-correct="true">A : 방 온도가 28도가 넘어가면 에어컨을 켜줘!</button>
+                <button class="answer-pick card-btn p11-opt p11-q5-opt2" data-correct="false">B : 에어컨</button>
+                <button class="answer-pick card-btn p11-opt p11-q5-opt3" data-correct="false">C : 내일 에어컨을 켜줘!</button>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="ox-result-correct is-avatar is-off" data-sound="sound/correct.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct_gwa.png" alt=""></div>
+              <p class="avatar-popup-text">정답이에요!</p>
+              <div class="avatar-popup-extra"><img src="../../img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div>
+          <div class="ox-result-wrong is-avatar is-off" data-sound="sound/incorrect.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text is-small">문장을 다시 한 번 잘 읽어봐요.</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="퀴즈 풀기" data-next="page12.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const HINT = "집 안의 모든 스마트 가전제품을 조종하는 똑똑한 중심 두뇌는 'AI 허브'랍니다!";
+    const blank = document.getElementById('p11Blank');
+    const cards = Array.from(document.querySelectorAll('.p11-card'));
+    const rightLayer = document.querySelector('.ox-result-correct');
+    const wrongLayer = document.querySelector('.ox-result-wrong');
+    const wrongText = wrongLayer.querySelector('.avatar-popup-text');
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+    const stage = document.getElementById('stage');
+    let done = false;
+
+    const overBlank = (x, y) => {
+      const r = blank.getBoundingClientRect();
+      return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+    };
+
+    cards.forEach((card) => {
+      card.addEventListener('pointerdown', (e) => {
+        if (done) return;
+        e.preventDefault();
+        const s = stage.getBoundingClientRect().width / 1920;
+        const sx = e.clientX;
+        const sy = e.clientY;
+        card.setPointerCapture(e.pointerId);
+        card.classList.add('is-dragging');
+        const move = (ev) => {
+          card.style.transform = 'translate(' + (ev.clientX - sx) / s + 'px,' + (ev.clientY - sy) / s + 'px)';
+          blank.classList.toggle('is-over', overBlank(ev.clientX, ev.clientY));
+        };
+        const up = (ev) => {
+          card.removeEventListener('pointermove', move);
+          card.removeEventListener('pointerup', up);
+          card.removeEventListener('pointercancel', up);
+          card.classList.remove('is-dragging');
+          blank.classList.remove('is-over');
+          card.style.transform = '';
+          if (!overBlank(ev.clientX, ev.clientY)) return;
+          if (card.dataset.correct) {
+            done = true;
+            blank.appendChild(card);
+            playCorrect();
+            flashLayer(rightLayer);
+            setTimeout(() => advancePanelOrNavigate(blank, null), 2000);
+          } else {
+            playWrong();
+            card.classList.remove('is-wrong');
+            void card.offsetWidth;
+            card.classList.add('is-wrong');
+            wrongText.textContent = HINT;
+            wrongText.className = 'avatar-popup-text is-medium';
+            flashLayer(wrongLayer);
+          }
+        };
+        card.addEventListener('pointermove', move);
+        card.addEventListener('pointerup', up);
+        card.addEventListener('pointercancel', up);
+      });
+    });
+  })();
+  </script>
+</body>
+</html>

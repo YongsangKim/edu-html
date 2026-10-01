@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>어떤 말을 전할까?</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 20~31p. 친구 3명에게 알맞은 말 고르기 → 맞으면 마음 전달 화면(게이지가 참) → 다음 친구.
+           틀리면 캐릭터 말풍선이 친구 감정 안내로 2초 바뀜. 상황 그림 img/p05_sit{번호}.png, 전달 화면 그림 img/p05_send{번호}.png, 게이지 별 img/p05_star.png */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p05-bubble{left:95px;bottom:600px;width:416px;min-height:0;padding:30px 12px;display:flex;align-items:center;justify-content:center;font-size:42px;z-index:5}
+        .p05-character{position:absolute;left:69px;top:300px;width:381px;height:504px;display:flex;align-items:flex-end;justify-content:center}
+        .p05-character img{max-width:100%;max-height:100%;object-fit:contain}
+
+        .p05-photo{position:absolute;left:540px;top:40px;width:1290px;height:500px;box-sizing:border-box;border:solid 6px #48159c;border-radius:36px;overflow:hidden;background:#48159c center / cover no-repeat;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p05-caption{position:absolute;left:0;bottom:0;width:100%;height:100px;display:flex;align-items:center;justify-content:center;background:rgba(27,23,56,.75);
+          font-family:'Cafe24 Ssurround';font-size:46px;color:#fff;letter-spacing:-0.04em}
+        .p05-opts{position:absolute;left:540px;top:600px;width:1290px;display:grid;grid-template-columns:1fr 1fr;gap:40px 40px}
+        .p05-opts .card-btn{min-width:0;height:115px;padding:8px 20px 4px;font-size:44px;line-height:1.15;letter-spacing:-0.05em;word-break:keep-all}
+
+        .p05-send{position:absolute;left:600px;top:60px;width:720px;height:560px;box-sizing:border-box;padding:30px;display:flex;flex-direction:column;align-items:center;gap:24px;
+          background:#fefbf9;border:solid 6px #48159c;border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p05-send i{width:612px;height:397px;border-radius:24px;background:#48159c center / cover no-repeat}
+        .p05-send p{margin:0;font-family:'Cafe24 Ssurround';font-size:44px;line-height:1.25;color:#48159c;text-align:center;letter-spacing:-0.04em;word-break:keep-all}
+        .p05-gauge{left:506px;top:750px;width:908px}
+        .p05-gauge:before{background-image:url('img/p05_star.png')}
+        .p05-gauge .gauge-fill{transition:none}
+        .p05-gauge .gauge-fill.is-go{width:100%;transition:width 2.5s linear}
+        .p05-status{position:absolute;left:0;top:815px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:52px;color:#48159c;letter-spacing:-0.04em}
+        .p05-send-next{position:absolute;left:1475px;top:800px}
+
+        .p05 .is-off{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default p05">
+          <div id="p05Pick">
+            <p class="guide-bubble p05-bubble" id="p05Bubble"></p>
+            <div class="p05-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+            <div class="p05-photo" id="p05Photo"><span class="p05-caption" id="p05Caption"></span></div>
+            <div class="p05-opts" id="p05Opts"></div>
+          </div>
+
+          <div class="is-off" id="p05SendView">
+            <div class="p05-send"><i id="p05SendImg"></i><p id="p05SendText"></p></div>
+            <div class="gauge is-thin p05-gauge"><div class="gauge-fill" id="p05Fill"></div></div>
+            <p class="p05-status" id="p05Status"></p>
+            <a href="javascript:;" class="js-sfx p05-send-next is-off" id="p05Next" data-sound="sound/click.mp3">
+              <img src="../../img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" alt="다음">
+            </a>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="어떤 말을 전할까?" data-next="page06.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const ASK = '친구에게 어떤<br>말을 해줄까요?';
+    // 기획서 24~25p 보기 '네 덕분이'는 28p와 같은 '네 덕분에'로 맞춤
+    const ROUNDS = [
+      { caption: '시험에서 실수로 문제를 많이 틀린 친구',
+        opts: ['정말 대단해!', '다음에는 더 잘할 수 있을 거야!', '그것도 못 했어?', '축하해!'], answer: 1,
+        wrong: '친구는 지금 속상한<br>감정을 느끼고 있어요.<br>어떤 말을 해야 할까요?' },
+      { caption: '열심히 노력하여 태권도 검은 띠를 딴 친구',
+        opts: ['미안해. 내가 잘못했어.', '괜찮아. 다음에 다시 도전해보자!', '정말 대단해! 멋있다!', '고마워! 네 덕분에 힘이 나.'], answer: 2,
+        wrong: '친구는 지금 기쁘고 행복한<br>감정을 느끼고 있어요.<br>어떤 말을 해야 할까요?' },
+      { caption: '텃밭에서 기르던 작물이 시들어 슬퍼하는 친구',
+        opts: ['열심히 길렀을 텐데<br>정말 속상하겠다.', '고마워! 네 덕분에 힘이 나.', '정말 대단해! 멋있다!', '축하해. 열심히 노력했구나!'], answer: 0,
+        wrong: '친구는 지금 속상한<br>감정을 느끼고 있어요.<br>어떤 말을 해야 할까요?' }
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const bubble = $('p05Bubble');
+    const optsBox = $('p05Opts');
+    const nextBtn = $('p05Next');
+    const fill = $('p05Fill');
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+
+    let index = 0;
+    let busy = false;
+    let bubbleTimer = null;
+
+    function renderPick() {
+      const r = ROUNDS[index];
+      busy = false;
+      bubble.innerHTML = ASK;
+      $('p05Photo').style.backgroundImage = "url('img/p05_sit" + (index + 1) + ".png')";
+      $('p05Caption').textContent = r.caption;
+      optsBox.innerHTML = '';
+      r.opts.forEach((o, k) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'card-btn';
+        btn.innerHTML = o;
+        btn.addEventListener('click', () => pick(k, btn));
+        optsBox.appendChild(btn);
+      });
+      $('p05SendView').classList.add('is-off');
+      $('p05Pick').classList.remove('is-off');
+    }
+
+    function pick(k, btn) {
+      if (busy) return;
+      const r = ROUNDS[index];
+      if (k !== r.answer) {
+        playWrong();
+        bubble.innerHTML = r.wrong;
+        clearTimeout(bubbleTimer);
+        bubbleTimer = setTimeout(() => { bubble.innerHTML = ASK; }, 2000);
+        return;
+      }
+      busy = true;
+      clearTimeout(bubbleTimer);
+      playCorrect();
+      btn.classList.add('is-selected');
+      setTimeout(() => send(r.opts[k]), 600);
+    }
+
+    function send(message) {
+      $('p05Pick').classList.add('is-off');
+      $('p05SendView').classList.remove('is-off');
+      $('p05SendImg').style.backgroundImage = "url('img/p05_send" + (index + 1) + ".png')";
+      $('p05SendText').innerHTML = message;
+      $('p05Status').textContent = '마음을 전달하는 중이에요';
+      nextBtn.classList.add('is-off');
+      resetImageSwap(nextBtn);
+      fill.className = 'gauge-fill';
+      void fill.offsetWidth;
+      fill.classList.add('is-go');
+      setTimeout(() => {
+        $('p05Status').textContent = '마음을 성공적으로 전달했어요!';
+        nextBtn.classList.remove('is-off');
+      }, 2600);
+    }
+
+    nextBtn.addEventListener('click', () => {
+      setTimeout(() => {
+        index += 1;
+        if (index < ROUNDS.length) renderPick();
+        else navigateTo('page06.html');
+      }, 300);
+    });
+
+    renderPick();
+  })();
+  </script>
+</body>
+</html>

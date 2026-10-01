@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내가 모은 데이터로 AI에게 질문하기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:url('img/p24_bg.png') no-repeat}
+
+        /* 프롬프트 패널 — 단계마다 버튼이 바뀌므로 배경에 그려진 패널을 같은 색(#1b1738)으로 덮고 다시 그림 */
+        .p24-panel{position:absolute;left:1248px;top:156px;width:584px;height:656px;background:#1b1738;
+          border-radius:28px;box-sizing:border-box;padding:28px 44px}
+        .p24-panel h3{margin:0 0 28px;text-align:center;font-family:'Cafe24 Ssurround';font-size:60px;
+          font-weight:normal;color:#fff;letter-spacing:-0.04em}
+        .p24-opt{display:block;width:100%;height:104px;margin:0 0 26px;padding:0;cursor:pointer;
+          border:6px solid #2f6fed;border-radius:18px;
+          background:linear-gradient(180deg,#fff 0%,#e9d8ff 100%);
+          font-family:'Cafe24 Ssurround';font-size:48px;color:#c026d3;letter-spacing:-0.04em}
+        .p24-opt.is-on{border-color:#7c3aed;box-shadow:0 0 0 6px rgba(124,58,237,.35)}
+
+        /* 프롬프트 자동 입력 표시 — 고른 문구가 채팅 입력창에 쌓임 */
+        .p24-input{position:absolute;left:745px;top:452px;width:392px;height:96px;background:#fff;
+          display:flex;align-items:flex-start;padding:4px 2px;box-sizing:border-box}
+        .p24-input span{font-family:'Pretendard';font-size:25px;line-height:1.35;color:#1b1738}
+
+        /* 말풍선 안 버튼 — 1단계는 [다음], 2단계는 [입력 완료]. 고르기 전에는 비활성 */
+        .p24-act{position:absolute;left:462px;top:262px;width:206px;height:62px;padding:0;cursor:pointer;
+          border:5px solid #2f6fed;border-radius:14px;background:linear-gradient(180deg,#fff 0%,#f0e6ff 100%);
+          font-family:'Cafe24 Ssurround';font-size:34px;color:#7c3aed;letter-spacing:-0.04em}
+        .p24-act.is-disabled{opacity:.4;pointer-events:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main>
+
+          <div class="p24-input"><span id="p24Text"></span></div>
+
+          <div class="p24-panel">
+            <h3>프롬프트</h3>
+            <button class="p24-opt" id="p24Opt1"></button>
+            <button class="p24-opt" id="p24Opt2"></button>
+          </div>
+
+          <button class="p24-act is-disabled" id="p24Act"></button>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="내가 모은 데이터로 AI에게 질문하기" data-next="page25.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  /* 기획서 34p(ai_practice_14) — 프롬프트를 직접 골라 질문을 만드는 화면
+     - 1단계(목적어): '서울의 최고 기온을' / '오후 날씨 상태를' 중 하나를 고름
+     - 2단계(서술어): '가르쳐 줘.' / '요약해 줘.' 중 하나를 고름
+     - 고른 문구는 채팅 입력창에 자동으로 쌓여 표시됨
+     - 버튼을 고르기 전에는 안내창 버튼이 비활성이고, 고르면 활성화됨
+     - 1단계 버튼은 [다음], 2단계 버튼은 [입력 완료]로 문구가 바뀜
+     - [입력 완료]를 누르면 고른 질문을 sessionStorage에 남기고 page25로 이동
+       (page25에서 질문에 맞는 답변을 보여주기 위함) */
+  (function () {
+    const HEAD = '첨부한 신문 기사와 동영상에서 ';
+    const STEPS = [
+      { options: ['서울의 최고 기온을', '오후 날씨 상태를'], action: '다음' },
+      { options: ['가르쳐 줘.', '요약해 줘.'], action: '입력 완료' },
+    ];
+
+    const opt1 = document.getElementById('p24Opt1');
+    const opt2 = document.getElementById('p24Opt2');
+    const act = document.getElementById('p24Act');
+    const text = document.getElementById('p24Text');
+    const clickSound = new Audio(ASSET_BASE + 'sound/click.mp3');
+
+    let step = 0;
+    const picked = [];
+
+    function render() {
+      const s = STEPS[step];
+      opt1.textContent = s.options[0];
+      opt2.textContent = s.options[1];
+      opt1.classList.remove('is-on');
+      opt2.classList.remove('is-on');
+      act.textContent = s.action;
+      act.classList.add('is-disabled');
+      renderText();
+    }
+
+    function renderText() {
+      text.textContent = picked.length ? HEAD + picked.join(' ') : '';
+    }
+
+    [opt1, opt2].forEach((btn) => {
+      btn.addEventListener('click', () => {
+        opt1.classList.toggle('is-on', btn === opt1);
+        opt2.classList.toggle('is-on', btn === opt2);
+        picked[step] = btn.textContent;
+        renderText();
+        act.classList.remove('is-disabled');
+        clickSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+      });
+    });
+
+    act.addEventListener('click', () => {
+      clickSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+      if (step < STEPS.length - 1) {
+        step += 1;
+        render();
+        return;
+      }
+      try {
+        sessionStorage.setItem('gwa01_prompt', HEAD + picked.join(' '));
+      } catch (err) { /* sessionStorage를 못 쓰는 환경이면 무시 */ }
+      setTimeout(() => navigateTo('page25.html'), 300);
+    });
+
+    render();
+  })();
+  </script>
+</body>
+</html>

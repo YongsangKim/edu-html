@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>알록달록 과일 농장 알바왕</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:url('img/p02_bg.png') no-repeat}
+
+        /* 배경에 구워진 게이지/주문 문구는 회차마다 바뀌어야 해서 같은 자리에 실시간 DOM을 덮어 그림 */
+        .p02-gauge{left:62px;top:36px;width:757px}
+        .p02-gauge:before{background-image:url('img/p02_star.png')}
+
+        .p02-order{position:absolute;left:210px;top:753px;width:1100px;height:124px;display:flex;align-items:center;justify-content:center;padding:0;box-sizing:border-box}
+        .p02-order span{font-family:'Cafe24 Ssurround';font-size:65px;color:#1b1738;letter-spacing:-0.08em;text-align:center}
+
+        /* 과일이 깔리는 판(배경 통이미지의 어두운 패널 안쪽) */
+        .p02-field{position:absolute;left:0;top:0;width:1920px;height:960px}
+
+        /* 과일마다 원본 비율이 달라서, 같은 크기의 칸을 먼저 놓고 그 안에서
+           가로·세로 모두 가운데 정렬함(좌상단 기준으로 붙이면 줄이 안 맞아 보임) */
+        .p02-fruit{position:absolute;padding:0;margin:0;border:none;background:none;cursor:grab;touch-action:none;
+          width:300px;height:210px;display:flex;align-items:center;justify-content:center}
+        .p02-fruit img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;pointer-events:none}
+        .p02-fruit.is-dragging{cursor:grabbing;z-index:50}
+        .p02-fruit.is-collected{opacity:0;transform:scale(.35);transition:opacity .35s ease,transform .35s ease;pointer-events:none}
+        .p02-fruit.is-wrong{animation:fix-word-shake .3s ease}
+
+        /* 바구니(드롭 영역) — 배경 통이미지의 바구니 위에 투명하게 겹침 */
+        .p02-basket{position:absolute;left:1306px;top:576px;width:588px;height:332px;border-radius:40px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main>
+
+          <div class="gauge p02-gauge"><div class="gauge-fill" id="p02GaugeFill"></div></div>
+
+          <div class="p02-basket drop-zone" id="p02Basket"></div>
+          <div class="p02-field" id="p02Field"></div>
+
+          <div class="p02-order"><span id="p02OrderText"></span></div>
+
+          <div class="avatar-modal is-off" id="p02Modal">
+            <div class="avatar-card is-center">
+              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
+            <div class="step-flow">
+
+              <div class="step-panel">
+                <div class="avatar-card-body">
+<p class="avatar-card-title">과일 수집 완료!</p>
+<p class="avatar-card-text">이렇게 필요한 것을 모으는 것을<br>‘수집’이라고 해요.</p>
+</div>
+                <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn">
+                  <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                </a>
+              </div>
+
+              <div class="step-panel is-hidden">
+                <div class="avatar-card-body"><p class="avatar-card-text">이제 수집한 과일들을 가지고<br>종류별로 분류하러 가볼까요?</p></div>
+                <a href="page03.html" class="js-nav-effect js-sfx avatar-card-btn">
+                  <img src="../../img/common/btn_start_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_start_small_on.png" data-src-over="../../img/common/btn_start_small_over.png" data-sound="sound/click.mp3" alt="시작하기">
+                </a>
+              </div>
+
+            </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="알록달록 과일 농장 알바왕" data-next="page03.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  /* 기획서 3p(game01_01)
+     - 과일 종류는 6종 고정, 매 회차 화면에 깔리는 과일은 총 10개(정답 + 오답)이며
+       종류와 자리 모두 매번 무작위
+     - 주문에 맞는 과일을 바구니로 드래그앤드롭하면 수집(정답음),
+       아니면 포대자루 자리로 되돌아감(오답음)
+     - 한 회차의 정답 과일을 모두 담으면 게이지 20% 상승 후 다음 회차,
+       5회차를 마치면 page03(수집 완료)으로 이동
+     - 과일 이미지는 디자인에서 잘라낸 임시본이라 배경이 함께 붙어 있음(투명 PNG로 교체 필요) */
+  (function () {
+    /* 기획서 3p 정답규칙 — 색: 빨강(사과·딸기) / 노랑(레몬·바나나) / 보라(포도).
+       청사과는 색 묶음 어디에도 안 들어가므로 색을 묻는 회차(3·5회)에서는 오답이지만,
+       종류를 묻는 2회 '사과를 모두'에서는 홍사과와 함께 정답이다 */
+    const FRUITS = {
+      apple_red:   { src: 'img/fruit_apple_red.png',   color: 'red',    kind: 'apple' },
+      strawberry:  { src: 'img/fruit_strawberry.png',  color: 'red',    kind: 'strawberry' },
+      lemon:       { src: 'img/fruit_lemon.png',       color: 'yellow', kind: 'lemon' },
+      banana:      { src: 'img/fruit_banana.png',      color: 'yellow', kind: 'banana' },
+      grape:       { src: 'img/fruit_grape.png',       color: 'purple', kind: 'grape' },
+      apple_green: { src: 'img/fruit_apple_green.png', color: 'green',  kind: 'apple' },
+    };
+    const KEYS = Object.keys(FRUITS);
+
+    const isCorrectFor = (round, f) => round.match(f);
+
+    /* 기획서 "게임1 정답규칙" 표 그대로. answer에 적힌 정답 과일과 개수는 고정이고,
+       모자란 수만큼만 오답 과일을 무작위로 채워 매 회차 총 10개를 맞춘다 */
+    const ROUNDS = [
+      { text: '바나나를 모두 골라주세요!',               // 정답 4 / 오답 6
+        match: (f) => f.kind === 'banana',
+        answer: { banana: 4 } },
+      { text: '사과를 모두 골라주세요!',                 // 정답 5 / 오답 5
+        match: (f) => f.kind === 'apple',
+        answer: { apple_green: 2, apple_red: 3 } },
+      { text: '노란색 과일을 모두 골라주세요!',           // 정답 3 / 오답 7
+        match: (f) => f.color === 'yellow',
+        answer: { lemon: 2, banana: 1 } },
+      { text: '바나나와 포도를 모두 골라주세요!',         // 정답 6 / 오답 4
+        match: (f) => f.kind === 'banana' || f.kind === 'grape',
+        answer: { banana: 3, grape: 3 } },
+      { text: '노란색과 빨간색 과일을 모두 골라주세요!',   // 정답 6 / 오답 4
+        match: (f) => f.color === 'yellow' || f.color === 'red',
+        answer: { lemon: 1, banana: 2, apple_red: 1, strawberry: 2 } },
+    ];
+
+    const TOTAL = 10;          // 매 회차 과일 총합(정답 + 오답) 고정
+    const COLS = 5;
+    const SLOT_X = 95;         // 첫 칸 x, 이후 STEP_X 간격 (칸 크기 300x210)
+    const STEP_X = 345;
+    const ROW_Y = [140, 350];  // 2줄. 아랫줄이 바구니(top 576) 위에서 끝나도록 잡음
+    const JITTER_X = 25;
+    const JITTER_Y = 15;
+
+    const field = document.getElementById('p02Field');
+    const orderText = document.getElementById('p02OrderText');
+    const gaugeFill = document.getElementById('p02GaugeFill');
+    const basket = document.getElementById('p02Basket');
+
+    const correctSound = new Audio(ASSET_BASE + 'sound/correct.mp3');
+    const wrongSound = new Audio(ASSET_BASE + 'sound/incorrect.mp3');
+
+    let roundIndex = 0;
+    let remaining = 0;
+    let locked = false;
+
+    const rectOf = (el) => el.getBoundingClientRect();
+    const overlaps = (a, b) =>
+      a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+
+    function shuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    // 정답 과일은 round.answer에 적힌 종류/개수 그대로 깔고(난수 아님),
+    // 나머지는 그 회차 규칙에 걸리지 않는 과일로 채워 총 10개를 맞춤.
+    // 자리만 무작위로 섞임
+    function pickKeys(round) {
+      const out = [];
+      Object.keys(round.answer).forEach((key) => {
+        for (let i = 0; i < round.answer[key]; i++) out.push(key);
+      });
+
+      const no = KEYS.filter((k) => !round.match(FRUITS[k]));
+      while (out.length < TOTAL) out.push(no[Math.floor(Math.random() * no.length)]);
+      return shuffle(out.slice(0, TOTAL));
+    }
+
+    function makeFruit(key, slot, round) {
+      const f = FRUITS[key];
+      const el = document.createElement('button');
+      el.className = 'p02-fruit';
+      el.dataset.correct = String(isCorrectFor(round, f));
+      el.innerHTML = '<img src="' + f.src + '" alt="">';
+
+      // 자리도 매번 무작위: 격자 슬롯을 섞고 슬롯 안에서 약간씩 흔들어 배치
+      const left = SLOT_X + (slot % COLS) * STEP_X + Math.round(Math.random() * JITTER_X * 2 - JITTER_X);
+      const top = ROW_Y[Math.floor(slot / COLS)] + Math.round(Math.random() * JITTER_Y * 2 - JITTER_Y);
+      el.style.left = left + 'px';
+      el.style.top = top + 'px';
+      el.dataset.homeLeft = left;
+      el.dataset.homeTop = top;
+
+      el.querySelectorAll('img').forEach((im) => { im.draggable = false; });
+      el.addEventListener('dragstart', (e) => e.preventDefault());
+      attachDrag(el);
+      return el;
+    }
+
+    function attachDrag(el) {
+      let dragging = false;
+      let startX = 0, startY = 0, startLeft = 0, startTop = 0;
+      let pendingX = 0, pendingY = 0, frame = 0;
+
+      const flush = () => {
+        frame = 0;
+        if (!dragging) return;
+        el.style.left = pendingX + 'px';
+        el.style.top = pendingY + 'px';
+      };
+
+      el.addEventListener('pointerdown', (e) => {
+        if (locked || el.classList.contains('is-collected')) return;
+        dragging = true;
+        el.setPointerCapture(e.pointerId);
+        el.classList.add('is-dragging');
+        startX = e.clientX;
+        startY = e.clientY;
+        startLeft = parseFloat(el.style.left);
+        startTop = parseFloat(el.style.top);
+      });
+
+      el.addEventListener('pointermove', (e) => {
+        if (!dragging) return;
+        // 화면 이동량을 현재 스테이지 배율로 나눠 1920x1080 좌표계 이동량으로 변환
+        pendingX = startLeft + (e.clientX - startX) / currentScale;
+        pendingY = startTop + (e.clientY - startY) / currentScale;
+        if (!frame) frame = requestAnimationFrame(flush);
+        basket.classList.toggle('is-over', overlaps(rectOf(el), rectOf(basket)));
+      });
+
+      const endDrag = () => {
+        if (!dragging) return;
+        if (frame) {
+          cancelAnimationFrame(frame);
+          frame = 0;
+          el.style.left = pendingX + 'px';
+          el.style.top = pendingY + 'px';
+        }
+        dragging = false;
+        el.classList.remove('is-dragging');
+        basket.classList.remove('is-over');
+
+        if (!overlaps(rectOf(el), rectOf(basket))) {
+          goHome(el);
+          return;
+        }
+
+        if (el.dataset.correct === 'true') {
+          el.classList.add('is-collected');
+          correctSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+          remaining -= 1;
+          if (remaining === 0) finishRound();
+        } else {
+          // 오답: 바구니에 들어갔다가 다시 포대자루(원래 자리)로 돌아감
+          wrongSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+          goHome(el);
+          el.classList.remove('is-wrong');
+          void el.offsetWidth;
+          el.classList.add('is-wrong');
+        }
+      };
+
+      el.addEventListener('pointerup', endDrag);
+      el.addEventListener('pointercancel', endDrag);
+    }
+
+    function goHome(el) {
+      el.style.left = el.dataset.homeLeft + 'px';
+      el.style.top = el.dataset.homeTop + 'px';
+    }
+
+    function setupRound() {
+      const round = ROUNDS[roundIndex];
+      orderText.textContent = round.text;
+      field.innerHTML = '';
+
+      const keys = pickKeys(round);
+      const slots = shuffle(Array.from({ length: TOTAL }, (_, i) => i));
+      remaining = 0;
+
+      keys.forEach((key, i) => {
+        const el = makeFruit(key, slots[i], round);
+        if (el.dataset.correct === 'true') remaining += 1;
+        field.appendChild(el);
+      });
+      locked = false;
+    }
+
+    function finishRound() {
+      locked = true;
+      roundIndex += 1;
+      gaugeFill.style.width = (roundIndex * 20) + '%';
+
+      if (roundIndex >= ROUNDS.length) {
+        // 5회차까지 끝나면 페이지를 넘기지 않고 이 화면 위에 수집 완료 모달(기획서 4p)을 띄움
+        setTimeout(() => document.getElementById('p02Modal').classList.remove('is-off'), 900);
+        return;
+      }
+      setTimeout(setupRound, 900);
+    }
+
+    gaugeFill.style.width = '0%';
+    setupRound();
+  })();
+  </script>
+</body>
+</html>

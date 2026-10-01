@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내가 모은 데이터로 AI에게 질문하기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:url('img/p13_bg.png') no-repeat}
+
+        /* 사진첩 6칸 — 배경에 그려진 사진 위에 투명한 선택 영역만 얹음.
+           고르면 디자인과 같은 분홍 테두리 + 파란 체크가 표시됨 */
+        .p13-photo{position:absolute;width:140px;height:148px;padding:0;margin:0;border:none;background:none;cursor:pointer}
+        .p13-photo.is-on{outline:6px solid #ff4ff9;outline-offset:-3px}
+        .p13-photo.is-on:after{content:'';position:absolute;left:6px;top:6px;width:34px;height:34px;border-radius:50%;
+          background:#1a73e8;box-shadow:0 0 0 3px #fff inset}
+        .p13-c1{left:725px}
+        .p13-c2{left:866px}
+        .p13-c3{left:1008px}
+        .p13-r1{top:421px}
+        .p13-r2{top:570px}
+
+        /* 상단 체크(확인) 버튼 */
+        .p13-check{position:absolute;left:1082px;top:176px;width:56px;height:56px;border-radius:50%}
+
+        /* 오답 모달 — page06 프레임 재사용(기획서 23p) */
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main>
+
+          <button class="p13-photo p13-c1 p13-r1" data-correct="true"  aria-label="청소년 과학 체험 교실 뉴스"></button>
+          <button class="p13-photo p13-c2 p13-r1" data-correct="false" aria-label="강아지 사진"></button>
+          <button class="p13-photo p13-c3 p13-r1" data-correct="true"  aria-label="깨끗한 바다 뉴스"></button>
+          <button class="p13-photo p13-c1 p13-r2" data-correct="false" aria-label="떡볶이 사진"></button>
+          <button class="p13-photo p13-c2 p13-r2" data-correct="true"  aria-label="오늘 전국 날씨 뉴스"></button>
+          <button class="p13-photo p13-c3 p13-r2" data-correct="false" aria-label="야경 사진"></button>
+
+          <a href="javascript:;" class="js-sfx p13-check" id="p13Check" data-sound="sound/click.mp3" aria-label="선택 완료"></a>
+
+          <div class="avatar-modal is-off" id="p13Wrong">
+            <div class="avatar-card is-compact">
+              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
+            <div class="avatar-card-body is-side"><p class="avatar-card-text">뉴스 기사 이미지만 선택해볼까요?</p></div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="내가 모은 데이터로 AI에게 질문하기" data-next="page14.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  /* 기획서 22p(ai_practice_03) + 23p(오답)
+     - 사진 6장 중 뉴스 기사 이미지 3장만 고르고 상단 체크 버튼을 누르는 활동
+     - 일상 사진이 하나라도 섞이면 오답 안내가 2초 떴다 닫히고 사진첩이 처음부터 다시 선택되도록 초기화됨
+     - 정답 3장만 고른 경우 page14(업로드 로딩)로 이동 */
+  (function () {
+    const photos = Array.from(document.querySelectorAll('.p13-photo'));
+    const check = document.getElementById('p13Check');
+    const wrongModal = document.getElementById('p13Wrong');
+
+    const wrongSound = new Audio(ASSET_BASE + 'sound/incorrect.mp3');
+    const correctSound = new Audio(ASSET_BASE + 'sound/correct.mp3');
+    const clickSound = new Audio(ASSET_BASE + 'sound/click.mp3');
+
+    const NEED = photos.filter((p) => p.dataset.correct === 'true').length;
+    let locked = false;
+
+    photos.forEach((p) => {
+      p.addEventListener('click', () => {
+        if (locked) return;
+        p.classList.toggle('is-on');
+        clickSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+      });
+    });
+
+    check.addEventListener('click', () => {
+      if (locked) return;
+      const picked = photos.filter((p) => p.classList.contains('is-on'));
+      if (!picked.length) return;
+
+      const allCorrect = picked.length === NEED && picked.every((p) => p.dataset.correct === 'true');
+
+      if (allCorrect) {
+        locked = true;
+        correctSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+        setTimeout(() => navigateTo('page14.html'), 700);
+        return;
+      }
+
+      // 일상 사진이 섞였으면 사진첩을 리셋해 처음부터 다시 고르게 함
+      wrongSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+      photos.forEach((p) => p.classList.remove('is-on'));
+      wrongModal.classList.remove('is-off');
+      clearTimeout(wrongModal.__hideTimer);
+      wrongModal.__hideTimer = setTimeout(() => wrongModal.classList.add('is-off'), 2000);
+    });
+  })();
+  </script>
+</body>
+</html>

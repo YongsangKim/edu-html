@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>최선의 결정 보드게임</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 63~77p. 칸 배치는 63p 기준(출발 → 미션 확인하기 → 해결 방법 생각하기 → 해결 방법 결정하기 → 미션 성공!).
+           칸에 도착하면 1초 뒤 그 칸의 창이 뜸. 삽화 img/p13_mission.png, 방법 그림 img/p13_way_{sign|ask|map|ai}.png, 학생 캐릭터 img/p13_student.png.
+           AI 단점은 기획서 72p(끌어 넣기) 문구로 통일(76p 정리 화면은 다른 문구) */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p13-path{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none}
+        .p13-tile{position:absolute;width:228px;height:228px;box-sizing:border-box;padding:20px;display:flex;align-items:center;justify-content:center;text-align:center;
+          background:#fefbf9;border:solid 6px #48159c;border-radius:50%;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';font-size:40px;line-height:1.15;color:#48159c;letter-spacing:-0.04em;word-break:keep-all}
+        .p13-tile.is-start{background:#91b9e7;color:#fff;border-color:#1b1738}
+        .p13-tile.is-goal{background:#ffd83d;border-color:#1b1738;color:#1b1738}
+        .p13-tile.is-done{background:#eee8ff}
+        .p13-student{position:absolute;width:120px;height:140px;margin:-150px 0 0 -60px;background:url('img/p13_student.png') center bottom / contain no-repeat;transition:left .8s ease,top .8s ease;z-index:5}
+        .p13-student:after{content:'';position:absolute;left:35px;bottom:0;width:50px;height:50px;border-radius:50%;background:#ff4f8b;border:solid 5px #1b1738;z-index:-1}
+        .p13-go{position:absolute;right:90px;bottom:60px;width:288px}
+
+        .p13-pop{position:absolute;left:156px;top:88px;width:1609px;height:761px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:60px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';color:#48159c;letter-spacing:-0.04em;word-break:keep-all}
+        .p13-pop-title{position:absolute;left:0;top:40px;width:100%;margin:0;text-align:center;font-size:54px;line-height:1.25}
+        .p13-pop-btns{position:absolute;left:0;bottom:44px;width:100%;display:flex;justify-content:center;gap:40px}
+        .p13-pop-btns .card-btn{min-width:288px}
+        .p13-pop-btns .card-btn.is-disabled{opacity:.35}
+
+        .p13-mission-img{position:absolute;left:59px;top:55px;width:579px;height:656px;border-radius:32px;background:#48159c url('img/p13_mission.png') center / cover no-repeat}
+        .p13-mission-title{position:absolute;left:669px;top:80px;width:868px;margin:0;font-size:52px;line-height:1.3}
+        .p13-conds{position:absolute;left:706px;top:241px;width:786px;display:grid;grid-template-columns:1fr 1fr;gap:25px 20px}
+        .p13-cond{height:110px;box-sizing:border-box;padding:0 20px;display:flex;align-items:center;justify-content:center;text-align:center;background:#fff3b8;border-radius:20px;font-size:38px;line-height:1.15;color:#1b1738}
+        .p13-mission-foot{position:absolute;left:631px;top:526px;width:978px;margin:0;text-align:center;font-family:'Pretendard';font-size:36px;font-weight:700;color:#1b1738}
+        .p13-mission .p13-pop-btns{left:631px;width:978px}
+
+        .p13-ways{position:absolute;left:72px;top:185px;width:1453px;display:flex;justify-content:space-between}
+        .p13-way{position:relative;width:326px;height:360px;padding:0 0 16px;box-sizing:border-box;border:solid 6px #eae0fd;border-radius:28px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:12px;
+          font-family:'Cafe24 Ssurround';font-size:38px;color:#31248a;letter-spacing:-0.05em}
+        .p13-way i{flex:1 1 auto;width:100%;border-radius:22px 22px 0 0;background:#48159c center / cover no-repeat}
+        .p13-way:hover{border-color:#8278ff}
+        .p13-way.is-selected{border-color:#ff4ff9}
+        .p13-way.is-checked:after{content:'\2714';position:absolute;right:-18px;top:-18px;width:64px;height:64px;border-radius:50%;background:#2f6fed;color:#fff;font-size:36px;line-height:64px;text-align:center}
+
+        .p13-slots{position:absolute;left:115px;top:152px;width:1379px;display:flex;justify-content:space-between}
+        .p13-slot{position:relative;width:666px;height:228px;box-sizing:border-box;padding:70px 18px 18px;border:dashed 5px #b9b3dd;border-radius:28px}
+        .p13-slot b{position:absolute;left:0;top:10px;width:100%;text-align:center;font-weight:normal;font-size:44px}
+        .p13-slot[data-filled]{border-style:solid;border-color:#2f6fed}
+        .p13-cards{position:absolute;left:115px;top:420px;width:1379px;display:grid;grid-template-columns:1fr 1fr;gap:18px 53px}
+        .p13-hold{width:624px;height:128px}
+        .p13-card{width:624px;height:128px;box-sizing:border-box;padding:6px 20px 0;text-align:center;font-size:38px;line-height:1.2;letter-spacing:-0.05em;cursor:grab;user-select:none;position:relative;z-index:5;display:flex;align-items:center;justify-content:center}
+        .p13-card.is-dragging{cursor:grabbing;z-index:50}
+        .p13-slot .p13-card{width:100%;height:122px;cursor:default}
+
+        .p13-sum{position:absolute;left:53px;top:45px;width:1503px;display:grid;grid-template-columns:1fr 1fr;gap:37px 25px}
+        .p13-sum div{height:256px;box-sizing:border-box;padding:18px 30px;background:#fff;border:solid 4px #b9b3dd;border-radius:28px}
+        .p13-sum b{display:block;margin-bottom:12px;font-weight:normal;font-size:44px}
+        .p13-sum p{margin:0;font-family:'Pretendard';font-size:32px;line-height:1.45;font-weight:600;color:#1b1738}
+
+        .p13 .is-off{display:none}
+        #p13Mission{z-index:120}
+        #p13Wrong{z-index:130}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default p13">
+          <svg class="p13-path" viewBox="0 0 1920 960"><polyline id="p13Line" fill="none" stroke="#b9b3dd" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2 50"/></svg>
+          <div id="p13Tiles"></div>
+          <span class="p13-student" id="p13Student"></span>
+          <button type="button" class="card-btn is-popup p13-go" id="p13Go">출발하기</button>
+
+          <div class="avatar-modal is-off" id="p13Mission">
+            <div class="p13-pop p13-mission">
+              <div class="p13-mission-img"></div>
+              <p class="p13-mission-title">성준이가 청소년 문화의 집에서 동아리 활동 장소를 찾지 못하고 있어요!</p>
+              <div class="p13-conds">
+                <div class="p13-cond">약속까지 20분</div>
+                <div class="p13-cond">주변에<br>안내 표지판이 있음</div>
+                <div class="p13-cond">휴대전화 사용 가능</div>
+                <div class="p13-cond">주변에<br>사람들이 있음</div>
+              </div>
+              <p class="p13-mission-foot">위 조건을 확인하고, 장소를 찾아갈 수 있도록 도와주세요.</p>
+              <div class="p13-pop-btns"><button type="button" class="card-btn is-popup" id="p13MissionOk">확인</button></div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p13Think">
+            <div class="p13-pop">
+              <p class="p13-pop-title">어떻게 해결할 수 있을까요?<br>아래의 보기를 하나씩 클릭해서 모두 확인해봐요.</p>
+              <div class="p13-ways" id="p13ThinkWays"></div>
+              <div class="p13-pop-btns">
+                <button type="button" class="card-btn is-popup" id="p13MissionAgain">미션 다시 보기</button>
+                <button type="button" class="card-btn is-popup is-disabled" id="p13ThinkOk">확인</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p13Drag">
+            <div class="p13-pop">
+              <p class="p13-pop-title" id="p13DragTitle"></p>
+              <div class="p13-slots">
+                <div class="p13-slot" data-key="pro"><b>장점</b></div>
+                <div class="p13-slot" data-key="con"><b>단점</b></div>
+              </div>
+              <div class="p13-cards" id="p13Cards"></div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p13Decide">
+            <div class="p13-pop">
+              <p class="p13-pop-title">어떤 방법을 선택할까요?</p>
+              <div class="p13-ways" id="p13DecideWays"></div>
+              <div class="p13-pop-btns">
+                <button type="button" class="card-btn is-popup" id="p13SumOpen">장단점 다시 보기</button>
+                <button type="button" class="card-btn is-popup is-disabled" id="p13DecideOk">확인</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p13Sum">
+            <div class="p13-pop">
+              <div class="p13-sum" id="p13SumList"></div>
+              <div class="p13-pop-btns"><button type="button" class="card-btn is-popup" id="p13SumOk">확인</button></div>
+            </div>
+          </div>
+
+          <div class="ox-result-wrong is-avatar is-off" id="p13Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text is-medium">다시 생각해볼까요?</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="최선의 결정 보드게임" data-next="page14.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const TILES = [
+      { label: '출발!', x: 296, y: 234, cls: 'is-start' },
+      { label: '미션<br>확인하기', x: 697, y: 342 },
+      { label: '해결 방법<br>생각하기', x: 916, y: 669 },
+      { label: '해결 방법<br>결정하기', x: 1328, y: 515 },
+      { label: '미션<br>성공!', x: 1564, y: 227, cls: 'is-goal' }
+    ];
+    const WAYS = [
+      { key: 'sign', name: '표지판 확인하기', pro: '글과 화살표를 보고<br>방향을 알 수 있어요.', con: '표시를 이해하기<br>어려울 수 있어요.',
+        extra: ['궁금한 것을<br>직접 물어볼 수 있어요.', '배터리가 부족하면<br>사용하기 어려워요.'] },
+      { key: 'ask', name: '행인에게 물어보기', pro: '궁금한 것을<br>직접 물어볼 수 있어요.', con: '상대방이 그 장소를<br>잘 모를 수 있어요.',
+        extra: ['배터리가 부족하면<br>사용하기 어려워요.', 'AI가 정확하지 않은 정보를<br>알려줄 수 있어요.'] },
+      { key: 'map', name: '휴대전화 지도 보기', pro: '현재 위치와 이동할 방향을<br>확인할 수 있어요.', con: '배터리가 부족하면<br>사용하기 어려워요.',
+        extra: ['상대방이 그 장소를<br>잘 모를 수 있어요.', '궁금한 것을<br>직접 물어볼 수 있어요.'] },
+      { key: 'ai', name: 'AI에게 물어보기', pro: '궁금한 것을<br>얼마든지 질문할 수 있어요.', con: 'AI의 답만으로는 실제 이동<br>방향을 알기 어려울 수 있어요.',
+        extra: ['기기가 없어도 확인할 수 있어요.', '상대방이 그 장소를<br>잘 모를 수 있어요.'] }
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const student = $('p13Student');
+    const goBtn = $('p13Go');
+    const playClick = makeSfx('sound/click.mp3');
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+    const checked = new Set();
+
+    TILES.forEach((t) => {
+      const el = document.createElement('div');
+      el.className = 'p13-tile ' + (t.cls || '');
+      el.innerHTML = t.label;
+      el.style.left = (t.x - 114) + 'px';
+      el.style.top = (t.y - 114) + 'px';
+      $('p13Tiles').appendChild(el);
+    });
+    $('p13Line').setAttribute('points', TILES.map((t) => t.x + ',' + t.y).join(' '));
+    const tileEls = Array.from($('p13Tiles').children);
+
+    let pos = 0;
+    function moveTo(i, then) {
+      pos = i;
+      student.style.left = TILES[i].x + 'px';
+      student.style.top = TILES[i].y + 'px';
+      if (then) setTimeout(then, 1800);
+    }
+    moveTo(0);
+
+    function open(id) { $(id).classList.remove('is-off'); }
+    function close(id) { $(id).classList.add('is-off'); }
+
+    function waitGo(label, next, arrive) {
+      goBtn.textContent = label;
+      goBtn.classList.remove('is-off');
+      pointFingerAt(goBtn);
+      goBtn.onclick = () => {
+        playClick();
+        clearFingers();
+        goBtn.classList.add('is-off');
+        tileEls[pos].classList.add('is-done');
+        moveTo(next, arrive);
+      };
+    }
+
+    function wayBtn(w) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'p13-way';
+      btn.innerHTML = '<i style="background-image:url(\'img/p13_way_' + w.key + '.png\')"></i>' + w.name;
+      return btn;
+    }
+
+    // 1. 미션 확인하기
+    $('p13MissionOk').onclick = () => {
+      playClick();
+      close('p13Mission');
+      if (pos === 1) waitGo('다음', 2, () => open('p13Think'));
+    };
+
+    // 2. 해결 방법 생각하기: 방법마다 장단점 끌어 넣기
+    WAYS.forEach((w) => {
+      const btn = wayBtn(w);
+      btn.onclick = () => { playClick(); openDrag(w, btn); };
+      $('p13ThinkWays').appendChild(btn);
+    });
+    $('p13MissionAgain').onclick = () => { playClick(); open('p13Mission'); };
+    $('p13ThinkOk').onclick = () => {
+      if ($('p13ThinkOk').classList.contains('is-disabled')) return;
+      playClick();
+      close('p13Think');
+      waitGo('다음', 3, () => open('p13Decide'));
+    };
+
+    function openDrag(w, wayEl) {
+      $('p13DragTitle').textContent = '‘' + w.name + '’의 장단점을 찾아봐요.';
+      const slots = Array.from(document.querySelectorAll('#p13Drag .p13-slot'));
+      slots.forEach((s) => { delete s.dataset.filled; s.querySelectorAll('.p13-card').forEach((c) => c.remove()); });
+      const box = $('p13Cards');
+      box.innerHTML = '';
+      shuffleArray([{ text: w.pro, key: 'pro' }, { text: w.con, key: 'con' }].concat(w.extra.map((t) => ({ text: t, key: 'x' })))).forEach((c) => {
+        const el = document.createElement('div');
+        el.className = 'emotion-option p13-card';
+        el.dataset.key = c.key;
+        el.innerHTML = c.text;
+        const hold = document.createElement('div');
+        hold.className = 'p13-hold';
+        hold.appendChild(el);
+        box.appendChild(hold);
+      });
+      open('p13Drag');
+      initMatchDrag({
+        cards: Array.from(box.querySelectorAll('.p13-card')),
+        zones: slots,
+        onRight: () => playClick(),
+        onWrong: (card, slot) => {
+          if (!slot) return;
+          playWrong();
+          flashLayer($('p13Wrong'), 'is-off', 1000);
+        },
+        onDone: () => {
+          playCorrect();
+          checked.add(w.key);
+          wayEl.classList.add('is-checked');
+          setTimeout(() => {
+            close('p13Drag');
+            if (checked.size === WAYS.length) $('p13ThinkOk').classList.remove('is-disabled');
+          }, 1000);
+        }
+      });
+    }
+
+    // 3. 장단점 찾아보기 → 해결 방법 고르기(정답 없음)
+    let decided = null;
+    WAYS.forEach((w) => {
+      const btn = wayBtn(w);
+      btn.onclick = () => {
+        playClick();
+        $('p13DecideWays').querySelectorAll('.p13-way').forEach((b) => b.classList.toggle('is-selected', b === btn));
+        decided = w.key;
+        $('p13DecideOk').classList.remove('is-disabled');
+      };
+      $('p13DecideWays').appendChild(btn);
+    });
+    $('p13SumList').innerHTML = WAYS.map((w) => '<div><b>' + w.name + '</b><p>' + (w.pro + ' ' + w.con).replace(/<br>/g, ' ') + '</p></div>').join('');
+    $('p13SumOpen').onclick = () => { playClick(); open('p13Sum'); };
+    $('p13SumOk').onclick = () => { playClick(); close('p13Sum'); };
+    $('p13DecideOk').onclick = () => {
+      if (!decided || $('p13DecideOk').classList.contains('is-disabled')) return;
+      playClick();
+      close('p13Decide');
+      tileEls[3].classList.add('is-done');
+      moveTo(4, () => {
+        playCorrect();
+        setTimeout(() => navigateTo('page14.html'), 800);
+      });
+    };
+
+    waitGo('출발하기', 1, () => open('p13Mission'));
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI 가이드 - 진행도</title>
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="guide.css">
+    <style>
+        /* 게이지 별 아이콘은 페이지마다 자기 img 폴더에서 background-image로 지정(여기선 sa/04 것) */
+        .g-gauge-star:before{background-image:url('../sa/04/img/p22_star.png')}
+        .g-gauge-small:before{left:-30px;top:-20px;width:90px;height:85px}
+        .g-gauge-small .gauge-fill{border-radius:24px}
+        .g-gauge-small .gauge-fill:after{top:7px;height:7px}
+
+        /* 페이지 전용 스타일 복사본 */
+        .p02-badge{position:absolute;display:flex;align-items:stretch;height:108px;border-radius:54px;overflow:hidden;border:solid 5px #1b1738;box-shadow:0 10px 0 0 #becde7}
+        .p02-badge-num{display:flex;align-items:center;justify-content:center;padding:6px 50px 0 50px;background:#91b9e7;font-family:'Cafe24 Ssurround';font-size:70px;color:#fff;gap:20px}
+        .p02-badge-q{display:flex;align-items:center;padding:6px 70px 0 70px;background:#fefbf9;font-family:'Cafe24 Ssurround';font-size:70px;color:#1b1738}
+        .p02-stars{position:absolute;display:flex;align-items:center;justify-content:center;gap:56px;width:462px;height:104px;border-radius:52px;background:#fefbf9;border:solid 5px #1b1738;box-sizing:border-box}
+        .p02-stars .find-star{width:72px;height:68px}
+        .g-pill-badge{position:absolute;height:100px;padding:6px 50px 0;box-sizing:border-box;display:flex;align-items:center;background:#91b9e7;border:solid 5px #1b1738;border-radius:50px;box-shadow:0 10px 0 0 #becde7;
+          font-family:'Cafe24 Ssurround';font-size:60px;color:#fff;letter-spacing:-0.04em}
+    </style>
+</head>
+<body>
+  <div class="g-wrap">
+    <h1>진행도 (게이지 · 별 · 배지)</h1>
+    <p class="g-note">실제 화면(1920×960)을 절반 크기로 보여줌. 공용 <code>css/common.css</code>를 고치면 실제 페이지에도 그대로 반영됨. <span class="g-local">페이지 전용 스타일</span> 표시가 있는 항목은 그 페이지 &lt;style&gt;의 복사본.</p>
+    <ul class="g-toc"></ul>
+
+    <h2>1. 진행 게이지 <code>.gauge</code> + <code>.gauge-fill</code> — 공용화 완료</h2>
+    <p class="g-note">
+      마크업: <code>&lt;div class="gauge pNN-gauge"&gt;&lt;div class="gauge-fill" id="…"&gt;&lt;/div&gt;&lt;/div&gt;</code> — 채움 폭은 스크립트에서 <code>style.width = '40%'</code>.
+      모양(하늘색 테두리 · 자홍→노랑 그라데이션 · 광택 줄)은 전부 공용이고, 페이지에는 <b>위치·폭</b>과 <b>왼쪽 별 아이콘</b>(<code>.pNN-gauge:before{background-image:url('img/…')}</code>)만 둠.
+      기본 높이 94px, 얇게 쓸 때는 <code>.gauge.is-thin</code>(64px · 별 100×94). 그 밖의 크기는 페이지에서 덮어씀.
+    </p>
+    <div class="g-list">
+      <div class="g-item">
+        <p class="g-meta"><b>기본 94px</b> (별 124×117)<br>sa/04:22 · gwa/01:02·03</p>
+        <div class="g-view"><div class="g-stage">
+          <div class="gauge g-gauge-star" style="left:200px;top:200px;width:1500px"><div class="gauge-fill" style="width:30%"></div></div>
+          <div class="gauge g-gauge-star" style="left:200px;top:450px;width:1500px"><div class="gauge-fill" style="width:70%"></div></div>
+          <div class="gauge g-gauge-star" style="left:200px;top:700px;width:1500px"><div class="gauge-fill" style="width:100%"></div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta"><b>얇게 <code>.is-thin</code> 64px</b> (별 100×94) — 공용<br>sa/02:14 보도 판단 · sa/03:05·09 마음 전달 · sa/03:12 마음 게이지 · sa/06:12 가게 운영<br><b>56px</b> <span class="g-local">페이지 전용 스타일</span> (별 90×85) sa/02:06 기사문 패널 안</p>
+        <div class="g-view"><div class="g-stage">
+          <div class="gauge is-thin g-gauge-star" style="left:200px;top:260px;width:1500px"><div class="gauge-fill" style="width:50%"></div></div>
+          <div class="gauge g-gauge-star g-gauge-small" style="left:200px;top:560px;width:900px;height:56px;border-width:5px;border-radius:28px"><div class="gauge-fill" style="width:66.6%"></div></div>
+        </div></div>
+      </div>
+    </div>
+
+    <h2>2. 별 진행도 — 공용 <code>.prompt-fix-stars-pill</code> / <span class="g-local">sa/01:02 복사본</span></h2>
+    <p class="g-note">별 이미지 <code>img/common/icon_star.png</code> ↔ <code>icon_star_on.png</code>(맞힐 때마다 하나씩 켬). 두 곳이 같은 모양이라 sa/01:02도 공용으로 합칠 수 있음.</p>
+    <div class="g-list">
+      <div class="g-item">
+        <p class="g-meta"><b>별 3개 알약</b><br>공용 <code>.prompt-fix-stars-pill</code> sa/01:18 · <span class="g-local">.p02-stars</span> sa/01:02</p>
+        <div class="g-view"><div class="g-stage">
+          <div class="prompt-fix-stars-pill" style="left:300px;top:300px">
+            <img class="find-star" src="../img/common/icon_star_on.png" alt=""><img class="find-star" src="../img/common/icon_star_on.png" alt=""><img class="find-star" src="../img/common/icon_star.png" alt="">
+          </div>
+          <div class="p02-stars" style="left:1100px;top:300px">
+            <img class="find-star" src="../img/common/icon_star_on.png" alt=""><img class="find-star" src="../img/common/icon_star.png" alt=""><img class="find-star" src="../img/common/icon_star.png" alt="">
+          </div>
+        </div></div>
+      </div>
+    </div>
+
+    <h2>3. STAGE · ROUND 배지 — 아직 통일 안 됨</h2>
+    <p class="g-note">모두 <b>하늘색(#91b9e7) 알약 + 진한 테두리 + 아래 연한 그림자</b> 계열. 질문이 붙는 2칸형(①②)과 번호만 있는 1칸형(③)으로 나뉨 — 1칸형을 공용으로 뺄지 정하면 됨.</p>
+    <div class="g-list">
+      <div class="g-item">
+        <p class="g-meta"><b>① 공용 .prompt-fix-badge</b> (STAGE + 질문)<br>sa/01:18</p>
+        <div class="g-view"><div class="g-stage">
+          <div class="prompt-fix-badge" style="left:200px;top:400px">
+            <span class="prompt-fix-badge-num">STAGE 1</span>
+            <span class="prompt-fix-badge-question">어떤 부분이 잘못 되었을까?</span>
+          </div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta"><b>② .p02-badge</b> <span class="g-local">페이지 전용 스타일</span> (①과 거의 같음)<br>sa/01:02</p>
+        <div class="g-view"><div class="g-stage">
+          <div class="p02-badge" style="left:200px;top:400px">
+            <span class="p02-badge-num">STAGE 1</span>
+            <span class="p02-badge-q">어떤 직업일까?</span>
+          </div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta"><b>③ 1칸 알약</b> <span class="g-local">페이지 전용 스타일</span><br>sa/04:22 STAGE N · sa/05:02 STAGE 제목 · sa/05:10 ROUND · sa/02:03 "오늘의 취재 질문" · sa/03:02 · sa/06:05 활동 제목(그림자 포함 같은 모양) · sa/06:02 건물 간판(그림자 없음)</p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-pill-badge" style="left:200px;top:200px">STAGE 1</div>
+          <div class="g-pill-badge" style="left:200px;top:420px;font-size:56px">STAGE1 박물관까지 어떻게 갈까?</div>
+          <div class="g-pill-badge" style="left:200px;top:640px;font-size:50px">ROUND 1&nbsp;&nbsp;&nbsp;1/4</div>
+          <div class="g-pill-badge" style="left:900px;top:640px;font-size:56px">오늘의 취재 질문</div>
+        </div></div>
+      </div>
+    </div>
+
+    <h2>4. 단계 점 <code>.prompt-steps .step-dot</code> — 공용</h2>
+    <p class="g-note">현재 단계만 <code>.is-active</code>(진한 남색). 기능 S(프롬프트 빌더)는 자동으로 켜 주고, 그 외에는 스크립트에서 직접 켬.</p>
+    <div class="g-list">
+      <div class="g-item">
+        <p class="g-meta"><b>1 · 2 · 3 단계</b><br>sa/01:08 · sa/05:02 STAGE</p>
+        <div class="g-view"><div class="g-stage">
+          <div class="prompt-steps" style="position:absolute;left:300px;top:400px;transform:scale(2);transform-origin:0 0">
+            <span class="step-dot">1</span><span class="step-dot is-active">2</span><span class="step-dot">3</span>
+          </div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+  <script src="guide.js"></script>
+</body>
+</html>

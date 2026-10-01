@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>쏙쏙! 재화와 서비스 보물 상자 분류하기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 10~17p. 컨베이어 벨트 위 아이콘을 재화/서비스 보물 상자로 끌어 넣기, 3라운드.
+           맞으면 아이콘이 사라지고 정답 말풍선(2초), 틀리면 벨트로 돌아가고 오답 말풍선(5초). 라운드가 끝나면 다음 아이콘이 왼쪽에서 밀려 들어옴.
+           2라운드 서비스는 기획서 13p 정답 문구대로 '정비사의 수리'·'미용사의 이발'. 아이콘 img/p05_item_{key}.png, 상자 img/p05_box_{goods|service}.png */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p05-title{position:absolute;left:329px;top:40px;width:1264px;height:90px;box-sizing:border-box;padding:6px 30px 0;display:flex;align-items:center;justify-content:center;
+          background:#91b9e7;border:solid 5px #1b1738;border-radius:45px;box-shadow:0 10px 0 0 #becde7;font-family:'Cafe24 Ssurround';font-size:46px;color:#fff;letter-spacing:-0.04em}
+        .p05-belt{position:absolute;left:72px;top:330px;width:1740px;height:130px;box-sizing:border-box;border:solid 6px #1b1738;border-radius:65px;
+          background:repeating-linear-gradient(90deg,#5b5f73 0 60px,#6c7087 60px 120px);box-shadow:inset 0 -12px 0 rgba(0,0,0,.25)}
+        .p05-items{position:absolute;left:72px;top:150px;width:1740px;height:300px;overflow:visible}
+        .p05-items.is-slide{animation:p05-in .7s cubic-bezier(.2,.8,.2,1)}
+        @keyframes p05-in{from{transform:translateX(-1800px)}to{transform:none}}
+        .p05-item{position:absolute;top:0;width:260px;height:270px;box-sizing:border-box;padding:0 0 14px;border:solid 5px #1b1738;border-radius:28px;background:#fff;cursor:grab;touch-action:none;
+          display:flex;flex-direction:column;align-items:center;gap:6px;font-family:'Cafe24 Ssurround';font-size:36px;color:#31248a;letter-spacing:-0.05em;z-index:5}
+        .p05-item i{flex:1 1 auto;width:100%;border-radius:22px 22px 0 0;background:#48159c center / contain no-repeat;background-origin:content-box;padding:10px;box-sizing:border-box}
+        .p05-item.is-dragging{cursor:grabbing;z-index:60}
+        .p05-item.is-back{transition:transform .3s ease}
+        .p05-item.is-gone{opacity:0;transform:scale(.3)!important;transition:opacity .3s,transform .3s;pointer-events:none}
+
+        .p05-box{position:absolute;top:632px;width:570px;height:228px;box-sizing:border-box;border:solid 6px #48159c;border-radius:30px 30px 40px 40px;background:#eef3fb center / contain no-repeat;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);transition:transform .2s}
+        .p05-box-goods{left:240px;background-image:url('img/p05_box_goods.png')}
+        .p05-box-service{left:1172px;background-image:url('img/p05_box_service.png')}
+        .p05-box span{position:absolute;left:50%;bottom:-40px;transform:translateX(-50%);height:84px;padding:6px 40px 0;box-sizing:border-box;display:flex;align-items:center;white-space:nowrap;
+          background:#48159c;border:solid 5px #fefbf9;border-radius:42px;font-family:'Cafe24 Ssurround';font-size:44px;color:#fff}
+        .p05-box-service span{background:#2f6fed}
+
+        .p05-bubble{position:absolute;left:50%;bottom:300px;transform:translateX(-50%);width:354px;min-height:153px;box-sizing:border-box;padding:24px 30px;display:flex;align-items:center;justify-content:center;text-align:center;
+          background:#fefbf9;border:solid 6px #48159c;border-radius:36px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';font-size:44px;line-height:1.25;color:#48159c;letter-spacing:-0.04em;word-break:keep-all;z-index:30}
+        .p05-bubble.is-right{width:560px;color:#2f6fed}
+        .p05-bubble.is-wrong{width:963px;font-size:42px;color:#1b1738}
+        .p05-bubble:before{content:'';position:absolute;left:50%;bottom:-58px;margin-left:-50px;width:100px;height:70px;background:url('../../img/common/p_guide_tail.png') 0 0 / contain no-repeat}
+        .p05-avatar{position:absolute;left:830px;bottom:0;width:260px;height:313px;z-index:30}
+        .p05-avatar img{display:block;width:100%;height:100%;object-fit:contain;object-position:bottom}
+
+        #p05Done{z-index:120}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p05-title">컨베이어 벨트 위의 아이콘을 알맞은 보물 상자에 넣어 봐요!</div>
+          <div class="p05-belt"></div>
+          <div class="p05-items" id="p05Items"></div>
+
+          <div class="p05-box drop-zone p05-box-goods" data-type="goods"><span>재화 보물 상자</span></div>
+          <div class="p05-box drop-zone p05-box-service" data-type="service"><span>서비스 보물 상자</span></div>
+          <p class="p05-bubble" id="p05Bubble"></p>
+          <div class="p05-avatar"><img src="img/p_character_main.png" alt=""></div>
+
+          <div class="avatar-modal is-off" id="p05Done">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">좋아요!</p>
+                <p class="avatar-popup-sub">모든 아이콘을 알맞게 구분했어요!</p>
+                <a href="page06.html" class="js-nav-effect avatar-popup-next">
+                  <img src="../../img/common/btn_next_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_small_on.png" data-src-over="../../img/common/btn_next_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                </a>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="쏙쏙! 재화와 서비스 보물 상자 분류하기" data-next="page06.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const GOODS_WRONG = (subj) => subj + ' 우리가 눈으로 보고 손으로 잡을 수 있는 ‘물건’일까요, 누군가가 대신 해주는 ‘행동과 도움’일까요?';
+    const GOODS_RIGHT = (subj) => '맞아요! ' + subj + ' 우리가 사고 파는 재화예요.';
+    const SERVICE_WRONG = (subj, what) => subj + ' ' + what + ' ‘편리한 도움’일까요, 가방에 쏙 담는 ‘물건’일까요?';
+    const ROUNDS = [
+      [
+        { key: 'clothes', name: '옷', type: 'goods', subj: '옷은' },
+        { key: 'taxi', name: '택시 운전', type: 'service',
+          right: '맞아요! 택시 기사는 손님의 이동을 도와주는 서비스를 제공해요.',
+          wrong: SERVICE_WRONG('택시 기사님의 운전은', '목적지까지 안전하게 데려다주는') },
+        { key: 'pencil', name: '연필', type: 'goods', subj: '연필은' }
+      ],
+      [
+        { key: 'snack', name: '과자', type: 'goods', subj: '과자는' },
+        { key: 'mechanic', name: '정비사의 수리', type: 'service',
+          right: '맞아요! 정비사는 자동차의 수리를 도와주는 서비스를 제공해요.',
+          wrong: SERVICE_WRONG('정비사의 수리는', '자동차를 고쳐주는') },
+        { key: 'shoes', name: '신발', type: 'goods', subj: '신발은' },
+        { key: 'haircut', name: '미용사의 이발', type: 'service',
+          right: '맞아요! 미용사는 손님의 머리를 잘라주는 서비스를 제공해요.',
+          wrong: SERVICE_WRONG('미용사의 이발은', '머리를 잘라주는') }
+      ],
+      [
+        { key: 'delivery', name: '택배 배달', type: 'service',
+          right: '맞아요! 택배 기사님은 택배를 집 앞까지 배송해주는 서비스를 제공해요.',
+          wrong: SERVICE_WRONG('택배 기사님의 배달은', '물건을 집 앞까지 배달해주는') },
+        { key: 'bag', name: '가방', type: 'goods', subj: '가방은' },
+        { key: 'umbrella', name: '우산', type: 'goods', subj: '우산은' },
+        { key: 'doctor', name: '의사의 진료', type: 'service',
+          right: '맞아요! 의사 선생님은 아픈 환자를 치료하는 서비스를 제공해요.',
+          wrong: SERVICE_WRONG('의사 선생님의 진료는', '아픈 것을 치료해주는') },
+        { key: 'bread', name: '빵', type: 'goods', subj: '빵은' }
+      ]
+    ];
+    const DEFAULT_BUBBLE = '재화일까,<br>서비스일까?';
+
+    const $ = (id) => document.getElementById(id);
+    const itemsBox = $('p05Items');
+    const bubble = $('p05Bubble');
+    const boxes = Array.from(document.querySelectorAll('.p05-box'));
+    const stage = document.getElementById('stage');
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+
+    let round = 0;
+    let left = 0;
+    let bubbleTimer = null;
+
+    function say(html, cls, ms) {
+      bubble.innerHTML = html;
+      bubble.className = 'p05-bubble' + (cls ? ' ' + cls : '');
+      clearTimeout(bubbleTimer);
+      if (ms) bubbleTimer = setTimeout(() => say(DEFAULT_BUBBLE), ms);
+    }
+
+    function boxAt(x, y) {
+      return boxes.find((b) => {
+        const r = b.getBoundingClientRect();
+        return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+      });
+    }
+
+    function renderRound() {
+      const items = ROUNDS[round];
+      left = items.length;
+      itemsBox.innerHTML = '';
+      const gap = 1740 / items.length;
+      items.forEach((it, i) => {
+        const el = document.createElement('div');
+        el.className = 'p05-item';
+        el.style.left = Math.round(gap * i + (gap - 260) / 2) + 'px';
+        el.innerHTML = '<i style="background-image:url(\'img/p05_item_' + it.key + '.png\')"></i>' + it.name;
+        bindDrag(el, it);
+        itemsBox.appendChild(el);
+      });
+      itemsBox.classList.remove('is-slide');
+      void itemsBox.offsetWidth;
+      itemsBox.classList.add('is-slide');
+      say(DEFAULT_BUBBLE);
+    }
+
+    function bindDrag(el, it) {
+      el.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        const s = stage.getBoundingClientRect().width / 1920;
+        const sx = e.clientX;
+        const sy = e.clientY;
+        el.setPointerCapture(e.pointerId);
+        el.classList.remove('is-back');
+        el.classList.add('is-dragging');
+        const move = (ev) => {
+          el.style.transform = 'translate(' + (ev.clientX - sx) / s + 'px,' + (ev.clientY - sy) / s + 'px)';
+          const over = boxAt(ev.clientX, ev.clientY);
+          boxes.forEach((b) => b.classList.toggle('is-over', b === over));
+        };
+        const up = (ev) => {
+          el.removeEventListener('pointermove', move);
+          el.removeEventListener('pointerup', up);
+          el.removeEventListener('pointercancel', up);
+          el.classList.remove('is-dragging');
+          boxes.forEach((b) => b.classList.remove('is-over'));
+          const box = boxAt(ev.clientX, ev.clientY);
+          if (box && box.dataset.type === it.type) {
+            playCorrect();
+            el.classList.add('is-gone');
+            say(it.type === 'goods' ? GOODS_RIGHT(it.subj) : it.right, 'is-right', 2000);
+            left -= 1;
+            if (!left) setTimeout(nextRound, 2000);
+            return;
+          }
+          el.classList.add('is-back');
+          el.style.transform = '';
+          if (box) {
+            playWrong();
+            say(it.type === 'goods' ? GOODS_WRONG(it.subj) : it.wrong, 'is-wrong', 5000);
+          }
+        };
+        el.addEventListener('pointermove', move);
+        el.addEventListener('pointerup', up);
+        el.addEventListener('pointercancel', up);
+      });
+    }
+
+    function nextRound() {
+      round += 1;
+      if (round < ROUNDS.length) {
+        renderRound();
+        return;
+      }
+      $('p05Done').classList.remove('is-off');
+    }
+
+    renderRound();
+  })();
+  </script>
+</body>
+</html>

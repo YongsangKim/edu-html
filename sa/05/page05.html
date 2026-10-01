@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>조건 퍼즐 완성하기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 12~19p. 퍼즐 3판, 판마다 정답 조각 4개(2x2 칸이 정해져 있음) + 오답 2개를 무작위 순서로 보여줌.
+           기획서 12p 정답 표기는 '장소'지만 조각·완성 화면(12·15p)은 '비용'이라 비용을 정답으로 둠 */
+        /* 퍼즐판·조각은 sa/08 page06과 같은 지그소 모양 */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p05-bubble{left:92px;bottom:691px;width:480px;min-height:0;padding:26px 10px;display:flex;align-items:center;justify-content:center;font-size:40px}
+        .p05-bubble::before{left:120px}
+        .p05-character{position:absolute;left:140px;top:271px;width:258px;height:313px;display:flex;align-items:flex-end;justify-content:center}
+        .p05-character img{max-width:100%;max-height:100%;object-fit:contain}
+
+        .p05-board{position:absolute;left:670px;top:16px;width:620px;height:620px;border-radius:30px;background:#fff;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p05-grid{position:absolute;left:-24px;top:-24px}
+        .jig{position:absolute;left:0;top:0;display:block;overflow:visible}
+        .jig path{stroke-linejoin:round}
+        .p05-slot{position:absolute}
+        .p05-slot path{fill:#f6f5fb;stroke:#b9b3dd;stroke-width:4}
+        .p05-slot.is-filled{z-index:2}
+        .p05-slot.is-filled path{stroke:#48159c;stroke-width:5}
+        .p05-label{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:3;pointer-events:none;
+          font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.12;text-align:center;color:#31248a;letter-spacing:-0.04em;word-break:keep-all}
+        .p05-label.is-hint{color:#8278ff;opacity:0;transition:opacity .5s ease}
+        .p05-label.is-hint.is-on{opacity:.55}
+
+        .p05-tray-label{position:absolute;left:106px;top:585px;height:80px;padding:6px 50px 0;box-sizing:border-box;display:flex;align-items:center;background:#48159c;border-radius:40px 40px 0 0;
+          font-family:'Cafe24 Ssurround';font-size:44px;color:#fff}
+        .p05-tray{position:absolute;left:87px;top:649px;width:1788px;height:300px;box-sizing:border-box;padding:0 40px;display:flex;align-items:center;justify-content:space-between;
+          background:#fefbf9;border:solid 6px #48159c;border-radius:40px}
+        .p05-label b{display:block;font-weight:normal;font-size:50px;line-height:1.1;margin-bottom:4px}
+        .p05-piece{position:relative;flex:0 0 284px;height:284px;margin:0 -12px;padding:0;border:0;background:none;cursor:pointer;transition:transform .15s ease}
+        .p05-piece path{stroke:#48159c;stroke-width:5}
+        .p05-piece .p05-label{font-size:31px;line-height:1.1}
+        .p05-piece .p05-label b{font-size:38px;margin-bottom:2px}
+        .p05-piece:hover{transform:scale(1.08)}
+        .p05-piece.is-used{visibility:hidden}
+        .p05-piece.is-wrong{animation:fix-word-shake .3s ease}
+
+        .p05-next{position:absolute;left:1470px;top:440px}
+        .p05-next.is-off{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="guide-bubble p05-bubble" id="p05Bubble"></p>
+          <div class="p05-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+
+          <div class="p05-board"><div class="p05-grid" id="p05Grid"></div></div>
+
+          <div class="p05-tray-label">조건 퍼즐 조각</div>
+          <div class="p05-tray" id="p05Tray"></div>
+
+          <a href="javascript:;" class="js-sfx p05-next is-off" id="p05Next" data-sound="sound/click.mp3">
+            <img src="../../img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" alt="다음">
+          </a>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="조건 퍼즐 완성하기" data-next="page06.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    // cell: 0 왼쪽 위, 1 오른쪽 위, 2 왼쪽 아래, 3 오른쪽 아래(기획서 완성 화면 배치)
+    const PUZZLES = [
+      { ask: '박물관에 갈 계획을<br>세우려고 해요.<br>무엇을 생각해야 할까요?', done: '좋아요!<br>즐거운 박물관 방문을<br>위해 고민해봐요.',
+        pieces: [
+          { text: '비용', cell: 0 }, { text: '이동<br>방법', cell: 1 }, { text: '식사<br>방법', cell: 2 }, { text: '함께<br>갈 사람', cell: 3 },
+          { text: '내가<br>잘하는 일' }, { text: '필요한 이유' }
+        ] },
+      { ask: '나의 미래 직업을<br>선택해봐요.<br>무엇을 생각해야 할까요?', done: '좋아요!<br>나의 미래 직업을<br>선택하기 전에 고민해봐요.',
+        pieces: [
+          { text: '하고<br>싶은 일', cell: 0 }, { text: '일하는<br>시간', cell: 1 }, { text: '내가<br>잘하는 일', cell: 2 }, { text: '일하는<br>장소', cell: 3 },
+          { text: '가격' }, { text: '식사<br>방법' }
+        ] },
+      { ask: '필요한 물건을 사야 해요.<br>무엇을 생각해야 할까요?', done: '좋아요!<br>물건을 사기 전에<br>신중하게 고민해봐요.',
+        pieces: [
+          { text: '가격', cell: 0 }, { text: '좋은 점', cell: 1 }, { text: '불편한<br>점', cell: 2 }, { text: '필요한<br>이유', cell: 3 },
+          { text: '식사<br>방법' }, { text: '내가<br>잘하는 일' }
+        ] }
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const bubble = $('p05Bubble');
+    const grid = $('p05Grid');
+    const tray = $('p05Tray');
+    const nextBtn = $('p05Next');
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+
+    // 지그소 조각 변: 위·오른쪽·아래·왼쪽 순, 0 평평 / 1 튀어나옴 / -1 들어감. 조각은 판의 4가지 칸 모양만 씀(오답은 그중 무작위)
+    const CELL_EDGES = [[0, 1, -1, 0], [0, 0, 1, -1], [1, -1, 0, 0], [-1, 0, 0, 1]];
+    const COLORS = ['#fff3b8', '#cfe6ff', '#d6f5c8', '#ffd6e2', '#eee8ff', '#ffe3c7'];
+    const S = 260;
+    const M = 74;
+
+    let index = 0;
+    let filled = 0;
+    let bubbleTimer = null;
+
+    function jigPath(s, m, edges) {
+      const corners = [[m, m], [m + s, m], [m + s, m + s], [m, m + s]];
+      const dirs = [[1, 0], [0, 1], [-1, 0], [0, -1]];
+      const knob = [[0.42, 0, 0.41, 0.07, 0.39, 0.11], [0.35, 0.18, 0.4, 0.27, 0.5, 0.27], [0.6, 0.27, 0.65, 0.18, 0.61, 0.11], [0.59, 0.07, 0.58, 0, 0.62, 0]];
+      let d = 'M' + m + ' ' + m;
+      edges.forEach((e, k) => {
+        const [x0, y0] = corners[k];
+        const [dx, dy] = dirs[k];
+        const pt = (u, v) => (x0 + (u * dx + v * e * dy) * s).toFixed(1) + ' ' + (y0 + (u * dy - v * e * dx) * s).toFixed(1);
+        if (e) {
+          d += ' L' + pt(0.38, 0);
+          knob.forEach((c) => { d += ' C' + pt(c[0], c[1]) + ' ' + pt(c[2], c[3]) + ' ' + pt(c[4], c[5]); });
+        }
+        d += ' L' + pt(1, 0);
+      });
+      return d + ' Z';
+    }
+
+    function jigSvg(s, m, edges, fill) {
+      const w = s + m * 2;
+      return '<svg class="jig" width="' + w + '" height="' + w + '" viewBox="0 0 ' + w + ' ' + w + '"><path d="' + jigPath(s, m, edges) + '"' + (fill ? ' style="fill:' + fill + '"' : '') + '/></svg>';
+    }
+
+    // 들어간 변 쪽은 홈 깊이만큼 비워서 글자·아이콘이 조각 밖으로 안 나가게 함
+    function labelBox(s, m, edges, x, y) {
+      const pad = Math.round(s * 0.06);
+      const [t, r, b, l] = edges.map((e) => (e < 0 ? Math.round(s * 0.3) : pad));
+      return 'left:' + (x + m + l) + 'px;top:' + (y + m + t) + 'px;width:' + (s - l - r) + 'px;height:' + (s - t - b) + 'px';
+    }
+
+    function drawCell(i, text, fill) {
+      const x = (i % 2) * S;
+      const y = Math.floor(i / 2) * S;
+      const slot = grid.children[i * 2];
+      const label = grid.children[i * 2 + 1];
+      slot.innerHTML = jigSvg(S, M, CELL_EDGES[i], fill);
+      slot.classList.toggle('is-filled', !!fill);
+      slot.style.cssText = 'left:' + x + 'px;top:' + y + 'px';
+      label.className = 'p05-label' + (fill ? '' : ' is-hint');
+      label.style.cssText = labelBox(S, M, CELL_EDGES[i], x, y);
+      label.innerHTML = text;
+    }
+
+    function render() {
+      const p = PUZZLES[index];
+      bubble.innerHTML = p.ask;
+      filled = 0;
+      nextBtn.classList.add('is-off');
+      resetImageSwap(nextBtn);
+      grid.innerHTML = '<div class="p05-slot"></div><div></div>'.repeat(4);
+      for (let i = 0; i < 4; i++) drawCell(i, p.pieces.find((x) => x.cell === i).text);
+      tray.innerHTML = '';
+      const shaped = p.pieces.map((piece, i) => ({ piece, color: COLORS[i], edges: CELL_EDGES[piece.cell === undefined ? Math.floor(Math.random() * 4) : piece.cell] }));
+      shuffleArray(shaped).forEach(({ piece, color, edges }) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'p05-piece';
+        btn.innerHTML = jigSvg(180, 52, edges, color) + '<span class="p05-label" style="' + labelBox(180, 52, edges, 0, 0) + '">' + piece.text + '</span>';
+        btn.addEventListener('click', () => pick(btn, piece, color));
+        tray.appendChild(btn);
+      });
+    }
+
+    function pick(btn, piece, color) {
+      const p = PUZZLES[index];
+      if (piece.cell === undefined) {
+        playWrong();
+        btn.classList.remove('is-wrong');
+        void btn.offsetWidth;
+        btn.classList.add('is-wrong');
+        bubble.innerHTML = '다시 생각해볼까요?';
+        clearTimeout(bubbleTimer);
+        bubbleTimer = setTimeout(() => { bubble.innerHTML = p.ask; }, 1000);
+        const hints = Array.from(grid.querySelectorAll('.p05-label.is-hint'));
+        hints.forEach((h) => h.classList.add('is-on'));
+        setTimeout(() => hints.forEach((h) => h.classList.remove('is-on')), 1000);
+        return;
+      }
+      playCorrect();
+      btn.classList.add('is-used');
+      drawCell(piece.cell, piece.text, color);
+      filled += 1;
+      if (filled === 4) {
+        clearTimeout(bubbleTimer);
+        bubble.innerHTML = p.done;
+        nextBtn.classList.remove('is-off');
+      }
+    }
+
+    nextBtn.addEventListener('click', () => {
+      setTimeout(() => {
+        if (index < PUZZLES.length - 1) {
+          index += 1;
+          render();
+        } else {
+          navigateTo('page06.html');
+        }
+      }, 300);
+    });
+
+    render();
+  })();
+  </script>
+</body>
+</html>

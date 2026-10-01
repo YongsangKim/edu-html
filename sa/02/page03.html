@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나만의 자랑거리 찾기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 4~8p. page02 룰렛 결과(?topic=)의 주제 하나만 진행: 보기 선택 → 취재 카드(이모지 반응) → 확인 시 page04.
+           카드 그림은 img/p03_card_{topic}{번호}.png, 없으면 보라 칸 */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p03-note{position:absolute;left:222px;top:95px;width:1476px;height:790px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:48px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p03-tab{position:absolute;left:303px;top:44px;height:100px;padding:6px 60px 0;box-sizing:border-box;display:flex;align-items:center;background:#91b9e7;border:solid 5px #1b1738;border-radius:50px;box-shadow:0 10px 0 0 #becde7;
+          font-family:'Cafe24 Ssurround';font-size:56px;color:#fff;letter-spacing:-0.04em;z-index:1}
+        .p03-ask{position:absolute;left:222px;top:175px;width:1476px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.25;color:#48159c;letter-spacing:-0.04em;word-break:keep-all}
+        .p03-ask span{background:linear-gradient(transparent 62%,#ffd83d 62%,#ffd83d 90%,transparent 90%)}
+
+        .p03-opts{position:absolute;left:434px;top:345px;width:1052px;display:flex;flex-direction:column;gap:26px}
+        .p03-opts .card-btn{height:100px;font-size:50px;letter-spacing:-0.04em}
+
+        .p03-next{position:absolute;left:756px;top:735px}
+
+        .p03-card{width:900px;height:auto;padding:36px 50px 34px}
+        .p03-card .photo-card-title{margin:0 0 20px}
+        .p03-card .photo-card-img{width:700px;height:330px;background:#48159c center / cover no-repeat}
+        .p03-card .photo-card-text{margin:20px 0 0}
+        .p03-emojis{display:flex;justify-content:center;gap:34px;margin-top:26px}
+        .p03-emoji{position:relative;width:104px;height:104px;border-radius:50%;border:solid 5px #48159c;background:#fefbf9;font-size:56px;line-height:1;cursor:pointer;padding:0}
+        .p03-emoji:hover{background:#eee8ff}
+        .p03-emoji.is-selected{background:#ffd83d}
+        .p03-emoji.is-pop{animation:p03-bounce .45s cubic-bezier(.3,1.6,.5,1)}
+        @keyframes p03-bounce{0%{transform:scale(1)}35%{transform:scale(1.3)}100%{transform:scale(1)}}
+        .p03-fx{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none;overflow:hidden;z-index:20}
+        .p03-fx span{position:absolute;left:0;top:0;will-change:transform,opacity}
+        .p03-fx .is-paper{width:16px;height:26px;border-radius:3px}
+        .p03-fx .is-emoji{font-size:54px;line-height:1}
+        .p03-help{margin:22px 0 0;font-size:40px;color:#8278ff}
+        .p03-confirm img{display:block}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p03-note"></div>
+          <div class="p03-tab">오늘의 취재 질문</div>
+          <p class="p03-ask"><span id="p03Ask"></span></p>
+          <div class="p03-opts" id="p03Opts"></div>
+
+          <a href="javascript:;" class="js-sfx p03-next is-disabled" id="p03Next" data-sound="sound/click.mp3">
+            <img src="../../img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" alt="다음">
+          </a>
+
+          <div class="photo-modal is-off" id="p03Modal">
+            <div class="photo-card p03-card" id="p03Card">
+              <p class="photo-card-title" id="p03CardTitle"></p>
+              <div class="photo-card-img" id="p03CardImg"></div>
+              <p class="photo-card-text" id="p03CardText"></p>
+              <div class="p03-emojis">
+                <button type="button" class="p03-emoji" data-sound="sound/click.mp3">&#128077;</button>
+                <button type="button" class="p03-emoji" data-sound="sound/click.mp3">&#10084;&#65039;</button>
+                <button type="button" class="p03-emoji" data-sound="sound/click.mp3">&#128522;</button>
+                <button type="button" class="p03-emoji" data-sound="sound/click.mp3">&#11088;</button>
+              </div>
+              <p class="p03-help">반응을 눌러 스스로를 칭찬해요</p>
+            </div>
+            <a href="page04.html" class="js-nav-effect js-sfx p03-confirm" id="p03Confirm">
+              <img src="../../img/common/btn_confirm.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_confirm_on.png" data-src-over="../../img/common/btn_confirm_over.png" data-sound="sound/click.mp3" alt="확인">
+            </a>
+          </div>
+
+          <div class="avatar-modal is-off" id="p03Warn">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+              <p class="avatar-popup-text is-pill">이모지를 눌러 스스로를 칭찬해봐요.</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="나만의 자랑거리 찾기" data-next="page04.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const TOPICS = {
+      effort: {
+        ask: '목표를 정하고 꾸준히 노력한 일이 있나요?',
+        title: '끈기 취재 카드',
+        options: [
+          { text: '매일 운동했어요.', card: '매일 꾸준히 운동했어요!' },
+          { text: '매일 책을 읽었어요.', card: '매일 꾸준히 책을 읽었어요!' },
+          { text: '공부 계획을 지켰어요.', card: '매일 노력해서 공부 계획을 지켰어요!' }
+        ]
+      },
+      praise: {
+        ask: '최근에 선생님이나 가족에게<br>칭찬받은 일이 있나요?',
+        title: '칭찬 취재 카드',
+        options: [
+          { text: '수업에 열심히 참여했어요.', card: '수업을 열심히 들었어요!' },
+          { text: '방을 정리했어요.', card: '방을 깨끗하게 정리했어요!' },
+          { text: '약속을 잘 지켰어요.', card: '약속을 잘 지켰어요!' }
+        ]
+      },
+      help: {
+        ask: '최근에 가족이나 친구를 도와준 일이 있나요?',
+        title: '도움 취재 카드',
+        options: [
+          { text: '집안일을 도왔어요.', card: '집안일을 도왔어요!' },
+          { text: '친구의 공부를 도왔어요.', card: '친구의 공부를 도왔어요!' },
+          { text: '친구가 힘들 때 이야기를 들어줬어요.', card: '친구가 힘들 때 이야기를 들어줬어요!' }
+        ]
+      },
+      strength: {
+        ask: '친구들과 함께할 때<br>내가 잘하는 것은 무엇인가요?',
+        title: '강점 취재 카드',
+        options: [
+          { text: '함께 문제 해결하기', card: '함께 문제를 해결할 수 있어요!' },
+          { text: '친구 이야기 들어주기', card: '친구 이야기를 잘 들어줘요!' },
+          { text: '친구 웃게 해주기', card: '친구를 웃게 해줘요!' }
+        ]
+      }
+    };
+
+    const key = new URLSearchParams(location.search).get('topic');
+    const topicKey = TOPICS[key] ? key : 'effort';
+    const topic = TOPICS[topicKey];
+
+    const askEl = document.getElementById('p03Ask');
+    const optsBox = document.getElementById('p03Opts');
+    const nextBtn = document.getElementById('p03Next');
+    const modal = document.getElementById('p03Modal');
+    const card = document.getElementById('p03Card');
+    const cardTitle = document.getElementById('p03CardTitle');
+    const cardImg = document.getElementById('p03CardImg');
+    const cardText = document.getElementById('p03CardText');
+    const emojis = Array.from(card.querySelectorAll('.p03-emoji'));
+    const warn = document.getElementById('p03Warn');
+    const playClick = makeSfx('sound/click.mp3');
+
+    let picked = -1;
+    let reacted = false;
+
+    askEl.innerHTML = topic.ask;
+    cardTitle.textContent = topic.title;
+
+    topic.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'card-btn is-wide';
+      btn.textContent = opt.text;
+      btn.addEventListener('click', () => {
+        playClick();
+        optsBox.querySelectorAll('.card-btn').forEach((b) => b.classList.toggle('is-selected', b === btn));
+        picked = i;
+        nextBtn.classList.remove('is-disabled');
+      });
+      optsBox.appendChild(btn);
+    });
+
+    nextBtn.addEventListener('click', () => {
+      if (picked < 0) return;
+      cardText.textContent = topic.options[picked].card;
+      cardImg.style.backgroundImage = "url('img/p03_card_" + topicKey + (picked + 1) + ".png')";
+      reacted = false;
+      emojis.forEach((b) => b.classList.remove('is-selected'));
+      modal.classList.remove('is-off');
+    });
+
+    emojis.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        playClick();
+        emojis.forEach((b) => b.classList.toggle('is-selected', b === btn));
+        reacted = true;
+        btn.classList.remove('is-pop');
+        void btn.offsetWidth;
+        btn.classList.add('is-pop');
+        fanfare(btn);
+      });
+    });
+
+    // 팡파레: 누른 이모지 자리에서 색종이·이모지가 위로 솟았다가 중력으로 떨어지며 사라짐
+    const fx = document.createElement('div');
+    fx.className = 'p03-fx';
+    document.querySelector('main').appendChild(fx);
+    const COLORS = ['#ff4f8b', '#ffd83d', '#4d8bff', '#6ad17a', '#b37bff', '#ff9a3c'];
+
+    function fanfare(btn) {
+      const stage = document.getElementById('stage');
+      const s = stage.getBoundingClientRect().width / 1920;
+      const main = fx.getBoundingClientRect();
+      const r = btn.getBoundingClientRect();
+      const ox = (r.left + r.width / 2 - main.left) / s;
+      const oy = (r.top + r.height / 2 - main.top) / s;
+
+      const parts = [];
+      for (let i = 0; i < 34; i++) {
+        const isEmoji = i < 6;
+        const el = document.createElement('span');
+        el.className = isEmoji ? 'is-emoji' : 'is-paper';
+        if (isEmoji) el.textContent = btn.textContent;
+        else el.style.background = COLORS[i % COLORS.length];
+        fx.appendChild(el);
+        const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 0.9;
+        const speed = (isEmoji ? 900 : 1100) + Math.random() * 700;
+        parts.push({
+          el, isEmoji,
+          x: ox, y: oy,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          rot: Math.random() * 360,
+          vr: (Math.random() - 0.5) * 900,
+          sway: Math.random() * Math.PI * 2,
+          life: 1.4 + Math.random() * 0.6
+        });
+      }
+
+      let last = performance.now();
+      let t = 0;
+      function frame(now) {
+        const dt = Math.min((now - last) / 1000, 0.05);
+        last = now;
+        t += dt;
+        let alive = 0;
+        parts.forEach((p) => {
+          if (!p.el) return;
+          p.vy += 2200 * dt;
+          p.vx *= 1 - 1.8 * dt;
+          p.vy *= 1 - (p.isEmoji ? 1.2 : 2.2) * dt;
+          p.x += p.vx * dt + (p.isEmoji ? 0 : Math.sin(t * 8 + p.sway) * 40 * dt);
+          p.y += p.vy * dt;
+          p.rot += p.vr * dt;
+          const fade = Math.max(0, Math.min(1, (p.life - t) / 0.4));
+          const scale = p.isEmoji ? Math.min(1, t * 6) : 1;
+          const flip = p.isEmoji ? 1 : Math.cos(t * 10 + p.sway);
+          p.el.style.transform = 'translate(' + p.x + 'px,' + p.y + 'px) translate(-50%,-50%) rotate(' + (p.isEmoji ? p.rot * 0.15 : p.rot) + 'deg) scale(' + scale + ',' + (scale * flip) + ')';
+          p.el.style.opacity = fade;
+          if (fade <= 0) {
+            p.el.remove();
+            p.el = null;
+          } else {
+            alive += 1;
+          }
+        });
+        if (alive) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    // 확인 버튼 자체의 이동(js-nav-effect)보다 먼저 가로채야 해서 모달에서 캡처로 받음
+    modal.addEventListener('click', (e) => {
+      if (reacted || !e.target.closest('#p03Confirm')) return;
+      e.preventDefault();
+      e.stopPropagation();
+      flashLayer(warn);
+    }, true);
+  })();
+  </script>
+</body>
+</html>

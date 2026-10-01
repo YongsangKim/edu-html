@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나의 자랑거리를 소개하는 뉴스</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 42~43p. TV 목업은 img/p11_tv.png, 화면은 page08 뉴스데스크 이미지 재사용.
+           재생하기: 빨간 자막바 안에서 기사문이 오른쪽→왼쪽으로 흐르고 고른 음성(sound/p11_tts_{minjun|yuna}.mp3)이 같이 재생.
+           자막 속도는 음성 길이에 맞추고, 음성이 없으면 8초 */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p11-title{position:absolute;left:0;top:30px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:80px;letter-spacing:-0.06em;
+          background:linear-gradient(180deg,#02185c,#0362d7);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .p11-tv{position:absolute;left:190px;top:150px;width:1180px;height:720px;box-sizing:border-box;padding:40px;background:#1b1738 url('img/p11_tv.png') center / 100% 100% no-repeat;border-radius:40px}
+        .p11-screen{position:relative;width:100%;height:100%;border-radius:16px;overflow:hidden;background:#48159c center / cover no-repeat}
+        .p11-caption-track{position:absolute;left:0;bottom:30px;width:100%;height:80px;overflow:hidden;background:#d32f2f;display:flex;align-items:center}
+        .p11-caption-text{position:absolute;left:100%;white-space:nowrap;padding:0 20px;font-family:'Pretendard';font-size:44px;font-weight:700;color:#000}
+        .p11-caption-text.is-playing{animation:p11-scroll var(--dur,8s) linear forwards}
+        @keyframes p11-scroll{
+          from{left:100%;transform:translateX(0)}
+          to{left:0;transform:translateX(-100%)}
+        }
+
+        .p11-btns{position:absolute;left:1440px;top:560px;width:380px;display:flex;flex-direction:column;gap:50px}
+        .p11-btns .card-btn{width:100%;display:flex;align-items:center;justify-content:center;text-decoration:none}
+        .p11-btns .card-btn:active{color:#d168fb;box-shadow:0 4px 0 0 #a9a2ff,0 3px 0 10px #035fd3;transform:translateY(9px)}
+        .p11-btns .card-btn.is-selected{margin:0;transform:translateY(9px)}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="p11-title">나의 자랑거리 뉴스를 완성했어요!</p>
+          <div class="p11-tv">
+            <div class="p11-screen" id="p11Screen">
+              <div class="p11-caption-track">
+                <div class="p11-caption-text" id="p11CaptionText"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p11-btns">
+            <button type="button" class="card-btn is-popup js-sfx" id="p11PlayBtn" data-sound="sound/click.mp3">재생하기</button>
+            <a href="page12.html" class="card-btn is-popup js-nav-effect js-sfx" id="p11Next" data-sound="sound/click.mp3">다음</a>
+          </div>
+
+          <img class="particle-effect" src="../../img/common/img_particle01.png" data-frame1="../../img/common/img_particle01.png" data-frame2="../../img/common/img_particle02.png" data-interval="200" data-duration="2000" alt="">
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="나의 자랑거리를 소개하는 뉴스" data-next="page12.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const read = (k) => { try { return sessionStorage.getItem(k); } catch (e) { return null; } };
+    const article = read('sa02_article') || '오늘의 주인공은 매일 꾸준히 노력하여 스스로 세운 목표를 이뤘다고 합니다. 매우 자랑스러운 기분이라고 전해왔습니다.';
+    const desk = read('sa02_desk') || 'a1';
+    const voice = read('sa02_voice') || 'yuna';
+
+    const screen = document.getElementById('p11Screen');
+    const caption = document.getElementById('p11CaptionText');
+    const playBtn = document.getElementById('p11PlayBtn');
+    const tts = new Audio('sound/p11_tts_' + voice + '.mp3');
+
+    screen.style.backgroundImage = "url('img/p08_result_" + desk + ".png'), url('img/p08_tpl_" + desk.charAt(0) + ".png')";
+    caption.textContent = article;
+
+    playBtn.addEventListener('click', () => {
+      playBtn.classList.add('is-selected');
+      const dur = isFinite(tts.duration) && tts.duration > 0 ? tts.duration : 8;
+      caption.style.setProperty('--dur', dur + 's');
+      caption.classList.remove('is-playing');
+      void caption.offsetWidth;
+      caption.classList.add('is-playing');
+      tts.currentTime = 0;
+      tts.play().catch(() => {});
+    });
+
+    caption.addEventListener('animationend', () => {
+      caption.classList.remove('is-playing');
+      playBtn.classList.remove('is-selected');
+    });
+    document.getElementById('p11Next').addEventListener('click', (e) => e.currentTarget.classList.add('is-selected'));
+  })();
+  </script>
+</body>
+</html>

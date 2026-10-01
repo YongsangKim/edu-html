@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>퀴즈 풀기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 43~45p. sa/05/page11(QUIZ) 구조. Q1 2지선다, Q2 O/X(공용 아이콘), Q3 4개 중 정답 2개 */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p10-opt{position:absolute;margin-left:10px}
+        .p10-q1-opt1{left:420px;top:560px}
+        .p10-q1-opt2{left:1036px;top:560px}
+
+        .p10-ox{position:absolute;top:460px;width:360px;height:360px;padding:0;border:0;background:none;cursor:pointer}
+        .p10-ox img{width:100%;height:100%;object-fit:contain;display:block}
+        .p10-ox.is-wrong{animation:fix-word-shake .3s ease}
+        .p10-q2-o{left:480px}
+        .p10-q2-x{left:1080px}
+
+        .p10-q3 .p10-opt{width:380px;margin-left:0}
+        .p10-q3-opt1{left:110px;top:560px}
+        .p10-q3-opt2{left:550px;top:560px}
+        .p10-q3-opt3{left:990px;top:560px}
+        .p10-q3-opt4{left:1430px;top:560px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="quiz-stage">
+          <div class="step-flow">
+
+            <div class="step-panel p10-panel p10-q1">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q1.</span>
+                  <p class="quiz-ask">빵이나 장난감처럼 눈에 보이고 만질 수 있는 물건을 무엇이라고 부르나요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz">
+                <button class="answer-pick card-btn is-quiz p10-opt p10-q1-opt1" data-correct="true" aria-label="재화">재화</button>
+                <button class="answer-pick card-btn is-quiz p10-opt p10-q1-opt2" data-correct="false" aria-label="서비스">서비스</button>
+              </div>
+            </div>
+
+            <div class="step-panel p10-panel p10-q2">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q2.</span>
+                  <p class="quiz-ask">병원에서 진료를 받는 것처럼 눈에 보이지 않지만 편리함을 주고 받는 것을 ‘서비스’라고 해요.</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz">
+                <button class="answer-pick p10-ox p10-q2-o" data-correct="true" aria-label="O">
+                  <img class="js-img-swap" src="../../img/common/icon_o.png" data-src-on="../../img/common/icon_o_on.png" alt="O">
+                </button>
+                <button class="answer-pick p10-ox p10-q2-x" data-correct="false" aria-label="X">
+                  <img class="js-img-swap" src="../../img/common/icon_x.png" data-src-on="../../img/common/icon_x_on.png" alt="X">
+                </button>
+              </div>
+            </div>
+
+            <div class="step-panel p10-panel p10-q3">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q3.</span>
+                  <p class="quiz-ask">Suno AI가 멋진 노래를 만들어 내려면, 우리가 AI에게 어떤 재료 2가지를 알려주어야 할까요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz" data-next="page11.html">
+                <button class="answer-pick card-btn is-quiz p10-opt p10-q3-opt1" data-correct="true" aria-label="가사">가사</button>
+                <button class="answer-pick card-btn is-quiz p10-opt p10-q3-opt2" data-correct="true" aria-label="음악 장르">음악 장르</button>
+                <button class="answer-pick card-btn is-quiz p10-opt p10-q3-opt3" data-correct="false" aria-label="그림/사진">그림/사진</button>
+                <button class="answer-pick card-btn is-quiz p10-opt p10-q3-opt4" data-correct="false" aria-label="돈/동전">돈/동전</button>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="ox-result-correct is-avatar is-off" data-sound="sound/correct.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <p class="avatar-popup-text">정답이에요!</p>
+              <div class="avatar-popup-extra"><img src="../../img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div>
+          <div class="ox-result-wrong is-avatar is-off" data-sound="sound/incorrect.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text is-small">문장을 다시 한 번 잘 읽어봐요.</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="퀴즈 풀기" data-next="page11.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+</body>
+</html>

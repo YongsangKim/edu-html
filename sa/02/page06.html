@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나의 자랑거리 기사문 작성하기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 11~14p. 3번 질문 보기가 2번 선택에 따라 달라져서 페이지 전용 스크립트로 진행.
+           완성한 기사문 본문(제목 제외)은 sessionStorage 'sa02_article'에 저장해 뒤 활동에서 씀. 신문지 재질은 img/p06_paper.png */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p06-panel{position:absolute;left:48px;top:54px;width:761px;height:820px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:48px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p06-gauge{left:110px;top:100px;width:637px;height:56px;border-width:5px;border-radius:28px}
+        .p06-gauge:before{left:-30px;top:-20px;width:90px;height:85px;background-image:url('img/p06_star.png')}
+        .p06-gauge .gauge-fill{border-radius:24px}
+        .p06-gauge .gauge-fill:after{top:7px;height:7px}
+        .p06-title{position:absolute;left:48px;top:185px;width:761px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:60px;color:#48159c;letter-spacing:-0.04em}
+
+        .p06-opts{position:absolute;left:130px;top:295px;width:597px;display:flex;flex-direction:column;gap:38px}
+        .p06-opts .emotion-option{width:100%;height:100px;padding:4px 20px 0;font-size:46px;line-height:1.15;letter-spacing:-0.06em}
+
+        .p06-paper{position:absolute;left:847px;top:54px;width:995px;height:700px;box-sizing:border-box;padding:70px 90px;background:#f7f2e6 url('img/p06_paper.png') center / cover no-repeat;
+          border:solid 6px #1b1738;border-radius:24px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);font-family:'Cafe24 Ssurround';color:#1b1738;letter-spacing:-0.04em}
+        .p06-paper-title{min-height:90px;margin:0 0 40px;padding-bottom:20px;border-bottom:solid 5px #1b1738;text-align:center;font-size:72px;line-height:1.2;color:#02185c}
+        .p06-paper-body{margin:0;font-size:50px;line-height:1.5;word-break:keep-all}
+
+        .p06-next{position:absolute;left:1141px;top:790px}
+
+        .p06-done .p06-panel, .p06-done .p06-gauge, .p06-done .p06-title, .p06-done .p06-opts, .p06-done .p06-next{display:none}
+        .p06-done-title{position:absolute;left:0;top:40px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:80px;letter-spacing:-0.06em;
+          background:linear-gradient(180deg,#02185c,#0362d7);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .p06-done .p06-paper{left:360px;top:160px;width:1200px;height:590px}
+        .p06-done .p06-paper-body{text-align:center}
+        .p06-done-next{position:absolute;left:756px;top:790px}
+        .p06-done-title, .p06-done-next{display:none}
+        .p06-done .p06-done-title, .p06-done .p06-done-next{display:block}
+        .p06-fx{pointer-events:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default" id="p06Main">
+          <div class="p06-panel"></div>
+          <div class="gauge p06-gauge"><div class="gauge-fill" id="p06GaugeFill"></div></div>
+          <p class="p06-title" id="p06Title"></p>
+          <div class="p06-opts" id="p06Opts"></div>
+
+          <p class="p06-done-title">나의 자랑거리 기사문 완성!</p>
+          <div class="p06-paper">
+            <p class="p06-paper-title" id="p06PaperTitle"></p>
+            <p class="p06-paper-body" id="p06PaperBody"></p>
+          </div>
+
+          <a href="javascript:;" class="js-sfx p06-next is-disabled" id="p06Next" data-sound="sound/click.mp3">
+            <img src="../../img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" alt="다음">
+          </a>
+          <a href="page07.html" class="js-nav-effect p06-done-next">
+            <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+          </a>
+          <div class="step-panel is-hidden p06-fx" id="p06Fx">
+            <img class="particle-effect" src="../../img/common/img_particle01.png" data-frame1="../../img/common/img_particle01.png" data-frame2="../../img/common/img_particle02.png" data-interval="200" data-duration="2000" alt="">
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="나의 자랑거리 기사문 작성하기" data-next="page07.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const TITLES = ['단독 보도!', '오늘의 인물', '특종! 세상에 이런 일이', '사람 사는 이야기'];
+    const ACTIONS = [
+      { text: '매일 꾸준히 연습해서',
+        results: [
+          { text: '목표를 이뤘습니다.', clause: '스스로 세운 목표를 이뤘다고 합니다.' },
+          { text: '상을 받았습니다.', clause: '대회에 출전하여 상을 받았습니다.' },
+          { text: '칭찬을 받았습니다.', clause: '부모님과 선생님께 칭찬을 받았습니다.' }
+        ] },
+      { text: '친구의 이야기를 잘 들어줘서',
+        results: [
+          { text: '칭찬을 받았습니다.', clause: '부모님과 선생님께 칭찬을 받았습니다.' },
+          { text: '감사 인사를 받았습니다.', clause: '진심을 담은 감사 인사를 받았습니다.' },
+          { text: '친구와 사이가 좋아졌습니다.', clause: '친구와의 사이가 좋아졌다고 합니다.' }
+        ] },
+      { text: '수업 시간에 열심히 참여해서',
+        results: [
+          { text: '공부에 자신감이 생겼습니다.', clause: '공부에 자신감이 생겼다고 합니다.' },
+          { text: '칭찬을 받았습니다.', clause: '부모님과 선생님께 칭찬을 받았습니다.' },
+          { text: '시험 점수를 잘 받았습니다.', clause: '어려웠던 시험에서 좋은 점수를 받았습니다.' }
+        ] }
+    ];
+    const CLOSING = '매우 자랑스러운 기분이라고 전해왔습니다.';
+    const STEPS = [
+      { title: '제목을 골라요' },
+      { title: '어떤 행동을 했나요?' },
+      { title: '어떤 결과를 얻었나요?' }
+    ];
+
+    const main = document.getElementById('p06Main');
+    const gaugeFill = document.getElementById('p06GaugeFill');
+    const titleEl = document.getElementById('p06Title');
+    const optsBox = document.getElementById('p06Opts');
+    const paperTitle = document.getElementById('p06PaperTitle');
+    const paperBody = document.getElementById('p06PaperBody');
+    const nextBtn = document.getElementById('p06Next');
+    const fx = document.getElementById('p06Fx');
+    const playClick = makeSfx('sound/click.mp3');
+
+    const picks = [-1, -1, -1];
+    let step = 0;
+
+    function bodyLines() {
+      const lines = [];
+      if (picks[1] >= 0) lines.push('오늘의 주인공은 ' + ACTIONS[picks[1]].text);
+      if (picks[2] >= 0) lines.push(ACTIONS[picks[1]].results[picks[2]].clause, CLOSING);
+      return lines;
+    }
+
+    function renderPaper() {
+      paperTitle.textContent = picks[0] >= 0 ? TITLES[picks[0]] : '';
+      paperBody.innerHTML = bodyLines().join('<br>');
+      const done = picks.filter((p) => p >= 0).length;
+      gaugeFill.style.width = (done >= 3 ? 100 : done * (100 / 3)) + '%';
+    }
+
+    function optionsFor(s) {
+      if (s === 0) return TITLES;
+      if (s === 1) return ACTIONS.map((a) => a.text);
+      return ACTIONS[picks[1]].results.map((r) => r.text);
+    }
+
+    function renderStep() {
+      titleEl.textContent = STEPS[step].title;
+      optsBox.innerHTML = '';
+      optionsFor(step).forEach((text, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'emotion-option' + (picks[step] === i ? ' is-selected' : '');
+        btn.textContent = text;
+        btn.addEventListener('click', () => {
+          playClick();
+          optsBox.querySelectorAll('.emotion-option').forEach((b) => b.classList.toggle('is-selected', b === btn));
+          picks[step] = i;
+          renderPaper();
+          nextBtn.classList.remove('is-disabled');
+        });
+        optsBox.appendChild(btn);
+      });
+      nextBtn.classList.toggle('is-disabled', picks[step] < 0);
+      resetImageSwap(nextBtn);
+    }
+
+    function finish() {
+      try { sessionStorage.setItem('sa02_article', bodyLines().join(' ')); } catch (e) {}
+      main.classList.add('p06-done');
+      fx.classList.remove('is-hidden');
+      fx.dispatchEvent(new CustomEvent('step:visible'));
+    }
+
+    nextBtn.addEventListener('click', () => {
+      if (picks[step] < 0) return;
+      setTimeout(() => {
+        if (step < STEPS.length - 1) {
+          step += 1;
+          if (step === 2) picks[2] = -1;
+          renderPaper();
+          renderStep();
+        } else {
+          finish();
+        }
+      }, 300);
+    });
+
+    renderPaper();
+    renderStep();
+  })();
+  </script>
+</body>
+</html>

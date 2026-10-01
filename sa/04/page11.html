@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 이모티콘 문장 만들기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 와이어프레임. 기획서 29p:
+           page10에서 고른 카드로 만든 프롬프트가 타이핑되고, 조이스틱 레버를 내리면
+           바로 옆 생성 영역에서 로딩 스피너가 돈 뒤 이모티콘이 나타나고, 그제서야
+           기계 아래 여백에 '다음' 버튼이 나타남(페이지 이동은 없음 — page12는
+           다음 버튼으로만 이동). 기계 폭은 프롬프트 문장이 줄바꿈되지 않을 만큼
+           넓게 잡음(46px 폰트로 한 줄 표시하려면 대략 1200px+ 필요) */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:url('../../img/common/stage_bg_04.png') no-repeat}
+
+        .p11-machine{position:absolute;left:260px;top:90px;width:1480px;height:700px;background:#3b1e87;border:solid 8px #fefbf9;border-radius:56px;box-sizing:border-box;padding:44px 60px}
+        .p11-machine-title{margin:0 0 24px 0;font-family:'Cafe24 Ssurround';font-size:52px;color:#ffd83d;text-align:center}
+        .p11-screen{height:150px;background:#0f0d26;border:solid 6px #91b9e7;border-radius:32px;box-sizing:border-box;padding:34px 50px;
+          font-family:'Pretendard';font-size:46px;line-height:1.5;color:#fefbf9}
+        .p11-caret{display:inline-block;width:4px;height:48px;margin-left:6px;background:#ffd83d;vertical-align:-8px;animation:p11-blink 1s steps(1,end) infinite}
+        @keyframes p11-blink{0%,50%{opacity:1}50.01%,100%{opacity:0}}
+
+        /* 이모티콘 생성 영역 + 조이스틱을 한 줄에: 생성 영역이 왼쪽, 조이스틱이 오른쪽 */
+        .p11-gen-row{display:flex;align-items:stretch;gap:30px;margin-top:26px}
+
+        .p11-result{flex:1 1 auto;height:300px;background:#0f0d26;border:solid 6px #91b9e7;border-radius:32px;box-sizing:border-box;
+          display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px}
+        .p11-result-hint{margin:0;padding:0 30px;font-family:'Pretendard';font-size:30px;color:#8d97a6;text-align:center}
+        .p11-spinner{width:110px;height:110px;border-radius:50%;border:14px solid #3b1e87;border-top-color:#ffd83d;
+          animation:p11-spin 1s linear infinite}
+        @keyframes p11-spin{to{transform:rotate(360deg)}}
+        .p11-emoji-result{width:200px;height:200px;border-radius:40px;background:#fff3c9;border:solid 6px #1b1738;
+          display:flex;align-items:center;justify-content:center;font-size:120px}
+
+        /* 조이스틱: 레버를 클릭하면 아래로 내려가는 효과만 CSS로 표현. 생성 영역과
+           나란히 놓이도록 position:relative로 바꾸고(내부 절대좌표 기준점은 유지),
+           안내는 라벨 텍스트 대신 위의 스와이프 가이드 손가락으로 대신함 */
+        .p11-joystick{position:relative;flex:0 0 260px;height:300px;background:none;border:0;padding:0;cursor:pointer}
+        .p11-joystick-base{position:absolute;left:30px;top:180px;width:200px;height:100px;background:#fefbf9;border:solid 6px #1b1738;border-radius:50px}
+        .p11-joystick-stick{position:absolute;left:113px;top:35px;width:26px;height:160px;background:#becde7;border:solid 5px #1b1738;border-radius:13px;transition:top .25s ease,height .25s ease}
+        .p11-joystick-knob{position:absolute;left:75px;top:0;width:100px;height:100px;background:#ff2f7b;border:solid 6px #1b1738;border-radius:50%;transition:top .25s ease}
+        .p11-joystick.is-pulled .p11-joystick-knob{top:95px}
+        .p11-joystick.is-pulled .p11-joystick-stick{top:130px;height:65px}
+
+        /* 기계가 넓어져 오른쪽 여백이 부족해서, '다음' 버튼은 기계 아래
+           빈 공간(세로 790~960px)에 놓음 */
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main>
+
+          <div class="p11-machine">
+            <p class="p11-machine-title">AI 이모티콘 생성기</p>
+            <div class="p11-screen"><span id="p11Text"></span><span class="p11-caret"></span></div>
+
+            <div class="p11-gen-row">
+              <div class="p11-result" id="p11Result">
+                <p class="p11-result-hint" id="p11ResultHint">레버를 내리면 이모티콘이 생성돼요</p>
+              </div>
+
+              <button type="button" class="p11-joystick js-sfx" id="p11Joystick" data-sound="sound/click.mp3" aria-label="조이스틱 레버 내리기">
+                <span class="p11-joystick-base"></span>
+                <span class="p11-joystick-stick"></span>
+                <span class="p11-joystick-knob"></span>
+
+                <!-- 손가락이 레버를 누른 채 아래로 드래그하는 모션(기능 N): 2번 반복 후 사라짐 -->
+                <div class="swipe-guide" style="position:absolute;left:0;top:0;width:260px;height:300px;pointer-events:none;z-index:20">
+                  <img class="swipe-guide-finger" src="../../img/common/img_finger01.png" alt=""
+                       style="position:absolute;left:120px;top:-10px;"
+                       data-start-left="120" data-start-top="-10"
+                       data-end-left="120" data-end-top="135"
+                       data-repeat="2">
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <a href="page12.html" class="js-nav-effect next-btn is-off">
+            <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+          </a>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="AI 이모티콘 문장 만들기" data-next="page12.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  /* 기획서 29p. 프롬프트 문장을 한 글자씩 타이핑한 뒤 조이스틱 클릭을 기다림 */
+  (function () {
+    const PROMPT = '고마운 마음을 담은 웃는 얼굴 이모티콘을 만들어 줘.';
+    const textEl = document.getElementById('p11Text');
+    const joystick = document.getElementById('p11Joystick');
+    const result = document.getElementById('p11Result');
+    const resultHint = document.getElementById('p11ResultHint');
+    const nextBtn = document.querySelector('.next-btn');
+
+    let i = 0;
+    const typer = setInterval(() => {
+      i += 1;
+      textEl.textContent = PROMPT.slice(0, i);
+      if (i >= PROMPT.length) clearInterval(typer);
+    }, 70);
+
+    joystick.addEventListener('click', () => {
+      if (joystick.classList.contains('is-pulled')) return;
+      joystick.classList.add('is-pulled');
+      document.querySelectorAll('.swipe-guide').forEach((el) => { el.style.display = 'none'; });
+
+      // 레버를 내리면 생성 영역에 스피너가 돌다가, 잠시 뒤 이모티콘 결과로 바뀌고
+      // 그제서야 '다음' 버튼이 나타남(자동 이동은 하지 않음)
+      resultHint.remove();
+      const spinner = document.createElement('div');
+      spinner.className = 'p11-spinner';
+      result.appendChild(spinner);
+
+      setTimeout(() => {
+        spinner.remove();
+        const emoji = document.createElement('div');
+        emoji.className = 'p11-emoji-result';
+        emoji.innerHTML = '&#128522;';
+        result.appendChild(emoji);
+        nextBtn.classList.remove('is-off');
+      }, 1800);
+    });
+  })();
+  </script>
+</body>
+</html>

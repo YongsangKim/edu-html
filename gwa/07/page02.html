@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>삼촌의 이사를 도와라!</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 2p. 새집 전체는 통이미지 한 장(img/p02_bg_house.png), 가운데 '이사 짐 나르기' 버튼 → 1라운드.
+           아래는 배치할 스마트 기기 10개를 5개씩 보여주고 양옆 화살표로 넘김. 기기 아이콘 img/p03_dev_{key}.png(게임 화면과 같이 씀) */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p02-title{position:absolute;margin:0;left:329px;top:30px;width:1264px;height:90px;box-sizing:border-box;padding:6px 30px 0;display:flex;align-items:center;justify-content:center;
+          background:#91b9e7;border:solid 5px #1b1738;border-radius:45px;box-shadow:0 10px 0 0 #becde7;font-family:'Cafe24 Ssurround';font-size:52px;color:#fff;letter-spacing:-0.04em}
+        .p02-house{position:absolute;left:420px;top:150px;width:1460px;height:480px;background:#fefbf9 url('img/p02_bg_house.png') 0 0 / 100% 100% no-repeat}
+        .p02-start.card-btn{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:120px;display:flex;align-items:center;justify-content:center;font-size:60px;text-decoration:none;white-space:nowrap}
+        .p02-start.card-btn:active, .p02-start.card-btn.is-pressed{transform:translate(-50%,calc(-50% + 10px));box-shadow:0 4px 0 0 #a9a2ff,0 3px 0 10px #035fd3;color:#d168fb}
+        .p02-character{position:absolute;left:20px;top:220px;width:400px;height:420px;display:flex;align-items:flex-end;justify-content:center}
+        .p02-character img{max-width:100%;max-height:100%;object-fit:contain}
+
+        .p02-tray{position:absolute;left:40px;top:660px;width:1840px;height:270px;box-sizing:border-box;padding:40px 30px;background:#fefbf9;border:solid 6px #48159c;border-radius:36px;
+          display:flex;gap:24px;justify-content:center}
+        .p02-dev{width:236px;height:180px;box-sizing:border-box;border:solid 4px #91b9e7;border-radius:24px;background:#fff;display:flex;flex-direction:column;align-items:center;padding:10px 6px 8px;
+          font-family:'Cafe24 Ssurround';font-size:27px;color:#31248a;letter-spacing:-0.07em;white-space:nowrap}
+        .p02-dev i{flex:1 1 auto;width:100%;background:center / contain no-repeat}
+        .p02-dev.is-off{display:none}
+        .p02-arrow{position:absolute;top:759px;padding:0;border:0;background:none;cursor:pointer}
+        .p02-arrow img{display:block}
+        .p02-arrow-prev{left:70px}
+        .p02-arrow-prev img{transform:scaleX(-1)}
+        .p02-arrow-next{left:1630px}
+        .p02-arrow.is-disabled{pointer-events:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="p02-title">삼촌의 새 집을 살펴보세요.</p>
+          <div class="p02-house">
+            <a href="page03.html" class="js-nav-effect js-sfx card-btn p02-start" data-sound="sound/click.mp3">이사 짐 나르기</a>
+          </div>
+          <div class="p02-character"><img src="img/p_character_main.png" alt="삼촌과 로운이"></div>
+
+          <div class="p02-tray">
+            <div class="p02-dev" data-set="1"><i style="background-image:url('img/p03_dev_tv.png')"></i>스마트 TV</div>
+            <div class="p02-dev" data-set="1"><i style="background-image:url('img/p03_dev_aircon.png')"></i>스마트 에어컨</div>
+            <div class="p02-dev" data-set="1"><i style="background-image:url('img/p03_dev_sensor.png')"></i>온습도 센서</div>
+            <div class="p02-dev" data-set="1"><i style="background-image:url('img/p03_dev_light.png')"></i>스마트 전등</div>
+            <div class="p02-dev" data-set="1"><i style="background-image:url('img/p03_dev_robot.png')"></i>스마트 로봇청소기</div>
+            <div class="p02-dev is-off" data-set="2"><i style="background-image:url('img/p03_dev_hub.png')"></i>AI 허브</div>
+            <div class="p02-dev is-off" data-set="2"><i style="background-image:url('img/p03_dev_cctv.png')"></i>CCTV 카메라</div>
+            <div class="p02-dev is-off" data-set="2"><i style="background-image:url('img/p03_dev_fridge.png')"></i>스마트 냉장고</div>
+            <div class="p02-dev is-off" data-set="2"><i style="background-image:url('img/p03_dev_purifier.png')"></i>스마트 공기청정기</div>
+            <div class="p02-dev is-off" data-set="2"><i style="background-image:url('img/p03_dev_washer.png')"></i>스마트 세탁기</div>
+          </div>
+          <button class="p02-arrow p02-arrow-prev js-sfx is-disabled" data-set="1" data-sound="sound/click.mp3" aria-label="앞 기기 보기">
+            <img src="../../img/common/btn_arrow_mini.png" class="js-img-swap" data-src-alt="../../img/common/btn_arrow_mini_on.png" data-src-over="../../img/common/btn_arrow_mini_over.png" alt="">
+          </button>
+          <button class="p02-arrow p02-arrow-next js-sfx" data-set="2" data-sound="sound/click.mp3" aria-label="다음 기기 보기">
+            <img src="../../img/common/btn_arrow_mini.png" class="js-img-swap" data-src-alt="../../img/common/btn_arrow_mini_on.png" data-src-over="../../img/common/btn_arrow_mini_over.png" alt="">
+          </button>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="삼촌의 이사를 도와라!" data-next="page03.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const start = document.querySelector('.p02-start');
+    start.addEventListener('click', () => start.classList.add('is-pressed'));
+    const arrows = Array.from(document.querySelectorAll('.p02-arrow'));
+    const devs = Array.from(document.querySelectorAll('.p02-dev'));
+    const firstImg = arrows[0].querySelector('img');
+    firstImg.classList.add('is-swapped');
+    firstImg.src = firstImg.dataset.srcAlt;
+    arrows.forEach((arrow) => {
+      arrow.addEventListener('click', () => {
+        const set = arrow.dataset.set;
+        devs.forEach((d) => d.classList.toggle('is-off', d.dataset.set !== set));
+        arrows.forEach((a) => a.classList.toggle('is-disabled', a === arrow));
+      });
+    });
+  })();
+  </script>
+</body>
+</html>

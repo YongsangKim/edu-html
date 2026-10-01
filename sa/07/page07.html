@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>찰칵! 우리 동네 정보를 찾아라</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 11~22p. 장소 5곳(순서 자유) 선택 → 왼쪽 구글 렌즈 결과 화면(HTML로 그림) + 오른쪽 질문 2개.
+           1번: 틀리면 흔들림 + 휴대폰 화면의 정답 줄 강조(계속 유지), 맞으면 다음 질문 자동. 2번: 틀리면 흔들림 + 힌트 팝업, 맞으면 팝업 + 다음 → 장소 선택으로(끝낸 장소는 비활성).
+           5곳을 다 하면 완료 팝업. 장소 사진 img/p07_place_{key}.png */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+        .p07-view.is-off{display:none}
+
+        .p07-title{position:absolute;left:460px;top:40px;width:1000px;height:100px;margin:0;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;
+          background:#fff;border:solid 5px #1b1738;border-radius:50px;box-shadow:0 10px 0 0 #becde7;font-family:'Cafe24 Ssurround';font-size:56px;color:#1b1738;letter-spacing:-0.05em}
+        .p07-places{position:absolute;left:60px;top:220px;width:1800px;display:flex;gap:30px}
+        .p07-place{flex:1 1 0;height:560px;padding:0;box-sizing:border-box;border:solid 6px #48159c;border-radius:30px;background:#fff;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;
+          font-family:'Cafe24 Ssurround';font-size:50px;color:#48159c;transition:transform .2s}
+        .p07-place i{flex:1 1 auto;background:#dfe7f5 center / cover no-repeat;transition:transform .3s}
+        .p07-place span{flex:0 0 110px;display:flex;align-items:center;justify-content:center;padding-top:6px}
+        .p07-place:hover i{transform:scale(1.1)}
+        .p07-place.is-done{cursor:default;pointer-events:none;border-color:#b9b9b9;color:#9a9a9a}
+        .p07-place.is-done i{filter:grayscale(1) opacity(.6)}
+
+        /* 구글 렌즈 결과 휴대폰 */
+        .p07-phone{position:absolute;left:60px;top:24px;width:560px;height:910px;box-sizing:border-box;padding:18px;background:#1b1738;border-radius:70px;box-shadow:0 0 0 6px #c9c4bb}
+        .p07-screen{position:relative;width:100%;height:100%;box-sizing:border-box;padding:60px 26px 26px;border-radius:54px;background:#fff;overflow:hidden;font-family:'Pretendard';color:#1b1738}
+        .p07-screen:before{content:'';position:absolute;left:50%;top:18px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#1b1738}
+        .p07-search{display:flex;align-items:center;gap:14px;height:64px;padding:0 18px;border-radius:32px;background:#f1f3f4;font-size:22px;color:#5f6368}
+        .p07-search i{width:70px;height:46px;border-radius:10px;background:#dfe7f5 center / cover no-repeat}
+        .p07-ai{margin:26px 0 12px;font-size:26px;font-weight:700;color:#1a73e8}
+        .p07-ai:before{content:'✦ ';}
+        .p07-lens-title{margin:0 0 14px;font-size:27px;font-weight:600;line-height:1.4}
+        .p07-lens-sub{margin:0 0 10px;font-size:27px;font-weight:800}
+        .p07-line{margin:0 0 10px;padding:8px 12px;border-radius:12px;font-size:25px;line-height:1.45;font-weight:500;transition:background .3s,box-shadow .3s}
+        .p07-line b{font-weight:800}
+        .p07-line.is-hl{background:#fff3a8;box-shadow:0 0 0 4px #ffd83d}
+
+        .p07-head{position:absolute;left:680px;top:40px;width:1180px;margin:0;box-sizing:border-box;padding:24px 40px 18px;background:#fff;border:solid 5px #1b1738;border-radius:40px;box-shadow:0 10px 0 0 #becde7;
+          font-family:'Cafe24 Ssurround';font-size:44px;line-height:1.3;color:#1b1738;text-align:center;letter-spacing:-0.05em;word-break:keep-all}
+        .p07-head em{position:absolute;left:30px;top:-34px;height:62px;padding:4px 30px 0;box-sizing:border-box;display:flex;align-items:center;background:#48159c;border-radius:31px;font-style:normal;font-size:36px;color:#fff}
+        .p07-q{position:absolute;left:680px;top:250px;width:1180px;margin:0;font-family:'Cafe24 Ssurround';font-size:48px;color:#48159c;letter-spacing:-0.05em}
+        .p07-opts{position:absolute;left:690px;top:350px;width:1160px;display:flex;flex-direction:column;gap:36px}
+        .p07-opt.card-btn{height:110px;width:100%;text-align:left;padding:10px 40px 4px;font-size:44px;line-height:1.1}
+        .p07-opt.is-wrong{animation:fix-word-shake .3s ease}
+        .p07-opts.is-locked{pointer-events:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p07-view" id="p07Select">
+            <p class="p07-title">우리 동네 장소를 선택해요!</p>
+            <div class="p07-places" id="p07Places"></div>
+          </div>
+
+          <div class="p07-view is-off" id="p07Quiz">
+            <div class="p07-phone">
+              <div class="p07-screen">
+                <div class="p07-search"><i id="p07SearchImg"></i>이 이미지에 관해 질문하기</div>
+                <p class="p07-ai">AI 개요</p>
+                <div id="p07Lens"></div>
+              </div>
+            </div>
+            <p class="p07-head"><em id="p07PlaceName"></em><span id="p07Head"></span></p>
+            <p class="p07-q" id="p07Q"></p>
+            <div class="p07-opts" id="p07Opts"></div>
+          </div>
+
+          <div class="ox-result-wrong is-avatar is-off" id="p07Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">다시 생각해볼까요?</p>
+                <p class="avatar-popup-sub" id="p07WrongText"></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p07Right">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">맞아요.</p>
+                <p class="avatar-popup-sub" id="p07RightText"></p>
+                <button class="avatar-popup-next" id="p07Back" style="padding:0;border:0;background:none;cursor:pointer">
+                  <img src="../../img/common/btn_next_small.png" class="js-img-swap js-sfx" data-src-over="../../img/common/btn_next_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p07Done">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">좋아요!</p>
+                <p class="avatar-popup-sub">구글 렌즈의 검색 결과 화면을 보고<br>알맞은 정보와 이웃을 찾았어요.</p>
+                <a href="page08.html" class="js-nav-effect avatar-popup-next">
+                  <img src="../../img/common/btn_next_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_small_on.png" data-src-over="../../img/common/btn_next_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                </a>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="찰칵! 우리 동네 정보를 찾아라" data-next="page08.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    // lines: [굵게 표시할 머리말, 내용]. q1.hl = 1번 오답 때 강조할 줄 번호(lines 기준)
+    const PLACES = [
+      { key: 'pharmacy', name: '약국', head: '약국의 이름과<br>약국에서 만날 수 있는 이웃을 찾아봐요!',
+        title: '사진에 나타난 곳은 행복약국으로 보입니다.', sub: '행복약국 정보',
+        lines: [['위치', '충청남도 천안시 한솔구 가온길 27'], ['하는 일', '약을 사고, 약 복용 방법을 안내 받을 수 있습니다.'], ['방문 후기', '친절하고 약에 대해 설명을 잘해 준다는 후기가 있습니다.']],
+        q1: { text: '1. 내가 검색한 장소의 이름은 무엇인가요?', opts: ['사랑약국', '희망약국', '행복약국', '소망약국'], answer: 2, hl: 'title' },
+        q2: { opts: ['공원 관리인', '약사', '교통안전 도우미', '버스 운전기사'], answer: 1,
+          wrong: '약을 구매할 수 있도록 도와주는 이웃을 찾아보세요.', right: '약사는 우리가 약을 구매할 수 있도록 도와줘요.' } },
+      { key: 'library', name: '도서관', head: '도서관에서 하는 일과<br>도서관에서 만날 수 있는 이웃을 찾아봐요!',
+        title: '사진에 나타난 곳은 시립도서관으로 보입니다.', sub: '시립도서관 정보',
+        lines: [['위치', '전라북도 전주시 새롬구 한들길 17'], ['운영 시간', '오전 9시 ~ 오후 10시'], ['하는 일', '책을 빌려 읽고, 다양한 자료를 이용할 수 있습니다.'], ['대여 방법', '빌리고 싶은 책과 회원 카드를 사서에게 보여주면 대여할 수 있습니다.']],
+        q1: { text: '1. 도서관에서 하는 일은 무엇인가요?', opts: ['간식이나 물건을 구매할 수 있어요.', '산책을 하고 공용 기구들을 이용할 수 있어요.', '아플 때 약을 구매할 수 있어요.', '책을 빌려 읽고, 다양한 자료를 이용할 수 있어요.'], answer: 3, hl: 2 },
+        q2: { opts: ['사서', '교통안전 도우미', '버스 운전기사', '편의점 판매원'], answer: 0,
+          wrong: '책을 빌릴 수 있도록 도와주는 이웃을 찾아보세요.', right: '사서는 우리가 책을 빌릴 수 있도록 도와줘요.' } },
+      { key: 'school', name: '학교', head: '학교의 운영 시간과<br>학교에서 만날 수 있는 이웃을 찾아봐요!',
+        title: '사진에 나타난 곳은 우리중학교로 보입니다.', sub: '우리중학교 정보',
+        lines: [['위치', '경기도 고양시 한결구 가람로 33'], ['운영 시간', '오전 8시 ~ 오후 4시 30분<br>토요일과 일요일은 휴무입니다.'], ['학교 주변 모습', '학교 앞 횡단보도에서는 학생들이 안전하게 길을 건널 수 있도록 신호를 안내해줍니다.']],
+        q1: { text: '1. 우리중학교의 운영 시간은 언제인가요?', opts: ['오전 8:00 ~ 오후 4:30', '오전 9:00 ~ 오후 10:00', '오전 8:00 ~ 오후 6:00', '오전 9:00 ~ 오후 4:30'], answer: 0, hl: 1 },
+        q2: { opts: ['공원 관리인', '편의점 판매원', '교통안전 도우미', '약사'], answer: 2,
+          wrong: '길을 안전하게 건널 수 있도록 도와주는 이웃을 찾아보세요.', right: '교통안전 도우미는 우리가 길을 안전하게 건널 수 있도록 도와줘요.' } },
+      { key: 'park', name: '공원', head: '공원의 위치와<br>공원에서 만날 수 있는 이웃을 찾아봐요!',
+        title: '사진에 나타난 곳은 달빛공원으로 보입니다.', sub: '달빛공원 정보',
+        lines: [['위치', '서울특별시 한빛구 새봄로 123'], ['운영 시간', '오전 5시 ~ 오후 10시'], ['하는 일', '산책, 운동, 휴식을 즐기며 자연을 만날 수 있습니다.'], ['방문 후기', '산책하기 좋고 아이들과 함께 방문하기 좋다는 후기가 있습니다.']],
+        q1: { text: '1. 공원의 위치는 어디인가요?', opts: ['서울특별시 한빛구 새봄로 123', '서울특별시 한빛구 해솔길 45', '서울특별시 다솜구 마루로 84', '서울특별시 다솜구 누리길 102'], answer: 0, hl: 0 },
+        q2: { opts: ['사서', '버스 운전기사', '공원 관리인', '편의점 판매원'], answer: 2,
+          wrong: '공원을 깨끗하고 안전하게 관리하는 이웃을 찾아보세요.', right: '공원 관리인은 공원을 깨끗하고 안전하게 관리해줘요.' } },
+      { key: 'store', name: '편의점', head: '편의점의 운영 시간과<br>편의점에서 만날 수 있는 이웃을 찾아봐요!',
+        title: '사진에 나타난 곳은 우리동네 편의점으로 보입니다.', sub: '우리동네 편의점 정보',
+        lines: [['운영 시간', '24시간 운영<br>연중무휴로 운영됩니다.'], ['주요 서비스', '식음료, 생활용품, 간식 등을 구매할 수 있습니다.']],
+        q1: { text: '1. 편의점의 운영 시간은 언제인가요?', opts: ['오전 7:00 ~ 오후 6:00', '오전 7:00 ~ 오후 10:00', '24시간 운영(주말에는 쉽니다.)', '24시간 운영(연중무휴로 운영됩니다.)'], answer: 3, hl: 0 },
+        q2: { opts: ['사서', '교통안전 도우미', '버스 운전기사', '편의점 판매원'], answer: 3,
+          wrong: '간식이나 물건을 살 수 있도록 도와주는 이웃을 찾아보세요.', right: '편의점 판매원은 우리가 물건이나 간식을 구매할 수 있도록 도와줘요.' } }
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+    const done = new Set();
+    let place = null;
+
+    PLACES.forEach((p) => {
+      const btn = document.createElement('button');
+      btn.className = 'p07-place js-sfx';
+      btn.dataset.sound = 'sound/click.mp3';
+      btn.dataset.key = p.key;
+      btn.innerHTML = "<i style=\"background-image:url('img/p07_place_" + p.key + ".png')\"></i><span>" + p.name + '</span>';
+      btn.addEventListener('click', () => open(p));
+      $('p07Places').appendChild(btn);
+    });
+
+    function open(p) {
+      place = p;
+      $('p07Select').classList.add('is-off');
+      $('p07Quiz').classList.remove('is-off');
+      $('p07SearchImg').style.backgroundImage = "url('img/p07_place_" + p.key + ".png')";
+      $('p07PlaceName').textContent = p.name;
+      $('p07Head').innerHTML = p.head;
+      $('p07Lens').innerHTML = '<p class="p07-lens-title" data-line="title">' + p.title + '</p><p class="p07-lens-sub">' + p.sub + '</p>' +
+        p.lines.map((l, i) => '<p class="p07-line" data-line="' + i + '"><b>' + l[0] + ':</b> ' + l[1] + '</p>').join('');
+      ask(1);
+    }
+
+    function ask(n) {
+      const q = n === 1 ? place.q1 : place.q2;
+      $('p07Q').textContent = n === 1 ? q.text : '2. 이 장소에서 만나는 이웃은 누구인가요?';
+      const box = $('p07Opts');
+      box.innerHTML = '';
+      box.classList.remove('is-locked');
+      q.opts.forEach((text, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'card-btn p07-opt';
+        btn.textContent = ['①', '②', '③', '④'][i] + ' ' + text;
+        btn.addEventListener('click', () => pick(n, btn, i === q.answer));
+        box.appendChild(btn);
+      });
+    }
+
+    function pick(n, btn, right) {
+      if (!right) {
+        playWrong();
+        btn.classList.remove('is-wrong');
+        void btn.offsetWidth;
+        btn.classList.add('is-wrong');
+        if (n === 1) {
+          const line = $('p07Lens').querySelector('[data-line="' + place.q1.hl + '"]');
+          if (line) line.classList.add('is-hl');
+        } else {
+          $('p07WrongText').textContent = place.q2.wrong;
+          flashLayer($('p07Wrong'));
+        }
+        return;
+      }
+      playCorrect();
+      btn.classList.add('is-selected');
+      $('p07Opts').classList.add('is-locked');
+      if (n === 1) {
+        setTimeout(() => ask(2), 1000);
+        return;
+      }
+      $('p07RightText').textContent = place.q2.right;
+      setTimeout(() => $('p07Right').classList.remove('is-off'), 600);
+    }
+
+    $('p07Back').addEventListener('click', () => {
+      resetImageSwap($('p07Back'));
+      $('p07Right').classList.add('is-off');
+      done.add(place.key);
+      document.querySelector('.p07-place[data-key="' + place.key + '"]').classList.add('is-done');
+      $('p07Quiz').classList.add('is-off');
+      $('p07Select').classList.remove('is-off');
+      if (done.size === PLACES.length) setTimeout(() => $('p07Done').classList.remove('is-off'), 400);
+    });
+  })();
+  </script>
+</body>
+</html>

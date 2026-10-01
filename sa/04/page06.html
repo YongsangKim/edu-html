@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>감정과 표현 선택하기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 와이어프레임. 기획서 14~18p. page06~08은 상황만 다른 같은 구조라
+           생김새는 공용 .talk-* , 진행은 공용 initEmotionPickFlow */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:#dbe9f7}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main>
+
+          <div class="talk-chat" id="talkChat"></div>
+
+          <div class="talk-right">
+            <p class="talk-ask" id="talkAsk"></p>
+            <div class="talk-options" id="talkOptions"></div>
+          </div>
+
+          <div class="avatar-modal talk-popup is-off" id="talkPopup">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text is-medium"></p>
+            </div>
+          </div>
+
+          <div class="avatar-modal talk-popup is-off" id="talkPopupCorrect">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">좋아요!</p>
+                <p class="avatar-popup-sub"></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="talkPopupWarn">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text" id="talkPopupWarnText"></p>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="감정과 표현 선택하기" data-next="page07.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  /* 기획서 14~18p (상황 1: 지우 / 고마움) */
+  initEmotionPickFlow({
+    chat: [
+      { who: '지우', me: false, text: '수학 숙제 3번 문제를 계속 틀리고 있어. 내일까지 내야 하는데 아직 방법을 잘 모르겠어.' },
+      { who: '민준', me: true,  text: '내가 답을 바로 알려주기 보다, 푸는 방법을 같이 생각해보자. 먼저 문제에서 구해야 하는 것을 표시해봐.' },
+      { who: '지우', me: false, text: '아, 이렇게 하니까 조금 알 것 같아. 네가 쉬는 시간까지 써서 알려줘서 미안하고 고마워.' }
+    ],
+    steps: [
+      {
+        kind: 'emotion',
+        ask: '지우는 어떤 감정을<br>느끼고 있을까요?',
+        wrong: '친구의 마음을 다시 생각해볼까요?',
+        options: [
+          { text: '고마움', correct: true },
+          { text: '걱정' },
+          { text: '부끄러움' },
+          { text: '서운함' }
+        ]
+      },
+      {
+        kind: 'message',
+        ask: '맞아요! 이 상황에서는<br>고마운 마음을 표현할 수 있어요.<br>어떤 메시지를 보내 볼까요?',
+        wrong: '이 말을 들으면 친구의 기분이 어떨까요?<br>따뜻한 마음을 전하는 다른 말을 찾아볼까요?',
+        correct: '상황에 맞는 감정과 말을<br>선택하면 마음을 더 잘 전할 수 있어요.',
+        options: [
+          { text: '고마워. 네가 알려준 방법으로 다시 풀어볼게.', correct: true },
+          { text: '고마워. 다음에도 답을 바로 알려줘.' },
+          { text: '미안해. 네가 대신 숙제를 다 해 줘.' },
+          { text: '이제 알겠어. 그런데 너무 오래 걸렸어.' }
+        ]
+      }
+    ],
+    nextHref: 'page07.html'
+  });
+  </script>
+</body>
+</html>

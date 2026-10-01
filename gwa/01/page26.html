@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>퀴즈 풀기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:url('img/p26_bg_q1.png') no-repeat}
+
+        /* 문항마다 질문과 보기가 바뀌므로, 배경의 말풍선 글자 자리를 흰색으로 덮고 다시 그림 */
+        .p26-q{position:absolute;left:452px;top:150px;width:1260px;height:160px;background:#fff;
+          display:flex;align-items:center;text-align:left}
+        .p26-q p{margin:0;font-family:'Cafe24 Ssurround';font-size:56px;line-height:1.25;
+          color:#3b1e87;letter-spacing:-0.04em}
+        .p26-q .p26-no{color:#7c3aed;margin-right:10px}
+
+        /* 보기 — 2지선다/OX/3지선다를 모두 가로 한 줄로 배치 */
+        .p26-opts{position:absolute;left:160px;top:590px;width:1600px;height:180px;
+          display:flex;align-items:center;justify-content:center;gap:90px}
+        /* 글자 보기는 공용 .card-btn 모양, O/X 보기는 아이콘 이미지(.is-icon) */
+        .p26-opts .card-btn{font-size:64px}
+        .p26-opt.is-wrong{animation:fix-word-shake .3s ease}
+        .p26-opt img{display:block;height:150px;width:auto}
+        .p26-opt.is-icon{padding:0;border:none;background:none;cursor:pointer}
+
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main>
+
+          <div class="p26-q"><p><span class="p26-no" id="p26No"></span><span id="p26Text"></span></p></div>
+          <div class="p26-opts" id="p26Opts"></div>
+
+          <div class="avatar-modal is-off" id="p26Wrong">
+            <div class="avatar-card is-compact">
+              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
+            <div class="avatar-card-body is-side"><p class="avatar-card-text" id="p26Hint"></p></div>
+            <button class="card-btn is-popup avatar-card-btn" id="p26Retry">다시 해보기</button>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="퀴즈 풀기" data-next="page27.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  /* 기획서 37p~41p — 퀴즈 풀기(뼈대)
+     - 한 페이지 안에서 문항을 순서대로 진행(사회 1차시 page16과 같은 방식)
+     - 정답이면 정답음 후 다음 문항, 오답이면 문항별 힌트 팝업 + [다시 해보기]
+     - 기획서에 Q3 화면이 없어 Q1·Q2·Q4·Q5 네 문항만 넣음
+     - 디자인은 37p(2지선다)와 38p(OX)만 있어서, Q5(3지선다)는 같은 틀을 그대로 씀 */
+  (function () {
+    const QUIZ = [
+      { no: 'Q1.', text: '인터넷에서 날씨 정보를 모으는 행동을 뭐라고 할까요?',
+        options: ['데이터 제거', '데이터 수집'], answer: 1,
+        hint: '날씨 정보를 ‘차곡차곡’ 모으는 행동을 뭐라고 할까요?' },
+      { no: 'Q2.', text: '단어를 표에 깔끔하게 정리하면 AI가 잘 이해할까요?',
+        ox: true, answer: 0,
+        hint: '데이터의 정리가 잘 되어 있으면 AI도 쉽게 읽을 수 있어요!' },
+      { no: 'Q4.', text: 'AI에게 신문이나 동영상을 넣으면 중요한 내용을 요약할 수 있을까요?',
+        ox: true, answer: 0,
+        hint: 'AI는 길고 어려운 글을 짧게 줄여주는 능력이 있어요.' },
+      { no: 'Q5.', text: '내일의 부산 날씨에 대해 물어볼 때, 어떻게 질문해야 똑똑하게 답할까요?',
+        options: ['내일 부산의 날씨는 어때?', '내일 서울의 날씨는 어때?', '날씨'], answer: 0,
+        hint: '필요한 정보에 대해 자세하게 물어볼수록 AI가 원하는 답을 잘 찾아줘요!' },
+    ];
+
+    const noEl = document.getElementById('p26No');
+    const textEl = document.getElementById('p26Text');
+    const optsEl = document.getElementById('p26Opts');
+    const wrongModal = document.getElementById('p26Wrong');
+    const hintEl = document.getElementById('p26Hint');
+    const retry = document.getElementById('p26Retry');
+
+    const correctSound = new Audio(ASSET_BASE + 'sound/correct.mp3');
+    const wrongSound = new Audio(ASSET_BASE + 'sound/incorrect.mp3');
+
+    let index = 0;
+    let locked = false;
+
+    function render() {
+      const q = QUIZ[index];
+      noEl.textContent = q.no;
+      textEl.textContent = q.text;
+      optsEl.innerHTML = '';
+
+      const labels = q.ox ? ['O', 'X'] : q.options;
+      labels.forEach((label, i) => {
+        const b = document.createElement('button');
+        b.className = q.ox ? 'p26-opt is-icon' : 'card-btn p26-opt';
+        if (q.ox) {
+          b.innerHTML = '<img src="../../img/common/icon_' + (i === 0 ? 'o' : 'x') + '.png" alt="' + label + '">';
+        } else {
+          b.textContent = label;
+        }
+        b.addEventListener('click', () => onPick(b, i));
+        optsEl.appendChild(b);
+      });
+      locked = false;
+    }
+
+    function onPick(btn, i) {
+      if (locked) return;
+      const q = QUIZ[index];
+
+      if (i === q.answer) {
+        locked = true;
+        correctSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+        index += 1;
+        setTimeout(() => {
+          if (index >= QUIZ.length) {
+            navigateTo('page27.html');
+            return;
+          }
+          render();
+        }, 1200);
+        return;
+      }
+
+      wrongSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+      btn.classList.remove('is-wrong');
+      void btn.offsetWidth;
+      btn.classList.add('is-wrong');
+      hintEl.textContent = q.hint;
+      wrongModal.classList.remove('is-off');
+      locked = true;
+    }
+
+    retry.addEventListener('click', () => {
+      wrongModal.classList.add('is-off');
+      locked = false;
+    });
+
+    render();
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리 동네 이웃 앨범 만들기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 48~65p. 펼친 앨범: 장소 6곳 × 질문 3개(장소 이름 → 만날 수 있는 이웃 → 이웃의 역할), 총 18문제, 한 문제마다 게이지 1/18.
+           보기 순서 무작위, 틀리면 흔들림, 맞으면 정답 효과음 뒤 다음 문제 자동. 끝나면 앨범 보기(page13).
+           장소 사진 img/p12_place_{key}.png, 이웃 사진은 page05와 같은 img/p05_job_{key}.png(약사만 새로 img/p05_job_pharmacist.png) */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p12-gauge{left:260px;top:34px;width:1400px}
+        .p12-gauge:before{background-image:url('../../img/common/icon_star_on.png')}
+
+        .p12-book{position:absolute;left:110px;top:130px;width:1700px;height:800px;box-sizing:border-box;padding:30px;border-radius:40px;background:#8b5a3c;box-shadow:0 16px 0 0 #5e3a24;display:flex;gap:8px}
+        .p12-page{flex:1 1 0;position:relative;border-radius:22px;background:#fffaf0;box-shadow:inset 0 0 30px rgba(139,90,60,.15);overflow:hidden}
+        .p12-left{display:flex;flex-direction:column;padding:34px;box-sizing:border-box;gap:20px}
+        .p12-photo{flex:1 1 auto;border:solid 10px #fff;border-radius:10px;background:#dfe7f5 center / cover no-repeat;box-shadow:0 6px 16px rgba(0,0,0,.2);transform:rotate(-1.5deg)}
+        .p12-info{flex:0 0 auto;margin:0;padding:18px 22px;border-radius:16px;background:#fff;font:500 25px/1.5 'Pretendard';color:#1b1738}
+        .p12-info b{font-weight:800}
+        .p12-info.is-off{display:none}
+        .p12-right{padding:40px 40px 30px;box-sizing:border-box;display:flex;flex-direction:column;gap:30px}
+        .p12-q{margin:0;font-family:'Cafe24 Ssurround';font-size:52px;line-height:1.3;color:#48159c;text-align:center;letter-spacing:-0.05em;word-break:keep-all}
+        .p12-opts{flex:1 1 auto;display:grid;grid-template-columns:1fr 1fr;gap:24px}
+        .p12-opts.is-role{grid-template-columns:1fr}
+        .p12-opt{position:relative;padding:0;box-sizing:border-box;border:solid 5px #91b9e7;border-radius:24px;background:#fff;cursor:pointer;overflow:hidden;display:flex;flex-direction:column;
+          font-family:'Cafe24 Ssurround';font-size:42px;color:#31248a;letter-spacing:-0.05em;transition:transform .15s,border-color .15s}
+        .p12-opt:hover{transform:translateY(-6px);border-color:#48159c}
+        .p12-opt.is-selected{border-color:#ff2fc2}
+        .p12-opt.is-wrong{animation:fix-word-shake .3s ease}
+        .p12-opt span{flex:1 1 auto;display:flex;align-items:center;justify-content:center;padding:10px 16px 4px;text-align:center;word-break:keep-all}
+        .p12-opt i{flex:0 0 190px;background:#dfe7f5 center top / cover no-repeat}
+        .p12-opt i + span{flex:0 0 66px}
+        .p12-opts.is-role .p12-opt{font-size:36px}
+        .p12-opts.is-locked{pointer-events:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="gauge is-thin p12-gauge"><div class="gauge-fill" id="p12Fill"></div></div>
+          <div class="p12-book">
+            <div class="p12-page p12-left">
+              <div class="p12-photo" id="p12Photo"></div>
+              <p class="p12-info is-off" id="p12Info"></p>
+            </div>
+            <div class="p12-page p12-right">
+              <p class="p12-q" id="p12Q"></p>
+              <div class="p12-opts" id="p12Opts"></div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="우리 동네 이웃 앨범 만들기" data-next="page13.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const JOB_IMG = { '약사': 'pharmacist', '사서': 'librarian', '공원 관리인': 'park', '버스 기사': 'bus', '편의점 판매원': 'clerk', '교통안전 도우미': 'guard' };
+    // 각 질문의 보기는 정답이 맨 앞(화면에서는 섞어서 보여줌)
+    const PLACES = [
+      { key: 'pharmacy', info: '<b>사진에 나타난 곳은 행복약국으로 보입니다.</b><br>위치: 충청남도 천안시 한솔구 가온길 27<br>하는 일: 약을 사고, 약 복용 방법을 안내 받을 수 있습니다.',
+        place: ['약국', '도서관', '공원', '버스정류장'], job: ['약사', '편의점 판매원', '사서', '교통안전 도우미'],
+        role: ['약을 구매할 수 있도록 도와준다.', '길을 안전하게 건널 수 있도록 도와준다.', '책을 빌릴 수 있도록 도와준다.', '공원을 깨끗하게 관리한다.'] },
+      { key: 'library', info: '<b>사진에 나타난 곳은 시립도서관으로 보입니다.</b><br>하는 일: 책을 빌려 읽고, 다양한 자료를 이용할 수 있어요.<br>대여 방법: 빌리고 싶은 책과 회원 카드를 사서에게 보여주면 대여할 수 있습니다.',
+        place: ['도서관', '약국', '공원', '버스정류장'], job: ['사서', '편의점 판매원', '약사', '버스 기사'],
+        role: ['책을 빌릴 수 있도록 도와준다.', '물건을 구매할 수 있도록 도와준다.', '약을 구매할 수 있도록 도와준다.', '공원을 깨끗하게 관리한다.'] },
+      { key: 'park', info: '<b>사진에 나타난 곳은 달빛공원으로 보입니다.</b><br>운영 시간: 오전 5시 ~ 오후 10시<br>하는 일: 산책, 운동, 휴식을 즐기며 자연을 만날 수 있습니다.',
+        place: ['공원', '약국', '편의점', '버스정류장'], job: ['공원 관리인', '약사', '사서', '버스 기사'],
+        role: ['공원을 깨끗하고 안전하게 관리한다.', '물건을 구매할 수 있도록 도와준다.', '약을 구매할 수 있도록 도와준다.', '목적지까지 안전하게 이동하도록 도와준다.'] },
+      { key: 'bus', info: '<b>사진에 나타난 곳은 은하 버스정류장으로 보입니다.</b><br>운영 시간: 버스마다 운행 시간이 다릅니다. 노선을 확인하고 이용하세요.<br>하는 일: 버스를 기다리고, 원하는 버스를 타고 다른 장소로 이동할 수 있습니다.',
+        place: ['버스정류장', '도서관', '편의점', '공원'], job: ['버스 기사', '공원 관리인', '약사', '사서'],
+        role: ['목적지까지 안전하게 이동하도록 도와준다.', '물건을 구매할 수 있도록 도와준다.', '약을 구매할 수 있도록 도와준다.', '길을 안전하게 건널 수 있도록 도와준다.'] },
+      { key: 'store', info: '<b>사진에 나타난 곳은 우리동네 편의점으로 보입니다.</b><br>운영 시간: 24시간 운영, 연중무휴로 운영됩니다.<br>주요 서비스: 식음료, 생활용품, 간편식 등을 구매할 수 있습니다.',
+        place: ['편의점', '도서관', '약국', '버스정류장'], job: ['편의점 판매원', '공원 관리인', '사서', '버스 기사'],
+        role: ['물건을 구매할 수 있도록 도와준다.', '약을 구매할 수 있도록 도와준다.', '목적지까지 안전하게 이동하도록 도와준다.', '책을 빌릴 수 있도록 도와준다.'] },
+      { key: 'school', info: '<b>사진에 나타난 곳은 우리중학교로 보입니다.</b><br>운영 시간: 오전 8시 ~ 오후 4시 30분, 토요일과 일요일은 휴무입니다.<br>학교 주변 모습: 학교 앞 횡단보도에서는 학생들이 안전하게 길을 건널 수 있도록 신호를 안내해줍니다.',
+        place: ['학교', '편의점', '약국', '버스정류장'], job: ['교통안전 도우미', '공원 관리인', '편의점 판매원', '버스 기사'],
+        role: ['안전하게 길을 건널 수 있도록 도와준다.', '물건을 구매할 수 있도록 도와준다.', '목적지까지 안전하게 이동하도록 도와준다.', '책을 빌릴 수 있도록 도와준다.'] }
+    ];
+    const STEPS = ['place', 'job', 'role'];
+    const ASK = { place: '사진은 어떤 장소인가요?', job: '이 곳에서 만날 수 있는 이웃은<br>누구인가요?', role: '이웃의 역할은 무엇인가요?' };
+    const TOTAL = PLACES.length * STEPS.length;
+
+    const $ = (id) => document.getElementById(id);
+    const opts = $('p12Opts');
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+    let n = 0;
+
+    function show() {
+      const p = PLACES[Math.floor(n / 3)];
+      const step = STEPS[n % 3];
+      $('p12Photo').style.backgroundImage = "url('img/p12_place_" + p.key + ".png')";
+      $('p12Info').innerHTML = p.info;
+      $('p12Info').classList.toggle('is-off', step === 'place');
+      $('p12Q').innerHTML = ASK[step];
+      opts.className = 'p12-opts' + (step === 'role' ? ' is-role' : '');
+      opts.innerHTML = '';
+      shuffleArray(p[step].map((text, i) => ({ text, right: i === 0 }))).forEach((o) => {
+        const btn = document.createElement('button');
+        btn.className = 'p12-opt';
+        btn.innerHTML = (step === 'job' ? "<i style=\"background-image:url('img/p05_job_" + JOB_IMG[o.text] + ".png')\"></i>" : '') + '<span>' + o.text + '</span>';
+        btn.addEventListener('click', () => pick(btn, o.right));
+        opts.appendChild(btn);
+      });
+    }
+
+    function pick(btn, right) {
+      if (!right) {
+        playWrong();
+        btn.classList.remove('is-wrong');
+        void btn.offsetWidth;
+        btn.classList.add('is-wrong');
+        return;
+      }
+      playCorrect();
+      btn.classList.add('is-selected');
+      opts.classList.add('is-locked');
+      n += 1;
+      $('p12Fill').style.width = (n / TOTAL * 100) + '%';
+      setTimeout(() => {
+        if (n >= TOTAL) {
+          navigateTo('page13.html');
+          return;
+        }
+        show();
+      }, 1000);
+    }
+
+    show();
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>출동! 우리 동네 심부름 탐험대</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 3~7p. 학생 캐릭터를 알맞은 건물로 끌어다 놓기(질문 4개 차례로). 놓은 뒤 캐릭터는 제자리로 돌아오고,
+           맞힌 건물은 간판·불빛이 켜진 채 유지. 지도 img/p02_map.png, 건물 img/p02_bld_{key}.png, 학생은 임시로 메인 캐릭터(img/p_character_main.png) */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p02-map{position:absolute;left:33px;top:34px;width:1860px;height:774px;box-sizing:border-box;border:solid 6px #48159c;border-radius:40px;background:#fefbf9 url('img/p02_map.png') center / cover no-repeat}
+        .p02-place{position:absolute;width:386px;height:258px;transition:transform .2s ease}
+        .p02-sign{position:absolute;left:31px;top:0;width:325px;height:87px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:#91b9e7;border:solid 5px #1b1738;border-radius:44px;
+          font-family:'Cafe24 Ssurround';font-size:48px;color:#fff;transition:background-color .3s,color .3s,box-shadow .3s}
+        .p02-bld{position:absolute;left:0;top:84px;width:386px;height:171px;border-radius:24px;background:#fefbf9 center / contain no-repeat;border:solid 5px #1b1738;box-sizing:border-box;transition:box-shadow .3s}
+        .p02-place.is-lit .p02-sign{background:#ffd83d;color:#1b1738;box-shadow:0 0 30px 10px rgba(255,216,61,.8)}
+        .p02-place.is-lit .p02-bld{box-shadow:0 0 40px 14px rgba(255,216,61,.75)}
+
+        .p02-student{position:absolute;left:109px;top:521px;width:287px;height:396px;background:url('img/p_character_main.png') center bottom / contain no-repeat;cursor:grab;touch-action:none;z-index:20}
+        .p02-student:after{content:'학생';position:absolute;left:50%;bottom:30px;transform:translateX(-50%);width:200px;height:200px;box-sizing:border-box;border-radius:50%;background:#91b9e7;border:solid 6px #1b1738;
+          display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:48px;color:#fff}
+        .p02-student.has-img:after{display:none}
+        .p02-student.is-dragging{cursor:grabbing;z-index:60}
+        .p02-student.is-back{transition:left .3s ease,top .3s ease}
+
+        .p02-bubble{position:absolute;left:430px;top:700px;width:1371px;height:171px;box-sizing:border-box;padding:0 50px;display:flex;align-items:center;
+          background:#fefbf9;border:solid 6px #48159c;border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';font-size:52px;line-height:1.25;color:#48159c;letter-spacing:-0.04em;word-break:keep-all;z-index:10}
+        .p02-bubble:before{content:'';position:absolute;left:-58px;top:50%;margin-top:-30px;border-style:solid;border-width:30px 58px 30px 0;border-color:transparent #48159c transparent transparent}
+        .p02-bubble:after{content:'';position:absolute;left:-47px;top:50%;margin-top:-22px;border-style:solid;border-width:22px 48px 22px 0;border-color:transparent #fefbf9 transparent transparent}
+
+        #p02Done{z-index:120}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p02-map"></div>
+          <div class="p02-place drop-zone" data-key="bakery" style="left:296px;top:69px"><div class="p02-sign">빵집</div><div class="p02-bld" style="background-image:url('img/p02_bld_bakery.png')"></div></div>
+          <div class="p02-place drop-zone" data-key="stationery" style="left:1024px;top:69px"><div class="p02-sign">문구점</div><div class="p02-bld" style="background-image:url('img/p02_bld_stationery.png')"></div></div>
+          <div class="p02-place drop-zone" data-key="hospital" style="left:633px;top:411px"><div class="p02-sign">병원</div><div class="p02-bld" style="background-image:url('img/p02_bld_hospital.png')"></div></div>
+          <div class="p02-place drop-zone" data-key="salon" style="left:1362px;top:411px"><div class="p02-sign">미용실</div><div class="p02-bld" style="background-image:url('img/p02_bld_salon.png')"></div></div>
+
+          <div class="p02-student" id="p02Student" aria-label="학생 캐릭터"></div>
+          <p class="p02-bubble" id="p02Bubble"></p>
+
+          <div class="avatar-modal is-off" id="p02Done">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">좋아요!</p>
+                <p class="avatar-popup-sub">모든 미션을 성공했어요.</p>
+                <a href="page03.html" class="js-nav-effect avatar-popup-next">
+                  <img src="../../img/common/btn_next_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_small_on.png" data-src-over="../../img/common/btn_next_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                </a>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="출동! 우리 동네 심부름 탐험대" data-next="page03.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const MISSIONS = [
+      { key: 'hospital', ask: '독감에 걸려서 아파요. 어디로 가야 할까요?', done: '병원에서 독감 진료를 받았어요!' },
+      { key: 'bakery', ask: '내일 친구의 생일 축하 케이크를 사주고 싶어요. 어디로 가야 할까요?', done: '빵집에서 맛있는 케이크를 구매했어요!' },
+      { key: 'salon', ask: '앞머리가 눈을 가려서 책을 읽을 때 불편해요. 어디로 가야 할까요?', done: '미용실에서 앞머리를 잘랐어요!' },
+      { key: 'stationery', ask: '내일은 미술시간이에요. 그런데 집에 다양한 색연필이 없어요. 어디로 가야 할까요?', done: '문구점에서 색연필을 구매했어요!' }
+    ];
+    const WRONG = '다시 한 번 잘 생각해봐요.';
+
+    const $ = (id) => document.getElementById(id);
+    const student = $('p02Student');
+    const bubble = $('p02Bubble');
+    const places = Array.from(document.querySelectorAll('.p02-place'));
+    const stage = document.getElementById('stage');
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+
+    const probe = new Image();
+    probe.onload = () => student.classList.add('has-img');
+    probe.src = 'img/p_character_main.png';
+
+    let index = 0;
+    let locked = false;
+    let wrongTimer = null;
+
+    function ask() {
+      bubble.textContent = MISSIONS[index].ask;
+      locked = false;
+    }
+
+    function placeAt(x, y) {
+      return places.find((p) => {
+        const r = p.getBoundingClientRect();
+        return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+      });
+    }
+
+    student.addEventListener('pointerdown', (e) => {
+      if (locked) return;
+      e.preventDefault();
+      const s = stage.getBoundingClientRect().width / 1920;
+      const sx = e.clientX;
+      const sy = e.clientY;
+      student.setPointerCapture(e.pointerId);
+      student.classList.remove('is-back');
+      student.classList.add('is-dragging');
+
+      const move = (ev) => {
+        student.style.transform = 'translate(' + (ev.clientX - sx) / s + 'px,' + (ev.clientY - sy) / s + 'px)';
+        const over = placeAt(ev.clientX, ev.clientY);
+        places.forEach((p) => p.classList.toggle('is-over', p === over));
+      };
+      const up = (ev) => {
+        student.removeEventListener('pointermove', move);
+        student.removeEventListener('pointerup', up);
+        student.removeEventListener('pointercancel', up);
+        student.classList.remove('is-dragging');
+        student.classList.add('is-back');
+        student.style.transform = '';
+        places.forEach((p) => p.classList.remove('is-over'));
+        const place = placeAt(ev.clientX, ev.clientY);
+        if (place) drop(place);
+      };
+      student.addEventListener('pointermove', move);
+      student.addEventListener('pointerup', up);
+      student.addEventListener('pointercancel', up);
+    });
+
+    function drop(place) {
+      const m = MISSIONS[index];
+      if (place.dataset.key !== m.key) {
+        playWrong();
+        bubble.textContent = WRONG;
+        clearTimeout(wrongTimer);
+        wrongTimer = setTimeout(() => { if (!locked) bubble.textContent = m.ask; }, 2000);
+        return;
+      }
+      clearTimeout(wrongTimer);
+      locked = true;
+      playCorrect();
+      place.classList.add('is-lit');
+      bubble.textContent = m.done;
+      // 기획서: 맞힌 문구 2초 뒤 다음 질문(마지막이면 완료 팝업)
+      setTimeout(() => {
+        if (index === MISSIONS.length - 1) {
+          $('p02Done').classList.remove('is-off');
+          return;
+        }
+        index += 1;
+        ask();
+      }, 2000);
+    }
+
+    ask();
+  })();
+  </script>
+</body>
+</html>

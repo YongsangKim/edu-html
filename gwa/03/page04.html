@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>음식 속에 숨겨진 정보를 찾아라!</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서(최종본) 5~7p·10p. 3라운드(로운이·주희 공통 음식) → 4라운드(세 명 공통 음식) → 5라운드(남학생 둘에겐 있고 여학생에겐 없는 음식) → 종료 안내 3단계.
+           음식은 고기·생선·과일 3가지로 매번 무작위, 선택 카드 위치는 고정. 배경은 빈 접시 + 질문 문구가 든 통이미지 img/p04_bg_round{3|4|5}.png */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+        .p04-panel{background:0 0 no-repeat}
+        .p04-round3{background-image:url('img/p04_bg_round3.png')}
+        .p04-round4{background-image:url('img/p04_bg_round4.png')}
+        .p04-round5{background-image:url('img/p04_bg_round5.png')}
+        .p04-opt{position:absolute;top:730px;width:220px;height:220px;border:0}
+        .p04-opt1{left:565px}
+        .p04-opt2{left:845px}
+        .p04-opt3{left:1125px}
+        .p04-food{position:absolute;top:528px;width:170px;height:155px;display:flex;align-items:center;justify-content:center;pointer-events:none}
+        .p04-food img{max-width:100%;max-height:100%}
+        .avatar-card{padding:90px 90px 150px}
+        .avatar-card-text{letter-spacing:-0.06em}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main>
+          <div class="step-flow">
+            <div class="step-panel p04-panel p04-round3" data-round="3"></div>
+            <div class="step-panel p04-panel p04-round4" data-round="4"></div>
+            <div class="step-panel p04-panel p04-round5" data-round="5"></div>
+          </div>
+
+          <div class="ox-result-correct is-avatar is-off" data-sound="sound/correct.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct_gwa.png" alt=""></div>
+              <p class="avatar-popup-text">정답이에요!</p>
+              <div class="avatar-popup-extra"><img src="../../img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div>
+          <div class="ox-result-wrong is-avatar is-off" data-sound="sound/incorrect.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text">다시 한번 살펴볼까요?</p>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p04Done">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-title">정말 잘했어요!</p>
+                    <p class="avatar-card-text">각각의 접시에 담긴 음식들을 살펴보고<br>비교해보며 새로운 정보를 찾을 수 있었어요.</p>
+                  </div>
+                  <a href="page05.html" class="js-nav-effect avatar-card-btn">
+                    <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">이처럼 하나의 빅데이터를 살펴보거나,<br>여러 개의 빅데이터를 비교하며<br>새로운 정보를 찾는 걸 데이터 마이닝이라고 해요.</p>
+                  </div>
+                  <a href="page05.html" class="js-nav-effect avatar-card-btn">
+                    <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">빅데이터가 많으면 많을수록 더 다양한<br>정보를 확인할 수 있어요.<br><br>날씨를 통해 더 자세한 내용을 확인해볼까요?</p>
+                  </div>
+                  <a href="page05.html" class="js-nav-effect avatar-card-btn">
+                    <img src="../../img/common/btn_next_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_small_on.png" data-src-over="../../img/common/btn_next_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="음식 속에 숨겨진 정보를 찾아라!" data-next="page05.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script>
+  (function () {
+    const FOODS = [
+      { key: 'chicken', name: '고기' },
+      { key: 'orange', name: '과일' },
+      { key: 'salmon', name: '생선' }
+    ];
+    // 접시 가운데 x좌표(배경 이미지 기준). 3라운드는 로운이·주희, 4·5라운드는 주희·로운이·아로 순서
+    const PLATES = { 3: [635, 1290], 4: [330, 985, 1630], 5: [330, 985, 1630] };
+
+    const shuffle = (arr) => {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    };
+
+    // 라운드마다 접시별 음식 세 개와 정답을 정함(기획서처럼 같은 음식이 두 번 들어갈 수 있음)
+    const pick = (x, y) => (Math.random() < 0.5 ? x : y);
+    const plate = (x, y) => [x, y, pick(x, y)];
+    function makeRound(round) {
+      const [ans, a, b] = shuffle(FOODS.map((f) => f.key));
+      if (round === 3) return { answer: ans, plates: [plate(ans, a), plate(ans, b)] };
+      if (round === 4) {
+        const others = shuffle([a, b, Math.random() < 0.5 ? a : b]);
+        return { answer: ans, plates: others.map((o) => plate(ans, o)) };
+      }
+      // 5라운드: 남학생(둘째·셋째) 접시엔 정답이 있고, 여학생(첫째) 접시엔 나머지 둘만
+      return { answer: ans, plates: [plate(a, b), plate(ans, a), plate(ans, b)] };
+    }
+
+    document.querySelectorAll('.p04-panel').forEach((panel) => {
+      const round = Number(panel.dataset.round);
+      const data = makeRound(round);
+      let html = '';
+      data.plates.forEach((foods, i) => {
+        shuffle(foods).forEach((key, j) => {
+          const left = PLATES[round][i] - 182 + j * 97;
+          html += '<div class="p04-food" style="left:' + left + 'px"><img src="img/p02_' + key + '.png" alt=""></div>';
+        });
+      });
+      html += '<div class="answer-pick-quiz reveal-stagger" data-delay="500" data-interval="300">';
+      FOODS.forEach((f, i) => {
+        const right = f.key === data.answer;
+        html += '<button class="answer-pick pick-card p04-opt p04-opt' + (i + 1) + '" data-correct="' + right + '" aria-label="' + f.name + '">' +
+          '<img class="js-img-swap js-sfx" src="img/p02_opt_' + f.key + '.png" data-src-over="img/p02_opt_' + f.key + '_over.png"' +
+          (right ? ' data-src-on="img/p02_opt_' + f.key + '_on.png"' : '') +
+          ' data-sound="sound/' + (right ? 'correct' : 'incorrect') + '.mp3" alt="' + f.name + '"></button>';
+      });
+      panel.innerHTML = html + '</div>';
+    });
+
+    document.querySelector('.p04-round5 [data-correct="true"]').addEventListener('click', () => {
+      setTimeout(() => document.getElementById('p04Done').classList.remove('is-off'), 2000);
+    });
+  })();
+  </script>
+  <script src="../../js/common.js"></script>
+</body>
+</html>

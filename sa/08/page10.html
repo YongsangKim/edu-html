@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오늘은 내가 여행 플래너!</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 32~73p. 네이버 지도 실습(안동 하회마을). 단계마다 휴대폰 화면 그림 img/p10_s{기획서 쪽}.png 위에
+           누를 곳(.p10-hot, 좌표는 화면 그림이 들어오면 맞춤)을 HTML로 얹고, 왼쪽 말풍선 안내 + 손가락. 식당 선택·예약 폼·확인·경로 고르기는 HTML로 그림.
+           고른 식당·인원·날짜·시간은 예약 확인(46~47p)에 그대로 보여줌. 캐릭터는 임시로 sa/06 캐릭터 복사본 */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p10-bubble{position:absolute;left:30px;top:auto;bottom:560px;width:580px;margin:0;box-sizing:border-box;padding:30px;background:#fefbf9;border:solid 5px #48159c;border-radius:30px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';font-size:38px;line-height:1.35;color:#48159c;text-align:center;letter-spacing:-0.05em;word-break:keep-all;z-index:3}
+        .p10-bubble:before{content:'';position:absolute;left:230px;bottom:-58px;width:100px;height:70px;background:url('../../img/common/p_guide_tail.png') 0 0 / contain no-repeat}
+        .p10-character{position:absolute;left:40px;top:470px;width:540px;height:470px;display:flex;align-items:flex-end;justify-content:center}
+        .p10-character img{max-width:100%;max-height:100%;object-fit:contain}
+
+        .p10-phone{position:absolute;left:710px;top:24px;width:500px;height:910px;box-sizing:border-box;padding:18px;background:#1b1738;border-radius:70px;box-shadow:0 0 0 6px #c9c4bb}
+        .p10-screen{position:relative;width:100%;height:100%;border-radius:54px;overflow:hidden;background:#f4f5f8 center top / 100% auto no-repeat;font-family:'Pretendard';color:#1b1738}
+
+        /* 누를 곳: 그림이 없어도 알아볼 수 있게 글자 칩으로 보임 */
+        .p10-hot{position:absolute;box-sizing:border-box;padding:0 10px;border:solid 3px #03c75a;border-radius:16px;background:rgba(255,255,255,.92);cursor:pointer;
+          display:flex;align-items:center;justify-content:center;font:700 24px/1.2 'Pretendard';color:#1b1738;text-align:center;transition:box-shadow .15s}
+        .p10-hot:hover{box-shadow:0 0 0 5px rgba(3,199,90,.35)}
+        .p10-hot.is-glow{box-shadow:0 0 0 6px #ffd83d,0 0 24px 8px rgba(255,216,61,.8)}
+
+        .p10-list{position:absolute;left:16px;right:16px;top:120px;display:flex;flex-direction:column;gap:16px}
+        .p10-item{padding:18px 20px;border:solid 3px transparent;border-radius:18px;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.08);text-align:left;cursor:pointer;font:600 24px/1.4 'Pretendard';color:#1b1738}
+        .p10-item:hover{border-color:#03c75a}
+        .p10-item b{display:block;font-size:28px}
+        .p10-item small{color:#6b7080;font-size:20px}
+        .p10-item.is-off{opacity:.45;pointer-events:none}
+        .p10-item.is-wrong{animation:fix-word-shake .3s ease}
+
+        /* 예약 폼(45p)·확인(46p) */
+        .p10-form{position:absolute;inset:0;display:flex;flex-direction:column;background:#fff;font:600 22px 'Pretendard'}
+        .p10-form-head{flex:0 0 auto;padding:70px 20px 14px;border-bottom:solid 2px #eef1f6;font-size:28px;font-weight:800}
+        .p10-form-body{flex:1 1 auto;overflow-y:auto;padding:16px 20px}
+        .p10-form-foot{flex:0 0 auto;display:flex;gap:12px;padding:14px 20px 26px;border-top:solid 2px #eef1f6}
+        .p10-form h5{margin:16px 0 10px;font-size:22px}
+        .p10-chips{display:flex;flex-wrap:wrap;gap:10px}
+        .p10-chip{min-width:80px;height:52px;padding:0 14px;border:solid 2px #dde1ea;border-radius:12px;background:#fff;cursor:pointer;font:700 21px 'Pretendard';color:#1b1738}
+        .p10-chip.is-on{border-color:#03c75a;background:#e8f8ef;color:#03a14a}
+        .p10-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:19px}
+        .p10-cal span{padding:6px 0;color:#9aa0ad}
+        .p10-cal button{height:46px;border:0;border-radius:50%;background:none;cursor:pointer;font:700 19px 'Pretendard';color:#1b1738}
+        .p10-cal button.is-on{background:#03c75a;color:#fff}
+        .p10-btn{flex:1 1 0;height:64px;border:0;border-radius:14px;font:800 24px 'Pretendard';cursor:pointer}
+        .p10-btn.is-main{background:#03c75a;color:#fff}
+        .p10-btn.is-sub{background:#eef1f6;color:#1b1738}
+        .p10-btn:disabled{background:#c4c9d4;cursor:default}
+        .p10-sum{padding:16px 18px;border-radius:14px;background:#f4f5f8;line-height:1.6}
+        .p10-agree{display:flex;align-items:center;gap:12px;margin-top:16px;padding:16px 18px;border:solid 2px #dde1ea;border-radius:14px;cursor:pointer}
+        .p10-agree i{width:30px;height:30px;border:solid 3px #9aa0ad;border-radius:8px;flex:0 0 auto}
+        .p10-agree.is-on i{border-color:#03c75a;background:#03c75a}
+        .p10-toast{position:absolute;left:20px;right:20px;bottom:110px;padding:16px;border-radius:14px;background:#1b1738;color:#fff;font:700 20px 'Pretendard';text-align:center;z-index:5}
+        .p10-toast.is-off, .is-hide{display:none!important}
+
+        .p10-input.card-btn{position:absolute;left:1290px;top:700px;width:560px;height:auto;min-height:130px;padding:18px 30px 12px;font-size:44px;line-height:1.2}
+        .p10-next.card-btn{display:flex;align-items:center;justify-content:center;min-width:0;width:300px;height:110px;margin-bottom:20px;padding:8px 10px 0;font-size:56px;z-index:7}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="p10-bubble" id="p10Bubble"></p>
+          <div class="p10-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+          <div class="p10-phone"><div class="p10-screen" id="p10Screen"></div></div>
+          <button class="card-btn p10-input is-hide" id="p10Input"></button>
+          <button class="card-btn js-sfx next-btn p10-next is-hide" id="p10Next" data-sound="sound/click.mp3">다음</button>
+
+          <div class="avatar-modal is-off" id="p10Done">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <p class="avatar-card-title">여행 계획 세우기 완료!</p>
+                <p class="avatar-card-text">네이버 지도의 기능을 익히고 활용해서<br>나의 여행 계획을 세웠어요.<br>즐거운 여행을 떠나요!</p>
+              </div>
+              <a href="page11.html" class="js-nav-effect avatar-card-btn">
+                <img src="../../img/common/btn_next_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_small_on.png" data-src-over="../../img/common/btn_next_small_over.png" data-sound="sound/click.mp3" alt="다음">
+              </a>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="오늘은 내가 여행 플래너!" data-next="page11.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    // 휴대폰 화면 안 좌표(464×874). hot: [글자, x, y, w, h]
+    const SAVE_STAR = ['⭐', 360, 330, 74, 64];
+    const SAVE_BTN = ['저장', 300, 760, 140, 64];
+    const BACK = ['‹ 뒤로', 16, 60, 110, 56];
+    const ARRIVE = ['도착', 330, 330, 110, 60];
+    const STEPS = [
+      { s: 32, bubble: '네이버 지도를 클릭해요.', hot: ['네이버 지도', 160, 300, 144, 144] },
+      { s: 33, bubble: '검색창을 클릭해요.', hot: ['🔍 장소, 버스, 지하철 검색', 20, 64, 424, 64] },
+      { s: 34, bubble: '오른쪽의 버튼을 눌러<br>여행지를 검색해요.', input: '안동 하회마을' },
+      { s: 35, bubble: '좋아요! 여행 장소를 저장해봐요.<br>별 버튼을 클릭해요.', hot: SAVE_STAR },
+      { s: 36, bubble: '저장 버튼을 클릭해요.', hot: SAVE_BTN },
+      { s: 37, bubble: '잘했어요!<br>본격적으로 여행 계획을<br>세워봐요.', next: true },
+      { s: 38, bubble: '운영 시간을 확인해볼까요?<br>아래의 정보창을 클릭해요.', hot: ['안동 하회마을 정보', 20, 560, 424, 120] },
+      { s: 39, bubble: '운영 시간 부분을<br>클릭해서 자세히 살펴봐요.', hot: ['⌚ 운영 시간', 20, 300, 424, 70] },
+      { s: 40, bubble: '운영 시간을 확인했어요!', next: true },
+      { s: 41, bubble: '이번엔 여행지 주변의<br>맛집과 카페를 탐방해봐요.<br>주변 탭을 클릭해요.', hot: ['주변', 250, 250, 100, 56] },
+      { s: 42, bubble: '여행지 주변에 맛있는<br>식당이 있어요!<br>가고 싶은 식당을 선택해요.', pick: 'restaurant' },
+      { s: 43, bubble: '원활한 여행을 위해<br>식당을 예약해볼까요?<br>예약 버튼을 클릭해요.', hot: ['예약', 300, 400, 140, 64] },
+      { s: 44, bubble: '‘인원, 날짜, 시간으로 검색’을<br>클릭해 예약을 진행해요.', hot: ['인원, 날짜, 시간으로 검색', 20, 500, 424, 70] },
+      { s: 45, bubble: '식당 방문을 희망하는<br>인원, 날짜, 시간을 순서대로<br>선택해요.', form: 'reserve' },
+      { s: 46, bubble: '내가 선택한 내용을 확인하고<br>화면을 아래로 내려 개인정보 수집 및 제공에 동의함 버튼을 클릭해요.', form: 'confirm' },
+      { s: 47, bubble: '예약을 완료했어요!<br>남은 여행 계획을 마저 세워봐요.', form: 'reserved', next: true },
+      { s: 48, bubble: '뒤로 가기를 눌러<br>주변에 함께 가볼 만한 곳을<br>찾아봐요.', hot: BACK },
+      { s: 49, bubble: '놀거리 버튼을 클릭해요.', hot: ['놀거리', 150, 140, 110, 56] },
+      { s: 50, bubble: '다양한 곳이 있어요!<br>각 장소의 정보를 확인해 1시간 이내로<br>이동할 수 있는 곳을 찾아볼까요?', pick: 'spots-view', next: true },
+      { s: 51, bubble: '하회마을 나룻배부터<br>확인해봐요. 장소를 클릭해요.', pick: 'spots', only: 'boat' },
+      { s: 52, bubble: '도착 버튼을 클릭해<br>이동 시간을 확인해요.', hot: ARRIVE },
+      { s: 53, bubble: '하회마을 나룻배까지는<br>12분이 소요돼요. 이어서<br>다음 장소를 확인해봐요.', next: true },
+      { s: 54, bubble: '도산서원을 클릭해<br>이동 시간을 확인해봐요.', pick: 'spots', only: 'dosan' },
+      { s: 55, bubble: '도착 버튼을 클릭해요.', hot: ARRIVE },
+      { s: 56, bubble: '도산서원까지는<br>2시간 23분이 소요돼요.', next: true },
+      { s: 57, bubble: '1시간 이내로 이동할 수 있는<br>장소는 어디인가요?', pick: 'spots', answer: 'boat',
+        wrong: '하회마을 나룻배까지는 12분,<br>도산서원까지는 2시간 23분이<br>소요돼요.' },
+      { s: 58, bubble: '좋아요!<br>하회마을 나룻배로 결정했어요.', next: true },
+      { s: 59, bubble: '별 모양 버튼을 클릭해<br>장소를 저장해요.', hot: SAVE_STAR },
+      { s: 60, bubble: '저장 버튼을 클릭해요.', hot: SAVE_BTN },
+      { s: 61, bubble: '좋아요! 이제 마지막으로<br>장소 별 이동 시간을 확인해봐요.', next: true },
+      { s: 62, bubble: '뒤로가기 버튼을 클릭해요.', hot: BACK },
+      { s: 63, bubble: '홈 버튼을 클릭해요.', hot: ['🏠 홈', 30, 790, 110, 60] },
+      { s: 64, bubble: '안동역에서 안동 하회마을까지의<br>이동 경로를 알아봐요.<br>도착 버튼을 클릭해요.', hot: ARRIVE },
+      { s: 65, bubble: '출발지 입력창을 클릭해요.', hot: ['출발지 입력', 20, 120, 424, 64] },
+      { s: 66, bubble: '오른쪽의 버튼을 클릭해<br>안동역을 입력해요.', input: '안동역' },
+      { s: 67, bubble: '추천된 이동 경로를 확인했어요!<br>시간과 이동 방법을 비교해<br>나에게 알맞은 경로를 골라봐요.', pick: 'route1' },
+      { s: 68, bubble: '뒤로 가기 버튼을 눌러<br>이전 화면으로 돌아가요.', hot: BACK },
+      { s: 69, bubble: '마지막으로, 안동 하회마을에서<br>하회마을 나룻배까지의<br>이동 경로를 확인해봐요.<br>출발 버튼을 클릭해요.', hot: ['출발', 200, 330, 110, 60] },
+      { s: 70, bubble: '저장 버튼을 클릭해요.', hot: SAVE_BTN },
+      { s: 71, bubble: '내가 저장한 장소들의 목록이에요!<br>하회마을 나룻배를 클릭해요.', pick: 'saved' },
+      { s: 72, bubble: '나에게 알맞은 이동 경로를<br>고르면 여행 계획 세우기 완료!', pick: 'route2', last: true }
+    ];
+    const RESTAURANTS = [
+      { name: '국특원 찜닭', sub: '한식 · 영업 중 · 리뷰 120' },
+      { name: '에듀국시', sub: '국수 · 영업 중 · 리뷰 51' }
+    ];
+    const SPOTS = [
+      { key: 'boat', name: '하회마을 나룻배', sub: '선착장 · 리뷰 50' },
+      { key: 'dosan', name: '도산서원', sub: '국가유산 · 리뷰 4,976' }
+    ];
+    const LISTS = {
+      route1: [{ name: '급행2번 버스', sub: '탑승하기' }, { name: '210번 버스', sub: '탑승하기' }],
+      route2: [{ name: '풍천2번 버스', sub: '탑승 후 도보로 이동' }, { name: '210번 버스', sub: '탑승 후 도보로 이동' }],
+      saved: [{ name: '하회마을 나룻배', sub: '선착장', key: 'boat' }, { name: '안동 하회마을', sub: '관광지' }]
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const screen = $('p10Screen');
+    const bubble = $('p10Bubble');
+    const input = $('p10Input');
+    const nextBtn = $('p10Next');
+    const playClick = makeSfx('sound/click.mp3');
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+    const picked = { restaurant: '국특원 찜닭', people: '', date: '', time: '' };
+    let i = 0;
+    let onNext = null;
+
+    const show = (el, on) => el.classList.toggle('is-hide', !on);
+    const go = () => { clearFingers(); i += 1; render(); };
+
+    function hot(spec, onClick) {
+      const b = document.createElement('button');
+      b.className = 'p10-hot';
+      b.style.cssText = 'left:' + spec[1] + 'px;top:' + spec[2] + 'px;width:' + spec[3] + 'px;height:' + spec[4] + 'px';
+      b.textContent = spec[0];
+      b.addEventListener('click', onClick);
+      screen.appendChild(b);
+      return b;
+    }
+
+    function list(items, onPick) {
+      const box = document.createElement('div');
+      box.className = 'p10-list';
+      items.forEach((it) => {
+        const b = document.createElement('button');
+        b.className = 'p10-item';
+        b.innerHTML = '<b>' + it.name + '</b><small>' + it.sub + '</small>';
+        b.addEventListener('click', () => onPick(it, b));
+        box.appendChild(b);
+      });
+      screen.appendChild(box);
+      return box;
+    }
+
+    function render() {
+      const st = STEPS[i];
+      bubble.innerHTML = st.bubble;
+      screen.innerHTML = '';
+      screen.style.backgroundImage = "url('img/p10_s" + st.s + ".png')";
+      show(input, false);
+      show(nextBtn, false);
+      clearFingers();
+
+      if (st.hot) pointFingerAt(hot(st.hot, () => { playClick(); go(); }), { onMain: true });
+      if (st.input) {
+        input.textContent = st.input;
+        show(input, true);
+      }
+      if (st.pick === 'restaurant') {
+        list(RESTAURANTS, (it) => { playClick(); picked.restaurant = it.name; go(); });
+      }
+      if (st.pick === 'spots-view' || st.pick === 'spots') {
+        const box = list(SPOTS, (it, b) => {
+          if (st.answer && it.key !== st.answer) {
+            playWrong();
+            b.classList.remove('is-wrong');
+            void b.offsetWidth;
+            b.classList.add('is-wrong');
+            bubble.innerHTML = st.wrong;
+            return;
+          }
+          if (st.answer) playCorrect(); else playClick();
+          go();
+        });
+        if (st.pick === 'spots-view') box.querySelectorAll('.p10-item').forEach((b) => b.classList.add('is-off'));
+        if (st.only) Array.from(box.children).forEach((b, k) => b.classList.toggle('is-off', SPOTS[k].key !== st.only));
+      }
+      if (LISTS[st.pick]) {
+        list(LISTS[st.pick], (it) => {
+          if (st.pick === 'saved' && it.key !== 'boat') return;
+          if (st.last) { playCorrect(); $('p10Done').classList.remove('is-off'); return; }
+          playClick();
+          go();
+        });
+      }
+      if (st.form === 'reserve') reserveForm();
+      if (st.form === 'confirm') confirmForm();
+      if (st.form === 'reserved') {
+        screen.insertAdjacentHTML('beforeend', '<div class="p10-form"><div class="p10-form-head">' + picked.restaurant + ' ›</div><div class="p10-form-body"><div class="p10-sum">예약<br>' +
+          picked.date + ' 오후 ' + picked.time + ' · ' + picked.people + '</div></div></div>');
+      }
+      if (st.next) show(nextBtn, true);
+    }
+
+    input.addEventListener('click', () => { playClick(); go(); });
+    nextBtn.addEventListener('click', () => go());
+
+    // 45p: 인원 → 날짜 → 시간 순서로 처음 선택(그 뒤 변경은 자유), 셋 다 고르면 다음 활성
+    function reserveForm() {
+      const days = ['일', '월', '화', '수', '목', '금', '토'];
+      let cal = days.map((d) => '<span>' + d + '</span>').join('') + '<span></span><span></span><span></span><span></span>';
+      for (let d = 1; d <= 31; d++) cal += '<button data-d="' + d + '">' + d + '</button>';
+      screen.insertAdjacentHTML('beforeend',
+        '<div class="p10-form"><div class="p10-form-head">' + picked.restaurant + ' 예약하기</div><div class="p10-form-body">' +
+        '<h5>인원</h5><div class="p10-chips" id="p10People">' + ['2명', '3명', '4명', '5명'].map((p) => '<button class="p10-chip">' + p + '</button>').join('') + '</div>' +
+        '<h5>날짜 · 2026년 10월</h5><div class="p10-cal" id="p10Cal">' + cal + '</div>' +
+        '<div id="p10TimeWrap" class="is-hide"><h5>시간 · 오후</h5><div class="p10-chips" id="p10Time">' + ['12:00', '1:00', '2:00', '3:00'].map((t) => '<button class="p10-chip">' + t + '</button>').join('') + '</div></div>' +
+        '</div><div class="p10-form-foot"><button class="p10-btn is-sub">닫기</button><button class="p10-btn is-main" id="p10FormNext" disabled>다음</button></div>' +
+        '<p class="p10-toast is-off" id="p10Toast">인원을 먼저 선택해 주세요.</p></div>');
+      const toast = $('p10Toast');
+      const sel = (box, btn) => box.querySelectorAll('button').forEach((b) => b.classList.toggle('is-on', b === btn));
+      const check = () => { $('p10FormNext').disabled = !(picked.people && picked.date && picked.time); };
+      $('p10People').addEventListener('click', (e) => {
+        const b = e.target.closest('button'); if (!b) return;
+        playClick(); sel($('p10People'), b); picked.people = b.textContent; check();
+      });
+      $('p10Cal').addEventListener('click', (e) => {
+        const b = e.target.closest('button'); if (!b) return;
+        if (!picked.people) {
+          toast.classList.remove('is-off');
+          clearTimeout(toast.__t);
+          toast.__t = setTimeout(() => toast.classList.add('is-off'), 3000);
+          return;
+        }
+        playClick(); sel($('p10Cal'), b);
+        const dow = days[(Number(b.dataset.d) + 3) % 7];
+        picked.date = '10.' + b.dataset.d + '.(' + dow + ')';
+        $('p10TimeWrap').classList.remove('is-hide');
+        check();
+      });
+      $('p10Time').addEventListener('click', (e) => {
+        const b = e.target.closest('button'); if (!b) return;
+        playClick(); sel($('p10Time'), b); picked.time = b.textContent; check();
+      });
+      $('p10FormNext').addEventListener('click', () => { playClick(); go(); });
+    }
+
+    // 46p: 선택 내용 확인 → 동의 체크 → 예약하기
+    function confirmForm() {
+      screen.insertAdjacentHTML('beforeend',
+        '<div class="p10-form"><div class="p10-form-head">예약 확인</div><div class="p10-form-body">' +
+        '<div class="p10-sum"><b>' + picked.restaurant + '</b><br>예약 ' + picked.date + ' 오후 ' + picked.time + '<br>' + picked.people + '</div>' +
+        '<h5>예약자 정보</h5><div class="p10-sum">이름: 김누리<br>전화번호: 010-12**-34**</div>' +
+        '<h5>주차 안내</h5><div class="p10-sum">매장 전용 주차장 이용 바랍니다.</div>' +
+        '<div class="p10-agree" id="p10Agree"><i></i>개인정보 수집 및 제공에 동의합니다.</div>' +
+        '</div><div class="p10-form-foot"><button class="p10-btn is-main" id="p10Book" disabled>예약하기</button></div></div>');
+      pointFingerAt($('p10Agree'), { onMain: true });
+      $('p10Agree').addEventListener('click', () => {
+        playClick();
+        $('p10Agree').classList.add('is-on');
+        $('p10Book').disabled = false;
+        bubble.innerHTML = '예약하기 버튼을 클릭해<br>마무리해요!';
+        pointFingerAt($('p10Book'), { onMain: true });
+      });
+      $('p10Book').addEventListener('click', () => { playCorrect(); go(); });
+    }
+
+    render();
+  })();
+  </script>
+</body>
+</html>

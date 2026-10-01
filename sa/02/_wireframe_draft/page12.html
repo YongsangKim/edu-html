@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나의 자랑거리를 소개하는 뉴스</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 와이어프레임. 신규 기능: 체크박스 4개를 전부 체크해야 완성하기가
+           진행됨(기능 R 멀티셀렉트게이트와 목적은 비슷하지만 체크박스 UI라 이 페이지
+           전용으로 우선 구현 - 필요해지면 공용 기능으로 승격) */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:url('img/p12_bg.png') no-repeat}
+        .privacy-check-list{position:absolute;left:600px;top:300px;width:700px;background:#fff;border-radius:16px;padding:40px;box-shadow:0 0 20px rgba(0,0,0,.2)}
+        .privacy-check-item{display:flex;align-items:center;gap:16px;font-size:26px;margin-bottom:20px;cursor:pointer}
+        .privacy-check-item input{width:32px;height:32px}
+        .privacy-warning-popup{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;border-radius:16px;padding:40px 60px;font-size:28px;box-shadow:0 0 30px rgba(0,0,0,.3)}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main>
+          <div class="privacy-check-list" id="privacyCheckList">
+            <label class="privacy-check-item"><input type="checkbox">이름이 들어있지 않아요.</label>
+            <label class="privacy-check-item"><input type="checkbox">집 주소가 들어있지 않아요.</label>
+            <label class="privacy-check-item"><input type="checkbox">전화번호가 들어있지 않아요.</label>
+            <label class="privacy-check-item"><input type="checkbox">학교 이름이 들어있지 않아요.</label>
+          </div>
+
+          <a href="page13.html" id="privacyConfirmBtn" class="js-nav-effect js-sfx next-btn-center" data-sound="sound/click.mp3">
+            <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="완성하기">
+          </a>
+
+          <div class="privacy-warning-popup hidden" id="privacyWarningPopup">
+            영상을 만들 때는 이름, 집 주소, 전화번호, 학교 이름과 같은 개인정보가<br>포함되어 있지 않은지 확인해야 해요!
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="나의 자랑거리를 소개하는 뉴스" data-next="page13.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const confirmBtn = document.getElementById('privacyConfirmBtn');
+    const checkboxes = Array.from(document.querySelectorAll('#privacyCheckList input[type="checkbox"]'));
+    const warning = document.getElementById('privacyWarningPopup');
+
+    confirmBtn.addEventListener('click', (e) => {
+      const allChecked = checkboxes.every((cb) => cb.checked);
+      if (!allChecked) {
+        e.preventDefault();
+        e.stopPropagation();
+        warning.classList.remove('hidden');
+        setTimeout(() => warning.classList.add('hidden'), 2000);
+      }
+    }, true);
+  })();
+  </script>
+</body>
+</html>
