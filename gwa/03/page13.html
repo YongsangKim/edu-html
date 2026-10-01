@@ -6,13 +6,63 @@
     <title>오늘은 무슨 옷을 입을까?</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 없음 - 기획서(최종본) 50p 학습 종료. 공용 마무리 구성(end-*), 트로피 img/p13_trophy.png(뒤에 컨페티) */
-        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
-        .p13-character{position:absolute;left:60px;top:107px;width:792px;height:856px;z-index:10}
-        .p13-character img{display:block;width:100%;height:100%;object-fit:contain}
-        .p13-trophy{position:absolute;left:1640px;top:40px;width:200px;height:200px;background:url('img/p13_trophy.png') center / contain no-repeat;z-index:2}
-        .end-panel .end-desc{font-size:52px;line-height:1.3;letter-spacing:-0.04em;color:#1b1738}
-        .end-lead{letter-spacing:-0.08em}
+        /* 디자인 48p-ok-1~13, 기획서 최종본 46~51p + 수정2(옷장 구성). 배경 p13_bg.png는 안내 문구·날씨 판(리본)·방·빈 옷장만 든 통이미지
+           TODO: 지금은 장마 라운드만. 눈/더위/추위 라운드 데이터는 gwa/_backup_03_page12/page12.html의 ROUNDS에 있음(디자인 나오면 붙임) */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:url('img/p13_bg.png') no-repeat}
+
+        .p13-cards{position:absolute;left:225px;top:452px;width:370px;height:310px}
+        .p13-card{position:absolute;width:323px;height:260px;box-sizing:border-box;border:solid 5px #1b1738;border-radius:14px;background:#fff;
+          display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:6px;font-family:'Cafe24 Ssurround';color:#1b1738}
+        .p13-card.is-back{left:40px;top:43px;background:#aebbd6}
+        .p13-card.is-front{left:0;top:0;z-index:1}
+        .p13-card.is-front.is-flip{animation:p13-flip .25s ease-out}
+        @keyframes p13-flip{from{opacity:.3;transform:translateX(-12px)}to{opacity:1;transform:none}}
+        .p13-card-icon{position:absolute;left:50%;top:14px;width:200px;height:150px;transform:translateX(-50%);object-fit:contain}
+        .p13-card-date{font-size:62px;line-height:1.2;letter-spacing:-0.03em}
+        .p13-card-temp{position:absolute;right:16px;top:10px;font-size:36px;color:#e5402f}
+        .p13-card.is-back .p13-card-icon, .p13-card.is-back .p13-card-temp{display:none}
+
+        .p13-arrow{position:absolute;top:518px;width:124px;height:119px;padding:0;border:0;cursor:pointer;background:center / contain no-repeat}
+        .p13-arrow.is-prev{left:85px;background-image:url('img/p09_btn_arrow_left.png')}
+        .p13-arrow.is-prev:hover{background-image:url('img/p09_btn_arrow_left_over.png')}
+        .p13-arrow.is-next{left:608px;background-image:url('img/p09_btn_arrow_right.png')}
+        .p13-arrow.is-next:hover{background-image:url('img/p09_btn_arrow_right_over.png')}
+        /* 처음/마지막 카드에서 막힌 쪽은 분홍(_on) 모양 — 디자인 15일 화면 기준 */
+        .p13-arrow.is-prev.is-disabled{background-image:url('img/p09_btn_arrow_left_on.png');pointer-events:none}
+        .p13-arrow.is-next.is-disabled{background-image:url('img/p09_btn_arrow_right_on.png');pointer-events:none}
+
+        .p13-char{position:absolute;left:840px;top:160px;width:400px;height:800px;z-index:5;pointer-events:none}
+        /* 캐릭터 이미지는 그 단계까지 입은 옷이 다 그려진 전신 한 장씩(크기 제각각) → 원본 크기로 발끝·가운데 맞춤, 마지막에 입힌 한 장만 보임 */
+        .p13-char img{position:absolute;left:50%;bottom:15px;transform:translateX(-50%)}
+        .p13-char img[hidden]{display:none}
+        .p13-wear-top{z-index:1} .p13-wear-bottom{z-index:2} .p13-wear-outer{z-index:3} .p13-wear-acc{z-index:4}
+
+        .p13-zone{position:absolute;z-index:4}
+        .p13-zone.is-top{left:900px;top:260px;width:280px;height:280px}
+        .p13-zone.is-bottom{left:910px;top:500px;width:260px;height:230px}
+        .p13-zone.is-outer{left:880px;top:250px;width:320px;height:500px}
+        .p13-zone.is-acc{left:840px;top:160px;width:400px;height:800px}
+
+        .p13-label{position:absolute;width:102px;height:40px;margin:0;padding-top:3px;box-sizing:border-box;border-radius:20px;background:#1e2252;
+          font-family:'Cafe24 Ssurround';font-size:30px;line-height:37px;text-align:center;color:#9aa0c0}
+        .p13-label.is-active{color:#fff}
+        .p13-label.is-top{left:1373px;top:272px} .p13-label.is-bottom{left:1622px;top:272px}
+        .p13-label.is-outer{left:1373px;top:493px} .p13-label.is-acc{left:1622px;top:493px}
+
+        .p13-item{position:absolute;z-index:6;filter:grayscale(1);pointer-events:none;touch-action:none}
+        .p13-item img{display:block;width:100%;height:100%;object-fit:contain;object-position:center top;pointer-events:none}
+        .p13-item.is-active{filter:none;pointer-events:auto;cursor:grab}
+        .p13-item.is-dragging{z-index:50;cursor:grabbing}
+        #p13RightNext{padding:0;border:0;background:none;cursor:pointer}
+
+        .p13-slot-top1{left:1280px;top:325px;width:155px;height:175px}
+        .p13-slot-top2{left:1432px;top:325px;width:105px;height:175px}
+        .p13-slot-bottom1{left:1552px;top:325px;width:125px;height:175px}
+        .p13-slot-bottom2{left:1678px;top:325px;width:125px;height:175px}
+        .p13-slot-outer1{left:1282px;top:530px;width:165px;height:245px}
+        .p13-slot-outer2{left:1398px;top:530px;width:172px;height:245px}
+        .p13-slot-acc1{left:1578px;top:555px;width:192px;height:105px}
+        .p13-slot-acc2{left:1620px;top:682px;width:105px;height:118px}
     </style>
 </head>
 <body>
@@ -20,30 +70,207 @@
   <div id="viewport" class="viewport">
     <div id="stage-spacer">
       <div id="stage" class="stage">
-        <main class="bg-default">
-          <div class="p13-character"><img src="img/p13_avatar_finish.png" alt="메인 캐릭터"></div>
+        <main>
+          <div class="p13-cards">
+            <div class="p13-card is-back" id="p13CardBack"><span class="p13-card-date"></span></div>
+            <div class="p13-card is-front" id="p13CardFront">
+              <img class="p13-card-icon" alt="">
+              <span class="p13-card-temp"></span>
+              <span class="p13-card-date"></span>
+            </div>
+          </div>
+          <button class="p13-arrow is-prev js-sfx" id="p13Prev" data-sound="sound/click.mp3" aria-label="이전 날짜"></button>
+          <button class="p13-arrow is-next js-sfx" id="p13Next" data-sound="sound/click.mp3" aria-label="다음 날짜"></button>
 
-          <p class="end-title">최고예요!</p>
-          <div class="p13-trophy"></div>
-          <div class="end-panel">
-            <p class="end-lead">최근 7일간의 날씨 데이터를 분석하고<br>그 결과에 딱 맞는 코디를 골랐어요!</p>
-            <p class="end-desc">수많은 데이터를 분석해 숨은 패턴을 찾고, 최적의 선택을 알려주는 것이 오늘 배웠던 인공지능의 원리예요.</p>
+          <div class="p13-char" id="p13Char">
+            <img class="p13-char-base" src="img/p13_char_base.png" alt="캐릭터">
+            <img class="p13-wear-top" hidden alt="">
+            <img class="p13-wear-bottom" hidden alt="">
+            <img class="p13-wear-outer" hidden alt="">
+            <img class="p13-wear-acc" hidden alt="">
           </div>
 
-          <a href="page12.html" class="js-nav-effect end-btn-retry">
-            <img src="../../img/common/btn_game_retry.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_game_retry_on.png" data-src-over="../../img/common/btn_game_retry_over.png" data-sound="sound/click.mp3" alt="게임 다시하기">
-          </a>
-          <a href="../04/page01.html" class="js-nav-effect end-btn-next-lesson">
-            <img src="../../img/common/btn_next_lesson.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_lesson_on.png" data-src-over="../../img/common/btn_next_lesson_over.png" data-sound="sound/click.mp3" alt="다음차시 학습하기">
-          </a>
+          <p class="p13-label is-top" data-cat="top">상의</p>
+          <p class="p13-label is-bottom" data-cat="bottom">하의</p>
+          <p class="p13-label is-outer" data-cat="outer">외투</p>
+          <p class="p13-label is-acc" data-cat="acc">소품</p>
+
+          <div id="p13Board"></div>
+
+          <div class="avatar-modal is-off" id="p13Right">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct_gwa.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">코디 완성!</p>
+                <p class="avatar-popup-sub">오늘 코디 너무 멋진데요?<br>날씨 데이터를 보고 패턴을 잘 파악했군요!</p>
+                <button class="avatar-popup-next" id="p13RightNext">
+                  <img src="../../img/common/btn_next_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_small_on.png" data-src-over="../../img/common/btn_next_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p13Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">날씨 데이터를 다시 살펴볼까요?</p>
+                <button type="button" class="card-btn is-popup js-sfx avatar-popup-next" id="p13Retry" data-sound="sound/click.mp3">다시 해보기</button>
+              </div>
+            </div>
+          </div>
         </main>
       </div>
     </div>
   </div>
   <div class="zoom-info" id="zoomInfo"></div>
 
-  <script src="../../js/header.js" data-title="오늘은 무슨 옷을 입을까?" data-next="../gwa.html"></script>
+  <script src="../../js/header.js" data-title="오늘은 무슨 옷을 입을까?" data-next="page14.html"></script>
   <script src="../../js/toc-gwa.js"></script>
   <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const ITEMS = {
+      sweater: { name: '스웨터', cat: 'top' },
+      tank: { name: '반팔', cat: 'top' },
+      pants: { name: '기모 긴바지', cat: 'bottom' },
+      shorts: { name: '반바지', cat: 'bottom' },
+      padding: { name: '패딩', cat: 'outer' },
+      raincoat: { name: '우비', cat: 'outer' },
+      cardigan: { name: '얇은 여름용 가디건', cat: 'outer' },
+      umbrella: { name: '우산', cat: 'acc' },
+      fan: { name: '손 선풍기', cat: 'acc' },
+      beanie: { name: '털모자', cat: 'acc' }
+    };
+    const CATS = ['top', 'bottom', 'outer', 'acc'];
+    const days = (from, weather, temps) => weather.map((w, i) => ({ day: from + i, w: w, temp: temps ? temps[i] : null }));
+    const ROUNDS = [
+      { cards: days(15, ['rain', 'rain', 'rain', 'cloud', 'cloud', 'rain', 'rain']),
+        slots: { top1: 'sweater', top2: 'tank', bottom1: 'pants', bottom2: 'shorts', outer1: 'padding', outer2: 'raincoat', acc1: 'umbrella', acc2: 'beanie' },
+        answer: ['tank', 'shorts', 'raincoat', 'umbrella'] }
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const board = $('p13Board');
+    const front = $('p13CardFront');
+    const back = $('p13CardBack');
+    const prev = $('p13Prev');
+    const next = $('p13Next');
+    const labels = document.querySelectorAll('.p13-label');
+    const wears = {};
+    CATS.forEach((c) => { wears[c] = document.querySelector('.p13-wear-' + c); });
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+    const playClick = makeSfx('sound/click.mp3');
+
+    const order = shuffleArray(ROUNDS);
+    let roundNo = 0;
+    let round = null;
+    let cardIdx = 0;
+    let step = 0;
+
+    function showCard() {
+      const c = round.cards[cardIdx];
+      front.querySelector('.p13-card-icon').src = 'img/p13_weather_' + c.w + '.png';
+      front.querySelector('.p13-card-temp').textContent = c.temp ? c.temp + '℃' : '';
+      front.querySelector('.p13-card-date').textContent = c.day + '일';
+      const after = round.cards[cardIdx + 1];
+      back.querySelector('.p13-card-date').textContent = after ? after.day + '일' : '';
+      prev.classList.toggle('is-disabled', cardIdx === 0);
+      next.classList.toggle('is-disabled', cardIdx === round.cards.length - 1);
+      front.classList.remove('is-flip');
+      void front.offsetWidth;
+      front.classList.add('is-flip');
+    }
+    prev.addEventListener('click', () => { if (cardIdx > 0) { cardIdx -= 1; showCard(); } });
+    next.addEventListener('click', () => { if (cardIdx < round.cards.length - 1) { cardIdx += 1; showCard(); } });
+
+    function startRound() {
+      round = order[roundNo];
+      cardIdx = 0;
+      step = 0;
+      showCard();
+      CATS.forEach((c) => { wears[c].hidden = true; });
+      document.querySelector('.p13-char-base').hidden = false;
+      board.innerHTML = '';
+      Object.keys(round.slots).forEach((slot) => {
+        const id = round.slots[slot];
+        const item = ITEMS[id];
+        const el = document.createElement('div');
+        el.className = 'p13-item p13-slot-' + slot;
+        el.dataset.cat = item.cat;
+        el.dataset.id = id;
+        el.dataset.key = round.answer.includes(id) ? item.cat : 'x';
+        el.innerHTML = '<img src="img/p13_item_' + id + '.png" alt="' + item.name + '">';
+        board.appendChild(el);
+      });
+      CATS.forEach((c) => {
+        const z = document.createElement('div');
+        z.className = 'p13-zone is-' + c;
+        z.dataset.key = c;
+        board.appendChild(z);
+      });
+      activate();
+    }
+
+    function activate() {
+      const cat = CATS[step];
+      labels.forEach((l) => l.classList.toggle('is-active', l.dataset.cat === cat));
+      const cards = Array.from(board.querySelectorAll('.p13-item')).filter((el) => el.dataset.cat === cat);
+      cards.forEach((el) => el.classList.add('is-active'));
+      initMatchDrag({
+        cards: cards,
+        zones: [board.querySelector('.p13-zone.is-' + cat)],
+        slop: 80,
+        onRight: wear,
+        onWrong: (card, zone) => {
+          if (!zone) return;
+          playWrong();
+          $('p13Wrong').classList.remove('is-off');
+        }
+      });
+    }
+
+    function wear(card) {
+      const cat = card.dataset.cat;
+      card.hidden = true;
+      $('p13Char').querySelectorAll('img').forEach((img) => { img.hidden = true; });
+      wears[cat].src = 'img/p13_wear_' + card.dataset.id + '.png';
+      wears[cat].hidden = false;
+      playClick();
+      step += 1;
+      const deactivate = () => board.querySelectorAll('.p13-item.is-active').forEach((el) => el.classList.remove('is-active'));
+      if (step < CATS.length) {
+        setTimeout(() => { deactivate(); activate(); }, 300);
+        return;
+      }
+      setTimeout(() => {
+        deactivate();
+        labels.forEach((l) => l.classList.remove('is-active'));
+        setTimeout(() => {
+          playCorrect();
+          $('p13Right').classList.remove('is-off');
+        }, 500);
+      }, 500);
+    }
+
+    $('p13Retry').addEventListener('click', () => {
+      $('p13Wrong').classList.add('is-off');
+    });
+
+    $('p13RightNext').addEventListener('click', () => {
+      roundNo += 1;
+      if (roundNo >= order.length) {
+        navigateTo('page14.html');
+        return;
+      }
+      resetImageSwap($('p13Right'));
+      $('p13Right').classList.add('is-off');
+      startRound();
+    });
+
+    startRound();
+  })();
+  </script>
 </body>
 </html>
