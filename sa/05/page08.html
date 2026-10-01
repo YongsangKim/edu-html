@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>물어보고, 살펴보고, 결정하기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 23~30p. STEP1 프롬프트 빈칸 끌어 넣기(initMatchDrag) → STEP2·3 말풍선이 차례로 올라오고
+           Gemini 답변은 로딩 2초 뒤 타이핑 → STEP4 최종 결정(정답 없음) → 마무리 안내 */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p08-step{position:absolute;left:259px;top:40px;width:834px;height:91px;box-sizing:border-box;padding:6px 30px 0;display:flex;align-items:center;justify-content:center;z-index:2;
+          background:#48159c;border-radius:46px;font-family:'Cafe24 Ssurround';font-size:48px;color:#fff;letter-spacing:-0.04em}
+        .p08-box{position:absolute;left:109px;top:88px;width:1134px;height:281px;box-sizing:border-box;padding:50px 40px 20px;display:flex;align-items:center;justify-content:center;
+          background:#fefbf9;border:solid 6px #48159c;border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';font-size:50px;line-height:1.3;color:#48159c;text-align:center;letter-spacing:-0.04em;word-break:keep-all}
+        .p08-character{position:absolute;left:1361px;top:146px;width:431px;height:630px;display:flex;align-items:flex-end;justify-content:center}
+        .p08-character img{max-width:100%;max-height:100%;object-fit:contain}
+
+        .p08-prompt{position:absolute;left:109px;top:400px;width:1134px;box-sizing:border-box;padding:30px 40px;background:#fff;border:solid 4px #b9b3dd;border-radius:28px;
+          font-family:'Cafe24 Ssurround';font-size:52px;line-height:2;color:#1b1738;letter-spacing:-0.04em}
+        .p08-blank{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;width:300px;height:92px;box-sizing:border-box;margin:0 6px;border:dashed 4px #8278ff;border-radius:16px;
+          font-size:34px;color:#8278ff}
+        .p08-blank[data-filled]{border:0}
+        .p08-cards{position:absolute;left:109px;top:710px;width:1134px;display:flex;justify-content:space-around}
+        .p08-hold{width:300px;height:92px}
+        .p08-card{width:300px;height:92px;padding:6px 20px 0;box-sizing:border-box;font-size:48px;cursor:grab;user-select:none;position:relative;z-index:5;display:flex;align-items:center;justify-content:center}
+        .p08-card.is-dragging{cursor:grabbing;z-index:50}
+        .p08-blank .p08-card{cursor:default}
+
+        .p08-chat{position:absolute;left:0;top:0;width:1300px;height:960px;pointer-events:none}
+        .p08-msg{position:absolute;box-sizing:border-box;padding:30px 40px;border:solid 4px #1b1738;border-radius:32px;font-family:'Pretendard';font-size:40px;line-height:1.45;font-weight:600;color:#1b1738;
+          letter-spacing:-0.02em;word-break:keep-all;transition:top .5s ease,opacity .4s ease;opacity:0}
+        .p08-msg.is-show{opacity:1}
+        .p08-msg.is-me{left:145px;width:807px;background:#fff3c9}
+        .p08-msg.is-ai{background:#eef3fb}
+        .p08-dots span{display:inline-block;animation:p08-dot 1s infinite}
+        .p08-dots span:nth-child(2){animation-delay:.2s}
+        .p08-dots span:nth-child(3){animation-delay:.4s}
+        @keyframes p08-dot{0%,100%{opacity:.2}50%{opacity:1}}
+
+        .p08-yes{position:absolute;left:536px;top:748px;width:280px}
+        .p08-picks{position:absolute;left:145px;top:610px;width:1044px;display:grid;grid-template-columns:1fr 1fr;gap:40px 36px}
+        .p08-picks .card-btn{min-width:0;height:115px;padding:8px 20px 4px;font-size:40px;line-height:1.2;letter-spacing:-0.05em}
+
+        .p08-end{position:absolute;left:746px;top:178px;width:942px;height:594px;box-sizing:border-box;padding:60px 70px 160px;display:flex;align-items:center;justify-content:center;
+          background:#fefbf9;border:solid 6px #48159c;border-radius:60px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';font-size:54px;line-height:1.35;color:#48159c;text-align:center;letter-spacing:-0.04em;word-break:keep-all}
+        .p08-end-character{position:absolute;left:200px;top:180px;width:440px;height:576px;display:flex;align-items:flex-end;justify-content:center}
+        .p08-end-character img{max-width:100%;max-height:100%;object-fit:contain}
+        .p08-end-next{position:absolute;left:1014px;top:600px}
+
+        .p08 .is-off{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default p08">
+          <div id="p08Play">
+            <div class="p08-step" id="p08Step"></div>
+            <div class="p08-box" id="p08Box"></div>
+            <div class="p08-character"><img src="img/p8_character_intro.png" alt="메인 캐릭터"></div>
+
+            <div id="p08Step1">
+              <div class="p08-prompt">
+                <span class="p08-blank" data-key="place">장소</span>에 <span class="p08-blank" data-key="goal">목적</span>고 해요.<br>
+                어떤 <span class="p08-blank" data-key="ask">질문</span>이 필요할까요?
+              </div>
+              <div class="p08-cards" id="p08Cards">
+                <div class="p08-hold"><div class="emotion-option p08-card" data-key="place">공원</div></div>
+                <div class="p08-hold"><div class="emotion-option p08-card" data-key="ask">준비물</div></div>
+                <div class="p08-hold"><div class="emotion-option p08-card" data-key="goal" data-fill="놀러 가려">놀러 가기</div></div>
+              </div>
+            </div>
+
+            <div class="p08-chat">
+              <div class="p08-msg is-me" id="p08Me"></div>
+              <div class="p08-msg is-ai" id="p08Ai"></div>
+            </div>
+
+            <button type="button" class="card-btn is-popup p08-yes is-off" id="p08Yes">네</button>
+            <div class="p08-picks is-off" id="p08Picks">
+              <button type="button" class="card-btn">비가 오니 공원은<br>다른 날에 가야지.</button>
+              <button type="button" class="card-btn">짐이 많을 테니<br>우비를 입고 가야겠어.</button>
+              <button type="button" class="card-btn">일기예보를<br>다시 확인 해볼까?</button>
+              <button type="button" class="card-btn">큰 우산을 들고<br>가면 괜찮을 거야.</button>
+            </div>
+          </div>
+
+          <div class="is-off" id="p08EndView">
+            <div class="p08-end-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+            <div class="p08-end">좋아요!<br>Gemini Live는 나의 질문을 듣고<br>조언을 줄 수 있지만,<br>마지막 결정은 내가 하는 거예요.</div>
+            <a href="page09.html" class="js-nav-effect p08-end-next">
+              <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+            </a>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="물어보고, 살펴보고, 결정하기" data-next="page09.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const $ = (id) => document.getElementById(id);
+    const stepEl = $('p08Step');
+    const box = $('p08Box');
+    const me = $('p08Me');
+    const ai = $('p08Ai');
+    const yesBtn = $('p08Yes');
+    const picks = $('p08Picks');
+    const playClick = makeSfx('sound/click.mp3');
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+    const LOADING = '<span class="p08-dots"><span>●</span> <span>●</span> <span>●</span></span>';
+
+    function place(el, left, top, width) {
+      el.style.left = left + 'px';
+      el.style.top = top + 'px';
+      if (width) el.style.width = width + 'px';
+    }
+
+    function type(el, text, done) {
+      let i = 0;
+      el.textContent = '';
+      const timer = setInterval(() => {
+        i += 1;
+        el.textContent = text.slice(0, i);
+        if (i >= text.length) {
+          clearInterval(timer);
+          if (done) setTimeout(done, 600);
+        }
+      }, 60);
+    }
+
+    function ask(meText, aiLeft, aiText, done) {
+      me.textContent = meText;
+      place(me, 145, 401);
+      me.classList.add('is-show');
+      setTimeout(() => {
+        ai.innerHTML = LOADING;
+        place(ai, aiLeft, 604, aiLeft === 289 ? 955 : 807);
+        ai.classList.add('is-show');
+        setTimeout(() => type(ai, aiText, done), 2000);
+      }, 700);
+    }
+
+    function step2() {
+      $('p08Step1').classList.add('is-off');
+      stepEl.textContent = 'STEP2 Gemini Live의 조언 듣기';
+      box.textContent = 'Gemini Live가 답변하는 중이에요.';
+      ask('공원에 놀러 가려고 해요. 어떤 준비물이 필요할까요?', 289,
+        '날씨를 확인하고, 물과 모자를 준비하면 좋아요. 함께 갈 사람과 약속 시간도 정해 보세요. 날씨 정보를 알려 드릴까요?', () => {
+          me.classList.remove('is-show');
+          ai.style.top = '408px';
+          box.textContent = '‘네’를 클릭해 나에게 필요한 정보를 얻어봐요.';
+          yesBtn.classList.remove('is-off');
+        });
+    }
+
+    function step3() {
+      clearFingers();
+      yesBtn.classList.add('is-off');
+      ai.classList.remove('is-show');
+      stepEl.textContent = 'STEP3 나에게 필요한 정보 선택하기';
+      box.textContent = 'Gemini Live가 답변하는 중이에요.';
+      setTimeout(() => ask('네. 주말 날씨 정보를 알려주세요.', 436, '주말에 비 예보가 있습니다. 우산을 챙겨가는 것을 권장합니다.', step4), 400);
+    }
+
+    function step4() {
+      me.classList.remove('is-show');
+      ai.style.top = '410px';
+      stepEl.textContent = 'STEP4 최종 결정하기';
+      box.innerHTML = 'Gemini Live의 답변을 확인하고 최종 결정을 해요.<br>정답은 없어요. 나의 생각과 가까운 것을 선택해봐요.';
+      picks.classList.remove('is-off');
+    }
+
+    stepEl.textContent = 'STEP1 궁금한 점 물어보기';
+    box.innerHTML = '주말에 공원에 가고 싶어요.<br>AI에게 보낼 프롬프트 문장을 완성해봐요.';
+
+    initMatchDrag({
+      cards: Array.from(document.querySelectorAll('.p08-card')),
+      zones: Array.from(document.querySelectorAll('.p08-blank')),
+      onRight: (card, blank) => {
+        playClick();
+        blank.firstChild.nodeType === 3 && blank.firstChild.remove();
+        if (card.dataset.fill) card.textContent = card.dataset.fill;
+      },
+      onWrong: (card, blank) => { if (blank) playWrong(); },
+      onDone: () => {
+        playCorrect();
+        setTimeout(step2, 1000);
+      }
+    });
+
+    yesBtn.addEventListener('click', () => { playClick(); step3(); });
+    picks.querySelectorAll('.card-btn').forEach((btn) => btn.addEventListener('click', () => {
+      playClick();
+      btn.classList.add('is-selected');
+      setTimeout(() => {
+        $('p08Play').classList.add('is-off');
+        $('p08EndView').classList.remove('is-off');
+      }, 500);
+    }));
+  })();
+  </script>
+</body>
+</html>

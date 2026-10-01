@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suno와 함께 뚝딱! 나도 경제 뮤지션</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 27~42p. 가운데 Suno 화면은 img/p09_screen_{이름}.png(468x895), 노래 표지 img/p09_cover.png.
+           가사는 앞 활동(sessionStorage 'sa06_lyrics'), 없으면 기획서 30p 가사. 노래는 가사 버전(1·2) x 장르 4 = 8곡 sound/p09_song_v{1|2}_{hiphop|kpop|trot|rock}.mp3.
+           클릭 영역 좌표는 화면 이미지 나오면 조정 */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p09-bubble{left:132px;bottom:620px;width:553px;min-height:0;padding:30px 16px;display:flex;align-items:center;justify-content:center;font-size:42px;z-index:5}
+        .p09-character{position:absolute;left:170px;top:360px;width:480px;height:580px;display:flex;align-items:flex-end;justify-content:center}
+        .p09-character img{max-width:100%;max-height:100%;object-fit:contain}
+
+        .p09-screen{position:absolute;left:721px;top:21px;width:468px;height:895px;box-sizing:border-box;border:solid 8px #1b1738;border-radius:40px;background:#fff center / cover no-repeat;overflow:hidden}
+        .p09-field{position:absolute;left:739px;width:432px;box-sizing:border-box;padding:14px 18px;background:#f4f2fb;border:solid 3px #b9b3dd;border-radius:14px;
+          font-family:'Pretendard';font-size:24px;line-height:1.45;font-weight:600;color:#1b1738;white-space:pre-line;overflow:hidden}
+        .p09-lyrics{top:287px;height:180px}
+        .p09-style{top:603px;height:77px;display:flex;align-items:center;font-size:30px}
+        .p09-full{position:absolute;left:737px;top:40px;width:436px;height:770px;box-sizing:border-box;padding:24px 26px;background:#fff;border-radius:24px;overflow-y:auto;
+          font-family:'Pretendard';font-size:23px;line-height:1.55;font-weight:600;color:#1b1738;white-space:pre-line}
+        .p09-tool{position:absolute;width:80px;height:80px;border:solid 4px #1b1738;border-radius:50%;background:#fefbf9;font-size:40px;line-height:1;cursor:pointer;padding:0;z-index:6}
+        .p09-tool:disabled{opacity:.3;cursor:default}
+        .p09-pulse{animation:p09-pulse .7s ease-in-out 3}
+        @keyframes p09-pulse{50%{transform:scale(1.25);box-shadow:0 0 0 12px rgba(255,79,139,.45)}}
+
+        .p09-load{position:absolute;left:1300px;top:407px;width:420px;height:117px;font-size:50px;white-space:nowrap}
+        .p09-genres{position:absolute;left:1384px;top:169px;width:383px;display:flex;flex-direction:column;gap:50px}
+        .p09-genres .card-btn{width:100%;height:117px;font-size:56px}
+
+        .p09-ring{position:absolute;left:885px;top:400px;width:140px;height:140px;box-sizing:border-box;border-radius:50%;border:solid 16px #ffd6e2;border-top-color:#ff4f8b;animation:p09-spin .8s linear infinite}
+        @keyframes p09-spin{to{transform:rotate(360deg)}}
+
+        .p09-songs{position:absolute;left:737px;top:340px;width:436px;display:flex;flex-direction:column;gap:14px}
+        .p09-song{position:relative;display:flex;align-items:center;gap:16px;height:70px;padding:0 90px 0 4px;border:0;border-radius:14px;background:#f4f2fb;cursor:pointer;
+          font-family:'Pretendard';font-size:26px;font-weight:700;color:#1b1738;text-align:left}
+        .p09-song i{flex:0 0 73px;height:64px;border-radius:10px;background:#48159c url('img/p09_cover.png') center / cover no-repeat}
+        .p09-song.is-playing{background:#ffd6e2}
+        .p09-song-more{position:absolute;right:8px;top:7px;width:56px;height:56px;border:0;border-radius:50%;background:#fff;font-size:30px;font-weight:700;cursor:pointer;z-index:2}
+
+        .p09-final{position:absolute;left:314px;top:196px;width:1293px;height:685px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:60px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p09-final-title{position:absolute;left:0;top:44px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.2;letter-spacing:-0.06em;
+          background:linear-gradient(180deg,#02185c,#0362d7);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .p09-final-cover{position:absolute;left:226px;top:92px;width:385px;height:385px;border-radius:30px;background:#48159c url('img/p09_cover.png') center / cover no-repeat;
+          display:flex;align-items:flex-end;justify-content:center;padding-bottom:26px;box-sizing:border-box;font-family:'Cafe24 Ssurround';font-size:46px;color:#fff}
+        .p09-player{position:absolute;left:645px;top:172px;width:518px;height:262px;box-sizing:border-box;padding:30px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
+          background:#eef3fb;border:solid 4px #1b1738;border-radius:28px;font-family:'Cafe24 Ssurround';font-size:36px;color:#48159c}
+        .p09-final-next{position:absolute;left:756px;top:710px}
+
+        .p09 .is-off{display:none}
+        /* 임시: Suno 화면 이미지가 없어서 클릭할 자리를 색으로 표시. 화면 이미지 넣으면 이 두 줄 삭제 */
+        .p09 .hit-area{background:rgba(255,79,139,.3);outline:5px dashed #ff4f8b;outline-offset:-5px;border-radius:14px;animation:p09-hit-blink 1.2s ease-in-out infinite}
+        @keyframes p09-hit-blink{50%{background:rgba(255,79,139,.55)}}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default p09">
+          <div id="p09Play">
+            <p class="guide-bubble p09-bubble" id="p09Bubble"></p>
+            <div class="p09-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+
+            <div class="p09-screen" id="p09Screen"></div>
+            <div class="p09-field p09-lyrics is-off" id="p09Lyrics"></div>
+            <div class="p09-field p09-style is-off" id="p09Style"></div>
+            <div class="p09-full is-off" id="p09Full"></div>
+            <button type="button" class="p09-tool is-off" id="p09Prev" style="left:754px;top:830px" aria-label="이전 가사">&#9664;</button>
+            <button type="button" class="p09-tool is-off" id="p09Wand" style="left:915px;top:830px" aria-label="마법봉">&#10024;</button>
+            <button type="button" class="p09-tool is-off" id="p09Next2" style="left:1000px;top:830px" aria-label="다음 가사">&#9654;</button>
+            <button type="button" class="p09-tool is-off" id="p09Check" style="left:1090px;top:830px" aria-label="체크">&#10004;</button>
+
+            <div class="p09-ring is-off" id="p09Ring"></div>
+            <div class="p09-songs is-off" id="p09Songs"></div>
+
+            <button type="button" class="card-btn p09-load is-off" id="p09Load">가사 불러오기</button>
+            <div class="p09-genres is-off" id="p09Genres">
+              <button type="button" class="card-btn" data-genre="hiphop">힙합</button>
+              <button type="button" class="card-btn" data-genre="kpop">K-POP</button>
+              <button type="button" class="card-btn" data-genre="trot">트로트</button>
+              <button type="button" class="card-btn" data-genre="rock">락</button>
+            </div>
+
+            <button type="button" class="hit-area is-off" id="p09Hit" aria-label="클릭"></button>
+            <a href="javascript:;" class="js-sfx next-btn is-off" id="p09Next" data-sound="sound/click.mp3">
+              <img src="../../img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" alt="다음">
+            </a>
+          </div>
+
+          <div class="is-off" id="p09FinalView">
+            <p class="p09-final-title">Suno와 함께 뚝딱!<br>재화와 서비스를 노래로 만들었어요!</p>
+            <div class="p09-final">
+              <div class="p09-final-cover">재화와 서비스</div>
+              <div class="p09-player">
+                <span>재화와 서비스</span>
+                <img class="video-play-btn" style="position:static;transform:none" src="../../img/common/btn_play.png" id="p09FinalPlay" alt="재생">
+              </div>
+            </div>
+            <a href="page10.html" class="js-nav-effect p09-final-next">
+              <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+            </a>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="Suno와 함께 뚝딱! 나도 경제 뮤지션" data-next="page10.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const DEFAULT_LYRICS = '우리가 입는 옷은 사고 파는 재화\n이동을 도와주는 택시기사의 운전은 서비스\n재화는 눈에 보이는 것, 서비스는 편리함';
+    const VERSIONS = [
+      '[Intro]\n재화! 서비스!\n우리 생활 속에서 찾아봐\n하나, 둘, 셋, Go!\n\n[Verse 1]\n우리가 입는 옷은 사고 파는 재화\n연필도 가방도 필요한 재화\n손으로 만지고 눈으로 보고\n우리에게 필요한 물건, 바로 재화\n\n[Verse 2]\n아플 때 우리를 도와주는 의사의 진료는 서비스\n머리를 다듬어 주는 미용도 서비스\n택배를 전해 주고 이동을 도와주는\n생활을 편리하게 만드는 서비스\n\n[Hook]\n재화는 눈에 보이는 것, 서비스는 편리함\n재화! 서비스! 구분해 봐\n눈에 보이는 물건은 재화\n도움을 주는 활동은 서비스\n\n[Outro]\n재화와 서비스, 이제 알겠지?\n우리 생활 속에서 찾아봐!',
+      '[Intro]\n주위를 둘러봐, 하나 둘 셋\n재화와 서비스 찾아볼래?\n\n[Verse 1]\n우리가 입는 옷은 사고 파는 재화\n맛있는 빵도 사고 파는 재화\n가방과 연필, 필요한 물건\n눈으로 보고 만질 수 있어\n\n[Verse 2]\n아플 때 우리를 도와주는 의사의 진료는 서비스\n머리를 멋지게, 미용도 서비스\n택시를 타고 원하는 곳으로\n우리 생활을 편리하게 해 줘\n\n[Hook]\n재화는 눈에 보이는 것, 서비스는 편리함\n물건이라면 재화\n도움을 주면 서비스\n재화와 서비스, 이제 구분해 봐\n\n[Outro]\n보고! 찾고! 구분해 봐!\n재화와 서비스, 바로 알아봐!'
+    ];
+    const GENRE_NAME = { hiphop: '힙합', kpop: 'K-POP', trot: '트로트', rock: '락' };
+    let lyrics = DEFAULT_LYRICS;
+    try { lyrics = sessionStorage.getItem('sa06_lyrics') || DEFAULT_LYRICS; } catch (e) {}
+
+    const $ = (id) => document.getElementById(id);
+    const bubble = $('p09Bubble');
+    const screen = $('p09Screen');
+    const lyricsEl = $('p09Lyrics');
+    const styleEl = $('p09Style');
+    const full = $('p09Full');
+    const hit = $('p09Hit');
+    const nextBtn = $('p09Next');
+    const tools = { prev: $('p09Prev'), wand: $('p09Wand'), next: $('p09Next2'), check: $('p09Check') };
+    const playClick = makeSfx('sound/click.mp3');
+
+    const state = { ver: 0, shownVer: 0, genre: '' };
+    let audio = null;
+
+    const ALL = ['p09Lyrics', 'p09Style', 'p09Full', 'p09Prev', 'p09Wand', 'p09Next2', 'p09Check', 'p09Ring', 'p09Songs', 'p09Load', 'p09Genres', 'p09Hit', 'p09Next'];
+    function show(bubbleHtml, screenName, ids) {
+      bubble.innerHTML = bubbleHtml;
+      screen.style.backgroundImage = "url('img/p09_screen_" + screenName + ".png')";
+      ALL.forEach((id) => $(id).classList.toggle('is-off', !ids.includes(id)));
+      Object.values(tools).forEach((t) => t.classList.remove('p09-pulse'));
+      clearFingers();
+      resetImageSwap(nextBtn);
+    }
+    function guide(rect, then) {
+      hit.style.cssText = 'left:' + rect[0] + 'px;top:' + rect[1] + 'px;width:' + rect[2] + 'px;height:' + rect[3] + 'px';
+      hit.classList.remove('is-off');
+      pointFingerAt(hit);
+      hit.onclick = () => { playClick(); then(); };
+    }
+    function pulse(el) {
+      el.classList.remove('p09-pulse');
+      void el.offsetWidth;
+      el.classList.add('p09-pulse');
+    }
+
+    function stepHome() {
+      show('Suno를 클릭해요.', 'home', []);
+      guide([880, 377, 151, 151], stepLyricsField);
+    }
+    function stepLyricsField() {
+      show('가사 입력창을 클릭해요.', 'create', ['p09Lyrics']);
+      lyricsEl.textContent = '';
+      guide([739, 287, 432, 180], stepLoad);
+    }
+    function stepLoad() {
+      show('재화와 서비스에 대한<br>가사를 만들어볼게요.<br>내가 조립한 가사를 불러와요.', 'create', ['p09Lyrics', 'p09Load']);
+      $('p09Load').onclick = () => { playClick(); lyricsEl.textContent = lyrics; stepWand(); };
+    }
+    function stepWand() {
+      show('마법봉을 클릭해요.<br>내가 입력한 내용에 맞게<br>Suno가 가사를 만들어줄 거예요.', 'create', ['p09Lyrics']);
+      guide([1110, 230, 70, 60], stepMade);
+    }
+    function stepMade() {
+      state.shownVer = 0;
+      show('가사가 완성됐어요!<br>전체화면 버튼을 클릭해<br>가사를 자세히 읽어봐요.', 'create', ['p09Lyrics']);
+      lyricsEl.textContent = VERSIONS[0];
+      guide([1110, 420, 60, 60], stepReview);
+    }
+    function showFull(v) {
+      state.shownVer = v;
+      full.textContent = VERSIONS[v];
+      full.scrollTop = 0;
+      tools.prev.disabled = v === 0;
+      tools.next.disabled = v === 1;
+    }
+    function stepReview() {
+      show('가사를 다시 만들고 싶다면<br>하단의 마법봉 버튼을, 그대로 사용하고 싶다면 체크 버튼을 클릭해요.', 'full', ['p09Full', 'p09Wand', 'p09Check']);
+      showFull(0);
+      pulse(tools.wand);
+      pulse(tools.check);
+      pointFingerAt(tools.check);
+      tools.wand.onclick = () => { playClick(); stepSecond(); };
+      tools.check.onclick = () => { playClick(); choose(0); };
+    }
+    function stepSecond() {
+      show('두 번째 버전의 가사가<br>만들어졌어요!', 'full', ['p09Full', 'p09Next']);
+      showFull(1);
+      nextBtn.onclick = () => setTimeout(stepCompare, 300);
+    }
+    function stepCompare() {
+      show('아래의 화살표를 클릭해 가사를 비교해서 읽어보고, 체크 버튼을 눌러 무엇을 사용할 지 결정해요.', 'full', ['p09Full', 'p09Prev', 'p09Next2', 'p09Check']);
+      showFull(1);
+      pulse(tools.prev);
+      pulse(tools.next);
+      pointFingerAt(tools.prev);
+      tools.prev.onclick = () => { playClick(); clearFingers(); showFull(0); };
+      tools.next.onclick = () => { playClick(); clearFingers(); showFull(1); };
+      tools.check.onclick = () => { playClick(); choose(state.shownVer); };
+    }
+    function choose(v) {
+      state.ver = v;
+      show('이제 노래 스타일을<br>입력해볼까요?<br>스타일 입력창을 클릭해요.', 'style', ['p09Lyrics', 'p09Style']);
+      lyricsEl.textContent = VERSIONS[v];
+      styleEl.textContent = '';
+      guide([739, 603, 432, 77], stepGenre);
+    }
+    function stepGenre() {
+      show('우리는 다양한 스타일의<br>노래를 만들 수있어요!<br>키워드를 클릭해봐요.', 'style', ['p09Lyrics', 'p09Style', 'p09Genres']);
+      $('p09Genres').querySelectorAll('.card-btn').forEach((b) => {
+        b.onclick = () => {
+          playClick();
+          state.genre = b.dataset.genre;
+          styleEl.textContent = GENRE_NAME[state.genre];
+          setTimeout(stepMake, 300);
+        };
+      });
+    }
+    function stepMake() {
+      show('이제 모든 준비가 끝났어요.<br>만들기 버튼을 눌러<br>노래를 만들어봐요!', 'style', ['p09Lyrics', 'p09Style']);
+      guide([739, 700, 432, 80], stepLoading);
+    }
+    function stepLoading() {
+      show('노래가 만들어지고 있어요.', 'songs', ['p09Ring']);
+      setTimeout(stepSongs, 2000);
+    }
+    function songSrc() { return 'sound/p09_song_v' + (state.ver + 1) + '_' + state.genre + '.mp3'; }
+    function play() {
+      if (audio) audio.pause();
+      audio = new Audio(songSrc());
+      audio.play().catch(() => {});
+    }
+    function stepSongs() {
+      show('완성됐어요!<br>노래를 클릭해<br>하나씩 들어볼까요?', 'songs', ['p09Songs']);
+      const box = $('p09Songs');
+      box.innerHTML = [1, 2].map((n) => '<div class="p09-song" data-n="' + n + '"><i></i>재화와 서비스<button type="button" class="p09-song-more is-off" aria-label="더보기">&#8942;</button></div>').join('');
+      const rows = Array.from(box.children);
+      pointFingerAt(rows[0]);
+      let played = false;
+      rows.forEach((row) => row.addEventListener('click', (e) => {
+        if (e.target.closest('.p09-song-more')) return;
+        rows.forEach((r) => r.classList.toggle('is-playing', r === row));
+        play();
+        if (!played) {
+          played = true;
+          setTimeout(() => stepChoose(rows), 1500);
+        }
+      }));
+    }
+    function stepChoose(rows) {
+      bubble.innerHTML = '마음에 드는 노래를<br>선택해 다운로드 해봐요.';
+      clearFingers();
+      rows.forEach((row) => {
+        const more = row.querySelector('.p09-song-more');
+        more.classList.remove('is-off');
+        pulse(more);
+        more.onclick = () => { playClick(); stepDownload(); };
+      });
+      pointFingerAt(rows[0].querySelector('.p09-song-more'));
+    }
+    function stepDownload() {
+      show('다운로드 버튼을 클릭해요.', 'download', []);
+      guide([760, 760, 390, 80], stepFinal);
+    }
+    function stepFinal() {
+      if (audio) audio.pause();
+      clearFingers();
+      $('p09Play').classList.add('is-off');
+      $('p09FinalView').classList.remove('is-off');
+      $('p09FinalPlay').onclick = play;
+    }
+
+    stepHome();
+  })();
+  </script>
+</body>
+</html>

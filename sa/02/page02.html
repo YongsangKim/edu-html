@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나만의 자랑거리 찾기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 2~3p 배치에 기존 스타일 적용(말풍선: guide-bubble). 룰렛 회전은 이 페이지 전용 스크립트 */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .roulette-wrap{position:absolute;left:218px;top:60px;width:828px;height:828px}
+        .roulette-wheel{position:absolute;left:0;top:0;width:100%;height:100%;border-radius:50%;box-sizing:border-box;border:solid 14px #48159c;
+          box-shadow:0 0 0 8px #fefbf9,-7px 16px 10px 10px rgba(92,61,240,.2);transition:transform 3s cubic-bezier(0.2,0.8,0.2,1);
+          background:conic-gradient(#fff3b8 0deg 90deg,#cfe6ff 90deg 180deg,#d6f5c8 180deg 270deg,#ffd6e2 270deg 360deg)}
+        .roulette-wheel:before{content:'';position:absolute;left:0;top:0;width:100%;height:100%;border-radius:50%;
+          background:repeating-conic-gradient(#48159c 0deg 0.8deg,transparent 0.8deg 89.2deg,#48159c 89.2deg 90deg)}
+        .roulette-label{position:absolute;left:50%;top:50%;width:300px;margin:-60px 0 0 -150px;height:120px;display:flex;align-items:center;justify-content:center;
+          text-align:center;font-family:'Cafe24 Ssurround';font-size:50px;line-height:1.15;color:#48159c;letter-spacing:-0.06em;word-break:keep-all}
+        .roulette-label1{transform:rotate(45deg) translateY(-215px) rotate(-45deg)}
+        .roulette-label2{transform:rotate(135deg) translateY(-215px) rotate(-135deg)}
+        .roulette-label3{transform:rotate(225deg) translateY(-215px) rotate(-225deg)}
+        .roulette-label4{transform:rotate(315deg) translateY(-215px) rotate(-315deg)}
+        .roulette-hub{position:absolute;left:50%;top:50%;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;background:#fefbf9;border:solid 12px #48159c;box-sizing:border-box;z-index:2}
+        .roulette-pointer{position:absolute;left:50%;top:-40px;width:0;height:0;margin-left:-50px;border-left:50px solid transparent;border-right:50px solid transparent;border-top:90px solid #ff4f8b;
+          filter:drop-shadow(0 6px 0 #48159c);z-index:3}
+
+        .p02-bubble{left:1143px;top:150px;bottom:auto;width:520px;padding:40px 20px}
+
+        .p02-actions{position:absolute;left:1200px;top:590px;display:flex;flex-direction:column;align-items:center;gap:30px}
+        .p02-actions .hidden{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="roulette-wrap">
+            <div class="roulette-wheel" id="rouletteWheel">
+              <div class="roulette-label roulette-label1">칭찬받은 일</div>
+              <div class="roulette-label roulette-label2">내가<br>잘하는 것</div>
+              <div class="roulette-label roulette-label3">누군가를<br>도운 일</div>
+              <div class="roulette-label roulette-label4">노력해서<br>이룬 일</div>
+            </div>
+            <div class="roulette-hub"></div>
+            <div class="roulette-pointer"></div>
+          </div>
+
+          <p class="guide-bubble p02-bubble">룰렛을 돌려서<br>나의 자랑거리를 찾아보세요!</p>
+
+          <div class="p02-actions">
+            <a href="javascript:;" id="rouletteSpinBtn" class="js-sfx" data-sound="sound/click.mp3">
+              <img src="img/p02_btn_spin.png" class="js-img-swap" data-src-over="img/p02_btn_spin_over.png" alt="룰렛 돌리기">
+            </a>
+            <a href="page03.html" class="js-nav-effect js-sfx hidden" id="p02NextBtn">
+              <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+            </a>
+            <a href="javascript:;" id="rouletteRetryBtn" class="js-sfx hidden" data-sound="sound/click.mp3">
+              <img src="img/p02_btn_retry.png" class="js-img-swap" data-src-over="img/p02_btn_retry_over.png" alt="다시 돌리기">
+            </a>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="나만의 자랑거리 찾기" data-next="page03.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const wheel = document.getElementById('rouletteWheel');
+    const spinBtn = document.getElementById('rouletteSpinBtn');
+    const retryBtn = document.getElementById('rouletteRetryBtn');
+    const nextBtn = document.getElementById('p02NextBtn');
+    let currentAngle = 0;
+
+    // 포인터는 위쪽(0deg) 고정, 구역 중심은 시계방향 45/135/225/315deg
+    function spin(activeBtn) {
+      activeBtn.classList.add('is-disabled');
+      nextBtn.classList.add('hidden');
+
+      const SEGMENTS = [
+        { center: 45, topic: 'praise' },
+        { center: 135, topic: 'strength' },
+        { center: 225, topic: 'help' },
+        { center: 315, topic: 'effort' }
+      ];
+      const seg = SEGMENTS[Math.floor(Math.random() * SEGMENTS.length)];
+      const targetCenter = seg.center;
+      nextBtn.href = 'page03.html?topic=' + seg.topic;
+      const targetFinalMod = (360 - targetCenter) % 360;
+      const remainder = ((targetFinalMod - (currentAngle % 360)) + 360) % 360;
+
+      currentAngle += 4 * 360 + remainder;
+      wheel.style.transform = 'rotate(' + currentAngle + 'deg)';
+
+      setTimeout(() => {
+        activeBtn.classList.remove('is-disabled');
+        spinBtn.classList.add('hidden');
+        retryBtn.classList.remove('hidden');
+        nextBtn.classList.remove('hidden');
+      }, 3000);
+    }
+
+    spinBtn.addEventListener('click', () => spin(spinBtn));
+    retryBtn.addEventListener('click', () => spin(retryBtn));
+  })();
+  </script>
+</body>
+</html>

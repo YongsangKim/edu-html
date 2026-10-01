@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리 동네 가게를 운영하라!</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 46~61p. 손님 5명의 주문을 보고 재화/서비스 선반에서 알맞은 것 고르기.
+           맞으면 웃는 손님 + 감사 말풍선 2초 뒤 다음 손님(게이지 20%씩), 틀리면 힌트 팝업 3초(기획서 5초는 너무 길어 줄임).
+           가게 배경 img/p12_bg.png, 점원 뒷모습 img/p12_clerk.png, 손님 img/p12_guest{번호}(_happy).png, 물건 img/p12_item_{key}.png */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:url('img/p12_bg.png') center / cover no-repeat, linear-gradient(180deg,#d9ddeb 0%,#cddcea 50%,#c2d9e9 100%)}
+
+        .p12-gauge{left:156px;top:30px;width:1614px}
+        .p12-gauge:before{background-image:url('img/p12_star.png')}
+
+        .p12-guest{position:absolute;left:697px;top:146px;width:357px;height:626px;background:center bottom / contain no-repeat}
+        .p12-guest:after{content:'손님';position:absolute;left:59px;top:90px;width:240px;height:300px;border-radius:140px 140px 40px 40px;background:rgba(72,21,156,.2);
+          display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:48px;color:#48159c}
+        .p12-guest.has-img:after{display:none}
+        .p12-clerk{position:absolute;left:109px;top:212px;width:418px;height:733px;z-index:10;pointer-events:none}
+        .p12-clerk img{display:block;width:100%;height:100%;object-fit:contain;object-position:bottom}
+
+        .p12-order{position:absolute;left:1070px;top:212px;width:495px;min-height:188px;box-sizing:border-box;padding:28px 34px;display:flex;align-items:center;justify-content:center;text-align:center;
+          background:#fefbf9;border:solid 6px #48159c;border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';font-size:42px;line-height:1.3;color:#48159c;letter-spacing:-0.04em;word-break:keep-all}
+        .p12-order:before{content:'';position:absolute;left:-52px;top:50%;margin-top:-28px;border-style:solid;border-width:28px 52px 28px 0;border-color:transparent #48159c transparent transparent}
+        .p12-order:after{content:'';position:absolute;left:-42px;top:50%;margin-top:-21px;border-style:solid;border-width:21px 43px 21px 0;border-color:transparent #fefbf9 transparent transparent}
+
+        .p12-counter{position:absolute;left:61px;top:495px;width:1799px;height:457px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p12-ask{position:absolute;left:577px;top:522px;width:1261px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:48px;color:#48159c;letter-spacing:-0.04em}
+        .p12-shelf{position:absolute;top:605px;width:593px;height:320px;box-sizing:border-box;padding:40px 30px 0;display:flex;justify-content:space-around;
+          background:#eef3fb;border:solid 5px #1b1738;border-radius:26px}
+        .p12-shelf-goods{left:598px}
+        .p12-shelf-service{left:1222px}
+        .p12-shelf b{position:absolute;top:-36px;height:70px;padding:6px 36px 0;box-sizing:border-box;display:flex;align-items:center;border-radius:35px;font-weight:normal;
+          font-family:'Cafe24 Ssurround';font-size:40px;color:#fff}
+        .p12-shelf-goods b{left:20px;background:#48159c}
+        .p12-shelf-service b{right:20px;background:#2f6fed}
+        .p12-item{width:228px;height:260px;box-sizing:border-box;padding:0 0 10px;border:solid 5px #eae0fd;border-radius:24px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;
+          font-family:'Cafe24 Ssurround';font-size:32px;line-height:1.1;color:#31248a;letter-spacing:-0.05em;word-break:keep-all}
+        .p12-item i{flex:1 1 auto;width:100%;border-radius:18px 18px 0 0;background:#48159c center / contain no-repeat;background-origin:content-box;padding:8px;box-sizing:border-box}
+        .p12-item:hover{border-color:#8278ff}
+        .p12-item.is-selected{border-color:#ff4ff9}
+        .p12-item.is-wrong{animation:fix-word-shake .3s ease}
+        .p12-thanks{position:absolute;left:577px;top:676px;width:1261px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:60px;color:#2f6fed;letter-spacing:-0.04em}
+
+        .p12 .is-off{display:none}
+        #p12Hint{z-index:120}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="p12">
+          <div class="gauge is-thin p12-gauge"><div class="gauge-fill" id="p12GaugeFill"></div></div>
+          <div class="p12-guest" id="p12Guest"></div>
+          <p class="p12-order" id="p12Order"></p>
+
+          <div class="p12-counter"></div>
+          <p class="p12-ask" id="p12Ask">손님이 원하는 것은 무엇인가요?</p>
+          <div class="p12-shelf p12-shelf-goods" id="p12Goods"><b>재화</b></div>
+          <div class="p12-shelf p12-shelf-service" id="p12Service"><b>서비스</b></div>
+          <p class="p12-thanks is-off" id="p12Thanks"></p>
+          <div class="p12-clerk"><img src="img/p12_clerk.png" alt="점원"></div>
+
+          <div class="avatar-modal is-off" id="p12Hint">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+              <p class="avatar-popup-text is-medium"><span id="p12HintText"></span></p>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="우리 동네 가게를 운영하라!" data-next="page13.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const GUESTS = [
+      { order: '배가 너무 고파요.<br>달콤한 빵 주세요!', answer: 'bread', type: 'goods',
+        goods: [['umbrella', '우산'], ['bread', '빵']], service: [['haircut', '미용사의 이발'], ['doctor', '의사의 진료']],
+        hint: '배가 고픈 손님에게 필요한 것은 누군가의 기술과 도움일까요, 맛있게 먹을 수 있는 물건일까요?' },
+      { order: '앞머리가 눈을 가려요.', answer: 'haircut', type: 'service',
+        goods: [['shoes', '신발'], ['snack', '과자']], service: [['haircut', '미용사의 이발'], ['taxi', '택시기사의 운전']],
+        hint: '긴 머리카락 때문에 불편한 손님에게 필요한 것은 미용사의 기술과 도움일까요, 가방에 쏙 들어가는 물건일까요?' },
+      { order: '내일 미술 시간인데<br>알록달록 그림 그릴 도구가 없어요!', answer: 'crayon', type: 'goods',
+        goods: [['crayon', '색연필'], ['paper', '색종이']], service: [['haircut', '미용사의 이발'], ['doctor', '의사의 진료']],
+        hint: '준비물이 없는 손님에게 필요한 것은 손으로 잡고 그림을 그리는 물건일까요, 누군가의 기술과 도움일까요?' },
+      { order: '콜록콜록! 기침이 나고<br>열이 나서 몸이 아파요.', answer: 'doctor', type: 'service',
+        goods: [['bread', '빵'], ['crayon', '색연필']], service: [['doctor', '의사의 진료'], ['taxi', '택시기사의 운전']],
+        hint: '몸이 아픈 손님에게 필요한 것은 가방에 쏙 넣을 수 있는 물건일까요, 의사 선생님의 기술과 도움일까요?' },
+      { order: '집에 가야 하는데 멀어서<br>걸어가기 힘들어요.', answer: 'taxi', type: 'service',
+        goods: [['shoes', '신발'], ['snack', '과자']], service: [['taxi', '택시기사의 운전'], ['haircut', '미용사의 이발']],
+        hint: '집에 가는 길이 먼 손님에게 필요한 것은 손으로 잡을 수 있는 물건일까요, 택시 기사님의 기술과 도움일까요?' }
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const guest = $('p12Guest');
+    const order = $('p12Order');
+    const shelves = { goods: $('p12Goods'), service: $('p12Service') };
+    const thanks = $('p12Thanks');
+    const gaugeFill = $('p12GaugeFill');
+    const playClick = makeSfx('sound/click.mp3');
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+
+    let index = 0;
+    let busy = false;
+
+    function setGuest(n, happy) {
+      if (!happy) { guest.style.backgroundImage = ''; guest.classList.remove('has-img'); }
+      const src = 'img/p12_guest' + n + (happy ? '_happy' : '') + '.png';
+      const probe = new Image();
+      probe.onload = () => { guest.style.backgroundImage = "url('" + src + "')"; guest.classList.add('has-img'); };
+      probe.src = src;
+    }
+
+    function render() {
+      const g = GUESTS[index];
+      busy = false;
+      setGuest(index + 1, false);
+      order.innerHTML = g.order;
+      thanks.classList.add('is-off');
+      $('p12Ask').classList.remove('is-off');
+      ['goods', 'service'].forEach((type) => {
+        const shelf = shelves[type];
+        shelf.classList.remove('is-off');
+        shelf.querySelectorAll('.p12-item').forEach((el) => el.remove());
+        g[type].forEach(([key, name]) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'p12-item';
+          btn.innerHTML = '<i style="background-image:url(\'img/p12_item_' + key + '.png\')"></i>' + name;
+          btn.addEventListener('click', () => pick(btn, key));
+          shelf.appendChild(btn);
+        });
+      });
+    }
+
+    function pick(btn, key) {
+      if (busy) return;
+      const g = GUESTS[index];
+      if (key !== g.answer) {
+        playWrong();
+        btn.classList.remove('is-wrong');
+        void btn.offsetWidth;
+        btn.classList.add('is-wrong');
+        $('p12HintText').innerHTML = g.hint;
+        flashLayer($('p12Hint'), 'is-off', 3000);
+        return;
+      }
+      busy = true;
+      playCorrect();
+      btn.classList.add('is-selected');
+      setTimeout(() => {
+        setGuest(index + 1, true);
+        order.innerHTML = '감사합니다!';
+        shelves.goods.classList.add('is-off');
+        shelves.service.classList.add('is-off');
+        $('p12Ask').classList.add('is-off');
+        thanks.textContent = g.type === 'goods' ? '알맞은 재화를 전달했어요!' : '알맞은 서비스를 제공했어요!';
+        thanks.classList.remove('is-off');
+        gaugeFill.style.width = ((index + 1) * 20) + '%';
+        setTimeout(() => {
+          index += 1;
+          if (index < GUESTS.length) render();
+          else navigateTo('page13.html');
+        }, 2000);
+      }, 400);
+    }
+
+    gaugeFill.style.width = '0%';
+    render();
+  })();
+  </script>
+</body>
+</html>

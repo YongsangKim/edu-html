@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>직업 퀴즈 게임</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p02-stage-bg{position:absolute;left:0;top:0;width:1920px;height:960px}
+
+        .p02-badge{position:absolute;left:140px;top:48px;display:flex;align-items:stretch;height:108px;border-radius:54px;overflow:hidden;border:solid 5px #1b1738;box-shadow:0 10px 0 0 #becde7}
+        .p02-badge-num{display:flex;align-items:center;justify-content:center;padding:6px 50px 0 50px;background:#91b9e7;font-family:'Cafe24 Ssurround';font-size:70px;letter-spacing:0em;color:#fff;gap:20px}
+        .p02-badge-q{display:flex;align-items:center;padding:6px 70px 0 70px;background:#fefbf9;font-family:'Cafe24 Ssurround';font-size:70px;letter-spacing:0em;color:#1b1738}
+
+        .p02-stars{position:absolute;left:1317px;top:48px;display:flex;align-items:center;justify-content:center;gap:56px;width:462px;height:104px;border-radius:52px;background:#fefbf9;border:solid 5px #1b1738;box-sizing:border-box}
+        .p02-stars .find-star{width:72px;height:68px}
+
+        /* 힌트 3칸: 사진 img/p02_hint_{id}_{1~3}.png + 이름표 */
+        .p02-hints{position:absolute;left:0;top:0}
+        .p02-hint{position:absolute;top:200px;width:557px;height:314px;box-sizing:border-box;border:solid 5px #1b1738;border-radius:14px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+        .p02-hint i{flex:1 1 auto;background:#dfe7f5 top center / cover no-repeat}
+        .p02-hint span{flex:0 0 92px;display:flex;align-items:center;justify-content:center;padding-top:6px;background:#91b9e7;font-family:'Cafe24 Ssurround';font-size:64px;color:#fff;letter-spacing:-0.05em}
+        .p02-hint.slot1{left:82px}
+        .p02-hint.slot2{left:683px}
+        .p02-hint.slot3{left:1282px}
+        .p02-hint-btn{background:url('img/p02_hint.png') no-repeat;background-size:contain;top:200px;width:557px;height:314px}
+        .p02-hint-btn.slot2{left:683px}
+        .p02-hint-btn.slot3{left:1282px}
+
+        .p02-card{position:absolute;top:560px;width:280px;height:355px}
+        .p02-card01{left:100px}
+        .p02-card02{left:388px}
+        .p02-card03{left:676px}
+        .p02-card04{left:965px}
+        .p02-card05{left:1252px}
+        .p02-card06{left:1541px}
+
+        /* 정답 카드는 공용 .photo-modal/.photo-card, 확인 버튼은 카드 바로 아래 */
+        .hint-quiz-correct .hint-quiz-confirm{border:0;background:transparent;cursor:pointer;padding:0}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main>
+
+          <img class="p02-stage-bg" id="p02StageBg" src="" alt="">
+
+          <div class="p02-badge">
+            <span class="p02-badge-num">STAGE <span id="p02StageNum">1</span></span>
+            <span class="p02-badge-q">어떤 직업일까?</span>
+          </div>
+          <div class="p02-stars">
+            <img class="find-star" src="../../img/common/icon_star.png" data-src-on="../../img/common/icon_star_on.png" alt="">
+            <img class="find-star" src="../../img/common/icon_star.png" data-src-on="../../img/common/icon_star_on.png" alt="">
+            <img class="find-star" src="../../img/common/icon_star.png" data-src-on="../../img/common/icon_star_on.png" alt="">
+          </div>
+
+          <div class="p02-hints" id="p02Hints"></div>
+
+          <div class="job-quiz">
+            <button class="hint-reveal-btn hit-area p02-hint-btn slot2 js-sfx" data-sound="sound/click.mp3" aria-label="다른 힌트 보기"></button>
+            <button class="hint-reveal-btn hit-area p02-hint-btn slot3 js-sfx" data-sound="sound/click.mp3" aria-label="다른 힌트 보기"></button>
+
+            <div class="hint-cards">
+              <button class="hint-card pick-card p02-card p02-card01" data-slot="1" aria-label="소방관"></button>
+              <button class="hint-card pick-card p02-card p02-card02" data-slot="2" aria-label="웹툰작가"></button>
+              <button class="hint-card pick-card p02-card p02-card03" data-slot="3" aria-label="사진사"></button>
+              <button class="hint-card pick-card p02-card p02-card04" data-slot="4" aria-label="농구선수"></button>
+              <button class="hint-card pick-card p02-card p02-card05" data-slot="5" aria-label="바리스타"></button>
+              <button class="hint-card pick-card p02-card p02-card06" data-slot="6" aria-label="개발자"></button>
+            </div>
+          </div>
+
+          <div class="hint-quiz-wrong is-off" data-sound="sound/incorrect.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+              <p class="avatar-popup-text is-medium">다시 한 번 힌트를 확인하고<br>알맞은 직업을 찾아볼까요?</p>
+            </div>
+          </div>
+          <div class="hint-quiz-correct photo-modal is-off" data-sound="sound/correct.mp3">
+            <div class="photo-card">
+              <div class="photo-card-img" id="p02CorrectPhoto"></div>
+              <p class="photo-card-title">정답이에요!</p>
+              <p class="photo-card-text" id="p02CorrectText"></p>
+            </div>
+            <button type="button" id="p02ConfirmBtn" class="hint-quiz-confirm js-sfx" data-sound="sound/click.mp3">
+              <img src="../../img/common/btn_confirm.png" class="js-img-swap" data-src-alt="../../img/common/btn_confirm_on.png" data-src-over="../../img/common/btn_confirm_over.png" alt="확인">
+            </button>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="직업 퀴즈 게임" data-next="page03.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  /* 소방관~개발자 6개 직업 중 매 플레이마다 3개를 무작위로 뽑아 STAGE1~3으로
+     출제. 힌트 이미지는 직업별로 img/p02_bg_{id}.png, 정답 카드 사진은 img/p02_photo_{id}.png
+     로 준비(현재는 소방관 분만 실제 디자인 있음, 나머지 5개는 추후 같은 이름
+     규칙으로 이미지만 채워 넣으면 됨) — STAGE 배지/별 진행도는 이미지에 굽지
+     않고 실시간 텍스트/아이콘으로 그려서 직업이 어느 스테이지에 나오든
+     동일한 이미지를 재사용할 수 있게 함 */
+  (function () {
+    const JOBS = [
+      { id: 'firefighter', label: '소방관', slot: 1, hints: ['소화전', '방화복', '소방차'], text: '소방관은 불을 끄고 사람들을 안전하게 도와줘요.' },
+      { id: 'webtoon', label: '웹툰작가', slot: 2, hints: ['타블렛과 펜', '컴퓨터', '웹툰'], text: '웹툰작가는 이야기를 만들고 그림을 그려 웹툰을 만들어요.' },
+      { id: 'photographer', label: '사진사', slot: 3, hints: ['삼각대와 조명판', '사진', '카메라'], sounds: { 3: 'sound/p02_camera.mp3' }, text: '사진사는 카메라로 풍경이나 인물의 사진을 찍는 일을 해요.' },
+      { id: 'basketball', label: '농구선수', slot: 4, hints: ['유니폼', '코트', '경기 장면'], text: '농구 선수는 농구를 직업으로 삼은 사람이에요.' },
+      { id: 'barista', label: '바리스타', slot: 5, hints: ['앞치마', '커피머신', '카페'], sounds: { 2: 'sound/p02_coffee.mp3' }, text: '바리스타는 카페에서 커피와 여러 가지 음료를 만들어 손님에게 제공해요.' },
+      { id: 'developer', label: '개발자', slot: 6, hints: ['앱스토어 화면', '컴퓨터', '코딩 화면'], text: '개발자는 컴퓨터나 스마트폰에서 사용하는 프로그램을 만들어요.' },
+    ];
+
+    function shuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    const stageJobs = shuffle(JOBS).slice(0, 3);
+    let stageIndex = 0;
+    let answered = false;
+
+    const stageBg = document.getElementById('p02StageBg');
+    const hintsBox = document.getElementById('p02Hints');
+    const stageNumEl = document.getElementById('p02StageNum');
+    const stars = Array.from(document.querySelectorAll('.p02-stars .find-star'));
+    const revealBtns = Array.from(document.querySelectorAll('.hint-reveal-btn'));
+    const hintCards = Array.from(document.querySelectorAll('.hint-card'));
+    const wrongLayer = document.querySelector('.hint-quiz-wrong');
+    const correctLayer = document.querySelector('.hint-quiz-correct');
+    const correctPhoto = document.getElementById('p02CorrectPhoto');
+    const correctText = document.getElementById('p02CorrectText');
+    const confirmBtn = document.getElementById('p02ConfirmBtn');
+
+    const wrongSound = new Audio(ASSET_BASE + wrongLayer.dataset.sound);
+    const correctSound = new Audio(ASSET_BASE + correctLayer.dataset.sound);
+
+    function fillStars(count) {
+      stars.forEach((star, i) => {
+        star.src = i < count ? star.dataset.srcOn : '../../img/common/icon_star.png';
+      });
+    }
+
+    function setupStage() {
+      const job = stageJobs[stageIndex];
+      answered = false;
+
+      stageNumEl.textContent = String(stageIndex + 1);
+      fillStars(stageIndex);
+
+      stageBg.src = `img/p02_bg_${job.id}.png`;
+      hintsBox.innerHTML = job.hints ? job.hints.map((name, i) =>
+        '<div class="p02-hint slot' + (i + 1) + '"><i style="background-image:url(\x27img/p02_hint_' + job.id + '_' + (i + 1) + '.png\x27)"></i><span>' + name + '</span></div>').join('') : '';
+      // 사진: img/p02_photo_{id}.png (아직 없으면 보라 칸 더미로 보임)
+      correctPhoto.style.backgroundImage = `url('img/p02_photo_${job.id}.png')`;
+      correctPhoto.style.backgroundPosition = 'center';
+      correctPhoto.style.backgroundSize = 'cover';
+      correctText.textContent = job.text;
+
+      revealBtns.forEach((btn) => btn.classList.remove('hidden'));
+      hintCards.forEach((card) => {
+        card.classList.remove('is-selected');
+        card.dataset.correct = String(Number(card.dataset.slot) === job.slot);
+      });
+      wrongLayer.classList.add('is-off');
+      correctLayer.classList.add('is-off');
+
+      // js-img-swap은 한 번 눌리면 is-swapped가 계속 남는데, 확인 버튼은
+      // 스테이지마다 같은 엘리먼트를 재사용하다 보니 2/3번째 스테이지가
+      // 시작부터 눌린 이미지로 보이는 문제가 있어서 스테이지 시작할 때마다 리셋
+      const confirmImg = confirmBtn.querySelector('.js-img-swap');
+      if (confirmImg) {
+        confirmImg.classList.remove('is-swapped');
+        confirmImg.src = confirmImg.dataset.originalSrc || confirmImg.src;
+      }
+    }
+
+    revealBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        btn.classList.add('hidden');
+        // 기획서: 바리스타 커피머신(2번째)·사진사 카메라(3번째) 힌트는 열릴 때 효과음
+        const sounds = stageJobs[stageIndex].sounds;
+        const slot = btn.classList.contains('slot2') ? 2 : 3;
+        if (sounds && sounds[slot]) new Audio(sounds[slot]).play().catch((err) => console.warn('사운드 재생 실패:', err));
+      });
+    });
+
+    hintCards.forEach((card) => {
+      card.addEventListener('click', () => {
+        if (answered) return;
+
+        if (card.dataset.correct === 'true') {
+          answered = true;
+          hintCards.forEach((c) => c.classList.toggle('is-selected', c === card));
+
+          const wasRevealing = revealBtns.some((b) => !b.classList.contains('hidden'));
+          revealBtns.forEach((b) => b.classList.add('hidden'));
+          fillStars(stageIndex + 1);
+          setTimeout(() => {
+            correctLayer.classList.remove('is-off');
+            correctSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+          }, wasRevealing ? 1000 : 0);
+        } else {
+          wrongLayer.classList.remove('is-off');
+          wrongSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+          clearTimeout(wrongLayer.__hideTimer);
+          wrongLayer.__hideTimer = setTimeout(() => wrongLayer.classList.add('is-off'), 2000);
+        }
+      });
+    });
+
+    confirmBtn.addEventListener('click', () => {
+      setTimeout(() => {
+        stageIndex += 1;
+        if (stageIndex >= stageJobs.length) {
+          window.location.href = 'page03.html';
+        } else {
+          setupStage();
+        }
+      }, 300);
+    });
+
+    setupStage();
+  })();
+  </script>
+</body>
+</html>

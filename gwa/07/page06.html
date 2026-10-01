@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스마트 기기 역할 분류하기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 13~18p. 라운드마다 역할 상자 1개(센서 → AI 허브 → 스마트 가전), 아래 기기 카드 5장(무작위 순서) 중 알맞은 카드를 상자로 끌어 넣기.
+           맞으면 카드가 상자 안에 고정되고 정답 팝업(확인), 틀리면 제자리로 돌아가고 힌트 팝업 2초. 상자를 다 채우면 상자 완료 팝업, 마지막엔 연동 준비 완료 → 정리 안내 2단계.
+           기기 아이콘은 page03 이미지(img/p03_dev_{key}.png) 재사용, 미세먼지 측정 센서만 img/p06_dev_dust.png */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p06-ask{position:absolute;margin:0;left:230px;top:30px;width:1460px;height:100px;box-sizing:border-box;padding:6px 30px 0;display:flex;align-items:center;justify-content:center;
+          background:#91b9e7;border:solid 5px #1b1738;border-radius:50px;box-shadow:0 10px 0 0 #becde7;font-family:'Cafe24 Ssurround';font-size:48px;color:#fff;letter-spacing:-0.05em}
+        .p06-box{position:absolute;left:460px;top:175px;width:1000px;height:360px;box-sizing:border-box;padding:100px 30px 24px;border:solid 8px #48159c;border-radius:40px;background:#eef3fb;
+          display:flex;flex-wrap:wrap;align-content:flex-start;justify-content:center;gap:16px;transition:box-shadow .2s,transform .2s}
+        .p06-box-label{position:absolute;left:50%;top:-6px;transform:translateX(-50%);height:90px;padding:6px 60px 0;box-sizing:border-box;display:flex;align-items:center;white-space:nowrap;
+          background:#48159c;border-radius:0 0 40px 40px;font-family:'Cafe24 Ssurround';font-size:52px;color:#fff}
+        .p06-chip{width:170px;height:170px;padding:10px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;background:#fff;border:solid 4px #91b9e7;border-radius:20px;
+          font-family:'Cafe24 Ssurround';font-size:22px;color:#31248a;letter-spacing:-0.08em;white-space:nowrap}
+        .p06-chip i{flex:1 1 auto;width:100%;background:center / contain no-repeat}
+
+        .p06-cards{position:absolute;left:60px;top:620px;width:1800px;height:280px;display:flex;justify-content:center;gap:30px}
+        .p06-card{position:relative;width:320px;height:270px;box-sizing:border-box;padding:12px 8px 14px;border:solid 5px #91b9e7;border-radius:28px;background:#fff;cursor:grab;touch-action:none;
+          display:flex;flex-direction:column;align-items:center;gap:8px;font-family:'Cafe24 Ssurround';font-size:36px;color:#31248a;letter-spacing:-0.07em;white-space:nowrap;z-index:5}
+        .p06-card i{flex:1 1 auto;width:100%;background:center / contain no-repeat;pointer-events:none}
+        .p06-card.is-dragging{cursor:grabbing;z-index:60}
+        .p06-card.is-back{transition:transform .3s ease}
+        .p06-card.is-gone{visibility:hidden}
+
+        .p06-ok{padding:0;border:0;background:none;cursor:pointer}
+        .p06-ok img{display:block;height:110px}
+        #p06Clear .avatar-card-title{margin-bottom:30px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="p06-ask" id="p06Ask"></p>
+          <div class="p06-box drop-zone" id="p06Box"><span class="p06-box-label" id="p06BoxLabel"></span></div>
+          <div class="p06-cards" id="p06Cards"></div>
+
+          <div class="avatar-modal is-off" id="p06Right">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct_gwa.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">잘했어요!</p>
+                <p class="avatar-popup-sub" id="p06RightText"></p>
+                <button class="p06-ok avatar-popup-next" id="p06RightOk">
+                  <img src="../../img/common/btn_confirm.png" class="js-img-swap js-sfx" data-src-over="../../img/common/btn_confirm_over.png" data-sound="sound/click.mp3" alt="확인">
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p06Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text is-medium" id="p06WrongText"></p>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p06Clear">
+            <div class="avatar-card is-small is-center">
+              <img class="avatar-card-avatar" src="../../img/common/avatar_correct_gwa.png" alt="">
+              <p class="avatar-card-title" id="p06ClearTitle"></p>
+              <p class="avatar-card-text" id="p06ClearText"></p>
+              <button class="avatar-card-btn p06-ok" id="p06ClearOk">
+                <img src="../../img/common/btn_next_small.png" class="js-img-swap js-sfx" data-src-over="../../img/common/btn_next_small_over.png" data-sound="sound/click.mp3" alt="다음">
+              </button>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p06Summary">
+            <div class="avatar-card is-side">
+              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">완벽해! 센서는 집 안에서 AI의 눈, 귀, 피부가 되어 정보를 수집해. AI 허브는 모인 정보를 보고 상황을 판단하지. 그 다음 스마트 가전에게 명령을 보내 집 안 환경을 알맞게 조절하는 거야.</p>
+                  </div>
+                  <a href="page07.html" class="js-nav-effect avatar-card-btn">
+                    <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">이렇게 AI가 움직일 규칙을 정해 주는 것을 ‘조건문 코딩’이라고 해.<br>다음 활동에서 AI 스마트홈 코딩을 알아볼까?</p>
+                  </div>
+                  <a href="page07.html" class="js-nav-effect avatar-card-btn">
+                    <img src="../../img/common/btn_confirm.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_confirm_on.png" data-src-over="../../img/common/btn_confirm_over.png" data-sound="sound/click.mp3" alt="확인">
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="스마트 기기 역할 분류하기" data-next="page07.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const DEVICES = {
+      sensor: { name: '온습도 센서', type: 'sensor',
+        right: '온습도 센서는 온도와 습도를 감지하는 입력 장치예요',
+        wrong: '온습도 센서는 바람을 내보내거나 직접 움직이기보다 집 안의 온도와 습도를 감지하는 입력 장치(센서)에 가까워요. 다시 옮겨볼까요?' },
+      cctv: { name: '현관 CCTV 카메라', type: 'sensor',
+        right: '현관 CCTV 카메라는 집 안팎의 움직임을 감지하는 입력 장치예요',
+        wrong: '현관 CCTV 카메라는 현관문을 열거나 닫기보다 집 안팎의 움직임을 감지하는 입력 장치(센서)에 가까워요. 다시 옮겨볼까요?' },
+      dust: { name: '미세먼지 측정 센서', type: 'sensor',
+        right: '미세먼지 측정 센서는 공기 중의 미세먼지를 측정하는 입력 장치예요',
+        wrong: '미세먼지 측정 센서는 공기를 직접 깨끗하게 하기보다 공기 중의 미세먼지 수치를 측정하는 입력 장치(센서)에 가까워요. 다시 옮겨볼까요?' },
+      hub: { name: 'AI 스마트 허브', type: 'hub',
+        right: 'AI 스마트 허브는 센서 정보를 모아 상황을 판단하는 중심 두뇌예요',
+        wrong: 'AI 스마트 허브는 주변 환경을 직접 감지하거나 가전을 움직이기보다 센서가 보낸 정보를 모아 상황을 판단하는 판단 장치(AI 허브)에 가까워요. 다시 옮겨볼까요?' },
+      aircon: { name: '스마트 에어컨', type: 'device',
+        right: '스마트 에어컨은 AI의 명령을 받아 시원한 바람을 내보내는 실행 장치예요',
+        wrong: '스마트 에어컨은 스스로 온도를 측정하기보다 AI의 명령을 받아 바람을 내보내는 실행 장치(스마트 가전)에 가까워요. 다시 옮겨볼까요?' },
+      robot: { name: '스마트 로봇청소기', type: 'device',
+        right: '스마트 로봇청소기는 AI의 명령을 받아 집 안을 청소하는 실행 장치예요',
+        wrong: '스마트 로봇청소기는 집 안의 정보를 모아 판단하기보다 AI의 명령을 받아 이동하며 청소하는 실행 장치(스마트 가전)에 가까워요. 다시 옮겨볼까요?' },
+      light: { name: '스마트 전등', type: 'device',
+        right: '스마트 전등은 AI의 명령을 받아 불을 켜거나 끄는 실행 장치예요',
+        wrong: '스마트 전등은 주변의 밝기를 감지해 정보를 전달하기보다 AI의 명령을 받아 불을 켜거나 끄는 실행 장치(스마트 가전)에 가까워요. 다시 옮겨볼까요?' },
+      purifier: { name: '스마트 공기청정기', type: 'device',
+        right: '스마트 공기청정기는 AI의 명령을 받아 공기를 깨끗하게 하는 실행 장치예요',
+        wrong: '스마트 공기청정기는 미세먼지 수치를 측정하기보다 AI의 명령을 받아 공기를 깨끗하게 하는 실행 장치(스마트 가전)에 가까워요. 다시 옮겨볼까요?' },
+      washer: { name: '스마트 세탁기', type: 'device',
+        right: '스마트 세탁기는 AI의 명령을 받아 빨래하는 실행 장치예요',
+        wrong: '스마트 세탁기는 집 안의 환경 정보를 모아 판단하기보다 AI의 명령을 받아 세탁을 수행하는 실행 장치(스마트 가전)에 가까워요. 다시 옮겨볼까요?' }
+    };
+    const ROUNDS = [
+      { type: 'sensor', label: '센서(입력)', ask: '아래의 기기들 중 센서 아이콘을 3가지를 골라보세요.',
+        cards: ['cctv', 'dust', 'aircon', 'sensor', 'hub'],
+        clearTitle: '센서 상자 완료!', clearText: '센서는 집 안의 환경 정보를 감지해요.' },
+      { type: 'hub', label: 'AI허브(판단)', ask: '아래의 기기들 중 AI허브판단 아이콘을 1가지를 골라보세요.',
+        cards: ['robot', 'hub', 'washer', 'cctv', 'dust'],
+        clearTitle: 'AI 허브 상자 완료!', clearText: 'AI 허브는 센서 정보를 모아 판단해요.' },
+      { type: 'device', label: '스마트가전(실행)', ask: '아래의 기기들 중 스마트가전 아이콘을 5가지를 골라보세요.',
+        cards: ['purifier', 'light', 'washer', 'aircon', 'robot'],
+        clearTitle: '스마트 가전 상자 완료!', clearText: '스마트 가전은 AI의 명령을 실행해요.' }
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const box = $('p06Box');
+    const cardsBox = $('p06Cards');
+    const stage = document.getElementById('stage');
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+
+    let round = 0;
+    let left = 0;
+    let finalShown = false;
+
+    function overBox(x, y) {
+      const r = box.getBoundingClientRect();
+      return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+    }
+
+    function renderRound() {
+      const r = ROUNDS[round];
+      $('p06Ask').textContent = r.ask;
+      $('p06BoxLabel').textContent = r.label;
+      box.querySelectorAll('.p06-chip').forEach((c) => c.remove());
+      cardsBox.innerHTML = '';
+      left = r.cards.filter((k) => DEVICES[k].type === r.type).length;
+      shuffleArray(r.cards).forEach((key) => cardsBox.appendChild(makeCard(key)));
+    }
+
+    function makeCard(key) {
+      const d = DEVICES[key];
+      const card = document.createElement('div');
+      card.className = 'p06-card';
+      card.innerHTML = '<i style="background-image:url(\'img/' + (key === 'dust' ? 'p06_dev_' : 'p03_dev_') + key + '.png\')"></i>' + d.name;
+
+      card.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        const s = stage.getBoundingClientRect().width / 1920;
+        const sx = e.clientX;
+        const sy = e.clientY;
+        card.setPointerCapture(e.pointerId);
+        card.classList.remove('is-back');
+        card.classList.add('is-dragging');
+
+        const move = (ev) => {
+          card.style.transform = 'translate(' + (ev.clientX - sx) / s + 'px,' + (ev.clientY - sy) / s + 'px)';
+          box.classList.toggle('is-over', overBox(ev.clientX, ev.clientY));
+        };
+        const up = (ev) => {
+          card.removeEventListener('pointermove', move);
+          card.removeEventListener('pointerup', up);
+          card.removeEventListener('pointercancel', up);
+          card.classList.remove('is-dragging');
+          box.classList.remove('is-over');
+          card.classList.add('is-back');
+          card.style.transform = '';
+          if (!overBox(ev.clientX, ev.clientY)) return;
+          if (d.type === ROUNDS[round].type) {
+            right(card, d);
+          } else {
+            playWrong();
+            $('p06WrongText').textContent = d.wrong;
+            flashLayer($('p06Wrong'));
+          }
+        };
+        card.addEventListener('pointermove', move);
+        card.addEventListener('pointerup', up);
+        card.addEventListener('pointercancel', up);
+      });
+      return card;
+    }
+
+    function right(card, d) {
+      playCorrect();
+      card.classList.add('is-gone');
+      const chip = document.createElement('span');
+      chip.className = 'p06-chip';
+      chip.innerHTML = card.querySelector('i').outerHTML;
+      chip.setAttribute('aria-label', d.name);
+      box.appendChild(chip);
+      left -= 1;
+      $('p06RightText').textContent = d.right;
+      $('p06Right').classList.remove('is-off');
+    }
+
+    $('p06RightOk').addEventListener('click', () => {
+      $('p06Right').classList.add('is-off');
+      resetImageSwap($('p06RightOk'));
+      if (left > 0) return;
+      const r = ROUNDS[round];
+      $('p06ClearTitle').textContent = r.clearTitle;
+      $('p06ClearText').textContent = r.clearText;
+      $('p06Clear').classList.remove('is-off');
+    });
+
+    $('p06ClearOk').addEventListener('click', () => {
+      resetImageSwap($('p06ClearOk'));
+      if (round < ROUNDS.length - 1) {
+        $('p06Clear').classList.add('is-off');
+        round += 1;
+        renderRound();
+        return;
+      }
+      if (!finalShown) {
+        finalShown = true;
+        $('p06ClearTitle').textContent = 'AI스마트홈 연동 준비 완료!';
+        $('p06ClearText').textContent = '';
+        return;
+      }
+      $('p06Clear').classList.add('is-off');
+      $('p06Summary').classList.remove('is-off');
+    });
+
+    renderRound();
+  })();
+  </script>
+</body>
+</html>

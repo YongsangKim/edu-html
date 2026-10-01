@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 비서와 똑똑하게 소통하기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 15~16p(이번 기획서는 SW 실습 제외본이라 이후 실습 화면은 없음). 안드로이드 홈 화면(HTML로 그림)의
+           Assistant 마이크를 누르면 '오케이 구글' 음성(sound/p08_ok_google.mp3) 뒤 Assistant 화면. 실습 이후 흐름이 없어서 다음 버튼은 임의로 넣음.
+           Assistant 아이콘 img/p08_assistant.png, 캐릭터는 임시로 sa/06 캐릭터 복사본 */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p08-bubble{position:absolute;left:30px;top:auto;bottom:560px;width:560px;margin:0;box-sizing:border-box;padding:30px;background:#fefbf9;border:solid 5px #48159c;border-radius:30px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';font-size:38px;line-height:1.35;color:#48159c;text-align:center;letter-spacing:-0.05em;word-break:keep-all;z-index:3}
+        .p08-bubble:before{content:'';position:absolute;left:220px;bottom:-58px;width:100px;height:70px;background:url('../../img/common/p_guide_tail.png') 0 0 / contain no-repeat}
+        .p08-character{position:absolute;left:40px;top:470px;width:520px;height:470px;display:flex;align-items:flex-end;justify-content:center}
+        .p08-character img{max-width:100%;max-height:100%;object-fit:contain}
+
+        .p08-phone{position:absolute;left:710px;top:24px;width:500px;height:910px;box-sizing:border-box;padding:18px;background:#1b1738;border-radius:70px;box-shadow:0 0 0 6px #c9c4bb}
+        .p08-screen{position:relative;width:100%;height:100%;border-radius:54px;overflow:hidden;background:linear-gradient(160deg,#3a6ea5,#7fb3e8 45%,#c9e2f7);font-family:'Pretendard'}
+        .p08-screen:before{content:'';position:absolute;left:50%;top:18px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#1b1738;z-index:3}
+        .p08-app{position:absolute;left:50%;top:210px;width:150px;margin-left:-75px;display:flex;flex-direction:column;align-items:center;gap:10px;font-size:24px;font-weight:600;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.4)}
+        .p08-app i{width:130px;height:130px;border-radius:34px;background:#fff url('img/p08_assistant.png') center / 75% no-repeat;box-shadow:0 6px 14px rgba(0,0,0,.2)}
+        .p08-search{position:absolute;left:30px;right:30px;bottom:130px;height:84px;display:flex;align-items:center;gap:14px;padding:0 14px 0 30px;border-radius:42px;background:#fff;box-shadow:0 6px 16px rgba(0,0,0,.2);font-size:24px;color:#5f6368}
+        .p08-search span{flex:1 1 auto}
+        /* 마이크는 휴대폰 밖에 놓인 물건(기획서 15p). 그림 img/p08_mic.png(없으면 이모지) */
+        .p08-mic{position:absolute;left:1330px;top:300px;width:340px;height:340px;padding:0;border:solid 8px #1b1738;border-radius:50%;background:#fff url('img/p08_mic.png') center / 70% no-repeat;cursor:pointer;font-size:170px;line-height:1;box-shadow:0 14px 0 0 #becde7;transition:transform .15s}
+        .p08-mic:hover{transform:scale(1.05)}
+        .p08-mic:active{transform:scale(.95)}
+        .p08-nav{position:absolute;left:0;right:0;bottom:30px;display:flex;justify-content:space-around;font-size:40px;color:rgba(255,255,255,.85)}
+
+        .p08-assist{position:absolute;inset:0;padding:120px 36px 0;box-sizing:border-box;background:#fff;display:flex;flex-direction:column;align-items:center;gap:30px;font-size:30px;color:#1b1738}
+        .p08-assist b{font-size:40px;font-weight:700}
+        .p08-dots{display:flex;gap:14px;margin-top:60px}
+        .p08-dots i{width:34px;height:34px;border-radius:50%;animation:p08-dot 1s ease-in-out infinite}
+        .p08-dots i:nth-child(1){background:#4285f4}
+        .p08-dots i:nth-child(2){background:#ea4335;animation-delay:.15s}
+        .p08-dots i:nth-child(3){background:#fbbc05;animation-delay:.3s}
+        .p08-dots i:nth-child(4){background:#34a853;animation-delay:.45s}
+        @keyframes p08-dot{50%{transform:translateY(-18px)}}
+        .p08-assist.is-off{display:none}
+
+        .p08-next.card-btn{display:flex;align-items:center;justify-content:center;text-decoration:none;min-width:0;width:300px;height:110px;margin-bottom:20px;padding:8px 10px 0;font-size:56px}
+        .p08-next.is-off{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="p08-bubble" id="p08Bubble">스마트폰의 Google Assistant를 직접 사용하려면, 마이크를 먼저 깨워야 해요!<br>마이크를 클릭해볼까요?</p>
+          <div class="p08-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+
+          <div class="p08-phone">
+            <div class="p08-screen">
+              <div class="p08-app"><i></i>Assistant</div>
+              <div class="p08-search"><span>Google</span></div>
+              <div class="p08-nav"><span>|||</span><span>○</span><span>‹</span></div>
+              <div class="p08-assist is-off" id="p08Assist"><b>Assistant</b><div class="p08-dots"><i></i><i></i><i></i><i></i></div></div>
+            </div>
+          </div>
+
+          <button class="p08-mic" id="p08Mic" aria-label="마이크">🎤</button>
+
+          <a href="page09.html" class="js-nav-effect card-btn next-btn p08-next is-off" id="p08Next" data-sound="sound/click.mp3">다음</a>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="AI 비서와 똑똑하게 소통하기" data-next="page09.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const $ = (id) => document.getElementById(id);
+    const mic = $('p08Mic');
+    pointFingerAt(mic);
+    // 기본 손가락(110px, 버튼 오른쪽 아래 모서리)보다 크게, 마이크 쪽으로 더 붙임
+    const finger = document.querySelector('.js-point-finger');
+    finger.style.width = '200px';
+    finger.style.left = '1560px';
+    finger.style.top = '520px';
+    mic.addEventListener('click', () => {
+      clearFingers();
+      new Audio('sound/p08_ok_google.mp3').play().catch(() => {});
+      $('p08Assist').classList.remove('is-off');
+      $('p08Next').classList.remove('is-off');
+    });
+  })();
+  </script>
+</body>
+</html>

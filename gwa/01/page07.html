@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>다양한 매체에서 날씨 데이터 수집하기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:url('img/p07_bg.png') no-repeat}
+
+        /* 영상 클립 화면 — 미리보기를 누르면 그 클립이 5초간 재생되고,
+           재생이 끝나면 아웃라인이 생기며 폴더로 드래그할 수 있게 됨 */
+        .p07-screen{position:absolute;left:54px;top:46px;width:1121px;height:609px;
+          padding:0;margin:0;border:none;background:none;overflow:hidden;border-radius:14px;
+          cursor:default;touch-action:none;transform-origin:50% 50%;z-index:20}
+        .p07-screen img{display:block;width:100%;height:100%;object-fit:cover;pointer-events:none}
+        .p07-screen.is-ready{cursor:grab;outline:8px solid #2f6fed;outline-offset:4px}
+        .p07-screen.is-grabbed{cursor:grabbing;z-index:60}
+        .p07-screen.is-filed{opacity:0;transform:scale(.25);transition:opacity .35s ease,transform .35s ease;pointer-events:none}
+
+        /* 재생 중 표시(소리 없이 5초) */
+        .p07-playing{position:absolute;left:66px;top:52px;width:1105px;height:578px;
+          display:none;align-items:flex-end;justify-content:center;pointer-events:none;z-index:30}
+        .p07-playing.is-on{display:flex}
+        .p07-playing span{margin-bottom:24px;padding:10px 28px;border-radius:30px;
+          background:rgba(27,23,56,.78);color:#fff;font-family:'Cafe24 Ssurround';font-size:30px}
+
+        /* 영상 확인하기 버튼 3개 — 배경에 그려진 버튼 위에 투명하게 겹침 */
+        .p07-pick{position:absolute;top:619px;height:162px;padding:0;margin:0;border:none;background:none;
+          cursor:pointer;border-radius:14px;z-index:25}
+        .p07-pick img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}
+        /* .p07-pick.is-over{outline:6px solid #ffd83d;outline-offset:-6px} */
+        .p07-pick-opening{left:133px;width:320px}
+        .p07-pick-headline{left:427px;width:320px}
+        .p07-pick-weather{left:721px;width:320px}
+
+        /* 보관함 폴더(드롭 영역) */
+        .p07-folder{position:absolute;left:1160px;top:350px;width:740px;height:545px;border-radius:40px}
+        .p07-folder.is-over{outline:10px solid #ffd83d;outline-offset:-10px}
+
+        .p07-star{position:absolute;left:1470px;top:560px;width:120px;height:120px;
+          background:url('img/p02_star.png') 0 0 / contain no-repeat;opacity:0;pointer-events:none;z-index:70}
+        .p07-star.is-pop{animation:p07-pop .7s ease-out}
+        @keyframes p07-pop{
+          0%{opacity:1;transform:scale(.3) rotate(0deg)}
+          70%{opacity:1;transform:scale(1.5) rotate(200deg)}
+          100%{opacity:0;transform:scale(1.9) rotate(260deg)}
+        }
+
+        /* 오답/종료 모달 — page06과 같은 프레임을 재사용 */
+
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main>
+
+          <div class="p07-folder" id="p07Folder"></div>
+          <div class="p07-star" id="p07Star"></div>
+
+          <button class="p07-screen" id="p07Screen"><img id="p07ScreenImg" src="img/p07_clip_title.png" alt="영상 화면"></button>
+          <div class="p07-playing" id="p07Playing"><span>재생 중…</span></div>
+
+          <button class="p07-pick p07-pick-opening"  data-clip="opening"  data-correct="false" aria-label="영상 확인하기 오프닝"><img src="img/p07_pick_opening.png" alt=""></button>
+          <button class="p07-pick p07-pick-headline" data-clip="headline" data-correct="false" aria-label="영상 확인하기 헤드라인"><img src="img/p07_pick_headline.png" alt=""></button>
+          <button class="p07-pick p07-pick-weather"  data-clip="weather"  data-correct="true"  aria-label="영상 확인하기 날씨"><img src="img/p07_pick_weather.png" alt=""></button>
+
+          <!-- 오답: 2초 노출 후 자동으로 닫힘(기획서 13p) -->
+          <div class="avatar-modal is-off" id="p07Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text is-pill">영상을 다시 한번 살펴볼까요?</p>
+            </div>
+          </div>
+
+          <!-- 종료: 2단계 안내 후 활동2로 이동(기획서 14p) -->
+          <div class="avatar-modal is-off" id="p07Finish">
+            <div class="avatar-card is-center">
+              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
+            <div class="step-flow">
+              <div class="step-panel">
+                <div class="avatar-card-body"><p class="avatar-card-text">신문과 영상에서 필요한<br>날씨 데이터를 모두 모았어요.</p></div>
+                <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn">
+                  <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                </a>
+              </div>
+              <div class="step-panel is-hidden">
+                <div class="avatar-card-body"><p class="avatar-card-text">AI는 어떻게 일하는지,<br>지금 만나러 가볼까요?</p></div>
+                <a href="page08.html" class="js-nav-effect js-sfx avatar-card-btn">
+                  <img src="../../img/common/btn_next_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_small_on.png" data-src-over="../../img/common/btn_next_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                </a>
+              </div>
+            </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="다양한 매체에서 날씨 데이터 수집하기" data-next="page08.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  /* 기획서 12p(activity01_03) + 13p(오답) + 14p(종료)
+     - '영상 확인하기' 버튼을 누르면 그 클립이 5초간 재생됨(소리 없음)
+     - 재생이 끝나야 그 클립 화면에 아웃라인이 생기고 폴더로 드래그할 수 있음
+     - 날씨 클립을 폴더에 담으면 별 효과 + 정답음 → 종료 모달
+     - 오프닝/헤드라인 클립을 담으면 오답음과 함께 안내가 2초 떴다 닫힘
+     - 클립 이미지는 임시본: 오프닝/헤드라인은 날씨 화면을 복사해 둔 자리표시자라
+       실제 장면 이미지로 교체 필요(헤드라인은 '청소년 과학 체험 교실 참가자 모집' 장면) */
+  (function () {
+    const CLIPS = {
+      opening:  'img/p07_clip_opening.png',
+      headline: 'img/p07_clip_headline.png',
+      weather:  'img/p07_clip_weather.png',
+    };
+    const PLAY_MS = 5000;   // 클립 재생 시간(기획서: 5초)
+
+    const screen = document.getElementById('p07Screen');
+    const screenImg = document.getElementById('p07ScreenImg');
+    const playing = document.getElementById('p07Playing');
+    const picks = Array.from(document.querySelectorAll('.p07-pick'));
+    const folder = document.getElementById('p07Folder');
+    const star = document.getElementById('p07Star');
+    const wrongModal = document.getElementById('p07Wrong');
+    const finishModal = document.getElementById('p07Finish');
+
+    const clickSound = new Audio(ASSET_BASE + 'sound/click.mp3');
+    const correctSound = new Audio(ASSET_BASE + 'sound/correct.mp3');
+    const wrongSound = new Audio(ASSET_BASE + 'sound/incorrect.mp3');
+
+    const HOME_LEFT = 54, HOME_TOP = 46;
+    let currentClip = null;   // 재생을 끝내서 드래그할 수 있게 된 클립
+    let playTimer = 0;
+    let locked = false;
+
+    const rectOf = (el) => el.getBoundingClientRect();
+    const overlaps = (a, b) =>
+      a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+
+    picks.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        clearTimeout(playTimer);
+
+        currentClip = null;
+        screen.classList.remove('is-ready');
+        screenImg.src = CLIPS[btn.dataset.clip];
+        playing.classList.add('is-on');
+        picks.forEach((b) => b.classList.toggle('is-over', b === btn));
+        clickSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+
+        // 5초간 재생한 뒤에야 드래그가 열림
+        playTimer = setTimeout(() => {
+          playing.classList.remove('is-on');
+          currentClip = btn.dataset.clip;
+          screen.dataset.correct = btn.dataset.correct;
+          screen.classList.add('is-ready');
+        }, PLAY_MS);
+      });
+    });
+
+    let dragging = false;
+    let startX = 0, startY = 0, startLeft = HOME_LEFT, startTop = HOME_TOP;
+    let pendingX = 0, pendingY = 0, frame = 0;
+
+    screen.style.left = HOME_LEFT + 'px';
+    screen.style.top = HOME_TOP + 'px';
+    screen.querySelectorAll('img').forEach((im) => { im.draggable = false; });
+    screen.addEventListener('dragstart', (e) => e.preventDefault());
+
+    const flush = () => {
+      frame = 0;
+      if (!dragging) return;
+      screen.style.left = pendingX + 'px';
+      screen.style.top = pendingY + 'px';
+    };
+
+    const goHome = () => {
+      screen.style.left = HOME_LEFT + 'px';
+      screen.style.top = HOME_TOP + 'px';
+      screen.style.transform = 'scale(1)';
+    };
+
+    screen.addEventListener('pointerdown', (e) => {
+      if (locked || !currentClip) return;   // 재생을 마친 클립만 잡을 수 있음
+      dragging = true;
+      screen.setPointerCapture(e.pointerId);
+      screen.classList.add('is-grabbed');
+      screen.style.transform = 'scale(.45)';
+      startX = e.clientX;
+      startY = e.clientY;
+      startLeft = parseFloat(screen.style.left);
+      startTop = parseFloat(screen.style.top);
+    });
+
+    screen.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      // 화면 이동량을 현재 스테이지 배율로 나눠 1920x1080 좌표계 이동량으로 변환
+      pendingX = startLeft + (e.clientX - startX) / currentScale;
+      pendingY = startTop + (e.clientY - startY) / currentScale;
+      if (!frame) frame = requestAnimationFrame(flush);
+      folder.classList.toggle('is-over', overlaps(rectOf(screen), rectOf(folder)));
+    });
+
+    const endDrag = () => {
+      if (!dragging) return;
+      if (frame) {
+        cancelAnimationFrame(frame);
+        frame = 0;
+        screen.style.left = pendingX + 'px';
+        screen.style.top = pendingY + 'px';
+      }
+      dragging = false;
+      screen.classList.remove('is-grabbed');
+      folder.classList.remove('is-over');
+
+      if (!overlaps(rectOf(screen), rectOf(folder))) {
+        goHome();
+        return;
+      }
+
+      if (screen.dataset.correct === 'true') {
+        locked = true;
+        screen.classList.add('is-filed');
+        correctSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+        star.classList.remove('is-pop');
+        void star.offsetWidth;
+        star.classList.add('is-pop');
+        setTimeout(() => finishModal.classList.remove('is-off'), 900);
+      } else {
+        wrongSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+        goHome();
+        wrongModal.classList.remove('is-off');
+        clearTimeout(wrongModal.__hideTimer);
+        wrongModal.__hideTimer = setTimeout(() => wrongModal.classList.add('is-off'), 2000);
+      }
+    };
+
+    screen.addEventListener('pointerup', endDrag);
+    screen.addEventListener('pointercancel', endDrag);
+  })();
+  </script>
+</body>
+</html>

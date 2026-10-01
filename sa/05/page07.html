@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>물어보고, 살펴보고, 결정하기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 21~22p. 대화 순서 카드 4장을 순서도 칸에 끌어 넣기(공용 initMatchDrag) */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p07-bubble{left:109px;bottom:620px;width:552px;display:flex;align-items:center;justify-content:center;font-size:46px}
+        .p07-character{position:absolute;left:200px;top:300px;width:300px;height:330px;display:flex;align-items:flex-end;justify-content:center}
+        .p07-character img{max-width:100%;max-height:100%;object-fit:contain}
+
+        .p07-flow{position:absolute;left:740px;top:50px;width:1098px;height:494px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p07-slot{position:absolute;width:489px;height:180px;box-sizing:border-box;border:dashed 5px #b9b3dd;border-radius:28px;display:flex;align-items:center;justify-content:center}
+        .p07-slot1{left:766px;top:109px}
+        .p07-slot2{left:1313px;top:109px}
+        .p07-slot3{left:1313px;top:345px}
+        .p07-slot4{left:766px;top:345px}
+        .p07-num{position:absolute;left:-26px;top:-30px;width:70px;height:70px;border-radius:50%;background:#48159c;display:flex;align-items:center;justify-content:center;
+          font-family:'Cafe24 Ssurround';font-size:40px;color:#fff;z-index:10}
+        .p07-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;opacity:0;transition:opacity .5s ease;
+          font-family:'Cafe24 Ssurround';font-size:44px;line-height:1.15;color:#8278ff;letter-spacing:-0.04em}
+        .p07-hint.is-on{opacity:.5}
+        .p07-arrow{position:absolute;width:70px;height:70px;display:flex;align-items:center;justify-content:center;font-size:64px;line-height:1;color:#48159c;z-index:3}
+
+        .p07-tray{position:absolute;left:79px;top:632px;width:1759px;height:267px;box-sizing:border-box;padding:0 48px;display:flex;align-items:center;justify-content:space-between;
+          background:#fefbf9;border:solid 6px #48159c;border-radius:40px}
+        .p07-hold{width:359px;height:132px}
+        .p07-card{width:359px;height:132px;padding:8px 12px 4px;cursor:grab;user-select:none;position:relative;z-index:5}
+        .p07-card.emotion-option{font-size:42px;line-height:1.15;display:flex;align-items:center;justify-content:center;text-align:center;box-sizing:border-box}
+        .p07-card.is-dragging{cursor:grabbing;z-index:50}
+        .p07-slot .p07-card{cursor:default;border:0}
+        .p07-slot[data-filled]{border-style:solid;border-color:#2f6fed}
+
+        #p07Done{z-index:120}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="guide-bubble p07-bubble">먼저, Gemini Live와 어떤 순서로 대화해야 하는지 카드를 배열해서 알아봐요!</p>
+          <div class="p07-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+
+          <div class="p07-flow"></div>
+          <span class="p07-arrow" style="left:1249px;top:164px">&#10140;</span>
+          <span class="p07-arrow" style="left:1522px;top:282px;transform:rotate(90deg)">&#10140;</span>
+          <span class="p07-arrow" style="left:1249px;top:400px;transform:rotate(180deg)">&#10140;</span>
+          <div class="p07-slot p07-slot1" data-key="1"><span class="p07-num">1</span><span class="p07-hint">궁금한 점<br>질문하기</span></div>
+          <div class="p07-slot p07-slot2" data-key="2"><span class="p07-num">2</span><span class="p07-hint">Gemini Live의<br>조언 듣기</span></div>
+          <div class="p07-slot p07-slot3" data-key="3"><span class="p07-num">3</span><span class="p07-hint">나에게 필요한<br>정보 선택하기</span></div>
+          <div class="p07-slot p07-slot4" data-key="4"><span class="p07-num">4</span><span class="p07-hint">최종 결정하기</span></div>
+
+          <div class="p07-tray" id="p07Tray">
+            <div class="p07-hold"><div class="emotion-option p07-card" data-key="1">궁금한 점<br>질문하기</div></div>
+            <div class="p07-hold"><div class="emotion-option p07-card" data-key="2">Gemini Live의<br>조언 듣기</div></div>
+            <div class="p07-hold"><div class="emotion-option p07-card" data-key="3">나에게 필요한<br>정보 선택하기</div></div>
+            <div class="p07-hold"><div class="emotion-option p07-card" data-key="4">최종 결정하기</div></div>
+          </div>
+
+          <div class="ox-result-correct is-avatar is-off" id="p07Done">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">좋아요!</p>
+                <p class="avatar-popup-sub">이제 Gemini Live의 조언을 직접 들어볼까요?</p>
+              </div>
+              <div class="avatar-popup-extra"><img src="../../img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="물어보고, 살펴보고, 결정하기" data-next="page08.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const tray = document.getElementById('p07Tray');
+    const slots = Array.from(document.querySelectorAll('.p07-slot'));
+    shuffleArray(Array.from(tray.children)).forEach((c) => tray.appendChild(c));
+    const cards = Array.from(tray.querySelectorAll('.p07-card'));
+    const playClick = makeSfx('sound/click.mp3');
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+
+    initMatchDrag({
+      cards,
+      zones: slots,
+      onRight: (card, slot) => {
+        playClick();
+        slot.querySelector('.p07-hint').remove();
+      },
+      onWrong: (card, slot) => {
+        if (!slot) return;
+        playWrong();
+        const hints = slots.filter((s) => !s.dataset.filled).map((s) => s.querySelector('.p07-hint'));
+        hints.forEach((h) => h.classList.add('is-on'));
+        setTimeout(() => hints.forEach((h) => h.classList.remove('is-on')), 1000);
+      },
+      onDone: () => {
+        playCorrect();
+        flashLayer(document.getElementById('p07Done'));
+        setTimeout(() => navigateTo('page08.html'), 2000);
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>미래 진로 선택을 위한 가치 보물찾기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        /* 기획서 9~11p. 질문 · 보기 카드 4장 · 보물상자를 각각 분리(통이미지 대신). 카드 삽화 img/p05_card_r{라운드}_{1~4}.png,
+           닫힌 상자 img/p05_chest.png, 열린 상자 img/p05_chest_open.png(카드를 고르면 덮어서 보여줌) */
+        .p05-q{position:absolute;left:50%;top:80px;transform:translateX(-50%);min-width:1124px;min-height:100px;margin:0;box-sizing:border-box;padding:12px 60px 6px;display:flex;align-items:center;justify-content:center;
+          background:#fefbf9;border:solid 6px #1b1738;border-radius:56px;box-shadow:0 14px 0 0 #becde7;font-family:'Cafe24 Ssurround';font-size:64px;line-height:1.2;color:#1b1738;text-align:center;letter-spacing:-0.05em;white-space:nowrap}
+        .p05-q.is-long{top:56px;font-size:54px}
+        .p05-board{position:absolute;left:47px;top:229px;width:1827px;height:494px;border-radius:10px;background:#023187}
+
+        .p05-card{position:absolute;top:267px;width:334px;height:416px}
+        .p05-card01{left:66px}
+        .p05-card02{left:401px}
+        .p05-card03{left:738px}
+        .p05-card04{left:1074px}
+        .p05-card-in{display:flex;flex-direction:column;width:100%;height:100%;border-radius:10px;background:#fff;overflow:hidden}
+        .p05-card-in i{flex:0 0 250px;background:#dfe7f5 center / cover no-repeat}
+        .p05-card-in span{flex:1 1 auto;display:flex;align-items:center;justify-content:center;padding:6px 10px 0;font-family:'Cafe24 Ssurround';font-size:48px;line-height:1.15;color:#1b1738;text-align:center;letter-spacing:-0.05em}
+        .p05-round3 .p05-card-in span{font-size:40px}
+        .p05-card:hover .p05-card-in span{color:#48159c}
+
+        .p05-chest{position:absolute;left:1424px;top:237px;width:440px;height:476px;border-radius:6px;background:#1b1a22 url('img/p05_chest.png') center / cover no-repeat;overflow:hidden}
+        .p05-chest:after{content:'';position:absolute;inset:0;background:url('img/p05_chest_open.png') center / cover no-repeat;opacity:0;transform:scale(.92);transition:opacity .3s,transform .3s}
+        .p05-chest.is-open:after{opacity:1;transform:none;animation:p05-pop .45s ease}
+        @keyframes p05-pop{0%{transform:scale(.92)}60%{transform:scale(1.05)}100%{transform:none}}
+
+        /* 버튼 폭이 단계마다 달라서(다음 / 보물지도 완성하기) 폭과 상관없이 가운데로 */
+        .next-btn-center{top:790px;left:50%;transform:translateX(-50%)}
+
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <!-- 3라운드(좋아하는 것/잘하는 것/나의 적성)를 step-flow(기능 M)로 순차 전환. 1·2라운드 선택은 page06 직업 추천에 씀 -->
+          <div class="step-flow">
+            <div class="step-panel p05-round1">
+              <p class="p05-q">내가 좋아하는 것은 무엇인가요?</p>
+              <div class="p05-board"></div>
+              <div class="p05-chest"></div>
+              <div class="multi-select" data-single="true" data-choice-key="like">
+                <button class="multi-option pick-card p05-card p05-card01" data-pick="1" aria-label="그림 그리기"><span class="p05-card-in"><i style="background-image:url('img/p05_card_r1_1.png')"></i><span>그림<br>그리기</span></span></button>
+                <button class="multi-option pick-card p05-card p05-card02" data-pick="2" aria-label="동물 돌보기"><span class="p05-card-in"><i style="background-image:url('img/p05_card_r1_2.png')"></i><span>동물<br>돌보기</span></span></button>
+                <button class="multi-option pick-card p05-card p05-card03" data-pick="3" aria-label="음식이나 음료 만들기"><span class="p05-card-in"><i style="background-image:url('img/p05_card_r1_3.png')"></i><span>음식이나<br>음료 만들기</span></span></button>
+                <button class="multi-option pick-card p05-card p05-card04" data-pick="4" aria-label="노래하거나 춤추기"><span class="p05-card-in"><i style="background-image:url('img/p05_card_r1_4.png')"></i><span>노래하거나<br>춤추기</span></span></button>
+              </div>
+              <a href="javascript:;" class="js-nav-effect js-sfx multi-next is-disabled next-btn-center">
+                <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+              </a>
+            </div>
+
+            <div class="step-panel p05-round2">
+              <p class="p05-q is-long">다른 사람에게 칭찬받았거나,<br>내가 잘한다고 생각하는 것은 무엇인가요?</p>
+              <div class="p05-board"></div>
+              <div class="p05-chest"></div>
+              <div class="multi-select" data-single="true" data-choice-key="good">
+                <button class="multi-option pick-card p05-card p05-card01" data-pick="1" aria-label="정리정돈하기"><span class="p05-card-in"><i style="background-image:url('img/p05_card_r2_1.png')"></i><span>정리정돈<br>하기</span></span></button>
+                <button class="multi-option pick-card p05-card p05-card02" data-pick="2" aria-label="다른 사람 돕기"><span class="p05-card-in"><i style="background-image:url('img/p05_card_r2_2.png')"></i><span>다른 사람<br>돕기</span></span></button>
+                <button class="multi-option pick-card p05-card p05-card03" data-pick="3" aria-label="블록 조립하기"><span class="p05-card-in"><i style="background-image:url('img/p05_card_r2_3.png')"></i><span>블록<br>조립하기</span></span></button>
+                <button class="multi-option pick-card p05-card p05-card04" data-pick="4" aria-label="물건 담고 포장하기"><span class="p05-card-in"><i style="background-image:url('img/p05_card_r2_4.png')"></i><span>물건 담고<br>포장하기</span></span></button>
+              </div>
+              <a href="javascript:;" class="js-nav-effect js-sfx multi-next is-disabled next-btn-center">
+                <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+              </a>
+            </div>
+
+            <div class="step-panel p05-round3">
+              <p class="p05-q is-long">친구들과 새로운 활동을 한다면 나는?<br>나와 가장 가까운 것을 선택해 보세요.</p>
+              <div class="p05-board"></div>
+              <div class="p05-chest"></div>
+              <div class="multi-select" data-single="true">
+                <button class="multi-option pick-card p05-card p05-card01" aria-label="친구들과 이야기하며 함께한다"><span class="p05-card-in"><i style="background-image:url('img/p05_card_r3_1.png')"></i><span>친구들과<br>이야기하며<br>함께한다</span></span></button>
+                <button class="multi-option pick-card p05-card p05-card02" aria-label="직접 만들고 움직여 본다"><span class="p05-card-in"><i style="background-image:url('img/p05_card_r3_2.png')"></i><span>직접 만들고<br>움직여 본다</span></span></button>
+                <button class="multi-option pick-card p05-card p05-card03" aria-label="차근차근 생각해서 방법을 찾는다"><span class="p05-card-in"><i style="background-image:url('img/p05_card_r3_3.png')"></i><span>차근차근<br>생각해서<br>방법을 찾는다</span></span></button>
+                <button class="multi-option pick-card p05-card p05-card04" aria-label="설명을 듣고 순서대로 한다."><span class="p05-card-in"><i style="background-image:url('img/p05_card_r3_4.png')"></i><span>설명을 듣고<br>순서대로 한다.</span></span></button>
+              </div>
+              <a href="page06.html" class="js-nav-effect js-sfx multi-next is-disabled next-btn-center">
+                <img src="img/p05_btn_treasure_complete.png" class="js-img-swap js-sfx" data-src-alt="img/p05_btn_treasure_complete_on.png" data-src-over="img/p05_btn_treasure_complete_over.png" data-sound="sound/click.mp3" alt="보물지도 완성하기">
+              </a>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="미래 진로 선택을 위한 가치 보물찾기" data-next="page06.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  /* round1(좋아하는 것)/round2(잘하는 것) 선택을 sessionStorage에 저장해뒀다가
+     page06에서 4x4=16가지 직업 추천 조합을 고르는 데 씀(엑셀 "좋아하는 것_잘하는
+     것_조합_직업 표" 참고, 나의 적성 라운드는 이 표에 없어서 저장 안 함) */
+  document.querySelectorAll('.p05-chest').forEach((chest) => {
+    chest.closest('.step-panel').querySelectorAll('.multi-option').forEach((opt) => {
+      opt.addEventListener('click', () => {
+        chest.classList.remove('is-open');
+        void chest.offsetWidth;
+        chest.classList.add('is-open');
+      });
+    });
+  });
+
+  document.querySelectorAll('.multi-select[data-choice-key]').forEach((group) => {
+    const key = group.dataset.choiceKey;
+    group.querySelectorAll('.multi-option[data-pick]').forEach((opt) => {
+      opt.addEventListener('click', () => {
+        try { sessionStorage.setItem('p05_' + key, opt.dataset.pick); } catch (err) { /* 무시 */ }
+      });
+    });
+  });
+  </script>
+</body>
+</html>

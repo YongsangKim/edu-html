@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내가 모은 데이터로 AI에게 질문하기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:url('img/p25_bg.png') no-repeat}
+
+        /* 답변 생성 로딩 5초가 끝나야 두 버튼이 열림 */
+        .p25-btn{position:absolute;left:1440px;width:395px;border-radius:20px}
+        .p25-btn.is-off{pointer-events:none;opacity:.35}
+        .p25-again{top:580px;height:180px}
+        .p25-next{top:800px;height:120px}
+
+        /* 기획서 36p: AI 실습 종료 모달(이 화면 위에 덮임) */
+        .p25-finish{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:100;
+          background:url('img/p25_bg_finish.png') no-repeat}
+        .p25-finish.is-off{display:none}
+        .p25-finish-hit{position:absolute;left:1216px;top:545px;width:340px;height:110px;border-radius:16px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main>
+
+          <a href="page24.html" class="js-nav-effect js-sfx p25-btn p25-again is-off" id="p25Again" data-sound="sound/click.mp3" aria-label="다른 질문 확인하기"></a>
+          <a href="javascript:;" class="js-sfx p25-btn p25-next is-off" id="p25Next" data-sound="sound/click.mp3" aria-label="다음"></a>
+
+          <div class="p25-finish is-off" id="p25Finish">
+            <a href="page26.html" class="js-nav-effect js-sfx p25-finish-hit" data-sound="sound/click.mp3" aria-label="다음"></a>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="내가 모은 데이터로 AI에게 질문하기" data-next="page26.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  /* 기획서 35p(ai_practice_15) + 36p(종료)
+     - 답변 생성 로딩 5초가 지나면 안내 창과 두 버튼이 활성화됨
+     - [다른 질문 확인하기] → page24로 돌아가 질문을 다시 고름
+     - [다음] → 이 화면 위에 AI 실습 종료 모달을 띄우고, 그 안의 다음으로 퀴즈(page26)로 이동
+     - page24에서 고른 질문은 sessionStorage에 남아 있음(답변을 질문에 맞춰 바꿀 때 사용) */
+  (function () {
+    const LOADING_MS = 5000;
+    const again = document.getElementById('p25Again');
+    const next = document.getElementById('p25Next');
+    const finish = document.getElementById('p25Finish');
+
+    setTimeout(function () {
+      again.classList.remove('is-off');
+      next.classList.remove('is-off');
+    }, LOADING_MS);
+
+    next.addEventListener('click', function () {
+      setTimeout(function () { finish.classList.remove('is-off'); }, 300);
+    });
+  })();
+  </script>
+</body>
+</html>

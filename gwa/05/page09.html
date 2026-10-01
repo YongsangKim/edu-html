@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>퀴즈 풀기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 17~23p. Q1·Q5 2지선다, Q2·Q3 음파 그래프 4개(SVG) 중 고르기, Q4 4지선다. 오답은 문항별 힌트(data-wrong) */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+        .quiz-ask-box{padding:30px 60px 30px 30px}
+
+        .p09-opt2 .card-btn{position:absolute;top:590px}
+        .p09-opt2 .p09-a{left:410px}
+        .p09-opt2 .p09-b{left:1040px}
+
+        .p09-graphs{position:absolute;left:100px;top:470px;width:1720px;display:grid;grid-template-columns:repeat(4,1fr);gap:34px}
+        .p09-graph{height:400px;padding:0;box-sizing:border-box;border:solid 6px #91b9e7;border-radius:30px;background:#fff;cursor:pointer;display:flex;flex-direction:column;overflow:hidden;
+          font-family:'Cafe24 Ssurround';font-size:52px;color:#48159c;transition:border-color .15s,transform .15s}
+        .p09-graph:hover{border-color:#48159c;transform:translateY(-6px)}
+        .p09-graph.is-selected{border-color:#ff2fc2}
+        .p09-graph b{flex:0 0 80px;display:flex;align-items:center;justify-content:center;padding-top:6px;font-weight:normal;background:#eef3fb}
+        .p09-graph span{flex:1 1 auto;display:block;padding:10px}
+        .p09-graph svg{width:100%;height:100%;display:block}
+
+        .p09-opt4 .card-btn{position:absolute;top:520px;width:720px}
+        .p09-opt4 .p09-a{left:220px}
+        .p09-opt4 .p09-b{left:980px}
+        .p09-opt4 .p09-c{left:220px;top:720px}
+        .p09-opt4 .p09-d{left:980px;top:720px}
+
+        .p09-opt5 .card-btn{position:absolute;left:210px;width:1500px;height:120px;font-size:50px;text-align:left;padding:10px 50px 4px}
+        .p09-opt5 .p09-a{top:520px}
+        .p09-opt5 .p09-b{top:720px}
+
+        .p09-hint-title{align-self:flex-start;margin:0;height:64px;padding:6px 32px 0;box-sizing:border-box;display:flex;align-items:center;background:#8278ff;border-radius:32px;font-family:'Cafe24 Ssurround';font-size:40px;color:#fff}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="quiz-stage">
+          <div class="step-flow">
+
+            <div class="step-panel p09-opt2">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q1.</span>
+                  <p class="quiz-ask">컴퓨터나 AI가 사람의 귀처럼 소리 정보를 입력하는 장치는 무엇일까요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz" data-wrong="카메라는 사람의 눈처럼, 시각 정보를 받아들이는 장치이고,<br>소리를 들어 수집하는 장치는 마이크예요.">
+                <button class="answer-pick card-btn is-quiz p09-a" data-correct="true">마이크</button>
+                <button class="answer-pick card-btn is-quiz p09-b" data-correct="false">카메라</button>
+              </div>
+            </div>
+
+            <div class="step-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q2.</span>
+                  <p class="quiz-ask">4가지의 소리 파도(음파) 중 가장 큰 소리를 나타내는 파도는 무엇일까요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz p09-graphs" data-wrong="파도의 높이가 위 아래로 높을수록 큰 소리가 나요.">
+                <button class="answer-pick p09-graph" data-correct="false" data-amp="0.12" data-cycles="4"><span></span></button>
+                <button class="answer-pick p09-graph" data-correct="false" data-amp="0.5" data-cycles="1.5"><span></span></button>
+                <button class="answer-pick p09-graph" data-correct="false" data-amp="0.5" data-cycles="4"><span></span></button>
+                <button class="answer-pick p09-graph" data-correct="true" data-amp="0.95" data-cycles="4"><span></span></button>
+              </div>
+            </div>
+
+            <div class="step-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q3.</span>
+                  <p class="quiz-ask">4가지의 소리 파도(음파) 중 가장 높은 소리를 나타내는 파도는 무엇일까요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz p09-graphs" data-wrong="파도의 간격이 촘촘하게 가까울수록 높은 소리가 나요.">
+                <button class="answer-pick p09-graph" data-correct="false" data-amp="0.6" data-cycles="1.5"><span></span></button>
+                <button class="answer-pick p09-graph" data-correct="true" data-amp="0.6" data-cycles="9"><span></span></button>
+                <button class="answer-pick p09-graph" data-correct="false" data-amp="0.2" data-cycles="4"><span></span></button>
+                <button class="answer-pick p09-graph" data-correct="false" data-amp="0.6" data-cycles="4"><span></span></button>
+              </div>
+            </div>
+
+            <div class="step-panel p09-opt4">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q4.</span>
+                  <p class="quiz-ask">AI비서를 부를 때 사용하는 말을 뭐라고 할까요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz" data-wrong="AI 비서에게 명령을 전달하기 전, 마이크를 깨우는 구글 어시스턴트의<br>정확한 호출어는 ‘오케이 구글’ 이에요.">
+                <button class="answer-pick card-btn p09-a" data-correct="false">고등어</button>
+                <button class="answer-pick card-btn p09-b" data-correct="false">오징어</button>
+                <button class="answer-pick card-btn p09-c" data-correct="true">호출어</button>
+                <button class="answer-pick card-btn p09-d" data-correct="false">광어</button>
+              </div>
+            </div>
+
+            <div class="step-panel p09-opt5">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q5.</span>
+                  <p class="quiz-ask">AI 비서에게 음성 명령을 내릴 때, AI가 내 뜻을 정확하게 이해하도록 하려면 어떻게 해야할까요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz" data-next="page10.html" data-wrong="모호하고 짧게 말하면 AI가 알아듣지 못하거나<br>다른 동작을 할 수 있어요.">
+                <button class="answer-pick card-btn p09-a" data-correct="true">원하고자 하는 명령을 구체적이고 정확하게 말한다.</button>
+                <button class="answer-pick card-btn p09-b" data-correct="false">작은 목소리로 최대한 간단하게 말한다.</button>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="ox-result-correct is-avatar is-off" data-sound="sound/correct.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct_gwa.png" alt=""></div>
+              <p class="avatar-popup-text">정답이에요!</p>
+              <div class="avatar-popup-extra"><img src="../../img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div>
+          <div class="ox-result-wrong is-avatar is-off" data-sound="sound/incorrect.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="p09-hint-title">다시 한번 생각해볼까요?</p>
+                <p class="avatar-popup-text is-small">문장을 다시 한 번 잘 읽어봐요.</p>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="퀴즈 풀기" data-next="page10.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+    // 음파 그래프 보기(Q2·Q3): 높이 data-amp, 촘촘함 data-cycles
+    document.querySelectorAll('.p09-graph').forEach(function (btn) {
+      btn.querySelector('span').innerHTML = waveSvg(Number(btn.dataset.amp), Number(btn.dataset.cycles), { width: 380, height: 300, stroke: 7, axis: true });
+    });
+  </script>
+</body>
+</html>

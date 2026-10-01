@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>음식 속에 숨겨진 정보를 찾아라!</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:url('img/p03_bg_round2.png') no-repeat}
+        .p03-opt{position:absolute;top:730px;width:220px;height:220px;border:0}
+        .p03-opt1{left:565px}
+        .p03-opt2{left:845px}
+        .p03-opt3{left:1125px}
+        .p03-food{position:absolute;top:535px;width:175px;height:145px;display:flex;align-items:center;justify-content:center;pointer-events:none}
+        .p03-food img{max-width:100%;max-height:100%}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main>
+          <div class="p03-food" style="left:790px;z-index:1"><img alt=""></div>
+          <div class="p03-food" style="left:897px;z-index:2"><img alt=""></div>
+          <div class="p03-food" style="left:1004px;z-index:3"><img alt=""></div>
+
+          <div class="answer-pick-quiz reveal-stagger" id="p03Quiz" data-delay="500" data-interval="300">
+            <button class="answer-pick pick-card p03-opt p03-opt1" data-key="chicken" aria-label="고기">
+              <img class="js-img-swap js-sfx" src="img/p02_opt_chicken.png" data-src-over="img/p02_opt_chicken_over.png" alt="고기">
+            </button>
+            <button class="answer-pick pick-card p03-opt p03-opt2" data-key="orange" aria-label="과일">
+              <img class="js-img-swap js-sfx" src="img/p02_opt_orange.png" data-src-over="img/p02_opt_orange_over.png" alt="과일">
+            </button>
+            <button class="answer-pick pick-card p03-opt p03-opt3" data-key="salmon" aria-label="생선">
+              <img class="js-img-swap js-sfx" src="img/p02_opt_salmon.png" data-src-over="img/p02_opt_salmon_over.png" alt="생선">
+            </button>
+          </div>
+
+          <div class="ox-result-correct is-avatar is-off" data-sound="sound/correct.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct_gwa.png" alt=""></div>
+              <p class="avatar-popup-text">정답이에요!</p>
+              <div class="avatar-popup-extra"><img src="../../img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div>
+          <div class="ox-result-wrong is-avatar is-off" data-sound="sound/incorrect.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text">다시 한번 살펴볼까요?</p>
+            </div>
+          </div>
+
+          <div class="avatar-modal p03-popup1 is-off">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <p class="avatar-card-title">정보 분석 완료!</p>
+                <p class="avatar-card-text">각각의 음식 하나하나를 데이터 조각으로 볼 수 있고,<br>이런 음식들이 담긴 접시를 여러 데이터 조각이 담긴<br>‘빅데이터’라고 볼 수 있어요.</p>
+              </div>
+              <a href="javascript:;" class="js-nav-effect avatar-card-btn" id="p03Popup1Arrow">
+                <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
+              </a>
+            </div>
+          </div>
+
+          <div class="avatar-modal p03-popup2 is-off">
+            <div class="avatar-card is-side">
+              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <p class="avatar-card-text">우리는 하나의 빅데이터 안에서<br>데이터 조각을 살펴보며<br>다양한 정보를 확인할 수 있어요.<br>이번에는 여러 개의 접시 속에 담긴 음식을<br>살펴볼까요?</p>
+              </div>
+              <a href="page04.html" class="js-nav-effect avatar-card-btn">
+                <img src="../../img/common/btn_start_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_start_small_on.png" data-src-over="../../img/common/btn_start_small_over.png" data-sound="sound/click.mp3" alt="시작하기">
+              </a>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="음식 속에 숨겨진 정보를 찾아라!" data-next="page04.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script>
+  (function () {
+    const keys = ['chicken', 'orange', 'salmon'];
+    const answer = keys[Math.floor(Math.random() * keys.length)];
+    document.querySelectorAll('.p03-food img').forEach((img) => { img.src = 'img/p02_' + answer + '.png'; });
+    document.querySelectorAll('.p03-opt').forEach((btn) => {
+      const img = btn.querySelector('img');
+      const right = btn.dataset.key === answer;
+      btn.dataset.correct = right ? 'true' : 'false';
+      img.dataset.sound = right ? 'sound/correct.mp3' : 'sound/incorrect.mp3';
+      if (right) img.dataset.srcOn = 'img/p02_opt_' + answer + '_on.png';
+    });
+  })();
+  </script>
+  <script src="../../js/common.js"></script>
+  <script>
+    document.querySelector('#p03Quiz [data-correct="true"]').addEventListener('click', function () {
+      setTimeout(function () {
+        document.querySelector('.p03-popup1').classList.remove('is-off');
+      }, 2000);
+    });
+    document.getElementById('p03Popup1Arrow').addEventListener('click', function () {
+      document.querySelector('.p03-popup1').classList.add('is-off');
+      document.querySelector('.p03-popup2').classList.remove('is-off');
+    });
+  </script>
+</body>
+</html>

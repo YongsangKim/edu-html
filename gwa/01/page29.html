@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>정답을 부탁해!</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서 44p(game02_02) + 45p(정답) + 46p(오답)
+           디자인(44~46p-ok.png)이 아직 없어 뼈대만 잡아둔 상태.
+           실제 디자인이 나오면 p29_bg.png와 아래 좌표만 교체하면 됨 */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:#c7d6ea}
+
+        .p29-box{position:absolute;border:8px dashed #8aa0c8;border-radius:24px;background:#fff;
+          display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;box-sizing:border-box}
+        .p29-box p{margin:0;font-family:'Cafe24 Ssurround';font-size:38px;line-height:1.35;color:#1b1738}
+
+        .p29-mail{left:80px;top:60px;width:740px;height:420px}
+        .p29-data{left:860px;top:60px;width:980px;height:420px}
+        .p29-clock{left:1600px;top:520px;width:240px;height:240px}
+
+        .p29-guide{position:absolute;left:80px;top:520px;width:740px;height:90px;
+          display:flex;align-items:center;justify-content:center}
+        .p29-guide span{font-family:'Cafe24 Ssurround';font-size:46px;color:#1b1738}
+
+        .p29-ans{position:absolute;width:700px;height:120px;cursor:pointer;
+          border:8px solid #2f6fed;border-radius:20px;background:linear-gradient(180deg,#fff 0%,#e9d8ff 100%);
+          font-family:'Cafe24 Ssurround';font-size:40px;color:#3b1e87;letter-spacing:-0.04em}
+        .p29-ans.is-wrong{animation:fix-word-shake .3s ease}
+        .p29-ans-1{left:80px;top:640px}
+        .p29-ans-2{left:840px;top:640px}
+
+        /* 오답 안내 — 2초 노출 후 자동 닫힘 */
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main>
+
+          <div class="p29-box p29-mail"><p id="p29Mail"></p></div>
+          <div class="p29-box p29-data"><p id="p29Data"></p></div>
+          <div class="p29-box p29-clock"><p id="p29Clock"></p></div>
+
+          <div class="p29-guide"><span>어떤 답을 알려줘야 할까요?</span></div>
+
+          <button class="p29-ans p29-ans-1" id="p29Ans1"></button>
+          <button class="p29-ans p29-ans-2" id="p29Ans2"></button>
+
+          <div class="avatar-modal is-off" id="p29Wrong">
+            <div class="avatar-card is-compact">
+              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
+            <div class="avatar-card-body is-side"><p class="avatar-card-text">날씨 자료를 다시 살펴볼까요?</p></div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="정답을 부탁해!" data-next="page30.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  /* 기획서 44p — 의뢰 메일 5개를 무작위 순서로 풀고, 맞힐 때마다 시계가 2시간씩 진행됨
+     - 답 버튼 위치는 항상 고정(기획서), 메일 등장 순서만 무작위
+     - 정답이면 정답음 + 시계 이동 후 다음 메일, 오답이면 안내가 2초 떴다 닫힘
+     - 5개를 모두 풀면 page30(종료)으로 이동
+     - 날씨 자료는 기획서의 예시 값을 그대로 넣어둠(디자인 나오면 표/지도 이미지로 교체) */
+  (function () {
+    const WEATHER = [
+      { city: '부산', sky: '비',   temp: 20 },
+      { city: '대구', sky: '비',   temp: 27 },
+      { city: '인천', sky: '구름', temp: 26 },
+      { city: '대전', sky: '해',   temp: 23 },
+      { city: '울산', sky: '비',   temp: 25 },
+      { city: '서울', sky: '해',   temp: 28 },
+      { city: '제주', sky: '구름', temp: 24 },
+    ];
+
+    const MAILS = [
+      { q: '부산의 기온은 어떻게 될까요?',
+        answers: ['20도입니다.', '27도입니다.'], correct: 0 },
+      { q: '서울의 날씨는 어떻게 될까요?',
+        answers: ['맑아요.', '비가 와요.'], correct: 0 },
+      { q: '제주도로 소풍을 가려고 하는데, 우산이 필요할까요?',
+        answers: ['아니요. 우산이 필요 없어요.', '비가 올 예정이라 우산이 필요해요.'], correct: 0 },
+      { q: '대구와 제주 중 더 따뜻한 곳은 어디일까요?',
+        answers: ['대구입니다.', '제주입니다.'], correct: 0 },
+      { q: '기온이 가장 낮은 곳은 어디일까요?',
+        answers: ['부산입니다.', '서울입니다.'], correct: 0 },
+    ];
+
+    const CLOCK = ['09시', '11시', '13시', '15시', '17시', '18시'];
+
+    const mailEl = document.getElementById('p29Mail');
+    const dataEl = document.getElementById('p29Data');
+    const clockEl = document.getElementById('p29Clock');
+    const ans1 = document.getElementById('p29Ans1');
+    const ans2 = document.getElementById('p29Ans2');
+    const wrongModal = document.getElementById('p29Wrong');
+
+    const correctSound = new Audio(ASSET_BASE + 'sound/correct.mp3');
+    const wrongSound = new Audio(ASSET_BASE + 'sound/incorrect.mp3');
+
+    function shuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    const queue = shuffle(MAILS);
+    let index = 0;
+    let locked = false;
+
+    dataEl.textContent = WEATHER.map((w) => w.city + ' ' + w.sky + ' ' + w.temp + '도').join('  /  ');
+
+    function render() {
+      const m = queue[index];
+      mailEl.textContent = m.q;
+      ans1.textContent = m.answers[0];
+      ans2.textContent = m.answers[1];
+      clockEl.textContent = CLOCK[index];
+      locked = false;
+    }
+
+    [ans1, ans2].forEach((btn, i) => {
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        const m = queue[index];
+
+        if (i === m.correct) {
+          locked = true;
+          correctSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+          index += 1;
+          clockEl.textContent = CLOCK[Math.min(index, CLOCK.length - 1)];
+          setTimeout(() => {
+            if (index >= queue.length) {
+              navigateTo('page30.html');
+              return;
+            }
+            render();
+          }, 900);
+          return;
+        }
+
+        wrongSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+        btn.classList.remove('is-wrong');
+        void btn.offsetWidth;
+        btn.classList.add('is-wrong');
+        wrongModal.classList.remove('is-off');
+        clearTimeout(wrongModal.__hideTimer);
+        wrongModal.__hideTimer = setTimeout(() => wrongModal.classList.add('is-off'), 2000);
+      });
+    });
+
+    render();
+  })();
+  </script>
+</body>
+</html>

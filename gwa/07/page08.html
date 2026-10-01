@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 허브의 생각상자! 조건문 코딩하기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 20~27p. 캐릭터 말풍선(요구사항)을 보고 조건문 빈칸에 알맞은 카드를 골라 넣기, 5라운드(5라운드는 빈칸 2개 심화).
+           맞으면 빈칸이 채워지고 정답 그림 팝업(img/p08_illust_r{1~5}.png), 틀리면 흔들림 + 오답 팝업 2초. 끝나면 완료 안내 2단계. 캐릭터는 임시로 sa/06 캐릭터 복사본 */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p08-guide{position:absolute;margin:0;left:560px;top:30px;width:1300px;height:90px;box-sizing:border-box;padding:6px 30px 0;display:flex;align-items:center;justify-content:center;
+          background:#91b9e7;border:solid 5px #1b1738;border-radius:45px;box-shadow:0 10px 0 0 #becde7;font-family:'Cafe24 Ssurround';font-size:46px;color:#fff;letter-spacing:-0.04em}
+        .p08-bubble{position:absolute;margin:0;left:30px;top:30px;width:500px;min-height:250px;box-sizing:border-box;padding:30px;display:flex;align-items:center;justify-content:center;text-align:center;
+          background:#fefbf9;border:solid 5px #48159c;border-radius:30px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';font-size:40px;line-height:1.3;color:#48159c;letter-spacing:-0.05em;word-break:keep-all}
+        .p08-bubble:before{content:'';position:absolute;left:200px;bottom:-58px;width:100px;height:70px;background:url('../../img/common/p_guide_tail.png') 0 0 / contain no-repeat}
+        .p08-character{position:absolute;left:30px;top:370px;width:480px;height:570px;display:flex;align-items:flex-end;justify-content:center}
+        .p08-character img{max-width:100%;max-height:100%;object-fit:contain}
+
+        .p08-sentence{position:absolute;left:560px;top:160px;width:1300px;height:250px;box-sizing:border-box;padding:20px 40px;display:flex;flex-wrap:wrap;align-items:center;align-content:center;justify-content:center;gap:12px 8px;
+          background:#fff;border:solid 6px #48159c;border-radius:40px;box-shadow:0 14px 0 0 #bbc1e7;font-family:'Cafe24 Ssurround';font-size:48px;line-height:1.3;color:#1b1738;letter-spacing:-0.05em;word-break:keep-all}
+        .p08-blank{display:inline-flex;align-items:center;justify-content:center;min-width:300px;height:86px;padding:4px 24px 0;box-sizing:border-box;border:dashed 5px #8278ff;border-radius:20px;background:#eef3fb;color:#d168fb}
+        .p08-blank.is-filled{border:solid 5px #ffb800;background:#fff3c9;color:#1b1738;animation:p08-pop .4s ease}
+        @keyframes p08-pop{0%{transform:scale(.9)}60%{transform:scale(1.06)}100%{transform:scale(1)}}
+
+        .p08-options{position:absolute;left:560px;top:470px;width:1300px;display:flex;flex-direction:column;align-items:center;gap:44px}
+        .p08-options.is-grid{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:44px 40px}
+        .p08-opt.card-btn{width:1100px;height:110px;font-size:48px;line-height:1.1;padding:10px 20px 4px}
+        .p08-options.is-grid .p08-opt.card-btn{width:620px;font-size:38px}
+        .p08-opt.is-wrong{animation:fix-word-shake .3s ease}
+        .p08-opt.is-used{color:#d168fb;box-shadow:0 4px 0 0 #a9a2ff,0 3px 0 10px #035fd3;transform:translateY(10px);pointer-events:none}
+        .p08-options.is-locked{pointer-events:none}
+
+        .p08-next{padding:0;border:0;background:none;cursor:pointer}
+        .p08-next img{display:block}
+        #p08Right .photo-card-img{background:none;object-fit:contain}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="p08-guide">알맞은 ~이 ~한다 카드를 빈칸에 연결해 보세요.</p>
+          <p class="p08-bubble" id="p08Bubble"></p>
+          <div class="p08-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+          <div class="p08-sentence" id="p08Sentence"></div>
+          <div class="p08-options" id="p08Options"></div>
+
+          <div class="ox-result-wrong is-avatar is-off" id="p08Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text is-pill">다시 한번 해볼까요?</p>
+            </div>
+          </div>
+
+          <div class="photo-modal is-off" id="p08Right">
+            <div class="photo-card">
+              <img class="photo-card-img" id="p08RightImg" alt="">
+              <p class="photo-card-title">정답!</p>
+              <p class="photo-card-text" id="p08RightText"></p>
+            </div>
+            <button class="p08-next" id="p08RightNext">
+              <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
+            </button>
+          </div>
+
+          <div class="avatar-modal is-off" id="p08Done">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-title">조건문 코딩을 모두 완료했어!</p>
+                    <p class="avatar-card-text">이렇게 센서가 알려주는 [~가 ~하면] 조건에 맞춰, 우리가 [~를 한다]라는 규칙을 AI 허브에 코딩해 두면 AI 허브는 실시간으로 분석받고 판단해!</p>
+                  </div>
+                  <a href="page09.html" class="js-nav-effect avatar-card-btn">
+                    <img src="../../img/common/btn_next_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_small_on.png" data-src-over="../../img/common/btn_next_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">이제 사물인터넷(IOT)의 작동 원리를 완벽하게 익혔으니, 스마트홈 앱을 사용하여 코딩을 직접 해보도록 할까?</p>
+                  </div>
+                  <a href="page09.html" class="js-nav-effect avatar-card-btn">
+                    <img src="../../img/common/btn_next_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_small_on.png" data-src-over="../../img/common/btn_next_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="AI 허브의 생각상자! 조건문 코딩하기" data-next="page09.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    // parts: 문자열은 그대로, 숫자는 빈칸 번호. options의 slot이 그 빈칸의 정답
+    const ROUNDS = [
+      { ask: '“온도가 30도가 넘으면 에어컨이 자동으로 켜지게 하고 싶어.”',
+        parts: ['온도 센서가 30도 이상을 감지하면,', 0],
+        options: [
+          { text: '스마트 TV가 추천 영상을 틀어준다.' },
+          { text: '스마트 에어컨이 자동으로 켜진다.', slot: 0 },
+          { text: '제습기가 자동으로 켜진다.' }
+        ],
+        right: '온도가 30도 이상으로 올라가면 스마트 에어컨이 자동으로 켜져요.' },
+      { ask: '“음식 냄새가 나면 공기청정기가 강력 모드로 작동하게 하고 싶어.”',
+        parts: ['공기질 측정기가 냄새를 감지하면,', 0],
+        options: [
+          { text: '스마트 에어컨이 자동으로 켜진다.' },
+          { text: '스마트 공기청정기가 강력모드로 작동한다.', slot: 0 },
+          { text: '제습기가 자동으로 켜진다.' }
+        ],
+        right: '음식 냄새가 감지되면 공기청정기가 강력 모드로 작동해요.' },
+      { ask: '“현관에 사람이 들어오면, 현관조명이 켜지게 하고 싶어.”',
+        parts: [0, '에 사람이 인식되면, 현관조명을 켠다.'],
+        options: [
+          { text: '스마트 에어컨이 자동으로 켜진다.' },
+          { text: '스마트 공기청정기가 강력모드로 작동한다.' },
+          { text: '현관에 있는 동작인식 센서', slot: 0 }
+        ],
+        right: '현관 센서에 사람이 감지되면 현관 조명이 자동으로 켜져요.' },
+      { ask: '“습도가 60%이상이 되면, 제습기가 자동으로 켜지면 좋겠어.”',
+        parts: [0, ', 제습기가 자동으로 켜진다.'],
+        options: [
+          { text: '습도 센서가 60%를 느끼면', slot: 0 },
+          { text: '스마트 공기청정기가 강력모드로 작동한다.' },
+          { text: '현관에 있는 동작인식 센서에' }
+        ],
+        right: '습도가 60% 이상으로 올라가면 제습기가 자동으로 켜져요.' },
+      { ask: '“태양이 떠오르면, 커튼이 열리면 좋겠어.”',
+        parts: [0, ',', 1],
+        grid: true,
+        options: [
+          { text: '음식 냄새가 나면' },
+          { text: '에어컨이 강력모드로 작동한다.' },
+          { text: '빛센서에 빛이 인식되면', slot: 0 },
+          { text: '스마트 블라인드가 열린다.', slot: 1 },
+          { text: '동작인식 센서에 움직임이 감지되면' },
+          { text: '경보기가 울린다.' }
+        ],
+        right: '아침 햇빛이 감지되면 스마트 블라인드가 자동으로 열려요.' }
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const sentence = $('p08Sentence');
+    const optionsBox = $('p08Options');
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+
+    let round = 0;
+    let blanks = [];
+    let left = 0;
+
+    function renderRound() {
+      const r = ROUNDS[round];
+      $('p08Bubble').textContent = r.ask;
+      sentence.innerHTML = '';
+      blanks = [];
+      r.parts.forEach((p) => {
+        if (typeof p === 'number') {
+          const b = document.createElement('span');
+          b.className = 'p08-blank';
+          blanks[p] = b;
+          sentence.appendChild(b);
+        } else {
+          sentence.appendChild(document.createTextNode(p));
+        }
+      });
+      left = blanks.length;
+
+      optionsBox.innerHTML = '';
+      optionsBox.className = 'p08-options' + (r.grid ? ' is-grid' : '');
+      r.options.forEach((o) => {
+        const btn = document.createElement('button');
+        btn.className = 'card-btn p08-opt';
+        btn.textContent = o.text;
+        btn.addEventListener('click', () => pick(btn, o));
+        optionsBox.appendChild(btn);
+      });
+    }
+
+    function pick(btn, o) {
+      if (o.slot === undefined) {
+        playWrong();
+        btn.classList.remove('is-wrong');
+        void btn.offsetWidth;
+        btn.classList.add('is-wrong');
+        flashLayer($('p08Wrong'));
+        return;
+      }
+      playCorrect();
+      btn.classList.add('is-used');
+      blanks[o.slot].textContent = o.text;
+      blanks[o.slot].classList.add('is-filled');
+      left -= 1;
+      if (left > 0) return;
+      optionsBox.classList.add('is-locked');
+      setTimeout(() => {
+        $('p08RightImg').src = 'img/p08_illust_r' + (round + 1) + '.png';
+        $('p08RightText').textContent = ROUNDS[round].right;
+        $('p08Right').classList.remove('is-off');
+      }, 1000);
+    }
+
+    $('p08RightNext').addEventListener('click', () => {
+      $('p08Right').classList.add('is-off');
+      resetImageSwap($('p08RightNext'));
+      if (round === ROUNDS.length - 1) {
+        $('p08Done').classList.remove('is-off');
+        return;
+      }
+      round += 1;
+      renderRound();
+    });
+
+    renderRound();
+  })();
+  </script>
+</body>
+</html>

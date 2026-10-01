@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>다양한 매체에서 날씨 데이터 수집하기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:url('img/p06_bg.png') no-repeat}
+
+        /* 기사 카드 — 배경에 그려진 기사 위에 같은 그림을 얹어 드래그할 수 있게 함.
+           좌표는 디자인 9p에서 측정한 값 */
+        .p06-news{position:absolute;padding:0;margin:0;border:none;background:none;
+          cursor:grab;touch-action:none;transform-origin:50% 50%;z-index:20}
+        .p06-news img{display:block;width:100%;height:auto;pointer-events:none}
+        .p06-news.is-grabbed{cursor:grabbing;z-index:60;outline:8px solid #2f6fed;outline-offset:4px;border-radius:12px}
+        .p06-news.is-filed{opacity:0;transform:scale(.25);transition:opacity .35s ease,transform .35s ease;pointer-events:none}
+
+        .p06-news-main{left:78px;top:210px;width:820px}
+        .p06-news-01{left:78px;top:636px;width:397px}
+        .p06-news-02{left:490px;top:636px;width:410px}
+
+        /* 많이 본 뉴스 5줄 — 숫자는 배경에 두고 제목만 얹어 드래그함 */
+        .p06-list{left:932px;width:218px}
+        .p06-list-1{top:280px}
+        .p06-list-2{top:345px}
+        .p06-list-3{top:409px}
+        .p06-list-4{top:472px}
+        .p06-list-5{top:538px}
+
+        /* 보관함 폴더(드롭 영역) — 배경의 폴더 위에 투명하게 겹침 */
+        .p06-folder{position:absolute;left:1160px;top:350px;width:740px;height:545px;border-radius:40px}
+        .p06-folder.is-over{outline:10px solid #ffd83d;outline-offset:-10px}
+
+        /* 폴더 위에서 터지는 별 효과 */
+        .p06-star{position:absolute;left:1470px;top:560px;width:120px;height:120px;
+          background:url('img/p02_star.png') 0 0 / contain no-repeat;
+          opacity:0;pointer-events:none;z-index:70}
+        .p06-star.is-pop{animation:p06-pop .7s ease-out}
+        @keyframes p06-pop{
+          0%{opacity:1;transform:scale(.3) rotate(0deg)}
+          70%{opacity:1;transform:scale(1.5) rotate(200deg)}
+          100%{opacity:0;transform:scale(1.9) rotate(260deg)}
+        }
+
+        /* 모달 배경은 정답/오답을 따로 씀 — 각각 다른 이미지로 교체할 수 있게 분리 */
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main>
+
+          <div class="p06-folder" id="p06Folder"></div>
+          <div class="p06-star" id="p06Star"></div>
+
+          <button class="p06-news p06-news-main" data-correct="true">
+            <img src="img/p06_news_main.png" alt="전국 흐리고 오후부터 비, 강수 확률 70%"></button>
+          <button class="p06-news p06-news-01" data-correct="false">
+            <img src="img/p06_news_01.png" alt="오후부터 일부 지역 비, 외출 시 우산 필요"></button>
+          <button class="p06-news p06-news-02" data-correct="true">
+            <img src="img/p06_news_02.png" alt="서울 낮 최고 24도, 습도 75% 안팎"></button>
+
+          <button class="p06-news p06-list p06-list-1" data-correct="false">
+            <img src="img/p06_list_01.png" alt="전국 흐리고 오후부터 비, 강수 확률 70%"></button>
+          <button class="p06-news p06-list p06-list-2" data-correct="false">
+            <img src="img/p06_list_02.png" alt="오후부터 일부 지역 비, 외출 시 우산 필요"></button>
+          <button class="p06-news p06-list p06-list-3" data-correct="false">
+            <img src="img/p06_list_03.png" alt="서울 낮 최고 24도, 습도 75% 안팎"></button>
+          <button class="p06-news p06-list p06-list-4" data-correct="true">
+            <img src="img/p06_list_04.png" alt="빗길 교통사고 주의, 운전자 감속 운행 당부"></button>
+          <button class="p06-news p06-list p06-list-5" data-correct="false">
+            <img src="img/p06_list_05.png" alt="주말까지 잦은 비 소식, 농작물 관리에 유의"></button>
+
+          <!-- 오답: 2초 노출 후 자동으로 닫힘(기획서 10p) -->
+          <div class="avatar-modal is-off" id="p06Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text is-pill">뉴스 기사를 다시 한 번 읽어볼까요?</p>
+            </div>
+          </div>
+
+          <!-- 정답: 3개를 모두 담으면 뜨고, 다음 버튼으로 영상 수집 활동으로 이동(기획서 11p) -->
+          <div class="avatar-modal is-off" id="p06Correct">
+            <div class="avatar-card is-center">
+              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
+            <div class="avatar-card-body">
+<p class="avatar-card-title">잘했어요!</p>
+<p class="avatar-card-text">이제 영상 매체에서 자료를 수집해볼까요?</p>
+</div>
+            <a href="page07.html" class="js-nav-effect js-sfx avatar-card-btn">
+              <img src="../../img/common/btn_next_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_small_on.png" data-src-over="../../img/common/btn_next_small_over.png" data-sound="sound/click.mp3" alt="다음">
+            </a>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="다양한 매체에서 날씨 데이터 수집하기" data-next="page07.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  /* 기획서 9p(activity01_01) + 10p(오답) + 11p(정답)
+     - 날씨 데이터가 담긴 기사 3개를 보관함 폴더로 드래그해 담는 활동
+     - 기사를 잡으면 아웃라인이 생기고 크기가 작아짐
+     - 정답 기사를 폴더에 놓으면 별 효과 + 정답음, 기사는 폴더로 들어감
+     - 오답 기사를 놓으면 오답음과 함께 안내가 2초 떴다가 자동으로 닫히고 기사는 제자리로
+     - 정답 3개를 모두 담으면 정답 모달이 뜨고, 다음 버튼으로 page07(영상 수집)로 이동
+     - 정답 판정: 메인 기사, 아래 카드 중 02, 많이 본 뉴스 4번째 이미지 3개만 정답
+       (자리를 섞어도 data-correct가 이미지에 붙어 있어 그대로 정답 처리)
+     - 기사 이미지는 디자인에서 잘라낸 임시본 */
+  (function () {
+    const newsList = Array.from(document.querySelectorAll('.p06-news'));
+    const folder = document.getElementById('p06Folder');
+    const star = document.getElementById('p06Star');
+    const wrongModal = document.getElementById('p06Wrong');
+    const correctModal = document.getElementById('p06Correct');
+
+    const correctSound = new Audio(ASSET_BASE + 'sound/correct.mp3');
+    const wrongSound = new Audio(ASSET_BASE + 'sound/incorrect.mp3');
+
+    const TOTAL_CORRECT = newsList.filter((n) => n.dataset.correct === 'true').length;
+    let filed = 0;
+    let locked = false;
+
+    const rectOf = (el) => el.getBoundingClientRect();
+    const overlaps = (a, b) =>
+      a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+
+    /* 기사 위치는 매 활동 무작위(기획서 9p).
+       크기가 다른 것끼리 섞이면 안 되므로 같은 모양끼리만 자리를 바꾼다.
+       - 아래 카드 2개는 너비가 달라 순서만 바꿔 왼쪽부터 간격을 두고 배치
+       - 많이 본 뉴스 5줄끼리 (숫자는 배경에 고정이라 제목만 자리가 바뀜)
+       메인 기사는 혼자 크기가 달라 자리를 바꾸지 않는다 */
+    function shuffleWithin(selector) {
+      const items = Array.from(document.querySelectorAll(selector));
+      if (items.length < 2) return;
+
+      const spots = items.map((el) => {
+        const cs = getComputedStyle(el);
+        return { left: parseFloat(cs.left), top: parseFloat(cs.top) };
+      });
+
+      const order = spots.map((_, i) => i);
+      for (let i = order.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [order[i], order[j]] = [order[j], order[i]];
+      }
+
+      items.forEach((el, k) => {
+        const s = spots[order[k]];
+        el.style.left = s.left + 'px';
+        el.style.top = s.top + 'px';
+      });
+    }
+
+    const cards = [document.querySelector('.p06-news-01'), document.querySelector('.p06-news-02')];
+    if (Math.random() < 0.5) cards.reverse();
+    let cardLeft = 78;
+    cards.forEach((el) => {
+      el.style.left = cardLeft + 'px';
+      cardLeft += parseFloat(getComputedStyle(el).width) + 16;
+    });
+    shuffleWithin('.p06-list');
+
+    newsList.forEach((el) => {
+      el.dataset.homeLeft = parseFloat(getComputedStyle(el).left);
+      el.dataset.homeTop = parseFloat(getComputedStyle(el).top);
+      // 드래그 시작값을 el.style에서 읽으므로, 자리 섞기에서 빠진 메인 기사까지
+      // 전부 인라인 좌표를 채워둔다(없으면 parseFloat가 NaN이 됨)
+      el.style.left = el.dataset.homeLeft + 'px';
+      el.style.top = el.dataset.homeTop + 'px';
+      el.querySelectorAll('img').forEach((im) => { im.draggable = false; });
+      el.addEventListener('dragstart', (e) => e.preventDefault());
+
+      let dragging = false;
+      let startX = 0, startY = 0, startLeft = 0, startTop = 0;
+      let pendingX = 0, pendingY = 0, frame = 0;
+
+      const flush = () => {
+        frame = 0;
+        if (!dragging) return;
+        el.style.left = pendingX + 'px';
+        el.style.top = pendingY + 'px';
+      };
+
+      const goHome = () => {
+        el.style.left = el.dataset.homeLeft + 'px';
+        el.style.top = el.dataset.homeTop + 'px';
+        el.style.transform = 'scale(1)';
+      };
+
+      el.addEventListener('pointerdown', (e) => {
+        if (locked || el.classList.contains('is-filed')) return;
+        dragging = true;
+        el.setPointerCapture(e.pointerId);
+        el.classList.add('is-grabbed');
+        // 기획서는 "선택하면 작아짐"이지만, 배경에 기사가 그려져 있어 많이 줄이면
+        // 뒤에 있던 같은 기사가 드러나 보인다. 기사 없는 배경을 받으면 .55로 되돌리면 됨
+        el.style.transform = 'scale(.9)';
+        startX = e.clientX;
+        startY = e.clientY;
+        startLeft = parseFloat(el.style.left);
+        startTop = parseFloat(el.style.top);
+      });
+
+      el.addEventListener('pointermove', (e) => {
+        if (!dragging) return;
+        // 화면 이동량을 현재 스테이지 배율로 나눠 1920x1080 좌표계 이동량으로 변환
+        pendingX = startLeft + (e.clientX - startX) / currentScale;
+        pendingY = startTop + (e.clientY - startY) / currentScale;
+        if (!frame) frame = requestAnimationFrame(flush);
+        folder.classList.toggle('is-over', overlaps(rectOf(el), rectOf(folder)));
+      });
+
+      const endDrag = () => {
+        if (!dragging) return;
+        if (frame) {
+          cancelAnimationFrame(frame);
+          frame = 0;
+          el.style.left = pendingX + 'px';
+          el.style.top = pendingY + 'px';
+        }
+        dragging = false;
+        el.classList.remove('is-grabbed');
+        folder.classList.remove('is-over');
+
+        if (!overlaps(rectOf(el), rectOf(folder))) {
+          goHome();
+          return;
+        }
+
+        if (el.dataset.correct === 'true') {
+          el.classList.add('is-filed');
+          correctSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+          star.classList.remove('is-pop');
+          void star.offsetWidth;
+          star.classList.add('is-pop');
+
+          filed += 1;
+          if (filed >= TOTAL_CORRECT) {
+            locked = true;
+            setTimeout(() => correctModal.classList.remove('is-off'), 800);
+          }
+        } else {
+          wrongSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+          goHome();
+          wrongModal.classList.remove('is-off');
+          clearTimeout(wrongModal.__hideTimer);
+          wrongModal.__hideTimer = setTimeout(() => wrongModal.classList.add('is-off'), 2000);
+        }
+      };
+
+      el.addEventListener('pointerup', endDrag);
+      el.addEventListener('pointercancel', endDrag);
+    });
+  })();
+  </script>
+</body>
+</html>

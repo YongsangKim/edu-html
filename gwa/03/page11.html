@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>퀴즈 풀기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px;}
+        /* 기획서(최종본) 37~42p. Q1 2지선다, Q2·Q4·Q5 O/X(공용 아이콘), Q3 4지선다. 오답은 문항별 힌트(data-wrong) */
+        .p11-opt{position:absolute;top:590px;margin-left:10px}
+        .p11-opt1{left:400px}
+        .p11-opt2{left:1080px}
+
+        .p11-ox{position:absolute;top:470px;width:360px;height:360px;padding:0;border:0;background:none;cursor:pointer}
+        .p11-ox img{width:100%;height:100%;object-fit:contain;display:block}
+        .p11-o{left:480px}
+        .p11-x{left:1080px}
+
+        .p11-q3 .p11-opt{width:380px;margin-left:0}
+        .p11-q3-opt1{left:110px}
+        .p11-q3-opt2{left:550px}
+        .p11-q3-opt3{left:990px}
+        .p11-q3-opt4{left:1430px}
+        /* 오답 팝업 위 "힌트" 이름표. 힌트 문구(.avatar-popup-text)는 공용 기능 V가 문항별 data-wrong으로 바꿔 넣음 */
+        .p11-hint-title{align-self:flex-start;margin:0;height:64px;padding:6px 32px 0;box-sizing:border-box;display:flex;align-items:center;background:#8278ff;border-radius:32px;font-family:'Cafe24 Ssurround';font-size:40px;color:#fff}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="quiz-stage">
+          <div class="step-flow">
+
+            <div class="step-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q1.</span>
+                  <p class="quiz-ask">인터넷에서 날씨 정보를 모으는 행동을 뭐라고 할까요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz" data-wrong="데이터 조각들이 엄청나게 많이 모인 것을<br>‘빅데이터’라고 해요!">
+                <button class="answer-pick card-btn is-quiz p11-opt p11-opt1" data-correct="true">빅데이터</button>
+                <button class="answer-pick card-btn is-quiz p11-opt p11-opt2" data-correct="false">조각데이터</button>
+              </div>
+            </div>
+
+            <div class="step-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q2.</span>
+                  <p class="quiz-ask">데이터에 이상하거나 틀린 내용이 섞여 있으면 AI의 분석 결과에 영향을 줄 수 있을까요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz" data-wrong="틀린 내용이 들어가면 AI도 <br>잘못된 결과를 낼 수 있어요!">
+                <button class="answer-pick p11-ox p11-o" data-correct="true" aria-label="O">
+                  <img class="js-img-swap" src="../../img/common/icon_o.png" data-src-on="../../img/common/icon_o_on.png" alt="O">
+                </button>
+                <button class="answer-pick p11-ox p11-x" data-correct="false" aria-label="X">
+                  <img class="js-img-swap" src="../../img/common/icon_x.png" data-src-on="../../img/common/icon_x_on.png" alt="X">
+                </button>
+              </div>
+            </div>
+
+            <div class="step-panel p11-q3">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q3.</span>
+                  <p class="quiz-ask">엄청나게 많은 데이터 속에서 규칙이나 숨은 비밀을 찾아내는 것을 뭐라고 할까요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz" data-wrong="데이터 속에서 숨은 규칙을 찾아내는 것은<br>보물을 찾는 것(마이닝)과 같아요!">
+                <button class="answer-pick card-btn is-quiz is-long p11-opt p11-q3-opt1" data-correct="false">데이터 수집</button>
+                <button class="answer-pick card-btn is-quiz is-long p11-opt p11-q3-opt2" data-correct="true">데이터 마이닝</button>
+                <button class="answer-pick card-btn is-quiz is-long p11-opt p11-q3-opt3" data-correct="false">데이터 정리</button>
+                <button class="answer-pick card-btn is-quiz is-long p11-opt p11-q3-opt4" data-correct="false">데이터 시각화</button>
+              </div>
+            </div>
+
+            <div class="step-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q4.</span>
+                  <p class="quiz-ask">데이터에서 날씨가 바뀌는 규칙을 찾아내면, 앞으로 어떤 옷을 입어야 할지 결정하는 데 도움이 될까요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz" data-wrong="날씨 변화의 규칙을 알면 내일 일을<br>미리 준비할 수 있어요!">
+                <button class="answer-pick p11-ox p11-o" data-correct="true" aria-label="O">
+                  <img class="js-img-swap" src="../../img/common/icon_o.png" data-src-on="../../img/common/icon_o_on.png" alt="O">
+                </button>
+                <button class="answer-pick p11-ox p11-x" data-correct="false" aria-label="X">
+                  <img class="js-img-swap" src="../../img/common/icon_x.png" data-src-on="../../img/common/icon_x_on.png" alt="X">
+                </button>
+              </div>
+            </div>
+
+            <div class="step-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q5.</span>
+                  <p class="quiz-ask">수많은 데이터에서 규칙을 찾을 때, 사람이 혼자 찾는 것보다 AI를 사용하는 것이 더 느릴까요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz" data-next="page12.html" data-wrong="AI는 엄청나게 빠른 속도로<br>데이터를 찾아줄 수 있어요!">
+                <button class="answer-pick p11-ox p11-o" data-correct="false" aria-label="O">
+                  <img class="js-img-swap" src="../../img/common/icon_o.png" data-src-on="../../img/common/icon_o_on.png" alt="O">
+                </button>
+                <button class="answer-pick p11-ox p11-x" data-correct="true" aria-label="X">
+                  <img class="js-img-swap" src="../../img/common/icon_x.png" data-src-on="../../img/common/icon_x_on.png" alt="X">
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="ox-result-correct is-avatar is-off" data-sound="sound/correct.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct_gwa.png" alt=""></div>
+              <p class="avatar-popup-text">정답이에요!</p>
+              <div class="avatar-popup-extra"><img src="../../img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div>
+          <div class="ox-result-wrong is-avatar is-off" data-sound="sound/incorrect.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="p11-hint-title">힌트</p>
+                <p class="avatar-popup-text is-small">문장을 다시 한 번 잘 읽어봐요.</p>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="퀴즈 풀기" data-next="page12.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+</body>
+</html>

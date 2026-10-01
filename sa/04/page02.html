@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마음 톡톡! 감정 찾기 게임</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 와이어프레임(채팅 UI를 CSS로 직접 그림).
+           기획서 3~10p를 한 페이지로 합침: 채팅 목록 <-> 4개 문제 <-> 온도계 모달.
+           채팅방은 순서 상관없이 다시 들어올 수 있고 온도계 진행도가 유지돼야
+           해서 페이지를 쪼개지 않고 DOM 전환으로 처리 */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:#dbe9f7}
+        .p02-screen{position:absolute;left:0;top:0;width:1920px;height:960px}
+        .p02-screen.is-off{display:none}
+
+        .p02-head{position:absolute;left:0;top:52px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:70px;color:#1b1738;letter-spacing:-0.04em}
+
+        /* ---- 채팅 목록(기획서 3p / 7p): 위 제목 / 패널 상단 '채팅' 바 / 줄마다 이름 원+미리보기 한 줄+보기 버튼 ---- */
+        .p02-list-panel{position:absolute;left:360px;top:190px;width:1200px;height:680px;background:#fefbf9;border:solid 6px #023186;border-radius:48px;box-shadow:0 12px 0 0 #becde7;box-sizing:border-box;overflow:hidden}
+        .p02-list-bar{height:90px;margin:0;padding:0 50px;display:flex;align-items:center;background:#023186;font-family:'Cafe24 Ssurround';font-size:44px;color:#fff}
+        #p02Rows{padding:10px 44px}
+        .p02-row{display:flex;align-items:center;gap:26px;height:136px;border-bottom:solid 3px #dfe6f2}
+        .p02-row:last-child{border-bottom:0}
+        .p02-avatar{width:92px;height:92px;border-radius:50%;background:#91b9e7;border:solid 4px #1b1738;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:40px;color:#fff}
+        .p02-row .p02-avatar{font-size:30px}
+        .p02-avatar.is-boy{background:#91b9e7}
+        .p02-avatar.is-girl{background:#f59bbd}
+        .p02-row-preview{flex:1 1 auto;min-width:0;font-family:'Pretendard';font-size:32px;color:#1b1738;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+        /* 보기 버튼은 공용 .card-btn(기본/호버/is-selected 눌림) 모양, 크기만 목록 줄에 맞게 줄임 */
+        .p02-row-btn.card-btn{flex:0 0 auto;min-width:140px;height:70px;padding:4px 24px 2px;font-size:36px}
+        /* 다 푼 대화는 보기 버튼 자리에 체크 표시 */
+        .p02-row-check{flex:0 0 auto;width:140px;text-align:center;font-size:48px;color:#2fa46b}
+
+        /* ---- 감정 찾기 문제(기획서 4p / 8p / 9p / 10p) ---- */
+        /* 위: 이름+흰 말풍선이 든 넓은 대화 패널 / 가운데: 질문 / 아래: 이미지+감정 이름 카드 3개 가로 배치 */
+        .p02-chat{position:absolute;left:220px;top:60px;width:1480px;height:380px;background:#cfe6f2;border:solid 6px #1b1738;border-radius:40px;box-shadow:0 12px 0 0 #becde7;box-sizing:border-box;padding:40px 60px}
+        .p02-chat-name{margin:0 0 24px;font-family:'Cafe24 Ssurround';font-size:48px;color:#1b1738}
+        .p02-bubble{display:inline-block;max-width:1020px;background:#fff;border-radius:36px;padding:30px 40px;font-family:'Pretendard';font-size:36px;line-height:1.5;color:#1b1738;font-weight:600}
+
+        .p02-head.p02-quiz-ask{top:570px}
+
+        .p02-options{position:absolute;left:220px;top:670px;width:1480px;display:flex;gap:60px}
+        .p02-opt{flex:1 1 0;display:flex;align-items:center;gap:20px;height:220px;padding:0 30px;border:solid 5px #1b1738;border-radius:40px;background:#fefbf9;box-shadow:0 8px 0 0 #becde7;box-sizing:border-box;cursor:pointer}
+        .p02-opt:hover{background:#fff3c9}
+        .p02-opt.is-selected{background:#ffd83d}
+        .p02-opt.is-wrong{animation:fix-word-shake .3s ease}
+        .p02-opt-face{flex:0 0 auto;width:170px;height:170px;border-radius:24px;background:#ffe9b0;border:solid 4px #1b1738;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:100px}
+        .p02-opt-label{flex:1 1 auto;text-align:center;font-family:'Cafe24 Ssurround';font-size:50px;color:#1b1738}
+
+        /* ---- 온도계 모달(기획서 6p) — 딤 포함 오버레이 이미지는 임시 복사본 ---- */
+        .p02-modal{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:100;background:rgba(27,23,56,.55)}
+        .p02-modal.is-off{display:none}
+        .p02-modal-panel{position:absolute;left:560px;top:150px;width:800px;height:660px;background:#fefbf9;border:solid 6px #1b1738;border-radius:48px;box-sizing:border-box;padding:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px}
+        .p02-thermo{position:relative;width:110px;height:320px;border:solid 6px #1b1738;border-radius:55px;background:#eef3fb;overflow:hidden}
+        .p02-thermo-fill{position:absolute;left:0;bottom:0;width:100%;height:0;transition:height .6s ease}
+        .p02-modal-text{margin:0;font-family:'Cafe24 Ssurround';font-size:48px;line-height:1.3;color:#3b1e87;text-align:center}
+
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main>
+
+          <div class="p02-screen" id="p02List">
+            <p class="p02-head">어떤 대화를 살펴볼까요?</p>
+            <div class="p02-list-panel">
+              <p class="p02-list-bar">채팅</p>
+              <div id="p02Rows"></div>
+            </div>
+          </div>
+
+          <div class="p02-screen is-off" id="p02Quiz">
+            <div class="p02-chat">
+              <p class="p02-chat-name" id="p02QName"></p>
+              <div class="p02-bubble" id="p02QMsg"></div>
+            </div>
+            <p class="p02-head p02-quiz-ask">메시지에 어떤 마음이 숨어 있는지 찾아봐요!</p>
+            <div class="p02-options" id="p02Options"></div>
+          </div>
+
+          <div class="p02-modal is-off" id="p02Modal">
+            <div class="p02-modal-panel">
+              <div class="p02-thermo"><div class="p02-thermo-fill" id="p02ThermoFill"></div></div>
+              <p class="p02-modal-text" id="p02ModalText"></p>
+              <a href="javascript:;" id="p02ModalNext">
+                <img src="../../img/common/btn_next_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_small_on.png" data-src-over="../../img/common/btn_next_small_over.png" data-sound="sound/click.mp3" alt="다음">
+              </a>
+            </div>
+          </div>
+
+          <div class="ox-result-wrong is-avatar is-off" data-sound="sound/incorrect.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text">친구의 메시지를 다시 살펴볼까요?</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="마음 톡톡! 감정 찾기 게임" data-next="page03.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  /* 기획서 3~10p. 네 친구의 메시지에 숨은 감정을 찾는 게임.
+     - 채팅방은 순서 상관없이 고를 수 있고, 맞힌 방은 목록에서 '보기' 버튼이 사라짐
+     - 정답마다 온도계 모달이 뜨며 1/4씩 채워짐(파랑 -> 노랑 -> 주황 -> 빨강)
+     - 네 개를 다 맞힌 뒤 누르는 '다음'만 page03(배지 획득)으로 실제 이동 */
+  (function () {
+    const CHATS = [
+      {
+        name: '지우',
+        gender: 'girl',
+        preview: '친구가 약속을 바꾸자고 했어. "괜찮아"라고 말했지만...',
+        msg: '친구가 약속을 바꾸자고 했어.<br>"괜찮아"라고 말했지만, 사실은 오늘을 많이 기다렸어.',
+        options: [
+          { label: '화남', face: '\u{1F620}' },
+          { label: '아쉬움', face: '\u{1F61E}', correct: true },
+          { label: '걱정', face: '\u{1F61F}' }
+        ]
+      },
+      {
+        name: '민준',
+        gender: 'boy',
+        preview: '발표 연습을 많이 했어. 그런데 내 차례가 가까워지니까...',
+        msg: '발표 연습을 많이 했어.<br>그런데 내 차례가 가까워지니까 손에 땀이 났어.',
+        options: [
+          { label: '속상함', face: '\u{1F614}' },
+          { label: '슬픔', face: '\u{1F622}' },
+          { label: '긴장', face: '\u{1F630}', correct: true }
+        ]
+      },
+      {
+        name: '수빈',
+        gender: 'girl',
+        preview: '내가 실수로 친구의 그림을 구겼어. 친구가 괜찮다고 했지만...',
+        msg: '내가 실수로 친구의 그림을 구겼어.<br>친구가 괜찮다고 했지만, 미안해서 계속 친구의 표정을 살피게 돼.',
+        options: [
+          { label: '미안함', face: '\u{1F623}', correct: true },
+          { label: '부끄러움', face: '\u{1F633}' },
+          { label: '슬픔', face: '\u{1F622}' }
+        ]
+      },
+      {
+        name: '태우',
+        gender: 'boy',
+        preview: '친구들이 내 생일을 축하해 줬어. 고맙긴 한데...',
+        msg: '친구들이 내 생일을 축하해 줬어.<br>고맙긴 한데, 갑자기 많은 친구들이 나를 쳐다봐서 얼굴이 빨개졌어.',
+        options: [
+          { label: '걱정', face: '\u{1F61F}' },
+          { label: '부끄러움', face: '\u{1F633}', correct: true },
+          { label: '화남', face: '\u{1F620}' }
+        ]
+      }
+    ];
+
+    /* 기획서 6p: 몇 번째 정답이냐에 따라 온도계 수은 색과 높이가 달라짐 */
+    const THERMO = [
+      { color: '#4a9ae8', height: '25%',  text: '메시지에 숨은 마음을<br>잘 찾아냈어요!' },
+      { color: '#ffd83d', height: '50%',  text: '메시지에 숨은 마음을<br>잘 찾아냈어요!' },
+      { color: '#ff8a3d', height: '75%',  text: '메시지에 숨은 마음을<br>잘 찾아냈어요!' },
+      { color: '#ff2f7b', height: '100%', text: '메시지에 숨은 마음을<br>모두 찾아냈어요!' }
+    ];
+
+    const listScreen = document.getElementById('p02List');
+    const quizScreen = document.getElementById('p02Quiz');
+    const rowsBox = document.getElementById('p02Rows');
+    const optionsBox = document.getElementById('p02Options');
+    const qName = document.getElementById('p02QName');
+    const qMsg = document.getElementById('p02QMsg');
+    const modal = document.getElementById('p02Modal');
+    const modalText = document.getElementById('p02ModalText');
+    const modalNext = document.getElementById('p02ModalNext');
+    const thermoFill = document.getElementById('p02ThermoFill');
+    const wrongLayer = document.querySelector('.ox-result-wrong');
+
+    const playClick = makeSfx('sound/click.mp3');
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+
+    const solved = CHATS.map(() => false);
+
+    // 누르면 card-btn 눌림(is-selected) 모양이 잠깐 보인 뒤 문제 화면으로 넘어감
+    function bindViewBtn(btn, index) {
+      btn.addEventListener('click', () => {
+        if (btn.classList.contains('is-selected')) return;
+        btn.classList.add('is-selected');
+        playClick();
+        setTimeout(() => openQuiz(index), 300);
+      });
+    }
+
+    function renderList() {
+      rowsBox.innerHTML = '';
+      CHATS.forEach((chat, i) => {
+        const row = document.createElement('div');
+        row.className = 'p02-row';
+        row.innerHTML =
+          '<span class="p02-avatar is-' + chat.gender + '">' + chat.name + '</span>' +
+          '<span class="p02-row-preview">' + chat.preview + '</span>' +
+          (solved[i]
+            ? '<span class="p02-row-check">&#10004;</span>'
+            : '<button type="button" class="card-btn p02-row-btn">보기</button>');
+        if (!solved[i]) bindViewBtn(row.querySelector('.p02-row-btn'), i);
+        rowsBox.appendChild(row);
+      });
+    }
+
+    function openQuiz(index) {
+      const chat = CHATS[index];
+      qName.textContent = chat.name;
+      qMsg.innerHTML = chat.msg;
+
+      optionsBox.innerHTML = '';
+      chat.options.forEach((opt) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'p02-opt';
+        btn.innerHTML = '<span class="p02-opt-face">' + opt.face + '</span>' +
+                        '<span class="p02-opt-label">' + opt.label + '</span>';
+        btn.addEventListener('click', () => {
+          if (opt.correct) {
+            if (solved[index]) return;
+            btn.classList.add('is-selected');
+            playCorrect();
+            solved[index] = true;
+            setTimeout(showThermo, 500);
+          } else {
+            playWrong();
+            btn.classList.remove('is-wrong');
+            void btn.offsetWidth;
+            btn.classList.add('is-wrong');
+            flashLayer(wrongLayer);
+          }
+        });
+        optionsBox.appendChild(btn);
+      });
+
+      listScreen.classList.add('is-off');
+      quizScreen.classList.remove('is-off');
+    }
+
+    function showThermo() {
+      const step = THERMO[solved.filter(Boolean).length - 1];
+      thermoFill.style.background = step.color;
+      thermoFill.style.height = step.height;
+      modalText.innerHTML = step.text;
+      // 같은 다음 버튼을 모달마다 다시 쓰는데 js-img-swap은 눌린(_on) 상태를 계속 남겨서 원본으로 되돌림
+      const nextImg = modalNext.querySelector('.js-img-swap');
+      nextImg.classList.remove('is-swapped');
+      nextImg.src = nextImg.dataset.originalSrc || nextImg.src;
+      modal.classList.remove('is-off');
+    }
+
+    // 남은 채팅방이 있으면 목록으로 되돌리고, 다 맞혔으면 다음 활동으로 이동.
+    // js-nav-effect를 안 붙인 이유: 공용 initLinkEffect가 먼저 바인딩돼 있어서
+    // 여기서 preventDefault를 해도 이미 예약된 이동을 막을 수 없기 때문
+    modalNext.addEventListener('click', () => {
+      const done = solved.every(Boolean);
+      setTimeout(() => {
+        if (done) {
+          window.location.href = 'page03.html';
+          return;
+        }
+        modal.classList.add('is-off');
+        quizScreen.classList.add('is-off');
+        listScreen.classList.remove('is-off');
+        renderList();
+      }, 300);
+    });
+
+    renderList();
+  })();
+  </script>
+</body>
+</html>

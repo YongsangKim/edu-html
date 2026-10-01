@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마음 카드 디자이너 미션</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 33~45p. 카드 종류 고르기 → 배경색 → 글꼴 → 글자 크기 → 형식(굵게·기울임·밑줄)을 차례로 익힘.
+           안내된 곳이 아닌 데를 누르면 "앗, 다른 곳을 선택했어요!" 팝업. 카드 삽화 img/p07_illust_{comfort|congrats|sorry}.png. */
+        @font-face{font-family:'KCC-DodamDodam';src:url('../../fonts/KCC-DodamDodam.woff2') format('woff2')}
+        @font-face{font-family:'KCC-MurukMuruk';src:url('../../fonts/KCC-MurukMuruk.woff2') format('woff2')}
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p07-bubble{left:90px;bottom:619px;width:607px;min-height:0;padding:30px 16px;display:flex;align-items:center;justify-content:center;font-size:42px;z-index:5}
+        .p07-character{position:absolute;left:170px;top:360px;width:480px;height:580px;display:flex;align-items:flex-end;justify-content:center}
+        .p07-character img{max-width:100%;max-height:100%;object-fit:contain}
+
+        .p07-phone{position:absolute;left:726px;top:21px;width:468px;height:895px;box-sizing:border-box;border:solid 8px #1b1738;border-radius:40px;background:#ecebf3}
+        .p07-card{position:absolute;left:774px;top:218px;width:371px;height:466px;box-sizing:border-box;border-radius:10px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.18);transition:background-color .3s}
+        .p07-card.is-empty{background:#fff;box-shadow:none;border:dashed 3px #b9b3dd}
+        .p07-illust{position:absolute;left:72px;top:72px;width:228px;height:228px;border-radius:20px;background:#d9d3ee center / contain no-repeat}
+        .p07-text{position:absolute;left:10px;top:330px;width:351px;min-height:80px;box-sizing:border-box;padding:6px;display:flex;align-items:center;justify-content:center;text-align:center;
+          font-family:'Pretendard';font-size:40px;line-height:1.2;color:#1b1738;word-break:keep-all;border:solid 3px transparent;border-radius:8px}
+        .p07-text.is-picked{border-color:#8b3dff}
+
+        .p07-tools{position:absolute;left:740px;top:737px;width:440px;height:80px;overflow:hidden;border-radius:14px;background:#fff;touch-action:none}
+        .p07-tools-row{display:flex;gap:10px;padding:6px;height:100%;box-sizing:border-box;transition:transform .3s}
+        .p07-tools.is-page2 .p07-tools-row{transform:translateX(-300px)}
+        .p07-tool{flex:0 0 auto;height:100%;min-width:92px;padding:0 10px;box-sizing:border-box;border:solid 3px #d9d3ee;border-radius:12px;background:#fff;cursor:pointer;
+          font-family:'Pretendard';font-size:22px;font-weight:700;color:#1b1738}
+        .p07-tool:disabled{opacity:.35;cursor:default}
+        .p07-tool.is-on{border-color:#8b3dff;background:#f1e9ff}
+        .p07-tool.is-pulse{animation:p07-pulse .5s ease-in-out 4}
+        @keyframes p07-pulse{50%{transform:scale(1.15);box-shadow:0 0 0 8px rgba(255,79,139,.45)}}
+        .p07-swatch{flex:0 0 52px;height:52px;align-self:center;border:solid 3px #d9d3ee;border-radius:50%;cursor:pointer;padding:0}
+        .p07-swatch.is-on{border-color:#1b1738;box-shadow:0 0 0 3px #fff inset}
+        .p07-swatch:disabled{cursor:default}
+        .p07-size{display:flex;align-items:center;gap:8px;width:100%;padding:0 8px;box-sizing:border-box;font-family:'Pretendard';font-size:24px;font-weight:700}
+        .p07-size input{flex:1 1 auto;accent-color:#8b3dff}
+        .p07-size button{width:44px;height:44px;border:solid 3px #d9d3ee;border-radius:10px;background:#fff;font-size:26px;cursor:pointer;padding:0}
+        .p07-size b{width:48px;text-align:center}
+
+        .p07-types{position:absolute;left:1293px;top:152px;width:515px;height:635px;box-sizing:border-box;padding:30px 24px;display:flex;flex-direction:column;justify-content:space-around;
+          background:#fefbf9;border:solid 6px #48159c;border-radius:40px}
+        .p07-types .card-btn{width:100%;min-width:0;height:159px;padding:8px 16px 4px;font-size:44px;line-height:1.2;letter-spacing:-0.05em}
+
+        .p07-catch{position:absolute;left:726px;top:21px;width:468px;height:895px;border-radius:40px;z-index:3}
+        .p07-target{position:absolute;z-index:4;border-radius:12px;cursor:pointer}
+        .p07 .hit-area{background:rgba(255,79,139,.25);outline:5px dashed #ff4f8b;outline-offset:-5px}
+
+        #p07Oops{z-index:120}
+        .p07 .is-off{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default p07">
+          <p class="guide-bubble p07-bubble" id="p07Bubble"></p>
+          <div class="p07-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+
+          <div class="p07-phone"></div>
+          <div class="p07-card is-empty" id="p07Card">
+            <div class="p07-illust is-off" id="p07Illust"></div>
+            <p class="p07-text is-off" id="p07Text"></p>
+          </div>
+          <div class="p07-tools is-off" id="p07Tools"><div class="p07-tools-row" id="p07ToolsRow"></div></div>
+
+          <div class="p07-types" id="p07Types">
+            <button type="button" class="card-btn" data-type="comfort">속상한 친구에게<br>보내는 위로 카드</button>
+            <button type="button" class="card-btn" data-type="congrats">상을 받은 친구에게<br>보내는 축하 카드</button>
+            <button type="button" class="card-btn" data-type="sorry">마음이 상한 친구에게<br>보내는 사과 카드</button>
+          </div>
+
+          <div class="p07-catch is-off" id="p07Catch"></div>
+          <button type="button" class="hit-area p07-target is-off" id="p07Target" aria-label="안내된 곳"></button>
+
+          <a href="javascript:;" class="js-sfx next-btn is-off" id="p07Next" data-sound="sound/click.mp3">
+            <img src="../../img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" alt="다음">
+          </a>
+
+          <div class="avatar-modal is-off" id="p07Oops">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+              <p class="avatar-popup-text is-medium"><span>앗, 다른 곳을 선택했어요!<br>안내된 부분을 선택해주세요.</span></p>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="마음 카드 디자이너 미션" data-next="page08.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const TYPES = {
+      comfort: { name: '위로', friend: '속상한 친구에게 보내는', text: '힘내. 괜찮을 거야!' },
+      congrats: { name: '축하', friend: '상을 받은 친구에게 보내는', text: '정말 축하해!' },
+      sorry: { name: '사과', friend: '마음이 상한 친구에게 보내는', text: '미안해. 다음부터 조심할게.' }
+    };
+    // 기획서 36p: 무지개·색없음은 누를 수 없음, 분홍·노랑·흰색은 검정 글씨, 녹색·남색은 흰 글씨
+    const COLORS = [
+      { name: '무지개', bg: 'conic-gradient(red,orange,yellow,green,blue,purple,red)', off: true },
+      { name: '색없음', bg: 'linear-gradient(135deg,#fff 45%,#e8203a 45% 55%,#fff 55%)', off: true },
+      { name: '분홍색', value: '#ffc9dc', ink: '#1b1738' },
+      { name: '노란색', value: '#fff1a8', ink: '#1b1738' },
+      { name: '흰색', value: '#ffffff', ink: '#1b1738' },
+      { name: '녹색', value: '#2e8b57', ink: '#ffffff' },
+      { name: '남색', value: '#1f2a6b', ink: '#ffffff' }
+    ];
+    const FONTS = [
+      { name: 'KCC도담도담체', family: "'KCC-DodamDodam','Cafe24 Ssurround'" },
+      { name: 'KCC무럭무럭체', family: "'KCC-MurukMuruk','Pretendard'" }
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const bubble = $('p07Bubble');
+    const card = $('p07Card');
+    const text = $('p07Text');
+    const tools = $('p07Tools');
+    const row = $('p07ToolsRow');
+    const catcher = $('p07Catch');
+    const target = $('p07Target');
+    const nextBtn = $('p07Next');
+    const oops = $('p07Oops');
+    const playClick = makeSfx('sound/click.mp3');
+    let type = null;
+    let onNext = null;
+
+    function say(html) { bubble.innerHTML = html; }
+    function toolBtn(label, extra) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'p07-tool';
+      b.innerHTML = label;
+      if (extra) Object.assign(b.style, extra);
+      return b;
+    }
+    // 안내 단계: 정해진 곳(rect 또는 요소)만 누를 수 있고, 휴대폰 안 다른 곳은 팝업
+    function guideTo(rectOrEl, then) {
+      clearFingers();
+      catcher.classList.remove('is-off');
+      catcher.onclick = () => flashLayer(oops);
+      let r = rectOrEl;
+      if (rectOrEl instanceof Element) {
+        const el = rectOrEl;
+        const pr = el.getBoundingClientRect();
+        const mr = document.querySelector('main').getBoundingClientRect();
+        const s = mr.width / 1920;
+        r = [(pr.left - mr.left) / s, (pr.top - mr.top) / s, pr.width / s, pr.height / s];
+      }
+      target.style.cssText = 'left:' + r[0] + 'px;top:' + r[1] + 'px;width:' + r[2] + 'px;height:' + r[3] + 'px';
+      target.classList.remove('is-off');
+      pointFingerAt(target);
+      target.onclick = () => {
+        playClick();
+        target.classList.add('is-off');
+        catcher.classList.add('is-off');
+        clearFingers();
+        then();
+      };
+    }
+    function waitNext(fn) {
+      onNext = fn;
+      resetImageSwap(nextBtn);
+      nextBtn.classList.remove('is-off');
+    }
+    nextBtn.addEventListener('click', () => {
+      if (!onNext) return;
+      const fn = onNext;
+      onNext = null;
+      setTimeout(() => { nextBtn.classList.add('is-off'); fn(); }, 300);
+    });
+
+    // 0. 카드 고르기
+    say('친구에게 어떤 마음을<br>전달해볼까요?');
+    $('p07Types').querySelectorAll('.card-btn').forEach((b) => b.addEventListener('click', () => {
+      playClick();
+      type = TYPES[b.dataset.type];
+      b.classList.add('is-selected');
+      card.classList.remove('is-empty');
+      $('p07Illust').style.backgroundImage = "url('img/p07_illust_" + b.dataset.type + ".png')";
+      $('p07Illust').classList.remove('is-off');
+      text.textContent = type.text;
+      text.classList.remove('is-off');
+      setTimeout(() => { $('p07Types').classList.add('is-off'); stepBg(); }, 500);
+    }));
+
+    // 1~3. 배경색
+    function stepBg() {
+      say('먼저, 배경색을 설정해봐요.<br>배경 부분을 클릭해요.');
+      guideTo([774, 218, 371, 90], stepColorBtn);
+    }
+    function stepColorBtn() {
+      say('색상을 클릭해요.');
+      tools.classList.remove('is-off');
+      row.innerHTML = '';
+      const colorBtn = toolBtn('색상');
+      row.appendChild(colorBtn);
+      guideTo(colorBtn, stepPalette);
+    }
+    function stepPalette() {
+      say(type.friend + '<br>' + type.name + ' 카드라면 어떤 색이 좋을까요?<br>원하는 색을 아래에서 골라봐요.');
+      row.innerHTML = '';
+      COLORS.forEach((c) => {
+        const sw = document.createElement('button');
+        sw.type = 'button';
+        sw.className = 'p07-swatch';
+        sw.title = c.name;
+        sw.style.background = c.bg || c.value;
+        sw.disabled = !!c.off;
+        sw.addEventListener('click', () => {
+          playClick();
+          row.querySelectorAll('.p07-swatch').forEach((x) => x.classList.toggle('is-on', x === sw));
+          card.style.backgroundColor = c.value;
+          text.style.color = c.ink;
+          if (!onNext) waitNext(stepTextPick);
+        });
+        row.appendChild(sw);
+      });
+    }
+
+    // 4~6. 글꼴
+    function textTools(withFormat) {
+      row.innerHTML = '';
+      const fontBtn = toolBtn('글꼴');
+      const sizeBtn = toolBtn('글자 크기');
+      const fx = toolBtn('효과');
+      fx.disabled = true;
+      const anim = toolBtn('애니메이션');
+      anim.disabled = true;
+      const fmtBtn = toolBtn('형식');
+      [fontBtn, sizeBtn, fx, anim, fmtBtn].forEach((b) => row.appendChild(b));
+      tools.classList.toggle('is-page2', !!withFormat);
+      return { fontBtn, sizeBtn, fmtBtn };
+    }
+    function stepTextPick() {
+      tools.classList.add('is-off');
+      say('글자도 바꿔볼까요?<br>글자 부분을 클릭해요.');
+      guideTo(text, () => { text.classList.add('is-picked'); stepFontBtn(); });
+    }
+    function stepFontBtn() {
+      say('아래의 글꼴 버튼을 클릭해요.');
+      tools.classList.remove('is-off');
+      const t = textTools(false);
+      guideTo(t.fontBtn, stepFonts);
+    }
+    function stepFonts() {
+      say(type.name + ' 카드에 어울리는<br>글씨체는 무엇일까요?');
+      row.innerHTML = '';
+      FONTS.forEach((f) => {
+        const b = toolBtn(f.name, { fontFamily: f.family, fontSize: '26px', minWidth: '200px' });
+        b.addEventListener('click', () => {
+          playClick();
+          row.querySelectorAll('.p07-tool').forEach((x) => x.classList.toggle('is-on', x === b));
+          text.style.fontFamily = f.family;
+          if (!onNext) waitNext(stepSizeBtn);
+        });
+        row.appendChild(b);
+      });
+    }
+
+    // 7~8. 글자 크기
+    function stepSizeBtn() {
+      say('이번에는 전하고 싶은 마음이 잘<br>보이도록 글자 크기를 조절해봐요.<br>글꼴 크기 버튼을 클릭해요.');
+      const t = textTools(false);
+      guideTo(t.sizeBtn, stepSize);
+    }
+    function stepSize() {
+      say('게이지를 좌우로 움직이거나<br>오른쪽의 - +버튼을 눌러<br>글씨 크기를 바꿀 수 있어요.');
+      row.innerHTML = '<div class="p07-size"><input type="range" min="24" max="72" value="40" id="p07Range"><button type="button" id="p07Minus">−</button><b id="p07Num">40</b><button type="button" id="p07Plus">+</button></div>';
+      const range = $('p07Range');
+      const apply = (v) => {
+        v = Math.max(24, Math.min(72, v));
+        range.value = v;
+        $('p07Num').textContent = v;
+        text.style.fontSize = v + 'px';
+      };
+      range.addEventListener('input', () => apply(+range.value));
+      $('p07Minus').addEventListener('click', () => { playClick(); apply(+range.value - 2); });
+      $('p07Plus').addEventListener('click', () => { playClick(); apply(+range.value + 2); });
+      waitNext(stepSwipe);
+    }
+
+    // 9~11. 형식(도구창 밀기 → 형식 → 굵게·기울임·밑줄)
+    function stepSwipe() {
+      say('마지막으로, ' + type.name + ' 카드에<br>어울리게 글자를 꾸며봐요.<br>도구창을 오른쪽으로 슬라이드해요.');
+      const t = textTools(false);
+      pointFingerAt(tools);
+      let sx = null;
+      tools.onpointerdown = (e) => { sx = e.clientX; };
+      tools.onpointerup = (e) => {
+        if (sx === null) return;
+        const moved = Math.abs(e.clientX - sx);
+        sx = null;
+        if (moved < 30) return;
+        tools.onpointerdown = tools.onpointerup = null;
+        clearFingers();
+        tools.classList.add('is-page2');
+        setTimeout(() => stepFmtBtn(t.fmtBtn), 350);
+      };
+    }
+    function stepFmtBtn(fmtBtn) {
+      say('형식 버튼을 클릭해요.');
+      guideTo(fmtBtn, stepFormat);
+    }
+    function stepFormat() {
+      say('굵게, 기울임, 밑줄 버튼을 눌러<br>효과를 넣을 수 있어요.<br>원하는 효과의 버튼을 클릭해요.');
+      tools.classList.remove('is-page2');
+      row.innerHTML = '';
+      const on = {
+        B: ['fontWeight', '800', 'normal'],
+        I: ['fontStyle', 'italic', 'normal'],
+        U: ['textDecoration', 'underline', 'none']
+      };
+      ['B', 'I', 'U', 'S', 'aA', '⇵', '≡', '•', '1.'].forEach((k) => {
+        const b = toolBtn(k, { minWidth: '40px', padding: '0 6px' });
+        if (on[k]) {
+          b.classList.add('is-pulse');
+          b.addEventListener('click', () => {
+            playClick();
+            const [prop, yes, no] = on[k];
+            const now = !b.classList.contains('is-on');
+            b.classList.toggle('is-on', now);
+            text.style[prop] = now ? yes : no;
+            if (!onNext) waitNext(stepDone);
+          });
+        } else {
+          b.addEventListener('click', () => flashLayer(oops));
+        }
+        row.appendChild(b);
+      });
+    }
+
+    // 12. 마무리
+    function stepDone() {
+      tools.classList.add('is-off');
+      text.classList.remove('is-picked');
+      say('멋져요! 이 기능들을 활용하면<br>친구의 눈에 잘 띄는<br>예쁜 카드를 만들 수 있어요.');
+      waitNext(() => navigateTo('page08.html'));
+    }
+  })();
+  </script>
+</body>
+</html>

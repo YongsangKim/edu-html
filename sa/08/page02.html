@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인기 여행지 카드 짝 맞추기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 3~9p. 카드 짝 맞추기 3판(2쌍 → 3쌍 → 4쌍), 카드 순서 무작위. 처음 3초 앞면을 보여준 뒤 뒤집고,
+           두 장을 뒤집어 짝이면 앞면 유지 + 말풍선 피드백, 아니면 다시 뒤집음. 판을 끝내면 왼쪽부터 스탬프 하나, 3초 뒤 다음 판(마지막 판 뒤엔 page03 마무리).
+           카드 그림 img/p02_card_{key}.png, 스탬프 img/p02_stamp.png. 캐릭터는 임시로 sa/06 캐릭터 복사본 */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p02-stamps{position:absolute;left:70px;top:810px;width:460px;display:flex;justify-content:space-between}
+        .p02-stamp{width:110px;height:110px;box-sizing:border-box;border:dashed 5px #b9b3dd;border-radius:50%;background:center / contain no-repeat}
+        .p02-stamp.is-on{border:0;background-color:#ff6b6b;background-image:url('img/p02_stamp.png');animation:p02-stamp .4s ease}
+        .p02-stamp.is-on:after{content:'✈';display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:56px;color:#fff}
+        @keyframes p02-stamp{0%{transform:scale(2);opacity:0}100%{transform:none;opacity:1}}
+
+        .p02-bubble{position:absolute;left:30px;top:30px;width:560px;min-height:220px;margin:0;box-sizing:border-box;padding:26px;display:flex;align-items:center;justify-content:center;text-align:center;
+          background:#fefbf9;border:solid 5px #48159c;border-radius:30px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';font-size:36px;line-height:1.3;color:#48159c;letter-spacing:-0.05em;word-break:keep-all}
+        .p02-bubble:before{content:'';position:absolute;left:220px;bottom:-58px;width:100px;height:70px;background:url('../../img/common/p_guide_tail.png') 0 0 / contain no-repeat}
+        .p02-character{position:absolute;left:40px;top:320px;width:520px;height:460px;display:flex;align-items:flex-end;justify-content:center}
+        .p02-character img{max-width:100%;max-height:100%;object-fit:contain}
+
+        .p02-board{position:absolute;left:600px;top:30px;width:1290px;height:900px;box-sizing:border-box;border:solid 12px #1b1738;border-radius:30px;background:#fff;display:grid;gap:30px;justify-content:center;align-content:center;perspective:1600px}
+        .p02-card{position:relative;width:280px;height:340px;padding:0;border:0;background:none;cursor:pointer;transform-style:preserve-3d;transition:transform .5s ease}
+        .p02-card.is-back{transform:rotateY(180deg)}
+        .p02-card.is-done{cursor:default}
+        .p02-face{position:absolute;inset:0;box-sizing:border-box;border:solid 6px #48159c;border-radius:24px;backface-visibility:hidden;overflow:hidden;display:flex;flex-direction:column}
+        .p02-front{background:#fff}
+        .p02-front i{flex:1 1 auto;background:#dfe7f5 center / cover no-repeat}
+        .p02-front span{flex:0 0 100px;display:flex;align-items:center;justify-content:center;padding:6px 10px 0;font-family:'Cafe24 Ssurround';font-size:36px;line-height:1.15;color:#1b1738;text-align:center;letter-spacing:-0.06em;word-break:keep-all}
+        .p02-front.is-reason span{background:#fff3c9}
+        .p02-back{transform:rotateY(180deg);background:#48159c repeating-linear-gradient(45deg,rgba(255,255,255,.08) 0 20px,transparent 20px 40px);align-items:center;justify-content:center;font-size:110px}
+        .p02-card.is-done .p02-front{border-color:#ffb800;box-shadow:0 0 0 5px #ffd83d}
+        .p02-board.is-locked{pointer-events:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p02-stamps"><span class="p02-stamp"></span><span class="p02-stamp"></span><span class="p02-stamp"></span></div>
+          <p class="p02-bubble" id="p02Bubble"></p>
+          <div class="p02-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+          <div class="p02-board" id="p02Board"></div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="인기 여행지 카드 짝 맞추기" data-next="page03.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const PAIRS = [
+      { key: 'jeju', place: '제주 성산 일출봉', reason: '자연환경 관람', feedback: '일출과 바다 풍경을<br>보고 즐길 수 있어요.' },
+      { key: 'gyeongju', place: '경주 불국사', reason: '문화 유산 관람', feedback: '우리나라의 역사와 문화 유산을<br>직접 보고 경험할 수 있어요.' },
+      { key: 'andong', place: '안동 국제<br>탈춤 페스티벌', reason: '문화 공연<br>축제 관람', feedback: '문화 공연을 직접 보고<br>즐길 수 있어요.' },
+      { key: 'hoengseong', place: '횡성 한우 축제', reason: '지역 음식 체험', feedback: '지역의 유명한 음식을<br>직접 먹어볼 수 있어요.' }
+    ];
+    const ASK = '여행 지역과, 그곳으로 여행을 많이 가는 이유가 담긴 카드를 알맞게 짝지어봐요!';
+    const ROUNDS = [2, 3, 4];
+    const COLS = { 4: 2, 6: 3, 8: 4 };
+
+    const $ = (id) => document.getElementById(id);
+    const board = $('p02Board');
+    const bubble = $('p02Bubble');
+    const stamps = Array.from(document.querySelectorAll('.p02-stamp'));
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+    const playFlip = makeSfx('sound/click.mp3');
+
+    let round = 0;
+    let open = [];
+    let matched = 0;
+
+    function start() {
+      const pairs = PAIRS.slice(0, ROUNDS[round]);
+      const cards = shuffleArray(pairs.flatMap((p) => [
+        { key: p.key, kind: 'place', text: p.place },
+        { key: p.key, kind: 'reason', text: p.reason }
+      ]));
+      board.style.gridTemplateColumns = 'repeat(' + COLS[cards.length] + ', 280px)';
+      board.innerHTML = '';
+      bubble.innerHTML = ASK;
+      open = [];
+      matched = 0;
+      cards.forEach((c) => {
+        const el = document.createElement('button');
+        el.className = 'p02-card';
+        el.dataset.key = c.key;
+        el.innerHTML = '<span class="p02-face p02-front' + (c.kind === 'reason' ? ' is-reason' : '') + '">' +
+          '<i style="background-image:url(\'img/p02_card_' + c.key + '_' + c.kind + '.png\')"></i><span>' + c.text + '</span></span>' +
+          '<span class="p02-face p02-back">✈</span>';
+        el.addEventListener('click', () => flip(el));
+        board.appendChild(el);
+      });
+      // 기획서: 처음 3초 앞면을 보여준 뒤 뒤집음
+      board.classList.add('is-locked');
+      setTimeout(() => {
+        board.querySelectorAll('.p02-card').forEach((c) => c.classList.add('is-back'));
+        board.classList.remove('is-locked');
+      }, 3000);
+    }
+
+    function flip(el) {
+      if (!el.classList.contains('is-back') || open.length === 2) return;
+      playFlip();
+      el.classList.remove('is-back');
+      open.push(el);
+      if (open.length < 2) return;
+      const [a, b] = open;
+      if (a.dataset.key === b.dataset.key) {
+        playCorrect();
+        a.classList.add('is-done');
+        b.classList.add('is-done');
+        open = [];
+        matched += 1;
+        bubble.innerHTML = PAIRS.find((p) => p.key === a.dataset.key).feedback;
+        if (matched === ROUNDS[round]) finishRound();
+        return;
+      }
+      playWrong();
+      board.classList.add('is-locked');
+      setTimeout(() => {
+        a.classList.add('is-back');
+        b.classList.add('is-back');
+        open = [];
+        board.classList.remove('is-locked');
+      }, 900);
+    }
+
+    function finishRound() {
+      stamps[round].classList.add('is-on');
+      // 기획서: 말풍선을 읽을 시간 3초 뒤 다음 판
+      setTimeout(() => {
+        if (round === ROUNDS.length - 1) {
+          navigateTo('page03.html');
+          return;
+        }
+        round += 1;
+        start();
+      }, 3000);
+    }
+
+    start();
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마음 배달 이모티콘 게임</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 59~71p 배치에 기존 스타일 적용(배지: sa/01 STAGE 배지, 게이지: gwa/01, 메시지: talk-*, 선택지: card-btn) */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p22-badge{position:absolute;left:110px;top:36px;height:100px;padding:6px 50px 0;box-sizing:border-box;display:flex;align-items:center;background:#91b9e7;border:solid 5px #1b1738;border-radius:50px;box-shadow:0 10px 0 0 #becde7;
+          font-family:'Cafe24 Ssurround';font-size:60px;color:#fff}
+        .p22-gauge{left:520px;top:46px;width:1290px}
+        .p22-gauge:before{background-image:url('img/p22_star.png')}
+
+        .p22-ask{position:absolute;left:0;top:170px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:70px;line-height:1.15;color:#48159c;letter-spacing:-0.04em}
+
+        .p22-msg{position:absolute;left:205px;top:275px;width:1510px;height:290px;box-sizing:border-box;padding:30px 50px;display:flex;align-items:center;background:#fefbf9;border:solid 6px #1b1738;border-radius:40px;box-shadow:0 12px 0 0 #becde7}
+        .p22-msg .talk-line{align-items:flex-start;gap:24px;margin:0}
+        .p22-msg .talk-avatar{width:92px;height:92px;font-size:30px}
+        .p22-msg .talk-avatar.is-girl{background:#f59bbd}
+        .p22-msg .talk-who{font-size:36px}
+        .p22-msg .talk-bubble{max-width:1250px;font-size:44px}
+
+        .p22-opts{position:absolute;left:205px;top:650px;width:1510px;display:flex;flex-wrap:wrap;justify-content:space-between;row-gap:40px}
+        .p22-opts .card-btn{letter-spacing:-0.04em}
+        .p22-opts.is-msg{top:620px}
+        .p22-opts.is-msg .card-btn{width:735px;padding:12px 30px 8px;font-size:42px;line-height:1.2}
+        .p22-opts.is-emoji{top:615px}
+        .p22-opts.is-emoji .card-btn{height:270px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-size:120px;line-height:1}
+        .p22-opts.is-emoji .card-btn small{font-size:48px}
+        .p22-opts .card-btn.is-wrong{animation:fix-word-shake .3s ease}
+
+        #p22Popup .avatar-popup-text{text-align:left}
+
+        .p22-clear{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:120;background:rgba(27,23,56,.7);display:flex;align-items:center;justify-content:center;
+          font-family:'Cafe24 Ssurround';font-size:130px;color:#ffd83d;text-align:center}
+        .p22-clear.is-off{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="quiz-stage">
+
+          <div class="p22-badge">STAGE&nbsp;<span id="p22StageNum">1</span></div>
+          <div class="gauge p22-gauge"><div class="gauge-fill" id="p22GaugeFill"></div></div>
+
+          <p class="p22-ask" id="p22Ask"></p>
+
+          <div class="p22-msg">
+            <div class="talk-line">
+              <span class="talk-avatar" id="p22Avatar"></span>
+              <div class="talk-bubble"><span class="talk-who" id="p22Who"></span><span id="p22Text"></span></div>
+            </div>
+          </div>
+
+          <div class="p22-opts" id="p22Opts"></div>
+
+          <div class="avatar-modal is-off" id="p22Popup">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text" id="p22PopupText"></p>
+            </div>
+          </div>
+          <div class="p22-clear is-off" id="p22Clear"></div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="마음 배달 이모티콘 게임" data-next="page23.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  /* 기획서 59~71p. 한 스테이지에 감정/메시지/이모티콘 3문제, 총 9문제.
+     문제를 하나 맞힐 때마다 게이지가 11.1%씩 차고 마지막에 100%가 됨.
+     스테이지를 끝내면 STAGE CLEAR 화면이 2초 뜬 뒤 다음 스테이지로 자동 진행.
+
+     주의: 기획서 66p는 STAGE2(축하 상황)의 이모티콘 정답도 '위로 이모티콘'으로
+     적혀 있는데, 상황과 맞지 않아 앞 슬라이드에서 복사된 오기로 보고 여기서는
+     '축하 이모티콘'을 정답으로 뒀다. 기획서대로 되돌릴지는 확인 필요 */
+  (function () {
+    const WRONG_POPUP = '친구의 메시지를 다시 한 번 읽어봐요.';
+
+    const STAGES = [
+      {
+        who: '민준', gender: 'boy',
+        text: '오늘 자전거를 타다가 넘어졌어. 무릎이 아픈데,<br>보건실에 가야 할지 그냥 교실에 있어도 될지 모르겠어.',
+        questions: [
+          { ask: '어떤 감정을 전해야 할까요?', kind: 'word',
+            options: [
+              { text: '걱정', correct: true },
+              { text: '화남' },
+              { text: '슬픔' }
+            ] },
+          { ask: '좋아요! 어떤 메시지를 보낼까요?', kind: 'msg',
+            options: [
+              { text: '괜찮아? 많이 아프면 선생님께<br>말씀드리고 보건실에 같이 가자.', correct: true },
+              { text: '괜찮아? 다음부터는 조심해서 타.' },
+              { text: '빨리 나으면 좋겠어. 나중에 놀자.' },
+              { text: '왜 넘어졌어? 조심 했어야지.' }
+            ] },
+          { ask: '완벽해요! 어떤 이모티콘을 보낼까요?', kind: 'emoji',
+            options: [
+              { text: '&#129303;', label: '위로 이모티콘', correct: true },
+              { text: '&#127881;', label: '축하 이모티콘' },
+              { text: '&#128584;', label: '사과 이모티콘' }
+            ] }
+        ]
+      },
+      {
+        who: '수빈', gender: 'girl',
+        text: '경시대회에서 금상을 받았어! 어제까지 긴장돼서<br>포기하고 싶었는데, 끝까지 연습한 보람이 있었어.',
+        questions: [
+          { ask: '어떤 감정을 전해야 할까요?', kind: 'word',
+            options: [
+              { text: '기쁨', correct: true },
+              { text: '걱정' },
+              { text: '슬픔' }
+            ] },
+          { ask: '좋아요! 어떤 메시지를 보낼까요?', kind: 'msg',
+            options: [
+              { text: '끝까지 노력해서 금상을 받았구나.<br>정말 축하해!', correct: true },
+              { text: '금상 받았으니까<br>이제 연습 안 해도 되겠네.' },
+              { text: '좋겠다. 나도 상 받고 싶었는데.' },
+              { text: '다음에는 더 큰 상을 받아야 해.' }
+            ] },
+          { ask: '완벽해요! 어떤 이모티콘을 보낼까요?', kind: 'emoji',
+            options: [
+              { text: '&#129303;', label: '위로 이모티콘' },
+              { text: '&#127881;', label: '축하 이모티콘', correct: true },
+              { text: '&#128584;', label: '사과 이모티콘' }
+            ] }
+        ]
+      },
+      {
+        who: '태우', gender: 'boy',
+        text: '다음 달부터 다른 학교에 다니게 되었어. 쉬는 시간마다<br>같이 놀던 친구들을 자주 못 볼 것 같아.',
+        questions: [
+          { ask: '어떤 감정을 전해야 할까요?', kind: 'word',
+            options: [
+              { text: '걱정' },
+              { text: '화남' },
+              { text: '슬픔', correct: true }
+            ] },
+          { ask: '좋아요! 어떤 메시지를 보낼까요?', kind: 'msg',
+            options: [
+              { text: '헤어지게 되어 아쉽지만,<br>새 학교에서도 잘 지내길 바랄게.', correct: true },
+              { text: '왜 전학 가?<br>나랑 안 놀려고 그러는 거야?' },
+              { text: '새 학교 가니까 이제 우리 반은<br>잊어도 되겠다.' },
+              { text: '전학 가면 이제 연락 하지 마.' }
+            ] },
+          { ask: '완벽해요! 어떤 이모티콘을 보낼까요?', kind: 'emoji',
+            options: [
+              { text: '&#129303;', label: '위로 이모티콘', correct: true },
+              { text: '&#127881;', label: '축하 이모티콘' },
+              { text: '&#128584;', label: '사과 이모티콘' }
+            ] }
+        ]
+      }
+    ];
+
+    const TOTAL_Q = STAGES.reduce((sum, s) => sum + s.questions.length, 0);
+
+    const stageNumEl = document.getElementById('p22StageNum');
+    const gaugeFill = document.getElementById('p22GaugeFill');
+    const avatarEl = document.getElementById('p22Avatar');
+    const whoEl = document.getElementById('p22Who');
+    const textEl = document.getElementById('p22Text');
+    const askEl = document.getElementById('p22Ask');
+    const optsBox = document.getElementById('p22Opts');
+    const popup = document.getElementById('p22Popup');
+    const popupText = document.getElementById('p22PopupText');
+    const clearLayer = document.getElementById('p22Clear');
+
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+
+    let stageIndex = 0;
+    let questionIndex = 0;
+    let solvedCount = 0;
+
+    function showPopup(html) {
+      popupText.innerHTML = html;
+      flashLayer(popup);
+    }
+
+    function renderQuestion() {
+      const stage = STAGES[stageIndex];
+      const question = stage.questions[questionIndex];
+
+      stageNumEl.textContent = String(stageIndex + 1);
+      avatarEl.textContent = stage.who;
+      avatarEl.classList.toggle('is-girl', stage.gender === 'girl');
+      whoEl.textContent = stage.who;
+      textEl.innerHTML = stage.text;
+      askEl.textContent = question.ask;
+
+      optsBox.innerHTML = '';
+      optsBox.className = 'p22-opts is-' + question.kind;
+      shuffleArray(question.options).forEach((opt) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'card-btn is-quiz';
+        btn.innerHTML = question.kind === 'emoji'
+          ? opt.text + '<small>' + opt.label + '</small>'
+          : opt.text;
+        btn.addEventListener('click', () => {
+          if (!opt.correct) {
+            playWrong();
+            btn.classList.remove('is-wrong');
+            void btn.offsetWidth;
+            btn.classList.add('is-wrong');
+            showPopup(WRONG_POPUP);
+            return;
+          }
+
+          playCorrect();
+          btn.classList.add('is-selected');
+          optsBox.querySelectorAll('.card-btn').forEach((b) => { b.disabled = true; });
+
+          solvedCount += 1;
+          // 마지막 문제는 소수점 반올림 오차 없이 딱 100%가 되게 함
+          gaugeFill.style.width = (solvedCount >= TOTAL_Q ? 100 : solvedCount * (100 / TOTAL_Q)) + '%';
+
+          setTimeout(advance, 800);
+        });
+        optsBox.appendChild(btn);
+      });
+    }
+
+    function advance() {
+      questionIndex += 1;
+      if (questionIndex < STAGES[stageIndex].questions.length) {
+        renderQuestion();
+        return;
+      }
+
+      const isLastStage = stageIndex >= STAGES.length - 1;
+      clearLayer.innerHTML = isLastStage ? 'STAGE ALL CLEAR!' : 'STAGE ' + (stageIndex + 1) + ' CLEAR!';
+      clearLayer.classList.remove('is-off');
+
+      setTimeout(() => {
+        clearLayer.classList.add('is-off');
+        if (isLastStage) {
+          window.location.href = 'page23.html';
+          return;
+        }
+        stageIndex += 1;
+        questionIndex = 0;
+        renderQuestion();
+      }, 2000);
+    }
+
+    gaugeFill.style.width = '0%';
+    renderQuestion();
+  })();
+  </script>
+</body>
+</html>

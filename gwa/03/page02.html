@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>음식 속에 숨겨진 정보를 찾아라!</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:url('img/p02_bg_round1.png') no-repeat}
+        .p02-opt{position:absolute;top:730px;width:220px;height:220px;border:0}
+        .p02-opt1{left:565px}
+        .p02-opt2{left:845px}
+        .p02-opt3{left:1125px}
+        .p02-food{position:absolute;top:545px;width:200px;height:140px;display:flex;align-items:center;justify-content:center;pointer-events:none}
+        .p02-food img{max-width:100%;max-height:100%}
+        .p02-food1{left:790px}
+        .p02-food2{left:975px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main>
+          <div class="p02-food p02-food1"><img id="p02Food1" alt=""></div>
+          <div class="p02-food p02-food2"><img id="p02Food2" alt=""></div>
+
+          <div class="answer-pick-quiz reveal-stagger" data-delay="500" data-interval="300" data-next="page03.html">
+            <button class="answer-pick pick-card p02-opt p02-opt1" data-key="chicken" aria-label="닭다리">
+              <img class="js-img-swap js-sfx" src="img/p02_opt_chicken.png" data-src-over="img/p02_opt_chicken_over.png" alt="닭다리">
+            </button>
+            <button class="answer-pick pick-card p02-opt p02-opt2" data-key="orange" aria-label="귤">
+              <img class="js-img-swap js-sfx" src="img/p02_opt_orange.png" data-src-over="img/p02_opt_orange_over.png" alt="귤">
+            </button>
+            <button class="answer-pick pick-card p02-opt p02-opt3" data-key="salmon" aria-label="연어">
+              <img class="js-img-swap js-sfx" src="img/p02_opt_salmon.png" data-src-over="img/p02_opt_salmon_over.png" alt="연어">
+            </button>
+          </div>
+
+          <div class="ox-result-correct is-avatar is-off" data-sound="sound/correct.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct_gwa.png" alt=""></div>
+              <p class="avatar-popup-text">정답이에요!</p>
+              <div class="avatar-popup-extra"><img src="../../img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div>
+          <div class="ox-result-wrong is-avatar is-off" data-sound="sound/incorrect.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text">다시 한번 살펴볼까요?</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="음식 속에 숨겨진 정보를 찾아라!" data-next="page03.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script>
+  (function () {
+    const keys = shuffle(['chicken', 'orange', 'salmon']);
+    const answer = keys[2];
+    document.getElementById('p02Food1').src = 'img/p02_' + keys[0] + '.png';
+    document.getElementById('p02Food2').src = 'img/p02_' + keys[1] + '.png';
+    document.querySelectorAll('.p02-opt').forEach((btn) => {
+      const img = btn.querySelector('img');
+      const right = btn.dataset.key === answer;
+      btn.dataset.correct = right ? 'true' : 'false';
+      img.dataset.sound = right ? 'sound/correct.mp3' : 'sound/incorrect.mp3';
+      if (right) img.dataset.srcOn = 'img/p02_opt_' + answer + '_on.png';
+    });
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+  })();
+  </script>
+  <script src="../../js/common.js"></script>
+</body>
+</html>

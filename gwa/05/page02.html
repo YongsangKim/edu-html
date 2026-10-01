@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOS! 파도를 분석하라!</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 3~6p. 파도 4가지(높이 높/낮 × 간격 넓/좁)를 무작위 순서로 4문제. 관측 모니터의 파도(SVG, 흐르는 애니메이션)를 보고
+           높이·간격 버튼을 하나씩 고르면 확성기 활성 → 누르면 삑 소리 뒤 정답/오답. 맞힐 때마다 확성기 아이콘 하나씩 켜짐, 다 맞히면 마무리 안내 3단계.
+           파도 소리 sound/p02_wave_{high|low}_{wide|narrow}.mp3, 삑 sound/p02_beep.mp3, 대피 성공 그림 img/p02_success.png */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        /* 배치(기획서 3p): 왼쪽 위 알림 아이콘 + 안내 바, 오른쪽 위 성공 확성기 4개, 왼쪽 관측 모니터, 오른쪽 파도 분석 버튼 2×2, 오른쪽 아래 큰 확성기.
+           버튼 그림 img/p02_btn_{high|low|wide|narrow}.png(없으면 글자), 확성기 img/p02_horn.png, 성공 표시 img/p02_life(_on).png */
+        .p02-alert{position:absolute;left:58px;top:35px;width:1062px;height:110px;margin:0;box-sizing:border-box;padding:6px 30px 0 120px;display:flex;align-items:center;
+          background:#fff;border:solid 5px #1b1738;border-radius:55px;font-family:'Cafe24 Ssurround';font-size:48px;color:#1b1738;letter-spacing:-0.05em}
+        .p02-alert:before{content:'!';position:absolute;left:10px;top:50%;width:84px;height:84px;margin-top:-42px;border-radius:50%;background:#ff5a5a;color:#fff;font-size:60px;line-height:92px;text-align:center}
+
+        .p02-lives{position:absolute;left:1396px;top:40px;width:480px;height:105px;display:flex;align-items:center;justify-content:space-around}
+        .p02-lives i{width:100px;height:100px;background:url('img/p02_life.png') center / contain no-repeat;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:64px;filter:grayscale(1);opacity:.5;transition:all .3s}
+        .p02-lives i.is-on{background-image:url('img/p02_life_on.png');filter:none;opacity:1;transform:scale(1.1)}
+
+        .p02-monitor{position:absolute;left:58px;top:192px;width:1142px;height:686px;box-sizing:border-box;border:solid 12px #1b1738;border-radius:30px;background:#fff;overflow:hidden}
+        .p02-monitor-title{position:absolute;left:26px;top:20px;margin:0;font-family:'Cafe24 Ssurround';font-size:38px;color:#1b1738;z-index:2}
+        .p02-monitor-title:before{content:'';display:inline-block;width:18px;height:18px;margin-right:14px;border-radius:50%;background:#ff5a5a;vertical-align:4px;animation:p02-blink 1s step-end infinite}
+        @keyframes p02-blink{50%{opacity:.2}}
+        /* page07 음파 그래프와 같은 모양: 흰 모눈 + 파란 선 + 가운데 점선 기준선 */
+        .p02-sea{position:absolute;left:0;top:80px;width:100%;height:582px;overflow:hidden;
+          background-image:linear-gradient(#eef1f6 2px,transparent 2px),linear-gradient(90deg,#eef1f6 2px,transparent 2px);background-size:60px 60px}
+        .p02-sea svg{position:absolute;left:0;top:0;height:100%;animation:p02-flow linear infinite}
+        .p02-axis{position:absolute;left:0;top:371px;width:100%;border-top:dashed 2px #c4c9d4;pointer-events:none}
+        @keyframes p02-flow{to{transform:translateX(var(--shift))}}
+
+        .p02-btns{position:absolute;left:1240px;top:192px;width:622px;height:400px;box-sizing:border-box;padding:0 0 12px;display:grid;grid-template-columns:1fr 1fr;gap:30px 36px}
+        .p02-opt{padding:0;box-sizing:border-box;border:solid 6px #1b1738;border-radius:24px;background:#fff center / contain no-repeat;cursor:pointer;
+          font-family:'Cafe24 Ssurround';font-size:60px;color:#31248a;letter-spacing:-0.05em;box-shadow:0 12px 0 0 #becde7;transition:transform .15s,border-color .15s}
+        .p02-opt:hover{border-color:#48159c;transform:translateY(-4px)}
+        .p02-opt.is-on{border-color:#ff2fc2;box-shadow:0 0 0 6px #ff2fc2,0 12px 0 0 #becde7;color:#d168fb}
+
+        .p02-horn{position:absolute;left:1594px;top:596px;width:268px;height:328px;padding:0;border:0;background:url('img/p02_horn.png') center / contain no-repeat;cursor:pointer;font-size:200px;line-height:1;transition:transform .15s,filter .15s}
+        .p02-horn:hover{transform:scale(1.06) rotate(-4deg)}
+        .p02-horn:active{transform:scale(.95)}
+        .p02-horn:disabled{filter:grayscale(1) opacity(.5);cursor:default;transform:none}
+
+        .p02-success{justify-content:center;padding-top:0}
+        .p02-success .photo-card{height:auto;padding-bottom:40px}
+        #p02Wrong .avatar-popup-text{font-size:60px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="p02-alert">파도의 모양과 높이를 시민들에게 알려주세요!</p>
+          <div class="p02-lives" id="p02Lives"><i>📢</i><i>📢</i><i>📢</i><i>📢</i></div>
+
+          <div class="p02-monitor">
+            <p class="p02-monitor-title">AI 파도 관측 모니터</p>
+            <div class="p02-sea" id="p02Sea"></div>
+            <div class="p02-axis"></div>
+          </div>
+
+          <div class="p02-btns">
+            <button class="p02-opt js-sfx" data-sound="sound/click.mp3" data-group="height" data-val="high" style="background-image:url('img/p02_btn_high.png')">높아요</button>
+            <button class="p02-opt js-sfx" data-sound="sound/click.mp3" data-group="height" data-val="low" style="background-image:url('img/p02_btn_low.png')">낮아요</button>
+            <button class="p02-opt js-sfx" data-sound="sound/click.mp3" data-group="gap" data-val="wide" style="background-image:url('img/p02_btn_wide.png')">넓어요</button>
+            <button class="p02-opt js-sfx" data-sound="sound/click.mp3" data-group="gap" data-val="narrow" style="background-image:url('img/p02_btn_narrow.png')">좁아요</button>
+          </div>
+
+          <button class="p02-horn" id="p02Horn" disabled aria-label="확성기로 안내하기">📢</button>
+
+          <div class="photo-modal p02-success is-off" id="p02Right">
+            <div class="photo-card">
+              <img class="photo-card-img" src="img/p02_success.png" alt="">
+              <p class="photo-card-title">대피 성공!</p>
+            </div>
+          </div>
+
+          <div class="ox-result-wrong is-avatar is-off" id="p02Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text">파도의 높이와 간격을<br>다시 확인해 볼까요?</p>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p02Done">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-title">정말 잘했어요!</p>
+                    <p class="avatar-card-text">파도의 높이와 간격을 정확하게 분석해서<br>시민들을 안전하게 지켜냈어요.</p>
+                  </div>
+                  <a href="page03.html" class="js-nav-effect avatar-card-btn">
+                    <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">신기하게도, 우리가 귀로 듣는 소리도<br>마이크를 통과하면 바다의 파도 모양처럼 바뀌어요!</p>
+                  </div>
+                  <a href="page03.html" class="js-nav-effect avatar-card-btn">
+                    <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">컴퓨터와 AI가 소리 파도를<br>어떻게 분석하는지 알아볼까요?</p>
+                  </div>
+                  <a href="page03.html" class="js-nav-effect avatar-card-btn">
+                    <img src="../../img/common/btn_next_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_small_on.png" data-src-over="../../img/common/btn_next_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="SOS! 파도를 분석하라!" data-next="page03.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    // 높이 high/low × 간격 wide/narrow. amp·cycles는 모니터 그림용
+    const WAVES = shuffleArray([
+      { height: 'high', gap: 'wide', amp: 0.75, cycles: 1.6 },
+      { height: 'high', gap: 'narrow', amp: 0.75, cycles: 5.5 },
+      { height: 'low', gap: 'wide', amp: 0.2, cycles: 1.6 },
+      { height: 'low', gap: 'narrow', amp: 0.2, cycles: 5.5 }
+    ]);
+    const W = 1118;
+    const H = 582;
+    // 가로로 물결 한 개 더 그려 두고 그만큼 흘려서 끊김 없이 반복. 가운데 점선 기준선은 흐르지 않게 따로
+    function seaSvg(amp, cycles) {
+      const total = W + W / cycles;
+      const mid = H / 2;
+      const a = amp * (H / 2 - 12);
+      let d = 'M0 ' + mid;
+      for (let x = 2; x <= total; x += 2) d += ' L' + x + ' ' + (mid - a * Math.sin((x / W) * cycles * 2 * Math.PI)).toFixed(1);
+      return '<svg viewBox="0 0 ' + total + ' ' + H + '" preserveAspectRatio="none" aria-hidden="true">' +
+        '<path d="' + d + '" fill="none" stroke="#2f6fed" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    }
+
+    const $ = (id) => document.getElementById(id);
+    const horn = $('p02Horn');
+    const lives = Array.from(document.querySelectorAll('#p02Lives i'));
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+    const beep = new Audio('sound/p02_beep.mp3');
+    let waveSound = null;
+    let round = 0;
+    const picked = {};
+
+    function show() {
+      const w = WAVES[round];
+      // 가로로 물결 한 개 더 그려 두고 그만큼 왼쪽으로 흘려서 끊김 없이 반복
+      $('p02Sea').innerHTML = seaSvg(w.amp, w.cycles);
+      const el = $('p02Sea').querySelector('svg');
+      el.style.width = (W + W / w.cycles) + 'px';
+      el.style.setProperty('--shift', (-W / w.cycles) + 'px');
+      el.style.animationDuration = (w.gap === 'narrow' ? 1.2 : 2.6) + 's';
+      document.querySelectorAll('.p02-opt').forEach((b) => b.classList.remove('is-on'));
+      delete picked.height;
+      delete picked.gap;
+      horn.disabled = true;
+      if (waveSound) waveSound.pause();
+      waveSound = new Audio('sound/p02_wave_' + w.height + '_' + w.gap + '.mp3');
+      waveSound.loop = true;
+      waveSound.play().catch(() => {});
+    }
+
+    // 높이(높아요/낮아요)·간격(넓어요/좁아요) 짝끼리 하나만 선택
+    const opts = Array.from(document.querySelectorAll('.p02-opt'));
+    opts.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        opts.filter((b) => b.dataset.group === btn.dataset.group).forEach((b) => b.classList.toggle('is-on', b === btn));
+        picked[btn.dataset.group] = btn.dataset.val;
+        horn.disabled = !(picked.height && picked.gap);
+      });
+    });
+
+    horn.addEventListener('click', () => {
+      horn.disabled = true;
+      beep.currentTime = 0;
+      beep.play().catch(() => {});
+      const w = WAVES[round];
+      setTimeout(() => {
+        if (picked.height !== w.height || picked.gap !== w.gap) {
+          playWrong();
+          flashLayer($('p02Wrong'));
+          horn.disabled = false;
+          return;
+        }
+        playCorrect();
+        lives[round].classList.add('is-on');
+        $('p02Right').classList.remove('is-off');
+        setTimeout(() => {
+          $('p02Right').classList.add('is-off');
+          round += 1;
+          if (round >= WAVES.length) {
+            if (waveSound) waveSound.pause();
+            $('p02Done').classList.remove('is-off');
+            return;
+          }
+          show();
+        }, 2000);
+      }, 500);
+    });
+
+    show();
+  })();
+  </script>
+</body>
+</html>

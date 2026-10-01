@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>안전한 뉴스 판별하기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 51~75p. 게이지 캐릭터 img/p14_runner.png(100%에서 p14_runner_done.png), 보드 아이콘 img/p14_icon_{ok|risk}.png.
+           보도 위험이 정답인 기사는 개인정보(.p14-pii)를 전부 눌러 지워야 다음 기사로 넘어감 */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p14-gauge{left:106px;top:60px;width:1709px}
+        .p14-gauge:before{background-image:url('img/p14_star.png')}
+        .p14-runner{position:absolute;left:40px;top:-60px;width:130px;height:150px;margin-left:-65px;background:url('img/p14_runner.png') center bottom / contain no-repeat;transition:left .4s ease;z-index:2}
+        .p14-runner.is-done{background-image:url('img/p14_runner_done.png')}
+
+        .p14-article{position:absolute;left:83px;top:226px;width:738px;height:497px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:36px;overflow:hidden;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p14-article-head{height:121px;display:flex;align-items:center;justify-content:center;padding:0 30px;background:#48159c;font-family:'Cafe24 Ssurround';font-size:48px;line-height:1.15;color:#fff;letter-spacing:-0.06em;text-align:center;word-break:keep-all}
+        .p14-article-body{margin:0;padding:40px 50px;font-family:'Pretendard';font-size:40px;line-height:1.55;font-weight:600;color:#1b1738;letter-spacing:-0.03em;word-break:keep-all}
+        .p14-pii{border-radius:6px;transition:background-color .6s ease}
+        .p14-pii.is-hint{background-color:#ffe36e;transition:none}
+        .is-erase .p14-article-body{cursor:pointer}
+        .p14-pii.is-struck{text-decoration:line-through;text-decoration-color:#e8203a;text-decoration-thickness:8px;color:#9a93b8}
+
+        .p14-choices{position:absolute;left:103px;top:752px;width:699px;display:flex;justify-content:space-between}
+        .p14-choices .card-btn{width:331px;min-width:0;height:121px;padding:12px 10px 8px;font-size:60px}
+        .is-erase .p14-choices{visibility:hidden}
+
+        .p14-board{position:absolute;left:853px;width:970px;height:321px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:36px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p14-board-ok{top:218px}
+        .p14-board-risk{top:555px}
+        .p14-board-head{position:absolute;left:55px;top:31px;display:flex;align-items:center;gap:16px;font-family:'Cafe24 Ssurround';font-size:60px;color:#48159c;letter-spacing:-0.04em}
+        .p14-board-head img{width:120px;height:120px;object-fit:contain}
+        .p14-slot{position:absolute;width:429px;height:119px;box-sizing:border-box;padding:0 20px;display:flex;align-items:center;justify-content:center;border:dashed 4px #b9b3dd;border-radius:24px;
+          font-family:'Cafe24 Ssurround';font-size:34px;line-height:1.15;color:#31248a;text-align:center;letter-spacing:-0.04em;word-break:keep-all}
+        .p14-slot.is-filled{border:solid 4px #8278ff;background:#eee8ff}
+        .p14-slot1{left:496px;top:25px}
+        .p14-slot2{left:34px;top:166px}
+        .p14-slot3{left:496px;top:166px}
+
+        .p14-end{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:110;background:rgba(27,23,56,.5);display:flex;align-items:center;justify-content:center}
+        .p14-end.is-off{display:none}
+        .p14-end p{margin:0;font-family:'Cafe24 Ssurround';font-size:160px;letter-spacing:-0.06em;color:#fff;-webkit-text-stroke:6px #48159c;paint-order:stroke fill}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default" id="p14Main">
+          <div class="gauge is-thin p14-gauge"><div class="gauge-fill" id="p14GaugeFill"></div><span class="p14-runner" id="p14Runner"></span></div>
+
+          <div class="p14-article">
+            <div class="p14-article-head" id="p14Head"></div>
+            <p class="p14-article-body" id="p14Body"></p>
+          </div>
+          <div class="p14-choices">
+            <button type="button" class="card-btn" data-choice="ok">보도 가능</button>
+            <button type="button" class="card-btn" data-choice="risk">보도 위험</button>
+          </div>
+
+          <div class="p14-board p14-board-ok">
+            <div class="p14-board-head"><img src="img/p14_icon_ok.png" alt="" onerror="this.style.visibility='hidden'">보도 가능!</div>
+            <div class="p14-slot p14-slot1"></div><div class="p14-slot p14-slot2"></div><div class="p14-slot p14-slot3"></div>
+          </div>
+          <div class="p14-board p14-board-risk">
+            <div class="p14-board-head"><img src="img/p14_icon_risk.png" alt="" onerror="this.style.visibility='hidden'">보도 위험!</div>
+            <div class="p14-slot p14-slot1"></div><div class="p14-slot p14-slot2"></div><div class="p14-slot p14-slot3"></div>
+          </div>
+
+          <div class="ox-result-correct is-avatar is-off" id="p14Good">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">GOOD!</p>
+                <p class="avatar-popup-sub" id="p14GoodText"></p>
+              </div>
+              <div class="avatar-popup-extra"><img src="../../img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div>
+          <div class="ox-result-wrong is-avatar is-off" id="p14TryAgain">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">TRY AGAIN</p>
+                <p class="avatar-popup-sub">기사를 다시 읽어보세요</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="p14-end is-off" id="p14End"><p>게임 종료!</p></div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="안전한 뉴스 판별하기" data-next="page15.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const ARTICLES = [
+      { title: '김모 군, 줄넘기 대회에서 수상', answer: 'ok',
+        body: '김모 군은 오늘 줄넘기 대회에서 상을 받았습니다. 열심히 연습한 결과라서 매우 뿌듯했다고 합니다.' },
+      { title: '박모 군 집주소 공개, 서울시···', answer: 'risk',
+        body: '박모 군은 매일 하교 후, [[서울시 가상구 안전로 12-3번지]]에 있는 집으로 귀가합니다.' },
+      { title: '필요한 사람은 언제든지 환영', answer: 'risk',
+        body: '[[○○학교 학생인 김철수]]의 전화번호는 [[010-0000-0000]]입니다. 필요한 사람은 언제든지 연락해도 됩니다.' },
+      { title: '따뜻한 어린이상 수상 예정', answer: 'ok',
+        body: '모 중학교의 학생이 친구를 도와주고 선생님께 칭찬을 받았다고 합니다. 친구도 고마운 마음을 전달했습니다.' },
+      { title: '도내 합창대회 수상자 SNS 계정', answer: 'risk',
+        body: '어제 열린 합창대회에서 [[최민지]] 학생이 대상을 수상했습니다. 학생의 개인 SNS 계정은 [[@○○_1234]]입니다.' },
+      { title: '모 중학교, 개인정보 안전교육 시행', answer: 'ok',
+        body: '모 중학교에서 학생들이 안전하게 인터넷을 사용할 수 있도록 개인정보를 지키는 안전교육을 시행하였습니다.' }
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const main = $('p14Main');
+    const head = $('p14Head');
+    const body = $('p14Body');
+    const gaugeFill = $('p14GaugeFill');
+    const runner = $('p14Runner');
+    const good = $('p14Good');
+    const goodText = $('p14GoodText');
+    const tryAgain = $('p14TryAgain');
+    const slots = {
+      ok: Array.from(document.querySelectorAll('.p14-board-ok .p14-slot')),
+      risk: Array.from(document.querySelectorAll('.p14-board-risk .p14-slot'))
+    };
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+    const playClick = makeSfx('sound/click.mp3');
+
+    let index = 0;
+    let solved = 0;
+    let busy = false;
+
+    const piis = () => Array.from(body.querySelectorAll('.p14-pii'));
+
+    function render() {
+      const a = ARTICLES[index];
+      main.classList.remove('is-erase');
+      head.textContent = a.title;
+      body.innerHTML = a.body.replace(/\[\[(.+?)\]\]/g, '<span class="p14-pii">$1</span>');
+    }
+
+    function hint() {
+      piis().forEach((s) => s.classList.add('is-hint'));
+      setTimeout(() => piis().forEach((s) => s.classList.remove('is-hint')), 500);
+    }
+
+    function solve() {
+      const a = ARTICLES[index];
+      busy = true;
+      playCorrect();
+      goodText.textContent = a.answer === 'ok' ? '안전한 기사예요' : '기사에 개인정보가 포함되어 있어요';
+      flashLayer(good, 'is-off', 1000);
+      const slot = slots[a.answer].find((s) => !s.textContent);
+      if (slot) { slot.textContent = a.title; slot.classList.add('is-filled'); }
+      solved += 1;
+      const pct = solved >= ARTICLES.length ? 100 : solved * (100 / ARTICLES.length);
+      gaugeFill.style.width = pct + '%';
+      runner.style.left = 'calc(40px + (100% - 80px) * ' + (pct / 100) + ')';
+      runner.classList.toggle('is-done', pct >= 100);
+
+      setTimeout(() => {
+        busy = false;
+        index += 1;
+        if (index < ARTICLES.length) {
+          render();
+          return;
+        }
+        $('p14End').classList.remove('is-off');
+        setTimeout(() => navigateTo('page15.html'), 2000);
+      }, 1000);
+    }
+
+    document.querySelectorAll('.p14-choices .card-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (busy) return;
+        const a = ARTICLES[index];
+        if (btn.dataset.choice !== a.answer) {
+          playWrong();
+          flashLayer(tryAgain, 'is-off', 1000);
+          if (a.answer === 'risk') setTimeout(hint, 1500);
+          return;
+        }
+        if (a.answer === 'ok') {
+          solve();
+          return;
+        }
+        playClick();
+        main.classList.add('is-erase');
+        head.textContent = piis().length > 1 ? '개인정보를 모두 지워보세요' : '개인정보를 지워보세요';
+      });
+    });
+
+    body.addEventListener('click', (e) => {
+      if (busy || !main.classList.contains('is-erase')) return;
+      const span = e.target.closest('.p14-pii');
+      if (!span) {
+        hint();
+        return;
+      }
+      if (span.classList.contains('is-struck')) return;
+      playClick();
+      span.classList.add('is-struck');
+      if (piis().every((s) => s.classList.contains('is-struck'))) {
+        busy = true;
+        setTimeout(solve, 500);
+      }
+    });
+
+    render();
+  })();
+  </script>
+</body>
+</html>

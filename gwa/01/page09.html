@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>정보를 깔끔하게 데이터로 정리하기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:url('img/p09_bg.png') no-repeat}
+
+        /* 안내 문구와 문장은 문제마다 바뀌므로, 배경에 그려진 자리를 같은 색으로 덮고 위에 다시 그림.
+           색과 좌표는 디자인 16p에서 픽셀로 측정한 값(말풍선 흰색, 문장 패널 #023186) */
+        .p09-guide{position:absolute;left:358px;top:76px;width:1210px;height:112px;
+          border-radius:56px;display:flex;align-items:center;justify-content:center;text-align:center}
+        .p09-guide span{font-family:'Cafe24 Ssurround';font-size:70px;color:#1b1738;letter-spacing:-0.04em}
+
+        .p09-sentence{position:absolute;left:47px;top:229px;width:1827px;height:435px;background:#023186;
+          border-radius:20px;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;
+          gap:18px 10px;padding:0 60px;box-sizing:border-box}
+        .p09-br{flex-basis:100%;height:0}
+        .p09-plain{font-family:'Cafe24 Ssurround';font-size:70px;color:#fff;letter-spacing:-0.04em;
+          display:flex;align-items:center}
+
+        /* 낱말 칩 — sa/01/page18의 fix-word-option 스타일(common.css)을 그대로 씀.
+           문장 안에서는 칩 사이 간격을 .p09-sentence의 gap이 정하므로 margin만 뺌 */
+        .p09-word{margin:0}
+        .p09-word.is-done{cursor:default;pointer-events:none}
+        .p09-word.is-done .fix-word-option-face{box-shadow:none;color:#d168fb;padding:21px 16px 11px 16px}
+
+        .p09-word.fix-word-option.is-wrong{background:linear-gradient(180deg, #1b1738, #0361d5)}
+        .p09-word.fix-word-option.is-wrong .fix-word-option-face{box-shadow:none;padding:21px 16px 11px 16px}
+
+        /* 데이터 항목 버튼 — 배경에 그려진 버튼 위에 투명하게 겹치고, 맞히면 하이라이트 */
+        .p09-cat{position:absolute;top:700px;width:570px;height:201px;border-radius:18px;pointer-events:none}
+        .p09-cat.is-on{outline:10px solid #ffd83d;outline-offset:-10px;box-shadow:0 0 40px rgba(255,216,61,.9)}
+        .p09-cat-area{left:72px}
+        .p09-cat-sky{left:675px}
+        .p09-cat-temp{left:1278px}
+
+        /* 오답/종료 모달 — 배경은 각각 다른 이미지로 교체할 수 있게 분리 */
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main>
+
+          <div class="p09-guide"><span id="p09Guide"></span></div>
+          <div class="p09-sentence" id="p09Sentence"></div>
+
+          <div class="p09-cat p09-cat-area" data-cat="area"></div>
+          <div class="p09-cat p09-cat-sky"  data-cat="sky"></div>
+          <div class="p09-cat p09-cat-temp" data-cat="temp"></div>
+
+          <!-- 오답: 묻고 있는 항목에 따라 문구가 달라지고 2초 뒤 자동으로 닫힘(기획서 17p) -->
+          <div class="avatar-modal is-off" id="p09Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text is-pill" id="p09WrongText"></p>
+            </div>
+          </div>
+
+          <!-- 종료: 2단계 안내 후 AI 실습으로 이동(기획서 18p) -->
+          <div class="avatar-modal is-off" id="p09Finish">
+            <div class="avatar-card is-center">
+              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
+            <div class="step-flow">
+              <div class="step-panel">
+                <div class="avatar-card-body">
+<p class="avatar-card-title">좋아요!</p>
+<p class="avatar-card-text">긴 문장 속에서 중요한 낱말을 찾아<br>지역, 날씨, 기온으로 정리했어요.</p>
+</div>
+                <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn">
+                  <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                </a>
+              </div>
+              <div class="step-panel is-hidden">
+                <div class="avatar-card-body"><p class="avatar-card-text">이제 정리한 자료를<br>AI에게 주고 분석해볼까요?</p></div>
+                <a href="page10.html" class="js-nav-effect js-sfx avatar-card-btn">
+                  <img src="../../img/common/btn_next_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_small_on.png" data-src-over="../../img/common/btn_next_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                </a>
+              </div>
+            </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="정보를 깔끔하게 데이터로 정리하기" data-next="page10.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  /* 기획서 16p(activity02_01) + 17p(오답) + 18p(종료)
+     - 긴 문장 속에서 지역·날씨·기온을 나타내는 낱말을 찾아 클릭하는 활동
+     - 묻는 항목 순서는 매번 무작위이고, 안내 문구도 그에 맞춰 바뀜
+     - 정답이면 정답음과 함께 해당 데이터 항목 버튼이 하이라이트됨
+     - 오답이면 오답음 + 안내가 2초 떴다 닫히고, 문구는 묻고 있던 항목에 맞춰 달라짐
+     - 문제 2개를 모두 풀면 종료 모달 2단계 후 page10(AI 실습)으로 이동 */
+  (function () {
+    const CATS = {
+      area: { label: '지역', el: document.querySelector('.p09-cat-area') },
+      sky:  { label: '날씨', el: document.querySelector('.p09-cat-sky') },
+      temp: { label: '기온', el: document.querySelector('.p09-cat-temp') },
+    };
+
+    // parts: 낱말 칩은 {w:'서울', cat:'area'}, 그냥 글자는 문자열
+    const QUESTIONS = [
+      { parts: [
+          { w: '오늘' }, { w: '서울', cat: 'area' }, '의', { w: '날씨' }, '는',
+          { w: '맑음', cat: 'sky' }, '이며,', { br: true }, { w: '기온' }, '은', { w: '25도', cat: 'temp' }, '입니다.',
+        ] },
+      { parts: [
+          { w: '부산', cat: 'area' }, '에는', { w: '내일' }, { w: '비', cat: 'sky' }, '가 내리고,',
+          { w: '18도', cat: 'temp' }, '로', { w: '선선한' }, { w: '날씨' }, '입니다.',
+        ] },
+    ];
+
+    const guide = document.getElementById('p09Guide');
+    const sentence = document.getElementById('p09Sentence');
+    const wrongModal = document.getElementById('p09Wrong');
+    const wrongText = document.getElementById('p09WrongText');
+    const finishModal = document.getElementById('p09Finish');
+
+    const correctSound = new Audio(ASSET_BASE + 'sound/correct.mp3');
+    const wrongSound = new Audio(ASSET_BASE + 'sound/incorrect.mp3');
+
+    let qIndex = 0;
+    let order = [];      // 이번 문제에서 물어볼 항목 순서(무작위)
+    let askIndex = 0;
+    let locked = false;
+
+    function shuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function currentCat() {
+      return order[askIndex];
+    }
+
+    // '지역을' / '날씨를'처럼 받침 유무에 따라 조사를 고름
+    // (한글 음절코드에서 (코드-0xAC00) % 28 이 0이 아니면 받침이 있음)
+    function withObjectParticle(word) {
+      const code = word.charCodeAt(word.length - 1) - 0xac00;
+      const hasFinal = code >= 0 && code <= 11171 && code % 28 !== 0;
+      return word + (hasFinal ? '을' : '를');
+    }
+
+    function renderGuide() {
+      guide.textContent = withObjectParticle(CATS[currentCat()].label) + ' 나타내는 낱말을 선택해주세요.';
+    }
+
+    function renderQuestion() {
+      const q = QUESTIONS[qIndex];
+      sentence.innerHTML = '';
+      Object.keys(CATS).forEach((k) => CATS[k].el.classList.remove('is-on'));
+
+      q.parts.forEach((p) => {
+        if (typeof p === 'string') {
+          const s = document.createElement('span');
+          s.className = 'p09-plain';
+          s.textContent = p;
+          sentence.appendChild(s);
+          return;
+        }
+        if (p.br) {
+          const br = document.createElement('span');
+          br.className = 'p09-br';
+          sentence.appendChild(br);
+          return;
+        }
+        const b = document.createElement('button');
+        b.className = 'fix-word-option p09-word';
+        b.innerHTML = '<span class="fix-word-option-face"></span>';
+        b.firstChild.textContent = p.w;
+        if (p.cat) b.dataset.cat = p.cat;
+        b.addEventListener('click', () => onPick(b));
+        sentence.appendChild(b);
+      });
+
+      order = shuffle(Object.keys(CATS));
+      askIndex = 0;
+      renderGuide();
+      locked = false;
+    }
+
+    function onPick(btn) {
+      if (locked || btn.classList.contains('is-done')) return;
+      const want = currentCat();
+
+      if (btn.dataset.cat === want) {
+        btn.classList.add('is-done');
+        CATS[want].el.classList.add('is-on');
+        correctSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+
+        askIndex += 1;
+        if (askIndex < order.length) {
+          renderGuide();
+          return;
+        }
+
+        // 이 문제의 세 항목을 다 맞힘
+        locked = true;
+        qIndex += 1;
+        if (qIndex < QUESTIONS.length) {
+          setTimeout(renderQuestion, 900);
+        } else {
+          setTimeout(() => finishModal.classList.remove('is-off'), 900);
+        }
+        return;
+      }
+
+      wrongSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+      btn.classList.remove('is-wrong');
+      void btn.offsetWidth;
+      btn.classList.add('is-wrong');
+
+      wrongText.textContent = '문장 속에서 ' + withObjectParticle(CATS[want].label) + ' 나타내는 낱말을 찾아볼까요?';
+      wrongModal.classList.remove('is-off');
+      clearTimeout(wrongModal.__hideTimer);
+      wrongModal.__hideTimer = setTimeout(() => wrongModal.classList.add('is-off'), 2000);
+    }
+
+    renderQuestion();
+  })();
+  </script>
+</body>
+</html>

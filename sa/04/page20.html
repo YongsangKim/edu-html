@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>퀴즈 풀기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 와이어프레임. 기획서 55~57p:
+           sa/01·02의 QUIZ처럼 한 페이지 안에서 q1/q2/q3을 step-flow로 진행.
+           스타일은 사용자가 보내준 참고 디자인(알약형 질문 박스 + 로봇 아바타 +
+           입체 버튼 카드)을 그대로 적용. 로봇은 공용 img/common/avatar_quiz.png. 문구는 sa/04 기획서(55~57p) 그대로 유지.
+           정답이 2개인 q3까지 공용 기능 V(initAnswerPickQuiz)가 그대로 처리 */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:#dbe9f7}
+
+        .p20-panel{position:absolute;left:0;top:0;width:1920px;height:960px}
+
+        /* 질문 박스(아바타+Q번호+문구, 상황 설명 카드)는 css/common.css의
+           공용 .quiz-ask-box 계열 재사용 */
+
+        /* 선택지 배치만 담당(생김새는 css/common.css의 공용 .card-btn 재사용) */
+        .p20-opts{position:absolute;left:120px;width:1680px;height:300px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:40px;align-items:center}
+        .p20-opts.has-case{top:540px}
+        .p20-opts.no-case{top:430px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main>
+          <div class="step-flow">
+
+            <div class="step-panel p20-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q1.</span>
+                  <p class="quiz-ask">아래 제시된 상황과 같이 친구가 나를 도와주었을 때 알맞은 감정은 무엇일까요?</p>
+                </div>
+                <p class="quiz-case">급식실에서 식판을 들고 가기 어려웠는데,<br>친구가 천천히 같이 가 주었습니다.</p>
+              </div>
+              <div class="answer-pick-quiz p20-opts has-case">
+                <button class="answer-pick card-btn" data-correct="false" aria-label="미안함">미안함</button>
+                <button class="answer-pick card-btn" data-correct="true" aria-label="고마움">고마움</button>
+                <button class="answer-pick card-btn" data-correct="false" aria-label="걱정">걱정</button>
+                <button class="answer-pick card-btn" data-correct="false" aria-label="속상함">속상함</button>
+              </div>
+            </div>
+
+            <div class="step-panel p20-panel is-hidden">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q2.</span>
+                  <p class="quiz-ask">온라인 대화에서 이모티콘을 사용하는 이유는 무엇일까요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz p20-opts no-case">
+                <button class="answer-pick card-btn is-wide" data-correct="true" aria-label="마음을 더 쉽게 전하기 위해 사용한다">마음을 더 쉽게 전하기 위해 사용한다.</button>
+                <button class="answer-pick card-btn is-wide" data-correct="false" aria-label="감정과 상관없이 재미있는 그림을 보내기 위해 사용한다">감정과 상관없이 재미있는 그림을 보내기 위해 사용한다.</button>
+                <button class="answer-pick card-btn is-wide" data-correct="false" aria-label="모든 감정을 이모티콘으로만 나타내기 위해 사용한다">모든 감정을 이모티콘으로만 나타내기 위해 사용한다.</button>
+              </div>
+            </div>
+
+            <div class="step-panel p20-panel is-hidden">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q3.</span>
+                  <p class="quiz-ask">AI에게 이모티콘을 만들게 할 때 어떤 내용이 필요할까요? 모두 골라보세요.</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz p20-opts no-case" data-next="page21.html">
+                <button class="answer-pick card-btn" data-correct="true" aria-label="감정">감정</button>
+                <button class="answer-pick card-btn" data-correct="false" aria-label="날씨">날씨</button>
+                <button class="answer-pick card-btn" data-correct="true" aria-label="문구">문구</button>
+                <button class="answer-pick card-btn" data-correct="false" aria-label="장소">장소</button>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="ox-result-correct is-avatar is-off" data-sound="sound/correct.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <p class="avatar-popup-text">정답이에요!</p>
+              <div class="avatar-popup-extra"><img src="../../img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div>
+          <div class="ox-result-wrong is-avatar is-off" data-sound="sound/incorrect.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text">다시 한번 생각해봐요!</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="퀴즈 풀기" data-next="page21.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>미래 진로 선택을 위한 가치 보물찾기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 배경(리본 + 흰 패널 틀)은 통이미지 img/p06_bg.png 한 장, 추천 직업 카드 3장과 하단 피드백 문구만 따로.
+           직업 사진 img/p06_job_{key}.png(10가지 직업) */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+        main.bg-default{background:url('img/p06_bg.png') no-repeat,linear-gradient(180deg,#d9ddeb 0%,#cddcea 50%,#c2d9e9 100%)}
+        .p06-card{position:absolute;top:237px;width:313px;height:397px;box-sizing:border-box;border:solid 4px #023187;border-radius:10px;background:#fff;overflow:hidden;display:flex;flex-direction:column}
+        .p06-card i{flex:0 0 280px;background:#dfe7f5 center top / cover no-repeat}
+        .p06-card span{flex:1 1 auto;display:flex;align-items:center;justify-content:center;padding:6px 10px 0;font-family:'Cafe24 Ssurround';font-size:42px;line-height:1.1;color:#1b1738;text-align:center;letter-spacing:-0.07em;word-break:keep-all}
+        .p06-card1{left:368px}
+        .p06-card2{left:803px}
+        .p06-card3{left:1240px}
+        .p06-feedback{position:absolute;left:260px;top:667px;width:1400px;margin:0;font-family:'Cafe24 Ssurround';font-size:50px;line-height:1.2;color:#1b1738;text-align:center;letter-spacing:-0.05em;word-break:keep-all}
+        .p06-result-next{position:absolute;left:750px;top:800px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p06-card p06-card1"><i></i><span></span></div>
+          <div class="p06-card p06-card2"><i></i><span></span></div>
+          <div class="p06-card p06-card3"><i></i><span></span></div>
+          <p class="p06-feedback" id="p06Feedback"></p>
+
+          <a href="page07.html" class="js-nav-effect p06-result-next">
+            <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+          </a>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="미래 진로 선택을 위한 가치 보물찾기" data-next="page07.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  /* page05 1단계(좋아하는 것)·2단계(잘하는 것) 선택 조합(4×4=16)으로 추천 직업 3개와 피드백 문구를 보여줌.
+     출처: 기획서/사회/(10개 직업군 수정) 좋아하는 것_잘하는 것_조합_직업 표.xlsx 두 번째 시트. 조합 번호 = (좋아하는 것-1)*4 + 잘하는 것 */
+  (function () {
+    const JOBS = {
+      store: '매장 관리·안내원', library: '도서관 사서 보조', illust: '일러스트 작가', care: '교육·돌봄 보조교사',
+      craft: '공예품 디자이너', pack: '포장·물류 업무 직원', pet: '반려동물 관리사', food: '음식점·급식실 도우미',
+      barista: '카페 바리스타', stage: '공연 예술가 (가수·댄서)'
+    };
+    const RESULTS = [
+      [['store', 'library', 'illust'], '그림 실력과 깔끔한 정리 솜씨로 주변을 멋지게 가꿔봐요!'],
+      [['illust', 'care', 'library'], '멋진 그림과 따뜻한 마음으로 사람들에게 행복을 전해줘요!'],
+      [['craft', 'illust', 'pack'], '풍부한 상상력과 꼼꼼한 손재주로 멋진 결과물을 만들어요!'],
+      [['pack', 'store', 'craft'], '예쁜 그림과 정성스러운 손길로 감동을 선물해 봐요!'],
+      [['pet', 'store', 'library'], '동물을 사랑하는 마음과 정리 솜씨로 깨끗한 환경을 만들어요!'],
+      [['pet', 'care', 'food'], '생명을 아끼고 남을 돕는 따뜻한 마음은 모두에게 힘이 돼요!'],
+      [['craft', 'pet', 'pack'], '동물을 사랑하는 마음과 손재주를 발휘해 멋지게 해내봐요!'],
+      [['pack', 'pet', 'store'], '다정한 마음과 꼼꼼한 솜씨로 소중한 이들을 잘 챙겨줘요!'],
+      [['barista', 'food', 'store'], '맛있는 손맛과 깔끔한 정리 습관으로 주변을 반짝이게 해요!'],
+      [['food', 'care', 'barista'], '맛있는 손맛과 베푸는 따뜻한 마음으로 사람들을 기쁘게 해요!'],
+      [['food', 'pack', 'barista'], '맛을 내는 감각과 차근차근 맞추는 손재주로 멋지게 완성해요!'],
+      [['pack', 'barista', 'food'], '정성껏 만든 것을 예쁘게 담아내는 솜씨가 정말 훌륭해요!'],
+      [['store', 'library', 'stage'], '밝은 에너지와 깔끔한 정리 솜씨로 기분 좋은 공간을 만들어요!'],
+      [['stage', 'care', 'food'], '신나는 에너지와 따뜻한 배려로 많은 이들에게 웃음을 줘요!'],
+      [['craft', 'stage', 'pack'], '신나는 열정과 꼼꼼한 손재주를 살려 멋진 세상을 만들어요!'],
+      [['pack', 'store', 'stage'], '신나는 마음과 정성스러운 손길로 사람들에게 설렘을 전해요!']
+    ];
+
+    let like = 1;
+    let good = 1;
+    try {
+      like = Number(sessionStorage.getItem('p05_like')) || 1;
+      good = Number(sessionStorage.getItem('p05_good')) || 1;
+    } catch (err) { /* 무시 */ }
+
+    const [jobs, feedback] = RESULTS[(like - 1) * 4 + good - 1];
+    document.querySelectorAll('.p06-card').forEach((card, i) => {
+      card.querySelector('i').style.backgroundImage = "url('img/p06_job_" + jobs[i] + ".png')";
+      card.querySelector('span').textContent = JOBS[jobs[i]];
+    });
+    document.getElementById('p06Feedback').textContent = feedback;
+  })();
+  </script>
+</body>
+</html>

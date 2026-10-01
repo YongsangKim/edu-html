@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1박 2일 수학여행 준비물 토너먼트</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 32~58p. 준비물 그림 img/p10_item_{key}.png, 휴대폰 화면 img/p10_screen_{home|live}.png(496x898).
+           1라운드는 두 카드를 하나씩 Gemini에게 물어본 뒤 고르고, 2라운드·결승은 바로 고름. 결과 문구는 최종 선택에 따라 다름.
+           기획서 46p 접이식 우산 답변은 앞 문장이 빠져 있어 49p 요약 문구로 채움 */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p10-bubble{left:111px;top:58px;bottom:auto;width:555px;min-height:217px;display:flex;align-items:center;justify-content:center;font-size:48px}
+        .p10-character{position:absolute;left:195px;top:300px;width:472px;height:629px;display:flex;align-items:flex-end;justify-content:center}
+        .p10-character img{max-width:100%;max-height:100%;object-fit:contain}
+
+        .p10-phone{position:absolute;left:715px;top:21px;width:496px;height:898px;box-sizing:border-box;border:solid 8px #1b1738;border-radius:48px;background:#fff center / cover no-repeat;overflow:hidden}
+        .p10-answer{position:absolute;left:740px;top:135px;width:450px;min-height:208px;box-sizing:border-box;padding:26px 28px;background:#eef3fb;border:solid 4px #1b1738;border-radius:28px;
+          font-family:'Pretendard';font-size:32px;line-height:1.5;font-weight:600;color:#1b1738;letter-spacing:-0.02em;word-break:keep-all}
+
+        .p10-side{position:absolute;left:1344px;top:107px;width:360px;height:761px;box-sizing:border-box;padding:30px 0;display:flex;flex-direction:column;align-items:center;justify-content:space-around;
+          background:#fefbf9;border:solid 6px #48159c;border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p10-item{width:285px;height:309px;padding:0 0 16px;box-sizing:border-box;border:solid 6px #eae0fd;border-radius:28px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:10px;
+          font-family:'Cafe24 Ssurround';font-size:44px;color:#31248a;letter-spacing:-0.04em}
+        .p10-item i{flex:1 1 auto;width:100%;border-radius:20px 20px 0 0;background:#48159c center / contain no-repeat;background-origin:content-box;padding:14px;box-sizing:border-box}
+        .p10-item:hover{border-color:#8278ff}
+        .p10-item.is-selected{border-color:#ff4ff9}
+        .p10-item:disabled{opacity:.4;cursor:default;border-color:#eae0fd}
+
+        .p10-panel{position:absolute;left:722px;top:77px;width:1091px;height:833px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:48px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p10-round{position:absolute;left:918px;top:30px;width:678px;height:95px;box-sizing:border-box;padding:6px 40px 0;display:flex;align-items:center;justify-content:center;z-index:2;
+          background:#91b9e7;border:solid 5px #1b1738;border-radius:48px;font-family:'Cafe24 Ssurround';font-size:50px;color:#fff;letter-spacing:-0.02em}
+        .p10-vs{position:absolute;left:785px;top:168px;width:972px;display:flex;justify-content:space-between}
+        .p10-vs .p10-item{width:454px;height:590px;padding:0 0 20px}
+        .p10-vs .p10-item i{flex:0 0 300px}
+        .p10-vs .p10-item small{padding:0 26px;font-family:'Pretendard';font-size:28px;line-height:1.45;font-weight:600;color:#1b1738;letter-spacing:-0.03em;word-break:keep-all;text-align:left}
+
+        .p10-overview{position:absolute;left:232px;top:79px;width:1456px;height:810px;box-sizing:border-box;padding:40px 0 0;background:#fefbf9;border:solid 6px #48159c;border-radius:48px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p10-overview-title{margin:0 0 30px;text-align:center;font-family:'Cafe24 Ssurround';font-size:60px;color:#48159c;letter-spacing:-0.04em}
+        .p10-overview-grid{display:grid;grid-template-columns:repeat(4,268px);gap:24px 36px;justify-content:center}
+        .p10-overview-grid .p10-item{width:268px;height:240px;cursor:default;font-size:38px}
+        .p10-overview-grid .p10-item:hover{border-color:#eae0fd}
+
+        .p10-result{position:absolute;left:613px;top:121px;width:1188px;height:706px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:60px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p10-result-title{position:absolute;left:0;top:40px;width:100%;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:70px;letter-spacing:-0.06em;
+          background:linear-gradient(180deg,#02185c,#0362d7);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .p10-result .p10-item{position:absolute;left:46px;top:173px;width:325px;height:353px;cursor:default}
+        .p10-result-type{position:absolute;left:417px;top:192px;width:710px;height:291px;margin:0;display:flex;align-items:center;justify-content:center;text-align:center;
+          font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.3;color:#48159c;letter-spacing:-0.04em;word-break:keep-all}
+
+        .p10-hit{position:absolute}
+
+        .p10.is-overview .p10-bubble, .p10.is-overview .p10-character{display:none}
+        /* 임시: Gemini 휴대폰 화면 이미지가 없어서 클릭할 자리를 색으로 표시. 화면 이미지 넣으면 이 두 줄 삭제 */
+        .p10 .hit-area{background:rgba(255,79,139,.3);outline:5px dashed #ff4f8b;outline-offset:-5px;border-radius:14px;animation:p10-hit-blink 1.2s ease-in-out infinite}
+        @keyframes p10-hit-blink{50%{background:rgba(255,79,139,.55)}}
+
+        .p10 .is-off{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default p10">
+          <p class="guide-bubble p10-bubble" id="p10Bubble"></p>
+          <div class="p10-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+
+          <div class="p10-overview" id="p10Overview">
+            <p class="p10-overview-title">어떤 준비물을 챙겨갈까요?</p>
+            <div class="p10-overview-grid" id="p10OverviewGrid"></div>
+          </div>
+
+          <div class="p10-phone is-off" id="p10Phone"></div>
+          <div class="p10-answer is-off" id="p10Answer"></div>
+          <button type="button" class="hit-area p10-hit is-off" id="p10Hit" aria-label="클릭"></button>
+          <div class="p10-side is-off" id="p10Side"></div>
+
+          <div class="is-off" id="p10VsView">
+            <div class="p10-panel"></div>
+            <div class="p10-round" id="p10Round"></div>
+            <div class="p10-vs" id="p10Vs"></div>
+          </div>
+
+          <div class="p10-result is-off" id="p10Result">
+            <p class="p10-result-title">최종 선택 결과!</p>
+            <div id="p10ResultItem"></div>
+            <p class="p10-result-type" id="p10ResultType"></p>
+          </div>
+
+          <a href="javascript:;" class="js-sfx next-btn is-off" id="p10Next" data-sound="sound/click.mp3">
+            <img src="../../img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" alt="다음">
+          </a>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="1박 2일 수학여행 준비물 토너먼트" data-next="page11.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const ITEMS = {
+      charger: { name: '충전기', obj: '충전기를',
+        answer: '핸드폰 배터리 방전 걱정 없이 마음껏 사용할 수 있습니다. 다만, 한정된 숙소 콘센트 때문에 먼저 충전하겠다고 다투는 갈등이 생길 수도 있습니다.',
+        summary: '핸드폰 배터리 방전 걱정 없이 마음껏 사용할 수 있지만, 먼저 충전하겠다고 친구들과 다투는 갈등이 생길 수도 있습니다.',
+        type: '중요한 순간에 끊기지 않는<br>확실한 신뢰의 여행가 타입!' },
+      battery: { name: '보조배터리', obj: '보조배터리를',
+        answer: '야외 활동 중에도 장소에 구애받지 않고 언제든 충전할 수 있습니다. 다만, 잃어버리지 않게 잘 챙겨야 하며 과열로 인한 화재 위험이 존재합니다.',
+        summary: '장소에 구애받지 않고 언제든 충전할 수 있지만, 잃어버리지 않게 잘 챙겨야 하며 과열로 인한 화재 위험이 존재합니다.',
+        type: '어디서든 100%를 확보하는<br>안전한 여행가 타입!' },
+      carrier: { name: '캐리어', obj: '캐리어를',
+        answer: '차곡차곡 정리하여 수납하기 쉽고, 이동할 때 바퀴로 굴릴 수 있습니다. 다만, 계단에서는 이동이 어렵고 이동 중에는 필요한 물건을 바로 꺼내 쓰지 못합니다.',
+        summary: '차곡차곡 정리하여 수납하기 쉽고 이동할 때 바퀴로 쉽게 굴릴 수 있지만, 이동 중에 필요한 물건을 바로 꺼내 쓰지 못합니다.',
+        type: '몸의 피로를 최소화할 줄 아는<br>현명한 여행가 타입!' },
+      backpack: { name: '배낭', obj: '배낭을',
+        answer: '양손이 자유로워 이동 중에 다양한 활동을 하기 편리합니다. 다만, 모든 짐의 무게를 직접 감당해야 해서 체력적 부담이 커집니다.',
+        summary: '양손이 자유로워 이동 중에 다양한 활동을 하기 편리하지만, 모든 짐의 무게를 직접 감당해야 해서 체력적 부담이 커집니다.',
+        type: '거침없이 어디든 누비는<br>자유로운 탐험가 타입!' },
+      umbrella: { name: '접이식 우산', obj: '접이식 우산을',
+        answer: '갑작스러운 비를 피할 수 있어 야외 활동 중에도 일정이 중단되지 않아요. 다만, 손으로 들고 다녀야 해서 불편하고 분실 위험이 있어요.',
+        summary: '갑작스러운 비를 피할 수 있어 야외 활동 중에도 일정이 중단되지 않지만, 보관이 불편하고 분실 위험이 있어요.',
+        type: '작지만 대비는 확실하게 하는<br>실속파 타입!' },
+      raincoat: { name: '우비', obj: '우비를',
+        answer: '두 손을 자유롭게 사용할 수 있어서 활동할 때 훨씬 편해요. 다만, 사용 후 젖은 우비를 보관하기 번거로워요.',
+        summary: '두 손을 자유롭게 사용할 수 있어서 활동할 때 훨씬 편하지만, 사용 후 젖은 우비를 보관하기 번거로워요.',
+        type: '비바람이 불어도 활동을 멈추지 않는<br>정면돌파 행동파 타입!' },
+      tablet: { name: '태블릿PC', obj: '태블릿PC를',
+        answer: '여행 중 촬영한 사진이나 영상을 큰 화면으로 확인하고 편집하기에 유용합니다. 다만, 야외 활동 중 파손되거나 잃어버릴 위험이 있습니다.',
+        summary: '여행 중 촬영한 사진이나 영상을 큰 화면으로 확인하고 편집하기에 유용하지만, 야외 활동 중 파손되거나 잃어버릴 위험이 있습니다.',
+        type: '친구들과 추억을 모아 보고 공유하는<br>분위기 메이커 타입!' },
+      game: { name: '휴대용 게임기', obj: '휴대용 게임기를',
+        answer: '이동 시간이나 숙소에서 친구들과 함께 게임을 즐길 수 있습니다. 다만, 게임이 너무 몰입하다 보면 수학여행 본연의 목적에 소홀해질 수 있습니다.',
+        summary: '이동 시간이나 숙소에서 친구들과 함께 게임을 즐길 수 있지만, 게임이 너무 몰입하다 보면 수학여행 본연의 목적에 소홀해질 수 있습니다.',
+        type: '틈새 시간까지 즐거움으로 가득 채우는<br>재미 추구 타입!' }
+    };
+    const ROUND1 = [['charger', 'battery'], ['carrier', 'backpack'], ['umbrella', 'raincoat'], ['tablet', 'game']];
+    const PICK_ASK = '질문하고 싶은<br>준비물 카드를 클릭해요.';
+
+    const $ = (id) => document.getElementById(id);
+    const bubble = $('p10Bubble');
+    const phone = $('p10Phone');
+    const answer = $('p10Answer');
+    const hit = $('p10Hit');
+    const side = $('p10Side');
+    const vs = $('p10Vs');
+    const nextBtn = $('p10Next');
+    const playClick = makeSfx('sound/click.mp3');
+
+    let onNext = null;
+    let chosen = null;
+
+    function itemBtn(key, withSummary) {
+      const it = ITEMS[key];
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'p10-item';
+      btn.innerHTML = '<i style="background-image:url(\'img/p10_item_' + key + '.png\')"></i>' + it.name + (withSummary ? '<small>' + it.summary + '</small>' : '');
+      return btn;
+    }
+
+    function show(ids) {
+      ['p10Overview', 'p10Phone', 'p10Answer', 'p10Hit', 'p10Side', 'p10VsView', 'p10Result', 'p10Next'].forEach((id) => $(id).classList.toggle('is-off', !ids.includes(id)));
+      document.querySelector('.p10').classList.remove('is-overview');
+      clearFingers();
+    }
+
+    function nextThen(fn) {
+      onNext = fn;
+      nextBtn.classList.remove('is-off');
+      resetImageSwap(nextBtn);
+    }
+
+    function typeText(el, text, done) {
+      let i = 0;
+      el.textContent = '';
+      const timer = setInterval(() => {
+        i += 1;
+        el.textContent = text.slice(0, i);
+        if (i >= text.length) {
+          clearInterval(timer);
+          done();
+        }
+      }, 50);
+    }
+
+    function clickGuide(bubbleHtml, screen, rect, then) {
+      show(['p10Phone', 'p10Hit']);
+      bubble.innerHTML = bubbleHtml;
+      phone.style.backgroundImage = "url('img/p10_screen_" + screen + ".png')";
+      hit.style.cssText = 'left:' + rect[0] + 'px;top:' + rect[1] + 'px;width:' + rect[2] + 'px;height:' + rect[3] + 'px';
+      pointFingerAt(hit);
+      hit.onclick = () => { playClick(); then(); };
+    }
+
+    function overview() {
+      show(['p10Overview']);
+      document.querySelector('.p10').classList.add('is-overview');
+      Object.keys(ITEMS).forEach((k) => $('p10OverviewGrid').appendChild(itemBtn(k)));
+      nextThen(() => clickGuide('Gemini 앱을 클릭해요.', 'home', [913, 335, 166, 166],
+        () => clickGuide('Gemini Live 모드<br>버튼을 클릭해요.', 'live', [775, 431, 369, 108], () => match(0))));
+    }
+
+    function match(m, asked) {
+      asked = asked || [];
+      const pair = ROUND1[m];
+      show(['p10Phone', 'p10Side']);
+      bubble.innerHTML = PICK_ASK;
+      side.innerHTML = '';
+      pair.forEach((key) => {
+        const btn = itemBtn(key);
+        btn.disabled = asked.includes(key);
+        btn.addEventListener('click', () => {
+          playClick();
+          askGemini(m, key, asked.concat(key));
+        });
+        side.appendChild(btn);
+      });
+    }
+
+    function askGemini(m, key, asked) {
+      show(['p10Phone', 'p10Answer']);
+      bubble.innerHTML = '수학여행에 ' + ITEMS[key].obj + '<br>가져가면 좋은 점은<br>무엇인가요?';
+      typeText(answer, ITEMS[key].answer, () => nextThen(() => {
+        if (asked.length < 2) match(m, asked);
+        else choose('ROUND 1&nbsp;&nbsp;&nbsp;' + (m + 1) + '/4', '어떤 준비물을<br>가져가는 게 좋을까?', ROUND1[m], true, (w) => {
+          round1Winners.push(w);
+          if (m < 3) match(m + 1);
+          else round2(0);
+        });
+      }));
+    }
+
+    const round1Winners = [];
+    const round2Winners = [];
+    const NEED_ASK = '나에게 가장 필요할 것 같은<br>준비물을 골라봐요.';
+
+    function round2(i) {
+      choose('ROUND 2&nbsp;&nbsp;&nbsp;' + (i + 1) + '/2', NEED_ASK, round1Winners.slice(i * 2, i * 2 + 2), false, (w) => {
+        round2Winners.push(w);
+        if (i === 0) round2(1);
+        else choose('FINAL ROUND', NEED_ASK, round2Winners, false, result);
+      });
+    }
+
+    function choose(roundText, ask, pair, withSummary, done) {
+      show(['p10VsView']);
+      $('p10Round').innerHTML = roundText;
+      bubble.innerHTML = ask;
+      vs.innerHTML = '';
+      chosen = null;
+      pair.forEach((key) => {
+        const btn = itemBtn(key, withSummary);
+        btn.addEventListener('click', () => {
+          playClick();
+          vs.querySelectorAll('.p10-item').forEach((b) => b.classList.toggle('is-selected', b === btn));
+          chosen = key;
+          nextThen(() => done(chosen));
+        });
+        vs.appendChild(btn);
+      });
+    }
+
+    function result(key) {
+      show(['p10Result']);
+      bubble.innerHTML = 'Gemini Live의 도움을 받아<br>나에게 꼭 필요한 준비물을<br>골랐어요!';
+      const btn = itemBtn(key);
+      btn.disabled = false;
+      $('p10ResultItem').replaceChildren(btn);
+      $('p10ResultType').innerHTML = ITEMS[key].type;
+      nextThen(() => navigateTo('page11.html'));
+    }
+
+    nextBtn.addEventListener('click', () => {
+      if (!onNext) return;
+      const fn = onNext;
+      onNext = null;
+      nextBtn.classList.add('is-off');
+      setTimeout(fn, 300);
+    });
+
+    overview();
+  })();
+  </script>
+</body>
+</html>

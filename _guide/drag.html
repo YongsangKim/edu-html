@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI 가이드 - 끌어 놓기</title>
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="guide.css">
+    <style>
+        /* 샘플 카드·칸(모든 항목 공통 모양) */
+        .g-card{position:absolute;width:300px;height:200px;box-sizing:border-box;padding:14px 8px 10px;border:solid 5px #91b9e7;border-radius:26px;background:#fff;
+          display:flex;flex-direction:column;align-items:center;justify-content:flex-end;font-family:'Cafe24 Ssurround';font-size:40px;color:#31248a;letter-spacing:-0.06em;cursor:grab;touch-action:none}
+        .g-card i{flex:1 1 auto;width:70%;margin-bottom:8px;border-radius:16px;background:#dfe7f5}
+        .g-zone{position:absolute;width:340px;height:240px;box-sizing:border-box;border:dashed 6px #8278ff;border-radius:30px;background:rgba(255,255,255,.55)}
+        .g-label{position:absolute;margin:0;font-family:'Cafe24 Ssurround';font-size:40px;color:#1b1738;text-align:center;width:360px}
+
+        /* 1·2. 통일 전 모습(각 페이지 스타일 복사본, 기록용) */
+        .now-drag-blue{border-color:#2f6fed;box-shadow:0 0 24px 6px rgba(47,111,237,.45)}
+        .now-drag-yellow{border-color:#ffd83d;box-shadow:0 0 0 5px #ffd83d,0 0 30px 10px rgba(255,216,61,.7)}
+        .now-drag-pink{border:solid 10px #ff2fc2}
+        .now-over-scale{scale:1.06}
+        .now-over-outline{outline:8px solid #ffd83d;outline-offset:-8px}
+        .now-over-glow{scale:1.03;box-shadow:0 0 0 8px #ffd83d,0 0 40px 14px rgba(255,216,61,.8)}
+
+        /* 3. 기준 — 칸 강조는 공용 .drop-zone.is-over, 카드는 커서·z-index만 */
+        .g-card.is-dragging{cursor:grabbing;z-index:60}
+        .g-card.is-placed{cursor:default}
+        .g-card.is-wrong{animation:fix-word-shake .3s ease}
+        .g-card.is-back{transition:transform .3s ease}
+    </style>
+</head>
+<body>
+  <div class="g-wrap">
+    <h1>끌어 놓기 (드래그)</h1>
+    <p class="g-note">
+      끄는 카드와 놓을 칸의 반응을 한 가지로 맞춘 기준. 실제 화면(1920×960)을 절반 크기로 보여줌.
+      1·2번은 통일 전 각 페이지 &lt;style&gt;의 복사본(기록용), 3번이 지금 기준이고 직접 끌어 볼 수 있음.
+    </p>
+    <ul class="g-toc"></ul>
+
+    <h2>1. 끄는 카드 <code>.is-dragging</code> — 통일 전 모습(기록용)</h2>
+    <div class="g-list">
+      <div class="g-item">
+        <p class="g-meta"><b>A. 효과 없음</b>(커서·z-index만) sa/05:07·08·13 · sa/06:02·05 · gwa/01:02 — <b>기준으로 채택</b><br>
+          <b>B. 파란 테두리+빛</b> gwa/07:03 · <b>C. 노란 테두리+빛</b> gwa/07:06 · <b>D. 분홍 테두리</b>(<code>.multi-option.is-selected</code>) gwa/07:11 → 모두 A로 바꿈</p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-card" style="left:110px;top:330px"><i></i>A</div>
+          <div class="g-card now-drag-blue" style="left:560px;top:330px"><i></i>B</div>
+          <div class="g-card now-drag-yellow" style="left:1010px;top:330px"><i></i>C</div>
+          <div class="g-card now-drag-pink" style="left:1460px;top:330px"><i></i>D</div>
+        </div></div>
+      </div>
+    </div>
+
+    <h2>2. 놓을 칸 위에 올렸을 때 <code>.is-over</code> — 통일 전 모습(기록용)</h2>
+    <div class="g-list">
+      <div class="g-item">
+        <p class="g-meta"><b>① 효과 없음</b> gwa/07:03 · sa/05 칸들 · <b>② 커짐</b>(1.06~1.1) sa/06:02·05 · gwa/07:11<br>
+          <b>③ 노란 안쪽 테두리</b> gwa/01:02·03·06·07 — <b>기준으로 채택</b> · <b>④ 노란 테두리+빛+커짐</b> gwa/07:06 → 모두 ③으로 바꿈</p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-zone" style="left:90px;top:330px"></div>
+          <div class="g-zone now-over-scale" style="left:540px;top:330px"></div>
+          <div class="g-zone now-over-outline" style="left:990px;top:330px"></div>
+          <div class="g-zone now-over-glow" style="left:1440px;top:330px"></div>
+          <p class="g-label" style="left:80px;top:620px">①</p><p class="g-label" style="left:530px;top:620px">②</p>
+          <p class="g-label" style="left:980px;top:620px">③</p><p class="g-label" style="left:1430px;top:620px">④</p>
+        </div></div>
+      </div>
+    </div>
+
+    <h2>3. 기준 — gwa/01:02 과일 바구니 · 공용화 완료</h2>
+    <p class="g-note">
+      가장 먼저 만든 끌기 화면은 sa/07:03(2026-09-11, 기능 F)이지만 끄는 중·칸 위 상태 스타일이 없어서, 상태를 처음 정한 gwa/01:02(2026-09-22)를 기준으로 삼음.<br>
+      <b>끄는 카드</b>: 커서(<code>grabbing</code>)·<code>z-index</code>만 바꾸고 색·테두리·빛은 넣지 않음 — 페이지 &lt;style&gt;에 <code>.pNN-card.is-dragging{cursor:grabbing;z-index:60}</code>.<br>
+      <b>놓을 칸</b>: 칸에 공용 <code>.drop-zone</code>을 달면 카드를 그 위에 올렸을 때 스크립트가 켜는 <code>is-over</code>로 <b>노란 안쪽 테두리 8px</b>
+      (<code>outline:8px solid #ffd83d;outline-offset:-8px</code>). <code>initMatchDrag</code>는 칸에 <code>drop-zone</code>을 자동으로 붙이고 <code>is-over</code>도 켜 줌.<br>
+      <b>틀렸을 때</b>: 카드에 <code>is-wrong</code>(흔들림 <code>fix-word-shake</code>) 후 제자리. <b>맞았을 때</b>: 칸 안에 고정하거나 사라짐(페이지마다).<br>
+      적용: gwa/01:02·03 · sa/05:07·08·13(initMatchDrag) · sa/06:02·05 · gwa/07:03·06·11.
+      <span class="g-local">예외</span> gwa/01:06·07 폴더는 이미지가 커서 10px 그대로.
+    </p>
+    <div class="g-list">
+      <div class="g-item">
+        <p class="g-meta"><b>직접 끌어 보기</b> — 파란 글자 카드는 왼쪽 칸이 정답, 빨간 글자 카드는 어느 칸이든 오답(흔들림). 놓은 카드는 더블클릭하면 제자리로</p>
+        <div class="g-view"><div class="g-stage g-demo">
+          <div class="g-zone drop-zone" data-key="ok" style="left:300px;top:120px"></div>
+          <div class="g-zone drop-zone" data-key="no" style="left:1280px;top:120px"></div>
+          <p class="g-label" style="left:290px;top:390px">맞는 칸</p><p class="g-label" style="left:1270px;top:390px">다른 칸</p>
+          <div class="g-card" data-key="ok" style="left:620px;top:600px"><i></i>맞는 카드</div>
+          <div class="g-card" data-key="x" style="left:1000px;top:600px;color:#e5484d"><i></i>틀린 카드</div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="guide.js"></script>
+  <script>
+  (function () {
+    document.querySelectorAll('.g-demo').forEach((stage) => {
+      const zones = Array.from(stage.querySelectorAll('.g-zone'));
+      const home = new Map();
+      const zoneAt = (x, y) => zones.find((z) => {
+        const r = z.getBoundingClientRect();
+        return !z.dataset.filled && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+      });
+
+      stage.querySelectorAll('.g-card').forEach((card) => {
+        home.set(card, card.getAttribute('style'));
+        card.addEventListener('pointerdown', (e) => {
+          if (card.classList.contains('is-placed')) return;
+          e.preventDefault();
+          const s = stage.getBoundingClientRect().width / 1920;
+          const sx = e.clientX;
+          const sy = e.clientY;
+          card.setPointerCapture(e.pointerId);
+          card.classList.remove('is-back');
+          card.classList.add('is-dragging');
+          const move = (ev) => {
+            card.style.transform = 'translate(' + (ev.clientX - sx) / s + 'px,' + (ev.clientY - sy) / s + 'px)';
+            const over = zoneAt(ev.clientX, ev.clientY);
+            zones.forEach((z) => z.classList.toggle('is-over', z === over));
+          };
+          const up = (ev) => {
+            card.removeEventListener('pointermove', move);
+            card.removeEventListener('pointerup', up);
+            card.classList.remove('is-dragging');
+            zones.forEach((z) => z.classList.remove('is-over'));
+            const zone = zoneAt(ev.clientX, ev.clientY);
+            card.style.transform = '';
+            if (zone && zone.dataset.key === card.dataset.key) {
+              zone.dataset.filled = '1';
+              card.style.left = (parseFloat(zone.style.left) + 20) + 'px';
+              card.style.top = (parseFloat(zone.style.top) + 20) + 'px';
+              card.classList.add('is-placed');
+              return;
+            }
+            card.classList.add('is-back');
+            if (zone) {
+              card.classList.remove('is-wrong');
+              void card.offsetWidth;
+              card.classList.add('is-wrong');
+            }
+          };
+          card.addEventListener('pointermove', move);
+          card.addEventListener('pointerup', up);
+        });
+        card.addEventListener('dblclick', () => {
+          card.setAttribute('style', home.get(card));
+          card.classList.remove('is-placed');
+          zones.forEach((z) => delete z.dataset.filled);
+        });
+      });
+    });
+  })();
+  </script>
+</body>
+</html>

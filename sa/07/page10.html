@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>퀴즈 풀기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 44~46p. Q1 O/X, Q2·Q3 3지선다. 정답/오답 팝업은 공용 아바타 팝업(기능 V) */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p10-ox{position:absolute;top:470px;width:360px;height:360px;padding:0;border:0;background:none;cursor:pointer}
+        .p10-ox img{width:100%;height:100%;object-fit:contain;display:block}
+        .p10-ox.is-wrong{animation:fix-word-shake .3s ease}
+        .p10-o{left:480px}
+        .p10-x{left:1080px}
+
+        .p10-opt.card-btn{position:absolute;left:410px;width:1100px;height:110px;font-size:52px}
+        .p10-opt1{top:470px}
+        .p10-opt2{top:620px}
+        .p10-opt3{top:770px}
+        .p10-q2 .quiz-ask-box{padding-right:60px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="quiz-stage">
+          <div class="step-flow">
+
+            <div class="step-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q1.</span>
+                  <p class="quiz-ask">버스 기사님은 우리가 안전하게 길을 건널 수 있도록 도와줘요.</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz">
+                <button class="answer-pick p10-ox p10-o" data-correct="false" aria-label="O">
+                  <img class="js-img-swap" src="../../img/common/icon_o.png" data-src-on="../../img/common/icon_o_on.png" alt="O">
+                </button>
+                <button class="answer-pick p10-ox p10-x" data-correct="true" aria-label="X">
+                  <img class="js-img-swap" src="../../img/common/icon_x.png" data-src-on="../../img/common/icon_x_on.png" alt="X">
+                </button>
+              </div>
+            </div>
+
+            <div class="step-panel p10-q2">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q2.</span>
+                  <p class="quiz-ask">약국에서 할 수 있는 일은 무엇인가요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz">
+                <button class="answer-pick card-btn p10-opt p10-opt1" data-correct="true">약을 구매할 수 있어요.</button>
+                <button class="answer-pick card-btn p10-opt p10-opt2" data-correct="false">책을 빌릴 수 있어요.</button>
+                <button class="answer-pick card-btn p10-opt p10-opt3" data-correct="false">간식을 구매할 수 있어요.</button>
+              </div>
+            </div>
+
+            <div class="step-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q3.</span>
+                  <p class="quiz-ask">구글 렌즈로 할 수 있는 것은 무엇인가요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz" data-next="page11.html">
+                <button class="answer-pick card-btn p10-opt p10-opt1" data-correct="false">동영상을 촬영할 수 있어요.</button>
+                <button class="answer-pick card-btn p10-opt p10-opt2" data-correct="false">사진에 그림을 그릴 수 있어요.</button>
+                <button class="answer-pick card-btn p10-opt p10-opt3" data-correct="true">검색한 장소의 정보를 확인할 수 있어요.</button>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="ox-result-correct is-avatar is-off" data-sound="sound/correct.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <p class="avatar-popup-text">정답이에요!</p>
+              <div class="avatar-popup-extra"><img src="../../img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div>
+          <div class="ox-result-wrong is-avatar is-off" data-sound="sound/incorrect.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text is-small">다시 한번 생각해볼까요?</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="퀴즈 풀기" data-next="page11.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+</body>
+</html>

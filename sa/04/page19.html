@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나의 마음 이모티콘 제작소</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 와이어프레임. 기획서 52~54p:
+           이모티콘 버튼 클릭 -> 이모티콘 탭 클릭 -> 내가 쓴 이모티콘 수첩(스크롤).
+           page14~18과 같은 3단 구조(왼쪽 안내문구+캐릭터 / 가운데 채팅(폰) / 오른쪽
+           다음버튼)로 맞춤. 실제로는 page14~17에서 고른 이모티콘을 보여줘야 하지만,
+           지금은 선택 결과를 저장/전달하는 규칙이 안 정해져서 예시 이모티콘을 깔아둠.
+           채팅 틀/입력바는 공용 .chatapp-* */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:#dbe9f7}
+
+        /* 이모티콘 탭+수첩: page14의 피커처럼 입력바 바로 위(키보드 자리)에 나옴 */
+        .p19-sheet{flex:0 0 auto;margin-top:16px;width:100%;height:420px;background:#eef3fb;border:solid 5px #1b1738;border-radius:32px;box-sizing:border-box;padding:20px 24px}
+        .p19-sheet.is-off{display:none}
+        .p19-tabs{display:flex;gap:16px;margin-bottom:20px}
+        .p19-tab{height:60px;padding:0 26px;border:solid 4px #1b1738;border-radius:30px;background:#fefbf9;font-family:'Cafe24 Ssurround';font-size:26px;color:#1b1738;cursor:pointer}
+        .p19-tab.is-on{background:#ffd83d}
+        .p19-album{height:300px;overflow-y:auto;display:flex;flex-wrap:wrap;gap:20px;align-content:flex-start}
+        .p19-album.is-off{display:none}
+        .p19-album-item{width:150px;height:150px;border:solid 4px #1b1738;border-radius:28px;background:#fff3c9;display:flex;align-items:center;justify-content:center;font-size:84px;pointer-events:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main>
+
+          <p class="guide-bubble" id="p19Guide">이모티콘 버튼을 클릭해요.</p>
+          <div class="guide-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+
+          <div class="chatapp">
+            <div class="chatapp-body"></div>
+
+            <div class="p19-sheet is-off" id="p19Sheet">
+              <div class="p19-tabs">
+                <button type="button" class="p19-tab js-sfx" id="p19TabEmoji" data-sound="sound/click.mp3">이모티콘</button>
+                <button type="button" class="p19-tab" disabled>사진</button>
+                <button type="button" class="p19-tab" disabled>파일</button>
+              </div>
+              <div class="p19-album is-off" id="p19Album"></div>
+            </div>
+
+            <div class="chatapp-input">
+              <span class="chatapp-input-field">메시지를 입력해요</span>
+              <button type="button" class="chatapp-icon-btn js-sfx" id="p19EmojiBtn" data-sound="sound/click.mp3" aria-label="이모티콘">&#128512;</button>
+              <button type="button" class="chatapp-icon-btn" disabled aria-label="보내기">&#10148;</button>
+            </div>
+          </div>
+
+          <a href="page20.html" class="js-nav-effect next-btn is-off" id="p19Next">
+            <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+          </a>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="나의 마음 이모티콘 제작소" data-next="page20.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  /* 기획서 52~54p. 클릭 가이드를 따라 이모티콘 수첩을 열어보는 화면 */
+  (function () {
+    // 상호작용에서 고른 이모티콘 8종 중 4종만 노출(기획서 54p)
+    const USED = ['&#128591;', '&#128522;', '&#128584;', '&#128549;', '&#127881;', '&#127874;', '&#128546;', '&#129394;'];
+
+    const guide = document.getElementById('p19Guide');
+    const emojiBtn = document.getElementById('p19EmojiBtn');
+    const sheet = document.getElementById('p19Sheet');
+    const tabEmoji = document.getElementById('p19TabEmoji');
+    const album = document.getElementById('p19Album');
+    const nextBtn = document.getElementById('p19Next');
+
+    pointFingerAt(emojiBtn);
+    emojiBtn.addEventListener('click', function once() {
+      emojiBtn.removeEventListener('click', once);
+      emojiBtn.classList.add('is-on');
+      clearFingers();
+      sheet.classList.remove('is-off');
+      guide.innerHTML = '이모티콘 탭을 클릭해요.';
+      pointFingerAt(tabEmoji);
+    });
+
+    tabEmoji.addEventListener('click', function once() {
+      tabEmoji.removeEventListener('click', once);
+      tabEmoji.classList.add('is-on');
+      clearFingers();
+      album.innerHTML = USED.slice(0, 4).map((e) =>
+        '<span class="p19-album-item">' + e + '</span>').join('');
+      album.classList.remove('is-off');
+      guide.innerHTML = '최근 사용한 이모티콘을<br>한 번에 모아볼 수 있는<br>나만의 이모티콘 수첩이에요!';
+      nextBtn.classList.remove('is-off');
+    });
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>경제Song! 가사 블록 조립하기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 19~25p. 가사 퍼즐 3판(정답 5 + 오답 2, 자리 무작위). 정답 블록을 누르면 아래 빈칸에 차례로 붙고,
+           오답이면 말풍선 2초 + 빈칸에 정답이 1초 흐릿하게 보임. 다 맞히면 반짝 효과와 함께 한 문장으로 바뀜.
+           2·3판 완성 말풍선은 기획서에 1판(재화)만 있어 같은 형식으로 맞춤. 완성 가사는 sessionStorage 'sa06_lyrics'(Suno 활동에서 씀) */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p07-bubble{left:80px;bottom:622px;width:490px;min-height:0;padding:30px 10px;display:flex;align-items:center;justify-content:center;font-size:44px;z-index:5}
+        .p07-character{position:absolute;left:90px;top:212px;width:360px;height:560px;display:flex;align-items:flex-end;justify-content:center;z-index:3}
+        .p07-character img{max-width:100%;max-height:100%;object-fit:contain}
+
+        .p07-board{position:absolute;left:527px;top:28px;width:1329px;height:556px}
+        .p07-piece{position:absolute;box-sizing:border-box;padding:6px 16px 0;display:flex;align-items:center;justify-content:center;text-align:center;
+          font-size:44px;line-height:1.15;cursor:pointer;transition:transform .15s ease,opacity .3s ease}
+        .p07-piece:hover{transform:scale(1.06)}
+        .p07-piece.is-used{opacity:0;pointer-events:none}
+        .p07-piece.is-wrong{animation:fix-word-shake .3s ease}
+
+        .p07-tray{position:absolute;left:87px;top:600px;width:1377px;height:317px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p07-slots{position:absolute;left:400px;top:632px;display:flex;gap:3px}
+        .p07-slot{position:relative;width:209px;height:253px;box-sizing:border-box;margin-right:0;border:dashed 4px #b9b3dd;border-radius:20px;display:flex;align-items:center;justify-content:center}
+        .p07-slot + .p07-slot{margin-left:-4px}
+        .p07-slot .emotion-option{width:189px;height:150px;padding:6px 8px 0;box-sizing:border-box;font-size:38px;line-height:1.15;display:flex;align-items:center;justify-content:center;text-align:center;cursor:default}
+        .p07-slot-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;opacity:0;transition:opacity .5s ease;
+          font-family:'Cafe24 Ssurround';font-size:38px;line-height:1.15;color:#8278ff;letter-spacing:-0.04em}
+        .p07-slot-hint.is-on{opacity:.5}
+        .p07-sentence{position:absolute;left:380px;top:710px;width:1045px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:70px;color:#48159c;letter-spacing:-0.04em;
+          animation:p07-shine 1s ease}
+        @keyframes p07-shine{0%{opacity:0;transform:scale(.9);filter:brightness(2)}60%{opacity:1;transform:scale(1.05)}100%{transform:none;filter:none}}
+        .p07-next{position:absolute;left:1485px;top:790px}
+
+        .p07-summary-title{position:absolute;left:0;top:51px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:70px;letter-spacing:-0.06em;
+          background:linear-gradient(180deg,#02185c,#0362d7);-webkit-background-clip:text;background-clip:text;color:transparent}
+        .p07-summary-sub{position:absolute;left:0;top:160px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:48px;color:#48159c;letter-spacing:-0.04em}
+        .p07-summary{position:absolute;left:408px;top:268px;width:1105px;height:455px;box-sizing:border-box;padding:40px;display:flex;flex-direction:column;justify-content:center;gap:34px;
+          background:#fefbf9;border:solid 6px #48159c;border-radius:48px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);font-family:'Cafe24 Ssurround';font-size:50px;color:#1b1738;text-align:center;letter-spacing:-0.04em}
+        .p07-summary-next{position:absolute;left:756px;top:770px}
+
+        .p07 .is-off{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default p07">
+          <div id="p07Play">
+            <p class="guide-bubble p07-bubble" id="p07Bubble"></p>
+            <div class="p07-tray"></div>
+            <div class="p07-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+            <div class="p07-board" id="p07Board"></div>
+            <div class="p07-slots" id="p07Slots"></div>
+            <p class="p07-sentence is-off" id="p07Sentence"></p>
+            <a href="javascript:;" class="js-sfx p07-next is-off" id="p07Next" data-sound="sound/click.mp3">
+              <img src="../../img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" alt="다음">
+            </a>
+          </div>
+
+          <div class="is-off" id="p07Summary">
+            <p class="p07-summary-title">재화와 서비스에 대한 노래 가사를 만들었어요!</p>
+            <p class="p07-summary-sub">조립한 가사들을 활용해서 노래를 만들어볼까요?</p>
+            <div class="p07-summary" id="p07SummaryList"></div>
+            <a href="page08.html" class="js-nav-effect p07-summary-next">
+              <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+            </a>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="경제Song! 가사 블록 조립하기" data-next="page08.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const PUZZLES = [
+      { ask: '재화에 대한 알맞은<br>블록을 연결해서 가사를<br>만들어봐요!', wrong: '재화에 대한 설명을<br>찾아봐요.', done: '좋아요!<br>재화에 대한 가사를<br>완성했어요!',
+        answer: ['우리가', '입는 옷은', '사고', '파는', '재화'], extra: ['서비스', '편리함'] },
+      { ask: '서비스에 대한 알맞은<br>블록을 연결해서 가사를<br>만들어봐요!', wrong: '서비스에 대한 설명을<br>찾아봐요.', done: '좋아요!<br>서비스에 대한 가사를<br>완성했어요!',
+        answer: ['이동을', '도와주는', '택시 기사의', '운전은', '서비스'], extra: ['연필은', '재화'] },
+      { ask: '재화와 서비스에 대한<br>개념 설명 블록을 찾아<br>연결해서 가사를 만들어봐요!', wrong: '재화와 서비스의 개념에 대한<br>설명을 찾아봐요.', done: '좋아요!<br>재화와 서비스에 대한 가사를<br>완성했어요!',
+        answer: ['재화는', '눈에', '보이는 것,', '서비스는', '편리함'], extra: ['택배는', '들리는 것,'] }
+    ];
+    // 기획서 19p 퍼즐 조각 자리(보드 기준 좌표·크기), 조각마다 무작위로 배정
+    const SPOTS = [
+      [23, 281, 286, 262], [359, 307, 286, 228], [167, 4, 270, 274], [486, 51, 334, 215],
+      [890, 0, 249, 280], [1022, 305, 286, 228], [683, 280, 286, 262]
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const bubble = $('p07Bubble');
+    const board = $('p07Board');
+    const slotsBox = $('p07Slots');
+    const sentence = $('p07Sentence');
+    const nextBtn = $('p07Next');
+    const playClick = makeSfx('sound/click.mp3');
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+    const lines = [];
+
+    let index = 0;
+    let filled = 0;
+    let bubbleTimer = null;
+
+    function render() {
+      const p = PUZZLES[index];
+      filled = 0;
+      bubble.innerHTML = p.ask;
+      sentence.classList.add('is-off');
+      nextBtn.classList.add('is-off');
+      resetImageSwap(nextBtn);
+      slotsBox.classList.remove('is-off');
+      slotsBox.innerHTML = p.answer.map((a) => '<div class="p07-slot"><span class="p07-slot-hint">' + a + '</span></div>').join('');
+      board.innerHTML = '';
+      const spots = shuffleArray(SPOTS);
+      shuffleArray(p.answer.map((t, i) => ({ t, i })).concat(p.extra.map((t) => ({ t, i: -1 })))).forEach((b, k) => {
+        const [x, y, w, h] = spots[k];
+        const el = document.createElement('button');
+        el.type = 'button';
+        el.className = 'emotion-option p07-piece';
+        el.style.cssText = 'left:' + x + 'px;top:' + y + 'px;width:' + w + 'px;height:' + h + 'px';
+        el.textContent = b.t;
+        el.addEventListener('click', () => pick(el, b));
+        board.appendChild(el);
+      });
+    }
+
+    function pick(el, b) {
+      const p = PUZZLES[index];
+      if (b.i < 0) {
+        playWrong();
+        el.classList.remove('is-wrong');
+        void el.offsetWidth;
+        el.classList.add('is-wrong');
+        bubble.innerHTML = p.wrong;
+        clearTimeout(bubbleTimer);
+        bubbleTimer = setTimeout(() => { bubble.innerHTML = p.ask; }, 2000);
+        const hints = Array.from(slotsBox.children).filter((s) => !s.querySelector('.emotion-option')).map((s) => s.querySelector('.p07-slot-hint'));
+        hints.forEach((h) => h.classList.add('is-on'));
+        setTimeout(() => hints.forEach((h) => h.classList.remove('is-on')), 1000);
+        return;
+      }
+      playClick();
+      el.classList.add('is-used');
+      const slot = slotsBox.children[b.i];
+      const placed = document.createElement('div');
+      placed.className = 'emotion-option';
+      placed.textContent = b.t;
+      slot.appendChild(placed);
+      filled += 1;
+      if (filled === p.answer.length) complete();
+    }
+
+    function complete() {
+      const p = PUZZLES[index];
+      const text = p.answer.join(' ');
+      lines.push(text);
+      clearTimeout(bubbleTimer);
+      playCorrect();
+      setTimeout(() => {
+        slotsBox.classList.add('is-off');
+        sentence.textContent = text;
+        sentence.classList.remove('is-off');
+        bubble.innerHTML = p.done;
+        nextBtn.classList.remove('is-off');
+      }, 600);
+    }
+
+    nextBtn.addEventListener('click', () => {
+      setTimeout(() => {
+        index += 1;
+        if (index < PUZZLES.length) {
+          render();
+          return;
+        }
+        try { sessionStorage.setItem('sa06_lyrics', lines.join('\n')); } catch (e) {}
+        $('p07SummaryList').innerHTML = lines.map((l) => '<p style="margin:0">' + l + '</p>').join('');
+        $('p07Play').classList.add('is-off');
+        $('p07Summary').classList.remove('is-off');
+      }, 300);
+    });
+
+    render();
+  })();
+  </script>
+</body>
+</html>

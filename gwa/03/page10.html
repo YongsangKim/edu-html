@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상호작용형 실습 콘텐츠</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+        .p10-panel{background-repeat:no-repeat}
+        .p10-step0{background-image:url('img/p10_bg_appicon.png')}
+        .p10-step1{background-image:url('img/p10_bg_step1.png')}
+        .p10-step2{background-image:url('img/p10_bg_step2.png')}
+        .p10-step3{background-image:url('img/p10_bg_step3.png')}
+        .p10-step4{background-image:url('img/p10_bg_step4.png')}
+        .p10-step5{background-image:url('img/p10_bg_step5.png')}
+        .p10-step5-added-img{position:absolute;left:0;top:0;width:1920px;height:960px;opacity:0;transition:opacity 0.4s ease;pointer-events:none}
+        .p10-step5.is-added .p10-step5-added-img{opacity:1}
+        .p10-step6{background-image:url('img/p10_bg_step6.png')}
+        .p10-step7{background-image:url('img/p10_bg_step7.png')}
+        .p10-step8{background-image:url('img/p10_bg_step8.png')}
+        .p10-step9{background-image:url('img/p10_bg_step9.png')}
+        .p10-step10{background-image:url('img/p10_bg_step10.png')}
+        .p10-step11{background-image:url('img/p10_bg_step11.png')}
+        .p10-arrow6{position:absolute;left:450px;top:290px}
+        .p10-hit8{position:absolute;left:735px;top:846px;width:283px;height:80px}
+        .p10-hit9{position:absolute;left:1220px;top:380px;width:636px;height:218px}
+        .p10-hit9 img{width:100%;height:100%;display:block}
+        .p10-hit0{position:absolute;left:830px;top:360px;width:220px;height:220px}
+        .p10-hit1{position:absolute;left:715px;top:854px;width:445px;height:80px}
+        .p10-hit2{position:absolute;left:1220px;top:380px;width:636px;height:218px}
+        .p10-hit3{position:absolute;left:740px;top:513px;width:50px;height:50px}
+        .p10-hit4{position:absolute;left:735px;top:504px;width:283px;height:80px}
+        .p10-hit2 img{width:100%;height:100%;display:block}
+
+        .p10-file{position:absolute;width:192px;height:193px;border-width:4px}
+        .p10-file1{left:736px;top:273px}
+        .p10-file2{left:945px;top:273px}
+        .p10-file3{left:736px;top:483px}
+        .p10-file4{left:945px;top:483px}
+        .p10-step5.is-added .p10-file.is-selected{border-color:#000}
+        .p10-files.is-locked{pointer-events:none}
+        .p10-radio{position:absolute;right:12px;top:8px;width:24px;height:24px;border-radius:50%;border:solid 2px #ddd;background:#fff}
+        .p10-file.is-selected .p10-radio{background:#000;border-color:#000}
+        .p10-file.is-selected .p10-radio::after{content:'\2713';position:absolute;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;line-height:1}
+        .p10-add{position:absolute;left:1041px;top:100px;width:80px;height:44px}
+        .p10-add.hidden{display:none}
+
+        .p10-pulse-dot{position:absolute;left:750px;top:280px;width:12px;height:12px;border-radius:50%;background:#3a83f6;animation:p10-pulse 1.2s ease-in-out infinite}
+        @keyframes p10-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.6)}}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main>
+          <div class="step-flow">
+            <div class="step-panel p10-panel p10-step0">
+              <a href="javascript:;" class="js-nav-effect js-sfx hit-area p10-hit0" data-sound="sound/click.mp3" aria-label="ChatGPT 앱 클릭"></a>
+            </div>
+            <div class="step-panel p10-panel p10-step1">
+              <a href="javascript:;" class="js-nav-effect js-sfx hit-area p10-hit1" data-sound="sound/click.mp3" aria-label="입력창 클릭"></a>
+            </div>
+            <div class="step-panel p10-panel p10-step2">
+              <a href="javascript:;" class="js-nav-effect p10-hit2">
+                <img src="img/p10_btn_typing.png" class="js-img-swap js-sfx" data-src-alt="img/p10_btn_typing_on.png" data-src-over="img/p10_btn_typing_over.png" data-sound="sound/click.mp3" alt="다음">
+              </a>
+            </div>
+            <div class="step-panel p10-panel p10-step3">
+              <a href="javascript:;" class="js-nav-effect js-sfx hit-area p10-hit3" data-sound="sound/click.mp3" aria-label="전송"></a>
+            </div>
+            <div class="step-panel p10-panel p10-step4">
+              <a href="javascript:;" class="js-nav-effect js-sfx hit-area p10-hit4" data-sound="sound/click.mp3" aria-label="다음"></a>
+            </div>
+            <div class="step-panel p10-panel p10-step5">
+              <img class="p10-step5-added-img" src="img/p10_bg_step5_added.png" alt="">
+              <div class="multi-select p10-files" data-single="true">
+                <button class="multi-option p10-file p10-file1 js-sfx" data-correct="false" data-sound="sound/incorrect.mp3" aria-label="12월 1일~10일 미세먼지 데이터">
+                  <span class="p10-radio"></span>
+                </button>
+                <button class="multi-option p10-file p10-file2 js-sfx" data-correct="false" data-sound="sound/incorrect.mp3" aria-label="11월 1일~10일 날씨 데이터">
+                  <span class="p10-radio"></span>
+                </button>
+                <button class="multi-option p10-file p10-file3 js-sfx" data-correct="false" data-sound="sound/incorrect.mp3" aria-label="12월 11일~20일 날씨 데이터">
+                  <span class="p10-radio"></span>
+                </button>
+                <button class="multi-option p10-file p10-file4 js-sfx" data-correct="true" data-sound="sound/correct.mp3" aria-label="12월 1일~10일 날씨 데이터">
+                  <span class="p10-radio"></span>
+                </button>
+              </div>
+              <a href="page11.html" class="multi-next is-disabled hidden js-nav-effect js-sfx hit-area p10-add" data-sound="sound/click.mp3" aria-label="추가"></a>
+            </div>
+            <div class="step-panel p10-panel p10-step6" id="p10Step6">
+              <span class="p10-pulse-dot"></span>
+            </div>
+            <div class="step-panel p10-panel p10-step7">
+              <a href="javascript:;" class="js-nav-effect p10-arrow6">
+                <img src="../../img/common/btn_arrow_mini.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_mini_on.png" data-src-over="../../img/common/btn_arrow_mini_over.png" data-sound="sound/click.mp3" alt="다음">
+              </a>
+            </div>
+            <div class="step-panel p10-panel p10-step8">
+              <a href="javascript:;" class="js-nav-effect js-sfx hit-area p10-hit8" data-sound="sound/click.mp3" aria-label="다음"></a>
+            </div>
+            <div class="step-panel p10-panel p10-step9">
+              <a href="javascript:;" class="js-nav-effect p10-hit9">
+                <img src="img/p10_btn_typing2.png" class="js-img-swap js-sfx" data-src-alt="img/p10_btn_typing2_on.png" data-src-over="img/p10_btn_typing2_over.png" data-sound="sound/click.mp3" alt="다음">
+              </a>
+            </div>
+            <div class="step-panel p10-panel p10-step10" id="p10Step10">
+              <span class="p10-pulse-dot"></span>
+            </div>
+            <div class="step-panel p10-panel p10-step11">
+              <a href="javascript:;" class="next-btn" id="p10Step11Next">
+                <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+              </a>
+
+              <div class="avatar-modal p10-popup11 is-off">
+                <div class="avatar-card">
+                  <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-title">잘 했어요.</p>
+                    <p class="avatar-card-text">날씨 뿐만 아니라 여러가지 빅데이터 사이에서<br>패턴을 찾을 때도 대화형 AI를 유용하게 이용할 수 있어요.</p>
+                  </div>
+                  <a href="javascript:;" class="avatar-card-btn" id="p10Popup11Arrow">
+                  <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+              </div>
+
+              <div class="avatar-modal p10-popup11b is-off">
+                <div class="avatar-card is-side">
+                  <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">참! AI가 정확하게 데이터 마이닝을 하려면<br>빅데이터를 구성하기 전<br>데이터 조각들이 먼저 바르고<br>정확해야 한다는 거 잊지 않았죠?</p>
+                  </div>
+                  <a href="page11.html" class="js-nav-effect avatar-card-btn">
+                  <img src="../../img/common/btn_next_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_small_on.png" data-src-over="../../img/common/btn_next_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="AI 날씨 데이터 분석과 맞춤 추천" data-next="page11.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+    document.querySelectorAll('#stage .p10-file').forEach(function (card) {
+      card.addEventListener('click', function () {
+        if (card.dataset.correct !== 'true') return;
+        var panel = document.querySelector('.p10-step5');
+        var addBtn = document.querySelector('.p10-add');
+        panel.classList.add('is-added');
+        addBtn.classList.remove('hidden');
+        document.querySelector('.p10-files').classList.add('is-locked');
+      });
+    });
+
+    var p10Step6 = document.getElementById('p10Step6');
+    whenVisible(p10Step6, function () {
+      setTimeout(function () {
+        advancePanelOrNavigate(p10Step6, null);
+      }, 3000);
+    });
+
+    var p10Step10 = document.getElementById('p10Step10');
+    whenVisible(p10Step10, function () {
+      setTimeout(function () {
+        advancePanelOrNavigate(p10Step10, null);
+      }, 3000);
+    });
+
+    document.getElementById('p10Step11Next').addEventListener('click', function () {
+      document.querySelector('.p10-popup11').classList.remove('is-off');
+    });
+
+    document.getElementById('p10Popup11Arrow').addEventListener('click', function () {
+      document.querySelector('.p10-popup11').classList.add('is-off');
+      document.querySelector('.p10-popup11b').classList.remove('is-off');
+    });
+  </script>
+</body>
+</html>

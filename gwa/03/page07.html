@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>쏙쏙! 알맞은 데이터 조각을 모아 빅데이터 만들기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:url('img/p07_bg.png') no-repeat}
+
+        .weather-card{
+          position:absolute;
+          width:270px;height:215px;
+          background:#fff;
+          border-color:#1b1738;
+          border-width:5px;
+          display:flex;flex-direction:column;align-items:center;justify-content:center
+        }
+        .weather-card.is-selected{border-color:#ff4ff9;border-width:8px}
+
+
+        .weather-icon{width:270px;height:215px;background-repeat:no-repeat;background-position:0 -5px}
+        .weather-icon.weather-rain{background-image:url('img/p07_weather_rain.png')}
+        .weather-icon.weather-sunny{background-image:url('img/p07_weather_sunny.png')}
+        .weather-icon.weather-cloudy{background-image:url('img/p07_weather_cloudy.png')}
+        .weather-icon.weather-suncloud{background-image:url('img/p07_weather_suncloud.png')}
+
+        .weather-day{font-family:'Cafe24 Ssurround';font-size:50px;color:#1b1738;line-height:1em}
+        .p07-popup .avatar-card-title{text-align:left}
+
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main>
+          <div class="answer-pick-quiz reveal-stagger" data-delay="500" data-interval="100" id="p06Quiz">
+            <button class="answer-pick pick-card weather-card" data-correct="true" data-day="10" aria-label="10일">
+              <span class="weather-icon weather-sunny"></span><span class="weather-day">10일</span>
+            </button>
+            <button class="answer-pick pick-card weather-card" data-correct="false" data-day="13" aria-label="13일">
+              <span class="weather-icon weather-cloudy"></span><span class="weather-day">13일</span>
+            </button>
+            <button class="answer-pick pick-card weather-card" data-correct="false" data-day="11" aria-label="11일">
+              <span class="weather-icon weather-suncloud"></span><span class="weather-day">11일</span>
+            </button>
+            <button class="answer-pick pick-card weather-card" data-correct="true" data-day="1" aria-label="1일">
+              <span class="weather-icon weather-rain"></span><span class="weather-day">1일</span>
+            </button>
+            <button class="answer-pick pick-card weather-card" data-correct="true" data-day="6" aria-label="6일">
+              <span class="weather-icon weather-rain"></span><span class="weather-day">6일</span>
+            </button>
+            <button class="answer-pick pick-card weather-card" data-correct="false" data-day="15" aria-label="15일">
+              <span class="weather-icon weather-cloudy"></span><span class="weather-day">15일</span>
+            </button>
+            <button class="answer-pick pick-card weather-card" data-correct="true" data-day="7" aria-label="7일">
+              <span class="weather-icon weather-rain"></span><span class="weather-day">7일</span>
+            </button>
+            <button class="answer-pick pick-card weather-card" data-correct="true" data-day="2" aria-label="2일">
+              <span class="weather-icon weather-sunny"></span><span class="weather-day">2일</span>
+            </button>
+            <button class="answer-pick pick-card weather-card" data-correct="false" data-day="14" aria-label="14일">
+              <span class="weather-icon weather-suncloud"></span><span class="weather-day">14일</span>
+            </button>
+            <button class="answer-pick pick-card weather-card" data-correct="true" data-day="3" aria-label="3일">
+              <span class="weather-icon weather-rain"></span><span class="weather-day">3일</span>
+            </button>
+            <button class="answer-pick pick-card weather-card" data-correct="true" data-day="5" aria-label="5일">
+              <span class="weather-icon weather-rain"></span><span class="weather-day">5일</span>
+            </button>
+            <button class="answer-pick pick-card weather-card" data-correct="true" data-day="4" aria-label="4일">
+              <span class="weather-icon weather-rain"></span><span class="weather-day">4일</span>
+            </button>
+            <button class="answer-pick pick-card weather-card" data-correct="false" data-day="12" aria-label="12일">
+              <span class="weather-icon weather-suncloud"></span><span class="weather-day">12일</span>
+            </button>
+            <button class="answer-pick pick-card weather-card" data-correct="true" data-day="8" aria-label="8일">
+              <span class="weather-icon weather-rain"></span><span class="weather-day">8일</span>
+            </button>
+            <button class="answer-pick pick-card weather-card" data-correct="true" data-day="9" aria-label="9일">
+              <span class="weather-icon weather-rain"></span><span class="weather-day">9일</span>
+            </button>
+          </div>
+
+          <img id="p07Finger" data-taps="2" src="../../img/common/img_finger01.png" data-frame1="../../img/common/img_finger01.png" data-frame2="../../img/common/img_finger02.png" data-interval="400" style="position:absolute;display:none;left:1585px;top:695px;width:220px;z-index:30;pointer-events:none" alt="">
+
+          <div class="ox-result-wrong is-avatar is-off" data-sound="sound/incorrect.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">다시 생각해볼까요?</p>
+                <p class="avatar-popup-sub">다른 날짜의 데이터가 들어가면<br>AI가 틀린 분석 결과를 낼 수 있어요.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal p07-popup is-off" data-sound="sound/correct.mp3">
+            <div class="avatar-card is-side">
+              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-title">정말 잘했어요!</p>
+                    <p class="avatar-card-text">8월 1일부터 10일까지의 데이터 조각을<br>모아서 빅데이터를 완성했어요.</p>
+                  </div>
+                  <a href="page08.html" class="js-nav-effect avatar-card-btn">
+                    <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-title">바른 데이터만 모아야 AI가<br>정확한 규칙을 찾아낼 수 있어요.</p>
+                    <p class="avatar-card-text">이제 10일간의 날씨 속 패턴을 찾아볼까요?</p>
+                  </div>
+                  <a href="page08.html" class="js-nav-effect avatar-card-btn">
+                    <img src="../../img/common/btn_next_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_small_on.png" data-src-over="../../img/common/btn_next_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="쏙쏙! 알맞은 데이터 조각을 모아 빅데이터 만들기" data-next="page08.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+    (function () {
+      var positions = [
+        [245, 180], [535, 180], [825, 180], [1115, 180], [1405, 180],
+        [245, 420], [535, 420], [825, 420], [1115, 420], [1405, 420],
+        [245, 660], [535, 660], [825, 660], [1115, 660], [1405, 660]
+      ];
+      for (var i = positions.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = positions[i]; positions[i] = positions[j]; positions[j] = tmp;
+      }
+      var cards = document.querySelectorAll('#p06Quiz .weather-card');
+      cards.forEach(function (card, i) {
+        card.style.left = positions[i][0] + 'px';
+        card.style.top = positions[i][1] + 'px';
+      });
+
+      // 카드 15장이 다 나온 뒤(0.5초 + 0.1초×15) 손가락 안내를 한 번 보여주고 사라짐
+      setTimeout(function () {
+        var finger = document.getElementById('p07Finger');
+        finger.style.display = '';
+        finger.classList.add('finger-guide');
+        initFingerGuide();
+      }, 2100);
+
+      cards.forEach(function (card) {
+        card.addEventListener('click', function () {
+          if (card.dataset.correct === 'false') return;
+          var remaining = document.querySelectorAll('#p06Quiz .weather-card[data-correct="true"]:not(.is-selected)').length;
+          if (remaining === 0) {
+            setTimeout(function () {
+              var popup = document.querySelector('.p07-popup');
+              popup.classList.remove('is-off');
+              new Audio(ASSET_BASE + popup.dataset.sound).play().catch(function (err) {
+                console.warn('사운드 재생 실패:', err);
+              });
+            }, 600);
+          }
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

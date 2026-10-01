@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마음을 전하는 카드 만들기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 47~61p. 상황 고르기 → 표현 고르기 → Canva 열기 → 자유 편집(배경색·글꼴·글자 크기·형식만) → 저장 → 공유 →
+           언어 예절 확인(체크 2개) → 마음 전달. 상황 그림 img/p09_sit_{key}.png, 카드 삽화 img/p09_illust_{key}.png,
+           Canva 화면 img/p09_screen_{home|design|projects}.png, 도움말 그림 img/p09_help{1|2}.png, 게이지 별 img/p05_star.png.
+           오답 표현을 골랐을 때 안내는 기획서에 없어 빙고 게임 오답 문구를 씀. 클릭 영역 좌표는 화면 이미지 나오면 조정 */
+        @font-face{font-family:'KCC-DodamDodam';src:url('../../fonts/KCC-DodamDodam.woff2') format('woff2')}
+        @font-face{font-family:'KCC-MurukMuruk';src:url('../../fonts/KCC-MurukMuruk.woff2') format('woff2')}
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p09-head{position:absolute;left:0;top:60px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:56px;color:#48159c;letter-spacing:-0.04em}
+        .p09-sits{position:absolute;left:180px;top:170px;width:1567px;height:560px;box-sizing:border-box;padding:24px 40px;display:flex;justify-content:space-between;
+          background:#fefbf9;border:solid 6px #48159c;border-radius:40px}
+        .p09-sit{width:440px;height:500px;padding:0 0 20px;box-sizing:border-box;border:solid 6px #eae0fd;border-radius:30px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:16px;
+          font-family:'Cafe24 Ssurround';font-size:40px;line-height:1.2;color:#31248a;letter-spacing:-0.05em;word-break:keep-all}
+        .p09-sit i{flex:1 1 auto;width:100%;border-radius:24px 24px 0 0;background:#48159c center / cover no-repeat}
+        .p09-sit span{flex:0 0 96px;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 16px}
+        .p09-sit:hover{border-color:#8278ff}
+        .p09-sit.is-selected{border-color:#ff4ff9}
+        .p09-exprs{position:absolute;left:361px;top:183px;width:1207px;height:504px;box-sizing:border-box;padding:36px 35px;display:grid;grid-template-columns:1fr 1fr;gap:28px;align-content:center;
+          background:#fefbf9;border:solid 6px #48159c;border-radius:40px}
+        .p09-exprs .emotion-option{width:auto;min-width:0;height:190px;box-sizing:border-box;padding:10px 24px 4px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:48px;line-height:1.25;letter-spacing:-0.05em;word-break:keep-all}
+        .p09-step-next{position:absolute;left:756px;top:790px}
+
+        .p09-bubble{left:90px;bottom:619px;width:607px;min-height:0;padding:30px 16px;display:flex;align-items:center;justify-content:center;font-size:42px;z-index:5}
+        .p09-character{position:absolute;left:170px;top:360px;width:480px;height:580px;display:flex;align-items:flex-end;justify-content:center}
+        .p09-character img{max-width:100%;max-height:100%;object-fit:contain}
+        .p09-phone{position:absolute;left:726px;top:21px;width:468px;height:895px;box-sizing:border-box;border:solid 8px #1b1738;border-radius:40px;background:#ecebf3 center / cover no-repeat}
+        .p09-card{position:absolute;left:754px;top:180px;width:413px;height:520px;box-sizing:border-box;border-radius:10px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.18);overflow:hidden;transition:background-color .3s}
+        .p09-illust{position:absolute;left:95px;top:98px;width:228px;height:228px;border-radius:20px;background:#d9d3ee center / contain no-repeat}
+        .p09-text{position:absolute;left:3px;top:360px;width:396px;min-height:94px;box-sizing:border-box;padding:6px;display:flex;align-items:center;justify-content:center;text-align:center;
+          font-family:'Pretendard';font-size:34px;line-height:1.2;color:#1b1738;word-break:keep-all;border:solid 3px transparent;border-radius:8px}
+        .p09-text.is-picked{border-color:#8b3dff}
+        .p09-tools{position:absolute;left:740px;top:737px;width:440px;height:80px;overflow-x:auto;border-radius:14px;background:#fff}
+        .p09-tools-row{display:flex;gap:10px;padding:6px;height:100%;box-sizing:border-box;width:max-content}
+        .p09-tool{flex:0 0 auto;height:100%;min-width:92px;padding:0 10px;box-sizing:border-box;border:solid 3px #d9d3ee;border-radius:12px;background:#fff;cursor:pointer;font-family:'Pretendard';font-size:22px;font-weight:700;color:#1b1738}
+        .p09-tool.is-on{border-color:#8b3dff;background:#f1e9ff}
+        .p09-swatch{flex:0 0 52px;height:52px;align-self:center;border:solid 3px #d9d3ee;border-radius:50%;cursor:pointer;padding:0}
+        .p09-swatch.is-on{border-color:#1b1738}
+        .p09-size{display:flex;align-items:center;gap:8px;width:420px;padding:0 8px;box-sizing:border-box;font-family:'Pretendard';font-size:24px;font-weight:700}
+        .p09-size input{flex:1 1 auto;accent-color:#8b3dff}
+        .p09-size button{width:44px;height:44px;border:solid 3px #d9d3ee;border-radius:10px;background:#fff;font-size:26px;cursor:pointer;padding:0}
+        .p09-help{position:absolute;right:36px;top:34px;width:190px;height:83px;font-size:40px;min-width:0;padding:6px 0 0}
+        .p09-finish{position:absolute;left:1496px;top:800px;width:360px;min-width:0;white-space:nowrap}
+        .p09-catch{position:absolute;left:726px;top:21px;width:468px;height:895px;border-radius:40px;z-index:3}
+        .p09-target{position:absolute;z-index:4;border-radius:12px;cursor:pointer}
+        .p09 .hit-area{background:rgba(255,79,139,.25);outline:5px dashed #ff4f8b;outline-offset:-5px}
+
+        .p09-helpbox{position:absolute;left:402px;top:55px;width:1117px;height:838px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:48px}
+        .p09-helpbox i{position:absolute;left:362px;top:80px;width:368px;height:592px;border-radius:24px;background:#d9d3ee center / cover no-repeat}
+        .p09-helpbox p{position:absolute;left:0;top:700px;width:100%;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.3;color:#48159c;letter-spacing:-0.04em}
+        .p09-helpbox button{position:absolute;width:80px;height:80px;border:0;border-radius:50%;background:#48159c;color:#fff;font-size:40px;cursor:pointer;padding:0}
+
+        .p09-check{position:absolute;left:343px;top:79px;width:1243px;height:721px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:48px}
+        .p09-check-title{position:absolute;left:0;top:40px;width:100%;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:48px;line-height:1.35;color:#48159c;letter-spacing:-0.04em}
+        .p09-check-card{position:absolute;left:153px;top:190px;width:384px;height:484px}
+        .p09-checks{position:absolute;left:565px;top:189px;width:600px;display:flex;flex-direction:column;gap:20px}
+        .p09-checkbox{display:flex;align-items:flex-start;gap:20px;padding:20px 24px;border:solid 4px #eae0fd;border-radius:22px;background:#fff;cursor:pointer;text-align:left;
+          font-family:'Cafe24 Ssurround';font-size:40px;line-height:1.3;color:#31248a;letter-spacing:-0.04em}
+        .p09-checkbox:before{content:'';flex:0 0 auto;width:44px;height:44px;margin-top:4px;box-sizing:border-box;border:solid 5px #48159c;border-radius:10px;background:#fff center / 70% no-repeat}
+        .p09-checkbox.is-checked{border-color:#ff4ff9}
+        .p09-checkbox.is-checked:before{background-color:#48159c;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 12l5 5L20 6' fill='none' stroke='%23fff' stroke-width='4'/%3E%3C/svg%3E")}
+        .p09-check-ok{position:absolute;left:990px;top:575px;width:200px;height:100px;min-width:0;padding:8px 0 4px;font-size:50px}
+
+        .p09-send-card{position:absolute;left:740px;top:60px;width:440px;height:560px}
+        .p09-gauge{left:506px;top:680px;width:908px}
+        .p09-gauge:before{background-image:url('img/p05_star.png')}
+        .p09-gauge .gauge-fill{transition:none}
+        .p09-gauge .gauge-fill.is-go{width:100%;transition:width 2.5s linear}
+        .p09-status{position:absolute;left:0;top:770px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:52px;color:#48159c;letter-spacing:-0.04em}
+
+        #p09Oops, #p09Wrong{z-index:130}
+        .p09 .is-off{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default p09">
+          <!-- 1. 상황 고르기 -->
+          <div id="p09SitView">
+            <p class="p09-head">다음 중 한 가지의 상황을 고르세요.</p>
+            <div class="p09-sits" id="p09Sits"></div>
+          </div>
+          <!-- 2. 표현 고르기 -->
+          <div class="is-off" id="p09ExprView">
+            <p class="p09-head" id="p09ExprHead"></p>
+            <div class="p09-exprs" id="p09Exprs"></div>
+          </div>
+          <a href="javascript:;" class="js-sfx p09-step-next is-disabled" id="p09StepNext" data-sound="sound/click.mp3">
+            <img src="../../img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" alt="다음">
+          </a>
+
+          <!-- 3. Canva 편집 -->
+          <div class="is-off" id="p09EditView">
+            <p class="guide-bubble p09-bubble" id="p09Bubble"></p>
+            <div class="p09-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+            <div class="p09-phone" id="p09Phone"></div>
+            <div class="p09-card is-off" id="p09Card">
+              <div class="p09-illust" id="p09Illust"></div>
+              <p class="p09-text" id="p09Text"></p>
+            </div>
+            <div class="p09-tools is-off" id="p09Tools"><div class="p09-tools-row" id="p09ToolsRow"></div></div>
+            <button type="button" class="card-btn p09-help is-off" id="p09HelpBtn">도움말</button>
+            <button type="button" class="card-btn is-popup p09-finish is-off" id="p09Finish">완성하기</button>
+            <div class="p09-catch is-off" id="p09Catch"></div>
+            <button type="button" class="hit-area p09-target is-off" id="p09Target" aria-label="안내된 곳"></button>
+          </div>
+
+          <!-- 4. 마음 전달 -->
+          <div class="is-off" id="p09SendView">
+            <div class="p09-send-card" id="p09SendCard"></div>
+            <div class="gauge is-thin p09-gauge"><div class="gauge-fill" id="p09Fill"></div></div>
+            <p class="p09-status" id="p09Status"></p>
+            <a href="page10.html" class="js-nav-effect next-btn is-off" id="p09SendNext">
+              <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+            </a>
+          </div>
+
+          <div class="avatar-modal is-off" id="p09HelpModal">
+            <div class="p09-helpbox">
+              <i id="p09HelpImg"></i>
+              <p id="p09HelpText"></p>
+              <button type="button" id="p09HelpClose" style="right:40px;top:30px" aria-label="닫기">&#10005;</button>
+              <button type="button" id="p09HelpPrev" style="left:40px;top:730px" aria-label="이전">&#9664;</button>
+              <button type="button" id="p09HelpNext" style="right:40px;top:730px" aria-label="다음">&#9654;</button>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p09CheckModal">
+            <div class="p09-check">
+              <p class="p09-check-title">잠깐!<br>언어 예절을 지킨 올바른 표현인지 다시 한 번 확인해볼까요?</p>
+              <div class="p09-check-card" id="p09CheckCard"></div>
+              <div class="p09-checks">
+                <button type="button" class="p09-checkbox">상대가 처한 상황을<br>생각한 메시지인가요?</button>
+                <button type="button" class="p09-checkbox">이 메시지를 받았을 때<br>상대방의 기분이 나쁘지는<br>않을까요?</button>
+              </div>
+              <button type="button" class="card-btn is-popup p09-check-ok is-disabled" id="p09CheckOk">확인</button>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p09Oops">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+              <p class="avatar-popup-text is-medium"><span>앗, 다른 곳을 선택했어요!<br>안내된 부분을 선택해주세요.</span></p>
+            </div>
+          </div>
+          <div class="ox-result-wrong is-avatar is-off" id="p09Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text is-medium">친구의 마음을 잘 들여다봐요.</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="마음을 전하는 카드 만들기" data-next="page10.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const SITUATIONS = {
+      sports: { label: '체육대회에서 우승한 친구', ask: '체육대회에서 우승한 친구에게 어떤 말을 해야 할까요?',
+        right: ['우승한 거 정말 축하해!', '열심히 노력한 만큼<br>좋은 결과가 있었네!'], wrong: ['힘내! 다음에는<br>더 잘할 수 있을 거야.', '우승한 게 뭐가 대단해?'] },
+      hand: { label: '손을 다쳐 피아노를<br>치지 못하는 친구', ask: '손을 다쳐 피아노를 치지 못하는 친구에게 어떤 말을 해야 할까요?',
+        right: ['손 많이 아프겠다.<br>빨리 나았으면 좋겠어.', '피아노를 못 쳐서<br>속상하겠다. 힘내!'], wrong: ['피아노 연주<br>정말 멋졌어!', '피아노 좀 못 치는 게<br>뭐 어때?'] },
+      umbrella: { label: '비 오는 날<br>우산을 씌워주는 친구', ask: '비 오는 날 우산을 씌워주는 친구에게 어떤 말을 해야 할까요?',
+        right: ['우산 씌워줘서<br>정말 고마워!', '네 덕분에 비를 맞지 않았어.<br>고마워!'], wrong: ['비 오는 날에는<br>우산을 꼭 챙겨야 해.', '우산 씌워주는 건<br>당연한 거 아니야?'] }
+    };
+    const COLORS = [
+      { name: '분홍색', value: '#ffc9dc', ink: '#1b1738' }, { name: '노란색', value: '#fff1a8', ink: '#1b1738' },
+      { name: '흰색', value: '#ffffff', ink: '#1b1738' }, { name: '녹색', value: '#2e8b57', ink: '#ffffff' }, { name: '남색', value: '#1f2a6b', ink: '#ffffff' }
+    ];
+    const FONTS = [
+      { name: 'KCC도담도담체', family: "'KCC-DodamDodam','Cafe24 Ssurround'" },
+      { name: 'KCC무럭무럭체', family: "'KCC-MurukMuruk','Pretendard'" }
+    ];
+    const HELP = ['배경을 클릭해 색상을 바꿀 수 있어요.', '텍스트를 클릭해<br>글꼴, 크기, 형식을 변경할 수 있어요.'];
+
+    const $ = (id) => document.getElementById(id);
+    const stepNext = $('p09StepNext');
+    const bubble = $('p09Bubble');
+    const phone = $('p09Phone');
+    const card = $('p09Card');
+    const text = $('p09Text');
+    const tools = $('p09Tools');
+    const row = $('p09ToolsRow');
+    const catcher = $('p09Catch');
+    const target = $('p09Target');
+    const oops = $('p09Oops');
+    const playClick = makeSfx('sound/click.mp3');
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+
+    let sitKey = null;
+    let expr = null;
+    let onStepNext = null;
+
+    function waitStepNext(fn) {
+      onStepNext = fn;
+      resetImageSwap(stepNext);
+      stepNext.classList.remove('is-disabled');
+    }
+    stepNext.addEventListener('click', () => {
+      if (!onStepNext) return;
+      const fn = onStepNext;
+      onStepNext = null;
+      setTimeout(() => { stepNext.classList.add('is-disabled'); resetImageSwap(stepNext); fn(); }, 300);
+    });
+
+    // 1. 상황
+    Object.keys(SITUATIONS).forEach((key) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'p09-sit';
+      b.innerHTML = '<i style="background-image:url(\'img/p09_sit_' + key + '.png\')"></i><span>' + SITUATIONS[key].label + '</span>';
+      b.addEventListener('click', () => {
+        playClick();
+        $('p09Sits').querySelectorAll('.p09-sit').forEach((x) => x.classList.toggle('is-selected', x === b));
+        sitKey = key;
+        if (!onStepNext) waitStepNext(showExpr);
+      });
+      $('p09Sits').appendChild(b);
+    });
+
+    // 2. 표현
+    function showExpr() {
+      const s = SITUATIONS[sitKey];
+      $('p09SitView').classList.add('is-off');
+      $('p09ExprView').classList.remove('is-off');
+      $('p09ExprHead').textContent = s.ask;
+      const box = $('p09Exprs');
+      box.innerHTML = '';
+      shuffleArray(s.right.map((t) => ({ t, ok: true })).concat(s.wrong.map((t) => ({ t, ok: false })))).forEach((o) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'emotion-option';
+        b.innerHTML = o.t;
+        b.addEventListener('click', () => {
+          playClick();
+          box.querySelectorAll('.emotion-option').forEach((x) => x.classList.toggle('is-selected', x === b));
+          expr = o;
+          if (!onStepNext) waitStepNext(checkExpr);
+        });
+        box.appendChild(b);
+      });
+    }
+    function checkExpr() {
+      if (!expr.ok) {
+        playWrong();
+        flashLayer($('p09Wrong'));
+        waitStepNext(checkExpr);
+        return;
+      }
+      stepNext.classList.add('is-off');
+      $('p09ExprView').classList.add('is-off');
+      $('p09EditView').classList.remove('is-off');
+      guideApp();
+    }
+
+    // 3. Canva 안내
+    function say(html) { bubble.innerHTML = html; }
+    function guideTo(r, then) {
+      clearFingers();
+      catcher.classList.remove('is-off');
+      catcher.onclick = () => flashLayer(oops);
+      target.style.cssText = 'left:' + r[0] + 'px;top:' + r[1] + 'px;width:' + r[2] + 'px;height:' + r[3] + 'px';
+      target.classList.remove('is-off');
+      pointFingerAt(target);
+      target.onclick = () => {
+        playClick();
+        target.classList.add('is-off');
+        catcher.classList.add('is-off');
+        clearFingers();
+        then();
+      };
+    }
+    function guideApp() {
+      say('Canva의 편집 기능을 이용하여<br>마음을 전하는 카드를<br>만들어봐요!');
+      phone.style.backgroundImage = "url('img/p09_screen_home.png')";
+      guideTo([873, 382, 174, 174], () => {
+        say('디자인 버튼을 클릭해요');
+        phone.style.backgroundImage = "url('img/p09_screen_design.png')";
+        guideTo([920, 780, 130, 100], () => {
+          say('내가 편집할<br>프로젝트를 선택해요.');
+          phone.style.backgroundImage = "url('img/p09_screen_projects.png')";
+          guideTo([780, 230, 360, 300], startEdit);
+        });
+      });
+    }
+
+    // 4. 자유 편집: 배경 색상 / 텍스트 글꼴·크기·형식만
+    let edited = false;
+    function markEdited() {
+      if (edited) return;
+      edited = true;
+      $('p09Finish').classList.remove('is-off');
+    }
+    function startEdit() {
+      say('학습한 기능을 바탕으로<br>마음 카드를 자유롭게 꾸며봐요!');
+      phone.style.backgroundImage = '';
+      $('p09Illust').style.backgroundImage = "url('img/p09_illust_" + sitKey + ".png')";
+      text.innerHTML = expr.t.replace(/<br>/g, ' ');
+      card.classList.remove('is-off');
+      $('p09HelpBtn').classList.remove('is-off');
+      catcher.classList.remove('is-off');
+      catcher.onclick = () => flashLayer(oops);
+      card.style.zIndex = 4;
+      tools.style.zIndex = 4;
+    }
+    card.addEventListener('click', (e) => {
+      if (!$('p09HelpBtn').offsetParent || $('p09Finish').dataset.locked) return;
+      if (e.target.closest('.p09-text')) textTools();
+      else bgTools();
+    });
+    function tool(label, onClick, extra) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'p09-tool';
+      b.innerHTML = label;
+      if (extra) Object.assign(b.style, extra);
+      b.addEventListener('click', () => { playClick(); onClick(b); });
+      row.appendChild(b);
+      return b;
+    }
+    function bgTools() {
+      text.classList.remove('is-picked');
+      tools.classList.remove('is-off');
+      row.innerHTML = '';
+      COLORS.forEach((c) => {
+        const sw = document.createElement('button');
+        sw.type = 'button';
+        sw.className = 'p09-swatch';
+        sw.title = c.name;
+        sw.style.background = c.value;
+        sw.addEventListener('click', () => {
+          playClick();
+          row.querySelectorAll('.p09-swatch').forEach((x) => x.classList.toggle('is-on', x === sw));
+          card.style.backgroundColor = c.value;
+          text.style.color = c.ink;
+          markEdited();
+        });
+        row.appendChild(sw);
+      });
+    }
+    function textTools() {
+      text.classList.add('is-picked');
+      tools.classList.remove('is-off');
+      row.innerHTML = '';
+      tool('글꼴', fontPanel);
+      tool('글자 크기', sizePanel);
+      tool('형식', formatPanel);
+    }
+    function backBtn() { tool('&#8592;', textTools, { minWidth: '56px' }); }
+    function fontPanel() {
+      row.innerHTML = '';
+      backBtn();
+      FONTS.forEach((f) => tool(f.name, (b) => {
+        row.querySelectorAll('.p09-tool').forEach((x) => x.classList.toggle('is-on', x === b));
+        text.style.fontFamily = f.family;
+        markEdited();
+      }, { fontFamily: f.family, fontSize: '24px' }));
+    }
+    function sizePanel() {
+      row.innerHTML = '';
+      backBtn();
+      const cur = parseInt(getComputedStyle(text).fontSize, 10);
+      const wrap = document.createElement('div');
+      wrap.className = 'p09-size';
+      wrap.innerHTML = '<input type="range" min="20" max="64" value="' + cur + '"><button type="button">−</button><b>' + cur + '</b><button type="button">+</button>';
+      row.appendChild(wrap);
+      const [range, minus, , plus] = [wrap.querySelector('input'), wrap.querySelectorAll('button')[0], null, wrap.querySelectorAll('button')[1]];
+      const apply = (v) => {
+        v = Math.max(20, Math.min(64, v));
+        range.value = v;
+        wrap.querySelector('b').textContent = v;
+        text.style.fontSize = v + 'px';
+        markEdited();
+      };
+      range.addEventListener('input', () => apply(+range.value));
+      minus.addEventListener('click', () => { playClick(); apply(+range.value - 2); });
+      plus.addEventListener('click', () => { playClick(); apply(+range.value + 2); });
+    }
+    function formatPanel() {
+      row.innerHTML = '';
+      backBtn();
+      [['B', 'fontWeight', '800', 'normal'], ['I', 'fontStyle', 'italic', 'normal'], ['U', 'textDecoration', 'underline', 'none']].forEach(([k, prop, yes, no]) => {
+        const b = tool(k, (btn) => {
+          const now = !btn.classList.contains('is-on');
+          btn.classList.toggle('is-on', now);
+          text.style[prop] = now ? yes : no;
+          markEdited();
+        }, { minWidth: '56px' });
+        if (text.style[prop] === yes) b.classList.add('is-on');
+      });
+    }
+
+    // 도움말
+    let helpPage = 0;
+    function showHelp() {
+      $('p09HelpImg').style.backgroundImage = "url('img/p09_help" + (helpPage + 1) + ".png')";
+      $('p09HelpText').innerHTML = HELP[helpPage];
+      $('p09HelpPrev').classList.toggle('is-off', helpPage === 0);
+      $('p09HelpNext').classList.toggle('is-off', helpPage === HELP.length - 1);
+    }
+    $('p09HelpBtn').addEventListener('click', () => { playClick(); helpPage = 0; showHelp(); $('p09HelpModal').classList.remove('is-off'); });
+    $('p09HelpNext').addEventListener('click', () => { playClick(); helpPage = 1; showHelp(); });
+    $('p09HelpPrev').addEventListener('click', () => { playClick(); helpPage = 0; showHelp(); });
+    $('p09HelpClose').addEventListener('click', () => { playClick(); $('p09HelpModal').classList.add('is-off'); });
+
+    // 5. 완성 → 저장 → 공유
+    $('p09Finish').addEventListener('click', () => {
+      playClick();
+      $('p09Finish').dataset.locked = '1';
+      $('p09Finish').classList.add('is-off');
+      $('p09HelpBtn').classList.add('is-off');
+      tools.classList.add('is-off');
+      text.classList.remove('is-picked');
+      card.style.zIndex = '';
+      say('완성한 카드를 저장하려면<br>오른쪽 위의 저장 버튼을 눌러요.');
+      guideTo([1110, 40, 70, 70], () => {
+        say('카드를 저장하고 있어요.');
+        catcher.classList.remove('is-off');
+        catcher.onclick = null;
+        setTimeout(() => {
+          say('카드를 저장했어요!<br>이제 공유 버튼을 클릭해<br>친구에게 마음을 전달해요.');
+          guideTo([1090, 620, 90, 90], openCheck);
+        }, 2000);
+      });
+    });
+
+    function cardSnapshot(box, w) {
+      const c = card.cloneNode(true);
+      c.removeAttribute('id');
+      c.style.cssText += ';position:absolute;left:0;top:0;transform-origin:0 0;transform:scale(' + (w / 413) + ');z-index:auto';
+      c.querySelector('.p09-text').classList.remove('is-picked');
+      box.innerHTML = '';
+      box.appendChild(c);
+    }
+
+    // 6. 언어 예절 확인
+    function openCheck() {
+      cardSnapshot($('p09CheckCard'), 384);
+      $('p09CheckModal').classList.remove('is-off');
+    }
+    const checks = Array.from(document.querySelectorAll('.p09-checkbox'));
+    checks.forEach((c) => c.addEventListener('click', () => {
+      playClick();
+      c.classList.toggle('is-checked');
+      $('p09CheckOk').classList.toggle('is-disabled', !checks.every((x) => x.classList.contains('is-checked')));
+    }));
+    $('p09CheckOk').addEventListener('click', () => {
+      if ($('p09CheckOk').classList.contains('is-disabled')) return;
+      playClick();
+      $('p09CheckModal').classList.add('is-off');
+      send();
+    });
+
+    // 7. 마음 전달
+    function send() {
+      $('p09EditView').classList.add('is-off');
+      $('p09SendView').classList.remove('is-off');
+      cardSnapshot($('p09SendCard'), 440);
+      $('p09Status').textContent = '마음을 전달하는 중이에요';
+      const fill = $('p09Fill');
+      void fill.offsetWidth;
+      fill.classList.add('is-go');
+      setTimeout(() => {
+        playCorrect();
+        $('p09Status').textContent = '마음을 성공적으로 전달했어요!';
+        $('p09SendNext').classList.remove('is-off');
+      }, 2600);
+    }
+  })();
+  </script>
+</body>
+</html>

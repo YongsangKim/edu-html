@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상호작용형 실습 콘텐츠</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 29~46p. Smart Things 루틴 만들기 과제 3개(1조건 1작동 → 1조건 2작동 → 2조건 1작동) + 정리.
+           왼쪽 캐릭터 말풍선, 가운데 스마트폰 앱 화면(HTML로 그림), 오른쪽 상황 그림(세로형 img/p10_scene_{t1|t1_on|t2|t2_on|t3|t3_on}.png, 마지막 정리 화면만 _on의 가로형 img/p10_scene_{t1|t2|t3}_on_wide.png). page09와 같은 배치.
+           실제 연출 화면(성공)은 3초 뒤 자동으로 다음 과제 안내 팝업을 띄움(기획서에 넘어가는 방법 없음). 앱 아이콘 img/p10_icon_{key}.png. 캐릭터는 임시로 sa/06 캐릭터 복사본 */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p10-bubble{position:absolute;margin:0;left:30px;top:30px;width:500px;min-height:280px;box-sizing:border-box;padding:28px 26px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;text-align:center;
+          background:#fefbf9;border:solid 5px #48159c;border-radius:30px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';font-size:36px;line-height:1.3;color:#48159c;letter-spacing:-0.05em;word-break:keep-all;z-index:2}
+        .p10-bubble:before{content:'';position:absolute;left:200px;bottom:-58px;width:100px;height:70px;background:url('../../img/common/p_guide_tail.png') 0 0 / contain no-repeat}
+        .p10-bubble.is-long{font-size:30px}
+        .p10-next.card-btn{min-width:0;width:200px;height:80px;padding:6px 10px 0;font-size:40px}
+        .p10-next.card-btn:active{margin:12px 0 -12px;box-shadow:0 4px 0 0 #a9a2ff,0 3px 0 10px #035fd3}
+        .p10-character{position:absolute;left:20px;top:420px;width:520px;height:520px;display:flex;align-items:flex-end;justify-content:center}
+        .p10-character img{max-width:100%;max-height:100%;object-fit:contain}
+
+        .p10-scene{position:absolute;left:1240px;top:40px;width:650px;height:880px;box-sizing:border-box;border:solid 6px #48159c;border-radius:36px;background:#dfe7f5 center / cover no-repeat;overflow:hidden}
+        .p10-scene[data-scene="t1"]{background-image:url('img/p10_scene_t1.png')}
+        .p10-scene[data-scene="t1_on"]{background-image:url('img/p10_scene_t1_on.png')}
+        .p10-scene[data-scene="t2"]{background-image:url('img/p10_scene_t2.png')}
+        .p10-scene[data-scene="t2_on"]{background-image:url('img/p10_scene_t2_on.png')}
+        .p10-scene[data-scene="t3"]{background-image:url('img/p10_scene_t3.png')}
+        .p10-scene[data-scene="t3_on"]{background-image:url('img/p10_scene_t3_on.png')}
+        .p10-scene[data-scene="final"]{background:#fefbf9;display:flex;flex-direction:column;gap:10px;padding:10px}
+        .p10-mini{flex:1 1 0;border-radius:20px;background:#dfe7f5 center / cover no-repeat}
+        .p10-window{position:absolute;left:60px;top:84px;width:286px;height:267px;box-sizing:border-box;border:dashed 6px #ffb800;border-radius:16px;background:rgba(255,255,255,.4);cursor:pointer;
+          font-family:'Cafe24 Ssurround';font-size:44px;color:#1b1738}
+        .p10-done-banner{position:absolute;left:667px;top:720px;width:565px;height:140px;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;
+          background:#1b1738;border:solid 6px #ffd83d;border-radius:55px;font-family:'Cafe24 Ssurround';font-size:40px;color:#ffd83d;z-index:5}
+
+        .p10-phone{position:absolute;left:710px;top:24px;width:500px;height:910px;box-sizing:border-box;padding:18px;background:#1b1738;border-radius:70px;box-shadow:0 0 0 6px #c9c4bb}
+        .p10-screen{position:relative;width:100%;height:100%;box-sizing:border-box;padding:70px 22px 20px;border-radius:54px;background:#f4f5f8;font-family:'Pretendard';color:#1b1738}
+        .p10-screen:before{content:'';position:absolute;left:50%;top:18px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#1b1738}
+        .p10-head{display:flex;align-items:center;justify-content:space-between;height:60px;margin-bottom:14px;font-size:32px;font-weight:700}
+        .p10-head span:before{content:'‹';margin-right:16px;font-weight:400}
+        .p10-head b{position:relative;font-size:30px;color:#2f6fed;padding:6px 10px;border-radius:12px;cursor:pointer}
+        .p10-sec{margin:20px 4px 10px;font-size:28px;font-weight:700}
+        .p10-and{height:62px;margin-bottom:12px;padding:0 20px;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;background:#fff;border:solid 2px #dde1ea;border-radius:18px;font-size:24px;font-weight:600;color:#2f6fed}
+        .p10-and:after{content:'⌄';color:#1b1738;margin-top:-14px}
+        .p10-item{position:relative;display:flex;align-items:center;gap:16px;min-height:88px;margin-bottom:12px;padding:10px 18px;box-sizing:border-box;background:#fff;border-radius:22px;font-size:26px;font-weight:600}
+        .p10-item i{flex:0 0 auto;width:56px;height:56px;border-radius:14px;background:#dfe7f5 center / contain no-repeat}
+        .p10-item small{display:block;margin-top:4px;font-size:21px;font-weight:600;color:#2f6fed}
+        .p10-add{position:relative;display:flex;align-items:center;gap:18px;height:72px;margin-bottom:12px;padding:0 24px;box-sizing:border-box;background:#fff;border-radius:22px;font-size:25px;font-weight:600;cursor:pointer}
+        .p10-add:before{content:'+';font-size:40px;font-weight:300;color:#2f6fed}
+        .p10-dev{display:flex;align-items:center;gap:20px;height:120px;margin-bottom:26px;padding:0 24px;background:#fff;border-radius:24px;font-size:28px;font-weight:600}
+        .p10-dev i{width:70px;height:90px;border-radius:14px;background:#dfe7f5 center / contain no-repeat}
+        .p10-power{padding:22px;background:#fff;border-radius:24px;font-size:26px;font-weight:600}
+        .p10-power-row{display:flex;gap:16px;margin:16px 0}
+        .p10-power-row div{position:relative;flex:1 1 0;height:80px;padding:0 22px;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;border:solid 2px #dde1ea;border-radius:18px;cursor:pointer}
+        .p10-power-row div:after{content:'';width:28px;height:28px;border-radius:50%;border:solid 2px #b9bfcc;box-sizing:border-box}
+        .p10-power-row div.is-on{background:#e3edff;border-color:#2f6fed;color:#2f6fed}
+        .p10-power-row div.is-on:after{border:0;background:#2f6fed}
+        .p10-power p{margin:0;font-size:20px;color:#6b7080}
+        .p10-row{display:flex;align-items:center;gap:16px;height:112px;margin-bottom:12px;padding:0 20px;box-sizing:border-box;background:#fff;border-radius:22px;font-size:26px;font-weight:600;line-height:1.3}
+        .p10-row i{flex:0 0 auto;width:60px;height:60px;border-radius:14px;background:#dfe7f5 center / contain no-repeat}
+        .p10-row div{flex:1 1 auto}
+        .p10-row em{display:inline-block;margin-left:8px;padding:2px 10px;border-radius:10px;background:#ffe1e1;color:#e5484d;font-size:18px;font-style:normal;vertical-align:middle}
+        .p10-toggle{flex:0 0 auto;position:relative;width:78px;height:44px;border-radius:22px;background:#c4c9d4;transition:background .3s}
+        .p10-toggle:after{content:'';position:absolute;left:5px;top:5px;width:34px;height:34px;border-radius:50%;background:#fff;transition:left .3s}
+        .p10-toggle.is-on{background:#2f6fed}
+        .p10-toggle.is-on:after{left:39px}
+        .p10-alert{margin:0 0 20px;padding:18px 22px;background:#fff;border-left:solid 10px #e5484d;border-radius:18px;box-shadow:0 6px 16px rgba(0,0,0,.12);font-size:24px;font-weight:700;animation:p10-drop .5s ease}
+        .p10-alert small{display:block;margin-top:4px;font-size:21px;font-weight:600;color:#e5484d}
+        @keyframes p10-drop{from{transform:translateY(-40px);opacity:0}to{transform:none;opacity:1}}
+
+        .p10-next.is-off, .p10-window.is-off, .p10-done-banner.is-off{display:none}
+        .p10-ok{padding:0;border:0;background:none;cursor:pointer}
+        .p10-ok img{display:block}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p10-bubble" id="p10Bubble">
+            <span id="p10BubbleText"></span>
+            <button class="card-btn js-sfx p10-next is-off" id="p10Next" data-sound="sound/click.mp3">다음</button>
+          </div>
+          <div class="p10-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+
+          <div class="p10-scene" id="p10Scene">
+            <button class="p10-window js-sfx is-off" id="p10Window" data-sound="sound/click.mp3">창문</button>
+          </div>
+          <div class="p10-done-banner is-off" id="p10Banner">스마트 홈 시스템 구축 완료!</div>
+
+          <div class="p10-phone"><div class="p10-screen" id="p10Screen"></div></div>
+
+          <div class="avatar-modal is-off" id="p10Modal">
+            <div class="avatar-card is-side">
+              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <p class="avatar-card-text" id="p10ModalText"></p>
+              </div>
+              <button class="avatar-card-btn p10-ok" id="p10ModalOk">
+                <img src="../../img/common/btn_confirm.png" class="js-img-swap js-sfx" data-src-over="../../img/common/btn_confirm_over.png" data-sound="sound/click.mp3" alt="확인">
+              </button>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="상호작용형 실습 콘텐츠" data-next="page11.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const ITEMS = {
+      cctv: { icon: 'cctv', name: '현관 CCTV', sub: '낯선 사람 감지' },
+      alert: { icon: 'alert', name: '스마트폰으로 알림 보내기', sub: '낯선 움직임 감지!' },
+      temp: { icon: 'temp', name: '온습도 센서', sub: '30°C 이상' },
+      aircon: { icon: 'aircon', name: '스마트 에어컨', sub: '전원 켜기' },
+      fan: { icon: 'fan', name: '스마트 선풍기', sub: '전원 켜기' },
+      dust: { icon: 'dust', name: '미세먼지 센서', sub: '나쁨' },
+      window: { icon: 'window', name: '창문 센서', sub: '닫힘' },
+      purifier: { icon: 'purifier', name: '스마트 공기청정기', sub: '전원 켜기' }
+    };
+    const ROUTINES = {
+      cctv: { icon: 'cctv', name: '현관 CCTV 감지', sub: '1조건 1작동' },
+      temp: { icon: 'temp', name: '온도 30도 이상', sub: '1조건 2작동' },
+      pure: { icon: 'purifier', name: '정화 모드', sub: '2조건 1작동' }
+    };
+
+    const icon = (key) => '<i style="background-image:url(\'img/p10_icon_' + key + '.png\')"></i>';
+    const item = (key) => { const d = ITEMS[key]; return '<div class="p10-item">' + icon(d.icon) + '<div>' + d.name + '<small>' + d.sub + '</small></div></div>'; };
+
+    function routineScreen(conds, acts, and) {
+      return '<div class="p10-head"><span>루틴 만들기</span><b data-act="save">저장</b></div>' +
+        '<p class="p10-sec">조건</p>' + (and ? '<div class="p10-and">모든 조건 충족 (AND)</div>' : '') +
+        conds.map(item).join('') + '<div class="p10-add">조건 추가</div>' +
+        '<p class="p10-sec">동작</p>' + acts.map(item).join('') + '<div class="p10-add" data-act="add">동작 추가</div>';
+    }
+    function deviceScreen(key) {
+      const d = ITEMS[key];
+      return '<div class="p10-head"><span>' + d.name + '</span><b data-act="done">완료</b></div>' +
+        '<div class="p10-dev">' + icon(d.icon) + d.name + '</div>' +
+        '<p class="p10-sec">동작 설정</p>' +
+        '<div class="p10-power">전원<div class="p10-power-row"><div data-act="on">켜기</div><div>끄기</div></div><p>' + d.name + '의 전원을 켭니다.</p></div>';
+    }
+    // rows: [routineKey, on여부, 비활성화 표시]
+    function listScreen(rows, alert) {
+      return (alert ? '<div class="p10-alert">경보 알림<small>낯선 움직임 감지!</small></div>' : '') +
+        '<div class="p10-head"><span>루틴</span></div><p class="p10-sec">저장된 루틴</p>' +
+        rows.map((r) => {
+          const d = ROUTINES[r[0]];
+          return '<div class="p10-row" data-routine="' + r[0] + '">' + icon(d.icon) + '<div>' + d.name + (r[2] ? '<em>비활성화</em>' : '') + '<br>' + d.sub + '</div><span class="p10-toggle' + (r[1] ? ' is-on' : '') + '"></span></div>';
+        }).join('');
+    }
+
+    const STEPS = [
+      { bubble: '현재 상황에 맞는<br>앱 제어를 해보자.', scene: 't1', screen: () => routineScreen(['cctv'], []), tap: ['add'] },
+      { bubble: '루틴을 만들었으니<br>저장 버튼을 누르면 설정 끝!', scene: 't1', screen: () => routineScreen(['cctv'], ['alert']), tap: ['save'] },
+      { bubble: '1조건 1작동 성공!<br>Cctv에 낯선 물체가 다가오니<br>경보 알람이 울리네!', scene: 't1_on', screen: () => listScreen([['cctv', true]], true),
+        modal: '이번에는 하나의 조건으로 두 가지 스마트 가전을 동시에 작동시켜 볼 거야!<br>집 안 온도가 30도 이상이 되면 스마트 에어컨과 스마트 선풍기가 함께 켜지도록 자동화 루틴을 만들어 보자!' },
+      { bubble: '현재 상황에 맞는<br>앱 제어를 해보자.', scene: 't2', screen: () => routineScreen(['temp'], []), tap: ['add'] },
+      { bubble: '스마트 선풍기도 추가해서<br>두 기기가 함께 작동하도록<br>설정해 볼까?', scene: 't2', screen: () => routineScreen(['temp'], ['aircon']), tap: ['add'] },
+      { bubble: '동작 켜기를 누르고<br>완료를 누르면 끝!', scene: 't2', screen: () => deviceScreen('fan'), tap: ['on', 'done'] },
+      { bubble: '루틴을 만들었으니<br>저장 버튼을 누르면 설정 완료!', scene: 't2', screen: () => routineScreen(['temp'], ['aircon', 'fan']), tap: ['save'] },
+      { bubble: '1조건 2작동 성공!<br>온습도 센서가 30도를 감지하니 에어컨과 선풍기가 동시에 작동되네!', scene: 't2_on', screen: () => listScreen([['cctv', true], ['temp', true]]),
+        modal: '이제 마지막 과제가 남아있어!<br>이번에는 두 가지 조건을 모두 확인해야 해!<br>미세먼지 수치가 ‘나쁨’이고 창문이 닫혀 있을 때 스마트 공기청정기가 작동하도록 자동화 루틴을 만들어 보자!' },
+      { bubble: '현재 상황에 맞는<br>앱 제어를 해보자.', scene: 't3', screen: () => routineScreen(['dust', 'window'], [], true), tap: ['add'] },
+      { bubble: '동작 켜기를 누르고<br>완료를 누르면 끝!', scene: 't3', screen: () => deviceScreen('purifier'), tap: ['on', 'done'] },
+      { bubble: '루틴을 만들었으니<br>저장 버튼을 누르면 설정 끝!', scene: 't3', screen: () => routineScreen(['dust', 'window'], ['purifier'], true), tap: ['save'] },
+      { bubble: '미세먼지 수치가 ‘나쁨’ 이여도<br>현재 창문이 열려 있으니까<br>공기청정기가 작동이 안되는구나!', scene: 't3', screen: () => listScreen([['cctv', true], ['temp', true], ['pure', false, true]]), next: true },
+      { bubble: '정화제어에서 조건을 설정한대로<br>창문을 닫아볼까?<br>창문을 클릭해봐!', scene: 't3', screen: () => listScreen([['cctv', true], ['temp', true], ['pure', false, true]]), window: true },
+      { bubble: '2조건 1작동 성공!<br>미세먼지가 ‘나쁨’이고<br>창문이 닫혀 있을 때 공기청정기가 작동하네!', scene: 't3_on', screen: () => listScreen([['cctv', true], ['temp', true], ['pure', true]]), auto: true },
+      { bubble: '정말 대단해! AI허브는 하나의 신호로 여러 가전을 동시에 움직일 수도 있고, 여러 센서의 조건이 모두 맞아떨어지는지 복합적으로 판단해서 작동할 수도 있어. 정말 똑똑한 우리 집 중앙 두뇌지?', long: true,
+        scene: 'final', screen: () => listScreen([['cctv', true], ['temp', true], ['pure', true]]), banner: true,
+        modal: '이제 센서, AI 허브, 스마트 가전이 어떻게 연결되어 작동하는지 퀴즈로 점검해 볼까?', last: true }
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const bubble = $('p10Bubble');
+    const scene = $('p10Scene');
+    const screen = $('p10Screen');
+    const win = $('p10Window');
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playClick = makeSfx('sound/click.mp3');
+
+    let index = 0;
+    let tapIndex = 0;
+
+    function show() {
+      const s = STEPS[index];
+      tapIndex = 0;
+      $('p10BubbleText').innerHTML = s.bubble;
+      bubble.classList.toggle('is-long', !!s.long);
+      scene.dataset.scene = s.scene;
+      scene.querySelectorAll('.p10-mini').forEach((m) => m.remove());
+      if (s.scene === 'final') {
+        ['t1_on_wide', 't2_on_wide', 't3_on_wide'].forEach((k) => {
+          const m = document.createElement('div');
+          m.className = 'p10-mini';
+          m.style.backgroundImage = 'url(\'img/p10_scene_' + k + '.png\')';
+          scene.appendChild(m);
+        });
+      }
+      screen.innerHTML = s.screen();
+      win.classList.toggle('is-off', !s.window);
+      $('p10Next').classList.toggle('is-off', !s.next);
+      $('p10Banner').classList.toggle('is-off', !s.banner);
+      clearFingers();
+
+      if (s.tap) pointFingerAt(screen.querySelector('[data-act="' + s.tap[0] + '"]'));
+      if (s.window) pointFingerAt(win);
+      if (s.next) pointFingerAt($('p10Next'));
+      if (s.modal || s.auto) {
+        playCorrect();
+        setTimeout(() => {
+          if (s.auto) { index += 1; show(); return; }
+          $('p10ModalText').innerHTML = s.modal;
+          $('p10Modal').classList.remove('is-off');
+        }, 3000);
+      }
+    }
+
+    screen.addEventListener('click', (e) => {
+      const s = STEPS[index];
+      const el = e.target.closest('[data-act]');
+      if (!s.tap || !el || el.dataset.act !== s.tap[tapIndex]) return;
+      playClick();
+      if (el.dataset.act === 'on') el.classList.add('is-on');
+      tapIndex += 1;
+      if (tapIndex < s.tap.length) {
+        pointFingerAt(screen.querySelector('[data-act="' + s.tap[tapIndex] + '"]'));
+        return;
+      }
+      clearFingers();
+      setTimeout(() => { index += 1; show(); }, 300);
+    });
+
+    win.addEventListener('click', () => {
+      clearFingers();
+      win.classList.add('is-off');
+      index += 1;
+      show();
+    });
+
+    $('p10Next').addEventListener('click', () => {
+      index += 1;
+      show();
+    });
+
+    $('p10ModalOk').addEventListener('click', () => {
+      if (STEPS[index].last) {
+        navigateTo('page11.html');
+        return;
+      }
+      $('p10Modal').classList.add('is-off');
+      resetImageSwap($('p10ModalOk'));
+      index += 1;
+      show();
+    });
+
+    show();
+  })();
+  </script>
+</body>
+</html>
