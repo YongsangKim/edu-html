@@ -14,20 +14,22 @@
         .p02-steps:before{content:'';position:absolute;left:50px;top:46px;width:512px;height:8px;background:#1b1738;z-index:-1}
         .p02-steps .step-dot{width:100px;height:100px;box-sizing:border-box;border:solid 9px #1b1738;font-size:60px;padding-top:6px;color:#1b1738}
         .p02-steps .step-dot.is-active{background:#1b1738;border-color:#1b1738;color:#fff}
-        .p02-title{position:absolute;left:640px;top:48px;width:1185px;height:100px;box-sizing:border-box;padding:8px 40px 0;display:flex;align-items:center;justify-content:center;background:#91b9e7;border:solid 5px #1b1738;border-radius:50px;box-shadow:0 10px 0 0 #becde7;
+        .p02-title{position:absolute;left:640px;top:48px;width:1185px;height:100px;box-sizing:border-box;padding:0 14px;display:flex;align-items:center;gap:26px;background:#fff;border:solid 5px #1b1738;border-radius:50px;box-shadow:0 10px 0 0 #becde7;
           font-family:'Cafe24 Ssurround';font-size:56px;color:#fff;letter-spacing:-0.04em}
+        .p02-title-stage{flex:0 0 auto;height:70px;box-sizing:border-box;padding:8px 34px 0;display:flex;align-items:center;border-radius:35px;background:#5b86c6;font-size:42px;color:#fff;letter-spacing:0}
+        .p02-title-q{flex:1 1 auto;padding-top:8px;text-align:left;color:#1b1738}
 
         .p02-board{position:absolute;left:59px;top:181px;width:1796px;height:702px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:48px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
         .p02-memo{position:absolute;left:109px;top:235px;width:584px;height:590px;box-sizing:border-box;padding:50px 40px;background:#fff3b8;border-radius:12px;box-shadow:4px 8px 0 0 #e6d487;
           font-family:'Cafe24 Ssurround';color:#1b1738;letter-spacing:-0.04em;word-break:keep-all}
         .p02-memo-ask{margin:0 0 40px;font-size:52px;line-height:1.2;color:#48159c;text-align:center}
-        .p02-memo-text{margin:0;font-family:'Pretendard';font-size:38px;line-height:1.5;font-weight:700}
-        .p02-memo-text p{position:relative;margin:0 0 12px;padding-left:1em}
-        .p02-memo-text p:before{content:'•';position:absolute;left:0;top:0}
+        .p02-memo-text{margin:0;font-size:38px;line-height:1.5}
+        .p02-memo-text p{position:relative;margin:0 0 12px;padding-left:1em;line-height:1.3em}
+        .p02-memo-text p:before{content:'';position:absolute;left:0;top:.4em;width:.3em;height:.3em;border-radius:50%;background:currentColor}
 
         .p02-opts{position:absolute;left:748px;top:260px;width:1033px;display:flex;justify-content:space-between}
         .p02-opt{width:323px;padding:0;border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:28px}
-        .p02-opt-img{width:323px;height:430px;box-sizing:border-box;border:solid 6px #eae0fd;border-radius:28px;background:#48159c center / cover no-repeat}
+        .p02-opt-img{width:323px;height:430px;box-sizing:border-box;border:solid 6px #eae0fd;border-radius:28px;background: center / cover no-repeat}
         .p02-opt .card-btn{display:flex;align-items:center;justify-content:center;min-width:0;width:300px;height:100px;padding:10px 10px 6px;font-size:52px;pointer-events:none}
         .p02-opt:hover .p02-opt-img{border-color:#8278ff}
         .p02-opt:hover .card-btn{color:#8278ff}
@@ -160,12 +162,26 @@
       flashLayer(wrong);
     }
 
+    // 메모지 안 내용이 넘치면 글자 크기를 한 단계씩 줄임
+    function fitMemo() {
+      const box = document.querySelector('.p02-memo');
+      const text = $('p02Memo');
+      let size = 38;
+      text.style.fontSize = size + 'px';
+      while (size > 24 && box.scrollHeight > box.clientHeight) {
+        size -= 1;
+        text.style.fontSize = size + 'px';
+      }
+    }
+
     function render() {
       const s = STAGES[index];
       dots.forEach((d, i) => d.classList.toggle('is-active', i === index));
-      $('p02Title').textContent = s.title;
+      const cut = s.title.indexOf(' ');
+      $('p02Title').innerHTML = '<span class="p02-title-stage">' + s.title.slice(0, cut) + '</span><span class="p02-title-q">' + s.title.slice(cut + 1) + '</span>';
       $('p02Ask').innerHTML = s.ask;
       $('p02Memo').innerHTML = s.memo.map((m) => '<p>' + m + '</p>').join('');
+      fitMemo();
       optsBox.innerHTML = '';
       s.options.forEach((label, i) => {
         const btn = document.createElement('button');

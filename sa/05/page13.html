@@ -12,15 +12,13 @@
         main{position:absolute;left:0;top:120px;width:1920px;height:960px}
 
         .p13-path{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none}
-        .p13-tile{position:absolute;width:228px;height:228px;box-sizing:border-box;padding:20px;display:flex;align-items:center;justify-content:center;text-align:center;
-          background:#fefbf9;border:solid 6px #48159c;border-radius:50%;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
-          font-family:'Cafe24 Ssurround';font-size:40px;line-height:1.15;color:#48159c;letter-spacing:-0.04em;word-break:keep-all}
-        .p13-tile.is-start{background:#91b9e7;color:#fff;border-color:#1b1738}
-        .p13-tile.is-goal{background:#ffd83d;border-color:#1b1738;color:#1b1738}
-        .p13-tile.is-done{background:#eee8ff}
-        .p13-student{position:absolute;width:120px;height:140px;margin:-150px 0 0 -60px;background:url('img/p13_student.png') center bottom / contain no-repeat;transition:left .8s ease,top .8s ease;z-index:5}
-        .p13-student:after{content:'';position:absolute;left:35px;bottom:0;width:50px;height:50px;border-radius:50%;background:#ff4f8b;border:solid 5px #1b1738;z-index:-1}
-        .p13-go{position:absolute;right:90px;bottom:60px;width:288px}
+        .p13-tile{position:absolute;width:228px;height:228px;box-sizing:border-box;overflow:hidden;background:#fff;border:solid 5px #1b1738;border-radius:50%;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';font-size:31px;line-height:1.12;color:#fff;text-align:center;letter-spacing:-0.04em;word-break:keep-all}
+        .p13-tile img{position:absolute;left:50%;top:12px;width:104px;height:104px;margin-left:-52px;object-fit:contain}
+        .p13-tile span{position:absolute;left:0;bottom:0;width:100%;height:104px;box-sizing:border-box;padding:6px 8px 12px;display:flex;align-items:center;justify-content:center;background:#1a62cf;border-radius:50% 50% 0 0 / 34px 34px 0 0}
+        .p13-tile.is-done{background:#e6ecfa}
+        .p13-student{position:absolute;width:132px;height:132px;margin:-228px 0 0 -66px;background:url('img/p13_student.png') center / contain no-repeat;transition:left .8s ease,top .8s ease;z-index:5}
+        .p13-go{position:absolute;right:130px;bottom:90px;width:288px}
 
         .p13-pop{position:absolute;left:156px;top:88px;width:1609px;height:761px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:60px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
           font-family:'Cafe24 Ssurround';color:#48159c;letter-spacing:-0.04em;word-break:keep-all}
@@ -148,11 +146,11 @@
   <script>
   (function () {
     const TILES = [
-      { label: '출발!', x: 296, y: 234, cls: 'is-start' },
-      { label: '미션<br>확인하기', x: 697, y: 342 },
-      { label: '해결 방법<br>생각하기', x: 916, y: 669 },
-      { label: '해결 방법<br>결정하기', x: 1328, y: 515 },
-      { label: '미션<br>성공!', x: 1564, y: 227, cls: 'is-goal' }
+      { label: '출발!', icon: 'flag', x: 296, y: 234, cls: 'is-start' },
+      { label: '미션<br>확인하기', icon: 'mission', x: 697, y: 342 },
+      { label: '해결 방법<br>생각하기', icon: 'think', x: 916, y: 669 },
+      { label: '해결 방법<br>결정하기', icon: 'decide', x: 1328, y: 515 },
+      { label: '미션<br>성공!', icon: 'flag', x: 1564, y: 227, cls: 'is-goal' }
     ];
     const WAYS = [
       { key: 'sign', name: '표지판 확인하기', pro: '글과 화살표를 보고<br>방향을 알 수 있어요.', con: '표시를 이해하기<br>어려울 수 있어요.',
@@ -176,7 +174,7 @@
     TILES.forEach((t) => {
       const el = document.createElement('div');
       el.className = 'p13-tile ' + (t.cls || '');
-      el.innerHTML = t.label;
+      el.innerHTML = '<img src="img/p13_icon_' + t.icon + '.png" alt=""><span>' + t.label + '</span>';
       el.style.left = (t.x - 114) + 'px';
       el.style.top = (t.y - 114) + 'px';
       $('p13Tiles').appendChild(el);
@@ -200,6 +198,7 @@
       goBtn.textContent = label;
       goBtn.classList.remove('is-off');
       pointFingerAt(goBtn);
+      document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.left = '1792px'; f.style.top = '845px'; });
       goBtn.onclick = () => {
         playClick();
         clearFingers();

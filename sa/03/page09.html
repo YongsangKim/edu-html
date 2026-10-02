@@ -8,13 +8,14 @@
     <style>
         /* 디자인 없음 - 기획서 47~61p. 상황 고르기 → 표현 고르기 → Canva 열기 → 자유 편집(배경색·글꼴·글자 크기·형식만) → 저장 → 공유 →
            언어 예절 확인(체크 2개) → 마음 전달. 상황 그림 img/p09_sit_{key}.png, 카드 삽화 img/p09_illust_{key}.png,
-           Canva 화면 img/p09_screen_{home|design|projects}.png, 도움말 그림 img/p09_help{1|2}.png, 게이지 별 img/p05_star.png.
-           오답 표현을 골랐을 때 안내는 기획서에 없어 빙고 게임 오답 문구를 씀. 클릭 영역 좌표는 화면 이미지 나오면 조정 */
+           도움말 그림 img/p09_help{1|2}.png, 게이지 별 img/p05_star.png. 가운데 휴대폰은 sa/02·page07과 같은 공용 Canva 틀(.cv)에 기획서 캡처
+           (홈 → Canva 홈 → 모든 프로젝트 → 편집 → 다운로드 완료)를 CSS로 그린 것. Canva 아이콘 img/p09_canva_icon.png.
+           오답 표현을 골랐을 때 안내는 기획서에 없어 빙고 게임 오답 문구를 씀. */
         @font-face{font-family:'KCC-DodamDodam';src:url('../../fonts/KCC-DodamDodam.woff2') format('woff2')}
         @font-face{font-family:'KCC-MurukMuruk';src:url('../../fonts/KCC-MurukMuruk.woff2') format('woff2')}
         main{position:absolute;left:0;top:120px;width:1920px;height:960px}
 
-        .p09-head{position:absolute;left:0;top:60px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:56px;color:#48159c;letter-spacing:-0.04em}
+        .p09-head{position:absolute;left:0;top:60px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:64px;color:#48159c;letter-spacing:-0.04em}
         .p09-sits{position:absolute;left:180px;top:170px;width:1567px;height:560px;box-sizing:border-box;padding:24px 40px;display:flex;justify-content:space-between;
           background:#fefbf9;border:solid 6px #48159c;border-radius:40px}
         .p09-sit{width:440px;height:500px;padding:0 0 20px;box-sizing:border-box;border:solid 6px #eae0fd;border-radius:30px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:16px;
@@ -31,30 +32,124 @@
         .p09-bubble{left:90px;bottom:619px;width:607px;min-height:0;padding:30px 16px;display:flex;align-items:center;justify-content:center;font-size:42px;z-index:5}
         .p09-character{position:absolute;left:170px;top:360px;width:480px;height:580px;display:flex;align-items:flex-end;justify-content:center}
         .p09-character img{max-width:100%;max-height:100%;object-fit:contain}
-        .p09-phone{position:absolute;left:726px;top:21px;width:468px;height:895px;box-sizing:border-box;border:solid 8px #1b1738;border-radius:40px;background:#ecebf3 center / cover no-repeat}
-        .p09-card{position:absolute;left:754px;top:180px;width:413px;height:520px;box-sizing:border-box;border-radius:10px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.18);overflow:hidden;transition:background-color .3s}
-        .p09-illust{position:absolute;left:95px;top:98px;width:228px;height:228px;border-radius:20px;background:#d9d3ee center / contain no-repeat}
-        .p09-text{position:absolute;left:3px;top:360px;width:396px;min-height:94px;box-sizing:border-box;padding:6px;display:flex;align-items:center;justify-content:center;text-align:center;
-          font-family:'Pretendard';font-size:34px;line-height:1.2;color:#1b1738;word-break:keep-all;border:solid 3px transparent;border-radius:8px}
-        .p09-text.is-picked{border-color:#8b3dff}
-        .p09-tools{position:absolute;left:740px;top:737px;width:440px;height:80px;overflow-x:auto;border-radius:14px;background:#fff}
-        .p09-tools-row{display:flex;gap:10px;padding:6px;height:100%;box-sizing:border-box;width:max-content}
-        .p09-tool{flex:0 0 auto;height:100%;min-width:92px;padding:0 10px;box-sizing:border-box;border:solid 3px #d9d3ee;border-radius:12px;background:#fff;cursor:pointer;font-family:'Pretendard';font-size:22px;font-weight:700;color:#1b1738}
-        .p09-tool.is-on{border-color:#8b3dff;background:#f1e9ff}
-        .p09-swatch{flex:0 0 52px;height:52px;align-self:center;border:solid 3px #d9d3ee;border-radius:50%;cursor:pointer;padding:0}
-        .p09-swatch.is-on{border-color:#1b1738}
-        .p09-size{display:flex;align-items:center;gap:8px;width:420px;padding:0 8px;box-sizing:border-box;font-family:'Pretendard';font-size:24px;font-weight:700}
-        .p09-size input{flex:1 1 auto;accent-color:#8b3dff}
-        .p09-size button{width:44px;height:44px;border:solid 3px #d9d3ee;border-radius:10px;background:#fff;font-size:26px;cursor:pointer;padding:0}
+        .cv9-home,.cv9-app,.cv9-proj,.cv9-edit,.cv9-saved{display:none}
+        .cv[data-screen="home"] .cv9-home,.cv[data-screen="design"] .cv9-app,.cv[data-screen="projects"] .cv9-proj{display:block}
+        .cv[data-screen="edit"] .cv9-edit,.cv[data-screen="saved"] .cv9-edit,.cv[data-screen="saved"] .cv9-saved{display:block}
+        .cv9-home,.cv9-app,.cv9-proj,.cv9-edit{position:absolute;inset:0}
+        .cv9-home{background:linear-gradient(160deg,#9fd8f0,#b9a8f5 55%,#f3b6d8)}
+        .cv9-home button{position:absolute;left:50%;top:44%;width:110px;height:110px;margin-left:-55px;padding:0;border:0;background:none;border-radius:28px;cursor:pointer}
+        .cv9-home button img{display:block;width:100%;height:100%;border-radius:28px;box-shadow:0 6px 14px rgba(0,0,0,.2)}
+
+        .cv9-app,.cv9-proj{background:linear-gradient(180deg,#d8eefa,#efe9ff 24%,#fff 46%)}
+        .cv9-app-trial{position:absolute;right:16px;top:30px;padding:10px 20px;border:solid 2px #e1dcf5;border-radius:30px;background:#fff;font-size:19px;font-weight:700}
+        .cv9-app-trial:before{content:'♛ ';color:#f5b53c}
+        .cv9-app-title{position:absolute;left:0;top:110px;width:100%;margin:0;text-align:center;font-size:31px;font-weight:700;color:#4b4fe0}
+        .cv9-search{position:absolute;left:16px;width:456px;height:60px;box-sizing:border-box;border:solid 2px #e6e2f6;border-radius:18px;background:#fff;display:flex;align-items:center;gap:12px;padding:0 16px;font-size:20px;color:#8a8c99}
+        .cv9-search svg{width:26px;height:26px;color:#1b1738}
+        .cv9-h{position:absolute;left:16px;margin:0;font-size:22px;font-weight:700}
+        .cv9-starts{position:absolute;left:16px;display:flex;gap:22px;font-size:17px;font-weight:600;text-align:center;white-space:nowrap}
+        .cv9-starts i{display:flex;width:84px;height:84px;margin-bottom:8px;border-radius:50%;align-items:center;justify-content:center;font-style:normal;font-size:34px;color:#fff}
+        .cv9-nav{position:absolute;left:0;bottom:0;width:100%;height:84px;display:flex;justify-content:space-around;align-items:center;border-top:solid 2px #eee;background:#fff;font-size:17px;font-weight:600;color:#1b1738}
+        .cv9-nav .is-on{color:#5b3fe8}
+        .cv9-nav button,.cv9-nav span{display:flex;flex-direction:column;align-items:center;gap:4px;padding:0;border:0;background:none;font-size:17px;font-weight:600}
+        .cv9-nav svg{width:28px;height:28px}
+        .cv9-proj-title{position:absolute;left:16px;top:84px;margin:0;font-size:31px;font-weight:700}
+        .cv9-chips{position:absolute;left:16px;top:228px;display:flex;gap:10px;font-size:19px;white-space:nowrap}
+        .cv9-chips span{padding:10px 16px;border:solid 2px #e6e2f6;border-radius:24px;background:#fff}
+        .cv9-proj-card{position:absolute;left:16px;top:346px;width:215px;padding:0;border:0;background:none;text-align:left;font-size:20px;font-weight:700}
+        .cv9-proj-card i{display:flex;align-items:center;justify-content:center;width:215px;height:161px;margin-bottom:10px;border-radius:20px;background:#f2f3f7}
+        .cv9-proj-card i svg{width:34px;height:34px}
+        .cv9-proj-card small{display:block;margin-top:6px;font-size:16px;font-weight:400;color:#6b6d7c}
+        .cv9-more{position:absolute;left:50%;top:600px;transform:translateX(-50%);padding:10px 20px;border:solid 2px #d6d8e0;border-radius:24px;background:#fff;font-size:19px;font-weight:600;white-space:nowrap}
+
+        .cv9-top-btn{display:flex;margin:-6px;padding:6px;border:0;background:none;color:inherit;cursor:pointer}
+        .cv7-body{position:absolute;left:0;top:64px;right:0;bottom:0;background:#f2f3f7;overflow:hidden}
+        .p09-card{position:absolute;left:44px;top:26px;width:400px;height:500px;box-sizing:border-box;overflow:hidden;background:#fff;box-shadow:0 6px 18px rgba(27,23,56,.12);transform-origin:50% 0;transition:background-color .3s,transform .3s}
+        .cv.is-fmt .p09-card{transform:scale(.6)}
+        .p09-illust{position:absolute;left:80px;top:60px;width:240px;height:240px;border-radius:20px;background:#d9d3ee center / contain no-repeat}
+        .p09-text{position:absolute;left:10px;top:340px;width:380px;min-height:100px;box-sizing:border-box;padding:6px;display:flex;align-items:center;justify-content:center;text-align:center;
+          font-family:'Pretendard';font-size:34px;line-height:1.2;color:#1b1738;word-break:keep-all;border:solid 3px transparent}
+        .p09-text.is-picked{border-color:#8b5cf6}
+        .cv.has-sel .cv-tabs{display:none}
+
+        .cv7-bar{position:absolute;left:8px;right:8px;bottom:16px;height:100px;border-radius:20px;background:#fff;box-shadow:0 2px 12px rgba(27,23,56,.15);z-index:6}
+        .cv7-view{position:absolute;left:0;top:0;right:70px;bottom:0;overflow:hidden;border-radius:20px 0 0 20px}
+        .p09-tools-row{display:flex;height:100%;padding:6px 0;box-sizing:border-box}
+        .p09-tool{flex:0 0 80px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:0;border:0;border-radius:14px;background:none;cursor:pointer;font-size:14px;font-weight:600;white-space:nowrap}
+        .p09-tool i{display:flex;align-items:center;justify-content:center;height:36px;font-style:normal;font-size:30px;line-height:1}
+        .p09-tool i svg{width:32px;height:32px}
+        .p09-tool.is-on{background:#e6e7ec}
+        .p09-dot{display:block;width:40px;height:40px;border-radius:50%;box-shadow:inset 0 0 0 2px rgba(27,23,56,.12)}
+        .cv7-check{position:absolute;right:8px;top:50%;margin-top:-30px;width:60px;height:60px;padding:0;border:0;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(27,23,56,.2);display:flex;align-items:center;justify-content:center;cursor:pointer}
+        .cv7-check svg{width:34px;height:34px}
+        .cv7-sub{position:absolute;left:8px;right:8px;bottom:126px;box-sizing:border-box;min-height:100px;padding:14px 16px;border-radius:20px;background:#fff;box-shadow:0 2px 12px rgba(27,23,56,.15);z-index:6;display:flex;align-items:center;gap:10px}
+        .p09-swatch{flex:0 0 52px;height:52px;border:solid 3px #d9d3ee;border-radius:50%;cursor:pointer;padding:0}
+        .p09-swatch.is-on{border-color:#8b5cf6;box-shadow:0 0 0 3px #fff inset}
+        .p09-chip{flex:0 0 auto;min-width:200px;height:64px;padding:0 20px;border:solid 4px transparent;border-radius:16px;background:#f2f3f7;cursor:pointer;font-size:26px;color:#1b1738}
+        .p09-chip.is-on{border-color:#8b5cf6;background:#fff}
+        .p09-size{flex-direction:column;align-items:stretch;gap:6px}
+        .p09-size p{margin:0;font-size:22px}
+        .p09-size div{display:flex;align-items:center;gap:16px}
+        .p09-size input{flex:1 1 auto;accent-color:#8b5cf6}
+        .p09-size span{display:flex;align-items:center;justify-content:space-between;flex:0 0 190px;height:56px;padding:0 10px;box-sizing:border-box;border:solid 2px #d9d9e2;border-radius:14px;font-size:24px}
+        .p09-size button{width:40px;height:40px;padding:0;border:0;background:none;font-size:32px;cursor:pointer}
+
+        .cv7-fmt{position:absolute;left:0;right:0;bottom:0;height:400px;box-sizing:border-box;padding:22px 16px 0;border-radius:28px 28px 0 0;background:#fff;z-index:7}
+        .cv7-fmt:before{content:'';position:absolute;left:50%;top:10px;width:46px;height:5px;margin-left:-23px;border-radius:3px;background:#d4d5dc}
+        .cv7-fmt h4{margin:0 0 22px;text-align:center;font-size:21px}
+        .cv7-fmt h4 button{position:absolute;right:16px;top:20px;width:44px;height:44px;padding:0;border:0;background:none;cursor:pointer}
+        .cv7-fmt h4 svg{width:32px;height:32px}
+        .cv7-fmt-row{display:flex;gap:8px;margin-bottom:16px}
+        .cv7-fmt-row button{flex:1;height:62px;padding:0;border:solid 2px #e1e2e8;border-radius:14px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:26px}
+        .cv7-fmt-row button.is-on{border-color:#8b5cf6;background:#f1e9ff}
+        .cv7-fmt-row button svg{width:30px;height:30px}
+        .cv7-fmt-align{background:#f2f3f7;border-radius:14px;padding:6px}
+        .cv7-fmt-align button{border:0;background:none}
+        .cv7-fmt-align button.is-sel{background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+
+        .cv9-saved{position:absolute;inset:0;z-index:8}
+        .cv9-saved:before{content:'';position:absolute;inset:0;background:rgba(27,23,56,.5)}
+        .cv9-saving{display:none;position:absolute;inset:0;z-index:8;background:rgba(27,23,56,.5)}
+        .cv.is-saving .cv9-saving{display:block}
+        .cv9-saving:after{content:'';position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border:solid 8px rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:p09-spin 1s linear infinite}
+        @keyframes p09-spin{to{transform:rotate(360deg)}}
+        .cv9-sheet{position:absolute;left:0;right:0;bottom:0;height:560px;box-sizing:border-box;padding:24px 16px 0;border-radius:28px 28px 0 0;background:#fff}
+        .cv9-sheet h4{display:flex;align-items:center;gap:12px;margin:0 0 16px;padding-bottom:14px;border-bottom:solid 2px #eee;font-size:23px}
+        .cv9-sheet h4 b{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:#2e8b3a;color:#fff;font-size:22px}
+        .cv9-sheet h4 em{margin-left:auto;font-style:normal;font-size:26px}
+        .cv9-thumb{position:relative;height:240px;border-radius:18px;background:#f2f3f7;overflow:hidden}
+        .cv9-thumb .p09-snap{position:absolute;left:50%;top:50%;width:150px;height:188px;margin:-94px 0 0 -75px;overflow:hidden}
+        .cv9-sheet p{margin:14px 0 2px;font-size:22px;font-weight:700}
+        .cv9-sheet small{display:block;font-size:17px;color:#6b6d7c}
+        .cv9-sheet .cv9-share{display:block;width:100%;height:52px;margin-top:22px;border:solid 2px #d6d8e0;border-radius:26px;background:#fff;font-size:19px;font-weight:700;cursor:pointer}
+        .cv9-sheet .cv9-open{display:block;width:100%;height:52px;margin-top:12px;border:0;border-radius:26px;background:#7a45ee;color:#fff;font-size:19px;font-weight:700}
+
         .p09-help{position:absolute;right:36px;top:34px;width:190px;height:83px;font-size:40px;min-width:0;padding:6px 0 0}
         .p09-finish{position:absolute;left:1496px;top:800px;width:360px;min-width:0;white-space:nowrap}
-        .p09-catch{position:absolute;left:726px;top:21px;width:468px;height:895px;border-radius:40px;z-index:3}
-        .p09-target{position:absolute;z-index:4;border-radius:12px;cursor:pointer}
-        .p09 .hit-area{background:rgba(255,79,139,.25);outline:5px dashed #ff4f8b;outline-offset:-5px}
+        .p09-catch{position:absolute;left:703px;top:21px;width:504px;height:895px;border-radius:40px;z-index:10}
+        .p09-target{position:absolute;z-index:11;padding:0;border:0;border-radius:12px;background:transparent;cursor:pointer;animation:cv-target 1.2s ease-in-out infinite}
 
-        .p09-helpbox{position:absolute;left:402px;top:55px;width:1117px;height:838px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:48px}
-        .p09-helpbox i{position:absolute;left:362px;top:80px;width:368px;height:592px;border-radius:24px;background:#d9d3ee center / cover no-repeat}
-        .p09-helpbox p{position:absolute;left:0;top:700px;width:100%;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.3;color:#48159c;letter-spacing:-0.04em}
+        .p09-helpbox{position:absolute;left:402px;top:120px;width:1117px;height:720px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:48px}
+        .p09-helpshot{position:absolute;left:362px;top:44px;width:368px;height:500px;border-radius:24px;overflow:hidden;background:#f2f3f7;box-shadow:0 0 0 3px #d9d3ee;font-family:'Pretendard';color:#1b1738}
+        .p09-helpshot svg{display:block;width:20px;height:20px;fill:none;stroke:#fff;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+        .hs-top{position:absolute;left:0;top:0;width:100%;height:40px;box-sizing:border-box;padding:0 14px;display:flex;align-items:center;gap:14px;background:linear-gradient(90deg,#4cc3c8,#5b63d9 55%,#7b3fe0)}
+        .hs-top span{flex:1}
+        .hs-card{position:absolute;left:54px;top:90px;width:260px;height:290px;box-shadow:0 4px 12px rgba(27,23,56,.12)}
+        .hs-ill{position:absolute;left:65px;top:26px;width:130px;height:130px;border-radius:14px;background:#d9d3ee center / contain no-repeat}
+        .hs-txt{position:absolute;left:10px;right:10px;top:200px;height:60px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:19px;line-height:1.2;word-break:keep-all}
+        .hs-sel{position:absolute;border:2px solid #8b5cf6}
+        .hs-sel b{position:absolute;width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid #8b5cf6;box-sizing:border-box}
+        .hs-pill{position:absolute;left:50%;margin-left:-70px;width:140px;height:28px;display:flex;justify-content:space-around;align-items:center;border-radius:14px;background:#fff;box-shadow:0 2px 8px rgba(27,23,56,.2);font-size:14px;z-index:2}
+        .hs-ring{position:absolute;box-sizing:border-box;border-radius:8px;z-index:3;animation:cv-target 1.2s ease-in-out infinite}
+        .hs-finger{position:absolute;width:64px;z-index:4}
+        .hs-bar{position:absolute;left:8px;right:8px;bottom:14px;height:64px;border-radius:14px;background:#fff;box-shadow:0 2px 10px rgba(27,23,56,.15);display:flex}
+        .hs-tool{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10px;font-weight:600;white-space:nowrap}
+        .hs-tool em{display:flex;align-items:center;justify-content:center;height:24px;font-style:normal;font-size:19px;line-height:1}
+        .hs-tool em i{font-family:serif}
+        .hs-tool em u{text-decoration:none;border-bottom:3px solid #f08fb0;line-height:1}
+        .hs-tool.is-on{background:#e6e7ec;border-radius:10px}
+        .hs-dot{display:block;width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 2px rgba(27,23,56,.15)}
+        .p09-helpbox p{position:absolute;left:0;top:562px;width:100%;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.3;color:#48159c;letter-spacing:-0.04em}
         .p09-helpbox button{position:absolute;width:80px;height:80px;border:0;border-radius:50%;background:#48159c;color:#fff;font-size:40px;cursor:pointer;padding:0}
 
         .p09-check{position:absolute;left:343px;top:79px;width:1243px;height:721px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:48px}
@@ -75,7 +170,7 @@
         .p09-gauge .gauge-fill.is-go{width:100%;transition:width 2.5s linear}
         .p09-status{position:absolute;left:0;top:770px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:52px;color:#48159c;letter-spacing:-0.04em}
 
-        #p09Oops, #p09Wrong{z-index:130}
+        #p09Oops, #p09Learn, #p09Wrong{z-index:130}
         .p09 .is-off{display:none}
     </style>
 </head>
@@ -103,16 +198,116 @@
           <div class="is-off" id="p09EditView">
             <p class="guide-bubble p09-bubble" id="p09Bubble"></p>
             <div class="p09-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
-            <div class="p09-phone" id="p09Phone"></div>
-            <div class="p09-card is-off" id="p09Card">
-              <div class="p09-illust" id="p09Illust"></div>
-              <p class="p09-text" id="p09Text"></p>
+
+            <div class="cv" id="p09Phone" data-screen="home">
+              <div class="cv9-home">
+                <button type="button" id="p09CanvaIcon" aria-label="Canva"><img src="img/p09_canva_icon.png" alt="Canva"></button>
+              </div>
+
+              <div class="cv9-app">
+                <span class="cv9-app-trial">요금제 업그레이드하기</span>
+                <p class="cv9-app-title">오늘은 무엇을 만들어 볼까요?</p>
+                <div class="cv9-search" style="top:176px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>어떤 걸 만들고 싶으세요?</div>
+                <p class="cv9-h" style="top:266px">시작 방법 선택</p>
+                <div class="cv9-starts" style="top:314px">
+                  <div><i style="background:#ec4d5a">♥</i>SNS</div>
+                  <div><i style="background:#f07a2d">▣</i>프레젠테이션</div>
+                  <div><i style="background:#3fa45a">⤢</i>화이트보드</div>
+                  <div><i style="background:#e9e8ef;color:#5b3fe8">↔</i>맞춤형 크기</div>
+                </div>
+                <div class="cv9-starts" style="top:466px">
+                  <div><i style="background:#d95cea">▶</i>동영상</div>
+                  <div><i style="background:#8a3cf0">▤</i>인쇄 제품</div>
+                  <div><i style="background:#e9e8ef;color:#5b3fe8">☁</i>업로드</div>
+                  <div><i style="background:#3b82f0">▦</i>시트</div>
+                </div>
+                <div class="cv9-nav">
+                  <span class="is-on"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z" fill="currentColor"/></svg>홈</span>
+                  <button type="button" id="p09DesignTab"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>디자인</button>
+                  <span><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 3v18M12 12h9"/></svg>템플릿</span>
+                  <span><svg viewBox="0 0 24 24"><path d="M12 4l1.8 4.2L18 10l-4.2 1.8L12 16l-1.8-4.2L6 10l4.2-1.8z"/></svg>Canva AI</span>
+                  <span><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="19" cy="12" r="1.3" fill="currentColor"/></svg>더 보기</span>
+                </div>
+              </div>
+
+              <div class="cv9-proj">
+                <p class="cv9-proj-title">모든 프로젝트 ⌄</p>
+                <div class="cv9-search" style="top:150px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>디자인, 폴더, 업로드 항목을 검색해 보세요</div>
+                <div class="cv9-chips"><span>유형 ⌄</span><span>카테고리 ⌄</span><span>소유자 ⌄</span></div>
+                <p class="cv9-h" style="top:300px">최근</p>
+                <button type="button" class="cv9-proj-card" id="p09ProjCard">
+                  <i><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></i>
+                  마음 카드<small>방금 전 편집함</small>
+                </button>
+                <span class="cv9-more">최근 디자인 모두 보기</span>
+                <p class="cv9-h" style="top:680px">모든 항목</p>
+                <div class="cv9-nav">
+                  <span><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-5h4v5"/></svg>홈</span>
+                  <span class="is-on"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z" fill="currentColor"/></svg>디자인</span>
+                  <span><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 3v18M12 12h9"/></svg>템플릿</span>
+                  <span><svg viewBox="0 0 24 24"><path d="M12 4l1.8 4.2L18 10l-4.2 1.8L12 16l-1.8-4.2L6 10l4.2-1.8z"/></svg>Canva AI</span>
+                  <span><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="19" cy="12" r="1.3" fill="currentColor"/></svg>더 보기</span>
+                </div>
+              </div>
+
+              <div class="cv9-edit">
+                <div class="cv-top">
+                  <svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-5h4v5"/></svg>
+                  <svg class="cv-undo" viewBox="0 0 24 24"><path d="M9 13L4 8l5-5"/><path d="M4 8h10a6 6 0 010 12h-3"/></svg>
+                  <svg class="cv-undo is-dim" viewBox="0 0 24 24"><path d="M15 13l5-5-5-5"/><path d="M20 8H10a6 6 0 000 12h3"/></svg>
+                  <span class="is-gap"></span>
+                  <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="19" cy="12" r="1.3" fill="currentColor"/></svg>
+                  <svg viewBox="0 0 24 24" style="color:#e3d8ff"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z" fill="currentColor"/></svg>
+                  <button type="button" class="cv9-top-btn" id="p09Save" aria-label="저장"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg></button>
+                  <svg viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M5 13v7h14v-7"/></svg>
+                </div>
+
+                <div class="cv7-body">
+                  <div class="p09-card" id="p09Card">
+                    <div class="p09-illust" id="p09Illust"></div>
+                    <p class="p09-text" id="p09Text"></p>
+                  </div>
+                </div>
+
+                <nav class="cv-tabs">
+                  <button type="button" class="cv-tab"><i><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 3v18M12 12h9"/></svg></i>추천 템플릿</button>
+                  <button type="button" class="cv-tab"><i><svg viewBox="0 0 24 24"><circle cx="7" cy="7" r="3"/><path d="M14 10l3.5-6 3.5 6z"/><rect x="4" y="14" width="6" height="6" rx="1"/><circle cx="17.5" cy="17" r="3"/></svg></i>요소</button>
+                  <button type="button" class="cv-tab"><i><svg viewBox="0 0 24 24"><path d="M5 5h14M12 5v15M9 20h6"/></svg></i>텍스트</button>
+                  <button type="button" class="cv-tab"><i><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="3"/><circle cx="12" cy="13.5" r="3.5"/><path d="M8 7l2-3h4l2 3"/></svg></i>갤러리</button>
+                  <button type="button" class="cv-tab"><i><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="3"/><path d="M7 10a5 5 0 0110 0"/></svg></i>브랜드 센터</button>
+                  <button type="button" class="cv-tab"><i><svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 010-8 6 6 0 0111.5 2A3 3 0 0118 18z"/></svg></i>업로드</button>
+                </nav>
+
+                <div class="cv7-sub is-off" id="p09Sub"></div>
+                <div class="cv7-bar is-off" id="p09Tools">
+                  <div class="cv7-view"><div class="p09-tools-row" id="p09ToolsRow"></div></div>
+                  <button type="button" class="cv7-check" id="p09BarOk" aria-label="완료"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+                </div>
+                <div class="cv7-fmt is-off" id="p09Fmt">
+                  <h4>형식<button type="button" id="p09FmtOk" aria-label="완료"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button></h4>
+                  <div class="cv7-fmt-row" id="p09FmtRow1"></div>
+                  <div class="cv7-fmt-row cv7-fmt-align" id="p09FmtRow2"></div>
+                  <div class="cv7-fmt-row" id="p09FmtRow3"></div>
+                </div>
+                <div class="cv9-saving"></div>
+              </div>
+
+              <div class="cv9-saved">
+                <div class="cv9-sheet">
+                  <h4><b>✓</b>다운로드 완료<em>✕</em></h4>
+                  <div class="cv9-thumb"><div class="p09-snap" id="p09Thumb"></div></div>
+                  <p>마음 카드</p>
+                  <small>카메라 롤에 저장했어요</small>
+                  <button type="button" class="cv9-share" id="p09Share">공유</button>
+                  <button type="button" class="cv9-open">열기</button>
+                </div>
+              </div>
             </div>
-            <div class="p09-tools is-off" id="p09Tools"><div class="p09-tools-row" id="p09ToolsRow"></div></div>
+
             <button type="button" class="card-btn p09-help is-off" id="p09HelpBtn">도움말</button>
             <button type="button" class="card-btn is-popup p09-finish is-off" id="p09Finish">완성하기</button>
             <div class="p09-catch is-off" id="p09Catch"></div>
-            <button type="button" class="hit-area p09-target is-off" id="p09Target" aria-label="안내된 곳"></button>
+            <button type="button" class="p09-target is-off" id="p09Target" aria-label="안내된 곳"></button>
           </div>
 
           <!-- 4. 마음 전달 -->
@@ -127,11 +322,11 @@
 
           <div class="avatar-modal is-off" id="p09HelpModal">
             <div class="p09-helpbox">
-              <i id="p09HelpImg"></i>
+              <div class="p09-helpshot" id="p09HelpImg"></div>
               <p id="p09HelpText"></p>
               <button type="button" id="p09HelpClose" style="right:40px;top:30px" aria-label="닫기">&#10005;</button>
-              <button type="button" id="p09HelpPrev" style="left:40px;top:730px" aria-label="이전">&#9664;</button>
-              <button type="button" id="p09HelpNext" style="right:40px;top:730px" aria-label="다음">&#9654;</button>
+              <button type="button" id="p09HelpPrev" style="left:40px;top:315px" aria-label="이전">&#9664;</button>
+              <button type="button" id="p09HelpNext" style="right:40px;top:315px" aria-label="다음">&#9654;</button>
             </div>
           </div>
 
@@ -151,6 +346,12 @@
             <div class="avatar-popup-panel">
               <div class="avatar-popup-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
               <p class="avatar-popup-text is-medium"><span>앗, 다른 곳을 선택했어요!<br>안내된 부분을 선택해주세요.</span></p>
+            </div>
+          </div>
+          <div class="avatar-modal is-off" id="p09Learn">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+              <p class="avatar-popup-text is-medium"><span>학습한 기능을 사용해 카드를 꾸며봐요.</span></p>
             </div>
           </div>
           <div class="ox-result-wrong is-avatar is-off" id="p09Wrong">
@@ -199,6 +400,8 @@
     const catcher = $('p09Catch');
     const target = $('p09Target');
     const oops = $('p09Oops');
+    const learn = $('p09Learn');
+    const warn = (layer) => { playWrong(); flashLayer(layer); };
     const playClick = makeSfx('sound/click.mp3');
     const playCorrect = makeSfx('sound/correct.mp3');
     const playWrong = makeSfx('sound/incorrect.mp3');
@@ -270,14 +473,33 @@
     }
 
     // 3. Canva 안내
+    const sub = $('p09Sub');
+    const fmt = $('p09Fmt');
+    const SVG = (d) => '<svg viewBox="0 0 24 24">' + d + '</svg>';
+    const ICON = {
+      shape: SVG('<circle cx="8" cy="8" r="4"/><rect x="11" y="11" width="9" height="9" rx="1"/>'),
+      edit: SVG('<rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>'),
+      style: SVG('<path d="M4 8h16M4 16h16" stroke-width="3.2"/>'),
+      corner: SVG('<path d="M5 20v-4a10 10 0 0110-10h2"/><circle cx="19" cy="6" r="1.6" fill="currentColor"/><circle cx="5" cy="20" r="1.6" fill="currentColor"/>'),
+      format: SVG('<path d="M4 5h5a3 3 0 010 6H4zM4 11h6a3.2 3.2 0 010 6.4H4zM15 7h6M15 12h6M15 17h6"/>')
+    };
+    let bgNow = '#ffffff';
+
     function say(html) { bubble.innerHTML = html; }
-    function guideTo(r, then) {
+    function nudgeFinger() {
+      document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.top = Math.min(parseFloat(f.style.top), 850) + 'px'; });
+    }
+    function guideTo(el, then) {
       clearFingers();
       catcher.classList.remove('is-off');
-      catcher.onclick = () => flashLayer(oops);
-      target.style.cssText = 'left:' + r[0] + 'px;top:' + r[1] + 'px;width:' + r[2] + 'px;height:' + r[3] + 'px';
+      catcher.onclick = () => warn(oops);
+      const pr = el.getBoundingClientRect();
+      const mr = document.querySelector('main').getBoundingClientRect();
+      const s = mr.width / 1920;
+      target.style.cssText = 'left:' + (pr.left - mr.left) / s + 'px;top:' + (pr.top - mr.top) / s + 'px;width:' + pr.width / s + 'px;height:' + pr.height / s + 'px';
       target.classList.remove('is-off');
       pointFingerAt(target);
+      nudgeFinger();
       target.onclick = () => {
         playClick();
         target.classList.add('is-off');
@@ -288,103 +510,134 @@
     }
     function guideApp() {
       say('Canva의 편집 기능을 이용하여<br>마음을 전하는 카드를<br>만들어봐요!');
-      phone.style.backgroundImage = "url('img/p09_screen_home.png')";
-      guideTo([873, 382, 174, 174], () => {
+      phone.dataset.screen = 'home';
+      guideTo($('p09CanvaIcon'), () => {
         say('디자인 버튼을 클릭해요');
-        phone.style.backgroundImage = "url('img/p09_screen_design.png')";
-        guideTo([920, 780, 130, 100], () => {
+        phone.dataset.screen = 'design';
+        guideTo($('p09DesignTab'), () => {
           say('내가 편집할<br>프로젝트를 선택해요.');
-          phone.style.backgroundImage = "url('img/p09_screen_projects.png')";
-          guideTo([780, 230, 360, 300], startEdit);
+          phone.dataset.screen = 'projects';
+          guideTo($('p09ProjCard'), startEdit);
         });
+        document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.left = '860px'; });
       });
     }
 
     // 4. 자유 편집: 배경 색상 / 텍스트 글꼴·크기·형식만
     let edited = false;
+    let freeEdit = false;
     function markEdited() {
+      phone.classList.add('is-edited');
       if (edited) return;
       edited = true;
       $('p09Finish').classList.remove('is-off');
     }
     function startEdit() {
       say('학습한 기능을 바탕으로<br>마음 카드를 자유롭게 꾸며봐요!');
-      phone.style.backgroundImage = '';
+      phone.dataset.screen = 'edit';
       $('p09Illust').style.backgroundImage = "url('img/p09_illust_" + sitKey + ".png')";
       text.innerHTML = expr.t.replace(/<br>/g, ' ');
-      card.classList.remove('is-off');
       $('p09HelpBtn').classList.remove('is-off');
-      catcher.classList.remove('is-off');
-      catcher.onclick = () => flashLayer(oops);
-      card.style.zIndex = 4;
-      tools.style.zIndex = 4;
+      freeEdit = true;
     }
-    card.addEventListener('click', (e) => {
-      if (!$('p09HelpBtn').offsetParent || $('p09Finish').dataset.locked) return;
-      if (e.target.closest('.p09-text')) textTools();
-      else bgTools();
+    phone.addEventListener('click', (e) => {
+      if (!freeEdit) return;
+      if (e.target.closest('.p09-card')) { playClick(); if (e.target.closest('.p09-text')) textTools(); else bgTools(); return; }
+      if (e.target.closest('.cv7-bar,.cv7-sub,.cv7-fmt')) return;
+      warn(learn);
     });
-    function tool(label, onClick, extra) {
+    function deselect() {
+      tools.classList.add('is-off');
+      sub.classList.add('is-off');
+      fmt.classList.add('is-off');
+      phone.classList.remove('is-fmt', 'has-sel');
+      text.classList.remove('is-picked');
+    }
+    $('p09BarOk').addEventListener('click', () => { playClick(); deselect(); });
+    $('p09FmtOk').addEventListener('click', () => { playClick(); fmt.classList.add('is-off'); phone.classList.remove('is-fmt'); textTools(); });
+
+    function toolBtn(label, glyph, fn) {
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'p09-tool';
-      b.innerHTML = label;
-      if (extra) Object.assign(b.style, extra);
-      b.addEventListener('click', () => { playClick(); onClick(b); });
-      row.appendChild(b);
+      b.innerHTML = '<i>' + glyph + '</i><span>' + label + '</span>';
+      b.addEventListener('click', () => { if (fn) { playClick(); fn(b); } else warn(learn); });
       return b;
+    }
+    function showBar(buttons) {
+      row.innerHTML = '';
+      buttons.forEach((b) => row.appendChild(b));
+      tools.classList.remove('is-off');
+      sub.classList.add('is-off');
+      fmt.classList.add('is-off');
+      phone.classList.add('has-sel');
+      phone.classList.remove('is-fmt');
+    }
+    function showSub(cls) {
+      sub.innerHTML = '';
+      sub.className = 'cv7-sub' + (cls ? ' ' + cls : '');
+      return sub;
     }
     function bgTools() {
       text.classList.remove('is-picked');
-      tools.classList.remove('is-off');
-      row.innerHTML = '';
-      COLORS.forEach((c) => {
-        const sw = document.createElement('button');
-        sw.type = 'button';
-        sw.className = 'p09-swatch';
-        sw.title = c.name;
-        sw.style.background = c.value;
-        sw.addEventListener('click', () => {
-          playClick();
-          row.querySelectorAll('.p09-swatch').forEach((x) => x.classList.toggle('is-on', x === sw));
-          card.style.backgroundColor = c.value;
-          text.style.color = c.ink;
-          markEdited();
+      const colorBtn = toolBtn('색상', '<b class="p09-dot" style="background:' + bgNow + '"></b>', () => {
+        colorBtn.classList.add('is-on');
+        showSub();
+        COLORS.forEach((c) => {
+          const sw = document.createElement('button');
+          sw.type = 'button';
+          sw.className = 'p09-swatch';
+          sw.title = c.name;
+          sw.style.background = c.value;
+          sw.addEventListener('click', () => {
+            playClick();
+            sub.querySelectorAll('.p09-swatch').forEach((x) => x.classList.toggle('is-on', x === sw));
+            bgNow = c.value;
+            card.style.backgroundColor = c.value;
+            text.style.color = c.ink;
+            colorBtn.querySelector('.p09-dot').style.background = c.value;
+            markEdited();
+          });
+          sub.appendChild(sw);
         });
-        row.appendChild(sw);
       });
+      showBar([toolBtn('도형', ICON.shape), toolBtn('편집', ICON.edit), colorBtn, toolBtn('스타일', ICON.style), toolBtn('모서리', ICON.corner)]);
     }
     function textTools() {
       text.classList.add('is-picked');
-      tools.classList.remove('is-off');
-      row.innerHTML = '';
-      tool('글꼴', fontPanel);
-      tool('글자 크기', sizePanel);
-      tool('형식', formatPanel);
+      const fontBtn = toolBtn('글꼴', '<span style="font-family:serif;font-style:italic">Ff</span>', () => { fontBtn.classList.add('is-on'); fontPanel(); });
+      const sizeBtn = toolBtn('글꼴 크기', '<span style="font-size:26px">A<small style="font-size:17px">A</small></span>', () => { sizeBtn.classList.add('is-on'); sizePanel(); });
+      const fmtBtn = toolBtn('형식', ICON.format, formatPanel);
+      showBar([fontBtn, toolBtn('텍스트 스타일', '<span style="font-family:serif">H</span>'), sizeBtn,
+        toolBtn('색상', '<u style="text-decoration:none;border-bottom:5px solid #f08fb0;line-height:1;padding-bottom:1px">A</u>'), fmtBtn]);
     }
-    function backBtn() { tool('&#8592;', textTools, { minWidth: '56px' }); }
     function fontPanel() {
-      row.innerHTML = '';
-      backBtn();
-      FONTS.forEach((f) => tool(f.name, (b) => {
-        row.querySelectorAll('.p09-tool').forEach((x) => x.classList.toggle('is-on', x === b));
-        text.style.fontFamily = f.family;
-        markEdited();
-      }, { fontFamily: f.family, fontSize: '24px' }));
+      showSub();
+      FONTS.forEach((f) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'p09-chip';
+        b.textContent = f.name;
+        b.style.fontFamily = f.family;
+        b.addEventListener('click', () => {
+          playClick();
+          sub.querySelectorAll('.p09-chip').forEach((x) => x.classList.toggle('is-on', x === b));
+          text.style.fontFamily = f.family;
+          markEdited();
+        });
+        sub.appendChild(b);
+      });
     }
     function sizePanel() {
-      row.innerHTML = '';
-      backBtn();
+      showSub('p09-size');
       const cur = parseInt(getComputedStyle(text).fontSize, 10);
-      const wrap = document.createElement('div');
-      wrap.className = 'p09-size';
-      wrap.innerHTML = '<input type="range" min="20" max="64" value="' + cur + '"><button type="button">−</button><b>' + cur + '</b><button type="button">+</button>';
-      row.appendChild(wrap);
-      const [range, minus, , plus] = [wrap.querySelector('input'), wrap.querySelectorAll('button')[0], null, wrap.querySelectorAll('button')[1]];
+      sub.innerHTML = '<p>글꼴 크기</p><div><input type="range" min="20" max="64" value="' + cur + '"><span><button type="button">−</button><b>' + cur + '</b><button type="button">+</button></span></div>';
+      const range = sub.querySelector('input');
+      const [minus, plus] = sub.querySelectorAll('button');
       const apply = (v) => {
         v = Math.max(20, Math.min(64, v));
         range.value = v;
-        wrap.querySelector('b').textContent = v;
+        sub.querySelector('b').textContent = v;
         text.style.fontSize = v + 'px';
         markEdited();
       };
@@ -393,23 +646,73 @@
       plus.addEventListener('click', () => { playClick(); apply(+range.value + 2); });
     }
     function formatPanel() {
-      row.innerHTML = '';
-      backBtn();
-      [['B', 'fontWeight', '800', 'normal'], ['I', 'fontStyle', 'italic', 'normal'], ['U', 'textDecoration', 'underline', 'none']].forEach(([k, prop, yes, no]) => {
-        const b = tool(k, (btn) => {
-          const now = !btn.classList.contains('is-on');
-          btn.classList.toggle('is-on', now);
-          text.style[prop] = now ? yes : no;
-          markEdited();
-        }, { minWidth: '56px' });
-        if (text.style[prop] === yes) b.classList.add('is-on');
-      });
+      tools.classList.add('is-off');
+      sub.classList.add('is-off');
+      fmt.classList.remove('is-off');
+      phone.classList.add('is-fmt');
+      const on = {
+        B: ['fontWeight', '800', 'normal'],
+        I: ['fontStyle', 'italic', 'normal'],
+        U: ['textDecoration', 'underline', 'none']
+      };
+      const glyph = {
+        B: '<b>B</b>', I: '<i style="font-family:serif">I</i>', U: '<u>U</u>', S: '<s>S</s>', aA: 'aA',
+        dir: SVG('<path d="M5 5h10M10 5v14M16 15l3 4 3-4M19 8v11"/>'),
+        l: SVG('<path d="M4 6h16M4 11h10M4 16h16M4 21h10"/>'), c: SVG('<path d="M4 6h16M7 11h10M4 16h16M7 21h10"/>'),
+        r: SVG('<path d="M4 6h16M10 11h10M4 16h16M10 21h10"/>'), j: SVG('<path d="M4 6h16M4 11h16M4 16h16M4 21h16"/>'),
+        ul: SVG('<circle cx="5" cy="7" r="1.4" fill="currentColor"/><circle cx="5" cy="14" r="1.4" fill="currentColor"/><path d="M10 7h10M10 14h10"/>'),
+        ol: SVG('<path d="M10 7h10M10 14h10M4 5l1.5-1v6M4 13h3l-3 4h3"/>')
+      };
+      const fill = (id, keys, sel) => {
+        const box = $(id);
+        box.innerHTML = '';
+        keys.forEach((k) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.innerHTML = glyph[k];
+          if (sel === k) b.classList.add('is-sel');
+          if (on[k]) {
+            const [prop, yes] = on[k];
+            if (text.style[prop] === yes) b.classList.add('is-on');
+            b.addEventListener('click', () => {
+              playClick();
+              const now = !b.classList.contains('is-on');
+              b.classList.toggle('is-on', now);
+              text.style[prop] = now ? yes : on[k][2];
+              markEdited();
+            });
+          } else {
+            b.addEventListener('click', () => warn(learn));
+          }
+          box.appendChild(b);
+        });
+      };
+      fill('p09FmtRow1', ['B', 'I', 'U', 'S', 'aA', 'dir']);
+      fill('p09FmtRow2', ['l', 'c', 'r', 'j'], 'c');
+      fill('p09FmtRow3', ['ul', 'ol']);
     }
 
     // 도움말
     let helpPage = 0;
+    function helpShot(page) {
+      const tool = (label, glyph, on) => '<span class="hs-tool' + (on ? ' is-on' : '') + '"><em>' + glyph + '</em>' + label + '</span>';
+      const bar = page === 0
+        ? tool('도형', '◇') + tool('편집', '⌨') + tool('색상', '<b class="hs-dot" style="background:' + bgNow + '"></b>', true) + tool('스타일', '☰') + tool('모서리', '⌒')
+        : tool('편집', '⌨') + tool('글꼴', '<i>Ff</i>') + tool('텍스트 스타일', 'H') + tool('글꼴 크기', 'AA') + tool('색상', '<u>A</u>');
+      const handles = '<b style="left:-6px;top:-6px"></b><b style="right:-6px;top:-6px"></b><b style="left:-6px;bottom:-6px"></b><b style="right:-6px;bottom:-6px"></b>';
+      const pill = '<div class="hs-pill" style="top:' + (page === 0 ? 46 : 246) + 'px"><span>💬</span><span>⧉</span><span>🗑</span><span>⋯</span></div>';
+      return '<div class="hs-top"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/></svg><svg viewBox="0 0 24 24"><path d="M9 13L4 8l5-5"/><path d="M4 8h10a6 6 0 010 12h-3"/></svg><span></span>'
+        + '<svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg><svg viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M5 13v7h14v-7"/></svg></div>'
+        + '<div class="hs-card" style="background:' + bgNow + '"><div class="hs-ill" style="background-image:url(\'img/p09_illust_' + sitKey + '.png\')"></div>'
+        + '<div class="hs-txt" style="color:' + (text.style.color || '#1b1738') + '">' + text.textContent + '</div>'
+        + (page === 0 ? '<div class="hs-sel" style="inset:0">' + handles + '</div>' : '<div class="hs-sel" style="left:8px;right:8px;top:196px;height:70px">' + handles + '</div>') + '</div>'
+        + pill
+        + '<div class="hs-ring" style="' + (page === 0 ? 'left:48px;top:84px;width:272px;height:302px' : 'left:58px;top:276px;width:252px;height:78px') + '"></div>'
+        + '<img class="hs-finger" src="../../img/common/img_finger01.png" alt="" style="' + (page === 0 ? 'left:250px;top:330px' : 'left:240px;top:318px') + '">'
+        + '<div class="hs-bar">' + bar + '</div>';
+    }
     function showHelp() {
-      $('p09HelpImg').style.backgroundImage = "url('img/p09_help" + (helpPage + 1) + ".png')";
+      $('p09HelpImg').innerHTML = helpShot(helpPage);
       $('p09HelpText').innerHTML = HELP[helpPage];
       $('p09HelpPrev').classList.toggle('is-off', helpPage === 0);
       $('p09HelpNext').classList.toggle('is-off', helpPage === HELP.length - 1);
@@ -422,20 +725,22 @@
     // 5. 완성 → 저장 → 공유
     $('p09Finish').addEventListener('click', () => {
       playClick();
-      $('p09Finish').dataset.locked = '1';
+      freeEdit = false;
       $('p09Finish').classList.add('is-off');
       $('p09HelpBtn').classList.add('is-off');
-      tools.classList.add('is-off');
-      text.classList.remove('is-picked');
-      card.style.zIndex = '';
+      deselect();
       say('완성한 카드를 저장하려면<br>오른쪽 위의 저장 버튼을 눌러요.');
-      guideTo([1110, 40, 70, 70], () => {
+      guideTo($('p09Save'), () => {
         say('카드를 저장하고 있어요.');
+        phone.classList.add('is-saving');
         catcher.classList.remove('is-off');
         catcher.onclick = null;
         setTimeout(() => {
+          phone.classList.remove('is-saving');
+          cardSnapshot($('p09Thumb'), 150);
+          phone.dataset.screen = 'saved';
           say('카드를 저장했어요!<br>이제 공유 버튼을 클릭해<br>친구에게 마음을 전달해요.');
-          guideTo([1090, 620, 90, 90], openCheck);
+          guideTo($('p09Share'), openCheck);
         }, 2000);
       });
     });
@@ -443,7 +748,7 @@
     function cardSnapshot(box, w) {
       const c = card.cloneNode(true);
       c.removeAttribute('id');
-      c.style.cssText += ';position:absolute;left:0;top:0;transform-origin:0 0;transform:scale(' + (w / 413) + ');z-index:auto';
+      c.style.cssText += ';position:absolute;left:0;top:0;transform-origin:0 0;transform:scale(' + (w / 400) + ');z-index:auto';
       c.querySelector('.p09-text').classList.remove('is-picked');
       box.innerHTML = '';
       box.appendChild(c);
