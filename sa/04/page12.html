@@ -6,9 +6,15 @@
     <title>AI 이모티콘 문장 만들기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 없음 - 와이어프레임. page09와 동일한 구조, 배경도 그 이미지를
-           img/p12_bg_explain.png로 복사해서 씀 */
-        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:#c2d9e9 url('img/p12_bg_explain.png') no-repeat}
+        /* 기획서 32p: 네모 박스 하나 안에 왼쪽 생성된 이모티콘 + 오른쪽 문구 + 다음 버튼. 위치는 기획서 도형 좌표를 1920 폭으로 환산.
+           생성한 이모티콘은 sessionStorage(sa04_emoji), 목차로 바로 들어오면 page11 기본 이모티콘 */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+        .p12-box{position:absolute;left:302px;top:129px;width:1296px;height:686px;box-sizing:border-box;background:#fff;border:solid 15px #1b1738;border-radius:25px;box-shadow:0 0 0 5px #fff}
+        .p12-emoji{position:absolute;left:95px;top:170px;width:340px;height:340px;border-radius:70px;background:#fff3c9;border:solid 8px #1b1738;
+          display:flex;align-items:center;justify-content:center;font-size:200px;line-height:1}
+        .p12-text{position:absolute;left:531px;top:100px;width:640px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.35;letter-spacing:-0.06em;color:#1b1738;word-break:keep-all}
+        .p12-text b{display:block;margin-bottom:30px;font-weight:normal;font-size:120px;line-height:1.2;color:#48159c}
+        .p12-next{left:966px;top:640px}
     </style>
 </head>
 <body>
@@ -16,9 +22,13 @@
   <div id="viewport" class="viewport">
     <div id="stage-spacer">
       <div id="stage" class="stage">
-        <main>
+        <main class="bg-default">
+          <div class="p12-box">
+            <div class="p12-emoji" id="p12Emoji">&#128522;</div>
+            <p class="p12-text"><b>좋아요!</b>AI가 감정과 상황을<br>이해하기 쉽게 설명했어요.</p>
+          </div>
 
-          <a href="page13.html" class="js-nav-effect next-btn-intro">
+          <a href="page13.html" class="js-nav-effect next-btn-intro p12-next">
             <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
           </a>
         </main>
@@ -30,5 +40,11 @@
   <script src="../../js/header.js" data-title="AI 이모티콘 문장 만들기" data-next="page13.html"></script>
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
+  <script>
+  try {
+    const emoji = sessionStorage.getItem('sa04_emoji');
+    if (emoji) document.getElementById('p12Emoji').textContent = emoji;
+  } catch (e) {}
+  </script>
 </body>
 </html>

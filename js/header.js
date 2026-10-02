@@ -10,6 +10,7 @@
       마크업을 찾아서 동작을 붙이기 때문)
    - 페이지마다 다른 부분(제목, "다음" 버튼이 가는 곳)은 이 스크립트를
      불러오는 <script> 태그의 data-title / data-next 속성으로 넘김
+     (data-no-next를 주면 '다음' 버튼을 아예 안 그림 — 골라서 가는 게이트(차시 선택) 페이지용)
      (data-next를 안 주면 "다음" 버튼은 javascript:next(), 즉 같은 폴더의 다음 번호 페이지로 감.
       "이전" 버튼은 항상 javascript:prev() — 둘 다 js/common.js의 initLinkEffect가 해석)
    예시:
@@ -25,6 +26,7 @@
   var BASE = scriptEl ? scriptEl.src.replace(/js\/header\.js(?:\?.*)?$/, '') : '';
   var title = (scriptEl && scriptEl.dataset.title) || '';
   var next = (scriptEl && scriptEl.dataset.next) || 'javascript:next();';
+  var noNext = !!(scriptEl && scriptEl.hasAttribute('data-no-next'));
 
   var HEADER_HTML = `<header>
           <div class="header-left">
@@ -36,10 +38,10 @@
               <img src="${BASE}img/common/btn_list.png" class="js-img-swap js-sfx" data-src-over="${BASE}img/common/btn_list_over.png" data-sound="sound/click.mp3" alt="목차">
               <img src="${BASE}img/common/btn_list_tooltip.png" class="btn-tooltip tooltip-left" alt="목록으로 가기">
             </a>
-            <a href="${next}" class="js-nav-effect has-tooltip">
+${noNext ? '' : `            <a href="${next}" class="js-nav-effect has-tooltip">
               <img src="${BASE}img/common/btn_next.png" class="js-img-swap js-sfx" data-src-alt="${BASE}img/common/btn_next_on.png" data-src-over="${BASE}img/common/btn_next_over.png" data-sound="sound/click.mp3" alt="다음">
               <img src="${BASE}img/common/btn_next_tooltip.png" class="btn-tooltip tooltip-left" alt="다음화면으로 가기">
-            </a>
+            </a>`}
           </div>
           <h1 class="page-title">${title}</h1>
           <div class="header-right">

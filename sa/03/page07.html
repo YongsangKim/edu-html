@@ -6,8 +6,9 @@
     <title>마음 카드 디자이너 미션</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 33~45p. 카드 종류 고르기 → 배경색 → 글꼴 → 글자 크기 → 형식(굵게·기울임·밑줄)을 차례로 익힘.
-           안내된 곳이 아닌 데를 누르면 "앗, 다른 곳을 선택했어요!" 팝업. 카드 삽화 img/p07_illust_{comfort|congrats|sorry}.png. */
+        /* 디자인 없음 - 기획서 33~45p. 가운데 휴대폰은 sa/02 page08·10과 같은 공용 Canva 틀(.cv)에 기획서 캡처의 텍스트·도형 편집 화면을 CSS로 그린 것.
+           카드 종류 고르기 → 배경색 → 글꼴 → 글자 크기 → 형식(굵게·기울임·밑줄)을 차례로 익힘. 안내된 곳이 아닌 데를 누르면 "앗, 다른 곳을 선택했어요!" 팝업.
+           카드 삽화 img/p07_illust_{comfort|congrats|sorry}.png. */
         @font-face{font-family:'KCC-DodamDodam';src:url('../../fonts/KCC-DodamDodam.woff2') format('woff2')}
         @font-face{font-family:'KCC-MurukMuruk';src:url('../../fonts/KCC-MurukMuruk.woff2') format('woff2')}
         main{position:absolute;left:0;top:120px;width:1920px;height:960px}
@@ -16,38 +17,64 @@
         .p07-character{position:absolute;left:170px;top:360px;width:480px;height:580px;display:flex;align-items:flex-end;justify-content:center}
         .p07-character img{max-width:100%;max-height:100%;object-fit:contain}
 
-        .p07-phone{position:absolute;left:726px;top:21px;width:468px;height:895px;box-sizing:border-box;border:solid 8px #1b1738;border-radius:40px;background:#ecebf3}
-        .p07-card{position:absolute;left:774px;top:218px;width:371px;height:466px;box-sizing:border-box;border-radius:10px;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.18);transition:background-color .3s}
-        .p07-card.is-empty{background:#fff;box-shadow:none;border:dashed 3px #b9b3dd}
-        .p07-illust{position:absolute;left:72px;top:72px;width:228px;height:228px;border-radius:20px;background:#d9d3ee center / contain no-repeat}
-        .p07-text{position:absolute;left:10px;top:330px;width:351px;min-height:80px;box-sizing:border-box;padding:6px;display:flex;align-items:center;justify-content:center;text-align:center;
-          font-family:'Pretendard';font-size:40px;line-height:1.2;color:#1b1738;word-break:keep-all;border:solid 3px transparent;border-radius:8px}
-        .p07-text.is-picked{border-color:#8b3dff}
+        .cv7-body{position:absolute;left:0;top:64px;right:0;bottom:0;background:#f2f3f7;overflow:hidden}
+        .p07-card{position:absolute;left:44px;top:26px;width:400px;height:500px;box-sizing:border-box;overflow:hidden;background:#fff;box-shadow:0 6px 18px rgba(27,23,56,.12);transform-origin:50% 0;transition:background-color .3s,transform .3s}
+        .p07-card.is-empty{box-shadow:none;border:dashed 3px #b9b3dd}
+        .cv.is-fmt .p07-card{transform:scale(.6)}
+        .p07-illust{position:absolute;left:80px;top:50px;width:240px;height:240px;border-radius:20px;background:#d9d3ee center / contain no-repeat}
+        .p07-text{position:absolute;left:10px;top:320px;width:380px;min-height:100px;box-sizing:border-box;padding:6px;display:flex;align-items:center;justify-content:center;text-align:center;
+          font-family:'Pretendard';font-size:40px;line-height:1.2;color:#1b1738;word-break:keep-all;border:solid 3px transparent}
+        .p07-text.is-picked{border-color:#8b5cf6}
 
-        .p07-tools{position:absolute;left:740px;top:737px;width:440px;height:80px;overflow:hidden;border-radius:14px;background:#fff;touch-action:none}
-        .p07-tools-row{display:flex;gap:10px;padding:6px;height:100%;box-sizing:border-box;transition:transform .3s}
-        .p07-tools.is-page2 .p07-tools-row{transform:translateX(-300px)}
-        .p07-tool{flex:0 0 auto;height:100%;min-width:92px;padding:0 10px;box-sizing:border-box;border:solid 3px #d9d3ee;border-radius:12px;background:#fff;cursor:pointer;
-          font-family:'Pretendard';font-size:22px;font-weight:700;color:#1b1738}
-        .p07-tool:disabled{opacity:.35;cursor:default}
-        .p07-tool.is-on{border-color:#8b3dff;background:#f1e9ff}
-        .p07-tool.is-pulse{animation:p07-pulse .5s ease-in-out 4}
-        @keyframes p07-pulse{50%{transform:scale(1.15);box-shadow:0 0 0 8px rgba(255,79,139,.45)}}
-        .p07-swatch{flex:0 0 52px;height:52px;align-self:center;border:solid 3px #d9d3ee;border-radius:50%;cursor:pointer;padding:0}
-        .p07-swatch.is-on{border-color:#1b1738;box-shadow:0 0 0 3px #fff inset}
+        .cv7-bar{position:absolute;left:8px;right:8px;bottom:16px;height:100px;border-radius:20px;background:#fff;box-shadow:0 2px 12px rgba(27,23,56,.15);z-index:6}
+        .cv7-view{position:absolute;left:0;top:0;right:70px;bottom:0;overflow:hidden;touch-action:none;border-radius:20px 0 0 20px}
+        .p07-tools-row{display:flex;height:100%;padding:6px 0;box-sizing:border-box;transition:transform .3s}
+        .cv7-bar.is-page2 .p07-tools-row{transform:translateX(-80px)}
+        .p07-tool{flex:0 0 80px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:0;border:0;border-radius:14px;background:none;cursor:pointer;
+          font-size:14px;font-weight:600;white-space:nowrap}
+        .p07-tool i{display:flex;align-items:center;justify-content:center;height:36px;font-style:normal;font-size:30px;line-height:1}
+        .p07-tool i svg{width:32px;height:32px}
+        .p07-tool.is-on{background:#e6e7ec}
+        .p07-dot{display:block;width:40px;height:40px;border-radius:50%;box-shadow:inset 0 0 0 2px rgba(27,23,56,.12)}
+        .cv7-check{position:absolute;right:8px;top:50%;margin-top:-30px;width:60px;height:60px;padding:0;border:0;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(27,23,56,.2);display:flex;align-items:center;justify-content:center}
+        .cv7-check svg{width:34px;height:34px}
+
+        .cv7-sub{position:absolute;left:8px;right:8px;bottom:126px;box-sizing:border-box;min-height:100px;padding:14px 16px;border-radius:20px;background:#fff;box-shadow:0 2px 12px rgba(27,23,56,.15);z-index:6;
+          display:flex;align-items:center;gap:10px}
+        .p07-swatch{flex:0 0 52px;height:52px;border:solid 3px #d9d3ee;border-radius:50%;cursor:pointer;padding:0}
+        .p07-swatch.is-on{border-color:#8b5cf6;box-shadow:0 0 0 3px #fff inset}
         .p07-swatch:disabled{cursor:default}
-        .p07-size{display:flex;align-items:center;gap:8px;width:100%;padding:0 8px;box-sizing:border-box;font-family:'Pretendard';font-size:24px;font-weight:700}
-        .p07-size input{flex:1 1 auto;accent-color:#8b3dff}
-        .p07-size button{width:44px;height:44px;border:solid 3px #d9d3ee;border-radius:10px;background:#fff;font-size:26px;cursor:pointer;padding:0}
-        .p07-size b{width:48px;text-align:center}
+        .p07-chip{flex:0 0 auto;min-width:200px;height:64px;padding:0 20px;border:solid 4px transparent;border-radius:16px;background:#f2f3f7;cursor:pointer;font-size:26px;color:#1b1738}
+        .p07-chip.is-on{border-color:#8b5cf6;background:#fff}
+        .p07-size{flex-direction:column;align-items:stretch;gap:6px}
+        .p07-size p{margin:0;font-size:22px}
+        .p07-size div{display:flex;align-items:center;gap:16px}
+        .p07-size input{flex:1 1 auto;accent-color:#8b5cf6}
+        .p07-size span{display:flex;align-items:center;justify-content:space-between;flex:0 0 190px;height:56px;padding:0 10px;box-sizing:border-box;border:solid 2px #d9d9e2;border-radius:14px;font-size:24px}
+        .p07-size button{width:40px;height:40px;padding:0;border:0;background:none;font-size:32px;cursor:pointer}
 
-        .p07-types{position:absolute;left:1293px;top:152px;width:515px;height:635px;box-sizing:border-box;padding:30px 24px;display:flex;flex-direction:column;justify-content:space-around;
-          background:#fefbf9;border:solid 6px #48159c;border-radius:40px}
+        .cv7-fmt{position:absolute;left:0;right:0;bottom:0;height:400px;box-sizing:border-box;padding:22px 16px 0;border-radius:28px 28px 0 0;background:#fff;z-index:7}
+        .cv7-fmt:before{content:'';position:absolute;left:50%;top:10px;width:46px;height:5px;margin-left:-23px;border-radius:3px;background:#d4d5dc}
+        .cv7-fmt h4{margin:0 0 22px;text-align:center;font-size:21px}
+        .cv7-fmt h4 svg{position:absolute;right:20px;top:26px;width:32px;height:32px}
+        .cv7-fmt-row{display:flex;gap:8px;margin-bottom:16px}
+        .cv7-fmt button{flex:1;height:62px;padding:0;border:solid 2px #e1e2e8;border-radius:14px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:26px}
+        .cv7-fmt button.is-on{border-color:#8b5cf6;background:#f1e9ff}
+        .cv7-fmt button svg{width:30px;height:30px}
+        .cv7-fmt-align{background:#f2f3f7;border-radius:14px;padding:6px}
+        .cv7-fmt-align button{border:0;background:none}
+        .cv7-fmt-align button.is-sel{background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+        .p07-pulse{animation:p07-pulse .5s ease-in-out 4}
+        @keyframes p07-pulse{50%{transform:scale(1.12);box-shadow:0 0 0 6px rgba(255,79,139,.45)}}
+
+        .p07-types{position:absolute;left:1293px;top:152px;width:515px;height:635px;box-sizing:border-box;padding:30px 24px;display:flex;flex-direction:column;justify-content:space-around}
         .p07-types .card-btn{width:100%;min-width:0;height:159px;padding:8px 16px 4px;font-size:44px;line-height:1.2;letter-spacing:-0.05em}
 
-        .p07-catch{position:absolute;left:726px;top:21px;width:468px;height:895px;border-radius:40px;z-index:3}
-        .p07-target{position:absolute;z-index:4;border-radius:12px;cursor:pointer}
-        .p07 .hit-area{background:rgba(255,79,139,.25);outline:5px dashed #ff4f8b;outline-offset:-5px}
+        .p07-catch{position:absolute;left:703px;top:21px;width:504px;height:895px;border-radius:40px;z-index:10}
+        .p07-target{position:absolute;z-index:11;padding:0;border:0;border-radius:12px;background:transparent;cursor:pointer;animation:cv-target 1.2s ease-in-out infinite}
+
+        .p07-swipe{position:absolute;left:1120px;top:850px;width:110px;z-index:30;pointer-events:none;animation:p07-swipe 1.6s ease-in-out infinite}
+        @keyframes p07-swipe{0%{transform:translateX(0);opacity:0}15%{opacity:1}70%{transform:translateX(-300px);opacity:1}85%,100%{transform:translateX(-300px);opacity:0}}
 
         #p07Oops{z-index:120}
         .p07 .is-off{display:none}
@@ -62,12 +89,38 @@
           <p class="guide-bubble p07-bubble" id="p07Bubble"></p>
           <div class="p07-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
 
-          <div class="p07-phone"></div>
-          <div class="p07-card is-empty" id="p07Card">
-            <div class="p07-illust is-off" id="p07Illust"></div>
-            <p class="p07-text is-off" id="p07Text"></p>
+          <div class="cv" id="p07Phone">
+            <div class="cv-top">
+              <svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-5h4v5"/></svg>
+              <svg class="cv-undo" viewBox="0 0 24 24"><path d="M9 13L4 8l5-5"/><path d="M4 8h10a6 6 0 010 12h-3"/></svg>
+              <svg class="cv-undo is-dim" viewBox="0 0 24 24"><path d="M15 13l5-5-5-5"/><path d="M20 8H10a6 6 0 000 12h3"/></svg>
+              <span class="is-gap"></span>
+              <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="19" cy="12" r="1.3" fill="currentColor"/></svg>
+              <svg viewBox="0 0 24 24" style="color:#e3d8ff"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z" fill="currentColor"/></svg>
+              <svg viewBox="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>
+              <svg viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M5 13v7h14v-7"/></svg>
+            </div>
+
+            <div class="cv7-body">
+              <div class="p07-card is-empty" id="p07Card">
+                <div class="p07-illust is-off" id="p07Illust"></div>
+                <p class="p07-text is-off" id="p07Text"></p>
+              </div>
+            </div>
+
+            <div class="cv7-sub is-off" id="p07Sub"></div>
+            <div class="cv7-bar is-off" id="p07Tools">
+              <div class="cv7-view"><div class="p07-tools-row" id="p07ToolsRow"></div></div>
+              <button type="button" class="cv7-check" aria-label="완료"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+            </div>
+
+            <div class="cv7-fmt is-off" id="p07Fmt">
+              <h4>형식<svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></h4>
+              <div class="cv7-fmt-row" id="p07FmtRow1"></div>
+              <div class="cv7-fmt-row cv7-fmt-align" id="p07FmtRow2"></div>
+              <div class="cv7-fmt-row" id="p07FmtRow3"></div>
+            </div>
           </div>
-          <div class="p07-tools is-off" id="p07Tools"><div class="p07-tools-row" id="p07ToolsRow"></div></div>
 
           <div class="p07-types" id="p07Types">
             <button type="button" class="card-btn" data-type="comfort">속상한 친구에게<br>보내는 위로 카드</button>
@@ -76,7 +129,9 @@
           </div>
 
           <div class="p07-catch is-off" id="p07Catch"></div>
-          <button type="button" class="hit-area p07-target is-off" id="p07Target" aria-label="안내된 곳"></button>
+          <button type="button" class="p07-target is-off" id="p07Target" aria-label="안내된 곳"></button>
+
+          <img class="p07-swipe is-off" id="p07Swipe" src="../../img/common/img_finger01.png" alt="">
 
           <a href="javascript:;" class="js-sfx next-btn is-off" id="p07Next" data-sound="sound/click.mp3">
             <img src="../../img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" alt="다음">
@@ -118,13 +173,25 @@
       { name: 'KCC도담도담체', family: "'KCC-DodamDodam','Cafe24 Ssurround'" },
       { name: 'KCC무럭무럭체', family: "'KCC-MurukMuruk','Pretendard'" }
     ];
+    const SVG = (d) => '<svg viewBox="0 0 24 24">' + d + '</svg>';
+    const ICON = {
+      shape: SVG('<circle cx="8" cy="8" r="4"/><rect x="11" y="11" width="9" height="9" rx="1"/>'),
+      edit: SVG('<rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>'),
+      style: SVG('<path d="M4 8h16M4 16h16" stroke-width="3.2"/>'),
+      corner: SVG('<path d="M5 20v-4a10 10 0 0110-10h2"/><circle cx="19" cy="6" r="1.6" fill="currentColor"/><circle cx="5" cy="20" r="1.6" fill="currentColor"/>'),
+      format: SVG('<path d="M4 5h5a3 3 0 010 6H4zM4 11h6a3.2 3.2 0 010 6.4H4zM15 7h6M15 12h6M15 17h6"/>'),
+      check: SVG('<path d="M5 12l5 5L20 7"/>')
+    };
 
     const $ = (id) => document.getElementById(id);
+    const phone = $('p07Phone');
     const bubble = $('p07Bubble');
     const card = $('p07Card');
     const text = $('p07Text');
     const tools = $('p07Tools');
     const row = $('p07ToolsRow');
+    const sub = $('p07Sub');
+    const fmt = $('p07Fmt');
     const catcher = $('p07Catch');
     const target = $('p07Target');
     const nextBtn = $('p07Next');
@@ -132,15 +199,31 @@
     const playClick = makeSfx('sound/click.mp3');
     let type = null;
     let onNext = null;
+    let bgNow = '#ffffff';
+    let inkNow = '#1b1738';
 
     function say(html) { bubble.innerHTML = html; }
-    function toolBtn(label, extra) {
+    function toolBtn(label, glyph) {
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'p07-tool';
-      b.innerHTML = label;
-      if (extra) Object.assign(b.style, extra);
+      b.innerHTML = '<i>' + glyph + '</i><span>' + label + '</span>';
+      b.addEventListener('click', () => flashLayer(oops));
       return b;
+    }
+    function showBar(buttons, page2) {
+      row.innerHTML = '';
+      buttons.forEach((b) => row.appendChild(b));
+      tools.classList.remove('is-off', 'is-page2');
+      if (page2) tools.classList.add('is-page2');
+    }
+    function showSub(cls) {
+      sub.innerHTML = '';
+      sub.className = 'cv7-sub' + (cls ? ' ' + cls : '');
+      return sub;
+    }
+    function nudgeFinger() {
+      document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.top = Math.min(parseFloat(f.style.top), 850) + 'px'; });
     }
     // 안내 단계: 정해진 곳(rect 또는 요소)만 누를 수 있고, 휴대폰 안 다른 곳은 팝업
     function guideTo(rectOrEl, then) {
@@ -149,8 +232,7 @@
       catcher.onclick = () => flashLayer(oops);
       let r = rectOrEl;
       if (rectOrEl instanceof Element) {
-        const el = rectOrEl;
-        const pr = el.getBoundingClientRect();
+        const pr = rectOrEl.getBoundingClientRect();
         const mr = document.querySelector('main').getBoundingClientRect();
         const s = mr.width / 1920;
         r = [(pr.left - mr.left) / s, (pr.top - mr.top) / s, pr.width / s, pr.height / s];
@@ -158,6 +240,7 @@
       target.style.cssText = 'left:' + r[0] + 'px;top:' + r[1] + 'px;width:' + r[2] + 'px;height:' + r[3] + 'px';
       target.classList.remove('is-off');
       pointFingerAt(target);
+      nudgeFinger();
       target.onclick = () => {
         playClick();
         target.classList.add('is-off');
@@ -195,19 +278,17 @@
     // 1~3. 배경색
     function stepBg() {
       say('먼저, 배경색을 설정해봐요.<br>배경 부분을 클릭해요.');
-      guideTo([774, 218, 371, 90], stepColorBtn);
+      guideTo(card, stepColorBtn);
     }
     function stepColorBtn() {
       say('색상을 클릭해요.');
-      tools.classList.remove('is-off');
-      row.innerHTML = '';
-      const colorBtn = toolBtn('색상');
-      row.appendChild(colorBtn);
-      guideTo(colorBtn, stepPalette);
+      const colorBtn = toolBtn('색상', '<b class="p07-dot" style="background:' + bgNow + '"></b>');
+      showBar([toolBtn('도형', ICON.shape), toolBtn('편집', ICON.edit), colorBtn, toolBtn('스타일', ICON.style), toolBtn('모서리', ICON.corner)]);
+      guideTo(colorBtn, () => { colorBtn.classList.add('is-on'); stepPalette(colorBtn); });
     }
-    function stepPalette() {
+    function stepPalette(colorBtn) {
       say(type.friend + '<br>' + type.name + ' 카드라면 어떤 색이 좋을까요?<br>원하는 색을 아래에서 골라봐요.');
-      row.innerHTML = '';
+      showSub();
       COLORS.forEach((c) => {
         const sw = document.createElement('button');
         sw.type = 'button';
@@ -217,64 +298,71 @@
         sw.disabled = !!c.off;
         sw.addEventListener('click', () => {
           playClick();
-          row.querySelectorAll('.p07-swatch').forEach((x) => x.classList.toggle('is-on', x === sw));
+          sub.querySelectorAll('.p07-swatch').forEach((x) => x.classList.toggle('is-on', x === sw));
+          bgNow = c.value;
+          inkNow = c.ink;
           card.style.backgroundColor = c.value;
           text.style.color = c.ink;
+          colorBtn.querySelector('.p07-dot').style.background = c.value;
+          phone.classList.add('is-edited');
           if (!onNext) waitNext(stepTextPick);
         });
-        row.appendChild(sw);
+        sub.appendChild(sw);
       });
     }
 
     // 4~6. 글꼴
-    function textTools(withFormat) {
-      row.innerHTML = '';
-      const fontBtn = toolBtn('글꼴');
-      const sizeBtn = toolBtn('글자 크기');
-      const fx = toolBtn('효과');
-      fx.disabled = true;
-      const anim = toolBtn('애니메이션');
-      anim.disabled = true;
-      const fmtBtn = toolBtn('형식');
-      [fontBtn, sizeBtn, fx, anim, fmtBtn].forEach((b) => row.appendChild(b));
-      tools.classList.toggle('is-page2', !!withFormat);
-      return { fontBtn, sizeBtn, fmtBtn };
+    function textTools() {
+      const t = {
+        fontBtn: toolBtn('글꼴', '<span style="font-family:serif;font-style:italic">Ff</span>'),
+        sizeBtn: toolBtn('글꼴 크기', '<span style="font-size:26px">A<small style="font-size:17px">A</small></span>'),
+        colorBtn: toolBtn('색상', '<u style="text-decoration:none;border-bottom:5px solid #f08fb0;line-height:1;padding-bottom:1px">A</u>'),
+        fmtBtn: toolBtn('형식', ICON.format)
+      };
+      showBar([toolBtn('편집', ICON.edit), t.fontBtn, toolBtn('텍스트 스타일', '<span style="font-family:serif">H</span>'), t.sizeBtn, t.colorBtn, t.fmtBtn]);
+      return t;
     }
     function stepTextPick() {
       tools.classList.add('is-off');
+      sub.classList.add('is-off');
       say('글자도 바꿔볼까요?<br>글자 부분을 클릭해요.');
       guideTo(text, () => { text.classList.add('is-picked'); stepFontBtn(); });
     }
     function stepFontBtn() {
       say('아래의 글꼴 버튼을 클릭해요.');
-      tools.classList.remove('is-off');
-      const t = textTools(false);
-      guideTo(t.fontBtn, stepFonts);
+      const t = textTools();
+      guideTo(t.fontBtn, () => { t.fontBtn.classList.add('is-on'); stepFonts(); });
     }
     function stepFonts() {
       say(type.name + ' 카드에 어울리는<br>글씨체는 무엇일까요?');
-      row.innerHTML = '';
+      showSub();
       FONTS.forEach((f) => {
-        const b = toolBtn(f.name, { fontFamily: f.family, fontSize: '26px', minWidth: '200px' });
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'p07-chip';
+        b.textContent = f.name;
+        b.style.fontFamily = f.family;
         b.addEventListener('click', () => {
           playClick();
-          row.querySelectorAll('.p07-tool').forEach((x) => x.classList.toggle('is-on', x === b));
+          sub.querySelectorAll('.p07-chip').forEach((x) => x.classList.toggle('is-on', x === b));
           text.style.fontFamily = f.family;
           if (!onNext) waitNext(stepSizeBtn);
         });
-        row.appendChild(b);
+        sub.appendChild(b);
       });
     }
 
     // 7~8. 글자 크기
     function stepSizeBtn() {
       say('이번에는 전하고 싶은 마음이 잘<br>보이도록 글자 크기를 조절해봐요.<br>글꼴 크기 버튼을 클릭해요.');
-      const t = textTools(false);
-      guideTo(t.sizeBtn, stepSize);
+      sub.classList.add('is-off');
+      const t = textTools();
+      guideTo(t.sizeBtn, () => { t.sizeBtn.classList.add('is-on'); stepSize(); });
     }
     function stepSize() {
       say('게이지를 좌우로 움직이거나<br>오른쪽의 - +버튼을 눌러<br>글씨 크기를 바꿀 수 있어요.');
-      row.innerHTML = '<div class="p07-size"><input type="range" min="24" max="72" value="40" id="p07Range"><button type="button" id="p07Minus">−</button><b id="p07Num">40</b><button type="button" id="p07Plus">+</button></div>';
+      showSub('p07-size');
+      sub.innerHTML = '<p>글꼴 크기</p><div><input type="range" min="24" max="72" value="40" id="p07Range"><span><button type="button" id="p07Minus">−</button><b id="p07Num">40</b><button type="button" id="p07Plus">+</button></span></div>';
       const range = $('p07Range');
       const apply = (v) => {
         v = Math.max(24, Math.min(72, v));
@@ -291,8 +379,10 @@
     // 9~11. 형식(도구창 밀기 → 형식 → 굵게·기울임·밑줄)
     function stepSwipe() {
       say('마지막으로, ' + type.name + ' 카드에<br>어울리게 글자를 꾸며봐요.<br>도구창을 오른쪽으로 슬라이드해요.');
-      const t = textTools(false);
-      pointFingerAt(tools);
+      sub.classList.add('is-off');
+      const t = textTools();
+      clearFingers();
+      $('p07Swipe').classList.remove('is-off');
       let sx = null;
       tools.onpointerdown = (e) => { sx = e.clientX; };
       tools.onpointerup = (e) => {
@@ -301,7 +391,7 @@
         sx = null;
         if (moved < 30) return;
         tools.onpointerdown = tools.onpointerup = null;
-        clearFingers();
+        $('p07Swipe').classList.add('is-off');
         tools.classList.add('is-page2');
         setTimeout(() => stepFmtBtn(t.fmtBtn), 350);
       };
@@ -312,35 +402,56 @@
     }
     function stepFormat() {
       say('굵게, 기울임, 밑줄 버튼을 눌러<br>효과를 넣을 수 있어요.<br>원하는 효과의 버튼을 클릭해요.');
-      tools.classList.remove('is-page2');
-      row.innerHTML = '';
+      tools.classList.add('is-off');
+      sub.classList.add('is-off');
+      fmt.classList.remove('is-off');
+      phone.classList.add('is-fmt');
       const on = {
         B: ['fontWeight', '800', 'normal'],
         I: ['fontStyle', 'italic', 'normal'],
         U: ['textDecoration', 'underline', 'none']
       };
-      ['B', 'I', 'U', 'S', 'aA', '⇵', '≡', '•', '1.'].forEach((k) => {
-        const b = toolBtn(k, { minWidth: '40px', padding: '0 6px' });
-        if (on[k]) {
-          b.classList.add('is-pulse');
-          b.addEventListener('click', () => {
-            playClick();
-            const [prop, yes, no] = on[k];
-            const now = !b.classList.contains('is-on');
-            b.classList.toggle('is-on', now);
-            text.style[prop] = now ? yes : no;
-            if (!onNext) waitNext(stepDone);
-          });
-        } else {
-          b.addEventListener('click', () => flashLayer(oops));
-        }
-        row.appendChild(b);
-      });
+      const glyph = {
+        B: '<b>B</b>', I: '<i style="font-family:serif">I</i>', U: '<u>U</u>', S: '<s>S</s>', aA: 'aA',
+        dir: SVG('<path d="M5 5h10M10 5v14M16 15l3 4 3-4M19 8v11"/>'),
+        l: SVG('<path d="M4 6h16M4 11h10M4 16h16M4 21h10"/>'), c: SVG('<path d="M4 6h16M7 11h10M4 16h16M7 21h10"/>'),
+        r: SVG('<path d="M4 6h16M10 11h10M4 16h16M10 21h10"/>'), j: SVG('<path d="M4 6h16M4 11h16M4 16h16M4 21h16"/>'),
+        ul: SVG('<circle cx="5" cy="7" r="1.4" fill="currentColor"/><circle cx="5" cy="14" r="1.4" fill="currentColor"/><path d="M10 7h10M10 14h10"/>'),
+        ol: SVG('<path d="M10 7h10M10 14h10M4 5l1.5-1v6M4 13h3l-3 4h3"/>')
+      };
+      const fill = (id, keys, extra) => {
+        const box = $(id);
+        box.innerHTML = '';
+        keys.forEach((k) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.innerHTML = glyph[k];
+          if (extra && extra(k)) b.classList.add(extra(k));
+          if (on[k]) {
+            b.classList.add('p07-pulse');
+            b.addEventListener('click', () => {
+              playClick();
+              const [prop, yes, no] = on[k];
+              const now = !b.classList.contains('is-on');
+              b.classList.toggle('is-on', now);
+              text.style[prop] = now ? yes : no;
+              if (!onNext) waitNext(stepDone);
+            });
+          } else {
+            b.addEventListener('click', () => flashLayer(oops));
+          }
+          box.appendChild(b);
+        });
+      };
+      fill('p07FmtRow1', ['B', 'I', 'U', 'S', 'aA', 'dir']);
+      fill('p07FmtRow2', ['l', 'c', 'r', 'j'], (k) => (k === 'c' ? 'is-sel' : ''));
+      fill('p07FmtRow3', ['ul', 'ol']);
     }
 
     // 12. 마무리
     function stepDone() {
-      tools.classList.add('is-off');
+      fmt.classList.add('is-off');
+      phone.classList.remove('is-fmt');
       text.classList.remove('is-picked');
       say('멋져요! 이 기능들을 활용하면<br>친구의 눈에 잘 띄는<br>예쁜 카드를 만들 수 있어요.');
       waitNext(() => navigateTo('page08.html'));

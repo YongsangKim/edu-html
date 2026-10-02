@@ -6,24 +6,56 @@
     <title>1박 2일 수학여행 준비물 토너먼트</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 32~58p. 준비물 그림 img/p10_item_{key}.png, 휴대폰 화면 img/p10_screen_{home|live}.png(496x898).
+        /* 디자인 없음 - 기획서 32~58p. 준비물 그림 img/p10_item_{key}.png. 가운데 휴대폰 화면(홈 → Gemini 채팅 → Gemini Live)은 기획서 캡처를 CSS로 그린 것.
            1라운드는 두 카드를 하나씩 Gemini에게 물어본 뒤 고르고, 2라운드·결승은 바로 고름. 결과 문구는 최종 선택에 따라 다름.
            기획서 46p 접이식 우산 답변은 앞 문장이 빠져 있어 49p 요약 문구로 채움 */
         main{position:absolute;left:0;top:120px;width:1920px;height:960px}
 
         .p10-bubble{left:111px;top:58px;bottom:auto;width:555px;min-height:217px;display:flex;align-items:center;justify-content:center;font-size:48px}
-        .p10-character{position:absolute;left:195px;top:300px;width:472px;height:629px;display:flex;align-items:flex-end;justify-content:center}
+        .p10-character{position:absolute;left:128px;top:239px;width:472px;height:629px;display:flex;align-items:flex-end;justify-content:center}
         .p10-character img{max-width:100%;max-height:100%;object-fit:contain}
 
         .p10-phone{position:absolute;left:715px;top:21px;width:496px;height:898px;box-sizing:border-box;border:solid 8px #1b1738;border-radius:48px;background:#fff center / cover no-repeat;overflow:hidden}
-        .p10-answer{position:absolute;left:740px;top:135px;width:450px;min-height:208px;box-sizing:border-box;padding:26px 28px;background:#eef3fb;border:solid 4px #1b1738;border-radius:28px;
+        .scr{display:none;position:absolute;inset:0;font-family:'Pretendard';color:#1b1738}
+        .p10-phone[data-screen="home"] .scr-home, .p10-phone[data-screen="chat"] .scr-chat, .p10-phone[data-screen="live"] .scr-live, .p10-phone[data-screen="answer"] .scr-live{display:block}
+        .p10-phone[data-screen="answer"] .scr-hello{display:none}
+        .scr svg{display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+        .scr-status{position:absolute;left:0;top:0;width:100%;height:50px;padding:14px 26px 0;box-sizing:border-box;display:flex;justify-content:space-between;font-size:20px;font-weight:600}
+        .scr-nav{position:absolute;left:0;bottom:0;width:100%;height:70px;display:flex;justify-content:space-around;align-items:center;color:#4a4f5c}
+        .scr-nav svg{width:34px;height:34px}
+        .scr-star{display:block}
+        .scr-home{background:linear-gradient(170deg,#8fd3e8,#b9a8f5 60%,#f0b2d6)}
+        .scr-home .scr-status{color:#fff}
+        .scr-home .scr-nav{color:#fff}
+        .scr-app{position:absolute;left:157px;top:358px;width:166px;height:166px;display:flex;align-items:center;justify-content:center}
+        .scr-app{flex-direction:column;gap:12px;font-size:24px;font-weight:600;color:#fff}
+        .scr-app span{display:flex;align-items:center;justify-content:center;width:110px;height:110px;border-radius:30px;background:#fff;box-shadow:0 6px 14px rgba(0,0,0,.2)}
+        .scr-app svg{width:68px;height:68px;stroke:none}
+        .scr-chat, .scr-live{background:linear-gradient(180deg,#fcfcfd 0,#fcfcfd 55%,#eaf1fc 75%,#a9c8f7 100%)}
+        .scr-top{position:absolute;left:0;top:76px;width:100%;height:50px;padding:0 24px;box-sizing:border-box;display:flex;align-items:center;gap:20px}
+        .scr-top svg{width:34px;height:34px}
+        .scr-top .is-gap{flex:1}
+        .scr-model{font-size:25px}
+        .scr-hello{position:absolute;left:0;top:380px;width:100%;text-align:center;font-size:30px;line-height:1.4}
+        .scr-hello svg{margin:0 auto 18px;width:46px;height:46px;stroke:none}
+        .scr-input{position:absolute;left:24px;right:24px;top:718px;height:84px;border-radius:42px;background:#fff;box-shadow:0 4px 14px rgba(27,23,56,.08);display:flex;align-items:center;gap:14px;padding:0 9px 0 24px;box-sizing:border-box;font-size:22px;color:#8d97a6}
+        .scr-input .is-gap{flex:1}
+        .scr-input svg{width:30px;height:30px;color:#1b1738}
+        .scr-wave{display:flex;align-items:center;justify-content:center;width:66px;height:66px;border-radius:50%;background:#dce9fb}
+        .scr-ctl{position:absolute;left:0;top:735px;width:100%;display:flex;align-items:center;justify-content:center;gap:12px}
+        .scr-ctl i{display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:50%;background:#fff}
+        .scr-ctl i svg{width:28px;height:28px}
+        .scr-ctl b{width:132px;height:76px;border-radius:38px;background:linear-gradient(180deg,#fff 0,#fff 45%,#8fb4ee 100%)}
+        .p10-answer{position:absolute;left:740px;top:160px;width:450px;min-height:208px;box-sizing:border-box;padding:26px 28px;background:#eef3fb;border-radius:28px;
           font-family:'Pretendard';font-size:32px;line-height:1.5;font-weight:600;color:#1b1738;letter-spacing:-0.02em;word-break:keep-all}
+        .p10-acts{display:flex;gap:30px;margin-top:22px;color:#1b1738}
+        .p10-acts svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
         .p10-side{position:absolute;left:1344px;top:107px;width:360px;height:761px;box-sizing:border-box;padding:30px 0;display:flex;flex-direction:column;align-items:center;justify-content:space-around;
           background:#fefbf9;border:solid 6px #48159c;border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
         .p10-item{width:285px;height:309px;padding:0 0 16px;box-sizing:border-box;border:solid 6px #eae0fd;border-radius:28px;background:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:10px;
           font-family:'Cafe24 Ssurround';font-size:44px;color:#31248a;letter-spacing:-0.04em}
-        .p10-item i{flex:1 1 auto;width:100%;border-radius:20px 20px 0 0;background:#48159c center / contain no-repeat;background-origin:content-box;padding:14px;box-sizing:border-box}
+        .p10-item i{flex:1 1 auto;width:100%;border-radius:20px 20px 0 0;background:#eef3fb center / cover no-repeat}
         .p10-item:hover{border-color:#8278ff}
         .p10-item.is-selected{border-color:#ff4ff9}
         .p10-item:disabled{opacity:.4;cursor:default;border-color:#eae0fd}
@@ -31,9 +63,12 @@
         .p10-panel{position:absolute;left:722px;top:77px;width:1091px;height:833px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:48px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
         .p10-round{position:absolute;left:918px;top:30px;width:678px;height:95px;box-sizing:border-box;padding:6px 40px 0;display:flex;align-items:center;justify-content:center;z-index:2;
           background:#91b9e7;border:solid 5px #1b1738;border-radius:48px;font-family:'Cafe24 Ssurround';font-size:50px;color:#fff;letter-spacing:-0.02em}
-        .p10-vs{position:absolute;left:785px;top:168px;width:972px;display:flex;justify-content:space-between}
-        .p10-vs .p10-item{width:454px;height:590px;padding:0 0 20px}
-        .p10-vs .p10-item i{flex:0 0 300px}
+        .p10-vs{position:absolute;left:785px;top:215px;width:972px;display:flex;justify-content:space-between}
+        .p10-vs .p10-item{width:454px;height:394px;padding:0 0 20px}
+        .p10-vs .p10-item i{flex:1 1 0;min-height:0}
+        .p10-vs.is-summary{top:168px}
+        .p10-vs.is-summary .p10-item{height:570px}
+        .p10-vs.is-summary .p10-item i{flex:0 0 300px}
         .p10-vs .p10-item small{padding:0 26px;font-family:'Pretendard';font-size:28px;line-height:1.45;font-weight:600;color:#1b1738;letter-spacing:-0.03em;word-break:keep-all;text-align:left}
 
         .p10-overview{position:absolute;left:232px;top:79px;width:1456px;height:810px;box-sizing:border-box;padding:40px 0 0;background:#fefbf9;border:solid 6px #48159c;border-radius:48px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
@@ -46,15 +81,14 @@
         .p10-result-title{position:absolute;left:0;top:40px;width:100%;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:70px;letter-spacing:-0.06em;
           background:linear-gradient(180deg,#02185c,#0362d7);-webkit-background-clip:text;background-clip:text;color:transparent}
         .p10-result .p10-item{position:absolute;left:46px;top:173px;width:325px;height:353px;cursor:default}
-        .p10-result-type{position:absolute;left:417px;top:192px;width:710px;height:291px;margin:0;display:flex;align-items:center;justify-content:center;text-align:center;
-          font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.3;color:#48159c;letter-spacing:-0.04em;word-break:keep-all}
+        .p10-result-type small{display:block;color:#1b1738;font-size:inherit}
+        .p10-result-type{position:absolute;left:417px;top:173px;width:710px;height:353px;margin:0;display:flex;flex-direction:column;justify-content:center;text-align:left;
+          font-family:'Cafe24 Ssurround';font-size:52px;line-height:1.3;color:#48159c;letter-spacing:-0.05em;word-break:keep-all}
 
         .p10-hit{position:absolute}
 
-        .p10.is-overview .p10-bubble, .p10.is-overview .p10-character{display:none}
-        /* 임시: Gemini 휴대폰 화면 이미지가 없어서 클릭할 자리를 색으로 표시. 화면 이미지 넣으면 이 두 줄 삭제 */
-        .p10 .hit-area{background:rgba(255,79,139,.3);outline:5px dashed #ff4f8b;outline-offset:-5px;border-radius:14px;animation:p10-hit-blink 1.2s ease-in-out infinite}
-        @keyframes p10-hit-blink{50%{background:rgba(255,79,139,.55)}}
+        .p10.is-overview .p10-bubble, .p10.is-overview .p10-character, .p10.is-result .p10-bubble{display:none}
+        .p10 .hit-area{padding:0;border:0;background:transparent;border-radius:30px;cursor:pointer}
 
         .p10 .is-off{display:none}
     </style>
@@ -73,7 +107,31 @@
             <div class="p10-overview-grid" id="p10OverviewGrid"></div>
           </div>
 
-          <div class="p10-phone is-off" id="p10Phone"></div>
+          <div class="p10-phone is-off" id="p10Phone" data-screen="home">
+            <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gstar" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fb4b4b"/><stop offset=".25" stop-color="#f6b40e"/><stop offset=".5" stop-color="#3b82f6"/><stop offset=".8" stop-color="#2f7df6"/><stop offset="1" stop-color="#12b866"/></linearGradient></defs></svg>
+
+            <div class="scr scr-home">
+              <div class="scr-status"><span>17:58</span><span>LTE ▂▄▆ 69</span></div>
+              <div class="scr-app"><span><svg viewBox="0 0 100 100" style="fill:url(#gstar)"><path d="M50 4C54 30 70 46 96 50C70 54 54 70 50 96C46 70 30 54 4 50C30 46 46 30 50 4Z"/></svg></span>Gemini</div>
+              <div class="scr-nav"><svg viewBox="0 0 24 24"><path d="M7 5v14M12 5v14M17 5v14"/></svg><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="5"/></svg><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></div>
+            </div>
+
+            <div class="scr scr-chat">
+              <div class="scr-status"><span>17:58</span><span>LTE ▂▄▆ 69</span></div>
+              <div class="scr-top"><svg viewBox="0 0 24 24"><path d="M4 9h16M4 15h16"/></svg><span class="scr-model">Gemini Flash ⌄</span><span class="is-gap"></span><svg viewBox="0 0 24 24"><path d="M15 4l5 5-10 10H5v-5z"/></svg></div>
+              <div class="scr-hello"><svg viewBox="0 0 100 100" style="fill:url(#gstar)"><path d="M50 4C54 30 70 46 96 50C70 54 54 70 50 96C46 70 30 54 4 50C30 46 46 30 50 4Z"/></svg>안녕하세요.<br>시작해 볼까요?</div>
+              <div class="scr-input"><svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg><span class="is-gap">Gemini에게 물어보세요</span><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M6 11a6 6 0 0012 0M12 17v4"/></svg><span class="scr-wave"><svg viewBox="0 0 24 24"><path d="M6 9v6M10 5v14M14 8v8M18 10v4"/></svg></span></div>
+              <div class="scr-nav"><svg viewBox="0 0 24 24"><path d="M7 5v14M12 5v14M17 5v14"/></svg><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="5"/></svg><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></div>
+            </div>
+
+            <div class="scr scr-live">
+              <div class="scr-status"><span>17:58</span><span>LTE ▂▄▆ 69</span></div>
+              <div class="scr-top"><svg viewBox="0 0 24 24"><path d="M4 9h16M4 15h16"/></svg><span class="is-gap"></span><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8 12h5M8 16h3"/></svg><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="19" cy="12" r="1.3" fill="currentColor"/></svg></div>
+              <div class="scr-hello"><svg viewBox="0 0 100 100" style="fill:url(#gstar)"><path d="M50 4C54 30 70 46 96 50C70 54 54 70 50 96C46 70 30 54 4 50C30 46 46 30 50 4Z"/></svg>안녕하세요.<br>시작해 볼까요?</div>
+              <div class="scr-ctl"><i><svg viewBox="0 0 24 24"><rect x="3" y="6" width="14" height="12" rx="3"/><path d="M17 10l4-2v8l-4-2"/></svg></i><i><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 16V8M8 12l4-4 4 4"/></svg></i><b></b><i><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M6 11a6 6 0 0012 0M12 17v4"/></svg></i><i><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></i></div>
+              <div class="scr-nav"><svg viewBox="0 0 24 24"><path d="M7 5v14M12 5v14M17 5v14"/></svg><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="5"/></svg><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></div>
+            </div>
+          </div>
           <div class="p10-answer is-off" id="p10Answer"></div>
           <button type="button" class="hit-area p10-hit is-off" id="p10Hit" aria-label="클릭"></button>
           <div class="p10-side is-off" id="p10Side"></div>
@@ -165,7 +223,10 @@
 
     function show(ids) {
       ['p10Overview', 'p10Phone', 'p10Answer', 'p10Hit', 'p10Side', 'p10VsView', 'p10Result', 'p10Next'].forEach((id) => $(id).classList.toggle('is-off', !ids.includes(id)));
-      document.querySelector('.p10').classList.remove('is-overview');
+      document.querySelector('.p10').classList.remove('is-overview', 'is-result');
+      // 다음 버튼: 큰 패널 화면은 패널 안 가운데 빈 공간에, 나머지는 기본(오른쪽 아래)
+      const at = ids.includes('p10Overview') ? [758, 742] : ids.includes('p10VsView') ? [1065, 665] : ids.includes('p10Result') ? [1005, 670] : null;
+      nextBtn.style.cssText = at ? 'left:' + at[0] + 'px;top:' + at[1] + 'px;right:auto;bottom:auto' : '';
       clearFingers();
     }
 
@@ -191,8 +252,8 @@
     function clickGuide(bubbleHtml, screen, rect, then) {
       show(['p10Phone', 'p10Hit']);
       bubble.innerHTML = bubbleHtml;
-      phone.style.backgroundImage = "url('img/p10_screen_" + screen + ".png')";
-      hit.style.cssText = 'left:' + rect[0] + 'px;top:' + rect[1] + 'px;width:' + rect[2] + 'px;height:' + rect[3] + 'px';
+      phone.dataset.screen = screen;
+      hit.style.cssText = 'left:' + rect[0] + 'px;top:' + rect[1] + 'px;width:' + rect[2] + 'px;height:' + rect[3] + 'px;border-radius:' + (rect[4] || '30px');
       pointFingerAt(hit);
       hit.onclick = () => { playClick(); then(); };
     }
@@ -201,14 +262,15 @@
       show(['p10Overview']);
       document.querySelector('.p10').classList.add('is-overview');
       Object.keys(ITEMS).forEach((k) => $('p10OverviewGrid').appendChild(itemBtn(k)));
-      nextThen(() => clickGuide('Gemini 앱을 클릭해요.', 'home', [913, 335, 166, 166],
-        () => clickGuide('Gemini Live 모드<br>버튼을 클릭해요.', 'live', [775, 431, 369, 108], () => match(0))));
+      nextThen(() => clickGuide('Gemini 앱을 클릭해요.', 'home', [908, 395, 110, 110, '30px'],
+        () => clickGuide('Gemini Live 모드<br>버튼을 클릭해요.', 'chat', [1096, 748, 82, 82, '50%'], () => match(0))));
     }
 
     function match(m, asked) {
       asked = asked || [];
       const pair = ROUND1[m];
       show(['p10Phone', 'p10Side']);
+      phone.dataset.screen = 'live';
       bubble.innerHTML = PICK_ASK;
       side.innerHTML = '';
       pair.forEach((key) => {
@@ -222,17 +284,27 @@
       });
     }
 
+    const ACTS = '<div class="p10-acts">'
+      + '<svg viewBox="0 0 24 24"><path d="M7 11v9H4v-9zM7 11l4-7c1.5 0 2.5 1.2 2.2 2.7L12.7 9H19a2 2 0 011.9 2.6l-1.8 6.5A2 2 0 0117.2 20H7"/></svg>'
+      + '<svg viewBox="0 0 24 24"><path d="M7 13V4H4v9zM7 13l4 7c1.5 0 2.5-1.200 2.2-2.700L12.700 15H19a2 2 0 001.900-2.600L19.100 5.900A2 2 0 0017.200 4H7"/></svg>'
+      + '<svg viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M5 13v7h14v-7"/></svg>'
+      + '<svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2.500"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/></svg>'
+      + '<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.300" fill="currentColor"/><circle cx="12" cy="12" r="1.300" fill="currentColor"/><circle cx="19" cy="12" r="1.300" fill="currentColor"/></svg>'
+      + '</div>';
+
     function askGemini(m, key, asked) {
       show(['p10Phone', 'p10Answer']);
+      phone.dataset.screen = 'answer';
       bubble.innerHTML = '수학여행에 ' + ITEMS[key].obj + '<br>가져가면 좋은 점은<br>무엇인가요?';
-      typeText(answer, ITEMS[key].answer, () => nextThen(() => {
+      answer.innerHTML = '<span></span>';
+      typeText(answer.firstChild, ITEMS[key].answer, () => { answer.insertAdjacentHTML('beforeend', ACTS); nextThen(() => {
         if (asked.length < 2) match(m, asked);
         else choose('ROUND 1&nbsp;&nbsp;&nbsp;' + (m + 1) + '/4', '어떤 준비물을<br>가져가는 게 좋을까?', ROUND1[m], true, (w) => {
           round1Winners.push(w);
           if (m < 3) match(m + 1);
           else round2(0);
         });
-      }));
+      }); });
     }
 
     const round1Winners = [];
@@ -249,6 +321,8 @@
 
     function choose(roundText, ask, pair, withSummary, done) {
       show(['p10VsView']);
+      vs.classList.toggle('is-summary', !!withSummary);
+      nextBtn.style.top = withSummary ? '765px' : '665px';
       $('p10Round').innerHTML = roundText;
       bubble.innerHTML = ask;
       vs.innerHTML = '';
@@ -267,11 +341,11 @@
 
     function result(key) {
       show(['p10Result']);
-      bubble.innerHTML = 'Gemini Live의 도움을 받아<br>나에게 꼭 필요한 준비물을<br>골랐어요!';
+      document.querySelector('.p10').classList.add('is-result');
       const btn = itemBtn(key);
       btn.disabled = false;
       $('p10ResultItem').replaceChildren(btn);
-      $('p10ResultType').innerHTML = ITEMS[key].type;
+      $('p10ResultType').innerHTML = ITEMS[key].type + '<small>Gemini Live의 도움을 받아<br>나에게 꼭 필요한 준비물을 골랐어요!</small>';
       nextThen(() => navigateTo('page11.html'));
     }
 
