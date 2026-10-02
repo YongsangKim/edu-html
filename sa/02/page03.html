@@ -11,15 +11,19 @@
         main{position:absolute;left:0;top:120px;width:1920px;height:960px}
 
         .p03-note{position:absolute;left:222px;top:95px;width:1476px;height:790px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:48px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
-        .p03-tab{position:absolute;left:303px;top:44px;height:100px;padding:6px 60px 0;box-sizing:border-box;display:flex;align-items:center;background:#91b9e7;border:solid 5px #1b1738;border-radius:50px;box-shadow:0 10px 0 0 #becde7;
+        .p03-tab{position:absolute;left:303px;top:44px;height:100px;padding:6px 60px 0 30px;box-sizing:border-box;display:flex;align-items:center;background:#91b9e7;border:solid 5px #1b1738;border-radius:50px;box-shadow:0 10px 0 0 #becde7;
           font-family:'Cafe24 Ssurround';font-size:56px;color:#fff;letter-spacing:-0.04em;z-index:1}
-        .p03-ask{position:absolute;left:222px;top:175px;width:1476px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.25;color:#48159c;letter-spacing:-0.04em;word-break:keep-all}
-        .p03-ask span{background:linear-gradient(transparent 62%,#ffd83d 62%,#ffd83d 90%,transparent 90%)}
+        .p03-pencil{margin-right:16px;font-size:60px;line-height:1}
+        /* 질문이 한 줄/두 줄(주제마다 다름)이어도 질문-예시-다음 간격이 같도록 위에서부터 이어 붙임 */
+        .p03-flow{position:absolute;left:222px;top:165px;width:1476px;display:flex;flex-direction:column;align-items:center}
+        .p03-ask{width:100%;margin:10px 0 0 0;text-align:center;font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.25;color:#48159c;letter-spacing:-0.04em;word-break:keep-all}
+        .p03-ask em{font-style:normal;background:linear-gradient(transparent 62%,#ffd83d 62%,#ffd83d 90%,transparent 90%)}
 
-        .p03-opts{position:absolute;left:434px;top:345px;width:1052px;display:flex;flex-direction:column;gap:26px}
+        .p03-opts{width:1052px;margin-top:40px;display:flex;flex-direction:column;gap:40px}
         .p03-opts .card-btn{height:100px;font-size:50px;letter-spacing:-0.04em}
 
-        .p03-next{position:absolute;left:756px;top:735px}
+        .p03-next{margin-top:50px}
+        .p03-next img{display:block}
 
         .p03-card{width:900px;height:auto;padding:36px 50px 34px}
         .p03-card .photo-card-title{margin:0 0 20px}
@@ -46,13 +50,14 @@
       <div id="stage" class="stage">
         <main class="bg-default">
           <div class="p03-note"></div>
-          <div class="p03-tab">오늘의 취재 질문</div>
-          <p class="p03-ask"><span id="p03Ask"></span></p>
-          <div class="p03-opts" id="p03Opts"></div>
-
-          <a href="javascript:;" class="js-sfx p03-next is-disabled" id="p03Next" data-sound="sound/click.mp3">
-            <img src="../../img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" alt="다음">
-          </a>
+          <div class="p03-tab"><span class="p03-pencil">✏️</span>오늘의 취재 질문</div>
+          <div class="p03-flow">
+            <p class="p03-ask"><span id="p03Ask"></span></p>
+            <div class="p03-opts" id="p03Opts"></div>
+            <a href="javascript:;" class="js-sfx p03-next is-disabled" id="p03Next" data-sound="sound/click.mp3">
+              <img src="../../img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" alt="다음">
+            </a>
+          </div>
 
           <div class="photo-modal is-off" id="p03Modal">
             <div class="photo-card p03-card" id="p03Card">
@@ -91,7 +96,7 @@
   (function () {
     const TOPICS = {
       effort: {
-        ask: '목표를 정하고 꾸준히 노력한 일이 있나요?',
+        ask: '목표를 정하고 꾸준히 <em>노력한 일이 있나요</em>?',
         title: '끈기 취재 카드',
         options: [
           { text: '매일 운동했어요.', card: '매일 꾸준히 운동했어요!' },
@@ -100,7 +105,7 @@
         ]
       },
       praise: {
-        ask: '최근에 선생님이나 가족에게<br>칭찬받은 일이 있나요?',
+        ask: '최근에 선생님이나 가족에게 <em>칭찬받은 일이 있나요</em>?',
         title: '칭찬 취재 카드',
         options: [
           { text: '수업에 열심히 참여했어요.', card: '수업을 열심히 들었어요!' },
@@ -109,7 +114,7 @@
         ]
       },
       help: {
-        ask: '최근에 가족이나 친구를 도와준 일이 있나요?',
+        ask: '최근에 가족이나 친구를 <em>도와준 일이 있나요</em>?',
         title: '도움 취재 카드',
         options: [
           { text: '집안일을 도왔어요.', card: '집안일을 도왔어요!' },
@@ -118,7 +123,7 @@
         ]
       },
       strength: {
-        ask: '친구들과 함께할 때<br>내가 잘하는 것은 무엇인가요?',
+        ask: '친구들과 함께할 때<br>내가 <em>잘하는 것</em>은 무엇인가요?',
         title: '강점 취재 카드',
         options: [
           { text: '함께 문제 해결하기', card: '함께 문제를 해결할 수 있어요!' },

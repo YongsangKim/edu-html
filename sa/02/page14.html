@@ -6,14 +6,12 @@
     <title>안전한 뉴스 판별하기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 51~75p. 게이지 캐릭터 img/p14_runner.png(100%에서 p14_runner_done.png), 보드 아이콘 img/p14_icon_{ok|risk}.png.
+        /* 디자인 없음 - 기획서 51~75p. 보드 아이콘 img/p14_icon_{ok|risk}.png.
            보도 위험이 정답인 기사는 개인정보(.p14-pii)를 전부 눌러 지워야 다음 기사로 넘어감 */
         main{position:absolute;left:0;top:120px;width:1920px;height:960px}
 
         .p14-gauge{left:106px;top:60px;width:1709px}
         .p14-gauge:before{background-image:url('img/p14_star.png')}
-        .p14-runner{position:absolute;left:40px;top:-60px;width:130px;height:150px;margin-left:-65px;background:url('img/p14_runner.png') center bottom / contain no-repeat;transition:left .4s ease;z-index:2}
-        .p14-runner.is-done{background-image:url('img/p14_runner_done.png')}
 
         .p14-article{position:absolute;left:83px;top:226px;width:738px;height:497px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:36px;overflow:hidden;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
         .p14-article-head{height:121px;display:flex;align-items:center;justify-content:center;padding:0 30px;background:#48159c;font-family:'Cafe24 Ssurround';font-size:48px;line-height:1.15;color:#fff;letter-spacing:-0.06em;text-align:center;word-break:keep-all}
@@ -50,7 +48,7 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default" id="p14Main">
-          <div class="gauge is-thin p14-gauge"><div class="gauge-fill" id="p14GaugeFill"></div><span class="p14-runner" id="p14Runner"></span></div>
+          <div class="gauge is-thin p14-gauge"><div class="gauge-fill" id="p14GaugeFill"></div></div>
 
           <div class="p14-article">
             <div class="p14-article-head" id="p14Head"></div>
@@ -108,7 +106,7 @@
       { title: '박모 군 집주소 공개, 서울시···', answer: 'risk',
         body: '박모 군은 매일 하교 후, [[서울시 가상구 안전로 12-3번지]]에 있는 집으로 귀가합니다.' },
       { title: '필요한 사람은 언제든지 환영', answer: 'risk',
-        body: '[[○○학교 학생인 김철수]]의 전화번호는 [[010-0000-0000]]입니다. 필요한 사람은 언제든지 연락해도 됩니다.' },
+        body: '[[○○학교]] 학생인 [[김철수]]의 전화번호는 [[010-0000-0000]]입니다. 필요한 사람은 언제든지 연락해도 됩니다.' },
       { title: '따뜻한 어린이상 수상 예정', answer: 'ok',
         body: '모 중학교의 학생이 친구를 도와주고 선생님께 칭찬을 받았다고 합니다. 친구도 고마운 마음을 전달했습니다.' },
       { title: '도내 합창대회 수상자 SNS 계정', answer: 'risk',
@@ -122,7 +120,6 @@
     const head = $('p14Head');
     const body = $('p14Body');
     const gaugeFill = $('p14GaugeFill');
-    const runner = $('p14Runner');
     const good = $('p14Good');
     const goodText = $('p14GoodText');
     const tryAgain = $('p14TryAgain');
@@ -163,8 +160,6 @@
       solved += 1;
       const pct = solved >= ARTICLES.length ? 100 : solved * (100 / ARTICLES.length);
       gaugeFill.style.width = pct + '%';
-      runner.style.left = 'calc(40px + (100% - 80px) * ' + (pct / 100) + ')';
-      runner.classList.toggle('is-done', pct >= 100);
 
       setTimeout(() => {
         busy = false;
