@@ -2216,6 +2216,54 @@ function waveSvg(amp, cycles, opts) {
     '<path d="' + d + '" fill="none" stroke="' + o.color + '" stroke-width="' + o.stroke + '" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 }
 
+/* 막대·꺾은선 그래프 SVG 문자열(gwa/02 기온 그래프). data: [{ label: '0시', value: 15 }, ...]
+   opts: type('bar'|'line'), width/height(viewBox), max/step(세로축), unit(세로축 제목), xTitle, color, title,
+   hide(물음표로 가릴 칸 번호), mark(강조 칸 번호), font(글꼴) */
+function chartSvg(data, opts) {
+  const o = Object.assign({ type: 'bar', width: 900, height: 480, max: 35, step: 5, unit: '기온(℃)', xTitle: '시간', color: '#ff7a1a', title: '', hide: -1, mark: -1, font: 'Pretendard' }, opts);
+  const top = o.title ? 70 : 40;
+  const pad = { l: 80, r: 30, t: top, b: 70 };
+  const w = o.width - pad.l - pad.r;
+  const h = o.height - pad.t - pad.b;
+  const gap = w / data.length;
+  const y = (v) => pad.t + h - (v / o.max) * h;
+  const x = (i) => pad.l + gap * i + gap / 2;
+  let s = '<svg viewBox="0 0 ' + o.width + ' ' + o.height + '" font-family="' + o.font + '" aria-hidden="true">';
+  if (o.title) s += '<text x="' + o.width / 2 + '" y="38" text-anchor="middle" font-size="30" font-weight="700" fill="#1b1738">' + o.title + '</text>';
+  for (let v = 0; v <= o.max; v += o.step) {
+    s += '<line x1="' + pad.l + '" x2="' + (pad.l + w) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="#e1e4ec" stroke-width="2"/>';
+    s += '<text x="' + (pad.l - 12) + '" y="' + (y(v) + 8) + '" text-anchor="end" font-size="22" fill="#5b5e6e">' + v + '</text>';
+  }
+  s += '<text x="' + (pad.l - 12) + '" y="' + (pad.t - 14) + '" text-anchor="end" font-size="20" fill="#5b5e6e">' + o.unit + '</text>';
+  s += '<line x1="' + pad.l + '" x2="' + pad.l + '" y1="' + pad.t + '" y2="' + (pad.t + h) + '" stroke="#1b1738" stroke-width="3"/>';
+  s += '<line x1="' + pad.l + '" x2="' + (pad.l + w) + '" y1="' + (pad.t + h) + '" y2="' + (pad.t + h) + '" stroke="#1b1738" stroke-width="3"/>';
+  data.forEach((d, i) => {
+    const hidden = i === o.hide;
+    const marked = i === o.mark;
+    s += '<text x="' + x(i) + '" y="' + (pad.t + h + 34) + '" text-anchor="middle" font-size="22" fill="#1b1738"' + (marked ? ' font-weight="700"' : '') + '>' + d.label + '</text>';
+    if (hidden) {
+      s += '<rect x="' + (x(i) - gap * 0.35) + '" y="' + pad.t + '" width="' + gap * 0.7 + '" height="' + h + '" rx="10" fill="#d9dbe4" opacity=".8"/>' +
+        '<text x="' + x(i) + '" y="' + (pad.t + h / 2 + 22) + '" text-anchor="middle" font-size="64" font-weight="700" fill="#48159c">?</text>';
+      return;
+    }
+    if (o.type === 'bar') {
+      s += '<rect x="' + (x(i) - gap * 0.3) + '" y="' + y(d.value) + '" width="' + gap * 0.6 + '" height="' + (pad.t + h - y(d.value)) + '" fill="' + (marked ? '#ffd83d' : o.color) + '"' + (marked ? ' stroke="#ff9f1a" stroke-width="5"' : '') + '/>';
+    }
+  });
+  if (o.type === 'line') {
+    // 가린 칸(hide)에서 선을 끊어 답이 드러나지 않게
+    const segs = [[]];
+    data.forEach((d, i) => { if (i === o.hide) segs.push([]); else segs[segs.length - 1].push(x(i) + ',' + y(d.value)); });
+    segs.forEach((seg) => { if (seg.length > 1) s += '<polyline points="' + seg.join(' ') + '" fill="none" stroke="' + o.color + '" stroke-width="5" stroke-linejoin="round"/>'; });
+    data.forEach((d, i) => {
+      if (i === o.hide) return;
+      s += '<circle cx="' + x(i) + '" cy="' + y(d.value) + '" r="' + (i === o.mark ? 13 : 8) + '" fill="' + (i === o.mark ? '#ffd83d' : o.color) + '"' + (i === o.mark ? ' stroke="#ff9f1a" stroke-width="4"' : '') + '/>';
+    });
+  }
+  if (o.xTitle) s += '<text x="' + (pad.l + w) + '" y="' + (pad.t + h + 62) + '" text-anchor="end" font-size="20" fill="#5b5e6e">' + o.xTitle + '</text>';
+  return s + '</svg>';
+}
+
 function shuffleArray(arr) {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {

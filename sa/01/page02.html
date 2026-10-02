@@ -48,7 +48,7 @@
       <div id="stage" class="stage">
         <main>
 
-          <img class="p02-stage-bg" id="p02StageBg" src="" alt="">
+          <img class="p02-stage-bg" src="img/p02_bg.png" alt="">
 
           <div class="p02-badge">
             <span class="p02-badge-num">STAGE <span id="p02StageNum">1</span></span>
@@ -103,7 +103,7 @@
   <script src="../../js/common.js"></script>
   <script>
   /* 소방관~개발자 6개 직업 중 매 플레이마다 3개를 무작위로 뽑아 STAGE1~3으로
-     출제. 힌트 이미지는 직업별로 img/p02_bg_{id}.png, 정답 카드 사진은 img/p02_photo_{id}.png
+     출제. 배경은 한 장(img/p02_bg.png), 힌트 사진은 img/p02_hint_{id}_{1~3}.png, 정답 카드 사진은 img/p02_photo_{id}.png
      로 준비(현재는 소방관 분만 실제 디자인 있음, 나머지 5개는 추후 같은 이름
      규칙으로 이미지만 채워 넣으면 됨) — STAGE 배지/별 진행도는 이미지에 굽지
      않고 실시간 텍스트/아이콘으로 그려서 직업이 어느 스테이지에 나오든
@@ -131,7 +131,6 @@
     let stageIndex = 0;
     let answered = false;
 
-    const stageBg = document.getElementById('p02StageBg');
     const hintsBox = document.getElementById('p02Hints');
     const stageNumEl = document.getElementById('p02StageNum');
     const stars = Array.from(document.querySelectorAll('.p02-stars .find-star'));
@@ -159,7 +158,6 @@
       stageNumEl.textContent = String(stageIndex + 1);
       fillStars(stageIndex);
 
-      stageBg.src = `img/p02_bg_${job.id}.png`;
       hintsBox.innerHTML = job.hints ? job.hints.map((name, i) =>
         '<div class="p02-hint slot' + (i + 1) + '"><i style="background-image:url(\x27img/p02_hint_' + job.id + '_' + (i + 1) + '.png\x27)"></i><span>' + name + '</span></div>').join('') : '';
       // 사진: img/p02_photo_{id}.png (아직 없으면 보라 칸 더미로 보임)

@@ -42,12 +42,13 @@
             <div class="toc-accordion">
               <button class="toc-accordion-toggle js-sfx" data-sound="sound/click.mp3">2차시</button>
               <div class="toc-accordion-panel">
-                <a href="javascript:;" class="toc-sub-item">01</a>
-                <a href="javascript:;" class="toc-sub-item">02</a>
-                <a href="javascript:;" class="toc-sub-item">03</a>
-                <a href="javascript:;" class="toc-sub-item">04</a>
-                <a href="javascript:;" class="toc-sub-item">05</a>
-                <a href="javascript:;" class="toc-sub-item">06</a>
+                <a href="${BASE}gwa/02/page01.html" class="toc-sub-item">1) 생선 무게를 재고 블록으로 나타내요</a>
+                <a href="${BASE}gwa/02/page04.html" class="toc-sub-item">2) 개념 이해 영상</a>
+                <a href="${BASE}gwa/02/page05.html" class="toc-sub-item">3) 순서대로! 데이터 측정에서 시각화까지</a>
+                <a href="${BASE}gwa/02/page07.html" class="toc-sub-item">4) 직접 만드는 막대그래프와 꺾은선그래프</a>
+                <a href="${BASE}gwa/02/page10.html" class="toc-sub-item">5) AI에게 부탁해! 데이터 시각화!</a>
+                <a href="${BASE}gwa/02/page11.html" class="toc-sub-item">6) 퀴즈 풀기</a>
+                <a href="${BASE}gwa/02/page12.html" class="toc-sub-item">7) 그래프 해석 왕!</a>
               </div>
             </div>
 
