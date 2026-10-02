@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>퀴즈 풀기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 27~32p. Q1 2지선다, Q2·Q4 O/X(공용 아이콘), Q3 그래프 2개 중 고르기(공용 chartSvg), Q5 3지선다. 오답은 문항별 힌트(data-wrong) */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+        .quiz-ask-box{padding:30px 60px 30px 30px}
+
+        .p11-opt2 .card-btn{position:absolute;top:590px}
+        .p11-opt2 .p11-a{left:410px}
+        .p11-opt2 .p11-b{left:1040px}
+
+        .p11-ox{position:absolute;top:470px;width:360px;height:360px;padding:0;border:0;background:none;cursor:pointer}
+        .p11-ox img{width:100%;height:100%;object-fit:contain;display:block}
+        .p11-o{left:480px}
+        .p11-x{left:1080px}
+
+        .p11-graphs{position:absolute;left:180px;top:440px;width:1560px;display:grid;grid-template-columns:1fr 1fr;gap:60px}
+        .p11-graph{height:440px;padding:0;box-sizing:border-box;border:solid 6px #91b9e7;border-radius:30px;background:#fff;cursor:pointer;display:flex;flex-direction:column;overflow:hidden;
+          font-family:'Cafe24 Ssurround';font-size:44px;color:#48159c;transition:border-color .15s,transform .15s}
+        .p11-graph:hover{border-color:#48159c;transform:translateY(-6px)}
+        .p11-graph.is-selected{border-color:#ff2fc2}
+        .p11-graph b{flex:0 0 70px;display:flex;align-items:center;justify-content:center;padding-top:6px;font-weight:normal;background:#eef3fb}
+        .p11-graph span{flex:1 1 auto;display:block;padding:10px 20px}
+        .p11-graph svg{width:100%;height:100%;display:block}
+
+        .p11-opt3 .card-btn{position:absolute;left:210px;width:1500px;height:110px;font-size:46px;text-align:left;padding:10px 50px 4px}
+        .p11-opt3 .p11-a{top:450px}
+        .p11-opt3 .p11-b{top:610px}
+        .p11-opt3 .p11-c{top:770px}
+        .deg{font-family:sans-serif}
+
+        .p11-hint-title{align-self:flex-start;margin:0;height:64px;padding:6px 32px 0;box-sizing:border-box;display:flex;align-items:center;background:#8278ff;border-radius:32px;font-family:'Cafe24 Ssurround';font-size:40px;color:#fff}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="quiz-stage">
+          <div class="step-flow">
+
+            <div class="step-panel p11-opt2">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q1.</span>
+                  <p class="quiz-ask">저울을 사용하여 무게를 확인하거나, 온도계를 사용하여 기온을 확인할 수 있어요. 이것처럼 도구를 사용하여 숫자를 확인하는 것을 뭐라고 할까요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz" data-wrong="도구를 사용해 정확한 숫자를 알아내는 것을<br>‘측정’이라고 해요!">
+                <button class="answer-pick card-btn is-quiz p11-a" data-correct="true">데이터 측정</button>
+                <button class="answer-pick card-btn is-quiz p11-b" data-correct="false">데이터 시각화</button>
+              </div>
+            </div>
+
+            <div class="step-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q2.</span>
+                  <p class="quiz-ask">복잡한 숫자를 한눈에 알아보기 쉽게 그림이나 그래프로 만드는 것을 '시각화'라고 할까요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz" data-wrong="눈에 잘 보이게 그림이나 그래프로<br>나타내는 것이 ‘시각화’예요!">
+                <button class="answer-pick p11-ox p11-o" data-correct="true" aria-label="O">
+                  <img class="js-img-swap" src="../../img/common/icon_o.png" data-src-on="../../img/common/icon_o_on.png" alt="O">
+                </button>
+                <button class="answer-pick p11-ox p11-x" data-correct="false" aria-label="X">
+                  <img class="js-img-swap" src="../../img/common/icon_x.png" data-src-on="../../img/common/icon_x_on.png" alt="X">
+                </button>
+              </div>
+            </div>
+
+            <div class="step-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q3.</span>
+                  <p class="quiz-ask">자료를 막대 그래프로 시각화 한 것은 어떤 것일까요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz p11-graphs" data-wrong="특정한 값을 막대로 표시한 것을<br>막대그래프라고 해요.">
+                <button class="answer-pick p11-graph" data-correct="true" data-type="bar"><b><span class="deg">①</span></b><span></span></button>
+                <button class="answer-pick p11-graph" data-correct="false" data-type="line"><b><span class="deg">②</span></b><span></span></button>
+              </div>
+            </div>
+
+            <div class="step-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q4.</span>
+                  <p class="quiz-ask">꺾은선 그래프를 사용하여 자료를 시각화 하면, 자료가 점점 증가하는지, 점점 감소하는지 쉽게 확인할 수 있다.</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz" data-wrong="꺾은선 그래프를 이용하면 자료들이 점점 증가하는지,<br>감소하는지 한눈에 확인할 수 있어요.">
+                <button class="answer-pick p11-ox p11-o" data-correct="true" aria-label="O">
+                  <img class="js-img-swap" src="../../img/common/icon_o.png" data-src-on="../../img/common/icon_o_on.png" alt="O">
+                </button>
+                <button class="answer-pick p11-ox p11-x" data-correct="false" aria-label="X">
+                  <img class="js-img-swap" src="../../img/common/icon_x.png" data-src-on="../../img/common/icon_x_on.png" alt="X">
+                </button>
+              </div>
+            </div>
+
+            <div class="step-panel p11-opt3">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q5.</span>
+                  <p class="quiz-ask">기록된 자료를 막대 그래프로 시각화 하려 할 때 ChatGPT에게 어떻게 부탁해야 할까요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz" data-next="page12.html" data-wrong="원하는 답을 얻기 위해서는 정확하게 부탁해야 해요.<br>우리는 막대그래프로 시각화된 자료를 얻어야 해요.">
+                <button class="answer-pick card-btn p11-a" data-correct="false"><span class="deg">①</span> 기록된 자료를 꺾은선 그래프로 시각화 해줘.</button>
+                <button class="answer-pick card-btn p11-b" data-correct="true"><span class="deg">②</span> 기록된 자료를 막대 그래프로 시각화 해줘.</button>
+                <button class="answer-pick card-btn p11-c" data-correct="false"><span class="deg">③</span> 자료 중 가장 높은 값은 무엇인지 알려줘.</button>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="ox-result-correct is-avatar is-off" data-sound="sound/correct.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct_gwa.png" alt=""></div>
+              <p class="avatar-popup-text">정답이에요!</p>
+              <div class="avatar-popup-extra"><img src="../../img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div>
+          <div class="ox-result-wrong is-avatar is-off" data-sound="sound/incorrect.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="p11-hint-title">다시 한번 생각해볼까요?</p>
+                <p class="avatar-popup-text is-small">문장을 다시 한 번 잘 읽어봐요.</p>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="퀴즈 풀기" data-next="page12.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+    // Q3 보기 그래프: 하루 기온 자료를 막대/꺾은선으로
+    var DATA = [15, 15, 12, 20, 25, 30, 20, 15, 14].map(function (v, i) { return { label: i * 3 + '시', value: v }; });
+    document.querySelectorAll('.p11-graph').forEach(function (btn) {
+      btn.querySelector(':scope > span').innerHTML = chartSvg(DATA, { type: btn.dataset.type, width: 740, height: 340 });
+    });
+  </script>
+</body>
+</html>

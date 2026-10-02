@@ -6,7 +6,7 @@
     <title>우리 동네 이웃 앨범 만들기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 66~73p. 앨범 앞표지(앨범 보기) → 장소 6장(◀ ▶로 넘김) → 뒤표지(다시하기 · 다음 차시).
+        /* 디자인 없음 - 기획서 66~73p. 앨범 앞표지(앨범 보기) → 장소 6장(◀ ▶로 넘김) → 마지막 장에서 ▶ → page14(뒤표지·마무리).
            표지 삽화 img/p13_cover.png, 장소 사진은 page12와 같은 img/p12_place_{key}.png, 이웃 사진 img/p05_job_{key}.png */
         main{position:absolute;left:0;top:120px;width:1920px;height:960px}
         .p13-view.is-off{display:none}
@@ -14,29 +14,37 @@
         .p13-book{position:absolute;left:210px;top:40px;width:1500px;height:860px;box-sizing:border-box;padding:30px;border-radius:40px;background:#8b5a3c;box-shadow:0 16px 0 0 #5e3a24;display:flex;gap:8px}
         .p13-page{flex:1 1 0;position:relative;border-radius:22px;background:#fffaf0;box-shadow:inset 0 0 30px rgba(139,90,60,.15);overflow:hidden;box-sizing:border-box;padding:40px}
 
-        .p13-cover{position:absolute;left:560px;top:40px;width:800px;height:860px;box-sizing:border-box;padding:60px 50px;border-radius:30px 50px 50px 30px;background:#48159c;box-shadow:inset 22px 0 0 #31248a,0 16px 0 0 #1b1738;
+        .p13-cover{position:absolute;left:760px;top:40px;width:800px;height:860px;box-sizing:border-box;padding:60px 50px;border-radius:30px 50px 50px 30px;background:#48159c;box-shadow:inset 22px 0 0 #31248a,0 16px 0 0 #1b1738;
           display:flex;flex-direction:column;align-items:center;gap:30px;font-family:'Cafe24 Ssurround';color:#fff;text-align:center}
         .p13-cover h2{margin:0;font-weight:normal;font-size:80px;letter-spacing:-0.05em}
         .p13-cover i{flex:1 1 auto;width:100%;border-radius:24px;background:#e6dafe url('img/p13_cover.png') center / cover no-repeat}
         .p13-cover p{margin:0;font-size:44px;line-height:1.3}
-        .p13-cover .card-btn{min-width:0;width:360px}
+        .p13-cover .card-btn{min-width:0;width:400px;white-space:nowrap}
+        /* 기획서 66p: 안내 문구는 캐릭터 위 말풍선(공용 .guide-bubble) */
+        .p13-front-bubble{width:560px;font-size:50px}
         .p13-character{position:absolute;left:60px;top:380px;width:460px;height:560px;display:flex;align-items:flex-end;justify-content:center}
         .p13-character img{max-width:100%;max-height:100%;object-fit:contain}
 
         .p13-photo{width:100%;height:100%;border:solid 12px #fff;box-sizing:border-box;border-radius:10px;background:#dfe7f5 center / cover no-repeat;box-shadow:0 6px 16px rgba(0,0,0,.2);transform:rotate(-1.5deg)}
         .p13-right{display:flex;flex-direction:column;gap:22px;font-family:'Cafe24 Ssurround';color:#1b1738;letter-spacing:-0.05em}
-        .p13-place{margin:0;font-size:58px;color:#48159c}
-        .p13-label{margin:10px 0 0;font-size:36px;color:#8278ff}
+        /* 기획서 67p: 장소 이름은 사진 아래 */
+        .p13-left{display:flex;flex-direction:column;align-items:center;gap:26px}
+        .p13-left .p13-photo{flex:1 1 auto;height:auto}
+        .p13-place{margin:0;font-family:'Cafe24 Ssurround';font-size:56px;color:#48159c;letter-spacing:-0.05em}
+        .p13-right{justify-content:center}
+        .p13-label{margin:10px 0 0;font-size:56px;color:#8278ff}
         .p13-job{display:flex;align-items:center;gap:24px;font-size:48px}
         .p13-job i{width:200px;height:200px;border-radius:24px;border:solid 5px #91b9e7;background:#dfe7f5 center top / cover no-repeat}
         .p13-role{margin:0;font-size:44px;line-height:1.3;word-break:keep-all}
-        .p13-arrow{position:absolute;top:410px;width:110px;height:110px;padding:6px 0 0;border:solid 5px #1b1738;border-radius:50%;background:#fff;cursor:pointer;font-family:'Cafe24 Ssurround';font-size:52px;color:#48159c;z-index:3}
+        /* 동그라미 안 세모(▶◀ 글자가 글꼴에 없어서 CSS로 그림) */
+        .p13-arrow{position:absolute;top:410px;width:110px;height:110px;padding:0;border:solid 5px #1b1738;border-radius:50%;background:#fff;cursor:pointer;font-size:0;z-index:3;box-shadow:0 8px 0 0 #becde7}
+        .p13-arrow:hover{background:#eee8ff}
+        .p13-arrow:after{content:'';position:absolute;top:50%;left:50%;margin-top:-22px;border-style:solid;border-width:22px 0 22px 34px;border-color:transparent transparent transparent #48159c;margin-left:-12px}
+        .p13-prev:after{border-width:22px 34px 22px 0;border-color:transparent #48159c transparent transparent;margin-left:-22px}
         .p13-prev{left:60px}
         .p13-next{left:1750px}
         .p13-arrow.is-off{display:none}
 
-        .p13-back h2{font-size:76px}
-        .p13-back p{font-size:40px}
     </style>
 </head>
 <body>
@@ -46,20 +54,19 @@
       <div id="stage" class="stage">
         <main class="bg-default">
           <div class="p13-view" id="p13Front">
+            <p class="guide-bubble p13-front-bubble">앨범을 완성했어요!<br>함께 확인해볼까요?</p>
             <div class="p13-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
             <div class="p13-cover">
               <h2>우리 동네 이웃 앨범</h2>
               <i></i>
-              <p>앨범을 완성했어요!<br>함께 확인해볼까요?</p>
               <button class="card-btn js-sfx" id="p13Open" data-sound="sound/click.mp3">앨범 보기</button>
             </div>
           </div>
 
           <div class="p13-view is-off" id="p13Album">
             <div class="p13-book">
-              <div class="p13-page"><div class="p13-photo" id="p13Photo"></div></div>
+              <div class="p13-page p13-left"><div class="p13-photo" id="p13Photo"></div><p class="p13-place" id="p13Place"></p></div>
               <div class="p13-page p13-right">
-                <p class="p13-place" id="p13Place"></p>
                 <p class="p13-label">만날 수 있는 이웃</p>
                 <div class="p13-job"><i id="p13JobImg"></i><span id="p13Job"></span></div>
                 <p class="p13-label">이웃의 역할</p>
@@ -70,27 +77,13 @@
             <button class="p13-arrow p13-next js-sfx" id="p13Next" data-sound="sound/click.mp3" aria-label="다음 장">▶</button>
           </div>
 
-          <div class="p13-view is-off" id="p13Back">
-            <div class="p13-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
-            <div class="p13-cover p13-back">
-              <h2>우리 동네 이웃<br>앨범 만들기 성공!</h2>
-              <i></i>
-              <p>우리 동네에서 만날 수 있는<br>이웃을 찾아보고,<br>이웃의 역할도 이해했어요!</p>
-            </div>
-            <a href="page11.html" class="js-nav-effect end-btn-retry" style="left:130px;top:776px">
-              <img src="../../img/common/btn_retry.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_retry_on.png" data-src-over="../../img/common/btn_retry_over.png" data-sound="sound/click.mp3" alt="다시하기">
-            </a>
-            <a href="../08/page01.html" class="js-nav-effect end-btn-next-lesson" style="left:1420px;top:776px">
-              <img src="../../img/common/btn_next_lesson.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_lesson_on.png" data-src-over="../../img/common/btn_next_lesson_over.png" data-sound="sound/click.mp3" alt="다음차시 학습하기">
-            </a>
-          </div>
         </main>
       </div>
     </div>
   </div>
   <div class="zoom-info" id="zoomInfo"></div>
 
-  <script src="../../js/header.js" data-title="우리 동네 이웃 앨범 만들기" data-next="../sa.html"></script>
+  <script src="../../js/header.js" data-title="우리 동네 이웃 앨범 만들기" data-next="page14.html"></script>
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
   <script>
@@ -105,7 +98,7 @@
     ];
     const $ = (id) => document.getElementById(id);
     let i = 0;
-    const views = ['p13Front', 'p13Album', 'p13Back'];
+    const views = ['p13Front', 'p13Album'];
     const view = (id) => views.forEach((v) => $(v).classList.toggle('is-off', v !== id));
 
     function render() {
@@ -122,7 +115,7 @@
     $('p13Prev').addEventListener('click', () => { if (i > 0) { i -= 1; render(); } });
     $('p13Next').addEventListener('click', () => {
       if (i < PAGES.length - 1) { i += 1; render(); return; }
-      view('p13Back');
+      navigateTo('page14.html');
     });
   })();
   </script>

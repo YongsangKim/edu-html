@@ -18,9 +18,9 @@
         .p09-map-title{position:absolute;left:560px;top:30px;width:800px;height:96px;margin:0;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;
           background:#e6dafe;border:solid 5px #8278ff;border-radius:48px;font-family:'Cafe24 Ssurround';font-size:52px;color:#1b1738;letter-spacing:-0.05em}
         .p09-map{position:absolute;left:130px;top:160px;width:1660px;height:770px;box-sizing:border-box;border:solid 8px #1b1738;border-radius:36px;background:#eef0fb url('img/p09_map.png') center / cover no-repeat}
-        .p09-spot{position:absolute;width:300px;height:250px;padding:0;border:0;background:none;cursor:pointer;transition:transform .2s}
+        .p09-spot{position:absolute;width:300px;height:320px;padding:0;border:0;background:none;cursor:pointer;transition:transform .2s}
         .p09-spot:hover{transform:scale(1.06)}
-        .p09-spot i{position:absolute;left:30px;top:0;width:240px;height:170px;border-radius:24px;background:#d9d2f5 center / contain no-repeat}
+        .p09-spot i{position:absolute;left:30px;top:0;width:240px;height:240px;border-radius:24px;background:#d9d2f5 center / contain no-repeat}
         .p09-spot span{position:absolute;left:30px;bottom:0;width:240px;height:66px;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;
           background:#fff;border:solid 4px #8278ff;border-radius:33px;font-family:'Cafe24 Ssurround';font-size:38px;color:#1b1738}
         .p09-spot b{position:absolute;right:0;top:0;width:64px;height:62px;background:url('../../img/common/icon_star.png') center / contain no-repeat}
@@ -60,6 +60,8 @@
         .p09-sheet.is-open{cursor:default}
         .p09-handle{display:block;width:80px;height:8px;margin:0 auto 16px;border-radius:4px;background:#c4c9d4}
         .p09-scroll{height:100%;overflow-y:auto}
+        /* 닫힌 동안엔 안쪽 스크롤 칸도 손가락 끌기를 브라우저 스크롤로 넘기지 않게(모바일에서 끌어올리기가 취소되던 문제) */
+        .p09-sheet:not(.is-open) .p09-scroll{overflow:hidden;touch-action:none}
         .p09-ai{margin:0 0 10px;font-size:25px;font-weight:700;color:#1a73e8}
         .p09-ai:before{content:'✦ '}
         .p09-sheet h4{margin:0 0 10px;font-size:25px;font-weight:600;line-height:1.4}
@@ -185,7 +187,7 @@
         right: '좋아요! 편의점에서는 내가 필요한<br>물건을 구매할 수 있어요!', more: '편의점의 위치를<br>추가로 확인해볼까요?',
         question: '우리동네 편의점이 어디 있는지 알려줘.', done: '좋아요! 편의점의<br>위치를 확인했어요!',
         answerText: '우리동네 편의점은 부산광역시 푸른구 해솔길 45에 위치해 있습니다.' },
-      { key: 'library', name: '도서관', spot: [330, 400],
+      { key: 'library', name: '도서관', spot: [330, 380],
         mission: '도서관에서 어떻게<br>책을 빌릴 수 있을까요?<br>구글렌즈로 알아봐요!',
         title: '사진에 나타난 곳은 시립도서관으로 보입니다.', sub: '시립도서관 정보',
         lines: [['위치', '전라북도 전주시 새롬구 한들길 17'], ['운영 시간', '오전 9시 ~ 오후 10시<br>월요일은 휴관일 수 있습니다.'], ['하는 일', '책을 빌려 읽고, 다양한 자료를 이용할 수 있습니다.'], ['대여 방법', '빌리고 싶은 책과 회원 카드를 사서에게 보여주면 대여할 수 있습니다.'], ['방문 후기', '조용해서 공부하기 좋고 책 종류가 많다는 후기가 있습니다.']], answer: 3,
@@ -195,7 +197,7 @@
         right: '좋아요! 책을 빌리는<br>방법을 알았어요!', more: '도서관에서 진행하는 프로그램에 대해<br>추가로 확인해볼까요?',
         question: '도서관에서 진행하는 프로그램에 대해 알려줘.', done: '좋아요! 도서관에서 진행되는<br>프로그램 정보를 확인했어요!',
         answerText: '시립도서관에서는 매 10월마다 “가을 독서 문화제”를 진행합니다. 사전 신청을 하면 초청 작가들의 강연을 들을 수 있습니다.' },
-      { key: 'bus', name: '버스정류장', spot: [900, 440],
+      { key: 'bus', name: '버스정류장', spot: [900, 420],
         mission: '버스정류장의 주소는<br>무엇일까요?<br>구글렌즈로 알아봐요!',
         title: '사진에 나타난 곳은 은하 버스정류장으로 보입니다.', sub: '버스정류장 정보',
         lines: [['위치', '대전광역시 은하구 별빛리 777'], ['운영 시간', '버스마다 운행 시간이 다릅니다. 노선을 확인하고 이용하세요.'], ['하는 일', '원하는 버스를 타고 다른 장소로 이동할 수 있습니다.']], answer: 0,
@@ -310,6 +312,7 @@
       const up = () => {
         cam.removeEventListener('pointermove', move);
         cam.removeEventListener('pointerup', up);
+        cam.removeEventListener('pointercancel', up);
         cam.classList.remove('is-dragging');
         cam.classList.add('is-back');
         const dx = parseFloat(cam.style.left) - target.offsetLeft;
@@ -328,6 +331,7 @@
       };
       cam.addEventListener('pointermove', move);
       cam.addEventListener('pointerup', up);
+      cam.addEventListener('pointercancel', up);
     });
 
     $('p09Shutter').addEventListener('click', () => {
@@ -379,6 +383,7 @@
       const up = () => {
         sheet.removeEventListener('pointermove', move);
         sheet.removeEventListener('pointerup', up);
+        sheet.removeEventListener('pointercancel', up);
         sheet.classList.add('is-anim');
         // 기획서: 어느 정도(3분의 1쯤)만 올리면 나머지는 자동으로 올라감
         if (parseFloat(sheet.style.top) < SHEET_CLOSED - 150) {
@@ -395,6 +400,7 @@
       };
       sheet.addEventListener('pointermove', move);
       sheet.addEventListener('pointerup', up);
+      sheet.addEventListener('pointercancel', up);
     });
 
     // 결과 창 손잡이에서 위로 끌어올리는 손가락(반복). clearFingers로 같이 지워지게 js-point-finger를 붙임

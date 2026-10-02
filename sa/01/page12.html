@@ -73,8 +73,8 @@
 
               <div class="step-panel p12-step p12-step1" data-step="1">
                 <div class="multi-select" data-single="true">
-                  <button class="multi-option pick-card p12-choice p12-choice1" data-clause="나는 남자이고" aria-label="나는 남자이고"></button>
-                  <button class="multi-option pick-card p12-choice p12-choice2" data-clause="나는 여자이고" aria-label="나는 여자이고"></button>
+                  <button class="multi-option pick-card p12-choice p12-choice1" data-gender="m" data-clause="나는 남자이고" aria-label="나는 남자이고"></button>
+                  <button class="multi-option pick-card p12-choice p12-choice2" data-gender="f" data-clause="나는 여자이고" aria-label="나는 여자이고"></button>
                 </div>
                 <div class="step-actions p12-actions">
                   <a href="javascript:;" class="js-nav-effect js-sfx multi-next" data-warn-empty="true">
@@ -142,11 +142,11 @@
                    이미지 넣고 좌표(.p12-job*) 조정 필요 -->
               <div class="step-panel p12-step p12-step4" data-step="4">
                 <div class="multi-select" data-single="true">
-                  <button class="multi-option pick-card p12-job p12-job1" data-clause="미래의 나는 매장 관리·안내원이 되어 있을 거야.
+                  <button class="multi-option pick-card p12-job p12-job1" data-job="store" data-clause="미래의 나는 매장 관리·안내원이 되어 있을 거야.
 나의 미래 모습을 사진으로 만들어줘." aria-label="매장 관리·안내원"></button>
-                  <button class="multi-option pick-card p12-job p12-job2" data-clause="미래의 나는 도서관 사서 보조가 되어 있을 거야.
+                  <button class="multi-option pick-card p12-job p12-job2" data-job="library" data-clause="미래의 나는 도서관 사서 보조가 되어 있을 거야.
 나의 미래 모습을 사진으로 만들어줘." aria-label="도서관 사서 보조"></button>
-                  <button class="multi-option pick-card p12-job p12-job3" data-clause="미래의 나는 일러스트 작가가 되어 있을 거야.
+                  <button class="multi-option pick-card p12-job p12-job3" data-job="illust" data-clause="미래의 나는 일러스트 작가가 되어 있을 거야.
 나의 미래 모습을 사진으로 만들어줘." aria-label="일러스트 작가"></button>
                 </div>
                 <div class="step-actions p12-actions">
@@ -189,5 +189,17 @@
   <script src="../../js/header.js" data-title="나의 미래 모습 만들기" data-next="page13.html"></script>
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
+  <script>
+  // 고른 성별·직업을 page15 결과 이미지(img/p15_result_{직업}_{m|f}.png)에 넘김
+  // TODO: 직업 10개 디자인이 나오면 조합(좋아하는 것×잘하는 것)별 3개로 — 작업본은 _backup_page12_combo/page12.html
+  document.querySelectorAll('.p12-choice[data-gender], .p12-job[data-job]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      try {
+        if (btn.dataset.gender) sessionStorage.setItem('sa01_gender', btn.dataset.gender);
+        if (btn.dataset.job) sessionStorage.setItem('sa01_job', btn.dataset.job);
+      } catch (e) {}
+    });
+  });
+  </script>
 </body>
 </html>

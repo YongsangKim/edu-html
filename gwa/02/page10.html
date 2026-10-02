@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI에게 부탁해! 데이터 시각화</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 19~26p. 가운데 휴대폰은 기획서 ChatGPT 앱 캡처를 CSS로 그린 것.
+           홈 → ChatGPT → + → 사진 → 기온표 고르기 → 오른쪽 프롬프트 카드(노랑·빨강·파랑 한 장씩) → 전송 → 그래프(빨강 카드에 따라 막대/꺾은선) → 다운로드(실제 PNG 저장) → 정리 → page11.
+           그래프는 공용 chartSvg, 다운로드는 그 SVG를 canvas로 그려 PNG로 저장 */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+        .p10 .is-off{display:none}
+
+        .gp{position:absolute;left:703px;top:21px;width:504px;height:895px;box-sizing:border-box;border:solid 8px #1b1738;border-radius:40px;overflow:hidden;background:#fff;
+          font-family:'Pretendard';color:#1b1738;letter-spacing:-0.02em;user-select:none}
+        .gp svg.ic{display:block;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+        .gp button{font:inherit;color:inherit}
+        .gp-scr{position:absolute;inset:0;display:none}
+        .gp[data-screen="home"] .gp-home, .gp[data-screen="chat"] .gp-chat{display:block}
+
+        .gp-home{background:linear-gradient(160deg,#a6e1f5,#b7b0f7 55%,#f5c1df)}
+        .gp-app{position:absolute;left:50%;top:44%;width:110px;margin-left:-55px;padding:0;border:0;background:none;cursor:pointer;font-size:20px;font-weight:600;color:#fff !important;text-shadow:0 1px 3px rgba(0,0,0,.3)}
+        .gp-app i{display:flex;align-items:center;justify-content:center;width:110px;height:110px;margin-bottom:8px;border-radius:28px;background:#000;box-shadow:0 6px 14px rgba(0,0,0,.2)}
+        .gp-app i svg{width:70px;height:70px}
+
+        .gp-head{position:absolute;left:0;top:0;width:100%;height:84px;display:flex;align-items:center;gap:14px;padding:0 18px;box-sizing:border-box;z-index:3;background:linear-gradient(#fff 70%,rgba(255,255,255,0))}
+        .gp-round{width:52px;height:52px;border-radius:50%;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center}
+        .gp-round svg{width:26px;height:26px}
+        .gp-up{height:52px;padding:0 20px;border-radius:26px;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.1);display:flex;align-items:center;gap:8px;font-size:21px;font-weight:700;color:#2f6fed}
+        .gp-head .is-gap{flex:1}
+
+        .gp-log{position:absolute;left:0;top:84px;width:100%;bottom:110px;overflow-y:auto;padding:10px 16px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px}
+        .gp-sugg{position:absolute;left:28px;bottom:120px;display:flex;flex-direction:column;gap:22px;font-size:21px;color:#5b5e6e}
+        .gp-sugg span{display:flex;align-items:center;gap:14px}
+        .gp-sugg svg{width:26px;height:26px}
+        .gp.is-talk .gp-sugg{display:none}
+        .gp-me{align-self:flex-end;max-width:80%;padding:12px 18px;border-radius:22px;background:#dff0ff;color:#1a5fb4;font-size:20px;line-height:1.45}
+        .gp-me img, .gp-me .gp-thumb{display:block;margin-bottom:8px}
+        .gp-ai{font-size:19px;line-height:1.5}
+        .gp-ai .gp-chart{position:relative;margin:4px 0 10px;border-radius:8px;background:#fff;cursor:pointer;touch-action:none}
+        .gp-ai .gp-chart svg{display:block;width:100%;height:auto}
+        .gp-ai .gp-chart.is-press{outline:4px solid #2f6fed}
+        .gp-tools{display:flex;gap:22px;color:#5b5e6e}
+        .gp-tools svg{width:24px;height:24px}
+        .gp-dl{display:flex;align-items:center;gap:8px;margin:0 0 10px;padding:8px 16px;border:solid 2px #d9dbe4;border-radius:20px;background:#fff;font-size:18px;font-weight:700;cursor:pointer}
+        .gp-dl svg{width:22px;height:22px}
+        .gp-wait{color:#8a8c99;animation:gp-wait 1s ease-in-out infinite}
+        @keyframes gp-wait{50%{opacity:.4}}
+
+        .gp-bar{position:absolute;left:12px;right:12px;bottom:18px;min-height:76px;box-sizing:border-box;border-radius:38px;background:#f4f4f6;box-shadow:0 4px 14px rgba(0,0,0,.08);
+          display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 12px;z-index:4}
+        .gp-bar.has-file{border-radius:28px}
+        .gp-file{flex:0 0 100%;display:none}
+        .gp-bar.has-file .gp-file{display:block}
+        .gp-thumb{width:96px;height:120px;border-radius:12px;background:#fff;border:solid 2px #d9dbe4;overflow:hidden;font-size:9px;line-height:1.1}
+        .gp-thumb table{width:100%;border-collapse:collapse;text-align:center}
+        .gp-thumb th{background:#cfe3fb;font-weight:700}
+        .gp-thumb td, .gp-thumb th{border:solid 1px #9cc2ee;padding:1px 0}
+        .gp-plus{width:48px;height:48px;padding:0;border:0;border-radius:50%;background:none;display:flex;align-items:center;justify-content:center;cursor:pointer}
+        .gp-plus svg{width:30px;height:30px}
+        .gp-input{flex:1;min-width:0;font-size:20px;color:#8a8c99;line-height:1.35}
+        .gp-input.is-filled{color:#1b1738}
+        .gp-input b{font-weight:600}
+        .gp-input .y{color:#b98300} .gp-input .r{color:#e0382f} .gp-input .bl{color:#2f6fed}
+        .gp-send{width:52px;height:52px;padding:0;border:0;border-radius:50%;background:#2f6fed;color:#fff !important;display:flex;align-items:center;justify-content:center;cursor:pointer}
+        .gp-send svg{width:26px;height:26px}
+        .gp-send:disabled{background:#c9cad3;cursor:default}
+
+        .gp-menu{position:absolute;left:24px;bottom:100px;width:300px;padding:18px;box-sizing:border-box;border-radius:30px;background:#f6f6f8;box-shadow:0 8px 30px rgba(0,0,0,.15);z-index:5;
+          display:flex;flex-direction:column;gap:6px}
+        .gp-menu button{display:flex;align-items:center;gap:18px;padding:8px;border:0;border-radius:18px;background:none;font-size:22px;text-align:left;cursor:pointer}
+        .gp-menu i{width:56px;height:56px;border-radius:50%;background:#e8e8ec;display:flex;align-items:center;justify-content:center}
+        .gp-menu svg{width:28px;height:28px}
+
+        .gp-gallery{position:absolute;inset:0;z-index:6;background:#fff}
+        .gp-gal-head{height:84px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;font-size:22px;font-weight:700;border-bottom:solid 2px #eee}
+        .gp-gal-head svg{width:28px;height:28px}
+        .gp-gal-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:6px}
+        .gp-gal-grid button{position:relative;height:230px;padding:0;border:0;background:#eef1f6;display:flex;align-items:center;justify-content:center;font-size:90px;cursor:pointer;overflow:hidden}
+        .gp-gal-grid button .gp-thumb{width:160px;height:200px;font-size:14px}
+
+        .gp .is-target{cursor:pointer;animation:gp-target 1.2s ease-in-out infinite}
+        @keyframes gp-target{50%{box-shadow:0 0 0 5px rgba(255,79,139,.75)}}
+
+        .p10-cards{position:absolute;left:1250px;top:120px;width:620px;box-sizing:border-box;padding:30px;border:solid 6px #48159c;border-radius:36px;background:#fefbf9;
+          display:flex;flex-direction:column;gap:22px;font-family:'Cafe24 Ssurround'}
+        .p10-cards h3{margin:0;font-weight:normal;font-size:36px;color:#48159c;text-align:center}
+        .p10-row{display:flex;gap:16px;justify-content:center}
+        .p10-card{flex:1;height:96px;padding:6px 10px 0;box-sizing:border-box;border:solid 5px transparent;border-radius:20px;font:inherit;font-size:32px;color:#1b1738;cursor:pointer;
+          box-shadow:0 8px 0 rgba(0,0,0,.12);transition:transform .15s}
+        .p10-card.y{background:#ffe27a} .p10-card.r{background:#ffb0aa} .p10-card.b{background:#a9cbff}
+        .p10-card:hover{transform:translateY(-4px)}
+        .p10-card.is-on{border-color:#1b1738}
+        .p10-card:disabled{opacity:.4;cursor:default;transform:none}
+        .p10-hint{align-self:flex-end;height:64px;min-width:0;padding:6px 30px 0;font-size:32px}
+        .p10-hint-pop p{margin:0;font-family:'Cafe24 Ssurround';font-size:52px;color:#48159c;text-align:center}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default p10">
+          <p class="guide-bubble" id="p10Bubble"></p>
+          <div class="guide-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+
+          <div class="gp" id="p10Phone" data-screen="home">
+            <div class="gp-scr gp-home">
+              <button type="button" class="gp-app" data-hit="app"><i><svg class="ic" viewBox="0 0 24 24" style="color:#fff;stroke-width:1.6"><path d="M12 3.5a4 4 0 014 3.2 4 4 0 013.4 5.9 4 4 0 01-2.4 6.3 4 4 0 01-6.3 1.6 4 4 0 01-6-3.4 4 4 0 01-.6-6.5A4 4 0 018 4.4a4 4 0 014-.9z"/><path d="M9 8.5l6 3.5v5M15 8l-6 3.5v5M8 13.5l4 2.3 4-2.3"/></svg></i>ChatGPT</button>
+            </div>
+
+            <div class="gp-scr gp-chat">
+              <div class="gp-head">
+                <span class="gp-round"><svg class="ic" viewBox="0 0 24 24"><path d="M4 8h14M4 15h9"/></svg></span>
+                <span class="gp-up">✦ 업그레이드</span>
+                <span class="is-gap"></span>
+                <span class="gp-round"><svg class="ic" viewBox="0 0 24 24"><path d="M5 18l1.2-3.6A7.5 7.5 0 1112 19.5a7.6 7.6 0 01-3.3-.8z"/></svg></span>
+              </div>
+              <div class="gp-log" id="p10Log"></div>
+              <div class="gp-sugg">
+                <span><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="15" cy="9" r="2"/><path d="M3 17l5-5 5 5"/></svg>이미지나 스티커 만들어줘</span>
+                <span><svg class="ic" viewBox="0 0 24 24"><path d="M15 4l5 5-10 10H5v-5z"/></svg>글쓰기</span>
+                <span><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg>웹 검색</span>
+              </div>
+              <div class="gp-bar" id="p10Bar">
+                <div class="gp-file"><div class="gp-thumb" id="p10Thumb"></div></div>
+                <button type="button" class="gp-plus" data-hit="plus" aria-label="첨부"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+                <span class="gp-input" id="p10Input">ChatGPT에게 묻기</span>
+                <button type="button" class="gp-send" id="p10Send" data-hit="send" disabled aria-label="전송"><svg class="ic" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+              </div>
+              <div class="gp-menu is-off" id="p10Menu">
+                <button type="button"><i><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="3"/><circle cx="12" cy="13.5" r="3.5"/><path d="M8 7l2-3h4l2 3"/></svg></i>카메라</button>
+                <button type="button" data-hit="photo"><i><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="15" cy="9" r="2"/><path d="M3 17l5-5 5 5"/></svg></i>사진</button>
+                <button type="button"><i><svg class="ic" viewBox="0 0 24 24"><path d="M8 12l6-6a3 3 0 114 4l-8 8a5 5 0 01-7-7l7-7"/></svg></i>파일</button>
+                <button type="button"><i><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M16 12v1.5a2.5 2.5 0 005 0V12a9 9 0 10-3.5 7.1"/></svg></i>플러그인</button>
+              </div>
+              <div class="gp-gallery is-off" id="p10Gallery">
+                <div class="gp-gal-head"><svg class="ic" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>최근 항목<span style="width:28px"></span></div>
+                <div class="gp-gal-grid" id="p10Grid">
+                  <button type="button" data-pick="photo" aria-label="바다 사진">🏖️</button>
+                  <button type="button" data-pick="table" data-hit="table" aria-label="하루 기온 표"><div class="gp-thumb" id="p10TableBig"></div></button>
+                  <button type="button" data-pick="photo" aria-label="강아지 사진">🐶</button>
+                  <button type="button" data-pick="photo" aria-label="케이크 사진">🍰</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p10-cards is-off" id="p10Cards">
+            <h3>프롬프트 카드</h3>
+            <div class="p10-row"><button type="button" class="p10-card y" data-color="y">첨부한 기온 표 이미지를</button></div>
+            <div class="p10-row"><button type="button" class="p10-card r" data-color="r" data-kind="line">꺾은선 그래프로</button><button type="button" class="p10-card r" data-color="r" data-kind="bar">막대 그래프로</button></div>
+            <div class="p10-row"><button type="button" class="p10-card b" data-color="b">시각화해 줘.</button><button type="button" class="p10-card b" data-color="b">그려줘.</button></div>
+            <button type="button" class="card-btn p10-hint js-sfx" id="p10Hint" data-sound="sound/click.mp3">힌트</button>
+          </div>
+
+          <div class="avatar-modal is-off p10-hint-pop" id="p10HintPop">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+              <p class="avatar-popup-text is-medium">첨부한 기온 표 이미지를<br>막대 그래프로 시각화해 줘.</p>
+            </div>
+          </div>
+          <div class="ox-result-wrong is-avatar is-off" id="p10Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text is-medium" id="p10WrongText"></p>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p10Done">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-title">다운로드 완료!</p>
+                    <p class="avatar-card-text">다운로드 단추를 누르니 AI가 만든 멋진 그래프가 핸드폰에 png 그림 파일로 안전하게 저장되었네요.</p>
+                  </div>
+                  <a href="page11.html" class="js-nav-effect avatar-card-btn">
+                    <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side"><p class="avatar-card-text">이미지 첨부부터 프롬프트 전송, 파일 다운로드까지! AI를 활용하니, 복잡한 데이터 시각화 자료를 순식간에 만들고 저장이 가능해요.</p></div>
+                  <a href="page11.html" class="js-nav-effect avatar-card-btn">
+                    <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side"><p class="avatar-card-text">이제 퀴즈를 풀며 배운 내용을 확인해볼까요?</p></div>
+                  <a href="page11.html" class="js-nav-effect avatar-card-btn">
+                    <img src="../../img/common/btn_confirm.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_confirm_on.png" data-src-over="../../img/common/btn_confirm_over.png" data-sound="sound/click.mp3" alt="확인">
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="AI에게 부탁해! 데이터 시각화" data-next="page11.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const DATA = [15, 15, 12, 20, 25, 30, 20, 15, 14].map((v, i) => ({ label: i * 3 + '시', value: v }));
+    const RESULT = {
+      bar: { name: '막대 그래프', text: '기온표를 막대그래프로 시각화했어요. 막대의 높이를 비교하면 15시의 기온이 30도로 가장 높고, 6시의 기온이 12도로 가장 낮다는 것을 확인할 수 있어요.' },
+      line: { name: '꺾은선 그래프', text: '요청하신 기온 표 이미지를 분석하여 꺾은선그래프로 시각화했습니다. 낮 동안 기온이 올라갔다가 저녁에 내려가는 패턴을 확인할 수 있습니다.' }
+    };
+    const $ = (id) => document.getElementById(id);
+    const phone = $('p10Phone');
+    const bubble = $('p10Bubble');
+    const log = $('p10Log');
+    const bar = $('p10Bar');
+    const input = $('p10Input');
+    const send = $('p10Send');
+    const cards = $('p10Cards');
+    const playClick = makeSfx('sound/click.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+
+    const tableHtml = '<table><tr><th>시간</th><th>기온(℃)</th></tr>' + DATA.map((d) => '<tr><td>' + d.label + '</td><td>' + d.value + '</td></tr>').join('') + '</table>';
+    $('p10Thumb').innerHTML = tableHtml;
+    $('p10TableBig').innerHTML = tableHtml;
+
+    function say(html) { bubble.innerHTML = html; }
+    function target(hit) {
+      clearFingers();
+      phone.querySelectorAll('[data-hit]').forEach((h) => h.classList.toggle('is-target', h.dataset.hit === hit));
+      const el = phone.querySelector('[data-hit="' + hit + '"]');
+      if (el) setTimeout(() => {
+        if (!el.classList.contains('is-target')) return;
+        pointFingerAt(el, { onMain: true });
+        document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.top = Math.min(parseFloat(f.style.top), 850) + 'px'; });
+      }, 50);
+    }
+    function onHit(hit, fn) {
+      phone.querySelector('[data-hit="' + hit + '"]').addEventListener('click', (e) => {
+        if (!e.currentTarget.classList.contains('is-target')) return;
+        e.currentTarget.classList.remove('is-target');
+        clearFingers();
+        playClick();
+        fn();
+      });
+    }
+
+    // 1) 홈 → ChatGPT
+    say('기온표 이미지를 ChatGPT에 첨부하고,<br>원하는 그래프를 만들어 달라고<br>부탁해 보세요!');
+    target('app');
+    onHit('app', () => {
+      phone.dataset.screen = 'chat';
+      say('아래의 + 버튼을<br>클릭해보세요.');
+      target('plus');
+    });
+    // 2) + → 사진 → 기온표 고르기(다른 사진은 오답)
+    onHit('plus', () => {
+      $('p10Menu').classList.remove('is-off');
+      say('‘사진’ 버튼을 눌러,<br>하루 기온 표 파일을<br>선택해주세요.');
+      target('photo');
+    });
+    onHit('photo', () => {
+      $('p10Menu').classList.add('is-off');
+      $('p10Gallery').classList.remove('is-off');
+      target('table');
+    });
+    $('p10Grid').addEventListener('click', (e) => {
+      const b = e.target.closest('button');
+      if (!b || b.dataset.pick !== 'photo' || $('p10Gallery').classList.contains('is-off')) return;
+      playWrong();
+      $('p10WrongText').innerHTML = '하루 기온 표 파일을<br>선택해주세요.';
+      flashLayer($('p10Wrong'), 'is-off', 3000);
+    });
+    onHit('table', () => {
+      $('p10Gallery').classList.add('is-off');
+      bar.classList.add('has-file');
+      phone.classList.add('is-talk');
+      say('기온 표 이미지가 ChatGPT 입력창에 업로드되었어! 이제 표 데이터를 그림으로 시각화해 달라고 명령을 입력해 볼까?');
+      setTimeout(() => {
+        say('카드 중 노란색, 빨간색, 파란색 카드를 각각 하나씩 골라 문장을 만들고, 전송 버튼을 눌러봐!');
+        cards.classList.remove('is-off');
+      }, 3000);
+    });
+
+    // 3) 프롬프트 카드: 노랑 → 빨강 → 파랑 순서로 한 장씩, 고른 문구가 입력창에 쌓임
+    const ORDER = ['y', 'r', 'b'];
+    const picked = [];
+    let kind = '';
+    const cardBtns = Array.from(cards.querySelectorAll('.p10-card'));
+    const syncCards = () => cardBtns.forEach((c) => { c.disabled = c.dataset.color !== ORDER[picked.length]; });
+    syncCards();
+    cardBtns.forEach((c) => c.addEventListener('click', () => {
+      if (c.disabled) return;
+      playClick();
+      c.classList.add('is-on');
+      picked.push({ color: c.dataset.color, text: c.textContent });
+      if (c.dataset.kind) kind = c.dataset.kind;
+      input.classList.add('is-filled');
+      input.innerHTML = picked.map((p) => '<b class="' + (p.color === 'b' ? 'bl' : p.color) + '">' + p.text + '</b>').join(' ');
+      syncCards();
+      if (picked.length === ORDER.length) {
+        send.disabled = false;
+        target('send');
+      }
+    }));
+    $('p10Hint').addEventListener('click', () => flashLayer($('p10HintPop'), 'is-off', 3000));
+
+    // 4) 전송 → 분석 중 → 그래프 + 설명
+    let chartSvgText = '';
+    onHit('send', () => {
+      send.disabled = true;
+      cards.classList.add('is-off');
+      phone.classList.add('is-talk');
+      bar.classList.remove('has-file');
+      log.insertAdjacentHTML('beforeend', '<div class="gp-me"><div class="gp-thumb">' + tableHtml + '</div>' + picked.map((p) => p.text).join(' ') + '</div>');
+      input.classList.remove('is-filled');
+      input.textContent = 'ChatGPT에게 묻기';
+      const wait = document.createElement('div');
+      wait.className = 'gp-ai gp-wait';
+      wait.textContent = '이미지 분석 중 …';
+      log.appendChild(wait);
+      const r = RESULT[kind];
+      chartSvgText = chartSvg(DATA, { type: kind, width: 900, height: 560, title: '하루 기온 변화', color: kind === 'line' ? '#1f77b4' : '#ff7a1a' });
+      setTimeout(() => {
+        wait.remove();
+        log.insertAdjacentHTML('beforeend', '<div class="gp-ai"><p style="margin:0 0 8px">' + r.text + '</p><div class="gp-chart" id="p10Chart">' + chartSvgText + '</div>' +
+          '<button type="button" class="gp-dl" data-hit="download"><svg class="ic" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>다운로드</button>' +
+          '<div class="gp-tools"><svg class="ic" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 012-2h10"/></svg><svg class="ic" viewBox="0 0 24 24"><path d="M11 5L6 9H3v6h3l5 4zM15.5 8.5a5 5 0 010 7"/></svg><svg class="ic" viewBox="0 0 24 24"><path d="M7 11v9H4v-9zM7 11l4-7a2 2 0 013 2v4h5a2 2 0 012 2.3l-1.2 7A2 2 0 0117.8 21H7"/></svg></div></div>');
+        log.scrollTop = log.scrollHeight;
+        say('숫자로 된 기온표가 ' + r.name + '로 바뀌었어요! 기온의 변화를 한눈에 볼 수 있네요');
+        setTimeout(download, 5000);
+      }, 2000);
+    });
+
+    // 5) 다운로드: 아래 버튼을 누르거나 그래프를 꾹 누르면 실제 PNG 저장
+    function download() {
+      say('완성된 그래프를 핸드폰에 저장해 볼까요? 그래프를 꾹 눌러 저장을 하거나, 그래프 아래에 있는 다운로드 버튼을 눌러보세요');
+      target('download');
+      const chart = $('p10Chart');
+      const btn = phone.querySelector('[data-hit="download"]');
+      let timer = null;
+      chart.addEventListener('pointerdown', () => { chart.classList.add('is-press'); timer = setTimeout(save, 700); });
+      ['pointerup', 'pointerleave', 'pointercancel'].forEach((t) => chart.addEventListener(t, () => { chart.classList.remove('is-press'); clearTimeout(timer); }));
+      btn.addEventListener('click', save);
+    }
+    let saved = false;
+    function save() {
+      if (saved) return;
+      saved = true;
+      clearFingers();
+      playClick();
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1800;
+        canvas.height = 1120;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        try {
+          const a = document.createElement('a');
+          a.download = '하루_기온_그래프.png';
+          a.href = canvas.toDataURL('image/png');
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        } catch (err) { console.warn('그래프 저장 실패:', err); }
+        say('다운로드 완료!');
+        setTimeout(() => $('p10Done').classList.remove('is-off'), 1200);
+      };
+      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(chartSvgText.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" width="900" height="560" '));
+    }
+  })();
+  </script>
+</body>
+</html>

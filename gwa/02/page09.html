@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>직접 만드는 막대그래프와 꺾은선그래프</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 16~18p. page08에서 완성한 막대그래프 위 점을 0시부터 24시까지 차례로 끌어 이음(지금 점에서 다음 점까지).
+           다음 점만 노랗게 크게, 다른 곳에 놓으면 2초 오답 팝업 + 지금/다음 점 반짝. 다 이으면 막대가 사라지고 꺾은선만 → 미니퀴즈 2개(2지선다) → 정리 4단계 → page10 */
+        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+
+        .p09-ask{position:absolute;left:60px;top:30px;width:1800px;height:100px;margin:0;box-sizing:border-box;padding:6px 40px 0;display:flex;align-items:center;justify-content:center;
+          background:#fff;border:solid 5px #1b1738;border-radius:50px;box-shadow:0 10px 0 0 #becde7;font-family:'Cafe24 Ssurround';font-size:46px;color:#1b1738;letter-spacing:-0.05em}
+
+        .temp-table{position:absolute;left:60px;top:170px;width:340px;border-collapse:separate;border-spacing:0;border:solid 5px #1b1738;border-radius:20px;overflow:hidden;background:#fff;
+          font-family:'Cafe24 Ssurround';font-size:34px;color:#1b1738;text-align:center}
+        .temp-table th{height:66px;background:#91b9e7;color:#fff;font-weight:normal;font-size:32px}
+        .temp-table td{height:72px;border-top:solid 3px #dfe4ef}
+        .temp-table td + td, .temp-table th + th{border-left:solid 3px #dfe4ef}
+        .deg{font-family:sans-serif}
+
+        .p09-chart{position:absolute;left:460px;top:170px;width:1400px;height:770px;box-sizing:border-box;border:solid 6px #48159c;border-radius:36px;background:#fff}
+        .p09-plot{position:absolute;left:100px;top:60px;width:1250px;height:540px;border-left:solid 4px #1b1738;border-bottom:solid 4px #1b1738;
+          background-image:linear-gradient(#e4e7ef 2px,transparent 2px);background-size:100% 90px;background-position:0 -2px;touch-action:none}
+        .p09-yl{position:absolute;left:-74px;width:60px;text-align:right;font-family:'Cafe24 Ssurround';font-size:26px;color:#5b5e6e;transform:translateY(-50%)}
+        .p09-yt{position:absolute;left:-90px;top:-48px;font-family:'Cafe24 Ssurround';font-size:24px;color:#5b5e6e;white-space:nowrap}
+        .p09-x{position:absolute;bottom:-46px;width:120px;margin-left:-60px;text-align:center;font-family:'Cafe24 Ssurround';font-size:28px;color:#1b1738}
+        .p09-bar{position:absolute;bottom:0;width:80px;margin-left:-40px;background:#ffc89a;transition:opacity .8s}
+        .p09-plot.is-line .p09-bar{opacity:0}
+        .p09-plot svg{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible}
+        .p09-dot{fill:#fff;stroke:#ff7a1a;stroke-width:5}
+        .p09-dot.is-done{fill:#ff7a1a}
+        .p09-dot.is-next{fill:#ffd83d;stroke:#ff9f1a;stroke-width:6}
+        .p09-dot.is-now{fill:#ff7a1a;stroke:#ff4ff9;stroke-width:6;cursor:grab}
+        .p09-dot.is-blink{animation:p09-blink .4s ease-in-out 5}
+        @keyframes p09-blink{50%{opacity:.2}}
+        .p09-plot.is-line .p09-dot{fill:#ff7a1a;stroke:#ff7a1a}
+
+        .p09-opts{position:absolute;left:460px;top:836px;width:1400px;display:flex;justify-content:center;gap:60px}
+        .p09-opts .card-btn{width:520px;min-width:0;height:92px;padding-top:8px;font-size:44px}
+        .p09-opts.is-off{display:none}
+        .p09-chart, .temp-table{transition:transform .4s}
+        .p09-chart.is-quiz{transform:scale(.84);transform-origin:50% 0}
+        .p09-chart.is-quiz ~ .p09-opts{display:flex}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="p09-ask" id="p09Ask">시간 순서대로 점을 이어 보세요!</p>
+
+          <table class="temp-table"><thead><tr><th>시간</th><th>기온(<span class="deg">℃</span>)</th></tr></thead><tbody id="p09Rows"></tbody></table>
+
+          <div class="p09-chart" id="p09Chart">
+            <div class="p09-plot" id="p09Plot"><span class="p09-yt">기온(<span class="deg">℃</span>)</span></div>
+          </div>
+
+          <div class="p09-opts is-off" id="p09Opts">
+            <button type="button" class="card-btn js-sfx" data-sound="sound/click.mp3" data-pick="up"><span class="deg">①</span> 점점 올라간다</button>
+            <button type="button" class="card-btn js-sfx" data-sound="sound/click.mp3" data-pick="down"><span class="deg">②</span> 점점 내려간다</button>
+          </div>
+
+          <div class="ox-result-correct is-avatar is-off" id="p09Right">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct_gwa.png" alt=""></div>
+              <p class="avatar-popup-text">정답이에요!</p>
+              <div class="avatar-popup-extra"><img src="../../img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div>
+          <div class="ox-result-wrong is-avatar is-off" id="p09Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text is-medium" id="p09WrongText"></p>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p09Done">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side"><p class="avatar-card-text">점을 선으로 연결하니 꺾은선그래프가 완성되었어요!<br>낮에는 기온이 올라가고, 저녁에는 다시 내려가는 모습이 한눈에 보여요.</p></div>
+                  <a href="page10.html" class="js-nav-effect avatar-card-btn">
+                    <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side"><p class="avatar-card-text">숫자만 있을 때보다 그래프로 나타내니 기온이 올라가고 내려가는 모습이 한눈에 보여요!</p></div>
+                  <a href="page10.html" class="js-nav-effect avatar-card-btn">
+                    <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side"><p class="avatar-card-text">막대그래프는 수치의 크기를 비교해요.<br>꺾은선그래프는 시간에 따른 변화 모습을 알아봐요.</p></div>
+                  <a href="page10.html" class="js-nav-effect avatar-card-btn">
+                    <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side"><p class="avatar-card-text">숫자를 그림이나 그래프로 한눈에 보기 쉽게 나타내는 것을 ‘시각화’라고 해요.<br>이제 AI에게 그래프 만들기를 부탁해 볼까요?</p></div>
+                  <a href="page10.html" class="js-nav-effect avatar-card-btn">
+                    <img src="../../img/common/btn_confirm.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_confirm_on.png" data-src-over="../../img/common/btn_confirm_over.png" data-sound="sound/click.mp3" alt="확인">
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="직접 만드는 막대그래프와 꺾은선그래프" data-next="page10.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const TEMPS = [15, 15, 12, 20, 25, 30, 20, 15, 14];
+    const MAX = 30;
+    const W = 1250;
+    const H = 540;
+    const QUIZ = [
+      { ask: '3시 ~ 15시까지 기온은 어떻게 변화하고 있나요?', answer: 'up' },
+      { ask: '15시 ~ 24시까지 기온은 어떻게 변화하고 있나요?', answer: 'down' }
+    ];
+    const $ = (id) => document.getElementById(id);
+    const plot = $('p09Plot');
+    const playCorrect = makeSfx('sound/correct.mp3');
+    const playWrong = makeSfx('sound/incorrect.mp3');
+    const playClick = makeSfx('sound/click.mp3');
+
+    TEMPS.forEach((t, i) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + i * 3 + '시</td><td>' + t + '</td>';
+      $('p09Rows').appendChild(tr);
+    });
+    for (let v = 0; v <= MAX; v += 5) plot.insertAdjacentHTML('beforeend', '<span class="p09-yl" style="top:' + (H - v * 18) + 'px">' + v + '</span>');
+
+    const gap = W / TEMPS.length;
+    const pts = TEMPS.map((t, i) => ({ x: gap * i + gap / 2, y: H - t * 18 }));
+    pts.forEach((p, i) => {
+      plot.insertAdjacentHTML('beforeend', '<div class="p09-bar" style="left:' + p.x + 'px;height:' + (H - p.y) + 'px"></div><span class="p09-x" style="left:' + p.x + 'px">' + i * 3 + '시</span>');
+    });
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    plot.appendChild(svg);
+    const lines = document.createElementNS(NS, 'g');
+    svg.appendChild(lines);
+    const temp = document.createElementNS(NS, 'line');
+    temp.setAttribute('stroke', '#ff7a1a');
+    temp.setAttribute('stroke-width', '6');
+    temp.setAttribute('stroke-dasharray', '12 10');
+    temp.setAttribute('stroke-linecap', 'round');
+    temp.style.display = 'none';
+    svg.appendChild(temp);
+    const dots = pts.map((p) => {
+      const c = document.createElementNS(NS, 'circle');
+      c.setAttribute('cx', p.x);
+      c.setAttribute('cy', p.y);
+      c.setAttribute('r', 14);
+      c.setAttribute('class', 'p09-dot');
+      svg.appendChild(c);
+      return c;
+    });
+
+    let now = 0;
+    function mark() {
+      dots.forEach((d, i) => {
+        d.setAttribute('class', 'p09-dot' + (i < now ? ' is-done' : i === now ? ' is-now' : i === now + 1 ? ' is-next' : ''));
+        d.setAttribute('r', i === now + 1 ? 22 : 14);
+      });
+    }
+    mark();
+
+    const toPlot = (e) => {
+      const r = plot.getBoundingClientRect();
+      return { x: (e.clientX - r.left) * W / r.width, y: (e.clientY - r.top) * H / r.height };
+    };
+    let drawing = false;
+    plot.addEventListener('pointerdown', (e) => {
+      if (now >= pts.length - 1) return;
+      const p = toPlot(e);
+      if (Math.hypot(p.x - pts[now].x, p.y - pts[now].y) > 50) return;
+      e.preventDefault();
+      plot.setPointerCapture(e.pointerId);
+      drawing = true;
+      temp.setAttribute('x1', pts[now].x);
+      temp.setAttribute('y1', pts[now].y);
+      temp.setAttribute('x2', p.x);
+      temp.setAttribute('y2', p.y);
+      temp.style.display = '';
+    });
+    plot.addEventListener('pointermove', (e) => {
+      if (!drawing) return;
+      const p = toPlot(e);
+      temp.setAttribute('x2', p.x);
+      temp.setAttribute('y2', p.y);
+    });
+    const end = (e) => {
+      if (!drawing) return;
+      drawing = false;
+      temp.style.display = 'none';
+      const p = toPlot(e);
+      const next = pts[now + 1];
+      if (Math.hypot(p.x - next.x, p.y - next.y) > 50) {
+        playWrong();
+        $('p09WrongText').textContent = '반짝이는 다음 점을 이어 주세요.';
+        flashLayer($('p09Wrong'));
+        [dots[now], dots[now + 1]].forEach((d) => { d.classList.remove('is-blink'); void d.getBBox(); d.classList.add('is-blink'); });
+        return;
+      }
+      const l = document.createElementNS(NS, 'line');
+      l.setAttribute('x1', pts[now].x);
+      l.setAttribute('y1', pts[now].y);
+      l.setAttribute('x2', next.x);
+      l.setAttribute('y2', next.y);
+      l.setAttribute('stroke', '#ff7a1a');
+      l.setAttribute('stroke-width', '7');
+      l.setAttribute('stroke-linecap', 'round');
+      lines.appendChild(l);
+      playClick();
+      now += 1;
+      mark();
+      if (now === pts.length - 1) {
+        plot.classList.add('is-line');
+        setTimeout(() => quiz(0), 1600);
+      }
+    };
+    plot.addEventListener('pointerup', end);
+    plot.addEventListener('pointercancel', end);
+
+    // 미니퀴즈 2개: 꺾은선만 남은 그래프를 보고 2지선다
+    const opts = $('p09Opts');
+    let q = 0;
+    function quiz(n) {
+      q = n;
+      $('p09Ask').textContent = QUIZ[n].ask;
+      $('p09Chart').classList.add('is-quiz');
+      opts.classList.remove('is-off');
+    }
+    opts.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
+      if (b.dataset.pick !== QUIZ[q].answer) {
+        playWrong();
+        $('p09WrongText').innerHTML = '꺾은선 그래프를<br>다시 확인해보세요.';
+        flashLayer($('p09Wrong'), 'is-off', 3000);
+        return;
+      }
+      playCorrect();
+      flashLayer($('p09Right'));
+      setTimeout(() => {
+        if (q + 1 < QUIZ.length) quiz(q + 1);
+        else $('p09Done').classList.remove('is-off');
+      }, 2100);
+    }));
+  })();
+  </script>
+</body>
+</html>
