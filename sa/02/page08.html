@@ -6,34 +6,39 @@
     <title>나만의 뉴스데스크 꾸미기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 16~25p. 가운데 Canva 화면은 img/p08_screen_{이름}.png(504x895), 템플릿 img/p08_tpl_{a|b|c}.png,
-           스티커 img/p08_sticker_{1|2}.png, 완성 img/p08_result_{a|b|c}{1|2}.png. 클릭 영역 좌표는 화면 이미지 나오면 조정 */
+        /* 디자인 없음 - 기획서 16~25p. 가운데 휴대폰은 기획서 Canva 앱 캡처를 CSS로 그린 것(캡처 이미지 없이 동작).
+           템플릿 img/p08_tpl_{a|b|c}.png, 스티커 img/p08_sticker_{1|2}.png는 기획서에 든 이미지. 완성 화면은 템플릿 위에 스티커를 겹침(page10·11도 같은 방식) */
         main{position:absolute;left:0;top:120px;width:1920px;height:960px}
-
-        .p08-screen{position:absolute;left:703px;top:21px;width:504px;height:895px;box-sizing:border-box;border:solid 8px #1b1738;border-radius:40px;background:#fff center / cover no-repeat;overflow:hidden}
-        .p08-canvas{position:absolute;left:720px;top:173px;width:472px;height:265px;border-radius:12px;background:#48159c center / cover no-repeat}
-
-        .p08-tpls{position:absolute;left:735px;top:287px;width:440px;height:542px;overflow-y:auto;display:flex;flex-direction:column;gap:20px}
-        .p08-stickers{position:absolute;left:801px;top:326px;width:315px;display:flex;flex-direction:column;gap:24px}
-        .p08-pick{flex:0 0 auto;width:100%;height:244px;padding:0;border:solid 6px #eae0fd;border-radius:20px;background:#48159c center / cover no-repeat;
-          font-family:'Cafe24 Ssurround';font-size:60px;color:#fff;cursor:pointer}
-        .p08-pick:hover{border-color:#8278ff}
-        .p08-pick.is-selected{border-color:#ff4ff9}
-
-        .p08-search-text{position:absolute;left:775px;top:94px;width:288px;height:54px;display:flex;align-items:center;padding-left:14px;box-sizing:border-box;
-          font-family:'Pretendard';font-size:32px;font-weight:600;color:#1b1738}
-        .p08-type-btn{position:absolute;left:1374px;top:392px;width:367px;height:161px;font-size:56px;line-height:1.15}
-
-        .p08-hit-template{left:740px;top:740px;width:430px;height:90px}
-        .p08-hit-elements{left:880px;top:770px;width:120px;height:110px}
-        .p08-hit-searchbar{left:730px;top:190px;width:450px;height:80px}
-        .p08-hit-search{left:1070px;top:94px;width:80px;height:54px}
-
-        /* 임시: Canva 화면 이미지가 없어서 클릭할 자리를 색으로 표시. 화면 이미지 넣으면 이 두 줄 삭제 */
-        .p08 .hit-area{background:rgba(255,79,139,.3);outline:5px dashed #ff4f8b;outline-offset:-5px;border-radius:14px;animation:p08-hit-blink 1.2s ease-in-out infinite}
-        @keyframes p08-hit-blink{50%{background:rgba(255,79,139,.55)}}
-
+        .cv-canvas, .cv-clips i{background:var(--desk,#fff)}
         .p08 .is-off{display:none}
+
+        .cv-pick{display:block;width:100%;margin:0 0 14px;padding:0;border:solid 5px transparent;border-radius:10px;background:#f2f3f7 center / cover no-repeat;cursor:pointer}
+        .cv-pick.is-tpl{height:256px}
+        .cv-pick.is-sticker{height:226px;background-size:contain}
+        .cv-pick:hover{border-color:#8278ff}
+        .cv-pick.is-selected{border-color:#ff4ff9}
+
+        .cv-cats{display:grid;grid-template-columns:repeat(4,1fr);gap:22px 8px;text-align:center;font-size:18px}
+        .cv-cats i{display:flex;width:80px;height:80px;margin:0 auto 8px;border-radius:18px;align-items:center;justify-content:center;font-style:normal;font-size:38px;color:#fff;
+          box-shadow:6px -6px 0 rgba(255,255,255,.7),6px -6px 0 2px rgba(27,23,56,.06)}
+
+        .cv-chips{position:absolute;left:16px;top:168px;right:0;display:flex;gap:22px;font-size:20px;font-weight:600;color:#5b5e6e;white-space:nowrap;overflow:hidden}
+        .cv-chips .is-on{color:#1b1738;box-shadow:inset 0 -4px 0 #7a45ee;padding-bottom:10px}
+        .cv[data-screen="stickers"] .cv-h{top:226px}
+        .cv[data-screen="stickers"] .cv-body{top:264px}
+
+
+        .cv-sheet, .cv-kbd, .cv-chips, .cv-h, .cv-body > *{display:none}
+        .cv[data-screen="list"] .cv-sheet, .cv[data-screen="elements"] .cv-sheet, .cv[data-screen="search"] .cv-sheet, .cv[data-screen="stickers"] .cv-sheet{display:block}
+        .cv[data-screen="list"] .cv-h, .cv[data-screen="elements"] .cv-h, .cv[data-screen="stickers"] .cv-h{display:block}
+        .cv[data-screen="list"] .is-tpl, .cv[data-screen="stickers"] .is-sticker{display:block}
+        .cv[data-screen="elements"] .cv-cats{display:grid}
+        .cv[data-screen="stickers"] .cv-chips{display:flex}
+        .cv[data-screen="search"] .cv-kbd{display:block}
+        .cv[data-screen="search"] .cv-tabs{display:none}
+
+
+        .p08-type-btn{position:absolute;left:1374px;top:392px;width:367px;height:161px;font-size:56px;line-height:1.15}
     </style>
 </head>
 <body>
@@ -45,26 +50,78 @@
           <p class="guide-bubble" id="p08Bubble"></p>
           <div class="guide-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
 
-          <div class="p08-screen" id="p08Screen"></div>
-          <div class="p08-canvas is-off" id="p08Canvas"></div>
+          <div class="cv" id="p08Phone" data-screen="home">
+            <div class="cv-top">
+              <svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-5h4v5"/></svg>
+              <svg class="cv-undo" viewBox="0 0 24 24"><path d="M9 13L4 8l5-5"/><path d="M4 8h10a6 6 0 010 12h-3"/></svg>
+              <svg class="cv-undo is-dim" viewBox="0 0 24 24"><path d="M15 13l5-5-5-5"/><path d="M20 8H10a6 6 0 000 12h3"/></svg>
+              <span class="is-gap"></span>
+              <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="19" cy="12" r="1.3" fill="currentColor"/></svg>
+              <svg viewBox="0 0 24 24" style="color:#e3d8ff"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z" fill="currentColor"/></svg>
+              <svg viewBox="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>
+              <svg viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M5 13v7h14v-7"/></svg>
+            </div>
 
-          <div class="p08-tpls is-off" id="p08Tpls">
-            <button type="button" class="p08-pick" data-pick="a" style="background-image:url('img/p08_tpl_a.png')">A</button>
-            <button type="button" class="p08-pick" data-pick="b" style="background-image:url('img/p08_tpl_b.png')">B</button>
-            <button type="button" class="p08-pick" data-pick="c" style="background-image:url('img/p08_tpl_c.png')">C</button>
-          </div>
-          <div class="p08-stickers is-off" id="p08Stickers">
-            <button type="button" class="p08-pick" data-pick="1" style="background-image:url('img/p08_sticker_1.png')">1</button>
-            <button type="button" class="p08-pick" data-pick="2" style="background-image:url('img/p08_sticker_2.png')">2</button>
+            <div class="cv-editor">
+              <div class="cv-canvas" id="p08Canvas"></div>
+              <div class="cv-play"><b>0:00</b><i></i><span>0:05</span></div>
+              <div class="cv-ruler"><span>0초</span><i style="left:330px"></i><i style="left:400px"></i><i style="left:470px"></i></div>
+              <div class="cv-head"></div>
+              <div class="cv-row is-el"><svg viewBox="0 0 24 24"><circle cx="7" cy="7" r="3"/><path d="M14 10l3.5-6 3.5 6z"/><rect x="4" y="14" width="6" height="6" rx="1"/><circle cx="17.5" cy="17" r="3"/></svg>요소 추가</div>
+              <div class="cv-row is-media"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>미디어 추가</span><b>+</b><div class="cv-clips"><i></i><i></i></div></div>
+              <div class="cv-row is-audio"><svg viewBox="0 0 24 24"><path d="M9 18V6l11-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>오디오 추가</div>
+            </div>
+
+            <div class="cv-sheet">
+              <button type="button" class="cv-search" id="p08Search" data-hit="searchbar">
+                <span id="p08SearchLead"></span>
+                <span class="cv-search-text" id="p08SearchText"></span>
+                <span id="p08SearchEnd"></span>
+              </button>
+              <div class="cv-actions">
+                <div class="cv-gen"><span>생성</span><i><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></i></div>
+                <button type="button" class="cv-find" data-hit="search">검색</button>
+              </div>
+              <div class="cv-chips"><span>전체</span><span class="is-on">그래픽</span><span>동영상</span><span>사진</span><span>오디오</span><span>도형</span><span>프레임</span></div>
+              <p class="cv-h" id="p08SheetTitle"></p>
+              <div class="cv-body" id="p08Body">
+                <button type="button" class="cv-pick is-tpl" data-kind="tpl" data-pick="a" style="background-image:url('img/p08_tpl_a.png')" aria-label="아침 뉴스 템플릿"></button>
+                <button type="button" class="cv-pick is-tpl" data-kind="tpl" data-pick="b" style="background-image:url('img/p08_tpl_b.png')" aria-label="9시 뉴스 템플릿"></button>
+                <button type="button" class="cv-pick is-tpl" data-kind="tpl" data-pick="c" style="background-image:url('img/p08_tpl_c.png')" aria-label="연예 뉴스 템플릿"></button>
+                <div class="cv-cats">
+                  <div><i style="background:linear-gradient(135deg,#ff6b6b,#d63a4a)">♫</i>오디오</div>
+                  <div><i style="background:linear-gradient(135deg,#e46cf0,#a33de0)">▶</i>동영상</div>
+                  <div><i style="background:linear-gradient(135deg,#6aa8ff,#3c6fe0)">▣</i>사진</div>
+                  <div><i style="background:linear-gradient(135deg,#ff9f45,#f06a2a)">✿</i>그래픽</div>
+                  <div><i style="background:linear-gradient(135deg,#c06cf5,#7b4ae6)">◆</i>3D</div>
+                  <div><i style="background:linear-gradient(135deg,#5ccf7a,#2f9e55)">☺</i>애니메이션</div>
+                  <div><i style="background:linear-gradient(135deg,#6fd59a,#3aa86b)">☁</i>프레임</div>
+                  <div><i style="background:linear-gradient(135deg,#d58cf7,#a35ae8)">▦</i>그리드</div>
+                </div>
+                <button type="button" class="cv-pick is-sticker" data-kind="sticker" data-pick="1" style="background-image:url('img/p08_sticker_1.png')" aria-label="여자 아나운서 스티커"></button>
+                <button type="button" class="cv-pick is-sticker" data-kind="sticker" data-pick="2" style="background-image:url('img/p08_sticker_2.png')" aria-label="남자 아나운서 스티커"></button>
+              </div>
+            </div>
+
+            <div class="cv-kbd" aria-hidden="true">
+              <div><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span></div>
+              <div><span>ㅂ</span><span>ㅈ</span><span>ㄷ</span><span>ㄱ</span><span>ㅅ</span><span>ㅛ</span><span>ㅕ</span><span>ㅑ</span><span>ㅐ</span><span>ㅔ</span></div>
+              <div><span>ㅁ</span><span>ㄴ</span><span>ㅇ</span><span>ㄹ</span><span>ㅎ</span><span>ㅗ</span><span>ㅓ</span><span>ㅏ</span><span>ㅣ</span></div>
+              <div><span class="is-fn">⇧</span><span>ㅋ</span><span>ㅌ</span><span>ㅊ</span><span>ㅍ</span><span>ㅠ</span><span>ㅜ</span><span>ㅡ</span><span class="is-fn">⌫</span></div>
+              <div><span class="is-fn">!#1</span><span class="is-fn">한/영</span><span class="is-wide">한국어</span><span>.</span><span class="is-fn">↵</span></div>
+            </div>
+
+            <nav class="cv-tabs">
+              <button type="button" class="cv-tab" data-tab="template" data-hit="template"><i><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 3v18M12 12h9"/></svg></i>추천 템플릿</button>
+              <button type="button" class="cv-tab" data-tab="elements" data-hit="elements"><i><svg viewBox="0 0 24 24"><circle cx="7" cy="7" r="3"/><path d="M14 10l3.5-6 3.5 6z"/><rect x="4" y="14" width="6" height="6" rx="1"/><circle cx="17.5" cy="17" r="3"/></svg></i>요소</button>
+              <button type="button" class="cv-tab"><i><svg viewBox="0 0 24 24"><path d="M5 5h14M12 5v15M9 20h6"/></svg></i>텍스트</button>
+              <button type="button" class="cv-tab"><i><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="3"/><circle cx="12" cy="13.5" r="3.5"/><path d="M8 7l2-3h4l2 3"/></svg></i>갤러리</button>
+              <button type="button" class="cv-tab"><i><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="3"/><path d="M7 10a5 5 0 0110 0"/></svg></i>브랜드 센터</button>
+              <button type="button" class="cv-tab"><i><svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 010-8 6 6 0 0111.5 2A3 3 0 0118 18z"/></svg></i>업로드</button>
+            </nav>
           </div>
 
-          <span class="p08-search-text is-off" id="p08SearchText">아나운서</span>
           <button type="button" class="card-btn p08-type-btn is-off" id="p08TypeBtn">아나운서<br>입력하기</button>
-
-          <button type="button" class="hit-area p08-hit-template is-off" data-hit="template" aria-label="추천 템플릿"></button>
-          <button type="button" class="hit-area p08-hit-elements is-off" data-hit="elements" aria-label="요소"></button>
-          <button type="button" class="hit-area p08-hit-searchbar is-off" data-hit="searchbar" aria-label="검색창"></button>
-          <button type="button" class="hit-area p08-hit-search is-off" data-hit="search" aria-label="검색"></button>
 
           <a href="javascript:;" class="js-sfx next-btn is-off" id="p08Next" data-sound="sound/click.mp3">
             <img src="../../img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" alt="다음">
@@ -88,24 +145,39 @@
     const STEPS = [
       { bubble: '먼저, 템플릿을 골라볼까요?<br>아래의 ‘추천 템플릿’을<br>클릭해요.', screen: 'home', hit: 'template' },
       { bubble: '마음에 드는<br>템플릿을 선택해요.', screen: 'list', pick: 'tpl' },
-      { bubble: '뉴스 스타일을 선택했어요!<br>이제 아나운서 스티커를<br>붙여봐요.', screen: 'edit', canvas: true, next: true },
-      { bubble: '아래 편집 도구창에서<br>‘요소’를 클릭해요.', screen: 'edit', canvas: true, hit: 'elements' },
+      { bubble: '뉴스 스타일을 선택했어요!<br>이제 아나운서 스티커를<br>붙여봐요.', screen: 'edit', next: true },
+      { bubble: '아래 편집 도구창에서<br>‘요소’를 클릭해요.', screen: 'edit', hit: 'elements' },
       { bubble: '검색창을 클릭해요.', screen: 'elements', hit: 'searchbar' },
       { bubble: '버튼을 눌러 ‘아나운서’를<br>입력하고 검색을 클릭해요.', screen: 'search', type: true },
       { bubble: '버튼을 눌러 ‘아나운서’를<br>입력하고 검색을 클릭해요.', screen: 'search', typed: true, hit: 'search' },
       { bubble: '넣고 싶은<br>아나운서 스티커를 선택해요.', screen: 'stickers', pick: 'sticker' },
-      { bubble: '뉴스 데스크를 모두 꾸몄어요!<br>이제 본격적으로 뉴스를<br>만들어볼까요?', screen: 'edit', canvas: true, result: true, next: true, href: 'page09.html' }
+      { bubble: '뉴스 데스크를 모두 꾸몄어요!<br>이제 본격적으로 뉴스를<br>만들어볼까요?', screen: 'edit', result: true, next: true, href: 'page09.html' }
     ];
+    const SEARCH = {
+      list: { lead: 'plus', text: '원하는 디자인을 설명해 주세요', end: 'mic', title: '추천 템플릿' },
+      elements: { lead: 'plus', text: '원하는 이상적인 요소를 설명해 주세요', end: 'mic', title: '카테고리 둘러보기' },
+      search: { lead: 'back', text: '원하는 이상적인 요소를 설명해 주세요', end: 'mic', focus: true },
+      typed: { lead: 'back', text: '아나운서', end: 'clear', focus: true, filled: true },
+      stickers: { lead: 'plus', text: '아나운서', end: 'clear', filled: true, title: '검색 결과' }
+    };
+    const ICON = {
+      plus: '<svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg>',
+      back: '<svg viewBox="0 0 24 24"><path d="M20 12H4M10 6l-6 6 6 6"/></svg>',
+      mic: '<svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0012 0M12 17v4"/></svg>',
+      clear: '<span class="cv-clear">✕</span>'
+    };
+    const STICKER_LAYER = (s) => "url('img/p08_sticker_" + s + ".png') 0 36% / 66% auto no-repeat, ";
+    const deskBg = (tpl, sticker) => (sticker ? STICKER_LAYER(sticker) : '') + "url('img/p08_tpl_" + tpl + ".png') center / cover no-repeat";
 
-    const bubble = document.getElementById('p08Bubble');
-    const screen = document.getElementById('p08Screen');
-    const canvas = document.getElementById('p08Canvas');
-    const tpls = document.getElementById('p08Tpls');
-    const stickers = document.getElementById('p08Stickers');
-    const searchText = document.getElementById('p08SearchText');
-    const typeBtn = document.getElementById('p08TypeBtn');
-    const nextBtn = document.getElementById('p08Next');
-    const hits = Array.from(document.querySelectorAll('[data-hit]'));
+    const $ = (id) => document.getElementById(id);
+    const phone = $('p08Phone');
+    const bubble = $('p08Bubble');
+    const search = $('p08Search');
+    const body = $('p08Body');
+    const typeBtn = $('p08TypeBtn');
+    const nextBtn = $('p08Next');
+    const hits = Array.from(phone.querySelectorAll('[data-hit]'));
+    const picks = Array.from(phone.querySelectorAll('.cv-pick'));
     const playClick = makeSfx('sound/click.mp3');
 
     const chosen = { tpl: '', sticker: '' };
@@ -114,26 +186,35 @@
     function render() {
       const step = STEPS[index];
       bubble.innerHTML = step.bubble;
-      screen.style.backgroundImage = "url('img/p08_screen_" + step.screen + ".png')";
+      phone.dataset.screen = step.screen;
+      phone.classList.toggle('is-edited', !!chosen.tpl && step.screen === 'edit');
+      phone.style.setProperty('--desk', chosen.tpl ? deskBg(chosen.tpl, step.result && chosen.sticker) : '#fff');
 
-      canvas.classList.toggle('is-off', !step.canvas);
-      canvas.style.backgroundImage = step.result
-        ? "url('img/p08_result_" + chosen.tpl + chosen.sticker + ".png'), url('img/p08_tpl_" + chosen.tpl + ".png')"
-        : "url('img/p08_tpl_" + chosen.tpl + ".png')";
+      const s = SEARCH[step.typed ? 'typed' : step.screen];
+      if (s) {
+        $('p08SearchLead').innerHTML = ICON[s.lead];
+        $('p08SearchText').textContent = s.text;
+        $('p08SearchEnd').innerHTML = ICON[s.end];
+        search.classList.toggle('is-focus', !!s.focus);
+        search.classList.toggle('is-filled', !!s.filled);
+        $('p08SheetTitle').textContent = s.title || '';
+      }
+      body.scrollTop = 0;
+      phone.querySelectorAll('.cv-tab').forEach((t) => t.classList.toggle('is-on',
+        (t.dataset.tab === 'template' && step.screen === 'list') || (t.dataset.tab === 'elements' && ['elements', 'stickers'].includes(step.screen))));
 
-      tpls.classList.toggle('is-off', step.pick !== 'tpl');
-      stickers.classList.toggle('is-off', step.pick !== 'sticker');
       typeBtn.classList.toggle('is-off', !step.type);
-      searchText.classList.toggle('is-off', !step.typed);
       nextBtn.classList.toggle('is-off', !step.next);
       resetImageSwap(nextBtn);
 
       clearFingers();
-      hits.forEach((h) => {
-        const on = h.dataset.hit === step.hit;
-        h.classList.toggle('is-off', !on);
-        if (on) pointFingerAt(h);
-      });
+      hits.forEach((h) => h.classList.toggle('is-target', h.dataset.hit === step.hit));
+      const target = hits.find((h) => h.dataset.hit === step.hit);
+      if (target) {
+        pointFingerAt(target, { onMain: true, x: target === search ? 0.5 : 1 });
+        // 하단 탭을 가리킬 때 손가락이 화면(960px) 아래로 잘리지 않게
+        document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.top = Math.min(parseFloat(f.style.top), 850) + 'px'; });
+      }
     }
 
     function go() {
@@ -141,20 +222,22 @@
       render();
     }
 
-    hits.forEach((h) => h.addEventListener('click', () => { playClick(); go(); }));
+    hits.forEach((h) => h.addEventListener('click', () => {
+      if (!h.classList.contains('is-target')) return;
+      playClick();
+      go();
+    }));
     typeBtn.addEventListener('click', () => { playClick(); go(); });
 
-    [[tpls, 'tpl'], [stickers, 'sticker']].forEach(([box, key]) => {
-      box.querySelectorAll('.p08-pick').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          playClick();
-          box.querySelectorAll('.p08-pick').forEach((b) => b.classList.toggle('is-selected', b === btn));
-          chosen[key] = btn.dataset.pick;
-          if (key === 'tpl') bubble.innerHTML = TPL_FEEDBACK[chosen.tpl];
-          nextBtn.classList.remove('is-off');
-        });
-      });
-    });
+    picks.forEach((btn) => btn.addEventListener('click', () => {
+      const key = btn.dataset.kind;
+      if (STEPS[index].pick !== key) return;
+      playClick();
+      picks.forEach((b) => { if (b.dataset.kind === key) b.classList.toggle('is-selected', b === btn); });
+      chosen[key] = btn.dataset.pick;
+      if (key === 'tpl') bubble.innerHTML = TPL_FEEDBACK[chosen.tpl];
+      nextBtn.classList.remove('is-off');
+    }));
 
     nextBtn.addEventListener('click', () => {
       const step = STEPS[index];

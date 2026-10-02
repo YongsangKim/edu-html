@@ -6,24 +6,92 @@
     <title>나의 자랑거리를 소개하는 뉴스</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 27~41p(40~41p 개인정보 확인은 완성하기 뒤 모달). 가운데 Canva 화면은 img/p10_screen_{이름}.png(504x895), 꾸민 뉴스데스크는 page08 이미지(p08_result_*) 재사용.
-           앞 활동 결과는 sessionStorage(sa02_article, sa02_desk), 목차로 바로 들어오면 기획서 기본 조합. 음성 예시는 sound/p10_tts_{minjun|yuna}.mp3.
-           클릭 영역 좌표는 화면 이미지 나오면 조정 */
+        /* 디자인 없음 - 기획서 27~41p(40~41p 개인정보 확인은 완성하기 뒤 모달). 가운데 휴대폰은 기획서 Canva 캡처를 CSS로 그린 것(공용 .cv, page08과 같은 틀).
+           꾸민 뉴스데스크는 page08 템플릿+스티커를 겹쳐서 표시. 앱 아이콘·AI 음성 아바타(img/p10_canva_icon, p10_voice_*)는 기획서 이미지에서 잘라낸 것.
+           앞 활동 결과는 sessionStorage(sa02_article, sa02_desk), 목차로 바로 들어오면 기획서 기본 조합. 음성 예시는 sound/p10_tts_{minjun|yuna}.mp3 */
         main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+        .cv-canvas, .cv-clips i{background:var(--desk,#fff)}
+        .p10 .is-off{display:none}
 
-        .p10-screen{position:absolute;left:703px;top:21px;width:504px;height:895px;box-sizing:border-box;border:solid 8px #1b1738;border-radius:40px;background:#fff center / cover no-repeat;overflow:hidden}
-        .p10-canvas{position:absolute;left:720px;top:173px;width:472px;height:265px;border-radius:12px;background:#48159c center / cover no-repeat}
-        .p10-canvas-text{position:absolute;left:784px;top:375px;width:339px;height:52px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.85);border-radius:8px;
-          font-family:'Pretendard';font-size:28px;font-weight:600;color:#1b1738;white-space:nowrap;overflow:hidden}
+        /* 앱 아이콘 크기·위치는 sa/07 page09(Google 렌즈 앱)와 같게 */
+        .cv-home{position:absolute;inset:0;z-index:20;background:linear-gradient(160deg,#9fd8f0,#b9a8f5 55%,#f3b6d8)}
+        .cv-home button{position:absolute;left:50%;top:44%;width:110px;height:110px;margin-left:-55px;padding:0;border:0;background:none;border-radius:28px;cursor:pointer}
+        .cv-home button img{display:block;width:100%;height:100%;border-radius:28px;box-shadow:0 6px 14px rgba(0,0,0,.2);transition:transform .15s}
+        .cv-home button:hover img{transform:scale(1.06)}
+        .cv-home .is-target{animation:none}
 
-        .p10-voices{position:absolute;left:737px;top:437px;width:440px;display:flex;gap:30px}
-        .p10-voice{width:150px;height:170px;padding:0;border:solid 5px #eae0fd;border-radius:24px;background:#fefbf9;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
-          font-family:'Cafe24 Ssurround';font-size:40px;color:#31248a}
-        .p10-voice span{font-size:56px;line-height:1}
-        .p10-voice:hover{border-color:#8278ff}
-        .p10-voice.is-selected{border-color:#ff4ff9}
-        .p10-voice-text{position:absolute;left:715px;top:640px;width:482px;height:170px;box-sizing:border-box;padding:16px 20px;border:solid 3px #b9b3dd;border-radius:14px;background:#fff;
-          font-family:'Pretendard';font-size:26px;line-height:1.4;font-weight:600;color:#1b1738;overflow:hidden}
+        .cv-app{position:absolute;inset:0;z-index:20;background:linear-gradient(180deg,#d8eefa,#efe9ff 30%,#fff 50%)}
+        .cv-app-trial{position:absolute;right:16px;top:30px;padding:10px 20px;border:solid 2px #e1dcf5;border-radius:30px;background:#fff;font-size:19px;font-weight:700}
+        .cv-app-trial:before{content:'♛ ';color:#f5b53c}
+        .cv-app-title{position:absolute;left:0;top:110px;width:100%;margin:0;text-align:center;font-size:31px;font-weight:700;color:#4b4fe0}
+        .cv-app-search{position:absolute;left:16px;top:176px;width:456px;height:60px;box-sizing:border-box;border:solid 2px #e6e2f6;border-radius:18px;background:#fff;
+          display:flex;align-items:center;gap:12px;padding:0 16px;font-size:20px;color:#8a8c99}
+        .cv-app-search svg{width:26px;height:26px;color:#1b1738}
+        .cv-app-h{position:absolute;left:16px;margin:0;font-size:22px;font-weight:700}
+        .cv-app-h span{position:absolute;left:340px;white-space:nowrap;font-weight:600}
+        .cv-designs{position:absolute;left:16px;top:310px;display:flex;gap:14px}
+        .cv-design{width:200px;padding:0;border:0;background:none;text-align:left;font-size:19px;font-weight:700}
+        .cv-design i{display:flex;align-items:center;justify-content:center;width:200px;height:150px;margin-bottom:10px;border-radius:14px;background:#f1f1f5}
+        .cv-design b{display:block;width:150px;height:84px;background:var(--desk)}
+        .cv-design.is-dim{opacity:.55}
+        .cv-design.is-dim b{background:#d9dae2}
+        .cv-starts{position:absolute;left:16px;top:590px;display:flex;gap:22px;font-size:17px;font-weight:600;text-align:center;white-space:nowrap}
+        .cv-starts i{display:flex;width:84px;height:84px;margin-bottom:8px;border-radius:50%;align-items:center;justify-content:center;font-style:normal;font-size:34px;color:#fff}
+        .cv-appnav{position:absolute;left:0;bottom:0;width:100%;height:84px;display:flex;justify-content:space-around;align-items:center;border-top:solid 2px #eee;background:#fff;font-size:17px;font-weight:600;color:#5b3fe8}
+        .cv-appnav span{display:flex;flex-direction:column;align-items:center;gap:4px}
+        .cv-appnav svg{width:28px;height:28px}
+
+        .cv-txt{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);max-width:400px;padding:4px 10px;font-size:26px;font-weight:700;color:#1b1738;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+          background:rgba(255,255,255,.85);border-radius:4px}
+        .cv-txt.is-sel{outline:3px solid #8b5cf6}
+        .cv-textbar{position:absolute;left:8px;right:8px;bottom:310px;height:64px;border-radius:32px;background:#fff;box-shadow:0 4px 14px rgba(27,23,56,.15);z-index:7;
+          display:flex;align-items:center;gap:20px;padding:0 6px 0 22px;font-size:20px;font-weight:700}
+        .cv-textbar u{text-decoration:underline}
+        .cv-textbar .is-gap{flex:1}
+        .cv-check{width:56px;height:56px;padding:0;border:0;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(27,23,56,.2);display:flex;align-items:center;justify-content:center}
+        .cv-check svg{width:28px;height:28px}
+
+        .cv-tsheet .cv-search{top:28px}
+        .cv-tbtn{position:absolute;left:16px;width:456px;height:52px;padding:0;border-radius:14px;font-size:21px;font-weight:700}
+        .cv-tbtn.is-add{top:104px;border:0;background:linear-gradient(90deg,#8b5cf6,#7a45ee);color:#fff !important}
+        .cv-tbtn.is-magic{top:168px;border:solid 2px #e1e2e8;background:#fff}
+        .cv-tstyle{position:absolute;left:16px;width:456px;box-sizing:border-box;padding:0 22px;border:solid 2px #e1e2e8;border-radius:16px;display:flex;align-items:center}
+        .cv-tstyle.is-1{top:280px;height:76px;font-size:38px;font-weight:800}
+        .cv-tstyle.is-2{top:368px;height:62px;font-size:28px;font-weight:700}
+        .cv-tstyle.is-3{top:442px;height:56px;font-size:20px}
+
+        .cv-track{display:flex;flex:0 0 auto;transition:transform .4s ease}
+        .cv-track.is-drag{transition:none}
+        .cv-tabs.is-target{touch-action:none;cursor:grab}
+        .cv-tabs.is-target .cv-tab{pointer-events:none}
+
+        .cv-vsheet h4{margin:0;padding:24px 16px 18px;font-size:24px;border-bottom:solid 2px #eee}
+        .cv-vsheet h5{position:absolute;left:16px;margin:0;font-size:21px}
+        .cv-vtext{position:absolute;left:16px;top:116px;width:456px;height:170px;box-sizing:border-box;padding:14px 16px;border:solid 2px #e1e2e8;border-radius:16px;font-size:19px;line-height:1.5;color:#8a8c99;overflow:hidden}
+        .cv-vtext.is-filled{color:#1b1738}
+        .cv-vtext em{position:absolute;left:14px;bottom:12px;padding:6px 14px;border:solid 2px #e1e2e8;border-radius:20px;font-style:normal;font-size:18px;font-weight:700;color:#1b1738}
+        .cv-vtext.is-filled em{display:none}
+        .cv-vlang{position:absolute;left:16px;top:340px;width:456px;height:50px;box-sizing:border-box;padding:0 18px;border:solid 2px #e1e2e8;border-radius:14px;display:flex;align-items:center;justify-content:space-between;font-size:20px}
+        .cv-vlang svg{width:22px;height:22px}
+        .cv-voices{position:absolute;left:16px;top:408px;display:flex;gap:24px}
+        .cv-voice{width:130px;padding:0;border:0;background:none;font-size:19px;text-align:center;cursor:pointer}
+        .cv-voice img{display:block;width:120px;height:120px;margin:0 auto 6px;border:solid 4px transparent;border-radius:20px;box-sizing:content-box}
+        .cv-voice:hover img{border-color:#c4b5fd}
+        .cv-voice.is-selected img{border-color:#7a45ee}
+        .cv-vmake{position:absolute;left:16px;top:668px;width:456px;height:52px;padding:0;border:0;border-radius:14px;background:#eef0f4;font-size:21px;font-weight:700;color:#9a9caa !important}
+        .cv-vmake.is-ready{background:linear-gradient(90deg,#8b5cf6,#7a45ee);color:#fff !important}
+
+        .cv-home, .cv-app, .cv-sheet, .cv-kbd, .cv-textbar, .cv-txt{display:none}
+        .cv[data-screen="phone"] .cv-home{display:block}
+        .cv[data-screen="app"] .cv-app{display:block}
+        .cv[data-screen="text"] .cv-tsheet, .cv[data-screen="voice"] .cv-vsheet{display:block}
+        .cv[data-screen="typing"] .cv-kbd, .cv[data-screen="typing"] .cv-textbar{display:block}
+        .cv[data-screen="typing"] .cv-textbar{display:flex}
+        .cv[data-screen="typing"] .cv-tabs{display:none}
+        .cv.has-text .cv-txt{display:block}
+
+        .p10-swipe{position:absolute;left:1120px;top:850px;width:110px;z-index:30;pointer-events:none;animation:p10-swipe 1.6s ease-in-out infinite}
+        @keyframes p10-swipe{0%{transform:translateX(0);opacity:0}15%{opacity:1}70%{transform:translateX(-300px);opacity:1}85%,100%{transform:translateX(-300px);opacity:0}}
 
         .p10-load-btn{position:absolute;left:1302px;top:344px;width:515px;height:228px;font-size:56px;line-height:1.15}
         .p10-finish-btn{position:absolute;right:90px;bottom:60px;display:flex;align-items:center;justify-content:center;text-decoration:none}
@@ -47,12 +115,6 @@
         .p10-privacy-ok{position:absolute;left:403px;top:610px;border:0;padding:0;background:none;cursor:pointer}
         .p10-privacy-ok img{display:block}
         .p10-em{color:#ff2f7b;white-space:nowrap}
-
-        /* 임시: Canva 화면 이미지가 없어서 클릭할 자리를 색으로 표시. 화면 이미지 넣으면 이 두 줄 삭제 */
-        .p10 .hit-area{background:rgba(255,79,139,.3);outline:5px dashed #ff4f8b;outline-offset:-5px;border-radius:14px;animation:p10-hit-blink 1.2s ease-in-out infinite}
-        @keyframes p10-hit-blink{50%{background:rgba(255,79,139,.55)}}
-
-        .p10 .is-off{display:none}
     </style>
 </head>
 <body>
@@ -64,19 +126,110 @@
           <p class="guide-bubble" id="p10Bubble"></p>
           <div class="guide-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
 
-          <div class="p10-screen" id="p10Screen"></div>
-          <div class="p10-canvas is-off" id="p10Canvas"></div>
-          <span class="p10-canvas-text is-off" id="p10CanvasText"></span>
+          <div class="cv" id="p10Phone" data-screen="phone">
+            <div class="cv-top">
+              <svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-5h4v5"/></svg>
+              <svg class="cv-undo" viewBox="0 0 24 24"><path d="M9 13L4 8l5-5"/><path d="M4 8h10a6 6 0 010 12h-3"/></svg>
+              <svg class="cv-undo is-dim" viewBox="0 0 24 24"><path d="M15 13l5-5-5-5"/><path d="M20 8H10a6 6 0 000 12h3"/></svg>
+              <span class="is-gap"></span>
+              <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="19" cy="12" r="1.3" fill="currentColor"/></svg>
+              <svg viewBox="0 0 24 24" style="color:#e3d8ff"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z" fill="currentColor"/></svg>
+              <svg viewBox="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>
+              <svg viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M5 13v7h14v-7"/></svg>
+            </div>
 
-          <div class="p10-voices is-off" id="p10Voices">
-            <button type="button" class="p10-voice" data-voice="minjun"><span>&#128266;</span>민준</button>
-            <button type="button" class="p10-voice" data-voice="yuna"><span>&#128266;</span>유나</button>
+            <div class="cv-editor">
+              <div class="cv-canvas"><span class="cv-txt" id="p10Txt"></span></div>
+              <div class="cv-play"><b>0:00</b><i></i><span>0:15</span></div>
+              <div class="cv-ruler"><span>0초</span><i style="left:330px"></i><i style="left:400px"></i><i style="left:470px"></i></div>
+              <div class="cv-head"></div>
+              <div class="cv-row is-el"><svg viewBox="0 0 24 24"><circle cx="7" cy="7" r="3"/><path d="M14 10l3.5-6 3.5 6z"/><rect x="4" y="14" width="6" height="6" rx="1"/><circle cx="17.5" cy="17" r="3"/></svg>요소 추가</div>
+              <div class="cv-row is-media"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>미디어 추가</span><b>+</b><div class="cv-clips"><i></i><i></i></div></div>
+              <div class="cv-row is-audio"><svg viewBox="0 0 24 24"><path d="M9 18V6l11-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>오디오 추가</div>
+            </div>
+
+            <div class="cv-sheet cv-tsheet">
+              <div class="cv-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="cv-search-text">글꼴 및 조합 검색</span></div>
+              <button type="button" class="cv-tbtn is-add" data-hit="textbox">T&nbsp;&nbsp;텍스트 상자 추가</button>
+              <button type="button" class="cv-tbtn is-magic">✎&nbsp;&nbsp;Magic Write</button>
+              <p class="cv-h" style="top:244px;font-size:20px">기본 텍스트 스타일</p>
+              <div class="cv-tstyle is-1">제목 추가</div>
+              <div class="cv-tstyle is-2">부제목 추가</div>
+              <div class="cv-tstyle is-3">약간의 본문 텍스트 추가</div>
+            </div>
+
+            <div class="cv-sheet cv-vsheet">
+              <h4>AI 음성</h4>
+              <h5 style="top:82px">텍스트 입력</h5>
+              <div class="cv-vtext" id="p10VoiceText"><span id="p10VoiceTextBody">에뮤와 캥거루는 뒤로 걸을 수 없다는 사실을 알고 계셨나요?</span><em>💡 예시 사용해보기</em></div>
+              <h5 style="top:304px">음성 선택</h5>
+              <div class="cv-vlang">한국어<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></div>
+              <div class="cv-voices" id="p10Voices">
+                <button type="button" class="cv-voice" data-voice="minjun"><img src="img/p10_voice_minjun.png" alt="">민준</button>
+                <button type="button" class="cv-voice" data-voice="yuna"><img src="img/p10_voice_yuna.png" alt="">유나</button>
+              </div>
+              <button type="button" class="cv-vmake" id="p10Make" data-hit="make">AI 음성 생성</button>
+            </div>
+
+            <div class="cv-textbar">
+              <span>💬</span><span style="background:linear-gradient(90deg,#f44,#fb3,#4c4,#39f);-webkit-background-clip:text;color:transparent">A</span><span>글꼴</span><span>110 pt</span><b>B</b><i>I</i><u>U</u><span class="is-gap"></span>
+              <button type="button" class="cv-check" data-hit="check" aria-label="완료"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+            </div>
+            <div class="cv-kbd" aria-hidden="true">
+              <div><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span></div>
+              <div><span>ㅂ</span><span>ㅈ</span><span>ㄷ</span><span>ㄱ</span><span>ㅅ</span><span>ㅛ</span><span>ㅕ</span><span>ㅑ</span><span>ㅐ</span><span>ㅔ</span></div>
+              <div><span>ㅁ</span><span>ㄴ</span><span>ㅇ</span><span>ㄹ</span><span>ㅎ</span><span>ㅗ</span><span>ㅓ</span><span>ㅏ</span><span>ㅣ</span></div>
+              <div><span class="is-fn">⇧</span><span>ㅋ</span><span>ㅌ</span><span>ㅊ</span><span>ㅍ</span><span>ㅠ</span><span>ㅜ</span><span>ㅡ</span><span class="is-fn">⌫</span></div>
+              <div><span class="is-fn">!#1</span><span class="is-fn">한/영</span><span class="is-wide">한국어</span><span>.</span><span class="is-fn">↵</span></div>
+            </div>
+
+            <nav class="cv-tabs" id="p10Tabs" data-hit="swipe">
+              <div class="cv-track" id="p10Track">
+                <button type="button" class="cv-tab"><i><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 3v18M12 12h9"/></svg></i>추천 템플릿</button>
+                <button type="button" class="cv-tab"><i><svg viewBox="0 0 24 24"><circle cx="7" cy="7" r="3"/><path d="M14 10l3.5-6 3.5 6z"/><rect x="4" y="14" width="6" height="6" rx="1"/><circle cx="17.5" cy="17" r="3"/></svg></i>요소</button>
+                <button type="button" class="cv-tab" data-tab="text" data-hit="text"><i><svg viewBox="0 0 24 24"><path d="M5 5h14M12 5v15M9 20h6"/></svg></i>텍스트</button>
+                <button type="button" class="cv-tab"><i><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="3"/><circle cx="12" cy="13.5" r="3.5"/><path d="M8 7l2-3h4l2 3"/></svg></i>갤러리</button>
+                <button type="button" class="cv-tab"><i><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="3"/><path d="M7 10a5 5 0 0110 0"/></svg></i>브랜드 센터</button>
+                <button type="button" class="cv-tab"><i><svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 010-8 6 6 0 0111.5 2A3 3 0 0118 18z"/><path d="M12 12v6M9.5 14.5L12 12l2.5 2.5"/></svg></i>업로드 항목</button>
+                <button type="button" class="cv-tab"><i><svg viewBox="0 0 24 24"><path d="M15 4l5 5-10 10H5v-5z"/><path d="M4 21h16"/></svg></i>도구</button>
+                <button type="button" class="cv-tab"><i><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></i>프로젝트</button>
+                <button type="button" class="cv-tab"><i><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><path d="M17 14v6M14 17h6"/></svg></i>앱</button>
+                <button type="button" class="cv-tab" data-tab="voice" data-hit="voice"><i><svg viewBox="0 0 24 24"><rect x="4" y="8" width="11" height="11" rx="2"/><path d="M7.5 11.5h4M9.5 11.5v5M17 6c2 1.5 2 6.5 0 8M19.5 4c3 2.5 3 9.5 0 12"/></svg></i>AI 음성</button>
+              </div>
+            </nav>
+
+            <div class="cv-app">
+              <span class="cv-app-trial">무료 체험 시작하기</span>
+              <p class="cv-app-title">오늘은 무엇을 만들어 볼까요?</p>
+              <div class="cv-app-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>어떤 걸 만들고 싶으세요?</div>
+              <p class="cv-app-h" style="top:266px">이어서 디자인해 보세요<span>모두 보기</span></p>
+              <div class="cv-designs">
+                <button type="button" class="cv-design" data-hit="design"><i><b></b></i>제목 없는 디자인</button>
+                <span class="cv-design is-dim"><i><b></b></i></span>
+              </div>
+              <p class="cv-app-h" style="top:546px">시작 방법 선택</p>
+              <div class="cv-starts">
+                <div><i style="background:#ec4d5a">♥</i>SNS</div>
+                <div><i style="background:#f07a2d">▣</i>프레젠테이션</div>
+                <div><i style="background:#3fa45a">⤢</i>화이트보드</div>
+                <div><i style="background:#e9e8ef;color:#5b3fe8">↔</i>맞춤형 크기</div>
+              </div>
+              <div class="cv-appnav">
+                <span><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z" fill="currentColor"/></svg>홈</span>
+                <span style="color:#1b1738"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>디자인</span>
+                <span style="color:#1b1738"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 3v18M12 12h9"/></svg>템플릿</span>
+                <span style="color:#1b1738"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="19" cy="12" r="1.3" fill="currentColor"/></svg>더 보기</span>
+              </div>
+            </div>
+
+            <div class="cv-home">
+              <button type="button" data-hit="canva"><img src="img/p10_canva_icon.png" alt="Canva"></button>
+            </div>
           </div>
-          <div class="p10-voice-text is-off" id="p10VoiceText"></div>
+
+          <img class="p10-swipe is-off" id="p10Swipe" src="../../img/common/img_finger01.png" alt="">
 
           <button type="button" class="card-btn p10-load-btn is-off" id="p10LoadBtn">나만의 기사문<br>텍스트 블록<br>불러오기</button>
-
-          <button type="button" class="hit-area is-off" id="p10Hit" aria-label="클릭"></button>
 
           <a href="javascript:;" class="js-sfx next-btn is-off" id="p10Next" data-sound="sound/click.mp3">
             <img src="../../img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" alt="다음">
@@ -117,49 +270,52 @@
   <script src="../../js/common.js"></script>
   <script>
   (function () {
-    // 기획서 28p: 앞 활동 없이 목차로 들어오면 기본 기사문 + 아침 뉴스 템플릿 조합
+    // 기획서 28p: 앞 활동 없이 목차로 들어오면 기본 기사문 + 아침 뉴스·여자 아나운서 조합
     const DEFAULT_ARTICLE = '오늘의 주인공은 매일 꾸준히 노력하여 스스로 세운 목표를 이뤘다고 합니다. 매우 자랑스러운 기분이라고 전해왔습니다.';
     const DEFAULT_DESK = 'a1';
     const read = (k) => { try { return sessionStorage.getItem(k); } catch (e) { return null; } };
     const article = read('sa02_article') || DEFAULT_ARTICLE;
     const desk = read('sa02_desk') || DEFAULT_DESK;
+    const SHORT = article.split(' ').slice(0, 2).join(' ') + ' ···';
 
     const STEPS = [
-      { bubble: 'Canva를 클릭해요.', screen: 'home', hit: [868, 382, 174, 174] },
-      { bubble: '앞서 내가 만든<br>템플릿을 클릭해요.', screen: 'designs', hit: [723, 553, 473, 307] },
-      { bubble: '아래의 ‘텍스트’를<br>클릭해요.', screen: 'edit', canvas: true, hit: [900, 770, 130, 110] },
-      { bubble: '‘텍스트 상자 추가’<br>버튼을 클릭해요.', screen: 'text', hit: [730, 110, 450, 80] },
-      { bubble: '만들어 둔<br>나만의 기사문 블록을<br>입력해 볼까요?', screen: 'edit', canvas: true, load: true },
-      { bubble: '체크 버튼을 눌러<br>텍스트 작업을 마무리해요.', screen: 'edit', canvas: true, canvasText: true, hit: [1120, 360, 80, 80] },
-      { bubble: '좋아요!<br>이제 AI 음성 보이스를<br>골라봐요.', screen: 'edit', canvas: true, canvasText: true, next: true },
-      { bubble: '아래의 편집 도구창을<br>오른쪽으로 슬라이드 해요.', screen: 'edit', canvas: true, canvasText: true, hit: [720, 770, 470, 110], swipe: true },
-      { bubble: 'AI 음성 버튼을<br>클릭해요.', screen: 'tools', canvas: true, canvasText: true, hit: [1100, 740, 100, 120] },
-      { bubble: 'AI 음성 아이콘을 클릭하여<br>예시 음성을 들어보고<br>선택해요.', screen: 'voice', voice: true },
-      { bubble: '만들어 둔<br>나만의 기사문 블록을<br>다시 한 번 입력해요.', screen: 'voice', voice: true, load: true },
-      { bubble: '‘AI 음성 생성’<br>버튼을 클릭해요.', screen: 'voice', voice: true, voiceText: true, hit: [740, 830, 440, 70] },
-      { bubble: '좋아요!<br>‘완성하기’ 버튼을 눌러<br>뉴스 제작을 마무리해보세요.', screen: 'edit', canvas: true, canvasText: true, finish: true }
+      { bubble: 'Canva를 클릭해요.', screen: 'phone', hit: 'canva' },
+      { bubble: '앞서 내가 만든<br>템플릿을 클릭해요.', screen: 'app', hit: 'design' },
+      { bubble: '아래의 ‘텍스트’를<br>클릭해요.', screen: 'edit', hit: 'text' },
+      { bubble: '‘텍스트 상자 추가’<br>버튼을 클릭해요.', screen: 'text', hit: 'textbox' },
+      { bubble: '만들어 둔<br>나만의 기사문 블록을<br>입력해 볼까요?', screen: 'typing', txt: '단락 텍스트', sel: true, load: true },
+      { bubble: '체크 버튼을 눌러<br>텍스트 작업을 마무리해요.', screen: 'typing', txt: SHORT, sel: true, hit: 'check' },
+      { bubble: '좋아요!<br>이제 AI 음성 보이스를<br>골라봐요.', screen: 'edit', txt: SHORT, next: true },
+      { bubble: '아래의 편집 도구창을<br>오른쪽으로 슬라이드 해요.', screen: 'edit', txt: SHORT, hit: 'swipe' },
+      { bubble: 'AI 음성 버튼을<br>클릭해요.', screen: 'edit', txt: SHORT, tools: true, hit: 'voice' },
+      { bubble: 'AI 음성 아이콘을 클릭하여<br>예시 음성을 들어보고<br>선택해요.', screen: 'voice', tools: true, voice: true },
+      { bubble: '만들어 둔<br>나만의 기사문 블록을<br>다시 한 번 입력해요.', screen: 'voice', tools: true, voice: true, load: true },
+      { bubble: '‘AI 음성 생성’<br>버튼을 클릭해요.', screen: 'voice', tools: true, voice: true, filled: true, hit: 'make' },
+      { bubble: '좋아요!<br>‘완성하기’ 버튼을 눌러<br>뉴스 제작을 마무리해보세요.', screen: 'edit', txt: SHORT, tools: true, finish: true }
     ];
+    const TRACK_END = -372;
 
     const $ = (id) => document.getElementById(id);
+    const phone = $('p10Phone');
     const bubble = $('p10Bubble');
-    const screen = $('p10Screen');
-    const canvas = $('p10Canvas');
-    const canvasText = $('p10CanvasText');
-    const voices = $('p10Voices');
+    const txt = $('p10Txt');
+    const track = $('p10Track');
+    const tabs = $('p10Tabs');
+    const swipeFinger = $('p10Swipe');
     const voiceText = $('p10VoiceText');
+    const makeBtn = $('p10Make');
     const loadBtn = $('p10LoadBtn');
-    const hit = $('p10Hit');
     const nextBtn = $('p10Next');
     const finishBtn = $('p10Finish');
+    const hits = Array.from(phone.querySelectorAll('[data-hit]'));
     const playClick = makeSfx('sound/click.mp3');
     const tts = {
       minjun: new Audio('sound/p10_tts_minjun.mp3'),
       yuna: new Audio('sound/p10_tts_yuna.mp3')
     };
 
-    canvas.style.backgroundImage = "url('img/p08_result_" + desk + ".png'), url('img/p08_tpl_" + desk.charAt(0) + ".png')";
-    canvasText.textContent = article.split(' ').slice(0, 2).join(' ') + ' ···';
-    voiceText.textContent = article;
+    phone.style.setProperty('--desk', "url('img/p08_sticker_" + desk.charAt(1) + ".png') 0 36% / 66% auto no-repeat, url('img/p08_tpl_" + desk.charAt(0) + ".png') center / cover no-repeat");
+    phone.classList.add('is-edited');
 
     let index = 0;
     let voicePicked = false;
@@ -167,22 +323,36 @@
     function render() {
       const step = STEPS[index];
       bubble.innerHTML = step.bubble;
-      screen.style.backgroundImage = "url('img/p10_screen_" + step.screen + ".png')";
-      canvas.classList.toggle('is-off', !step.canvas);
-      canvasText.classList.toggle('is-off', !step.canvasText);
-      voices.classList.toggle('is-off', !step.voice);
-      voiceText.classList.toggle('is-off', !step.voiceText);
+      phone.dataset.screen = step.screen;
+      phone.classList.toggle('has-text', !!step.txt);
+      txt.textContent = step.txt || '';
+      txt.classList.toggle('is-sel', !!step.sel);
+      track.style.transform = step.tools ? 'translateX(' + TRACK_END + 'px)' : '';
+      phone.querySelectorAll('.cv-tab').forEach((t) => t.classList.toggle('is-on',
+        (t.dataset.tab === 'text' && step.screen === 'text') || (t.dataset.tab === 'voice' && step.screen === 'voice')));
+
+      voiceText.classList.toggle('is-filled', !!step.filled);
+      $('p10VoiceTextBody').textContent = step.filled ? article : '에뮤와 캥거루는 뒤로 걸을 수 없다는 사실을 알고 계셨나요?';
+      makeBtn.classList.toggle('is-ready', !!step.filled);
+
       loadBtn.classList.toggle('is-off', !step.load);
       nextBtn.classList.toggle('is-off', !step.next);
       resetImageSwap(nextBtn);
       finishBtn.classList.toggle('is-off', !step.finish);
 
       clearFingers();
-      hit.classList.toggle('is-off', !step.hit);
-      if (step.hit) {
-        const [l, t, w, h] = step.hit;
-        hit.style.cssText = 'left:' + l + 'px;top:' + t + 'px;width:' + w + 'px;height:' + h + 'px';
-        pointFingerAt(hit);
+      hits.forEach((h) => h.classList.toggle('is-target', h.dataset.hit === step.hit));
+      swipeFinger.classList.toggle('is-off', step.hit !== 'swipe');
+      const target = hits.find((h) => h.dataset.hit === step.hit);
+      if (target && step.hit !== 'swipe') {
+        const at = index;
+        const point = () => {
+          if (index !== at) return;
+          pointFingerAt(target, { onMain: true });
+          // 하단 탭·버튼을 가리킬 때 손가락이 화면(960px) 아래로 잘리지 않게
+          document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.top = Math.min(parseFloat(f.style.top), 850) + 'px'; });
+        };
+        if (target.closest('.cv-track')) setTimeout(point, 450); else point();
       }
     }
 
@@ -191,38 +361,58 @@
       render();
     }
 
-    let swipedAt = 0;
-    hit.addEventListener('click', () => {
-      if (STEPS[index].swipe || Date.now() - swipedAt < 500) return;
+    hits.forEach((h) => h.addEventListener('click', () => {
+      if (!h.classList.contains('is-target') || h.dataset.hit === 'swipe') return;
       playClick();
       go();
-    });
+    }));
 
-    let dragX = null;
-    hit.addEventListener('pointerdown', (e) => { if (STEPS[index].swipe) dragX = e.clientX; });
-    window.addEventListener('pointerup', (e) => {
-      if (dragX === null) return;
-      const moved = e.clientX - dragX;
-      dragX = null;
-      if (STEPS[index].swipe && moved > 30) {
-        swipedAt = Date.now();
-        go();
-      }
+    // 편집 도구창 슬라이드: 마우스·손가락 모두(pointer + touch-action:none). 끄는 만큼 따라오고 40px 넘게 밀면 끝까지 넘어감
+    const stage = document.getElementById('stage');
+    let drag = null;
+    tabs.addEventListener('pointerdown', (e) => {
+      if (STEPS[index].hit !== 'swipe') return;
+      e.preventDefault();
+      tabs.setPointerCapture(e.pointerId);
+      drag = { x: e.clientX, scale: stage.getBoundingClientRect().width / 1920, dx: 0 };
+      track.classList.add('is-drag');
+      swipeFinger.classList.add('is-off');
     });
+    tabs.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      drag.dx = Math.abs(e.clientX - drag.x) / drag.scale;
+      track.style.transform = 'translateX(' + Math.max(TRACK_END, -drag.dx) + 'px)';
+    });
+    const endDrag = () => {
+      if (!drag) return;
+      const moved = drag.dx;
+      drag = null;
+      track.classList.remove('is-drag');
+      if (moved > 40) {
+        track.style.transform = 'translateX(' + TRACK_END + 'px)';
+        playClick();
+        setTimeout(go, 400);
+      } else {
+        track.style.transform = '';
+        swipeFinger.classList.remove('is-off');
+      }
+    };
+    tabs.addEventListener('pointerup', endDrag);
+    tabs.addEventListener('pointercancel', endDrag);
 
     loadBtn.addEventListener('click', () => {
       playClick();
-      if (STEPS[index].voice && !voicePicked) return;
       go();
     });
 
-    voices.querySelectorAll('.p10-voice').forEach((btn) => {
+    phone.querySelectorAll('.cv-voice').forEach((btn) => {
       btn.addEventListener('click', () => {
+        if (!STEPS[index].voice) return;
         Object.values(tts).forEach((a) => { a.pause(); a.currentTime = 0; });
         tts[btn.dataset.voice].play().catch(() => {});
         try { sessionStorage.setItem('sa02_voice', btn.dataset.voice); } catch (e) {}
-        voices.querySelectorAll('.p10-voice').forEach((b) => b.classList.toggle('is-selected', b === btn));
-        if (!voicePicked && STEPS[index].voice && !STEPS[index].load) {
+        phone.querySelectorAll('.cv-voice').forEach((b) => b.classList.toggle('is-selected', b === btn));
+        if (!voicePicked && !STEPS[index].load) {
           voicePicked = true;
           nextBtn.classList.remove('is-off');
         }
