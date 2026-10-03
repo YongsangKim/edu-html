@@ -8,11 +8,11 @@
     <style>
         /* 디자인 48p-ok-1~13, 기획서 최종본 46~51p + 수정2(옷장 구성). 배경 p13_bg.png는 안내 문구·날씨 판(리본)·방·빈 옷장만 든 통이미지
            TODO: 지금은 장마 라운드만. 눈/더위/추위 라운드 데이터는 gwa/_backup_03_page12/page12.html의 ROUNDS에 있음(디자인 나오면 붙임) */
-        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:url('img/p13_bg.png') no-repeat}
+        main{background:url('img/p13_bg.png') no-repeat}
 
         .p13-cards{position:absolute;left:225px;top:452px;width:370px;height:310px}
-        .p13-card{position:absolute;width:323px;height:260px;box-sizing:border-box;border:solid 5px #1b1738;border-radius:14px;background:#fff;
-          display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:6px;font-family:'Cafe24 Ssurround';color:#1b1738}
+        .p13-card{position:absolute;width:323px;height:260px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:14px;background:var(--c-white);
+          display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:6px;font-family:'Cafe24 Ssurround';color:var(--c-ink)}
         .p13-card.is-back{left:40px;top:43px;background:#aebbd6}
         .p13-card.is-front{left:0;top:0;z-index:1}
         .p13-card.is-front.is-flip{animation:p13-flip .25s ease-out}
@@ -45,7 +45,7 @@
 
         .p13-label{position:absolute;width:102px;height:40px;margin:0;padding-top:3px;box-sizing:border-box;border-radius:20px;background:#1e2252;
           font-family:'Cafe24 Ssurround';font-size:30px;line-height:37px;text-align:center;color:#9aa0c0}
-        .p13-label.is-active{color:#fff}
+        .p13-label.is-active{color:var(--c-white)}
         .p13-label.is-top{left:1373px;top:272px} .p13-label.is-bottom{left:1622px;top:272px}
         .p13-label.is-outer{left:1373px;top:493px} .p13-label.is-acc{left:1622px;top:493px}
 
@@ -150,7 +150,6 @@
         answer: ['tank', 'shorts', 'raincoat', 'umbrella'] }
     ];
 
-    const $ = (id) => document.getElementById(id);
     const board = $('p13Board');
     const front = $('p13CardFront');
     const back = $('p13CardBack');
@@ -159,9 +158,6 @@
     const labels = document.querySelectorAll('.p13-label');
     const wears = {};
     CATS.forEach((c) => { wears[c] = document.querySelector('.p13-wear-' + c); });
-    const playCorrect = makeSfx('sound/correct.mp3');
-    const playWrong = makeSfx('sound/incorrect.mp3');
-    const playClick = makeSfx('sound/click.mp3');
 
     const order = shuffleArray(ROUNDS);
     let roundNo = 0;

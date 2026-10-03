@@ -10,32 +10,31 @@
            좌우 방향키(터치 화면은 끌기)로 바구니를 옮겨 받음. 카드 폭 절반 이상이 바구니에 걸치면 받은 것으로 침.
            정답 5장을 다 받아야 라운드 성공, 하나라도 놓치면 그 라운드 다시 시작(팝업 문구는 기획서에 없어 임의).
            정답 한 장마다 마음 게이지 1/15씩. 친구 img/p12_guest1.png(모든 라운드 공통), 바구니 밑 캐릭터 img/p12_character.png */
-        main{position:absolute;left:0;top:120px;width:1920px;height:960px;overflow:hidden}
+        main{overflow:hidden}
 
-        .p12-gauge-label{position:absolute;left:560px;top:40px;height:64px;padding:6px 30px 0;box-sizing:border-box;display:flex;align-items:center;border-radius:32px;background:#48159c;
-          font-family:'Cafe24 Ssurround';font-size:40px;color:#fff}
+        .p12-gauge-label{position:absolute;left:560px;top:40px;height:64px;padding:6px 30px 0;box-sizing:border-box;display:flex;align-items:center;border-radius:32px;background:var(--c-purple);
+          font-family:'Cafe24 Ssurround';font-size:40px;color:var(--c-white)}
         .p12-gauge{left:860px;top:40px;width:953px}
-        .p12-gauge:before{background-image:url('img/p12_star.png')}
 
         .p12-student{position:absolute;left:81px;top:381px;width:377px;height:509px;background:center bottom / contain no-repeat}
         .p12-student:after{content:'친구';position:absolute;left:70px;top:90px;width:240px;height:380px;border-radius:120px 120px 30px 30px;background:rgba(72,21,156,.2);
-          display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:44px;color:#48159c}
+          display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-purple)}
         .p12-student.has-img:after{display:none}
-        .p12-bubble{left:37px;bottom:562px;width:434px;min-height:0;padding:28px 14px;display:flex;align-items:center;justify-content:center;font-size:40px;z-index:5}
+        .p12-bubble{left:37px;bottom:562px;width:434px;padding:28px 14px;font-size:40px;z-index:5}
 
         .p12-card{position:absolute;top:0;left:0;width:395px;height:162px;box-sizing:border-box;padding:6px 24px 0;display:flex;align-items:center;justify-content:center;text-align:center;
           font-size:34px;line-height:1.25;letter-spacing:-0.05em;word-break:keep-all;will-change:transform;z-index:6;pointer-events:none}
         .p12-basket{position:absolute;left:1023px;top:611px;width:395px;height:300px;z-index:7;touch-action:none;cursor:grab}
-        .p12-basket-bowl{position:absolute;left:0;top:0;width:395px;height:162px;box-sizing:border-box;border:solid 6px #48159c;border-radius:20px 20px 120px 120px;
-          background:#91b9e7 center / contain no-repeat}
-        .p12-basket-char{position:absolute;left:82px;top:140px;width:231px;height:240px;background:url('img/p12_character.png') center top / contain no-repeat;z-index:-1}
-        .p12-heart{position:absolute;left:130px;top:26px;width:135px;height:109px;display:flex;align-items:center;justify-content:center;font-size:96px;line-height:1;color:#fff;
-          text-shadow:0 0 0 #1b1738,0 4px 0 rgba(0,0,0,.2);transition:transform .2s}
+        .p12-basket-bowl{position:absolute;left:0;top:0;width:395px;height:113px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:14px 14px 84px 84px;
+          background:var(--c-sky) center / contain no-repeat}
+        .p12-basket-char{position:absolute;left:82px;top:91px;width:231px;height:240px;background:url('img/p12_character.png') center top / contain no-repeat;z-index:-1}
+        .p12-heart{position:absolute;left:150px;top:18px;width:95px;height:76px;display:flex;align-items:center;justify-content:center;font-size:67px;line-height:1;color:var(--c-white);
+          text-shadow:0 0 0 var(--c-ink),0 4px 0 rgba(0,0,0,.2);transition:transform .2s}
         .p12-heart.is-good{color:#ff4f8b;transform:scale(1.25)}
         .p12-heart.is-bad{transform:scale(1.1) rotate(-10deg);opacity:.8}
 
         .p12-banner{position:absolute;left:0;top:340px;width:1920px;margin:0;text-align:center;z-index:20}
-        .p12-banner span{display:inline-block;padding:14px 60px 8px;border-radius:50px;background:#48159c;font-family:'Cafe24 Ssurround';font-size:64px;color:#fff;letter-spacing:-0.04em}
+        .p12-banner span{display:inline-block;padding:14px 60px 8px;border-radius:50px;background:var(--c-purple);font-family:'Cafe24 Ssurround';font-size:64px;color:var(--c-white);letter-spacing:-0.04em}
 
         #p12Retry{z-index:120}
         .p12 .is-off{display:none}
@@ -51,7 +50,7 @@
           <div class="gauge is-thin p12-gauge"><div class="gauge-fill" id="p12Fill"></div></div>
 
           <div class="p12-student" id="p12Student"></div>
-          <p class="guide-bubble p12-bubble" id="p12Bubble"></p>
+          <p class="guide-bubble is-center p12-bubble" id="p12Bubble"></p>
 
           <div id="p12Cards"></div>
           <div class="p12-basket" id="p12Basket">
@@ -95,19 +94,16 @@
     ];
     const TOTAL_GOOD = 15;
     const AREA = { left: 560, right: 1880, top: 120, catchY: 611 };
-    const FALL_SPEED = 130;
-    const SPAWN_GAP = 2400;
+    const FALL_SPEED = 95;
+    const SPAWN_GAP = 3200;
     const BASKET_W = 395;
 
-    const $ = (id) => document.getElementById(id);
     const main = $('p12Main');
     const cardsBox = $('p12Cards');
     const basket = $('p12Basket');
     const heart = $('p12Heart');
     const fill = $('p12Fill');
     const stage = document.getElementById('stage');
-    const playCorrect = makeSfx('sound/correct.mp3');
-    const playWrong = makeSfx('sound/incorrect.mp3');
 
     let round = 0;
     let basketX = 1023;

@@ -8,22 +8,21 @@
     <style>
         /* 디자인 없음 - 기획서 16~25p. 가운데 휴대폰은 기획서 Canva 앱 캡처를 CSS로 그린 것(캡처 이미지 없이 동작).
            템플릿 img/p08_tpl_{a|b|c}.png, 스티커 img/p08_sticker_{1|2}.png는 기획서에 든 이미지. 완성 화면은 템플릿 위에 스티커를 겹침(page10·11도 같은 방식) */
-        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
-        .cv-canvas, .cv-clips i{background:var(--desk,#fff)}
+        .cv-canvas, .cv-clips i{background:var(--desk,var(--c-white))}
         .p08 .is-off{display:none}
 
-        .cv-pick{display:block;width:100%;margin:0 0 14px;padding:0;border:solid 5px transparent;border-radius:10px;background:#f2f3f7 center / cover no-repeat;cursor:pointer}
+        .cv-pick{display:block;width:100%;margin:0 0 14px;padding:0;border:solid 5px transparent;border-radius:10px;background:var(--c-pale) center / cover no-repeat;cursor:pointer}
         .cv-pick.is-tpl{height:256px}
         .cv-pick.is-sticker{height:226px;background-size:contain}
-        .cv-pick:hover{border-color:#8278ff}
+        .cv-pick:hover{border-color:var(--c-violet)}
         .cv-pick.is-selected{border-color:#ff4ff9}
 
         .cv-cats{display:grid;grid-template-columns:repeat(4,1fr);gap:22px 8px;text-align:center;font-size:18px}
-        .cv-cats i{display:flex;width:80px;height:80px;margin:0 auto 8px;border-radius:18px;align-items:center;justify-content:center;font-style:normal;font-size:38px;color:#fff;
+        .cv-cats i{display:flex;width:80px;height:80px;margin:0 auto 8px;border-radius:18px;align-items:center;justify-content:center;font-style:normal;font-size:38px;color:var(--c-white);
           box-shadow:6px -6px 0 rgba(255,255,255,.7),6px -6px 0 2px rgba(27,23,56,.06)}
 
         .cv-chips{position:absolute;left:16px;top:168px;right:0;display:flex;gap:22px;font-size:20px;font-weight:600;color:#5b5e6e;white-space:nowrap;overflow:hidden}
-        .cv-chips .is-on{color:#1b1738;box-shadow:inset 0 -4px 0 #7a45ee;padding-bottom:10px}
+        .cv-chips .is-on{color:var(--c-ink);box-shadow:inset 0 -4px 0 #7a45ee;padding-bottom:10px}
         .cv[data-screen="stickers"] .cv-h{top:226px}
         .cv[data-screen="stickers"] .cv-body{top:264px}
 
@@ -169,7 +168,6 @@
     const STICKER_LAYER = (s) => "url('img/p08_sticker_" + s + ".png') 0 36% / 66% auto no-repeat, ";
     const deskBg = (tpl, sticker) => (sticker ? STICKER_LAYER(sticker) : '') + "url('img/p08_tpl_" + tpl + ".png') center / cover no-repeat";
 
-    const $ = (id) => document.getElementById(id);
     const phone = $('p08Phone');
     const bubble = $('p08Bubble');
     const search = $('p08Search');
@@ -178,7 +176,6 @@
     const nextBtn = $('p08Next');
     const hits = Array.from(phone.querySelectorAll('[data-hit]'));
     const picks = Array.from(phone.querySelectorAll('.cv-pick'));
-    const playClick = makeSfx('sound/click.mp3');
 
     const chosen = { tpl: '', sticker: '' };
     let index = 0;

@@ -8,22 +8,21 @@
     <style>
         /* 디자인 없음 - 기획서 3~17p. 3x3 빙고판에서 상황 카드를 골라 알맞은 말을 고르면 그 칸 완료(색 바뀜·다시 못 누름).
            가로·세로·대각선 한 줄이 되면 BINGO + 팡파레 → 완료 팝업. 상황 삽화 img/p02_sit_{key}.png */
-        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
 
         .p02-title{position:absolute;left:480px;top:40px;width:962px;height:108px;box-sizing:border-box;padding:8px 30px 0;display:flex;align-items:center;justify-content:center;
-          background:#91b9e7;border:solid 5px #1b1738;border-radius:54px;box-shadow:0 10px 0 0 #becde7;font-family:'Cafe24 Ssurround';font-size:56px;color:#fff;letter-spacing:-0.04em}
+          background:var(--c-sky);border:solid 5px var(--c-ink);border-radius:54px;box-shadow:0 10px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:56px;color:var(--c-white);letter-spacing:-0.04em}
 
-        .p02-board{position:absolute;left:94px;top:178px;width:1734px;height:720px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:48px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p02-board{position:absolute;left:94px;top:178px;width:1734px;height:720px;box-sizing:border-box;background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:48px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
         .p02-cells{position:absolute;left:127px;top:202px;width:1667px;display:grid;grid-template-columns:repeat(3,522px);gap:36px 50px}
         .p02-cell{width:522px;height:190px;min-width:0;padding:10px 20px 4px;font-size:54px;line-height:1.2;letter-spacing:-0.05em;word-break:keep-all}
         .p02-cell.is-done{pointer-events:none}
         .p02-bingo{position:absolute;left:739px;top:0;width:458px;height:161px;margin:0;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:130px;
-          color:#ff4f8b;-webkit-text-stroke:6px #fff;paint-order:stroke fill;letter-spacing:-0.04em;z-index:20;animation:p02-bingo .6s cubic-bezier(.3,1.6,.5,1)}
+          color:#ff4f8b;-webkit-text-stroke:6px var(--c-white);paint-order:stroke fill;letter-spacing:-0.04em;z-index:20;animation:p02-bingo .6s cubic-bezier(.3,1.6,.5,1)}
         @keyframes p02-bingo{from{transform:scale(.2);opacity:0}to{transform:none;opacity:1}}
 
-        .p02-sit-illust{position:absolute;left:150px;top:237px;width:401px;height:413px;border-radius:32px;background:#48159c center / cover no-repeat}
+        .p02-sit-illust{position:absolute;left:150px;top:237px;width:401px;height:413px;border-radius:32px;background:var(--c-purple) center / cover no-repeat}
         .p02-sit-text{position:absolute;left:620px;top:230px;width:1160px;min-height:196px;margin:0;box-sizing:border-box;padding:30px 40px;display:flex;align-items:center;
-          background:#eef3fb;border:solid 4px #1b1738;border-radius:28px;font-family:'Cafe24 Ssurround';font-size:52px;line-height:1.35;color:#48159c;letter-spacing:-0.04em;word-break:keep-all}
+          background:var(--c-pale);border:solid 4px var(--c-ink);border-radius:28px;font-family:'Cafe24 Ssurround';font-size:52px;line-height:1.35;color:var(--c-purple);letter-spacing:-0.04em;word-break:keep-all}
         .p02-opts{position:absolute;left:620px;top:540px;width:1160px;display:flex;justify-content:space-between}
         .p02-opts .card-btn{width:360px;min-width:0;height:183px;padding:10px 14px 4px;font-size:42px;line-height:1.2;letter-spacing:-0.05em;word-break:keep-all}
 
@@ -115,13 +114,9 @@
     ];
     const LINES = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
 
-    const $ = (id) => document.getElementById(id);
     const title = $('p02Title');
     const cellsBox = $('p02Cells');
     const optsBox = $('p02Opts');
-    const playClick = makeSfx('sound/click.mp3');
-    const playCorrect = makeSfx('sound/correct.mp3');
-    const playWrong = makeSfx('sound/incorrect.mp3');
     const done = new Set();
     let busy = false;
 

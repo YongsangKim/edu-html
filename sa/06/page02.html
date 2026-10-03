@@ -8,28 +8,27 @@
     <style>
         /* 디자인 없음 - 기획서 3~7p. 학생 캐릭터를 알맞은 건물로 끌어다 놓기(질문 4개 차례로). 놓은 뒤 캐릭터는 제자리로 돌아오고,
            맞힌 건물은 간판·불빛이 켜진 채 유지. 지도 img/p02_map.png, 건물 img/p02_bld_{key}.png, 학생은 임시로 메인 캐릭터(img/p_character_main.png) */
-        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
 
-        .p02-map{position:absolute;left:33px;top:34px;width:1860px;height:774px;box-sizing:border-box;border:solid 6px #48159c;border-radius:40px;background:#fefbf9 url('img/p02_map.png') center / cover no-repeat}
+        .p02-map{position:absolute;left:33px;top:34px;width:1860px;height:774px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:40px;background:var(--c-cream) url('img/p02_map.png') center / cover no-repeat}
         .p02-place{position:absolute;width:386px;height:258px;transition:transform .2s ease}
-        .p02-sign{position:absolute;left:31px;top:0;width:325px;height:87px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:#91b9e7;border:solid 5px #1b1738;border-radius:44px;
-          font-family:'Cafe24 Ssurround';font-size:48px;color:#fff;transition:background-color .3s,color .3s,box-shadow .3s}
-        .p02-bld{position:absolute;left:0;top:84px;width:386px;height:171px;border-radius:24px;background:#fefbf9 center / contain no-repeat;border:solid 5px #1b1738;box-sizing:border-box;transition:box-shadow .3s}
-        .p02-place.is-lit .p02-sign{background:#ffd83d;color:#1b1738;box-shadow:0 0 30px 10px rgba(255,216,61,.8)}
+        .p02-sign{position:absolute;left:31px;top:0;width:325px;height:87px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:var(--c-sky);border:solid 5px var(--c-ink);border-radius:44px;
+          font-family:'Cafe24 Ssurround';font-size:48px;color:var(--c-white);transition:background-color .3s,color .3s,box-shadow .3s}
+        .p02-bld{position:absolute;left:0;top:84px;width:386px;height:171px;border-radius:24px;background:var(--c-cream) center / contain no-repeat;border:solid 5px var(--c-ink);box-sizing:border-box;transition:box-shadow .3s}
+        .p02-place.is-lit .p02-sign{background:var(--c-yellow);color:var(--c-ink);box-shadow:0 0 30px 10px rgba(255,216,61,.8)}
         .p02-place.is-lit .p02-bld{box-shadow:0 0 40px 14px rgba(255,216,61,.75)}
 
         .p02-student{position:absolute;left:109px;top:521px;width:287px;height:396px;background:url('img/p_character_main.png') center bottom / contain no-repeat;cursor:grab;touch-action:none;z-index:20}
-        .p02-student:after{content:'학생';position:absolute;left:50%;bottom:30px;transform:translateX(-50%);width:200px;height:200px;box-sizing:border-box;border-radius:50%;background:#91b9e7;border:solid 6px #1b1738;
-          display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:48px;color:#fff}
+        .p02-student:after{content:'학생';position:absolute;left:50%;bottom:30px;transform:translateX(-50%);width:200px;height:200px;box-sizing:border-box;border-radius:50%;background:var(--c-sky);border:solid 6px var(--c-ink);
+          display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:48px;color:var(--c-white)}
         .p02-student.has-img:after{display:none}
         .p02-student.is-dragging{cursor:grabbing;z-index:60}
         .p02-student.is-back{transition:left .3s ease,top .3s ease}
 
         .p02-bubble{position:absolute;left:430px;top:700px;width:1371px;height:171px;box-sizing:border-box;padding:0 50px;display:flex;align-items:center;
-          background:#fefbf9;border:solid 6px #48159c;border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
-          font-family:'Cafe24 Ssurround';font-size:52px;line-height:1.25;color:#48159c;letter-spacing:-0.04em;word-break:keep-all;z-index:10}
-        .p02-bubble:before{content:'';position:absolute;left:-58px;top:50%;margin-top:-30px;border-style:solid;border-width:30px 58px 30px 0;border-color:transparent #48159c transparent transparent}
-        .p02-bubble:after{content:'';position:absolute;left:-47px;top:50%;margin-top:-22px;border-style:solid;border-width:22px 48px 22px 0;border-color:transparent #fefbf9 transparent transparent}
+          background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';font-size:52px;line-height:1.25;color:var(--c-purple);letter-spacing:-0.04em;word-break:keep-all;z-index:10}
+        .p02-bubble:before{content:'';position:absolute;left:-58px;top:50%;margin-top:-30px;border-style:solid;border-width:30px 58px 30px 0;border-color:transparent var(--c-purple) transparent transparent}
+        .p02-bubble:after{content:'';position:absolute;left:-47px;top:50%;margin-top:-22px;border-style:solid;border-width:22px 48px 22px 0;border-color:transparent var(--c-cream) transparent transparent}
 
         #p02Done{z-index:120}
     </style>
@@ -80,13 +79,10 @@
     ];
     const WRONG = '다시 한 번 잘 생각해봐요.';
 
-    const $ = (id) => document.getElementById(id);
     const student = $('p02Student');
     const bubble = $('p02Bubble');
     const places = Array.from(document.querySelectorAll('.p02-place'));
     const stage = document.getElementById('stage');
-    const playCorrect = makeSfx('sound/correct.mp3');
-    const playWrong = makeSfx('sound/incorrect.mp3');
 
     const probe = new Image();
     probe.onload = () => student.classList.add('has-img');

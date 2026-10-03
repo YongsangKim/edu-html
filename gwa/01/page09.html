@@ -6,19 +6,19 @@
     <title>정보를 깔끔하게 데이터로 정리하기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:url('img/p09_bg.png') no-repeat}
+        main{background:url('img/p09_bg.png') no-repeat}
 
         /* 안내 문구와 문장은 문제마다 바뀌므로, 배경에 그려진 자리를 같은 색으로 덮고 위에 다시 그림.
            색과 좌표는 디자인 16p에서 픽셀로 측정한 값(말풍선 흰색, 문장 패널 #023186) */
         .p09-guide{position:absolute;left:358px;top:76px;width:1210px;height:112px;
           border-radius:56px;display:flex;align-items:center;justify-content:center;text-align:center}
-        .p09-guide span{font-family:'Cafe24 Ssurround';font-size:70px;color:#1b1738;letter-spacing:-0.04em}
+        .p09-guide span{font-family:'Cafe24 Ssurround';font-size:70px;color:var(--c-ink);letter-spacing:-0.04em}
 
         .p09-sentence{position:absolute;left:47px;top:229px;width:1827px;height:435px;background:#023186;
           border-radius:20px;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;
           gap:18px 10px;padding:0 60px;box-sizing:border-box}
         .p09-br{flex-basis:100%;height:0}
-        .p09-plain{font-family:'Cafe24 Ssurround';font-size:70px;color:#fff;letter-spacing:-0.04em;
+        .p09-plain{font-family:'Cafe24 Ssurround';font-size:70px;color:var(--c-white);letter-spacing:-0.04em;
           display:flex;align-items:center}
 
         /* 낱말 칩 — sa/01/page18의 fix-word-option 스타일(common.css)을 그대로 씀.
@@ -27,12 +27,12 @@
         .p09-word.is-done{cursor:default;pointer-events:none}
         .p09-word.is-done .fix-word-option-face{box-shadow:none;color:#d168fb;padding:21px 16px 11px 16px}
 
-        .p09-word.fix-word-option.is-wrong{background:linear-gradient(180deg, #1b1738, #0361d5)}
+        .p09-word.fix-word-option.is-wrong{background:linear-gradient(180deg, var(--c-ink), #0361d5)}
         .p09-word.fix-word-option.is-wrong .fix-word-option-face{box-shadow:none;padding:21px 16px 11px 16px}
 
         /* 데이터 항목 버튼 — 배경에 그려진 버튼 위에 투명하게 겹치고, 맞히면 하이라이트 */
         .p09-cat{position:absolute;top:700px;width:570px;height:201px;border-radius:18px;pointer-events:none}
-        .p09-cat.is-on{outline:10px solid #ffd83d;outline-offset:-10px;box-shadow:0 0 40px rgba(255,216,61,.9)}
+        .p09-cat.is-on{outline:10px solid var(--c-yellow);outline-offset:-10px;box-shadow:0 0 40px rgba(255,216,61,.9)}
         .p09-cat-area{left:72px}
         .p09-cat-sky{left:675px}
         .p09-cat-temp{left:1278px}
@@ -126,22 +126,12 @@
     const wrongText = document.getElementById('p09WrongText');
     const finishModal = document.getElementById('p09Finish');
 
-    const correctSound = new Audio(ASSET_BASE + 'sound/correct.mp3');
-    const wrongSound = new Audio(ASSET_BASE + 'sound/incorrect.mp3');
 
     let qIndex = 0;
     let order = [];      // 이번 문제에서 물어볼 항목 순서(무작위)
     let askIndex = 0;
     let locked = false;
 
-    function shuffle(arr) {
-      const a = arr.slice();
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
-      return a;
-    }
 
     function currentCat() {
       return order[askIndex];
@@ -187,7 +177,7 @@
         sentence.appendChild(b);
       });
 
-      order = shuffle(Object.keys(CATS));
+      order = shuffleArray(Object.keys(CATS));
       askIndex = 0;
       renderGuide();
       locked = false;
@@ -200,7 +190,7 @@
       if (btn.dataset.cat === want) {
         btn.classList.add('is-done');
         CATS[want].el.classList.add('is-on');
-        correctSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+        playCorrect();
 
         askIndex += 1;
         if (askIndex < order.length) {
@@ -219,7 +209,7 @@
         return;
       }
 
-      wrongSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+      playWrong();
       btn.classList.remove('is-wrong');
       void btn.offsetWidth;
       btn.classList.add('is-wrong');

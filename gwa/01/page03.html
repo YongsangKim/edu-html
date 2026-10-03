@@ -6,11 +6,10 @@
     <title>알록달록 과일 농장 알바왕</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:url('img/p03_bg.png') no-repeat}
+        main{background:url('img/p03_bg.png') no-repeat}
 
         /* 배경에 구워진 게이지 위에 실시간 DOM을 덮어 그림(page02와 동일) */
         .p03-gauge{left:62px;top:36px;width:757px}
-        .p03-gauge:before{background-image:url('img/p02_star.png')}
 
         /* 컨베이어 위를 내려오는 과일 한 개.
            칸을 고정해 두고 그 안에서 가운데 정렬해야 과일마다 비율이 달라도 줄이 맞음.
@@ -146,8 +145,6 @@
     const gaugeFill = document.getElementById('p03GaugeFill');
     const boxes = Array.from(document.querySelectorAll('.p03-box'));
 
-    const correctSound = new Audio(ASSET_BASE + 'sound/correct.mp3');
-    const wrongSound = new Audio(ASSET_BASE + 'sound/incorrect.mp3');
 
     const rectOf = (el) => el.getBoundingClientRect();
     const overlaps = (a, b) =>
@@ -268,7 +265,7 @@
 
         if (target.dataset.box === el.dataset.fruit) {
           el.classList.add('is-dropped');
-          correctSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+          playCorrect();
           solved += 1;
           index += 1;
           gaugeFill.style.width = (solved * (100 / TOTAL)) + '%';
@@ -284,7 +281,7 @@
             sendNext();
           }, 250);
         } else {
-          wrongSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+          playWrong();
           target.classList.remove('is-wrong');
           void target.offsetWidth;
           target.classList.add('is-wrong');

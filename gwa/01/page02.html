@@ -6,14 +6,13 @@
     <title>알록달록 과일 농장 알바왕</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:url('img/p02_bg.png') no-repeat}
+        main{background:url('img/p02_bg.png') no-repeat}
 
         /* 배경에 구워진 게이지/주문 문구는 회차마다 바뀌어야 해서 같은 자리에 실시간 DOM을 덮어 그림 */
         .p02-gauge{left:62px;top:36px;width:757px}
-        .p02-gauge:before{background-image:url('img/p02_star.png')}
 
         .p02-order{position:absolute;left:210px;top:753px;width:1100px;height:124px;display:flex;align-items:center;justify-content:center;padding:0;box-sizing:border-box}
-        .p02-order span{font-family:'Cafe24 Ssurround';font-size:65px;color:#1b1738;letter-spacing:-0.08em;text-align:center}
+        .p02-order span{font-family:'Cafe24 Ssurround';font-size:65px;color:var(--c-ink);letter-spacing:-0.08em;text-align:center}
 
         /* 과일이 깔리는 판(배경 통이미지의 어두운 패널 안쪽) */
         .p02-field{position:absolute;left:0;top:0;width:1920px;height:960px}
@@ -137,8 +136,6 @@
     const gaugeFill = document.getElementById('p02GaugeFill');
     const basket = document.getElementById('p02Basket');
 
-    const correctSound = new Audio(ASSET_BASE + 'sound/correct.mp3');
-    const wrongSound = new Audio(ASSET_BASE + 'sound/incorrect.mp3');
 
     let roundIndex = 0;
     let remaining = 0;
@@ -148,14 +145,6 @@
     const overlaps = (a, b) =>
       a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
 
-    function shuffle(arr) {
-      const a = arr.slice();
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
-      return a;
-    }
 
     // 정답 과일은 round.answer에 적힌 종류/개수 그대로 깔고(난수 아님),
     // 나머지는 그 회차 규칙에 걸리지 않는 과일로 채워 총 10개를 맞춤.
@@ -168,7 +157,7 @@
 
       const no = KEYS.filter((k) => !round.match(FRUITS[k]));
       while (out.length < TOTAL) out.push(no[Math.floor(Math.random() * no.length)]);
-      return shuffle(out.slice(0, TOTAL));
+      return shuffleArray(out.slice(0, TOTAL));
     }
 
     function makeFruit(key, slot, round) {
@@ -243,12 +232,12 @@
 
         if (el.dataset.correct === 'true') {
           el.classList.add('is-collected');
-          correctSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+          playCorrect();
           remaining -= 1;
           if (remaining === 0) finishRound();
         } else {
           // 오답: 바구니에 들어갔다가 다시 포대자루(원래 자리)로 돌아감
-          wrongSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+          playWrong();
           goHome(el);
           el.classList.remove('is-wrong');
           void el.offsetWidth;
@@ -271,7 +260,7 @@
       field.innerHTML = '';
 
       const keys = pickKeys(round);
-      const slots = shuffle(Array.from({ length: TOTAL }, (_, i) => i));
+      const slots = shuffleArray(Array.from({ length: TOTAL }, (_, i) => i));
       remaining = 0;
 
       keys.forEach((key, i) => {

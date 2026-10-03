@@ -8,27 +8,24 @@
     <style>
         /* 디자인 없음 - 기획서 20~31p. 친구 3명에게 알맞은 말 고르기 → 맞으면 마음 전달 화면(게이지가 참) → 다음 친구.
            틀리면 캐릭터 말풍선이 친구 감정 안내로 2초 바뀜. 상황 그림 img/p05_sit{번호}.png, 전달 화면 그림 img/p05_send{번호}.png, 게이지 별 img/p05_star.png */
-        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
 
-        .p05-bubble{left:95px;bottom:600px;width:416px;min-height:0;padding:30px 12px;display:flex;align-items:center;justify-content:center;font-size:42px;z-index:5}
-        .p05-character{position:absolute;left:69px;top:300px;width:381px;height:504px;display:flex;align-items:flex-end;justify-content:center}
-        .p05-character img{max-width:100%;max-height:100%;object-fit:contain}
+        .p05-bubble{left:95px;bottom:600px;width:416px;padding:30px 12px;font-size:42px;z-index:5}
+        .p05-character{left:69px;top:300px;width:381px;height:504px}
 
-        .p05-photo{position:absolute;left:540px;top:40px;width:1290px;height:500px;box-sizing:border-box;border:solid 6px #48159c;border-radius:36px;overflow:hidden;background:#48159c center / cover no-repeat;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p05-photo{position:absolute;left:540px;top:40px;width:1290px;height:500px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:36px;overflow:hidden;background:var(--c-purple) center / cover no-repeat;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
         .p05-caption{position:absolute;left:0;bottom:0;width:100%;height:100px;display:flex;align-items:center;justify-content:center;background:rgba(27,23,56,.75);
-          font-family:'Cafe24 Ssurround';font-size:46px;color:#fff;letter-spacing:-0.04em}
+          font-family:'Cafe24 Ssurround';font-size:46px;color:var(--c-white);letter-spacing:-0.04em}
         .p05-opts{position:absolute;left:540px;top:600px;width:1290px;display:grid;grid-template-columns:1fr 1fr;gap:40px 40px}
         .p05-opts .card-btn{min-width:0;height:115px;padding:8px 20px 4px;font-size:44px;line-height:1.15;letter-spacing:-0.05em;word-break:keep-all}
 
         .p05-send{position:absolute;left:600px;top:60px;width:720px;height:560px;box-sizing:border-box;padding:30px;display:flex;flex-direction:column;align-items:center;gap:24px;
-          background:#fefbf9;border:solid 6px #48159c;border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
-        .p05-send i{width:612px;height:397px;border-radius:24px;background:#48159c center / cover no-repeat}
-        .p05-send p{margin:0;font-family:'Cafe24 Ssurround';font-size:44px;line-height:1.25;color:#48159c;text-align:center;letter-spacing:-0.04em;word-break:keep-all}
+          background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p05-send i{width:612px;height:397px;border-radius:24px;background:var(--c-purple) center / cover no-repeat}
+        .p05-send p{margin:0;font-family:'Cafe24 Ssurround';font-size:44px;line-height:1.25;color:var(--c-purple);text-align:center;letter-spacing:-0.04em;word-break:keep-all}
         .p05-gauge{left:506px;top:740px;width:908px}
-        .p05-gauge:before{background-image:url('img/p05_star.png')}
         .p05-gauge .gauge-fill{transition:none}
         .p05-gauge .gauge-fill.is-go{width:100%;transition:width 2.5s linear}
-        .p05-status{position:absolute;left:0;top:815px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:52px;color:#48159c;letter-spacing:-0.04em}
+        .p05-status{position:absolute;left:0;top:815px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:52px;color:var(--c-purple);letter-spacing:-0.04em}
         .p05-send-next{position:absolute;left:1475px;top:800px}
 
         .p05 .is-off{display:none}
@@ -41,8 +38,8 @@
       <div id="stage" class="stage">
         <main class="bg-default p05">
           <div id="p05Pick">
-            <p class="guide-bubble p05-bubble" id="p05Bubble"></p>
-            <div class="p05-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+            <p class="guide-bubble is-center p05-bubble" id="p05Bubble"></p>
+            <div class="char-box p05-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
             <div class="p05-photo" id="p05Photo"><span class="p05-caption" id="p05Caption"></span></div>
             <div class="p05-opts" id="p05Opts"></div>
           </div>
@@ -80,13 +77,10 @@
         wrong: '친구는 지금 속상한<br>감정을 느끼고 있어요.<br>어떤 말을 해야 할까요?' }
     ];
 
-    const $ = (id) => document.getElementById(id);
     const bubble = $('p05Bubble');
     const optsBox = $('p05Opts');
     const nextBtn = $('p05Next');
     const fill = $('p05Fill');
-    const playCorrect = makeSfx('sound/correct.mp3');
-    const playWrong = makeSfx('sound/incorrect.mp3');
 
     let index = 0;
     let busy = false;

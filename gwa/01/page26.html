@@ -6,10 +6,10 @@
     <title>퀴즈 풀기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:url('img/p26_bg_q1.png') no-repeat}
+        main{background:url('img/p26_bg_q1.png') no-repeat}
 
         /* 문항마다 질문과 보기가 바뀌므로, 배경의 말풍선 글자 자리를 흰색으로 덮고 다시 그림 */
-        .p26-q{position:absolute;left:452px;top:150px;width:1260px;height:160px;background:#fff;
+        .p26-q{position:absolute;left:452px;top:150px;width:1260px;height:160px;background:var(--c-white);
           display:flex;align-items:center;text-align:left}
         .p26-q p{margin:0;font-family:'Cafe24 Ssurround';font-size:56px;line-height:1.25;
           color:#3b1e87;letter-spacing:-0.04em}
@@ -81,8 +81,6 @@
     const hintEl = document.getElementById('p26Hint');
     const retry = document.getElementById('p26Retry');
 
-    const correctSound = new Audio(ASSET_BASE + 'sound/correct.mp3');
-    const wrongSound = new Audio(ASSET_BASE + 'sound/incorrect.mp3');
 
     let index = 0;
     let locked = false;
@@ -114,7 +112,7 @@
 
       if (i === q.answer) {
         locked = true;
-        correctSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+        playCorrect();
         index += 1;
         setTimeout(() => {
           if (index >= QUIZ.length) {
@@ -126,7 +124,7 @@
         return;
       }
 
-      wrongSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+      playWrong();
       btn.classList.remove('is-wrong');
       void btn.offsetWidth;
       btn.classList.add('is-wrong');

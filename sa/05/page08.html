@@ -8,20 +8,18 @@
     <style>
         /* 디자인 없음 - 기획서 23~30p. STEP1 프롬프트 빈칸 끌어 넣기(initMatchDrag) → STEP2·3 말풍선이 차례로 올라오고
            Gemini 답변은 로딩 2초 뒤 타이핑 → STEP4 최종 결정(정답 없음) → 마무리 안내 */
-        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
 
         .p08-step{position:absolute;left:259px;top:40px;width:834px;height:91px;box-sizing:border-box;padding:6px 30px 0;display:flex;align-items:center;justify-content:center;z-index:2;
-          background:#48159c;border-radius:46px;font-family:'Cafe24 Ssurround';font-size:48px;color:#fff;letter-spacing:-0.04em}
+          background:var(--c-purple);border-radius:46px;font-family:'Cafe24 Ssurround';font-size:48px;color:var(--c-white);letter-spacing:-0.04em}
         .p08-box{position:absolute;left:109px;top:88px;width:1134px;height:281px;box-sizing:border-box;padding:50px 40px 20px;display:flex;align-items:center;justify-content:center;
-          background:#fefbf9;border:solid 6px #48159c;border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
-          font-family:'Cafe24 Ssurround';font-size:50px;line-height:1.3;color:#48159c;text-align:center;letter-spacing:-0.04em;word-break:keep-all}
-        .p08-character{position:absolute;left:1361px;top:146px;width:431px;height:630px;display:flex;align-items:flex-end;justify-content:center}
-        .p08-character img{max-width:100%;max-height:100%;object-fit:contain}
+          background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';font-size:50px;line-height:1.3;color:var(--c-purple);text-align:center;letter-spacing:-0.04em;word-break:keep-all}
+        .p08-character{left:1361px;top:146px;width:431px;height:630px}
 
-        .p08-prompt{position:absolute;left:109px;top:400px;width:1134px;box-sizing:border-box;padding:30px 40px;background:#fff;border:solid 4px #b9b3dd;border-radius:28px;
-          font-family:'Cafe24 Ssurround';font-size:52px;line-height:2;color:#1b1738;letter-spacing:-0.04em}
-        .p08-blank{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;width:300px;height:92px;box-sizing:border-box;margin:0 6px;border:dashed 4px #8278ff;border-radius:16px;
-          font-size:34px;color:#8278ff}
+        .p08-prompt{position:absolute;left:109px;top:400px;width:1134px;box-sizing:border-box;padding:30px 40px;background:var(--c-white);border:solid 4px #b9b3dd;border-radius:28px;
+          font-family:'Cafe24 Ssurround';font-size:52px;line-height:2;color:var(--c-ink);letter-spacing:-0.04em}
+        .p08-blank{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;width:300px;height:92px;box-sizing:border-box;margin:0 6px;border:dashed 4px var(--c-violet);border-radius:16px;
+          font-size:34px;color:var(--c-violet)}
         .p08-blank[data-filled]{border:0}
         .p08-cards{position:absolute;left:109px;top:710px;width:1134px;display:flex;justify-content:space-around}
         .p08-hold{width:300px;height:92px}
@@ -30,11 +28,11 @@
         .p08-blank .p08-card{cursor:default}
 
         .p08-chat{position:absolute;left:0;top:0;width:1300px;height:960px;pointer-events:none}
-        .p08-msg{position:absolute;box-sizing:border-box;padding:30px 40px;border:solid 4px #1b1738;border-radius:32px;font-family:'Pretendard';font-size:40px;line-height:1.45;font-weight:600;color:#1b1738;
+        .p08-msg{position:absolute;box-sizing:border-box;padding:30px 40px;border:solid 4px var(--c-ink);border-radius:32px;font-family:'Pretendard';font-size:40px;line-height:1.45;font-weight:600;color:var(--c-ink);
           letter-spacing:-0.02em;word-break:keep-all;transition:top .5s ease,opacity .4s ease;opacity:0}
         .p08-msg.is-show{opacity:1}
         .p08-msg.is-me{left:145px;width:807px;background:#fff3c9}
-        .p08-msg.is-ai{background:#eef3fb}
+        .p08-msg.is-ai{background:var(--c-pale)}
         .p08-dots span{display:inline-block;animation:p08-dot 1s infinite}
         .p08-dots span:nth-child(2){animation-delay:.2s}
         .p08-dots span:nth-child(3){animation-delay:.4s}
@@ -45,10 +43,10 @@
         .p08-picks .card-btn{min-width:0;height:115px;padding:8px 20px 4px;font-size:40px;line-height:1.2;letter-spacing:-0.05em}
 
         .p08-end{position:absolute;left:746px;top:178px;width:942px;height:594px;box-sizing:border-box;padding:60px 70px 160px;display:flex;align-items:center;justify-content:center;
-          background:#fefbf9;border:solid 6px #48159c;border-radius:60px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
-          font-family:'Cafe24 Ssurround';font-size:54px;line-height:1.35;color:#48159c;text-align:center;letter-spacing:-0.04em;word-break:keep-all}
-        .p08-end{flex-direction:column;padding-top:30px;color:#1b1738}
-        .p08-end b{display:block;margin-bottom:16px;font-weight:normal;font-size:110px;line-height:1.1;color:#48159c}
+          background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:60px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';font-size:54px;line-height:1.35;color:var(--c-purple);text-align:center;letter-spacing:-0.04em;word-break:keep-all}
+        .p08-end{flex-direction:column;padding-top:30px;color:var(--c-ink)}
+        .p08-end b{display:block;margin-bottom:16px;font-weight:normal;font-size:110px;line-height:1.1;color:var(--c-purple)}
         .p08-end-character{position:absolute;left:200px;top:180px;width:440px;height:576px;display:flex;align-items:flex-end;justify-content:center}
         .p08-end-character img{max-width:100%;max-height:100%;object-fit:contain}
         .p08-end-next{position:absolute;left:1014px;top:600px}
@@ -65,7 +63,7 @@
           <div id="p08Play">
             <div class="p08-step" id="p08Step"></div>
             <div class="p08-box" id="p08Box"></div>
-            <div class="p08-character"><img src="img/p8_character_intro.png" alt="메인 캐릭터"></div>
+            <div class="char-box p08-character"><img src="img/p8_character_intro.png" alt="메인 캐릭터"></div>
 
             <div id="p08Step1">
               <div class="p08-prompt">
@@ -111,16 +109,12 @@
   <script src="../../js/common.js"></script>
   <script>
   (function () {
-    const $ = (id) => document.getElementById(id);
     const stepEl = $('p08Step');
     const box = $('p08Box');
     const me = $('p08Me');
     const ai = $('p08Ai');
     const yesBtn = $('p08Yes');
     const picks = $('p08Picks');
-    const playClick = makeSfx('sound/click.mp3');
-    const playCorrect = makeSfx('sound/correct.mp3');
-    const playWrong = makeSfx('sound/incorrect.mp3');
     const LOADING = '<span class="p08-dots"><span>●</span> <span>●</span> <span>●</span></span>';
 
     function place(el, left, top, width) {

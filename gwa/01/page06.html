@@ -6,14 +6,14 @@
     <title>다양한 매체에서 날씨 데이터 수집하기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:url('img/p06_bg.png') no-repeat}
+        main{background:url('img/p06_bg.png') no-repeat}
 
         /* 기사 카드 — 배경에 그려진 기사 위에 같은 그림을 얹어 드래그할 수 있게 함.
            좌표는 디자인 9p에서 측정한 값 */
         .p06-news{position:absolute;padding:0;margin:0;border:none;background:none;
           cursor:grab;touch-action:none;transform-origin:50% 50%;z-index:20}
         .p06-news img{display:block;width:100%;height:auto;pointer-events:none}
-        .p06-news.is-grabbed{cursor:grabbing;z-index:60;outline:8px solid #2f6fed;outline-offset:4px;border-radius:12px}
+        .p06-news.is-grabbed{cursor:grabbing;z-index:60;outline:8px solid var(--c-blue);outline-offset:4px;border-radius:12px}
         .p06-news.is-filed{opacity:0;transform:scale(.25);transition:opacity .35s ease,transform .35s ease;pointer-events:none}
 
         .p06-news-main{left:78px;top:210px;width:820px}
@@ -30,7 +30,7 @@
 
         /* 보관함 폴더(드롭 영역) — 배경의 폴더 위에 투명하게 겹침 */
         .p06-folder{position:absolute;left:1160px;top:350px;width:740px;height:545px;border-radius:40px}
-        .p06-folder.is-over{outline:10px solid #ffd83d;outline-offset:-10px}
+        .p06-folder.is-over{outline:10px solid var(--c-yellow);outline-offset:-10px}
 
         /* 폴더 위에서 터지는 별 효과 */
         .p06-star{position:absolute;left:1470px;top:560px;width:120px;height:120px;
@@ -121,8 +121,6 @@
     const wrongModal = document.getElementById('p06Wrong');
     const correctModal = document.getElementById('p06Correct');
 
-    const correctSound = new Audio(ASSET_BASE + 'sound/correct.mp3');
-    const wrongSound = new Audio(ASSET_BASE + 'sound/incorrect.mp3');
 
     const TOTAL_CORRECT = newsList.filter((n) => n.dataset.correct === 'true').length;
     let filed = 0;
@@ -237,7 +235,7 @@
 
         if (el.dataset.correct === 'true') {
           el.classList.add('is-filed');
-          correctSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+          playCorrect();
           star.classList.remove('is-pop');
           void star.offsetWidth;
           star.classList.add('is-pop');
@@ -248,7 +246,7 @@
             setTimeout(() => correctModal.classList.remove('is-off'), 800);
           }
         } else {
-          wrongSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+          playWrong();
           goHome();
           wrongModal.classList.remove('is-off');
           clearTimeout(wrongModal.__hideTimer);

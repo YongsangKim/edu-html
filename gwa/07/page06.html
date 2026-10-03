@@ -9,21 +9,20 @@
         /* 디자인 없음 - 기획서 13~18p. 라운드마다 역할 상자 1개(센서 → AI 허브 → 스마트 가전), 아래 기기 카드 5장(무작위 순서) 중 알맞은 카드를 상자로 끌어 넣기.
            맞으면 카드가 상자 안에 고정되고 정답 팝업(확인), 틀리면 제자리로 돌아가고 힌트 팝업 2초. 상자를 다 채우면 상자 완료 팝업, 마지막엔 연동 준비 완료 → 정리 안내 2단계.
            기기 아이콘은 page03 이미지(img/p03_dev_{key}.png) 재사용, 미세먼지 측정 센서만 img/p06_dev_dust.png */
-        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
 
         .p06-ask{position:absolute;margin:0;left:230px;top:30px;width:1460px;height:100px;box-sizing:border-box;padding:6px 30px 0;display:flex;align-items:center;justify-content:center;
-          background:#91b9e7;border:solid 5px #1b1738;border-radius:50px;box-shadow:0 10px 0 0 #becde7;font-family:'Cafe24 Ssurround';font-size:48px;color:#fff;letter-spacing:-0.05em}
-        .p06-box{position:absolute;left:460px;top:175px;width:1000px;height:360px;box-sizing:border-box;padding:100px 30px 24px;border:solid 8px #48159c;border-radius:40px;background:#eef3fb;
+          background:var(--c-sky);border:solid 5px var(--c-ink);border-radius:50px;box-shadow:0 10px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:48px;color:var(--c-white);letter-spacing:-0.05em}
+        .p06-box{position:absolute;left:460px;top:175px;width:1000px;height:360px;box-sizing:border-box;padding:100px 30px 24px;border:solid 8px var(--c-purple);border-radius:40px;background:var(--c-pale);
           display:flex;flex-wrap:wrap;align-content:flex-start;justify-content:center;gap:16px;transition:box-shadow .2s,transform .2s}
         .p06-box-label{position:absolute;left:50%;top:-6px;transform:translateX(-50%);height:90px;padding:6px 60px 0;box-sizing:border-box;display:flex;align-items:center;white-space:nowrap;
-          background:#48159c;border-radius:0 0 40px 40px;font-family:'Cafe24 Ssurround';font-size:52px;color:#fff}
-        .p06-chip{width:170px;height:170px;padding:10px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;background:#fff;border:solid 4px #91b9e7;border-radius:20px;
-          font-family:'Cafe24 Ssurround';font-size:22px;color:#31248a;letter-spacing:-0.08em;white-space:nowrap}
+          background:var(--c-purple);border-radius:0 0 40px 40px;font-family:'Cafe24 Ssurround';font-size:52px;color:var(--c-white)}
+        .p06-chip{width:170px;height:170px;padding:10px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;background:var(--c-white);border:solid 4px var(--c-sky);border-radius:20px;
+          font-family:'Cafe24 Ssurround';font-size:22px;color:var(--c-indigo);letter-spacing:-0.08em;white-space:nowrap}
         .p06-chip i{flex:1 1 auto;width:100%;background:center / contain no-repeat}
 
         .p06-cards{position:absolute;left:60px;top:620px;width:1800px;height:280px;display:flex;justify-content:center;gap:30px}
-        .p06-card{position:relative;width:320px;height:270px;box-sizing:border-box;padding:12px 8px 14px;border:solid 5px #91b9e7;border-radius:28px;background:#fff;cursor:grab;touch-action:none;
-          display:flex;flex-direction:column;align-items:center;gap:8px;font-family:'Cafe24 Ssurround';font-size:36px;color:#31248a;letter-spacing:-0.07em;white-space:nowrap;z-index:5}
+        .p06-card{position:relative;width:320px;height:270px;box-sizing:border-box;padding:12px 8px 14px;border:solid 5px var(--c-sky);border-radius:28px;background:var(--c-white);cursor:grab;touch-action:none;
+          display:flex;flex-direction:column;align-items:center;gap:8px;font-family:'Cafe24 Ssurround';font-size:36px;color:var(--c-indigo);letter-spacing:-0.07em;white-space:nowrap;z-index:5}
         .p06-card i{flex:1 1 auto;width:100%;background:center / contain no-repeat;pointer-events:none}
         .p06-card.is-dragging{cursor:grabbing;z-index:60}
         .p06-card.is-back{transition:transform .3s ease}
@@ -150,12 +149,9 @@
         clearTitle: '스마트 가전 상자 완료!', clearText: '스마트 가전은 AI의 명령을 실행해요.' }
     ];
 
-    const $ = (id) => document.getElementById(id);
     const box = $('p06Box');
     const cardsBox = $('p06Cards');
     const stage = document.getElementById('stage');
-    const playCorrect = makeSfx('sound/correct.mp3');
-    const playWrong = makeSfx('sound/incorrect.mp3');
 
     let round = 0;
     let left = 0;

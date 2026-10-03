@@ -6,6 +6,20 @@
   font-display: swap;
 }
 /* 300(Light), 600(SemiBold), 700(Bold), 800(ExtraBold)도 같은 방식으로 추가해뒀습니다 */
+:root{
+  --c-ink:#1b1738;
+  --c-white:#ffffff;
+  --c-purple:#48159c;
+  --c-cream:#fefbf9;
+  --c-yellow:#ffd83d;
+  --c-sky-pale:#becde7;
+  --c-sky:#91b9e7;
+  --c-blue:#2f6fed;
+  --c-violet:#8278ff;
+  --c-indigo:#31248a;
+  --c-pale:#eef3fb;
+  --c-mist:#dfe7f5;
+}
 @font-face {
   font-family: 'Cafe24 Ssurround';
   src: url('../fonts/Cafe24Ssurround.woff2') format('woff2'),
@@ -14,10 +28,10 @@
   font-style: normal;
   font-display: swap;
 }
-.page-title{font-family:'Cafe24 Ssurround';font-size:76px;color:#fff;font-weight:normal;letter-spacing:-0.06em}
+.page-title{font-family:'Cafe24 Ssurround';font-size:76px;color:var(--c-white);font-weight:normal;letter-spacing:-0.06em}
 /* 제목이 길어 두 줄로 넘어갈 때만(js/header.js가 is-long을 붙임) 자간을 더 좁힘 */
 .page-title.is-long{font-size:72px;letter-spacing:-0.1em}
-.toc-title{font-family:'Cafe24 Ssurround';font-size:76px;color:#1b1738;font-weight:normal}
+.toc-title{font-family:'Cafe24 Ssurround';font-size:76px;color:var(--c-ink);font-weight:normal}
 /* ==========================================================
    공통 레이아웃 CSS (모든 페이지에서 공유)
    - 1920x1080 스테이지 기본 골격, 헤더, 접근성 hidden 등
@@ -27,6 +41,7 @@
 html, body, div, header, main, footer, h1{margin:0;padding:0;box-sizing:border-box}
 html, body{width:100%;height:100%;background:#2b2f36;overflow:hidden}
 .viewport{position:relative;width:100%;height:100%;overflow:hidden}
+main{position:absolute;left:0;top:120px;width:1920px;height:960px}
 #page-fade {
   position: fixed;
   top: 0; left: 0;
@@ -42,7 +57,7 @@ html, body{width:100%;height:100%;background:#2b2f36;overflow:hidden}
   margin: 0 auto;
   overflow:hidden;
 }
-.stage{position:absolute;left:0;top:0;width:1920px;height:1080px;background:#fff;box-shadow:0 0 40px rgba(0,0,0,0.35);transform-origin:0 0}
+.stage{position:absolute;left:0;top:0;width:1920px;height:1080px;background:var(--c-white);box-shadow:0 0 40px rgba(0,0,0,0.35);transform-origin:0 0}
 /* 끌기(드래그) 중에 글자가 파랗게 선택되거나 이미지 잔상이 끌려 나오지 않게. 입력칸은 그대로 선택 가능 */
 .stage{-webkit-user-select:none;user-select:none}
 .stage img{-webkit-user-drag:none;user-drag:none}
@@ -91,7 +106,7 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
   .video-box .video-el {
     display: block;
     width: 100%; height: 100%;
-    border: solid 14px #1b1738;
+    border: solid 14px var(--c-ink);
     border-radius: 16px;
     object-fit: cover;
   }
@@ -111,7 +126,7 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
     width: 16px; /* 썸이 실제로 차지할 전체 너비 */
   }
   .custom-scrollbar::-webkit-scrollbar-track {
-    background-color: #1b1738;
+    background-color: var(--c-ink);
     background-clip: padding-box; /* 아래 border(투명) 영역엔 배경이 안 깔리게 */
     border: 6px solid transparent; /* 이 두께만큼 트랙이 얇게 보임(가운데 4px만 색이 남음) */
     border-radius: 20px;
@@ -119,7 +134,7 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
   .custom-scrollbar::-webkit-scrollbar-thumb {
     background: #a78bfa;
     border-radius: 20px;
-    border:solid 4px #1b1738;
+    border:solid 4px var(--c-ink);
     /* 트랙과 달리 테두리를 안 줘서 스크롤바 전체 너비(16px)를 꽉 채움
        → 얇은 트랙 위에 더 넓은 막대가 떠 있는 것처럼 보임 */
   }
@@ -152,7 +167,7 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
   position: absolute;
   left: 0; top: 0;
   width: 1920px; height: 1080px;
-  background: #fff;
+  background: var(--c-white);
   display: flex;
   flex-direction: column;
   transform: translateY(100%);
@@ -170,7 +185,7 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
+  background: var(--c-white);
 }
 .toc-close {
   position: absolute;
@@ -205,8 +220,8 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
   border-radius:20px;
   padding: 26px 8px 22px;
   font-size: 62px;
-  color: #1b1738;
-  background: #fff;
+  color: var(--c-ink);
+  background: var(--c-white);
   border: solid 4px #e4d7fe;
   cursor: pointer;
   text-align: left;
@@ -215,14 +230,14 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 }
 
 .toc-accordion-toggle:hover {
-  color: #8278ff;
+  color: var(--c-violet);
 }
 
 .toc-accordion.is-open .toc-accordion-toggle {
   background:linear-gradient(90deg, #02185c, #0362d7);
   border: 0;
   padding: 28px 8px 22px;
-  color: #fff;
+  color: var(--c-white);
   box-shadow:0 4px 0 0 #a29bff;
 }
 
@@ -242,12 +257,12 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 .toc-sub-item {
   display: block;
   padding: 20px 30px;
-  background: #fff;
+  background: var(--c-white);
   border-radius: 20px;
   height: 50px;
   text-align: left;
   text-decoration: none;
-  color: #1b1738;
+  color: var(--c-ink);
   font-size: 48px;
   font-weight: 700;
   font-family: 'Cafe24 Ssurround';
@@ -255,8 +270,8 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
   letter-spacing: -0.04em;
 }
 .toc-sub-item:hover {
-  background: #fff;
-  color: #8278ff;
+  background: var(--c-white);
+  color: var(--c-violet);
 }
 .hover-zoom img {
   transition: transform 0.2s ease;
@@ -301,10 +316,10 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
   min-width: 220px;
   padding: 22px 48px;
   border-radius: 20px;
-  background: linear-gradient(180deg, #ffffff, #e4d7fe);
-  border: solid 4px #1b1738;
-  box-shadow: 0 6px 0 0 #1b1738;
-  color: #1b1738;
+  background: linear-gradient(180deg, var(--c-white), #e4d7fe);
+  border: solid 4px var(--c-ink);
+  box-shadow: 0 6px 0 0 var(--c-ink);
+  color: var(--c-ink);
   font-family: 'Cafe24 Ssurround';
   font-size: 40px;
   font-weight: 700;
@@ -314,7 +329,7 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 }
 .btn-pill:active {
   transform: translateY(4px);
-  box-shadow: 0 2px 0 0 #1b1738;
+  box-shadow: 0 2px 0 0 var(--c-ink);
 }
 .is-disabled {
   opacity: 0.4;
@@ -459,25 +474,25 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
   justify-content: center;
   font-family: 'Cafe24 Ssurround';
   font-size: 34px;
-  color: #1b1738;
-  background: #fff;
-  border: solid 4px #1b1738;
+  color: var(--c-ink);
+  background: var(--c-white);
+  border: solid 4px var(--c-ink);
 }
 .prompt-steps .step-dot.is-active {
   background: #02185c;
-  color: #fff;
+  color: var(--c-white);
   border-color: #02185c;
 }
 .prompt-preview {
   z-index: 10;
   font-family: 'Cafe24 Ssurround';
   font-size: 50px;
-  color: #1b1738;
+  color: var(--c-ink);
   line-height: 1.2;
   letter-spacing: -0.06em;
 }
 .prompt-value {
-  color: #2f6fed;
+  color: var(--c-blue);
   font-weight: 700;
 }
 
@@ -506,10 +521,10 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
   background: none;
   border: 0;
   padding:10px;
-  background: linear-gradient(180deg, #1b1738, #0361d5);
+  background: linear-gradient(180deg, var(--c-ink), #0361d5);
   font-family: 'Cafe24 Ssurround';
   font-size: 70px;
-  color: #31248a;
+  color: var(--c-indigo);
   cursor: pointer;
   outline:0;
 }
@@ -521,11 +536,11 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
   box-sizing: border-box;
   padding: 16px;
   border-radius: 13px;
-  background: linear-gradient(180deg, #e4d7fe, #ffffff);
+  background: linear-gradient(180deg, #e4d7fe, var(--c-white));
   box-shadow: inset 0 -10px 0 0 #aca6ff;
 }
 .fix-word-option:hover {
-  color:#8278ff;
+  color:var(--c-violet);
 }
 @keyframes fix-word-shake {
   0%, 100% { transform: translateX(0); }
@@ -552,13 +567,13 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
   box-sizing: border-box;
   border: solid 3px #eae0fd;
   border-radius: 28px;
-  background: linear-gradient(180deg, #e6dafe, #fefbf9);
+  background: linear-gradient(180deg, #e6dafe, var(--c-cream));
   box-shadow: 0 13px 0 0 #a9a2ff, 0 14px 0 10px #035fd3;
   letter-spacing: -0.06em;
   font-family: 'Cafe24 Ssurround';
   font-size: 70px;
   line-height: 1.3;
-  color: #31248a;
+  color: var(--c-indigo);
   text-align: center;
   cursor: pointer;
 }
@@ -566,7 +581,7 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
   width: 100%;
 }
 .card-btn:hover {
-  color: #8278ff;
+  color: var(--c-violet);
 }
 .card-btn.is-selected {
   color: #d168fb;
@@ -579,7 +594,7 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
    - 끄는 카드(.is-dragging)는 커서·z-index만 바꾸고 색 효과는 넣지 않음(페이지에서 cursor:grabbing;z-index)
    - 놓을 칸에 .drop-zone을 달면, 카드를 그 위에 올렸을 때 스크립트가 켜는 is-over로 노란 안쪽 테두리
    - 틀리면 카드에 is-wrong(fix-word-shake 흔들림) 후 제자리. initMatchDrag는 칸에 drop-zone을 자동으로 붙임 */
-.drop-zone.is-over{outline:8px solid #ffd83d;outline-offset:-8px}
+.drop-zone.is-over{outline:8px solid var(--c-yellow);outline-offset:-8px}
 
 /* ---------------- 기능 J: 자식 요소 하나씩 순서대로 페이드인 ----------------
    JS가 reveal-stagger-item 클래스를 붙이기 전(=페이지가 막 그려진 순간)에도
@@ -616,8 +631,8 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 }
 .confirm-quiz-panel {
   position: relative;
-  background: #fff;
-  border: solid 5px #48159c;
+  background: var(--c-white);
+  border: solid 5px var(--c-purple);
   border-radius: 130px;
   padding: 48px 164px;
   /* max-width: 900px; */
@@ -631,7 +646,7 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
   font-family: 'Cafe24 Ssurround';
   font-size: 80px;
   font-weight: bold;
-  color: #48159c;
+  color: var(--c-purple);
   margin: 32px 0;
   text-align: center;
 }
@@ -646,7 +661,7 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 .confirm-quiz-text {
   font-family: 'Cafe24 Ssurround';
   font-size: 60px;
-  color: #48159c;
+  color: var(--c-purple);
   line-height: 1.2;
   letter-spacing: -0.04em;
   margin: 0 0 32px;
@@ -679,30 +694,30 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
   height: 96px;
   border-radius: 48px;
   overflow: hidden;
-  border: solid 5px #1b1738;
-  box-shadow: 0 17px 0 0 #becde7;
+  border: solid 5px var(--c-ink);
+  box-shadow: 0 17px 0 0 var(--c-sky-pale);
 }
 .prompt-fix-badge-num {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 380px;
-  background: #91b9e7;
+  background: var(--c-sky);
   font-family: 'Cafe24 Ssurround';
   font-size: 70px;
   letter-spacing: -0.06em;
-  color: #fff;
+  color: var(--c-white);
   padding-top: 8px;
 }
 .prompt-fix-badge-question {
   display: flex;
   align-items: center;
   padding: 0 40px;
-  background: #fefbf9;
+  background: var(--c-cream);
   font-family: 'Cafe24 Ssurround';
   font-size: 70px;
   letter-spacing: -0.06em;
-  color: #1b1738;
+  color: var(--c-ink);
   padding-top: 8px;
 }
 .prompt-fix-stars-pill {
@@ -716,8 +731,8 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
   width: 462px;
   height: 96px;
   border-radius: 48px;
-  background: #fefbf9;
-  border: solid 5px #1b1738;
+  background: var(--c-cream);
+  border: solid 5px var(--c-ink);
   box-sizing: border-box;
 }
 .prompt-fix-stars-pill .find-star {
@@ -731,9 +746,9 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
   width: 859px;
   height: 674px;
   border-radius: 20px;
-  border: solid 5px #1b1738;
+  border: solid 5px var(--c-ink);
   overflow: hidden;
-  background: #fefbf9;
+  background: var(--c-cream);
 }
 .prompt-fix-photo img {
   display: block;
@@ -748,7 +763,7 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
   width: 890px;
   height: 674px;
   border-radius: 20px;
-  background: #1b1738;
+  background: var(--c-ink);
 }
 .prompt-fix-box-title {
   position: absolute;
@@ -769,10 +784,10 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
   box-sizing: border-box;
   padding: 40px 20px;
   border-radius: 16px;
-  background: #fff;
+  background: var(--c-white);
   font-family: 'Cafe24 Ssurround';
   line-height: 1.7;
-  color: #1b1738;
+  color: var(--c-ink);
   font-size: 54px;
   letter-spacing:-0.06em;
   word-break: keep-all;
@@ -855,13 +870,18 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
   display: none;
 }
 
+/* 캐릭터 상자: 위치·크기(left/top/width/height)는 페이지 CSS에서, 안의 img는 상자에 맞춰 아래 정렬 */
+.char-box{position:absolute;display:flex;align-items:flex-end;justify-content:center}
+.char-box img{max-width:100%;max-height:100%;object-fit:contain}
+
 /* ---------------- 안내 캐릭터 + 말풍선 (sa/04 page14~19에서 반복 사용) ----------------
    - 그림자는 포토샵 드롭섀도우(곱하기, 불투명도17%, 각도55°, 거리12px, 스프레드21%,
      크기7px)를 CSS box-shadow로 환산한 값(오프셋 7px/10px, 블러6px+스프레드2px)
    - 좌표(left/bottom/top 등)는 지금까지 쓰인 화면에서 전부 동일해 그대로 공용화했고,
      다른 좌표가 필요하면 페이지 쪽 CSS에서 덮어쓰면 됨 */
-.guide-bubble{position:absolute;left:60px;bottom:560px;width:610px;background:#fefbf9;border:solid 5px #48159c;border-radius:18px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);box-sizing:border-box;padding:30px 10px;
-  font-family:'Cafe24 Ssurround';font-size:48px;line-height:1.25;color:#48159c;letter-spacing:-0.06em;text-align:center;z-index:1;word-break:keep-all}
+.guide-bubble{position:absolute;left:60px;bottom:560px;width:610px;background:var(--c-cream);border:solid 5px var(--c-purple);border-radius:18px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);box-sizing:border-box;padding:30px 10px;
+  font-family:'Cafe24 Ssurround';font-size:48px;line-height:1.25;color:var(--c-purple);letter-spacing:-0.06em;text-align:center;z-index:1;word-break:keep-all}
+.guide-bubble.is-center{display:flex;align-items:center;justify-content:center}
 .guide-bubble::before{content:'';position:absolute;left:230px;bottom:-58px;width:100px;height:70px;
   background:url('../img/common/p_guide_tail.png') no-repeat;background-size:contain}
 /* 캐릭터 자리(위치/크기)만 공용화. 이미지는 페이지마다 다를 수 있어 각 페이지
@@ -875,10 +895,10 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
    - 아바타 이미지(<img>)는 페이지마다 다를 수 있어 그대로 마크업에 둠, 원(틀)만 공용화 */
 /* 아바타는 위에 붙이고, 문구 칸은 최소 아바타 높이(224px)로 잡아 그 안에서 세로 중앙 정렬:
    문구가 짧으면 아바타와 중앙이 맞고, 길면 아바타가 상단에 남음 */
-.avatar-popup-panel{display:flex;align-items:flex-start;gap:40px;max-width:1800px;padding:10px 70px 10px 10px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:120px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
-.avatar-popup-avatar{flex:0 0 auto;width:224px;height:224px;border-radius:50%;background:#48159c;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.avatar-popup-panel{display:flex;align-items:flex-start;gap:40px;max-width:1800px;padding:10px 70px 10px 10px;box-sizing:border-box;background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:120px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+.avatar-popup-avatar{flex:0 0 auto;width:224px;height:224px;border-radius:50%;background:var(--c-purple);display:flex;align-items:center;justify-content:center;overflow:hidden}
 .avatar-popup-avatar img{width:100%;height:100%;object-fit:contain}
-.avatar-popup-text{flex:1 1 auto;min-height:224px;display:flex;flex-direction:column;justify-content:center;margin:0;font-family:'Cafe24 Ssurround';font-size:80px;line-height:1.25;color:#48159c;text-align:center;letter-spacing:-0.04em}
+.avatar-popup-text{flex:1 1 auto;min-height:224px;display:flex;flex-direction:column;justify-content:center;margin:0;font-family:'Cafe24 Ssurround';font-size:80px;line-height:1.25;color:var(--c-purple);text-align:center;letter-spacing:-0.04em}
 
 /* ---------------- 정답/오답 결과 레이어(딤+아바타 팝업, 기능 E/V 공용) ----------------
    기존엔 페이지마다 통이미지(ox_correct.png 등)를 꽉 채우는 방식이었는데,
@@ -902,10 +922,10 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
      제목 없이 본문이 아바타 옆에서 시작하는 안내는 .is-side
    - .avatar-modal(딤+가운데 정렬) 안에 넣어서 씀. 카드가 화면 가운데보다 55px 위에 오도록 margin-bottom */
 .avatar-card{position:relative;width:1490px;min-height:580px;margin-bottom:100px;box-sizing:border-box;padding:90px 100px 150px;
-  background:#fefbf9;border:solid 6px #48159c;border-radius:130px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+  background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:130px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
 .avatar-card-avatar{position:absolute;left:-50px;top:12px;width:305px;height:auto}
-.avatar-card-title{margin:0 0 65px;font-family:'Cafe24 Ssurround';font-size:80px;line-height:1.2;color:#48159c;text-align:center;letter-spacing:-0.04em}
-.avatar-card-text{margin:0;font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.2;color:#48159c;letter-spacing:-0.04em;word-break:keep-all}
+.avatar-card-title{margin:0 0 65px;font-family:'Cafe24 Ssurround';font-size:80px;line-height:1.2;color:var(--c-purple);text-align:center;letter-spacing:-0.04em}
+.avatar-card-text{margin:0;font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.2;color:var(--c-purple);letter-spacing:-0.04em;word-break:keep-all}
 .avatar-card.is-side .avatar-card-body{padding-left:200px}
 .avatar-card-btn{position:absolute;right:80px;bottom:36px}
 .avatar-card-btn img{display:block}
@@ -919,9 +939,9 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 .photo-modal{position:absolute;left:0;top:0;width:1920px;height:960px;box-sizing:border-box;padding-top:18px;background:rgba(27,23,56,.5);
   display:flex;flex-direction:column;align-items:center;gap:8px;z-index:10}
 .photo-modal.is-off{display:none}
-.photo-card{width:1147px;height:784px;box-sizing:border-box;padding:59px 55px 0;background:#fff;border:solid 5px #48159c;border-radius:32px;
-  box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);text-align:center;font-family:'Cafe24 Ssurround';color:#48159c;letter-spacing:-0.04em}
-.photo-card-img{display:block;width:1028px;height:462px;margin:0 auto;border-radius:20px;background:#48159c;object-fit:cover}
+.photo-card{width:1147px;height:784px;box-sizing:border-box;padding:59px 55px 0;background:var(--c-white);border:solid 5px var(--c-purple);border-radius:32px;
+  box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);text-align:center;font-family:'Cafe24 Ssurround';color:var(--c-purple);letter-spacing:-0.04em}
+.photo-card-img{display:block;width:1028px;height:462px;margin:0 auto;border-radius:20px;background:var(--c-purple);object-fit:cover}
 .photo-card-title{margin:22px 0 0;font-size:60px;line-height:1.2}
 .photo-card-text{margin:6px 0 0;font-size:52px;line-height:1.13;letter-spacing:-0.04em}
 /* 카드 안에서 문구를 단계별로 넘길 때(.step-flow > .step-panel)는 제자리에 놓이게.
@@ -935,7 +955,7 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 /* 작은 카드(.is-small): 아바타가 원 안에 들어간 일반 원형(avatar_correct 계열), 제목은 카드 가운데,
    본문은 아바타 오른쪽부터 */
 .avatar-card.is-small{width:1330px;min-height:520px;padding:60px 100px 150px}
-.avatar-card.is-small .avatar-card-avatar{left:17px;top:12px;width:254px;border-radius:50%;background:#48159c}
+.avatar-card.is-small .avatar-card-avatar{left:17px;top:12px;width:254px;border-radius:50%;background:var(--c-purple)}
 .avatar-card.is-small .avatar-card-title{margin-bottom:45px}
 .avatar-card.is-small .avatar-card-text{padding-left:225px}
 .ox-result-wrong .avatar-popup-text, .ox-result-wrong .avatar-popup-sub{text-align:left}
@@ -956,7 +976,7 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 .avatar-popup-body.is-finish .avatar-popup-text, .avatar-popup-body.is-finish .avatar-popup-sub{text-align:left}
 .avatar-popup-next{align-self:flex-end}
 .avatar-popup-next img{display:block}
-.avatar-popup-sub{margin:0;font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.3;color:#48159c;text-align:center;letter-spacing:-0.04em}
+.avatar-popup-sub{margin:0;font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.3;color:var(--c-purple);text-align:center;letter-spacing:-0.04em}
 
 /* ---------------- 다음 버튼 공통 위치(sa/04) ----------------
    - page03/04/10/11/12/14~19에서 제각각이던 좌표를 이 자리로 통일 */
@@ -983,11 +1003,21 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 .intro-character{position:absolute;left:0;bottom:0;width:856px;height:884px;z-index:2;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
 .intro-character img{max-width:100%;max-height:100%;object-fit:contain}
 .intro-panel{position:absolute;left:715px;top:110px;width:1140px;height:800px;box-sizing:border-box;padding:70px 70px 170px 85px;display:flex;flex-direction:column;justify-content:center;gap:50px;
-  background:#fff;border:solid 15px #1b1738;border-radius:25px;box-shadow:0 0 0 5px #fff;font-family:'Cafe24 Ssurround';color:#1b1738;letter-spacing:-0.04em;word-break:keep-all}
+  background:var(--c-white);border:solid 15px var(--c-ink);border-radius:25px;box-shadow:0 0 0 5px var(--c-white);font-family:'Cafe24 Ssurround';color:var(--c-ink);letter-spacing:-0.04em;word-break:keep-all}
+/* 활동 방법 안내 화면(.intro-panel.p-how-panel): 리드 문구 + 파란 테두리 안내 박스(.p-how, 제목 b, 목록, 팁).
+   글자 크기·여백이 다른 페이지는 같은 선택자로 그 값만 페이지 CSS에서 덮어쓴다 */
+.intro-panel.p-how-panel{gap:40px;justify-content:flex-start;padding:100px 60px 170px 70px}
+.p-how-lead{margin:0;font-size:40px;line-height:1.3;color:var(--c-ink);letter-spacing:-0.06em}
+.p-how{position:relative;margin:0;padding:46px 40px 22px;border:solid 5px #023187;border-radius:12px;background:#dff4fc}
+.p-how b{position:absolute;left:50%;top:-34px;transform:translateX(-50%);height:66px;padding:4px 50px 0;box-sizing:border-box;display:flex;align-items:center;white-space:nowrap;
+  font-weight:normal;background:#023187;border-radius:33px;font-size:40px;color:var(--c-white)}
+.p-how .intro-list{font-size:38px;color:#023187}
+.p-how .intro-list li + li{margin-top:8px}
+.p-how-tip{margin:14px 0 0;font-family:'Cafe24 Ssurround';font-size:30px;line-height:1.3;color:var(--c-purple);letter-spacing:-0.05em}
 .intro-tab{position:absolute;left:50%;top:-47px;transform:translateX(-50%);width:867px;height:122px;margin:0;box-sizing:border-box;padding-top:2px;display:flex;align-items:flex-start;justify-content:center;
-  background:url('../img/common/intro-tab_bg.png') no-repeat;font-size:70px;line-height:1.5em;color:#1b1738;white-space:nowrap}
+  background:url('../img/common/intro-tab_bg.png') no-repeat;font-size:70px;line-height:1.5em;color:var(--c-ink);white-space:nowrap}
 .intro-lead{margin:0;text-align:center;font-size:56px;line-height:1.2}
-.intro-list{margin:0;padding:0;list-style:none;font-size:58px;line-height:1.25;color:#1b1738;letter-spacing:-0.05em}
+.intro-list{margin:0;padding:0;list-style:none;font-size:58px;line-height:1.25;color:var(--c-ink);letter-spacing:-0.05em}
 .intro-list li{padding-left:1.05em;text-indent:-1.05em}
 .intro-list li + li{margin-top:56px}
 /* 디자인 화면엔 안내 문장(.intro-lead)이 없음. 있는 차시는 두 줄 목록까지 들어가도록 글자·간격을 줄임 */
@@ -1004,8 +1034,9 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 .intro-panel.is-title .intro-list{font-size:60px;letter-spacing:-0.06em}
 
 /* ---------------- 진행 게이지 —위치/폭과 :before 아이콘 이미지(background-image)는 페이지에서 지정 ---------------- */
-.gauge{position:absolute;height:94px;background:#1b1738;border-radius:45px;border:solid 7px #91b9e7}
+.gauge{position:absolute;height:94px;background:var(--c-ink);border-radius:45px;border:solid 7px var(--c-sky)}
 .gauge:before{content:'';position:absolute;left:-36px;top:-24px;width:124px;height:117px;background:0 0 / contain no-repeat;z-index:1}
+.gauge:before{background-image:url('../img/common/icon_gauge_star.png')}
 .gauge-fill{position:absolute;left:0;top:0;height:100%;width:0;border-radius:40px;overflow:hidden;
   background:linear-gradient(90deg,#a3104a 0%,#d81f55 30%,#f2605a 55%,#ffc25a 80%,#fff06e 100%);box-shadow:inset 0 -8px 0 rgba(120,0,40,.18);transition:width .4s ease}
 .gauge-fill:after{content:'';position:absolute;left:24px;right:36px;top:12px;height:10px;border-radius:5px;background:linear-gradient(90deg,rgba(255,255,255,.2),rgba(255,255,255,.65))}
@@ -1016,7 +1047,7 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 .gauge.is-thin .gauge-fill:after{top:8px;height:8px}
 
 .end-title{position:absolute;left:750px;top:65px;width:1100px;margin:0;text-align:left;font-family:'Cafe24 Ssurround';font-size:100px;background:linear-gradient(180deg,#02185c,#0362d7);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-0.06em}
-.end-panel{position:absolute;left:750px;top:185px;width:962px;min-height:540px;background:#fefbf9;border:solid 15px #023b95;border-radius:30px;box-shadow:0 0 0 5px #fff;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;padding:30px}
+.end-panel{position:absolute;left:750px;top:185px;width:962px;min-height:540px;background:var(--c-cream);border:solid 15px #023b95;border-radius:30px;box-shadow:0 0 0 5px var(--c-white);box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;padding:30px}
 .end-desc{margin:0;font-family:'Cafe24 Ssurround';font-size:70px;line-height:1.4;color:#3b1e87;text-align:center;letter-spacing:-0.04em;word-break:keep-all}
 /* end-panel 안 desc 앞에 오는 강조 문구 */
 .end-lead{margin:0;font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.3;color:#023b95;text-align:center;letter-spacing:-0.04em;word-break:keep-all}
@@ -1031,7 +1062,7 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
    - 컨테이너(.emotion-picker 위치/크기)는 페이지마다 달라질 수 있어 로컬에 남겨두고,
      버튼 생김새만 공용화. is-wrong 애니메이션은 기능 W(fix-word-shake)와 같은
      키프레임을 재사용 */
-.emotion-option{width:500px;height:140px;border:solid 5px #1b1738;border-radius:36px;background:#fefbf9;font-family:'Cafe24 Ssurround';font-size:80px;color:#266cc8;cursor:pointer;padding:0;letter-spacing:-0.04em}
+.emotion-option{width:500px;height:140px;border:solid 5px var(--c-ink);border-radius:36px;background:var(--c-cream);font-family:'Cafe24 Ssurround';font-size:80px;color:#266cc8;cursor:pointer;padding:0;letter-spacing:-0.04em}
 .emotion-option.is-selected{border:solid 10px #ff4ff9}
 .emotion-option.is-wrong{animation:fix-word-shake .3s ease}
 
@@ -1049,19 +1080,52 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
    sa/04/page20 Q1~Q3에서 3번 반복 쓰던 걸 공용화. 상황 설명이 필요한 문항만
    .quiz-case를 안에 추가로 둠(급식실 상황 예시처럼). 아바타 이미지(<img>)는
    페이지마다 다를 수 있어 그대로 마크업에 둠 */
-.quiz-ask-box{position:absolute;left:100px;top:60px;width:1720px;min-height:335px;background:#fff;justify-content:center;
-  border:solid 5px #48159c;border-radius:140px;box-shadow:0 16px 0 0 #bbc1e7;box-sizing:border-box;
+.quiz-ask-box{position:absolute;left:100px;top:60px;width:1720px;min-height:335px;background:var(--c-white);justify-content:center;
+  border:solid 5px var(--c-purple);border-radius:140px;box-shadow:0 16px 0 0 #bbc1e7;box-sizing:border-box;
   padding:30px;display:flex;flex-direction:column;gap:30px}
 .quiz-ask-row{display:flex;align-items:flex-start;gap:20px;padding-left:295px}
 .quiz-avatar{position:absolute;left:30px;top:30px;width:275px;height:275px;
-  border-radius:110px;background:#48159c;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  border-radius:110px;background:var(--c-purple);display:flex;align-items:center;justify-content:center;overflow:hidden}
 .quiz-avatar img{width:100%;height:100%;object-fit:contain}
-.quiz-qnum{flex:0 0 100px;font-family:'Cafe24 Ssurround';font-size:70px;color:#8278ff;line-height:1.15}
-.quiz-ask{margin:0;flex:1 1 auto;font-family:'Cafe24 Ssurround';font-size:70px;line-height:1.15;color:#48159c;word-break:keep-all;letter-spacing:-0.04em}
-.quiz-case{margin:0 0 0 290px;width:1250px;box-sizing:border-box;padding:26px 34px;background:#eef3fb;border:solid 4px #1b1738;border-radius:28px;
-  font-family:'Cafe24 Ssurround';font-size:48px;text-align:center;line-height:1.3;color:#1b1738;letter-spacing:-0.04em}
+.quiz-qnum{flex:0 0 100px;font-family:'Cafe24 Ssurround';font-size:70px;color:var(--c-violet);line-height:1.15}
+.quiz-ask{margin:0;flex:1 1 auto;font-family:'Cafe24 Ssurround';font-size:70px;line-height:1.15;color:var(--c-purple);word-break:keep-all;letter-spacing:-0.04em}
+.quiz-case{margin:0 0 0 290px;width:1250px;box-sizing:border-box;padding:26px 34px;background:var(--c-pale);border:solid 4px var(--c-ink);border-radius:28px;
+  font-family:'Cafe24 Ssurround';font-size:48px;text-align:center;line-height:1.3;color:var(--c-ink);letter-spacing:-0.04em}
 /* 퀴즈 화면 배경(디자인 통이미지와 같은 위→아래 그라데이션)과 선택지 크기(디자인 선택지 이미지 484×155, 그림자 포함) */
 .quiz-stage, .bg-default{background:linear-gradient(180deg,#d9ddeb 0%,#cddcea 50%,#c2d9e9 100%)}
+/* 폰 틀(어두운 테두리 + 회색 윤곽): left/top/width/height는 페이지 CSS에서, 틀 두께가 다르면 padding·border-radius만 덮어씀 */
+.phone-frame{position:absolute;box-sizing:border-box;padding:18px;background:var(--c-ink);border-radius:70px;box-shadow:0 0 0 6px #c9c4bb}
+
+/* 지그소 조건 퍼즐(initJigsawPuzzle): 퍼즐판·조각 트레이. 말풍선·캐릭터·다음 버튼 위치만 페이지 CSS에서 */
+.jig-board{position:absolute;left:670px;top:16px;width:620px;height:620px;border-radius:30px;background:var(--c-white);box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+.jig-grid{position:absolute;left:-24px;top:-24px}
+.jig{position:absolute;left:0;top:0;display:block;overflow:visible}
+.jig path{stroke-linejoin:round}
+.jig-slot{position:absolute}
+.jig-slot path{fill:#f6f5fb;stroke:#b9b3dd;stroke-width:4}
+.jig-slot.is-filled{z-index:2}
+.jig-slot.is-filled path{stroke:var(--c-purple);stroke-width:5}
+.jig-label{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:3;pointer-events:none;
+  font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.12;text-align:center;color:var(--c-indigo);letter-spacing:-0.04em;word-break:keep-all}
+.jig-label.is-hint{color:var(--c-violet);opacity:0;transition:opacity .5s ease}
+.jig-label.is-hint.is-on{opacity:.55}
+.jig-tray-label{position:absolute;left:106px;top:585px;height:80px;padding:6px 50px 0;box-sizing:border-box;display:flex;align-items:center;background:var(--c-purple);border-radius:40px 40px 0 0;
+  font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-white)}
+.jig-tray{position:absolute;left:87px;top:649px;width:1788px;height:300px;box-sizing:border-box;padding:0 40px;display:flex;align-items:center;justify-content:space-between;
+  background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:40px}
+.jig-label b{display:block;font-weight:normal;font-size:50px;line-height:1.1;margin-bottom:4px}
+.jig-piece{position:relative;flex:0 0 284px;height:284px;margin:0 -12px;padding:0;border:0;background:none;cursor:pointer;transition:transform .15s ease}
+.jig-piece path{stroke:var(--c-purple);stroke-width:5}
+.jig-piece .jig-label{font-size:31px;line-height:1.1}
+.jig-piece .jig-label b{font-size:38px;margin-bottom:2px}
+.jig-piece:hover{transform:scale(1.08)}
+.jig-piece.is-used{visibility:hidden}
+.jig-piece.is-wrong{animation:fix-word-shake .3s ease}
+.jig-next.is-off{display:none}
+
+.bg-sky{background:var(--c-mist)}
+.bg-mist{background:#c2d9e9}
+.bg-stage{background:url('../img/common/stage_bg_04.png') no-repeat}
 .card-btn.is-quiz{width:464px;min-width:0;padding:12px 10px 8px;font-size:64px}
 .card-btn.is-quiz.is-long{font-size:50px;line-height:1.05}
 /* 팝업(카드) 안에 들어가는 작은 버튼(예: 다시 해보기) */
@@ -1069,19 +1133,19 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 
 /* ---------------- 감정 -> 표현 고르기 채팅(sa/04 page06~08) ----------------
    JS는 common.js의 initEmotionPickFlow. 마무리 모달은 sa/04/page08에만 있어 로컬 유지 */
-.talk-chat{position:absolute;left:90px;top:80px;width:880px;height:760px;background:#fefbf9;border:solid 6px #1b1738;border-radius:40px;box-shadow:0 12px 0 0 #becde7;box-sizing:border-box;padding:30px 34px;overflow-y:auto}
+.talk-chat{position:absolute;left:90px;top:80px;width:880px;height:760px;background:var(--c-cream);border:solid 6px var(--c-ink);border-radius:40px;box-shadow:0 12px 0 0 var(--c-sky-pale);box-sizing:border-box;padding:30px 34px;overflow-y:auto}
 .talk-line{display:flex;align-items:flex-end;gap:16px;margin-bottom:26px}
 .talk-line.is-me{flex-direction:row-reverse}
-.talk-avatar{width:60px;height:60px;flex:0 0 auto;border-radius:50%;background:#91b9e7;border:solid 4px #1b1738;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:25px;color:#fff}
-.talk-line.is-me .talk-avatar{background:#ffd83d;color:#1b1738}
-.talk-bubble{max-width:640px;background:#eef3fb;border:solid 4px #1b1738;border-radius:26px;padding:22px 26px;font-family:'Pretendard';font-size:31px;line-height:1.35;color:#1b1738;font-weight:600}
+.talk-avatar{width:60px;height:60px;flex:0 0 auto;border-radius:50%;background:var(--c-sky);border:solid 4px var(--c-ink);display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:25px;color:var(--c-white)}
+.talk-line.is-me .talk-avatar{background:var(--c-yellow);color:var(--c-ink)}
+.talk-bubble{max-width:640px;background:var(--c-pale);border:solid 4px var(--c-ink);border-radius:26px;padding:22px 26px;font-family:'Pretendard';font-size:31px;line-height:1.35;color:var(--c-ink);font-weight:600}
 .talk-line.is-me .talk-bubble{background:#fff3c9}
 .talk-who{display:block;font-family:'Cafe24 Ssurround';font-size:26px;color:#7f93ad;margin-bottom:8px}
 
 .talk-right{position:absolute;left:1030px;top:80px;width:810px;height:760px}
 /* 오른쪽: 위 질문 박스 / 아래 선택지(감정 단계는 2x2, 표현 단계는 문장이 길어 세로 1열) */
 .talk-ask{min-height:220px;margin:0 0 34px 0;padding:20px 30px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;
-  background:#fefbf9;border:solid 5px #1b1738;border-radius:32px;font-family:'Cafe24 Ssurround';font-size:52px;line-height:1.3;color:#3b1e87;text-align:center}
+  background:var(--c-cream);border:solid 5px var(--c-ink);border-radius:32px;font-family:'Cafe24 Ssurround';font-size:52px;line-height:1.3;color:#3b1e87;text-align:center}
 .talk-options.is-grid{display:grid;grid-template-columns:1fr 1fr;gap:50px}
 .talk-options.is-grid .talk-card{margin:0}
 /* 표현(메시지) 단계 선택지는 공용 .emotion-option 모양, 문장이 길어서 크기·정렬만 맞춤 */
@@ -1103,34 +1167,34 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 /* ---------------- 폰 채팅 화면 + 이모티콘 피커(sa/04 page14~19) ----------------
    JS는 common.js의 initEmotionChatFlow(chatapp id/클래스를 그대로 씀).
    page18/19는 채팅 틀과 입력바만 가져다 씀 */
-.chatapp{position:absolute;left:650px;top:80px;width:615px;height:800px;background:#fefbf9;border:solid 6px #1b1738;border-radius:40px;box-shadow:0 12px 0 0 #becde7;box-sizing:border-box;padding:28px 30px;
+.chatapp{position:absolute;left:650px;top:80px;width:615px;height:800px;background:var(--c-cream);border:solid 6px var(--c-ink);border-radius:40px;box-shadow:0 12px 0 0 var(--c-sky-pale);box-sizing:border-box;padding:28px 30px;
   display:flex;flex-direction:column}
 .chatapp-body{flex:1 1 auto;min-height:0;overflow:hidden}
 .chatapp-line{display:flex;align-items:flex-end;gap:14px;margin-bottom:22px}
 .chatapp-line.is-me{flex-direction:row-reverse}
 .chatapp-line.is-new{animation:chatapp-rise .5s ease}
 @keyframes chatapp-rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
-.chatapp-avatar{width:60px;height:60px;flex:0 0 auto;border-radius:50%;background:#91b9e7;border:solid 4px #1b1738;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:25px;color:#fff}
-.chatapp-line.is-me .chatapp-avatar{background:#ffd83d;color:#1b1738}
-.chatapp-bubble{max-width:460px;background:#eef3fb;border:solid 4px #1b1738;border-radius:26px;padding:20px 24px;font-family:'Pretendard';font-size:24px;line-height:1.25;color:#1b1738;font-weight:600}
+.chatapp-avatar{width:60px;height:60px;flex:0 0 auto;border-radius:50%;background:var(--c-sky);border:solid 4px var(--c-ink);display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:25px;color:var(--c-white)}
+.chatapp-line.is-me .chatapp-avatar{background:var(--c-yellow);color:var(--c-ink)}
+.chatapp-bubble{max-width:460px;background:var(--c-pale);border:solid 4px var(--c-ink);border-radius:26px;padding:20px 24px;font-family:'Pretendard';font-size:24px;line-height:1.25;color:var(--c-ink);font-weight:600}
 .chatapp-line.is-me .chatapp-bubble{background:#fff3c9}
 .chatapp-bubble.is-emoji{font-size:96px;line-height:1;padding:16px 22px;background:none;border:0}
 .chatapp-who{display:block;font-family:'Cafe24 Ssurround';font-size:24px;color:#7f93ad;margin-bottom:8px}
 
-.chatapp-input{flex:0 0 auto;margin-top:16px;width:100%;height:96px;display:flex;align-items:center;gap:10px;background:#eef3fb;border:solid 4px #1b1738;border-radius:48px;box-sizing:border-box;padding:0 10px 0 20px}
+.chatapp-input{flex:0 0 auto;margin-top:16px;width:100%;height:96px;display:flex;align-items:center;gap:10px;background:var(--c-pale);border:solid 4px var(--c-ink);border-radius:48px;box-sizing:border-box;padding:0 10px 0 20px}
 .chatapp-input-field{flex:1 1 auto;font-family:'Pretendard';font-size:28px;color:#8d97a6}
-.chatapp-icon-btn{width:74px;height:74px;flex:0 0 auto;border:solid 4px #1b1738;border-radius:50%;background:#fefbf9;font-size:36px;cursor:pointer;padding:0}
-.chatapp-icon-btn.is-on{background:#ffd83d}
+.chatapp-icon-btn{width:74px;height:74px;flex:0 0 auto;border:solid 4px var(--c-ink);border-radius:50%;background:var(--c-cream);font-size:36px;cursor:pointer;padding:0}
+.chatapp-icon-btn.is-on{background:var(--c-yellow)}
 .chatapp-icon-btn.is-dim{opacity:.4;pointer-events:none}
 
-.chatapp-picker{flex:0 0 auto;margin-top:16px;width:100%;background:#fefbf9;border:solid 4px #1b1738;border-radius:32px;box-sizing:border-box;padding:20px 24px}
+.chatapp-picker{flex:0 0 auto;margin-top:16px;width:100%;background:var(--c-cream);border:solid 4px var(--c-ink);border-radius:32px;box-sizing:border-box;padding:20px 24px}
 .chatapp-picker.is-off{display:none}
 .chatapp-picker-bar{display:flex;align-items:center;gap:16px;margin-bottom:20px}
-.chatapp-picker-input{flex:1 1 auto;height:72px;background:#eef3fb;border:solid 4px #1b1738;border-radius:36px;box-sizing:border-box;padding:0 24px;display:flex;align-items:center;font-family:'Pretendard';font-size:28px;color:#1b1738}
+.chatapp-picker-input{flex:1 1 auto;height:72px;background:var(--c-pale);border:solid 4px var(--c-ink);border-radius:36px;box-sizing:border-box;padding:0 24px;display:flex;align-items:center;font-family:'Pretendard';font-size:28px;color:var(--c-ink)}
 .chatapp-candidates{display:flex;gap:20px;justify-content:center}
 .chatapp-candidates.is-off{display:none}
-.chatapp-candidate{width:180px;height:180px;border:solid 5px #1b1738;border-radius:32px;background:#fff3c9;font-size:100px;line-height:1;cursor:pointer;padding:0}
-.chatapp-candidate.is-selected{background:#ffd83d;box-shadow:0 0 0 8px #ff8a3d inset}
+.chatapp-candidate{width:180px;height:180px;border:solid 5px var(--c-ink);border-radius:32px;background:#fff3c9;font-size:100px;line-height:1;cursor:pointer;padding:0}
+.chatapp-candidate.is-selected{background:var(--c-yellow);box-shadow:0 0 0 8px #ff8a3d inset}
 
 .emotion-picker{position:absolute;right:80px;top:80px;width:500px;display:flex;flex-direction:column;gap:20px}
 .emotion-picker.is-off{display:none}
@@ -1143,68 +1207,68 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
    - 기획서 Canva 모바일 캡처를 CSS로 그린 것. .cv(504x895, 안쪽 488x879)를 페이지에서 left/top만 정해 놓음
    - 어떤 부분을 보일지(data-screen별)와 시트 안 내용은 페이지에서. 누를 곳은 .is-target(분홍 깜빡임)
    - 캔버스·클립 배경(--desk, 이미지 url)은 페이지 CSS에서 지정: 공용 CSS에서 var()로 쓰면 url이 css/ 기준으로 풀려 깨짐 */
-.cv{position:absolute;left:703px;top:21px;width:504px;height:895px;box-sizing:border-box;border:solid 8px #1b1738;border-radius:40px;overflow:hidden;
-  background:linear-gradient(90deg,#4cc3c8,#5b63d9 55%,#7b3fe0);font-family:'Pretendard';color:#1b1738;letter-spacing:-0.02em;user-select:none}
+.cv{position:absolute;left:703px;top:21px;width:504px;height:895px;box-sizing:border-box;border:solid 8px var(--c-ink);border-radius:40px;overflow:hidden;
+  background:linear-gradient(90deg,#4cc3c8,#5b63d9 55%,#7b3fe0);font-family:'Pretendard';color:var(--c-ink);letter-spacing:-0.02em;user-select:none}
 .cv svg{display:block;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .cv button{font:inherit;color:inherit}
-.cv-top{position:absolute;left:0;top:0;width:100%;height:64px;display:flex;align-items:center;gap:18px;padding:0 20px;box-sizing:border-box;color:#fff}
+.cv-top{position:absolute;left:0;top:0;width:100%;height:64px;display:flex;align-items:center;gap:18px;padding:0 20px;box-sizing:border-box;color:var(--c-white)}
 .cv-top svg{width:28px;height:28px}
 .cv-top .is-gap{flex:1}
 .cv-top .is-dim{opacity:.45}
 .cv:not(.is-edited) .cv-undo{display:none}
-.cv-editor{position:absolute;left:0;top:64px;width:100%;height:725px;background:#f2f3f7}
-.cv-canvas{position:absolute;left:16px;top:58px;width:456px;height:256px;background:#fff;box-shadow:0 6px 18px rgba(27,23,56,.12)}
+.cv-editor{position:absolute;left:0;top:64px;width:100%;height:725px;background:var(--c-pale)}
+.cv-canvas{position:absolute;left:16px;top:58px;width:456px;height:256px;background:var(--c-white);box-shadow:0 6px 18px rgba(27,23,56,.12)}
 .cv-play{position:absolute;left:0;top:350px;width:100%;display:flex;align-items:center;justify-content:center;gap:16px;font-size:24px;color:#8a8c99}
-.cv-play b{color:#1b1738}
-.cv-play i{width:50px;height:50px;border-radius:50%;background:#fff;box-shadow:0 3px 10px rgba(27,23,56,.15);position:relative}
-.cv-play i:after{content:'';position:absolute;left:19px;top:14px;border-style:solid;border-width:11px 0 11px 17px;border-color:transparent transparent transparent #1b1738}
+.cv-play b{color:var(--c-ink)}
+.cv-play i{width:50px;height:50px;border-radius:50%;background:var(--c-white);box-shadow:0 3px 10px rgba(27,23,56,.15);position:relative}
+.cv-play i:after{content:'';position:absolute;left:19px;top:14px;border-style:solid;border-width:11px 0 11px 17px;border-color:transparent transparent transparent var(--c-ink)}
 .cv-ruler{position:absolute;left:0;top:428px;width:100%;height:30px;border-top:solid 2px #dfe1e8;font-size:18px;color:#5b5e6e}
 .cv-ruler span{position:absolute;left:240px;top:6px}
 .cv-ruler i{position:absolute;top:12px;width:2px;height:12px;background:#b8bac6}
-.cv-head{position:absolute;left:232px;top:462px;width:3px;height:263px;background:#1b1738;z-index:1}
+.cv-head{position:absolute;left:232px;top:462px;width:3px;height:263px;background:var(--c-ink);z-index:1}
 .cv-row{position:absolute;left:236px;width:252px;box-sizing:border-box;padding-left:16px;display:flex;align-items:center;gap:10px;background:#e8e9ee;font-size:20px;font-weight:600}
 .cv-row svg{width:22px;height:22px}
 .cv-row.is-el{top:520px;height:38px}
 .cv-row.is-media{top:566px;height:74px}
 .cv-row.is-audio{top:648px;height:38px}
-.cv-row.is-media b{position:absolute;right:12px;top:12px;width:50px;height:50px;border-radius:50%;background:#fff;box-shadow:0 3px 10px rgba(27,23,56,.15);
+.cv-row.is-media b{position:absolute;right:12px;top:12px;width:50px;height:50px;border-radius:50%;background:var(--c-white);box-shadow:0 3px 10px rgba(27,23,56,.15);
   display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:400;z-index:2}
 .cv-clips{display:none;position:absolute;left:0;top:0;width:100%;height:100%;gap:2px}
 .cv-clips i{flex:0 0 132px;height:100%}
 .cv.is-edited .cv-clips{display:flex}
 .cv.is-edited .cv-row.is-media > span, .cv.is-edited .cv-row.is-media > svg{visibility:hidden}
-.cv-tabs{position:absolute;left:0;bottom:0;width:100%;height:90px;display:flex;background:#fff;border-top:solid 2px #e6e7ec;z-index:5;overflow:hidden}
+.cv-tabs{position:absolute;left:0;bottom:0;width:100%;height:90px;display:flex;background:var(--c-white);border-top:solid 2px #e6e7ec;z-index:5;overflow:hidden}
 .cv-tab{flex:0 0 86px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:0;border:0;background:none;font-size:17px;font-weight:600;white-space:nowrap}
 .cv-tab i{width:48px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center}
 .cv-tab svg{width:30px;height:30px}
 .cv-tab.is-on i{background:#efeaff;color:#5b3fe8}
-.cv-sheet{position:absolute;left:0;top:36px;width:100%;bottom:0;background:#fff;border-radius:28px 28px 0 0;z-index:4}
+.cv-sheet{position:absolute;left:0;top:36px;width:100%;bottom:0;background:var(--c-white);border-radius:28px 28px 0 0;z-index:4}
 .cv-sheet:before{content:'';position:absolute;left:50%;top:10px;width:46px;height:5px;margin-left:-23px;border-radius:3px;background:#d4d5dc}
 .cv-search{position:absolute;left:16px;top:28px;width:456px;height:62px;box-sizing:border-box;border:solid 2px #e1e2e8;border-radius:16px;padding:0 16px;
-  display:flex;align-items:center;gap:12px;background:#fff;font-size:21px;color:#8a8c99;text-align:left}
-.cv-search svg{flex:0 0 auto;width:26px;height:26px;color:#1b1738}
+  display:flex;align-items:center;gap:12px;background:var(--c-white);font-size:21px;color:#8a8c99;text-align:left}
+.cv-search svg{flex:0 0 auto;width:26px;height:26px;color:var(--c-ink)}
 .cv-search-text{flex:1;white-space:nowrap;overflow:hidden}
 .cv-search.is-focus{border-color:#8b5cf6}
-.cv-search.is-focus .cv-search-text:before{content:'';display:inline-block;width:2px;height:24px;margin-right:2px;vertical-align:-5px;background:#1b1738;animation:cv-caret 1s steps(1) infinite}
-.cv-search.is-filled .cv-search-text{color:#1b1738}
+.cv-search.is-focus .cv-search-text:before{content:'';display:inline-block;width:2px;height:24px;margin-right:2px;vertical-align:-5px;background:var(--c-ink);animation:cv-caret 1s steps(1) infinite}
+.cv-search.is-filled .cv-search-text{color:var(--c-ink)}
 .cv-search.is-filled.is-focus .cv-search-text:before{display:none}
-.cv-search.is-filled.is-focus .cv-search-text:after{content:'';display:inline-block;width:2px;height:24px;margin-left:2px;vertical-align:-5px;background:#1b1738;animation:cv-caret 1s steps(1) infinite}
+.cv-search.is-filled.is-focus .cv-search-text:after{content:'';display:inline-block;width:2px;height:24px;margin-left:2px;vertical-align:-5px;background:var(--c-ink);animation:cv-caret 1s steps(1) infinite}
 @keyframes cv-caret{50%{opacity:0}}
-.cv-clear{flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:#3a3c4a;color:#fff;font-size:16px;line-height:26px;text-align:center}
+.cv-clear{flex:0 0 auto;width:26px;height:26px;border-radius:50%;background:#3a3c4a;color:var(--c-white);font-size:16px;line-height:26px;text-align:center}
 .cv-actions{position:absolute;left:16px;top:104px;width:456px;height:48px;display:flex;gap:14px}
 .cv-gen{flex:0 0 210px;display:flex;align-items:center;border:solid 2px #e1e2e8;border-radius:14px;box-sizing:border-box;font-size:20px;font-weight:700}
 .cv-gen span{flex:1;text-align:center}
 .cv-gen span:before{content:'✦ ';color:#5b63d9}
 .cv-gen i{flex:0 0 52px;height:100%;border-left:solid 2px #e1e2e8;display:flex;align-items:center;justify-content:center}
 .cv-gen svg{width:20px;height:20px}
-.cv-find{flex:1;padding:0;border:0;border-radius:14px;background:linear-gradient(90deg,#8b5cf6,#7a45ee);font-size:20px;font-weight:700;color:#fff !important}
+.cv-find{flex:1;padding:0;border:0;border-radius:14px;background:linear-gradient(90deg,#8b5cf6,#7a45ee);font-size:20px;font-weight:700;color:var(--c-white) !important}
 .cv-h{position:absolute;left:16px;top:168px;margin:0;font-size:22px;font-weight:700}
 .cv-body{position:absolute;left:0;top:206px;width:100%;bottom:90px;overflow-y:auto;padding:0 16px 16px;box-sizing:border-box}
 .cv-body::-webkit-scrollbar{width:6px}
 .cv-body::-webkit-scrollbar-thumb{background:#c9cad3;border-radius:3px}
 .cv-kbd{position:absolute;left:0;bottom:0;width:100%;height:300px;background:#dfe2e8;z-index:6;padding:10px 6px 0;box-sizing:border-box;font-size:20px}
 .cv-kbd div{display:flex;gap:5px;margin-bottom:8px;justify-content:center}
-.cv-kbd span{flex:1;max-width:44px;height:48px;border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 0 #b8bac6}
+.cv-kbd span{flex:1;max-width:44px;height:48px;border-radius:7px;background:var(--c-white);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 0 #b8bac6}
 .cv-kbd span.is-wide{max-width:none;flex:3}
 .cv-kbd span.is-fn{background:#c5cad4;max-width:62px;flex:1.4}
 .cv .is-target{cursor:pointer;animation:cv-target 1.2s ease-in-out infinite}
