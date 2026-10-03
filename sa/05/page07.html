@@ -7,33 +7,31 @@
     <link rel="stylesheet" href="../../css/common.css">
     <style>
         /* 디자인 없음 - 기획서 21~22p. 대화 순서 카드 4장을 순서도 칸에 끌어 넣기(공용 initMatchDrag) */
-        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
 
-        .p07-bubble{left:109px;bottom:620px;width:552px;display:flex;align-items:center;justify-content:center;font-size:46px}
-        .p07-character{position:absolute;left:200px;top:300px;width:300px;height:330px;display:flex;align-items:flex-end;justify-content:center}
-        .p07-character img{max-width:100%;max-height:100%;object-fit:contain}
+        .p07-bubble{left:109px;bottom:620px;width:552px;font-size:46px}
+        .p07-character{left:200px;top:300px;width:300px;height:330px}
 
-        .p07-flow{position:absolute;left:740px;top:50px;width:1098px;height:494px;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p07-flow{position:absolute;left:740px;top:50px;width:1098px;height:494px;box-sizing:border-box;background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
         .p07-slot{position:absolute;width:489px;height:180px;box-sizing:border-box;border:dashed 5px #b9b3dd;border-radius:28px;display:flex;align-items:center;justify-content:center}
         .p07-slot1{left:766px;top:109px}
         .p07-slot2{left:1313px;top:109px}
         .p07-slot3{left:1313px;top:345px}
         .p07-slot4{left:766px;top:345px}
-        .p07-num{position:absolute;left:-26px;top:-30px;width:70px;height:70px;border-radius:50%;background:#48159c;display:flex;align-items:center;justify-content:center;
-          font-family:'Cafe24 Ssurround';font-size:40px;color:#fff;z-index:10}
+        .p07-num{position:absolute;left:-26px;top:-30px;width:70px;height:70px;border-radius:50%;background:var(--c-purple);display:flex;align-items:center;justify-content:center;
+          font-family:'Cafe24 Ssurround';font-size:40px;color:var(--c-white);z-index:10}
         .p07-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;opacity:0;transition:opacity .5s ease;
-          font-family:'Cafe24 Ssurround';font-size:44px;line-height:1.15;color:#8278ff;letter-spacing:-0.04em}
+          font-family:'Cafe24 Ssurround';font-size:44px;line-height:1.15;color:var(--c-violet);letter-spacing:-0.04em}
         .p07-hint.is-on{opacity:.5}
-        .p07-arrow{position:absolute;width:70px;height:70px;display:flex;align-items:center;justify-content:center;font-size:64px;line-height:1;color:#48159c;z-index:3}
+        .p07-arrow{position:absolute;width:70px;height:70px;display:flex;align-items:center;justify-content:center;font-size:64px;line-height:1;color:var(--c-purple);z-index:3}
 
         .p07-tray{position:absolute;left:79px;top:632px;width:1759px;height:267px;box-sizing:border-box;padding:0 48px;display:flex;align-items:center;justify-content:space-between;
-          background:#fefbf9;border:solid 6px #48159c;border-radius:40px}
+          background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:40px}
         .p07-hold{width:359px;height:132px}
         .p07-card{width:359px;height:132px;padding:8px 12px 4px;cursor:grab;user-select:none;position:relative;z-index:5}
         .p07-card.emotion-option{font-size:42px;line-height:1.15;display:flex;align-items:center;justify-content:center;text-align:center;box-sizing:border-box}
         .p07-card.is-dragging{cursor:grabbing;z-index:50}
         .p07-slot .p07-card{cursor:default;border:0}
-        .p07-slot[data-filled]{border-style:solid;border-color:#2f6fed}
+        .p07-slot[data-filled]{border-style:solid;border-color:var(--c-blue)}
 
         #p07Done{z-index:120}
     </style>
@@ -44,8 +42,8 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <p class="guide-bubble p07-bubble">먼저, Gemini Live와 어떤 순서로 대화해야 하는지 카드를 배열해서 알아봐요!</p>
-          <div class="p07-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+          <p class="guide-bubble is-center p07-bubble">먼저, Gemini Live와 어떤 순서로 대화해야 하는지 카드를 배열해서 알아봐요!</p>
+          <div class="char-box p07-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
 
           <div class="p07-flow"></div>
           <span class="p07-arrow" style="left:1249px;top:164px">&#10140;</span>
@@ -88,9 +86,6 @@
     const slots = Array.from(document.querySelectorAll('.p07-slot'));
     shuffleArray(Array.from(tray.children)).forEach((c) => tray.appendChild(c));
     const cards = Array.from(tray.querySelectorAll('.p07-card'));
-    const playClick = makeSfx('sound/click.mp3');
-    const playCorrect = makeSfx('sound/correct.mp3');
-    const playWrong = makeSfx('sound/incorrect.mp3');
 
     initMatchDrag({
       cards,

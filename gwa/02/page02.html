@@ -9,10 +9,9 @@
         /* 디자인 없음 - 기획서 3~4p. 매대 생선 4개(도미 200·광어 500·우럭 300·멍게 100g)를 접시저울로 끌어 놓으면 바늘이 움직이고, 표에 숫자로 무게 입력.
            맞으면 정답 팝업 + 게이지 25%, 틀리면 입력 지우고 바늘·눈금 반짝. 4개 다 맞히면 완료 안내 → page03.
            생선 그림 img/p02_fish_{dom|gwang|urok|mung}.png(없으면 이모지), 저울은 SVG */
-        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
 
         .p02-ask{position:absolute;left:620px;top:34px;width:1240px;height:100px;margin:0;box-sizing:border-box;padding:6px 40px 0;display:flex;align-items:center;
-          background:#fff;border:solid 5px #1b1738;border-radius:50px;box-shadow:0 10px 0 0 #becde7;font-family:'Cafe24 Ssurround';font-size:55px;color:#1b1738;letter-spacing:-0.05em}
+          background:var(--c-white);border:solid 5px var(--c-ink);border-radius:50px;box-shadow:0 10px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:55px;color:var(--c-ink);letter-spacing:-0.05em}
         .p02-gauge{left:100px;top:52px;width:450px}
         .p02-gauge:before{background-image:url('../../img/common/icon_star_on.png')}
 
@@ -22,26 +21,26 @@
         .p02-scale svg{width:100%;height:100%;display:block}
         .p02-needle{transform-origin:300px 320px;transition:transform 1s cubic-bezier(.3,1.4,.6,1)}
         .p02-scale.is-hint .p02-needle line, .p02-scale.is-hint .p02-tick.is-on{animation:p02-hint .4s ease-in-out 5}
-        @keyframes p02-hint{50%{stroke:#ffd83d;fill:#ff9f1a}}
+        @keyframes p02-hint{50%{stroke:var(--c-yellow);fill:#ff9f1a}}
         .p02-plate{position:absolute;left:150px;top:0;width:300px;height:120px}
         .p02-plate .p02-fish{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);cursor:default}
 
-        .p02-table{position:absolute;left:1320px;top:200px;width:500px;border-collapse:separate;border-spacing:0;border:solid 5px #1b1738;border-radius:24px;overflow:hidden;background:#fff;
-          font-family:'Cafe24 Ssurround';font-size:44px;color:#1b1738;text-align:center}
-        .p02-table th{height:90px;background:#91b9e7;color:#fff;font-weight:normal}
-        .p02-table td{height:104px;border-top:solid 3px #dfe4ef}
-        .p02-table td + td, .p02-table th + th{border-left:solid 3px #dfe4ef}
+        .p02-table{position:absolute;left:1320px;top:200px;width:500px;border-collapse:separate;border-spacing:0;border:solid 5px var(--c-ink);border-radius:24px;overflow:hidden;background:var(--c-white);
+          font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-ink);text-align:center}
+        .p02-table th{height:90px;background:var(--c-sky);color:var(--c-white);font-weight:normal}
+        .p02-table td{height:104px;border-top:solid 3px var(--c-mist)}
+        .p02-table td + td, .p02-table th + th{border-left:solid 3px var(--c-mist)}
         .p02-table tr.is-now td{background:#fff7d6}
-        .p02-table input{width:170px;height:70px;box-sizing:border-box;border:solid 4px #b9b3dd;border-radius:14px;font:inherit;font-size:42px;text-align:center;color:#2f6fed;background:#fff}
-        .p02-table input:disabled{border-color:#dfe4ef;background:#f4f5f9}
-        .p02-table input.is-ok{border-color:transparent;background:transparent;color:#2f6fed}
+        .p02-table input{width:170px;height:70px;box-sizing:border-box;border:solid 4px #b9b3dd;border-radius:14px;font:inherit;font-size:42px;text-align:center;color:var(--c-blue);background:var(--c-white)}
+        .p02-table input:disabled{border-color:var(--c-mist);background:var(--c-pale)}
+        .p02-table input.is-ok{border-color:transparent;background:transparent;color:var(--c-blue)}
         .p02-table b{font-weight:normal;margin-left:6px}
         .p02-check{margin-left:10px;height:70px;padding:0 20px;font-size:34px;vertical-align:middle}
 
         .p02-shelf{position:absolute;left:200px;top:730px;width:1080px;height:190px;box-sizing:border-box;border-radius:30px;background:#c98c56;box-shadow:inset 0 -18px 0 #a86c3a;
           display:flex;align-items:center;justify-content:space-around;padding-bottom:18px}
         .p02-fish{width:200px;height:160px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;border-radius:20px;background:center top / contain no-repeat;
-          font-family:'Cafe24 Ssurround';font-size:30px;color:#fff;text-shadow:0 2px 3px rgba(0,0,0,.35);touch-action:none;cursor:grab}
+          font-family:'Cafe24 Ssurround';font-size:30px;color:var(--c-white);text-shadow:0 2px 3px rgba(0,0,0,.35);touch-action:none;cursor:grab}
         .p02-fish i{font-style:normal;font-size:130px;line-height:1}
         .p02-emoji{margin-right:10px;font-size:46px;vertical-align:-4px}
         .p02-fish.is-img i{visibility:hidden}
@@ -129,10 +128,7 @@
       { key: 'mung', name: '멍게', g: 100, emoji: '🪸' }
     ];
     const MAX = 600;
-    const $ = (id) => document.getElementById(id);
     const scale = $('p02Scale');
-    const playCorrect = makeSfx('sound/correct.mp3');
-    const playWrong = makeSfx('sound/incorrect.mp3');
     // 저울에 올려놓는 소리(page03과 같은 소리, 절반 볼륨)
     const dragSfx = new Audio(ASSET_BASE + 'sound/drag.mp3');
     const playDrag = () => { const a = dragSfx.cloneNode(); a.volume = 0.5; a.play().catch(() => {}); };

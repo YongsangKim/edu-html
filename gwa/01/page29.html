@@ -9,11 +9,11 @@
         /* 기획서 44p(game02_02) + 45p(정답) + 46p(오답)
            디자인(44~46p-ok.png)이 아직 없어 뼈대만 잡아둔 상태.
            실제 디자인이 나오면 p29_bg.png와 아래 좌표만 교체하면 됨 */
-        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:#c7d6ea}
+        main{background:#c7d6ea}
 
-        .p29-box{position:absolute;border:8px dashed #8aa0c8;border-radius:24px;background:#fff;
+        .p29-box{position:absolute;border:8px dashed #8aa0c8;border-radius:24px;background:var(--c-white);
           display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;box-sizing:border-box}
-        .p29-box p{margin:0;font-family:'Cafe24 Ssurround';font-size:38px;line-height:1.35;color:#1b1738}
+        .p29-box p{margin:0;font-family:'Cafe24 Ssurround';font-size:38px;line-height:1.35;color:var(--c-ink)}
 
         .p29-mail{left:80px;top:60px;width:740px;height:420px}
         .p29-data{left:860px;top:60px;width:980px;height:420px}
@@ -21,10 +21,10 @@
 
         .p29-guide{position:absolute;left:80px;top:520px;width:740px;height:90px;
           display:flex;align-items:center;justify-content:center}
-        .p29-guide span{font-family:'Cafe24 Ssurround';font-size:46px;color:#1b1738}
+        .p29-guide span{font-family:'Cafe24 Ssurround';font-size:46px;color:var(--c-ink)}
 
         .p29-ans{position:absolute;width:700px;height:120px;cursor:pointer;
-          border:8px solid #2f6fed;border-radius:20px;background:linear-gradient(180deg,#fff 0%,#e9d8ff 100%);
+          border:8px solid var(--c-blue);border-radius:20px;background:linear-gradient(180deg,var(--c-white) 0%,#e9d8ff 100%);
           font-family:'Cafe24 Ssurround';font-size:40px;color:#3b1e87;letter-spacing:-0.04em}
         .p29-ans.is-wrong{animation:fix-word-shake .3s ease}
         .p29-ans-1{left:80px;top:640px}
@@ -103,19 +103,9 @@
     const ans2 = document.getElementById('p29Ans2');
     const wrongModal = document.getElementById('p29Wrong');
 
-    const correctSound = new Audio(ASSET_BASE + 'sound/correct.mp3');
-    const wrongSound = new Audio(ASSET_BASE + 'sound/incorrect.mp3');
 
-    function shuffle(arr) {
-      const a = arr.slice();
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
-      return a;
-    }
 
-    const queue = shuffle(MAILS);
+    const queue = shuffleArray(MAILS);
     let index = 0;
     let locked = false;
 
@@ -137,7 +127,7 @@
 
         if (i === m.correct) {
           locked = true;
-          correctSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+          playCorrect();
           index += 1;
           clockEl.textContent = CLOCK[Math.min(index, CLOCK.length - 1)];
           setTimeout(() => {
@@ -150,7 +140,7 @@
           return;
         }
 
-        wrongSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+        playWrong();
         btn.classList.remove('is-wrong');
         void btn.offsetWidth;
         btn.classList.add('is-wrong');

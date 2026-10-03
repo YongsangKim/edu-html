@@ -9,25 +9,24 @@
         /* 디자인 없음 - 기획서 5~6p. 왼쪽에 page02 무게 기록표, 그 아래 100g 블록(무한)을 생선별 받침대로 끌어 쌓고(생선 아래 무게는 쌓은 만큼), 생선마다 [제출]. 맞으면 블록이 초록으로 바뀌고 [완성], 틀리면 생선별 오답 문구.
            쌓은 블록은 맨 위 블록을 아래로 끌어내리면 빠짐. 4개 다 완성하면 반짝 테두리 + 게이지 100% → 왼쪽이 말풍선+캐릭터(버튼 없음)로 바뀌고 1초 뒤 정리 모달 3단계 → page04.
            생선 그림 img/p02_fish_*.png(page02와 같은 이미지, 없으면 이모지), 블록을 칸에 놓으면 sound/drag.mp3 */
-        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
 
         .p03-ask{position:absolute;left:620px;top:34px;width:1240px;height:100px;margin:0;box-sizing:border-box;padding:6px 40px 0;display:flex;align-items:center;
-          background:#fff;border:solid 5px #1b1738;border-radius:50px;box-shadow:0 10px 0 0 #becde7;font-family:'Cafe24 Ssurround';font-size:55px;color:#1b1738;letter-spacing:-0.05em}
+          background:var(--c-white);border:solid 5px var(--c-ink);border-radius:50px;box-shadow:0 10px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:55px;color:var(--c-ink);letter-spacing:-0.05em}
         .p03-gauge{left:100px;top:52px;width:450px}
         .p03-gauge:before{background-image:url('../../img/common/icon_star_on.png')}
 
-        .p03-board{position:absolute;left:640px;top:170px;width:1220px;height:770px;box-sizing:border-box;border:solid 6px #48159c;border-radius:36px;background:#fff;
+        .p03-board{position:absolute;left:640px;top:170px;width:1220px;height:770px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:36px;background:var(--c-white);
           display:flex;justify-content:space-around;align-items:flex-end;padding:0 10px 26px}
         .p03-board.is-all{animation:p03-glow 1s ease-in-out 3}
-        @keyframes p03-glow{50%{box-shadow:0 0 0 12px #ffd83d,0 0 40px 10px #ffd83d}}
+        @keyframes p03-glow{50%{box-shadow:0 0 0 12px var(--c-yellow),0 0 40px 10px var(--c-yellow)}}
         .p03-col{width:270px;display:flex;flex-direction:column;align-items:center;gap:12px}
         .p03-stack{width:220px;height:470px;display:flex;flex-direction:column-reverse;align-items:center;gap:4px;box-sizing:border-box;border-bottom:solid 10px #9aa3b8;border-radius:6px}
         .p03-stack.is-over{background:#fff7d6}
         .p03-fish{width:200px;height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:center / contain no-repeat;
-          font-family:'Cafe24 Ssurround';font-size:42px;color:#1b1738}
+          font-family:'Cafe24 Ssurround';font-size:42px;color:var(--c-ink)}
         .p03-fish i{font-style:normal;font-size:64px;line-height:1}
         .p03-fish.is-img i{visibility:hidden}
-        .p03-weight{margin:0;font-family:'Cafe24 Ssurround';font-size:38px;color:#2f6fed}
+        .p03-weight{margin:0;font-family:'Cafe24 Ssurround';font-size:38px;color:var(--c-blue)}
         .p03-submit{width:220px;height:84px;min-width:0;padding:6px 10px 0;font-size:44px}
         .p03-submit:disabled{opacity:.5;cursor:default}
         /* 누르면 눌림(공용 .card-btn.is-selected와 같은 그림자), 정답이면 눌린 채로 완성 */
@@ -35,27 +34,27 @@
         .p03-submit.is-done{pointer-events:none}
 
         .p03-block{width:200px;height:70px;box-sizing:border-box;border:solid 4px #a3101e;border-radius:8px;background:#ef4444;display:flex;align-items:center;justify-content:center;
-          font-family:'Cafe24 Ssurround';font-size:34px;color:#fff;touch-action:none;cursor:grab;flex:0 0 auto}
+          font-family:'Cafe24 Ssurround';font-size:34px;color:var(--c-white);touch-action:none;cursor:grab;flex:0 0 auto}
         .p03-stack.is-ok .p03-block{background:#22a35a;border-color:#11703a;cursor:default}
         .p03-block.is-drag{position:absolute;z-index:60;cursor:grabbing;pointer-events:none;box-shadow:0 8px 16px rgba(0,0,0,.25)}
 
-        .p03-source{position:absolute;left:60px;top:680px;width:540px;height:260px;box-sizing:border-box;border:solid 6px #1b1738;border-radius:36px;background:#eef3fb;
-          display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:'Cafe24 Ssurround';font-size:34px;color:#1b1738;text-align:center}
-        .p03-table{position:absolute;left:60px;top:170px;width:540px;border-collapse:separate;border-spacing:0;border:solid 5px #1b1738;border-radius:24px;overflow:hidden;background:#fff;
-          font-family:'Cafe24 Ssurround';font-size:40px;color:#1b1738;text-align:center}
-        .p03-table th{height:76px;background:#91b9e7;color:#fff;font-weight:normal}
-        .p03-table td{height:96px;border-top:solid 3px #dfe4ef}
-        .p03-table td + td, .p03-table th + th{border-left:solid 3px #dfe4ef}
-        .p03-table td:last-child{color:#2f6fed}
+        .p03-source{position:absolute;left:60px;top:680px;width:540px;height:260px;box-sizing:border-box;border:solid 6px var(--c-ink);border-radius:36px;background:var(--c-pale);
+          display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:'Cafe24 Ssurround';font-size:34px;color:var(--c-ink);text-align:center}
+        .p03-table{position:absolute;left:60px;top:170px;width:540px;border-collapse:separate;border-spacing:0;border:solid 5px var(--c-ink);border-radius:24px;overflow:hidden;background:var(--c-white);
+          font-family:'Cafe24 Ssurround';font-size:40px;color:var(--c-ink);text-align:center}
+        .p03-table th{height:76px;background:var(--c-sky);color:var(--c-white);font-weight:normal}
+        .p03-table td{height:96px;border-top:solid 3px var(--c-mist)}
+        .p03-table td + td, .p03-table th + th{border-left:solid 3px var(--c-mist)}
+        .p03-table td:last-child{color:var(--c-blue)}
         .p03-emoji{margin-right:8px;font-size:42px;vertical-align:-4px}
         .p03-source p{margin:0}
         /* 4개 다 완성하면 왼쪽 기록표·블록 자리가 말풍선 + 메인 캐릭터로 바뀜(기획서 5~6p, 모달 아님) */
         main.is-done .p03-table, main.is-done .p03-source{display:none}
         .p03-talk{position:absolute;left:40px;top:170px;width:580px;height:770px}
         .p03-talk.is-off{display:none}
-        .p03-bubble{position:relative;box-sizing:border-box;padding:30px 30px 24px;background:#fefbf9;border:solid 5px #48159c;border-radius:30px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);z-index:2}
+        .p03-bubble{position:relative;box-sizing:border-box;padding:30px 30px 24px;background:var(--c-cream);border:solid 5px var(--c-purple);border-radius:30px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);z-index:2}
         .p03-bubble:before{content:'';position:absolute;left:230px;bottom:-58px;width:100px;height:70px;background:url('../../img/common/p_guide_tail.png') 0 0 / contain no-repeat}
-        .p03-bubble p{margin:0;font-family:'Cafe24 Ssurround';font-size:38px;line-height:1.35;color:#48159c;letter-spacing:-0.05em;word-break:keep-all}
+        .p03-bubble p{margin:0;font-family:'Cafe24 Ssurround';font-size:38px;line-height:1.35;color:var(--c-purple);letter-spacing:-0.05em;word-break:keep-all}
         .p03-char{position:absolute;left:60px;top:310px;width:460px;height:330px;display:flex;align-items:flex-start;justify-content:center}
         .p03-char img{max-width:100%;max-height:100%;object-fit:contain}
     </style>
@@ -135,11 +134,8 @@
       { key: 'urok', name: '우럭', josa: '은', g: 300, emoji: '🐡' },
       { key: 'mung', name: '멍게', josa: '는', g: 100, emoji: '🪸' }
     ];
-    const $ = (id) => document.getElementById(id);
     const main = $('p03Main');
     const board = $('p03Board');
-    const playCorrect = makeSfx('sound/correct.mp3');
-    const playWrong = makeSfx('sound/incorrect.mp3');
     // 끌어 놓는 소리가 커서 절반 볼륨으로
     const dragSfx = new Audio(ASSET_BASE + 'sound/drag.mp3');
     const playDrag = () => { const a = dragSfx.cloneNode(); a.volume = 0.5; a.play().catch(() => {}); };

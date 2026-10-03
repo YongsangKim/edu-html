@@ -8,8 +8,7 @@
     <style>
         /* 디자인 없음 - 기획서 48~65p. 펼친 앨범: 장소 6곳 × 질문 3개(장소 이름 → 만날 수 있는 이웃 → 이웃의 역할), 총 18문제, 한 문제마다 게이지 1/18.
            보기 순서 무작위, 틀리면 흔들림, 맞으면 정답 효과음 뒤 다음 문제 자동. 끝나면 앨범 보기(page13).
-           장소 사진 img/p12_place_{key}.png, 이웃 사진은 page05와 같은 img/p05_job_{key}.png(약사만 새로 img/p05_job_pharmacist.png) */
-        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
+           장소 사진 img/p12_place_{key}.png, 이웃 사진은 카드 칸에 맞춘 가로로 긴 img/p12_job_{key}.png */
 
         .p12-gauge{left:260px;top:34px;width:1400px}
         .p12-gauge:before{background-image:url('../../img/common/icon_star_on.png')}
@@ -17,21 +16,21 @@
         .p12-book{position:absolute;left:110px;top:130px;width:1700px;height:800px;box-sizing:border-box;padding:30px;border-radius:40px;background:#8b5a3c;box-shadow:0 16px 0 0 #5e3a24;display:flex;gap:8px}
         .p12-page{flex:1 1 0;position:relative;border-radius:22px;background:#fffaf0;box-shadow:inset 0 0 30px rgba(139,90,60,.15);overflow:hidden}
         .p12-left{flex:3 1 0;display:flex;flex-direction:column;padding:34px;box-sizing:border-box;gap:20px}
-        .p12-photo{flex:1 1 auto;border:solid 10px #fff;border-radius:10px;background:#dfe7f5 center / cover no-repeat;box-shadow:0 6px 16px rgba(0,0,0,.2);transform:rotate(-1.5deg)}
-        .p12-info{flex:0 0 auto;margin:0;padding:18px 22px;border-radius:16px;background:#fff;font:500 25px/1.5 'Pretendard';color:#1b1738}
+        .p12-photo{flex:1 1 auto;border:solid 10px var(--c-white);border-radius:10px;background:var(--c-mist) center / cover no-repeat;box-shadow:0 6px 16px rgba(0,0,0,.2);transform:rotate(-1.5deg)}
+        .p12-info{flex:0 0 auto;margin:0;padding:18px 22px;border-radius:16px;background:var(--c-white);font:500 25px/1.5 'Pretendard';color:var(--c-ink)}
         .p12-info b{font-weight:800}
         .p12-info.is-off{display:none}
         .p12-right{flex:7 1 0;padding:40px 40px 30px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px}
-        .p12-q{margin:0;font-family:'Cafe24 Ssurround';font-size:56px;line-height:1.3;color:#48159c;text-align:center;letter-spacing:-0.05em;word-break:keep-all}
+        .p12-q{margin:0;font-family:'Cafe24 Ssurround';font-size:56px;line-height:1.3;color:var(--c-purple);text-align:center;letter-spacing:-0.05em;word-break:keep-all}
         .p12-opts{flex:1 1 auto;display:grid;grid-template-columns:1fr 1fr;gap:24px}
         .p12-opts.is-role{grid-template-columns:1fr}
-        .p12-opt{position:relative;padding:0;box-sizing:border-box;border:solid 5px #91b9e7;border-radius:24px;background:#fff;cursor:pointer;overflow:hidden;display:flex;flex-direction:column;
-          font-family:'Cafe24 Ssurround';font-size:56px;color:#31248a;letter-spacing:-0.05em;transition:transform .15s,border-color .15s}
-        .p12-opt:hover{transform:translateY(-6px);border-color:#48159c}
+        .p12-opt{position:relative;padding:0;box-sizing:border-box;border:solid 5px var(--c-sky);border-radius:24px;background:var(--c-white);cursor:pointer;overflow:hidden;display:flex;flex-direction:column;
+          font-family:'Cafe24 Ssurround';font-size:56px;color:var(--c-indigo);letter-spacing:-0.05em;transition:transform .15s,border-color .15s}
+        .p12-opt:hover{transform:translateY(-6px);border-color:var(--c-purple)}
         .p12-opt.is-selected{border-color:#ff2fc2}
         .p12-opt.is-wrong{animation:fix-word-shake .3s ease}
         .p12-opt span{flex:1 1 auto;display:flex;align-items:center;justify-content:center;padding:10px 16px 4px;text-align:center;word-break:keep-all}
-        .p12-opt i{flex:0 0 190px;background:#dfe7f5 center top / cover no-repeat}
+        .p12-opt i{flex:0 0 190px;background:var(--c-mist) center / cover no-repeat}
         .p12-opt i + span{flex:0 0 66px}
         .p12-opts.is-role .p12-opt{font-size:46px}
         .p12-opts.is-locked{pointer-events:none}
@@ -91,10 +90,7 @@
     const ASK = { place: '사진은 어떤 장소인가요?', job: '이 곳에서 만날 수 있는 이웃은 누구인가요?', role: '이웃의 역할은 무엇인가요?' };
     const TOTAL = PLACES.length * STEPS.length;
 
-    const $ = (id) => document.getElementById(id);
     const opts = $('p12Opts');
-    const playCorrect = makeSfx('sound/correct.mp3');
-    const playWrong = makeSfx('sound/incorrect.mp3');
     let n = 0;
 
     function show() {
@@ -109,7 +105,7 @@
       shuffleArray(p[step].map((text, i) => ({ text, right: i === 0 }))).forEach((o) => {
         const btn = document.createElement('button');
         btn.className = 'p12-opt';
-        btn.innerHTML = (step === 'job' ? "<i style=\"background-image:url('img/p05_job_" + JOB_IMG[o.text] + ".png')\"></i>" : '') + '<span>' + o.text + '</span>';
+        btn.innerHTML = (step === 'job' ? "<i style=\"background-image:url('img/p12_job_" + JOB_IMG[o.text] + ".png')\"></i>" : '') + '<span>' + o.text + '</span>';
         btn.addEventListener('click', () => pick(btn, o.right));
         opts.appendChild(btn);
       });

@@ -9,34 +9,33 @@
         /* 디자인 없음 - 기획서 3~6p. 파도 4가지(높이 높/낮 × 간격 넓/좁)를 무작위 순서로 4문제. 관측 모니터의 파도(SVG, 흐르는 애니메이션)를 보고
            높이·간격 버튼을 하나씩 고르면 확성기 활성 → 누르면 삑 소리 뒤 정답/오답. 맞힐 때마다 확성기 아이콘 하나씩 켜짐, 다 맞히면 마무리 안내 3단계.
            파도 소리 sound/p02_wave_{high|low}_{wide|narrow}.mp3, 삑 sound/p02_beep.mp3, 대피 성공 그림 img/p02_success.png */
-        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
 
         /* 배치(기획서 3p): 왼쪽 위 알림 아이콘 + 안내 바, 오른쪽 위 성공 확성기 4개, 왼쪽 관측 모니터, 오른쪽 파도 분석 버튼 2×2, 오른쪽 아래 큰 확성기.
            버튼 그림 img/p02_btn_{high|low|wide|narrow}.png(없으면 글자), 확성기 img/p02_horn.png, 성공 표시 img/p02_life(_on).png */
         .p02-alert{position:absolute;left:58px;top:35px;width:1062px;height:110px;margin:0;box-sizing:border-box;padding:6px 30px 0 120px;display:flex;align-items:center;
-          background:#fff;border:solid 5px #1b1738;border-radius:55px;font-family:'Cafe24 Ssurround';font-size:48px;color:#1b1738;letter-spacing:-0.05em}
-        .p02-alert:before{content:'!';position:absolute;left:10px;top:50%;width:84px;height:84px;margin-top:-42px;border-radius:50%;background:#ff5a5a;color:#fff;font-size:60px;line-height:92px;text-align:center}
+          background:var(--c-white);border:solid 5px var(--c-ink);border-radius:55px;font-family:'Cafe24 Ssurround';font-size:48px;color:var(--c-ink);letter-spacing:-0.05em}
+        .p02-alert:before{content:'!';position:absolute;left:10px;top:50%;width:84px;height:84px;margin-top:-42px;border-radius:50%;background:#ff5a5a;color:var(--c-white);font-size:60px;line-height:92px;text-align:center}
 
         .p02-lives{position:absolute;left:1396px;top:40px;width:480px;height:105px;display:flex;align-items:center;justify-content:space-around}
         .p02-lives i{width:100px;height:100px;background:url('img/p02_life.png') center / contain no-repeat;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:64px;filter:grayscale(1);opacity:.5;transition:all .3s}
         .p02-lives i.is-on{background-image:url('img/p02_life_on.png');filter:none;opacity:1;transform:scale(1.1)}
 
-        .p02-monitor{position:absolute;left:58px;top:192px;width:1142px;height:686px;box-sizing:border-box;border:solid 12px #1b1738;border-radius:30px;background:#fff;overflow:hidden}
-        .p02-monitor-title{position:absolute;left:26px;top:20px;margin:0;font-family:'Cafe24 Ssurround';font-size:38px;color:#1b1738;z-index:2}
+        .p02-monitor{position:absolute;left:58px;top:192px;width:1142px;height:686px;box-sizing:border-box;border:solid 12px var(--c-ink);border-radius:30px;background:var(--c-white);overflow:hidden}
+        .p02-monitor-title{position:absolute;left:26px;top:20px;margin:0;font-family:'Cafe24 Ssurround';font-size:38px;color:var(--c-ink);z-index:2}
         .p02-monitor-title:before{content:'';display:inline-block;width:18px;height:18px;margin-right:14px;border-radius:50%;background:#ff5a5a;vertical-align:4px;animation:p02-blink 1s step-end infinite}
         @keyframes p02-blink{50%{opacity:.2}}
         /* page07 음파 그래프와 같은 모양: 흰 모눈 + 파란 선 + 가운데 점선 기준선 */
         .p02-sea{position:absolute;left:0;top:80px;width:100%;height:582px;overflow:hidden;
-          background-image:linear-gradient(#eef1f6 2px,transparent 2px),linear-gradient(90deg,#eef1f6 2px,transparent 2px);background-size:60px 60px}
+          background-image:linear-gradient(var(--c-pale) 2px,transparent 2px),linear-gradient(90deg,var(--c-pale) 2px,transparent 2px);background-size:60px 60px}
         .p02-sea svg{position:absolute;left:0;top:0;height:100%;animation:p02-flow linear infinite}
         .p02-axis{position:absolute;left:0;top:371px;width:100%;border-top:dashed 2px #c4c9d4;pointer-events:none}
         @keyframes p02-flow{to{transform:translateX(var(--shift))}}
 
         .p02-btns{position:absolute;left:1240px;top:192px;width:622px;height:400px;box-sizing:border-box;padding:0 0 12px;display:grid;grid-template-columns:1fr 1fr;gap:30px 36px}
-        .p02-opt{padding:0;box-sizing:border-box;border:solid 6px #1b1738;border-radius:24px;background:#fff center / contain no-repeat;cursor:pointer;
-          font-family:'Cafe24 Ssurround';font-size:60px;color:#31248a;letter-spacing:-0.05em;box-shadow:0 12px 0 0 #becde7;transition:transform .15s,border-color .15s}
-        .p02-opt:hover{border-color:#48159c;transform:translateY(-4px)}
-        .p02-opt.is-on{border-color:#ff2fc2;box-shadow:0 0 0 6px #ff2fc2,0 12px 0 0 #becde7;color:#d168fb}
+        .p02-opt{padding:0;box-sizing:border-box;border:solid 6px var(--c-ink);border-radius:24px;background:var(--c-white) center / contain no-repeat;cursor:pointer;
+          font-family:'Cafe24 Ssurround';font-size:60px;color:var(--c-indigo);letter-spacing:-0.05em;box-shadow:0 12px 0 0 var(--c-sky-pale);transition:transform .15s,border-color .15s}
+        .p02-opt:hover{border-color:var(--c-purple);transform:translateY(-4px)}
+        .p02-opt.is-on{border-color:#ff2fc2;box-shadow:0 0 0 6px #ff2fc2,0 12px 0 0 var(--c-sky-pale);color:#d168fb}
 
         .p02-horn{position:absolute;left:1594px;top:596px;width:268px;height:328px;padding:0;border:0;background:url('img/p02_horn.png') center / contain no-repeat;cursor:pointer;font-size:200px;line-height:1;transition:transform .15s,filter .15s}
         .p02-horn:hover{transform:scale(1.06) rotate(-4deg)}
@@ -149,11 +148,8 @@
         '<path d="' + d + '" fill="none" stroke="#2f6fed" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     }
 
-    const $ = (id) => document.getElementById(id);
     const horn = $('p02Horn');
     const lives = Array.from(document.querySelectorAll('#p02Lives i'));
-    const playCorrect = makeSfx('sound/correct.mp3');
-    const playWrong = makeSfx('sound/incorrect.mp3');
     const beep = new Audio('sound/p02_beep.mp3');
     let waveSound = null;
     let round = 0;

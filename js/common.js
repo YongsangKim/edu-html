@@ -2195,6 +2195,19 @@ function makeSfx(path) {
   return () => audio.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
 }
 
+/* 공용 효과음 묶음: 페이지에서 makeSfx('sound/...')를 다시 만들지 말고 sfx.click / sfx.correct / sfx.wrong을 쓴다 */
+const sfx = {
+  click: makeSfx('sound/click.mp3'),
+  correct: makeSfx('sound/correct.mp3'),
+  wrong: makeSfx('sound/incorrect.mp3'),
+};
+
+const playClick = sfx.click;
+const playCorrect = sfx.correct;
+const playWrong = sfx.wrong;
+
+const $ = (id) => document.getElementById(id);
+
 /* 사인파 모양 SVG 문자열(파도·음파 그래프). amp: 높이(0~1, 칸 높이 대비), cycles: 칸 안 물결 수(클수록 촘촘).
    opts: width/height(viewBox, 기본 600×200), color, stroke(선 굵기), axis(true면 가운데 기준선), extra(가로로 더 그릴 물결 수 — 흐르는 애니메이션용),
    fill([위색, 아래색] — 물결 아래를 물처럼 채움, gwa/05 파도 관측 모니터와 같은 모양) */
@@ -2874,6 +2887,134 @@ function initIdlePreload() {
 
   if (document.readyState === 'complete') schedule();
   else window.addEventListener('load', schedule, { once: true });
+}
+
+/* 지그소 조건 퍼즐: 판(2x2 칸) 4개를 정답 조각으로 채우는 게임. 판마다 정답 4 + 오답 2개 조각, 다 맞추면 다음 판/다음 페이지.
+   마크업(.jig-* 클래스는 css/common.css, 위치는 페이지 CSS에서):
+     <p class="guide-bubble is-center p05-bubble"></p>
+     <div class="jig-board"><div class="jig-grid"></div></div>
+     <div class="jig-tray-label">조건 퍼즐 조각</div><div class="jig-tray"></div>
+     <a href="javascript:;" class="js-sfx jig-next is-off p05-next" data-sound="sound/click.mp3"><img ...다음 버튼></a>
+   호출: initJigsawPuzzle({ next: 'page06.html', puzzles: [{ ask, done, pieces: [{ text, cell: 0~3(정답 칸) }, ..., { text }(오답)] }] })
+   cell: 0 왼쪽 위, 1 오른쪽 위, 2 왼쪽 아래, 3 오른쪽 아래. 오답 조각은 cell을 생략 */
+function initJigsawPuzzle(cfg) {
+  const PUZZLES = cfg.puzzles;
+  const bubble = document.querySelector('main .guide-bubble');
+  const grid = document.querySelector('main .jig-grid');
+  const tray = document.querySelector('main .jig-tray');
+  const nextBtn = document.querySelector('main .jig-next');
+
+  // 지그소 조각 변: 위·오른쪽·아래·왼쪽 순, 0 평평 / 1 튀어나옴 / -1 들어감. 조각은 판의 4가지 칸 모양만 씀(오답은 그중 무작위)
+  const CELL_EDGES = [[0, 1, -1, 0], [0, 0, 1, -1], [1, -1, 0, 0], [-1, 0, 0, 1]];
+  const COLORS = ['#fff3b8', '#cfe6ff', '#d6f5c8', '#ffd6e2', '#eee8ff', '#ffe3c7'];
+  const S = 260;
+  const M = 74;
+
+  let index = 0;
+  let filled = 0;
+  let bubbleTimer = null;
+
+  function jigPath(s, m, edges) {
+    const corners = [[m, m], [m + s, m], [m + s, m + s], [m, m + s]];
+    const dirs = [[1, 0], [0, 1], [-1, 0], [0, -1]];
+    const knob = [[0.42, 0, 0.41, 0.07, 0.39, 0.11], [0.35, 0.18, 0.4, 0.27, 0.5, 0.27], [0.6, 0.27, 0.65, 0.18, 0.61, 0.11], [0.59, 0.07, 0.58, 0, 0.62, 0]];
+    let d = 'M' + m + ' ' + m;
+    edges.forEach((e, k) => {
+      const [x0, y0] = corners[k];
+      const [dx, dy] = dirs[k];
+      const pt = (u, v) => (x0 + (u * dx + v * e * dy) * s).toFixed(1) + ' ' + (y0 + (u * dy - v * e * dx) * s).toFixed(1);
+      if (e) {
+        d += ' L' + pt(0.38, 0);
+        knob.forEach((c) => { d += ' C' + pt(c[0], c[1]) + ' ' + pt(c[2], c[3]) + ' ' + pt(c[4], c[5]); });
+      }
+      d += ' L' + pt(1, 0);
+    });
+    return d + ' Z';
+  }
+
+  function jigSvg(s, m, edges, fill) {
+    const w = s + m * 2;
+    return '<svg class="jig" width="' + w + '" height="' + w + '" viewBox="0 0 ' + w + ' ' + w + '"><path d="' + jigPath(s, m, edges) + '"' + (fill ? ' style="fill:' + fill + '"' : '') + '/></svg>';
+  }
+
+  // 들어간 변 쪽은 홈 깊이만큼 비워서 글자·아이콘이 조각 밖으로 안 나가게 함
+  function labelBox(s, m, edges, x, y) {
+    const pad = Math.round(s * 0.06);
+    const [t, r, b, l] = edges.map((e) => (e < 0 ? Math.round(s * 0.3) : pad));
+    return 'left:' + (x + m + l) + 'px;top:' + (y + m + t) + 'px;width:' + (s - l - r) + 'px;height:' + (s - t - b) + 'px';
+  }
+
+  function drawCell(i, text, fill) {
+    const x = (i % 2) * S;
+    const y = Math.floor(i / 2) * S;
+    const slot = grid.children[i * 2];
+    const label = grid.children[i * 2 + 1];
+    slot.innerHTML = jigSvg(S, M, CELL_EDGES[i], fill);
+    slot.classList.toggle('is-filled', !!fill);
+    slot.style.cssText = 'left:' + x + 'px;top:' + y + 'px';
+    label.className = 'jig-label' + (fill ? '' : ' is-hint');
+    label.style.cssText = labelBox(S, M, CELL_EDGES[i], x, y);
+    label.innerHTML = text;
+  }
+
+  function render() {
+    const p = PUZZLES[index];
+    bubble.innerHTML = p.ask;
+    filled = 0;
+    nextBtn.classList.add('is-off');
+    resetImageSwap(nextBtn);
+    grid.innerHTML = '<div class="jig-slot"></div><div></div>'.repeat(4);
+    for (let i = 0; i < 4; i++) drawCell(i, p.pieces.find((x) => x.cell === i).text);
+    tray.innerHTML = '';
+    const shaped = p.pieces.map((piece, i) => ({ piece, color: COLORS[i], edges: CELL_EDGES[piece.cell === undefined ? Math.floor(Math.random() * 4) : piece.cell] }));
+    shuffleArray(shaped).forEach(({ piece, color, edges }) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'jig-piece';
+      btn.innerHTML = jigSvg(180, 52, edges, color) + '<span class="jig-label" style="' + labelBox(180, 52, edges, 0, 0) + '">' + piece.text + '</span>';
+      btn.addEventListener('click', () => pick(btn, piece, color));
+      tray.appendChild(btn);
+    });
+  }
+
+  function pick(btn, piece, color) {
+    const p = PUZZLES[index];
+    if (piece.cell === undefined) {
+      playWrong();
+      btn.classList.remove('is-wrong');
+      void btn.offsetWidth;
+      btn.classList.add('is-wrong');
+      bubble.innerHTML = '다시 생각해볼까요?';
+      clearTimeout(bubbleTimer);
+      bubbleTimer = setTimeout(() => { bubble.innerHTML = p.ask; }, 1000);
+      const hints = Array.from(grid.querySelectorAll('.jig-label.is-hint'));
+      hints.forEach((h) => h.classList.add('is-on'));
+      setTimeout(() => hints.forEach((h) => h.classList.remove('is-on')), 1000);
+      return;
+    }
+    playCorrect();
+    btn.classList.add('is-used');
+    drawCell(piece.cell, piece.text, color);
+    filled += 1;
+    if (filled === 4) {
+      clearTimeout(bubbleTimer);
+      bubble.innerHTML = p.done;
+      nextBtn.classList.remove('is-off');
+    }
+  }
+
+  nextBtn.addEventListener('click', () => {
+    setTimeout(() => {
+      if (index < PUZZLES.length - 1) {
+        index += 1;
+        render();
+      } else {
+        navigateTo(cfg.next);
+      }
+    }, 300);
+  });
+
+  render();
 }
 
 // 남은 기능들은 서로 참조하지 않으므로 순서 상관없이 각각 초기화

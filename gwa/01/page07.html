@@ -6,7 +6,7 @@
     <title>다양한 매체에서 날씨 데이터 수집하기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        main{position:absolute;left:0;top:120px;width:1920px;height:960px;background:url('img/p07_bg.png') no-repeat}
+        main{background:url('img/p07_bg.png') no-repeat}
 
         /* 영상 클립 화면 — 미리보기를 누르면 그 클립이 5초간 재생되고,
            재생이 끝나면 아웃라인이 생기며 폴더로 드래그할 수 있게 됨 */
@@ -14,7 +14,7 @@
           padding:0;margin:0;border:none;background:none;overflow:hidden;border-radius:14px;
           cursor:default;touch-action:none;transform-origin:50% 50%;z-index:20}
         .p07-screen img{display:block;width:100%;height:100%;object-fit:cover;pointer-events:none}
-        .p07-screen.is-ready{cursor:grab;outline:8px solid #2f6fed;outline-offset:4px}
+        .p07-screen.is-ready{cursor:grab;outline:8px solid var(--c-blue);outline-offset:4px}
         .p07-screen.is-grabbed{cursor:grabbing;z-index:60}
         .p07-screen.is-filed{opacity:0;transform:scale(.25);transition:opacity .35s ease,transform .35s ease;pointer-events:none}
 
@@ -23,20 +23,20 @@
           display:none;align-items:flex-end;justify-content:center;pointer-events:none;z-index:30}
         .p07-playing.is-on{display:flex}
         .p07-playing span{margin-bottom:24px;padding:10px 28px;border-radius:30px;
-          background:rgba(27,23,56,.78);color:#fff;font-family:'Cafe24 Ssurround';font-size:30px}
+          background:rgba(27,23,56,.78);color:var(--c-white);font-family:'Cafe24 Ssurround';font-size:30px}
 
         /* 영상 확인하기 버튼 3개 — 배경에 그려진 버튼 위에 투명하게 겹침 */
         .p07-pick{position:absolute;top:619px;height:162px;padding:0;margin:0;border:none;background:none;
           cursor:pointer;border-radius:14px;z-index:25}
         .p07-pick img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}
-        /* .p07-pick.is-over{outline:6px solid #ffd83d;outline-offset:-6px} */
+        /* .p07-pick.is-over{outline:6px solid var(--c-yellow);outline-offset:-6px} */
         .p07-pick-opening{left:133px;width:320px}
         .p07-pick-headline{left:427px;width:320px}
         .p07-pick-weather{left:721px;width:320px}
 
         /* 보관함 폴더(드롭 영역) */
         .p07-folder{position:absolute;left:1160px;top:350px;width:740px;height:545px;border-radius:40px}
-        .p07-folder.is-over{outline:10px solid #ffd83d;outline-offset:-10px}
+        .p07-folder.is-over{outline:10px solid var(--c-yellow);outline-offset:-10px}
 
         .p07-star{position:absolute;left:1470px;top:560px;width:120px;height:120px;
           background:url('img/p02_star.png') 0 0 / contain no-repeat;opacity:0;pointer-events:none;z-index:70}
@@ -130,9 +130,6 @@
     const wrongModal = document.getElementById('p07Wrong');
     const finishModal = document.getElementById('p07Finish');
 
-    const clickSound = new Audio(ASSET_BASE + 'sound/click.mp3');
-    const correctSound = new Audio(ASSET_BASE + 'sound/correct.mp3');
-    const wrongSound = new Audio(ASSET_BASE + 'sound/incorrect.mp3');
 
     const HOME_LEFT = 54, HOME_TOP = 46;
     let currentClip = null;   // 재생을 끝내서 드래그할 수 있게 된 클립
@@ -153,7 +150,7 @@
         screenImg.src = CLIPS[btn.dataset.clip];
         playing.classList.add('is-on');
         picks.forEach((b) => b.classList.toggle('is-over', b === btn));
-        clickSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+        playClick();
 
         // 5초간 재생한 뒤에야 드래그가 열림
         playTimer = setTimeout(() => {
@@ -228,13 +225,13 @@
       if (screen.dataset.correct === 'true') {
         locked = true;
         screen.classList.add('is-filed');
-        correctSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+        playCorrect();
         star.classList.remove('is-pop');
         void star.offsetWidth;
         star.classList.add('is-pop');
         setTimeout(() => finishModal.classList.remove('is-off'), 900);
       } else {
-        wrongSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
+        playWrong();
         goHome();
         wrongModal.classList.remove('is-off');
         clearTimeout(wrongModal.__hideTimer);

@@ -9,27 +9,26 @@
         /* 디자인 없음 - 기획서 6~9p. 생활 속 문제 6개를 차례로, 이웃 카드 3장(정답 + 나머지 5명 중 무작위 2명, 순서 무작위) 중 도와줄 이웃 고르기.
            맞으면 정답 효과음 뒤 다음 문제 자동, 틀리면 흔들림 + 오답 팝업 3초. 마지막 문제 뒤 완료 팝업.
            상황 그림 img/p05_sit_{1~6}.png, 이웃 사진 img/p05_job_{key}.png */
-        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
 
-        .p05-sit{position:absolute;left:60px;top:40px;width:700px;height:870px;box-sizing:border-box;border:solid 6px #48159c;border-radius:36px;background:#fefbf9;overflow:hidden;display:flex;flex-direction:column}
-        .p05-sit i{flex:1 1 auto;background:#dfe7f5 center / cover no-repeat}
-        .p05-sit p{margin:0;padding:34px 30px 30px;font-family:'Cafe24 Ssurround';font-size:44px;line-height:1.35;color:#1b1738;text-align:center;letter-spacing:-0.05em;word-break:keep-all}
-        .p05-num{position:absolute;left:24px;top:24px;height:70px;padding:4px 30px 0;box-sizing:border-box;display:flex;align-items:center;background:#48159c;border-radius:35px;font-family:'Cafe24 Ssurround';font-size:40px;color:#fff}
+        .p05-sit{position:absolute;left:60px;top:40px;width:700px;height:870px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:36px;background:var(--c-cream);overflow:hidden;display:flex;flex-direction:column}
+        .p05-sit i{flex:1 1 auto;background:var(--c-mist) center / cover no-repeat}
+        .p05-sit p{margin:0;padding:34px 30px 30px;font-family:'Cafe24 Ssurround';font-size:44px;line-height:1.35;color:var(--c-ink);text-align:center;letter-spacing:-0.05em;word-break:keep-all}
+        .p05-num{position:absolute;left:24px;top:24px;height:70px;padding:4px 30px 0;box-sizing:border-box;display:flex;align-items:center;background:var(--c-purple);border-radius:35px;font-family:'Cafe24 Ssurround';font-size:40px;color:var(--c-white)}
 
-        .p05-ask{position:absolute;left:810px;top:40px;width:1050px;margin:0;box-sizing:border-box;padding:26px 30px 20px;background:#fff;border:solid 5px #1b1738;border-radius:40px;box-shadow:0 10px 0 0 #becde7;
+        .p05-ask{position:absolute;left:810px;top:40px;width:1050px;margin:0;box-sizing:border-box;padding:26px 30px 20px;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:40px;box-shadow:0 10px 0 0 var(--c-sky-pale);
           font-family:'Cafe24 Ssurround';text-align:center;letter-spacing:-0.05em}
-        .p05-ask b{display:block;font-weight:normal;font-size:52px;color:#1b1738}
-        .p05-ask span{display:block;margin-top:8px;font-size:40px;color:#48159c}
+        .p05-ask b{display:block;font-weight:normal;font-size:52px;color:var(--c-ink)}
+        .p05-ask span{display:block;margin-top:8px;font-size:40px;color:var(--c-purple)}
 
         .p05-cards{position:absolute;left:810px;top:270px;width:1050px;height:640px;display:flex;gap:30px}
-        .p05-card{flex:1 1 0;box-sizing:border-box;padding:0;border:solid 6px #91b9e7;border-radius:30px;background:#fff;cursor:pointer;overflow:hidden;display:flex;flex-direction:column;
+        .p05-card{flex:1 1 0;box-sizing:border-box;padding:0;border:solid 6px var(--c-sky);border-radius:30px;background:var(--c-white);cursor:pointer;overflow:hidden;display:flex;flex-direction:column;
           font-family:'Cafe24 Ssurround';text-align:center;transition:transform .15s,border-color .15s}
-        .p05-card:hover{transform:translateY(-8px);border-color:#48159c}
+        .p05-card:hover{transform:translateY(-8px);border-color:var(--c-purple)}
         .p05-card.is-selected{border-color:#ff2fc2}
         .p05-card.is-wrong{animation:fix-word-shake .3s ease}
-        .p05-card i{flex:0 0 340px;background:#dfe7f5 center top / cover no-repeat}
-        .p05-card b{display:block;padding:18px 10px 0;font-weight:normal;font-size:46px;color:#48159c;letter-spacing:-0.05em}
-        .p05-card span{display:block;padding:12px 20px 0;font-size:31px;line-height:1.35;color:#1b1738;letter-spacing:-0.06em;word-break:keep-all}
+        .p05-card i{flex:0 0 340px;background:var(--c-mist) center top / cover no-repeat}
+        .p05-card b{display:block;padding:18px 10px 0;font-weight:normal;font-size:46px;color:var(--c-purple);letter-spacing:-0.05em;word-break:keep-all;text-wrap:balance}
+        .p05-card span{display:block;padding:12px 20px 0;font-size:31px;line-height:1.35;color:var(--c-ink);letter-spacing:-0.06em;word-break:keep-all;text-wrap:balance}
         .p05-cards.is-locked{pointer-events:none}
     </style>
 </head>
@@ -94,10 +93,7 @@
       { answer: 'hair', text: '앞머리가 너무 길어서 눈을 자꾸 가려요.<br>머리를 자르고 싶어요.' }
     ];
 
-    const $ = (id) => document.getElementById(id);
     const cardsBox = $('p05Cards');
-    const playCorrect = makeSfx('sound/correct.mp3');
-    const playWrong = makeSfx('sound/incorrect.mp3');
     let index = 0;
 
     function show() {

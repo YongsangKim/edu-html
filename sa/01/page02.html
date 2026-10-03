@@ -6,22 +6,21 @@
     <title>직업 퀴즈 게임</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        main{position:absolute;left:0;top:120px;width:1920px;height:960px}
 
         .p02-stage-bg{position:absolute;left:0;top:0;width:1920px;height:960px}
 
-        .p02-badge{position:absolute;left:140px;top:48px;display:flex;align-items:stretch;height:108px;border-radius:54px;overflow:hidden;border:solid 5px #1b1738;box-shadow:0 10px 0 0 #becde7}
-        .p02-badge-num{display:flex;align-items:center;justify-content:center;padding:6px 50px 0 50px;background:#91b9e7;font-family:'Cafe24 Ssurround';font-size:70px;letter-spacing:0em;color:#fff;gap:20px}
-        .p02-badge-q{display:flex;align-items:center;padding:6px 70px 0 70px;background:#fefbf9;font-family:'Cafe24 Ssurround';font-size:70px;letter-spacing:0em;color:#1b1738}
+        .p02-badge{position:absolute;left:140px;top:48px;display:flex;align-items:stretch;height:108px;border-radius:54px;overflow:hidden;border:solid 5px var(--c-ink);box-shadow:0 10px 0 0 var(--c-sky-pale)}
+        .p02-badge-num{display:flex;align-items:center;justify-content:center;padding:6px 50px 0 50px;background:var(--c-sky);font-family:'Cafe24 Ssurround';font-size:70px;letter-spacing:0em;color:var(--c-white);gap:20px}
+        .p02-badge-q{display:flex;align-items:center;padding:6px 70px 0 70px;background:var(--c-cream);font-family:'Cafe24 Ssurround';font-size:70px;letter-spacing:0em;color:var(--c-ink)}
 
-        .p02-stars{position:absolute;left:1317px;top:48px;display:flex;align-items:center;justify-content:center;gap:56px;width:462px;height:104px;border-radius:52px;background:#fefbf9;border:solid 5px #1b1738;box-sizing:border-box}
+        .p02-stars{position:absolute;left:1317px;top:48px;display:flex;align-items:center;justify-content:center;gap:56px;width:462px;height:104px;border-radius:52px;background:var(--c-cream);border:solid 5px var(--c-ink);box-sizing:border-box}
         .p02-stars .find-star{width:72px;height:68px}
 
         /* 힌트 3칸: 사진 img/p02_hint_{id}_{1~3}.png + 이름표 */
         .p02-hints{position:absolute;left:0;top:0}
-        .p02-hint{position:absolute;top:200px;width:557px;height:314px;box-sizing:border-box;border:solid 5px #1b1738;border-radius:14px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
-        .p02-hint i{flex:1 1 auto;background:#dfe7f5 top center / cover no-repeat}
-        .p02-hint span{flex:0 0 92px;display:flex;align-items:center;justify-content:center;padding-top:6px;background:#91b9e7;font-family:'Cafe24 Ssurround';font-size:64px;color:#fff;letter-spacing:-0.05em}
+        .p02-hint{position:absolute;top:200px;width:557px;height:314px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:14px;overflow:hidden;background:var(--c-white);display:flex;flex-direction:column}
+        .p02-hint i{flex:1 1 auto;background:var(--c-mist) top center / cover no-repeat}
+        .p02-hint span{flex:0 0 92px;display:flex;align-items:center;justify-content:center;padding-top:6px;background:var(--c-sky);font-family:'Cafe24 Ssurround';font-size:64px;color:var(--c-white);letter-spacing:-0.05em}
         .p02-hint.slot1{left:82px}
         .p02-hint.slot2{left:683px}
         .p02-hint.slot3{left:1282px}
@@ -118,16 +117,8 @@
       { id: 'developer', label: '개발자', slot: 6, hints: ['앱스토어 화면', '컴퓨터', '코딩 화면'], text: '개발자는 컴퓨터나 스마트폰에서 사용하는 프로그램을 만들어요.' },
     ];
 
-    function shuffle(arr) {
-      const a = arr.slice();
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
-      return a;
-    }
 
-    const stageJobs = shuffle(JOBS).slice(0, 3);
+    const stageJobs = shuffleArray(JOBS).slice(0, 3);
     let stageIndex = 0;
     let answered = false;
 
