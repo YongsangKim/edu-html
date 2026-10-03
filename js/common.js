@@ -2206,6 +2206,14 @@ const playClick = sfx.click;
 const playCorrect = sfx.correct;
 const playWrong = sfx.wrong;
 
+/* 끌어다 놓아서 맞았을 때 나는 소리(sound/drag.mp3). initMatchDrag는 맞게 놓으면 자동으로 부르고,
+   직접 구현한 드래그는 맞게 놓는 순간 playDrag()를 부른다. 볼륨 0.5 */
+const playDrag = (() => {
+  const audio = new Audio(ASSET_BASE + 'sound/drag.mp3');
+  audio.preload = 'auto';
+  return () => { const a = audio.cloneNode(); a.volume = 0.5; a.play().catch(() => {}); };
+})();
+
 const $ = (id) => document.getElementById(id);
 
 /* 사인파 모양 SVG 문자열(파도·음파 그래프). amp: 높이(0~1, 칸 높이 대비), cycles: 칸 안 물결 수(클수록 촘촘).
@@ -2387,6 +2395,7 @@ function initMatchDrag(opts) {
           card.dataset.placed = '1';
           zone.dataset.filled = '1';
           zone.appendChild(card);
+          if (!opts.silent) playDrag();
           if (onRight) onRight(card, zone);
           if (onDone && zones.every((z) => z.dataset.filled)) onDone();
         } else if (onWrong) {
