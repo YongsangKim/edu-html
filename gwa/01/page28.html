@@ -6,16 +6,24 @@
     <title>정답을 부탁해!</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 기획서 43p(game02_01) — 디자인(43p-ok.png)이 아직 없어 뼈대만 잡아둔 상태.
-           실제 디자인이 나오면 p28_bg.png와 아래 좌표만 교체하면 됨 */
-        main{background:#c7d6ea}
-        .p28-note{position:absolute;left:160px;top:120px;width:1600px;height:420px;
-          border:8px dashed #8aa0c8;border-radius:28px;background:var(--c-white);
-          display:flex;align-items:center;justify-content:center;text-align:center}
-        .p28-note p{margin:0;font-family:'Cafe24 Ssurround';font-size:48px;line-height:1.4;color:var(--c-ink)}
-        .p28-mail{position:absolute;left:760px;top:640px;width:400px;height:120px;cursor:pointer;
-          border:8px solid var(--c-blue);border-radius:20px;background:linear-gradient(180deg,var(--c-white) 0%,#e9d8ff 100%);
-          font-family:'Cafe24 Ssurround';font-size:52px;color:#3b1e87}
+        /* 기획서 43p(game02_01): 탐정사무소 책상에서 컴퓨터로 의뢰 메일 5통이 도착한 것을 확인. 디자인 없음 → 기획서 구조대로 CSS와 샘플 이모지 */
+        .p28-room{position:absolute;left:0;top:0;width:1920px;height:960px;overflow:hidden;
+          background:linear-gradient(180deg,#dcc9a5 0%,#e9dbbb 52%,#b88b5a 52%,#a37747 100%)}
+        .p28-wall{position:absolute;left:90px;top:60px;width:300px;height:340px;border-radius:14px;background:#fff8e6;border:solid 8px #8a6a43;box-shadow:inset 0 0 0 10px #f3e3b9}
+        .p28-wall b{position:absolute;left:0;right:0;top:130px;text-align:center;font-size:90px;font-weight:normal}
+        .p28-shelf{position:absolute;left:1560px;top:480px;width:300px;height:30px;border-radius:8px;background:#8a6a43}
+        .p28-shelf span{position:absolute;top:-80px;font-size:76px}
+        .p28-desk{position:absolute;left:120px;top:690px;width:1680px;height:270px;border-radius:30px 30px 0 0;background:linear-gradient(180deg,#8d5d32,#6d4423)}
+        .p28-pc{position:absolute;left:250px;top:240px;width:820px;height:520px;box-sizing:border-box;border:solid 18px #2d2a4a;border-radius:30px;background:linear-gradient(135deg,#27b1ff,#0a7bd6)}
+        .p28-pc:after{content:'';position:absolute;left:50%;bottom:-86px;margin-left:-120px;width:240px;height:70px;background:#2d2a4a;border-radius:0 0 20px 20px}
+        .p28-mail{position:absolute;display:flex;align-items:center;justify-content:center;width:240px;height:180px;border-radius:20px;background:#ffd23f;font-size:110px;box-shadow:0 10px 0 #e0a800}
+        .p28-mail i{position:absolute;right:-18px;top:-20px;width:58px;height:58px;border-radius:50%;background:#e5333a;color:#fff;font-size:36px;font-style:normal;line-height:58px;text-align:center;font-family:'Pretendard';font-weight:700}
+        .p28-back{left:1000px;top:520px;width:500px;height:440px;z-index:4}
+        .p28-clock{position:absolute;left:1700px;top:132px;font-size:160px}
+        .p28-think{left:940px;top:150px;bottom:auto;width:660px;height:350px;margin:0;box-sizing:border-box;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;font-size:50px;line-height:1.25;z-index:6}
+        .p28-think p{margin:0;padding-top:6px}
+        .p28-think:before{left:292px;bottom:-58px}
+        .p28-btn{position:static;min-width:0;width:230px;height:64px;font-size:30px;text-decoration:none;display:flex;align-items:center;justify-content:center;padding:10px 10px 4px;margin:0 0 8px}
     </style>
 </head>
 <body>
@@ -23,11 +31,21 @@
   <div id="viewport" class="viewport">
     <div id="stage-spacer">
       <div id="stage" class="stage">
-        <main>
-          <div class="p28-note">
-            <p>아로의 뒷모습과 컴퓨터 화면, 생각풍선,<br>메일 알림 5개, 시계(오전 09시) 자리<br><br>디자인 나오면 교체</p>
+        <main class="bg-default">
+          <div class="p28-room">
+            <div class="p28-wall"><b>🕵️</b></div>
+            <div class="p28-shelf"><span style="left:10px">🔍</span><span style="left:110px">📁</span><span style="left:210px">🪴</span></div>
+            <div class="p28-desk"></div>
+            <div class="p28-pc">
+                                                                      <div class="p28-mail" style="left:292px;top:160px">✉️<i>5</i></div>
+            </div>
           </div>
-          <a href="page29.html" class="js-nav-effect js-sfx p28-mail" data-sound="sound/click.mp3">메일 보기</a>
+          <div class="char-box p28-back"><img src="img/p27_character.png" alt="아로 뒷모습"></div>
+          <div class="p28-clock gm-clock">🕘</div>
+          <div class="guide-bubble p28-think">
+            <p>오늘의 의뢰메일을<br>확인해볼까~?</p>
+            <a href="page29.html" class="js-nav-effect js-sfx card-btn is-start p28-btn" data-sound="sound/click.mp3">메일 보기</a>
+          </div>
         </main>
       </div>
     </div>

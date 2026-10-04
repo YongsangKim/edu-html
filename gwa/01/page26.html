@@ -6,24 +6,13 @@
     <title>퀴즈 풀기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        main{background:url('img/p26_bg_q1.png') no-repeat}
-
-        /* 문항마다 질문과 보기가 바뀌므로, 배경의 말풍선 글자 자리를 흰색으로 덮고 다시 그림 */
-        .p26-q{position:absolute;left:452px;top:150px;width:1260px;height:160px;background:var(--c-white);
-          display:flex;align-items:center;text-align:left}
-        .p26-q p{margin:0;font-family:'Cafe24 Ssurround';font-size:56px;line-height:1.25;
-          color:#3b1e87;letter-spacing:-0.04em}
-        .p26-q .p26-no{color:#7c3aed;margin-right:10px}
-
-        /* 보기 — 2지선다/OX/3지선다를 모두 가로 한 줄로 배치 */
-        .p26-opts{position:absolute;left:160px;top:590px;width:1600px;height:180px;
-          display:flex;align-items:center;justify-content:center;gap:90px}
-        /* 글자 보기는 공용 .card-btn 모양, O/X 보기는 아이콘 이미지(.is-icon) */
-        .p26-opts .card-btn{font-size:64px}
+        .p26-opts{position:absolute;left:160px;top:560px;width:1600px;height:240px;display:flex;align-items:center;justify-content:center;gap:90px}
+        .p26-opts .card-btn.is-quiz{margin:0;display:flex;align-items:center;justify-content:center;height:150px;padding:10px 20px 6px}
+        .p26-opts .card-btn.is-quiz.is-long{font-size:42px;line-height:1.15;letter-spacing:-0.06em}
         .p26-opt.is-wrong{animation:fix-word-shake .3s ease}
-        .p26-opt img{display:block;height:150px;width:auto}
+        .p26-opt img{display:block;width:360px;height:360px;object-fit:contain}
         .p26-opt.is-icon{padding:0;border:none;background:none;cursor:pointer}
-
+        .p26-opts.is-ox{top:470px;height:360px;gap:240px}
     </style>
 </head>
 <body>
@@ -31,16 +20,28 @@
   <div id="viewport" class="viewport">
     <div id="stage-spacer">
       <div id="stage" class="stage">
-        <main>
+        <main class="quiz-stage">
 
-          <div class="p26-q"><p><span class="p26-no" id="p26No"></span><span id="p26Text"></span></p></div>
+          <div class="quiz-ask-box">
+            <div class="quiz-ask-row">
+              <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+              <span class="quiz-qnum" id="p26No"></span>
+              <p class="quiz-ask" id="p26Text"></p>
+            </div>
+          </div>
           <div class="p26-opts" id="p26Opts"></div>
 
+          <div class="avatar-modal is-off" id="p26Correct">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct_gwa.png" alt=""></div>
+              <p class="avatar-popup-text">정답이에요!</p>
+              <div class="avatar-popup-extra"><img src="../../img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div>
           <div class="avatar-modal is-off" id="p26Wrong">
-            <div class="avatar-card is-compact">
-              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
-            <div class="avatar-card-body is-side"><p class="avatar-card-text" id="p26Hint"></p></div>
-            <button class="card-btn is-popup avatar-card-btn" id="p26Retry">다시 해보기</button>
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text is-pill" id="p26Hint"></p>
             </div>
           </div>
         </main>
@@ -55,7 +56,7 @@
   <script>
   /* 기획서 37p~41p — 퀴즈 풀기(뼈대)
      - 한 페이지 안에서 문항을 순서대로 진행(사회 1차시 page16과 같은 방식)
-     - 정답이면 정답음 후 다음 문항, 오답이면 문항별 힌트 팝업 + [다시 해보기]
+     - 정답이면 정답음 후 다음 문항, 오답이면 문항별 힌트 팝업(2초 뒤 자동으로 닫힘)
      - 기획서에 Q3 화면이 없어 Q1·Q2·Q4·Q5 네 문항만 넣음
      - 디자인은 37p(2지선다)와 38p(OX)만 있어서, Q5(3지선다)는 같은 틀을 그대로 씀 */
   (function () {
@@ -70,7 +71,7 @@
         ox: true, answer: 0,
         hint: 'AI는 길고 어려운 글을 짧게 줄여주는 능력이 있어요.' },
       { no: 'Q5.', text: '내일의 부산 날씨에 대해 물어볼 때, 어떻게 질문해야 똑똑하게 답할까요?',
-        options: ['내일 부산의 날씨는 어때?', '내일 서울의 날씨는 어때?', '날씨'], answer: 0,
+        options: ['내일 부산의<br>날씨는 어때?', '내일 서울의<br>날씨는 어때?', '날씨'], answer: 0,
         hint: '필요한 정보에 대해 자세하게 물어볼수록 AI가 원하는 답을 잘 찾아줘요!' },
     ];
 
@@ -78,8 +79,8 @@
     const textEl = document.getElementById('p26Text');
     const optsEl = document.getElementById('p26Opts');
     const wrongModal = document.getElementById('p26Wrong');
+    const correctModal = document.getElementById('p26Correct');
     const hintEl = document.getElementById('p26Hint');
-    const retry = document.getElementById('p26Retry');
 
 
     let index = 0;
@@ -90,15 +91,17 @@
       noEl.textContent = q.no;
       textEl.textContent = q.text;
       optsEl.innerHTML = '';
+      optsEl.classList.toggle('is-ox', !!q.ox);
 
       const labels = q.ox ? ['O', 'X'] : q.options;
       labels.forEach((label, i) => {
         const b = document.createElement('button');
-        b.className = q.ox ? 'p26-opt is-icon' : 'card-btn p26-opt';
+        b.className = q.ox ? 'p26-opt is-icon' : 'card-btn is-quiz p26-opt' + (label.replace(/<br>/g, '').length > 6 ? ' is-long' : '');
+        if (q.ox) b.setAttribute('aria-label', label);
         if (q.ox) {
-          b.innerHTML = '<img src="../../img/common/icon_' + (i === 0 ? 'o' : 'x') + '.png" alt="' + label + '">';
+          b.innerHTML = '<img src="../../img/common/icon_' + (i === 0 ? 'o' : 'x') + '.png" data-src-on="../../img/common/icon_' + (i === 0 ? 'o' : 'x') + '_on.png" alt="' + label + '">';
         } else {
-          b.textContent = label;
+          b.innerHTML = label;
         }
         b.addEventListener('click', () => onPick(b, i));
         optsEl.appendChild(b);
@@ -106,21 +109,36 @@
       locked = false;
     }
 
+    // 선택 표시: OX는 색이 바뀐 이미지(_on), 글자 선택지는 눌린 모양(.is-selected)
+    function mark(btn, on) {
+      const img = btn.querySelector('img');
+      if (img) {
+        const src = img.getAttribute('src');
+        if (on) img.setAttribute('src', img.dataset.srcOn);
+        else img.setAttribute('src', src.replace('_on.png', '.png'));
+      } else {
+        btn.classList.toggle('is-selected', on);
+      }
+    }
+
     function onPick(btn, i) {
       if (locked) return;
       const q = QUIZ[index];
+      mark(btn, true);
 
       if (i === q.answer) {
         locked = true;
         playCorrect();
         index += 1;
+        correctModal.classList.remove('is-off');
         setTimeout(() => {
+          correctModal.classList.add('is-off');
           if (index >= QUIZ.length) {
             navigateTo('page27.html');
             return;
           }
           render();
-        }, 1200);
+        }, 2000);
         return;
       }
 
@@ -131,12 +149,13 @@
       hintEl.textContent = q.hint;
       wrongModal.classList.remove('is-off');
       locked = true;
+      clearTimeout(wrongModal.__hideTimer);
+      wrongModal.__hideTimer = setTimeout(() => {
+        wrongModal.classList.add('is-off');
+        mark(btn, false);
+        locked = false;
+      }, 2000);
     }
-
-    retry.addEventListener('click', () => {
-      wrongModal.classList.add('is-off');
-      locked = false;
-    });
 
     render();
   })();

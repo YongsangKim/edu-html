@@ -6,31 +6,29 @@
     <title>정답을 부탁해!</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 기획서 44p(game02_02) + 45p(정답) + 46p(오답)
-           디자인(44~46p-ok.png)이 아직 없어 뼈대만 잡아둔 상태.
-           실제 디자인이 나오면 p29_bg.png와 아래 좌표만 교체하면 됨 */
-        main{background:#c7d6ea}
+        /* 기획서 44p(game02_02) + 45p(정답) + 46p(오답). 디자인 없음 → 기획서 구조대로 CSS와 샘플 이모지 */
+        .p29-guide{position:absolute;left:330px;top:80px;width:1260px;height:120px;margin:0;box-sizing:border-box;
+          display:flex;align-items:center;justify-content:center;background:#fff;border:solid 5px var(--c-ink);border-radius:60px;box-shadow:0 8px 0 0 var(--c-sky-pale);
+          font-family:'Cafe24 Ssurround';font-size:70px;letter-spacing:-0.06em;color:var(--c-ink);padding-top:6px}
 
-        .p29-box{position:absolute;border:8px dashed #8aa0c8;border-radius:24px;background:var(--c-white);
-          display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;box-sizing:border-box}
-        .p29-box p{margin:0;font-family:'Cafe24 Ssurround';font-size:38px;line-height:1.35;color:var(--c-ink)}
+        .p29-mail{position:absolute;left:80px;top:268px;width:860px;height:340px;box-sizing:border-box;background:#fff;border:solid 6px var(--c-ink);border-radius:26px;box-shadow:0 10px 0 var(--c-sky-pale);overflow:hidden}
+        .p29-mail-head{display:flex;align-items:center;gap:16px;height:84px;padding:0 26px;background:#ffd23f;border-bottom:solid 6px var(--c-ink);font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-ink);letter-spacing:-0.06em}
+        .p29-mail-head i{font-style:normal;font-size:56px}
+        .p29-mail-body{display:flex;align-items:center;justify-content:center;height:250px;padding:0 40px;text-align:center;font-family:'Cafe24 Ssurround';font-size:50px;line-height:1.35;letter-spacing:-0.06em;color:var(--c-ink);word-break:keep-all}
 
-        .p29-mail{left:80px;top:60px;width:740px;height:420px}
-        .p29-data{left:860px;top:60px;width:980px;height:420px}
-        .p29-clock{left:1600px;top:520px;width:240px;height:240px}
+        .p29-map{position:absolute;left:980px;top:268px;width:860px;height:340px;box-sizing:border-box;background:linear-gradient(135deg,#d9f1ff,#bfe3f7);border:solid 6px var(--c-ink);border-radius:26px;box-shadow:0 10px 0 var(--c-sky-pale)}
+        .p29-map h4{position:absolute;left:24px;top:14px;margin:0;font-family:'Cafe24 Ssurround';font-size:34px;font-weight:normal;color:var(--c-navy);letter-spacing:-0.06em}
+        .p29-city{position:absolute;display:flex;align-items:center;gap:6px;padding:2px 12px 0 8px;border-radius:14px;background:#fff;border:solid 3px var(--c-sky);font-family:'Cafe24 Ssurround';font-size:25px;line-height:1.1;color:var(--c-ink);letter-spacing:-0.05em;white-space:nowrap}
+        .p29-city i{font-style:normal;font-size:32px}
+        .p29-city b{font-weight:normal;color:#0a57c9}
 
-        .p29-guide{position:absolute;left:80px;top:520px;width:740px;height:90px;
-          display:flex;align-items:center;justify-content:center}
-        .p29-guide span{font-family:'Cafe24 Ssurround';font-size:46px;color:var(--c-ink)}
+        .p29-clock{position:absolute;left:1680px;top:62px;font-size:160px}
 
-        .p29-ans{position:absolute;width:700px;height:120px;cursor:pointer;
-          border:8px solid var(--c-blue);border-radius:20px;background:linear-gradient(180deg,var(--c-white) 0%,#e9d8ff 100%);
-          font-family:'Cafe24 Ssurround';font-size:40px;color:#3b1e87;letter-spacing:-0.04em}
+        .p29-ans{position:absolute;top:670px;width:760px;height:160px;box-sizing:border-box;cursor:pointer;padding:10px 20px 4px;display:flex;align-items:center;justify-content:center;
+          min-width:0;font-size:52px;line-height:1.2;word-break:keep-all}
         .p29-ans.is-wrong{animation:fix-word-shake .3s ease}
-        .p29-ans-1{left:80px;top:640px}
-        .p29-ans-2{left:840px;top:640px}
-
-        /* 오답 안내 — 2초 노출 후 자동 닫힘 */
+        .p29-ans-1{left:130px}
+        .p29-ans-2{left:1030px}
     </style>
 </head>
 <body>
@@ -38,21 +36,26 @@
   <div id="viewport" class="viewport">
     <div id="stage-spacer">
       <div id="stage" class="stage">
-        <main>
+        <main class="bg-default">
 
-          <div class="p29-box p29-mail"><p id="p29Mail"></p></div>
-          <div class="p29-box p29-data"><p id="p29Data"></p></div>
-          <div class="p29-box p29-clock"><p id="p29Clock"></p></div>
+          <p class="p29-guide">어떤 답을 알려줘야 할까요?</p>
 
-          <div class="p29-guide"><span>어떤 답을 알려줘야 할까요?</span></div>
+          <div class="p29-mail">
+            <div class="p29-mail-head"><i>✉️</i>의뢰 메일</div>
+            <div class="p29-mail-body"><span id="p29Mail"></span></div>
+          </div>
 
-          <button class="p29-ans p29-ans-1" id="p29Ans1"></button>
-          <button class="p29-ans p29-ans-2" id="p29Ans2"></button>
+          <div class="p29-map" id="p29Map"><h4>전국 날씨 지도</h4></div>
+
+          <div class="gm-clock p29-clock" id="p29Clock">🕘</div>
+
+          <button class="card-btn p29-ans p29-ans-1" id="p29Ans1"></button>
+          <button class="card-btn p29-ans p29-ans-2" id="p29Ans2"></button>
 
           <div class="avatar-modal is-off" id="p29Wrong">
-            <div class="avatar-card is-compact">
-              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
-            <div class="avatar-card-body is-side"><p class="avatar-card-text">날씨 자료를 다시 살펴볼까요?</p></div>
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text is-pill">날씨 자료를 다시 살펴볼까요?</p>
             </div>
           </div>
         </main>
@@ -94,10 +97,10 @@
         answers: ['부산입니다.', '서울입니다.'], correct: 0 },
     ];
 
-    const CLOCK = ['09시', '11시', '13시', '15시', '17시', '18시'];
+    const CLOCK = ['🕘', '🕚', '🕐', '🕒', '🕔', '🕕'];   // 09시 → 11시 → 13시 → 15시 → 17시 → 18시
 
     const mailEl = document.getElementById('p29Mail');
-    const dataEl = document.getElementById('p29Data');
+    const mapEl = document.getElementById('p29Map');
     const clockEl = document.getElementById('p29Clock');
     const ans1 = document.getElementById('p29Ans1');
     const ans2 = document.getElementById('p29Ans2');
@@ -109,9 +112,25 @@
     let index = 0;
     let locked = false;
 
-    dataEl.textContent = WEATHER.map((w) => w.city + ' ' + w.sky + ' ' + w.temp + '도').join('  /  ');
+    const ICON = { '비': '🌧️', '구름': '☁️', '해': '☀️' };
+    const SPOT = {
+      '인천': [60, 40], '서울': [290, 10], '대전': [260, 100], '대구': [470, 100],
+      '울산': [600, 150], '부산': [470, 205], '제주': [120, 200],
+    };
+    WEATHER.forEach((w) => {
+      const el = document.createElement('div');
+      el.className = 'p29-city';
+      el.style.left = SPOT[w.city][0] + 'px';
+      el.style.top = (SPOT[w.city][1] + 56) + 'px';
+      el.innerHTML = '<i>' + ICON[w.sky] + '</i>' + w.city + ' <b>' + w.temp + '°</b>';
+      mapEl.appendChild(el);
+    });
 
     function render() {
+      ans1.blur();
+      ans2.blur();
+      ans1.classList.remove('is-selected');
+      ans2.classList.remove('is-selected');
       const m = queue[index];
       mailEl.textContent = m.q;
       ans1.textContent = m.answers[0];
@@ -124,6 +143,7 @@
       btn.addEventListener('click', () => {
         if (locked) return;
         const m = queue[index];
+        btn.classList.add('is-selected');
 
         if (i === m.correct) {
           locked = true;
@@ -146,7 +166,10 @@
         btn.classList.add('is-wrong');
         wrongModal.classList.remove('is-off');
         clearTimeout(wrongModal.__hideTimer);
-        wrongModal.__hideTimer = setTimeout(() => wrongModal.classList.add('is-off'), 2000);
+        wrongModal.__hideTimer = setTimeout(() => {
+          wrongModal.classList.add('is-off');
+          btn.classList.remove('is-selected');
+        }, 2000);
       });
     });
 

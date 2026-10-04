@@ -6,18 +6,8 @@
     <title>내가 모은 데이터로 AI에게 질문하기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        main{background:url('img/p14_bg.png') no-repeat}
-
-        /* 안내 말풍선은 7초 뒤 문구가 바뀌므로 배경에 그려진 자리를 덮고 다시 그림
-           (좌표는 디자인에서 측정한 값) */
-        .p-bubble{position:absolute;left:185px;top:123px;width:505px;height:228px;background:var(--c-white);
-          border:6px solid #3b1e87;border-radius:26px;box-sizing:border-box;
-          display:flex;align-items:center;justify-content:center;text-align:center;padding:0 24px}
-        .p-bubble span{font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.3;color:#3b1e87;letter-spacing:-0.04em}
-
-        /* 로딩이 끝나기 전에는 클릭 영역이 열리지 않음 */
-        .p-hit{position:absolute;left:900px;top:767px;width:145px;height:58px;border-radius:14px}
-        .p-hit.is-off{display:none}
+        .gn-src div{display:flex;align-items:center;gap:12px;height:60px;font-size:18px;white-space:nowrap}
+        .gn-src div span{overflow:hidden;text-overflow:ellipsis}
     </style>
 </head>
 <body>
@@ -25,9 +15,26 @@
   <div id="viewport" class="viewport">
     <div id="stage-spacer">
       <div id="stage" class="stage">
-        <main>
-          <div class="p-bubble"><span id="bubbleText">Gemini Notebook에<br>날씨 뉴스 이미지가<br>업로드 중이에요..</span></div>
-          <a href="page15.html" class="js-nav-effect js-sfx p-hit is-off" id="hit" data-sound="sound/click.mp3" aria-label="다음 단계"></a>
+        <main class="bg-default">
+          <p class="guide-bubble is-center gn-bubble is-sm" id="bub">Gemini Notebook에<br>날씨 뉴스 이미지가<br>업로드 중이에요..</p>
+          <div class="guide-character"><img src="img/p14_character.png" alt="메인 캐릭터"></div>
+          <div class="phone-frame gn-phone">
+<div class="gn-screen">
+            <div class="gn-status"><span>10:55</span><span class="gn-sys"><svg class="gn-wifi" viewBox="0 0 24 18" width="24" height="18" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M2 6.6Q12-2 22 6.6"/><path d="M5.6 10.4Q12 4.6 18.4 10.4"/><path d="M9.2 14Q12 11.6 14.8 14"/></g><circle cx="12" cy="16.4" r="1.5" fill="currentColor"/></svg><svg class="gn-sig" viewBox="0 0 18 15" width="18" height="15" aria-hidden="true"><rect x="0" y="9" width="3" height="6" rx="1" fill="currentColor"/><rect x="5" y="6" width="3" height="9" rx="1" fill="currentColor"/><rect x="10" y="3" width="3" height="12" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="15" rx="1" fill="currentColor" opacity=".35"/></svg><span class="gn-bat">84</span></span></div>
+            <div class="gn-bar"><span>←</span><em id="nbTitle">제목 없는 노트북</em><span><img class="gn-ico" src="img/src_icon_share.png" alt="공유"></span><span>⋮</span></div>
+            <div style="position:absolute;left:0;right:0;top:118px;padding:0 24px;font-size:18px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:22px"><span>소스</span><span>⋮</span></div>
+              <div class="gn-src" id="srcList">
+                <div><i class="gn-spin"></i><span>image_picker_081FCDA7-5836-4794-A…</span></div>
+                <div><i class="gn-spin"></i><span>image_picker_4C09E2B1-77AD-4E3C-9…</span></div>
+                <div><i class="gn-spin"></i><span>image_picker_B7F0A3D2-1E5C-4B28-8…</span></div>
+              </div>
+            </div>
+            <div class="gn-fab" style="bottom:146px"><span class="gn-cam"><img src="img/p11_photo.png" alt=""></span><a href="page15.html" class="js-nav-effect js-sfx gn-hl" id="hit" data-sound="sound/click.mp3" style="display:none;align-items:center;gap:8px;height:52px;padding:0 24px;border-radius:26px;background:#111;color:#fff;font-size:20px;text-decoration:none">＋ 소스 추가</a><span class="gn-btn" id="hitDummy">＋ 소스 추가</span></div>
+            <div class="gn-tabs"><div class="is-on"><img class="gn-tab-ico is-src" src="img/src_tab_source.png" alt="">소스</div><div class="" id="tabChat"><img class="gn-tab-ico" src="img/src_tab_chat.png" alt="">채팅</div><div><img class="gn-tab-ico" src="img/src_tab_studio.png" alt="">스튜디오</div></div>
+            <div class="gn-nav"><span>|||</span><span>○</span><span>‹</span></div>
+          </div>
+          </div>
         </main>
       </div>
     </div>
@@ -38,12 +45,27 @@
   <script src="../../js/toc-gwa.js"></script>
   <script src="../../js/common.js"></script>
   <script>
-  /* 기획서: 업로드 로딩 7초가 지나면 안내 문구가 바뀌고, 그 뒤에야 다음 위치를 누를 수 있음 */
   (function () {
+    var STEP = 2333;   // 한 장 올라가는 시간(3장 합쳐 약 7초)
+    var rows = document.querySelectorAll('#srcList > div');
+
+    rows.forEach(function (row, i) {
+      setTimeout(function () {
+        row.innerHTML = '<img class="gn-thumb" src="img/src_icon_photo_red.png" alt=""><span>image_날씨뉴스기사' + (i + 1) + '</span>';
+        sfx.upload();
+      }, STEP * (i + 1));
+    });
+
     setTimeout(function () {
-      document.getElementById('bubbleText').innerHTML = 'Gemini Notebook에 날씨 뉴스<br>이미지가 업로드 되었어요!<br>이제 유튜브 링크를 추가해볼까요?';
-      setTimeout(function () { document.getElementById('hit').classList.remove('is-off'); }, 1000);
-    }, 7000);
+      document.getElementById('bub').innerHTML = 'Gemini Notebook에 날씨 뉴스 이미지가 업로드 되었어요!<br>이제 유튜브 링크를 추가해볼까요?';
+      document.getElementById('nbTitle').textContent = '내가 모은 데이터로 AI에게 질문하기';
+      setTimeout(function () {
+        var hit = document.getElementById('hit');
+        document.getElementById('hitDummy').style.display = 'none';
+        hit.style.display = 'inline-flex';
+        pointFingerAt(hit, { onMain: true });
+      }, 1000);
+    }, STEP * 3);
   })();
   </script>
 </body>

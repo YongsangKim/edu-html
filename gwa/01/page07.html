@@ -6,13 +6,14 @@
     <title>다양한 매체에서 날씨 데이터 수집하기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        main{background:url('img/p07_bg.png') no-repeat}
+        
 
         /* 영상 클립 화면 — 미리보기를 누르면 그 클립이 5초간 재생되고,
            재생이 끝나면 아웃라인이 생기며 폴더로 드래그할 수 있게 됨 */
         .p07-screen{position:absolute;left:54px;top:46px;width:1121px;height:609px;
           padding:0;margin:0;border:none;background:none;overflow:hidden;border-radius:14px;
           cursor:default;touch-action:none;transform-origin:50% 50%;z-index:20}
+        .p07-left{position:absolute;left:0;top:0;width:1168px;height:960px;clip-path:polygon(0 0,1168px 0,1168px 652px,1156px 652px,1156px 684px,1168px 684px,1168px 960px,0 960px);background:url('img/p07_bg.png') 0 0 no-repeat;pointer-events:none}
         .p07-screen img{display:block;width:100%;height:100%;object-fit:cover;pointer-events:none}
         .p07-screen.is-ready{cursor:grab;outline:8px solid var(--c-blue);outline-offset:4px}
         .p07-screen.is-grabbed{cursor:grabbing;z-index:60}
@@ -25,29 +26,24 @@
         .p07-playing span{margin-bottom:24px;padding:10px 28px;border-radius:30px;
           background:rgba(27,23,56,.78);color:var(--c-white);font-family:'Cafe24 Ssurround';font-size:30px}
 
-        /* 영상 확인하기 버튼 3개 — 배경에 그려진 버튼 위에 투명하게 겹침 */
+        /* 영상 확인하기 버튼 3개 — 배경에 그려진 버튼 위에 같은 그림을 얹어 누르게 함 */
         .p07-pick{position:absolute;top:619px;height:162px;padding:0;margin:0;border:none;background:none;
           cursor:pointer;border-radius:14px;z-index:25}
         .p07-pick img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}
-        /* .p07-pick.is-over{outline:6px solid var(--c-yellow);outline-offset:-6px} */
+        .p07-pick.is-over{outline:6px solid var(--c-yellow);outline-offset:-6px}
         .p07-pick-opening{left:133px;width:320px}
         .p07-pick-headline{left:427px;width:320px}
         .p07-pick-weather{left:721px;width:320px}
 
-        /* 보관함 폴더(드롭 영역) */
-        .p07-folder{position:absolute;left:1160px;top:350px;width:740px;height:545px;border-radius:40px}
+        /* 보관함 폴더(드롭 영역) — page06과 같은 CSS 폴더 */
+        .p07-folder{position:absolute;left:1146px;top:360px;width:730px;height:670px;z-index:30}
+        .p07-folder-art{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+        .p07-folder-star{position:absolute;left:608px;top:-60px;width:126px;height:auto;pointer-events:none}
         .p07-folder.is-over{outline:10px solid var(--c-yellow);outline-offset:-10px}
 
-        .p07-star{position:absolute;left:1470px;top:560px;width:120px;height:120px;
-          background:url('img/p02_star.png') 0 0 / contain no-repeat;opacity:0;pointer-events:none;z-index:70}
-        .p07-star.is-pop{animation:p07-pop .7s ease-out}
-        @keyframes p07-pop{
-          0%{opacity:1;transform:scale(.3) rotate(0deg)}
-          70%{opacity:1;transform:scale(1.5) rotate(200deg)}
-          100%{opacity:0;transform:scale(1.9) rotate(260deg)}
-        }
+        .p07-star{left:1470px;top:640px}
 
-        /* 오답/종료 모달 — page06과 같은 프레임을 재사용 */
+        .p07-guide{left:1216px;top:62px;bottom:auto;margin:0;width:664px;height:226px;box-sizing:border-box;padding:12px 18px 8px;font-size:44px;line-height:1.3}
 
     </style>
 </head>
@@ -56,17 +52,26 @@
   <div id="viewport" class="viewport">
     <div id="stage-spacer">
       <div id="stage" class="stage">
-        <main>
+        <main class="bg-default">
 
-          <div class="p07-folder" id="p07Folder"></div>
-          <div class="p07-star" id="p07Star"></div>
+          <div class="p07-folder drop-zone" id="p07Folder"><svg class="p07-folder-art" viewBox="0 0 730 670" width="730" height="670" aria-hidden="true">
+            <path d="M144,85 L384,85 Q400,85 410,75 L444,32 Q454,15 478,15 L674,15 Q719,15 719,60 L719,545 L114,545 L114,115 Q114,85 144,85 Z" fill="#ffc20e" stroke="#fff" stroke-width="10" stroke-linejoin="round" paint-order="stroke"/>
+            <rect x="172" y="123" width="457" height="400" rx="20" fill="#fde7bd"/>
+            <rect x="199" y="150" width="460" height="400" rx="20" fill="#fff1d6"/>
+            <path d="M60,202 L574,202 Q594,202 600,220 L714,545 L104,545 L10,262 Q-6,236 20,214 Q36,202 60,202 Z" fill="#ffd876" stroke="#fff" stroke-width="10" stroke-linejoin="round" paint-order="stroke"/>
+            <path d="M544,95 Q540,14 640,10" fill="none" stroke="#f4887a" stroke-width="13" stroke-linecap="round"/>
+          </svg><img class="p07-folder-star" src="../../img/common/icon_gauge_star.png" alt=""></div>
+          <div class="fx-star p07-star" id="p07Star"><img src="../../img/common/icon_gauge_star.png" alt=""></div>
 
+          <div class="p07-left"></div>
           <button class="p07-screen" id="p07Screen"><img id="p07ScreenImg" src="img/p07_clip_title.png" alt="영상 화면"></button>
           <div class="p07-playing" id="p07Playing"><span>재생 중…</span></div>
 
           <button class="p07-pick p07-pick-opening"  data-clip="opening"  data-correct="false" aria-label="영상 확인하기 오프닝"><img src="img/p07_pick_opening.png" alt=""></button>
           <button class="p07-pick p07-pick-headline" data-clip="headline" data-correct="false" aria-label="영상 확인하기 헤드라인"><img src="img/p07_pick_headline.png" alt=""></button>
           <button class="p07-pick p07-pick-weather"  data-clip="weather"  data-correct="true"  aria-label="영상 확인하기 날씨"><img src="img/p07_pick_weather.png" alt=""></button>
+
+          <p class="guide-bubble is-center is-tail-right p07-guide">영상 미리보기를 클릭한 후,<br>살펴보고 날씨 데이터 정보가<br>담긴 화면을 끌어다 놓아주세요!</p>
 
           <!-- 오답: 2초 노출 후 자동으로 닫힘(기획서 13p) -->
           <div class="avatar-modal is-off" id="p07Wrong">

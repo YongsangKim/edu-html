@@ -6,19 +6,16 @@
     <title>내가 모은 데이터로 AI에게 질문하기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        main{background:url('img/p25_bg.png') no-repeat}
-
-        /* 답변 생성 로딩 5초가 끝나야 두 버튼이 열림 */
-        .p25-btn{position:absolute;left:1440px;width:395px;border-radius:20px}
-        .p25-btn.is-off{pointer-events:none;opacity:.35}
-        .p25-again{top:580px;height:180px}
+        .p25-btn{position:absolute;left:1440px;width:395px;min-width:0;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-decoration:none;line-height:1.15}
+        .p25-btn.is-off{display:none}
+        .p25-again{top:580px;height:180px;font-size:68px;padding:12px 10px 8px}
         .p25-next{top:800px;height:120px}
-
-        /* 기획서 36p: AI 실습 종료 모달(이 화면 위에 덮임) */
-        .p25-finish{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:100;
-          background:url('img/p25_bg_finish.png') no-repeat}
-        .p25-finish.is-off{display:none}
-        .p25-finish-hit{position:absolute;left:1216px;top:545px;width:340px;height:110px;border-radius:16px}
+        .gn-skel i{display:block;height:10px;margin:8px 0;border-radius:6px;background:#eee}
+        .gn-stream{position:absolute;left:0;right:0;top:222px;bottom:196px;overflow:auto;padding:0 30px;font-size:21px;line-height:1.65;color:#1b1b1f;scrollbar-width:thin;scrollbar-color:#8a63e8 transparent;letter-spacing:-0.02em}
+        .gn-stream::-webkit-scrollbar{width:8px}
+        .gn-stream::-webkit-scrollbar-thumb{border-radius:4px;background:#8a63e8}
+        .gn-stream .gn-ln{margin:0 0 14px;opacity:0;transform:translateY(8px);transition:opacity .5s ease,transform .5s ease}
+        .gn-stream .gn-ln.is-on{opacity:1;transform:none}
     </style>
 </head>
 <body>
@@ -26,13 +23,40 @@
   <div id="viewport" class="viewport">
     <div id="stage-spacer">
       <div id="stage" class="stage">
-        <main>
+        <main class="bg-default">
+          <p class="guide-bubble is-center gn-bubble" style="top:145px" id="bub">AI가 생성한 답변을<br>확인해보세요.</p>
+          <div class="guide-character"><img src="img/p25_character.png" alt="메인 캐릭터"></div>
+          <div class="phone-frame gn-phone">
+<div class="gn-screen">
+            <div class="gn-status"><span>10:57</span><span class="gn-sys"><svg class="gn-wifi" viewBox="0 0 24 18" width="24" height="18" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M2 6.6Q12-2 22 6.6"/><path d="M5.6 10.4Q12 4.6 18.4 10.4"/><path d="M9.2 14Q12 11.6 14.8 14"/></g><circle cx="12" cy="16.4" r="1.5" fill="currentColor"/></svg><svg class="gn-sig" viewBox="0 0 18 15" width="18" height="15" aria-hidden="true"><rect x="0" y="9" width="3" height="6" rx="1" fill="currentColor"/><rect x="5" y="6" width="3" height="9" rx="1" fill="currentColor"/><rect x="10" y="3" width="3" height="12" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="15" rx="1" fill="currentColor" opacity=".35"/></svg><span class="gn-bat">83</span></span></div>
+            <div class="gn-bar"><span>←</span><em>내가 모은 데이터로 AI에게 질문하기</em><span><img class="gn-ico" src="img/src_icon_share.png" alt="공유"></span><span>⋮</span></div>
+            <div class="gn-ask" style="position:absolute;left:54px;right:22px;top:120px;padding:14px 18px;border-radius:20px 20px 0 20px;background:#e8e8fb;font-size:18px;line-height:1.5"><span id="p25Q"></span></div>
+            <div id="p25Wait" class="gn-think" style="top:236px">
+              <div class="gn-think-head"><img src="img/src_icon_gemini_ai.png" alt=""><span>답변을 만들고 있어요</span></div>
+              <i style="width:92%"></i><i style="width:78%"></i><i style="width:60%"></i>
+            </div>
+            <div id="p25Answer" class="gn-off">
+              <div id="p25Text" class="gn-stream"></div>
+            </div>
+            <div class="gn-chat-in" style="bottom:140px">소스 2개 요청…<span>🗂️ 2 ▾</span></div>
+            <div class="gn-tabs"><div class=""><img class="gn-tab-ico is-src" src="img/src_tab_source.png" alt="">소스</div><div class="is-on is-cur" id="tabChat"><img class="gn-tab-ico" src="img/src_tab_chat.png" alt="">채팅</div><div><img class="gn-tab-ico" src="img/src_tab_studio.png" alt="">스튜디오</div></div>
+            <div class="gn-nav"><span>|||</span><span>○</span><span>‹</span></div>
+          </div>
+          </div>
+          <a href="page24.html" class="js-nav-effect js-sfx card-btn p25-btn p25-again is-off" id="p25Again" data-sound="sound/click.mp3">다른 질문<br>확인 하기</a>
+          <a href="javascript:;" class="js-sfx card-btn p25-btn p25-next is-off" id="p25Next" data-sound="sound/click.mp3">다음</a>
 
-          <a href="page24.html" class="js-nav-effect js-sfx p25-btn p25-again is-off" id="p25Again" data-sound="sound/click.mp3" aria-label="다른 질문 확인하기"></a>
-          <a href="javascript:;" class="js-sfx p25-btn p25-next is-off" id="p25Next" data-sound="sound/click.mp3" aria-label="다음"></a>
-
-          <div class="p25-finish is-off" id="p25Finish">
-            <a href="page26.html" class="js-nav-effect js-sfx p25-finish-hit" data-sound="sound/click.mp3" aria-label="다음"></a>
+<div class="avatar-modal is-off" id="p25Finish">
+            <div class="avatar-card is-center">
+              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <p class="avatar-card-title">AI와 함께 날씨 정보를<br>분석하고, 요약했어요!</p>
+                <p class="avatar-card-text">이제 퀴즈를 풀며 배운 내용을<br>확인해볼까요?</p>
+              </div>
+              <a href="page26.html" class="js-nav-effect js-sfx avatar-card-btn">
+                <img src="../../img/common/btn_next_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_small_on.png" data-src-over="../../img/common/btn_next_small_over.png" data-sound="sound/click.mp3" alt="다음">
+              </a>
+            </div>
           </div>
         </main>
       </div>
@@ -44,22 +68,61 @@
   <script src="../../js/toc-gwa.js"></script>
   <script src="../../js/common.js"></script>
   <script>
-  /* 기획서 35p(ai_practice_15) + 36p(종료)
-     - 답변 생성 로딩 5초가 지나면 안내 창과 두 버튼이 활성화됨
-     - [다른 질문 확인하기] → page24로 돌아가 질문을 다시 고름
-     - [다음] → 이 화면 위에 AI 실습 종료 모달을 띄우고, 그 안의 다음으로 퀴즈(page26)로 이동
-     - page24에서 고른 질문은 sessionStorage에 남아 있음(답변을 질문에 맞춰 바꿀 때 사용) */
   (function () {
     const LOADING_MS = 5000;
     const again = document.getElementById('p25Again');
     const next = document.getElementById('p25Next');
     const finish = document.getElementById('p25Finish');
-
+    let q = '첨부한 신문 기사와 동영상에서 오후 날씨 상태를 요약해 줘.';
+    try { q = sessionStorage.getItem('gwa01_prompt') || q; } catch (err) { /* sessionStorage를 못 쓰는 환경이면 기본 문구 */ }
+    document.getElementById('p25Q').textContent = q;
+  
     setTimeout(function () {
-      again.classList.remove('is-off');
-      next.classList.remove('is-off');
+      document.getElementById('p25Wait').classList.add('gn-off');
+      document.getElementById('p25Answer').classList.remove('gn-off');
+    // 기획서 35p: 질문 조합 4가지마다 AI 답변이 다름(기획서 폴더 '과학1차시-AI-생성-답변.png' 기준)
+    var AI = '<img class="gn-ai" src="img/src_icon_gemini_ai.png" alt="">';
+    var ANSWERS = {
+      '기온|가르쳐': [
+        '<b>' + AI + 'AI 답변 (단순 정보 추출)</b>',
+        '첨부하신 신문기사와 날씨 영상에 따르면, 오늘 <b>서울의 낮 최고 기온은 24도</b>입니다.'
+      ],
+      '기온|요약': [
+        '<b>' + AI + 'AI 답변 (맥락과 소스 종합 요약)</b>',
+        '기사와 영상 속 서울 기온 관련 핵심 내용을 정리한 요약입니다.',
+        '• <b>서울 최고 기온:</b> 낮 최고 <b>24도</b>로 확인됩니다.',
+        '• <b>체감 특징:</b> 전국 낮 최고 기온(30도)에 비하면 서울은 기온이 상대적으로 낮지만, 영상과 기사에서 공통적으로 강조하듯 <b>75% 안팎의 높은 습도</b> 때문에 실제 체감 온도는 기온보다 높고 꿉꿉하게 느껴집니다.'
+      ],
+      '날씨|가르쳐': [
+        '<b>' + AI + 'AI 답변 (명시적 정보 및 행동 안내)</b>',
+        '신문기사와 영상 소스를 통해 확인된 오늘 오후 날씨 상태 및 주의사항입니다.',
+        '☔ <b>오후 강수:</b> 오후부터 비구름이 들어오며 강수 확률 70%로 비가 시작됩니다.',
+        '☂️ <b>준비물:</b> 기상캐스터 및 기사 안내에 따라 <b>외출 시 우산을 꼭 챙기셔야 합니다.</b>',
+        '⚠️ <b>안전 주의:</b> 비가 밤까지 이어질 수 있으므로 미끄러운 빗길 이동 시 안전에 주의하시기 바랍니다.'
+      ],
+      '날씨|요약': [
+        '<b>' + AI + 'AI 답변 (전체 멀티미디어 종합 요약)</b>',
+        '제공된 기사 3편과 날씨 뉴스 영상 전체를 분석하여 정리한 오후 날씨 종합 요약입니다.',
+        '1. <b>비 시작 및 지속성 (레이더 영상 분석):</b> 오후부터 강수 확률 70%로 비가 오기 시작하며, 밤까지 비가 지속되는 곳이 있습니다.',
+        '2. <b>높은 습도와 후텁지근한 무더위:</b> 비가 내려도 기온이 낮 최고 30도까지 오르고, 습도가 75% 안팎으로 높아 오후 내내 꿉꿉하고 후텁지근한 날씨가 이어집니다.',
+        '3. <b>종합 결론:</b> 텍스트와 영상 모두 ‘오후 비 + 높은 습도 + 체감 더위’를 핵심 특징으로 지목하고 있으므로, 우산 지참과 빗길 안전사고 대비가 필요합니다.'
+      ]
+    };
+    var kind = (q.indexOf('기온') >= 0 ? '기온' : '날씨') + '|' + (q.indexOf('요약') >= 0 ? '요약' : '가르쳐');
+    var box = document.getElementById('p25Text');
+    box.innerHTML = ANSWERS[kind].map(function (h) { return '<p class="gn-ln">' + h + '</p>'; }).join('');
+      var lines = Array.from(box.querySelectorAll('.gn-ln'));
+      lines.forEach(function (ln, i) {
+        setTimeout(function () {
+          ln.classList.add('is-on');
+        }, 500 + i * 500);
+      });
+      setTimeout(function () {
+        again.classList.remove('is-off');
+        next.classList.remove('is-off');
+      }, 500 + lines.length * 500 + 500);
     }, LOADING_MS);
-
+  
     next.addEventListener('click', function () {
       setTimeout(function () { finish.classList.remove('is-off'); }, 300);
     });

@@ -2200,6 +2200,7 @@ const sfx = {
   click: makeSfx('sound/click.mp3'),
   correct: makeSfx('sound/correct.mp3'),
   wrong: makeSfx('sound/incorrect.mp3'),
+  upload: makeSfx('sound/upload.mp3'),   // 파일이 올라가는 소리(gwa/01 page14)
 };
 
 const playClick = sfx.click;
@@ -2312,7 +2313,9 @@ function resetImageSwap(root) {
 
 /* 눌러야 할 버튼 오른쪽 아래에 깜빡이는 손가락(기능 L)을 붙임. 다시 부르면 이전 손가락은 지움.
    opts.onMain: 버튼이 overflow:hidden 상자(휴대폰 화면 등) 안에 있어 손가락이 잘릴 때, 손가락을 main에 붙이고 화면 좌표로 계산
-   opts.x: 가로 어디를 가리킬지(0=왼쪽 끝 ~ 1=오른쪽 끝, 기본 1). 긴 입력창처럼 오른쪽 끝에 다른 버튼이 있을 때 */
+   opts.x: 가로 어디를 가리킬지(0=왼쪽 끝 ~ 1=오른쪽 끝, 기본 1). 긴 입력창처럼 오른쪽 끝에 다른 버튼이 있을 때
+   opts.dx / opts.dy: 손가락 위치를 px로 더 옮김(예: dy:-50이면 위로)
+   opts.w: 손가락 너비(px, 기본 110). 버튼이 화면 맨 아래라 손가락이 잘릴 때 줄여서 씀 */
 function pointFingerAt(el, opts) {
   if (opts && opts.onMain) {
     const main = el.closest('main');
@@ -2322,7 +2325,7 @@ function pointFingerAt(el, opts) {
     pointFingerAt({
       offsetLeft: (r.left - m.left) / s, offsetTop: (r.top - m.top) / s,
       offsetWidth: r.width / s * (opts.x === undefined ? 1 : opts.x), offsetHeight: r.height / s, offsetParent: main
-    });
+    }, { dx: opts.dx, dy: opts.dy, w: opts.w });
     return;
   }
   clearFingers();
@@ -2333,9 +2336,9 @@ function pointFingerAt(el, opts) {
   finger.dataset.frame2 = ASSET_BASE + 'img/common/img_finger02.png';
   finger.dataset.interval = '400';
   finger.dataset.loop = 'true';
-  finger.style.cssText = 'position:absolute;width:110px;z-index:30;pointer-events:none';
-  finger.style.left = (el.offsetLeft + el.offsetWidth - 20) + 'px';
-  finger.style.top = (el.offsetTop + el.offsetHeight - 10) + 'px';
+  finger.style.cssText = 'position:absolute;width:' + ((opts && opts.w) || 110) + 'px;z-index:30;pointer-events:none';
+  finger.style.left = (el.offsetLeft + el.offsetWidth - 20 + ((opts && opts.dx) || 0)) + 'px';
+  finger.style.top = (el.offsetTop + el.offsetHeight - 10 + ((opts && opts.dy) || 0)) + 'px';
   (el.offsetParent || el.parentElement).appendChild(finger);
   initFingerGuide();
 }
