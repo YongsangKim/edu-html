@@ -7,6 +7,10 @@
     <link rel="stylesheet" href="../../css/common.css">
     <style>
         .p14-bg{display:block;width:1920px;height:960px}
+        /* 대화창 속 사진 칸(805,115 · 324×298) 위에 page12에서 고른 결과 이미지를 덮음(없으면 배경 그대로) */
+        .p14-photo{position:absolute;left:805px;top:115px;width:324px;height:298px;border-radius:24px;object-fit:cover}
+        .p14-photo.is-off,.p14-share.is-off{display:none}
+        .p14-share{position:absolute;left:1060px;top:345px;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center}
     </style>
 </head>
 <body>
@@ -18,6 +22,8 @@
           <img class="loading-sequence p14-bg" src="img/p14_bg_ani1.png"
                data-frames="img/p14_bg_ani1.png,img/p14_bg_ani2.png,img/p14_bg_ani3.png,img/p14_bg_ani4.png,img/p14_bg_ani5.png"
                data-interval="1000" data-reveal=".next-btn" alt="">
+          <img class="p14-photo is-off" id="p14Photo" alt="나의 미래 모습">
+          <span class="p14-share is-off" id="p14Share"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></span>
           <a href="javascript:;" class="next-btn hidden confirm-quiz-trigger" data-confirm-quiz=".p14-confirm-quiz">
             <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
           </a>
@@ -97,5 +103,18 @@
   <script src="../../js/header.js" data-title="나의 미래 모습 만들기" data-next="page15.html"></script>
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    let job = 'store';
+    let gender = 'm';
+    try { job = sessionStorage.getItem('sa01_job') || job; gender = sessionStorage.getItem('sa01_gender') || gender; } catch (e) {}
+    const photo = document.getElementById('p14Photo');
+    photo.onload = function () {
+      photo.classList.remove('is-off');
+      document.getElementById('p14Share').classList.remove('is-off');
+    };
+    photo.src = 'img/p12_result_' + job + '_' + gender + '.png';
+  })();
+  </script>
 </body>
 </html>
