@@ -6,19 +6,44 @@
     <title>다양한 매체에서 날씨 데이터 수집하기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        main{background:url('img/p06_bg.png') no-repeat}
+        
 
         /* 기사 카드 — 배경에 그려진 기사 위에 같은 그림을 얹어 드래그할 수 있게 함.
            좌표는 디자인 9p에서 측정한 값 */
-        .p06-news{position:absolute;padding:0;margin:0;border:none;background:none;
+        .p06-news{position:absolute;padding:0;margin:0;border:none;background:none;text-align:left;font-family:'Pretendard';color:#1b1b1f;
           cursor:grab;touch-action:none;transform-origin:50% 50%;z-index:20}
-        .p06-news img{display:block;width:100%;height:auto;pointer-events:none}
         .p06-news.is-grabbed{cursor:grabbing;z-index:60;outline:8px solid var(--c-blue);outline-offset:4px;border-radius:12px}
         .p06-news.is-filed{opacity:0;transform:scale(.25);transition:opacity .35s ease,transform .35s ease;pointer-events:none}
 
+        /* 드래그 카드 — 크기는 화면 안의 기사 영역과 같음 */
         .p06-news-main{left:78px;top:210px;width:820px}
         .p06-news-01{left:78px;top:636px;width:397px}
         .p06-news-02{left:490px;top:636px;width:410px}
+
+        /* 뉴스 사이트 화면(디자인 9p) — 사진은 샘플 이모지 */
+        .p06-site{position:absolute;left:54px;top:46px;width:1121px;height:857px;box-sizing:border-box;background:#fff;border:solid 8px var(--c-ink);border-radius:16px;overflow:hidden;font-family:'Pretendard';color:#1b1b1f}
+        .p06-site-head{position:absolute;left:0;right:0;top:0;height:112px;border-bottom:1px solid #ddd}
+        .p06-logo{position:absolute;left:20px;top:2px;font-size:72px;font-weight:900;color:#0a2f8f;letter-spacing:-0.04em}
+        .p06-menu{position:absolute;left:20px;top:76px;display:flex;gap:38px;font-size:19px;font-weight:700}
+        .p06-top{position:absolute;right:20px;top:20px;display:flex;gap:26px;font-size:15px;font-weight:600;color:#333}
+        .p06-top b{color:#e5333a}
+        .p06-ic{position:absolute;right:22px;top:68px;font-size:30px;letter-spacing:12px}
+        .p06-tag{position:absolute;left:20px;top:122px;padding:3px 10px;border-radius:4px;background:#1a73e8;color:#fff;font-size:15px}
+        .p06-title{position:absolute;left:20px;top:156px;width:380px;margin:0;font-size:38px;line-height:1.35;font-weight:800;letter-spacing:-0.04em}
+        .p06-title b{color:#1a73e8}
+        .p06-sub{position:absolute;left:20px;top:252px;width:380px;font-size:21px;line-height:1.55;color:#222}
+        .p06-sub small{display:block;margin-top:14px;font-size:16px;line-height:1.55;color:#555}
+        .p06-hero{position:absolute;left:408px;top:122px;width:392px;height:370px;background:linear-gradient(160deg,#5d7d8c,#2e4756);display:flex;align-items:center;justify-content:center;font-size:150px}
+        .p06-hero em{position:absolute;right:20px;top:20px;padding:10px 14px;border-radius:6px;background:rgba(18,80,150,.9);color:#fff;font-size:18px;font-style:normal;line-height:1.5;text-align:center}
+        .p06-hero span{position:absolute;left:18px;bottom:16px;color:#fff;font-size:22px;font-weight:700;line-height:1.3}
+        .p06-no{position:absolute;left:864px;margin-top:-6px;font-size:22px;font-weight:800;color:#1a73e8;line-height:1}
+        .p06-aside{position:absolute;left:858px;top:146px;width:290px;font-size:28px;line-height:1;font-weight:800}
+        .p06-more{position:absolute;left:864px;top:568px;width:230px;height:42px;border:1px solid #ccc;border-radius:21px;font-size:16px;font-weight:700;text-align:center;line-height:42px}
+        .p06-card{position:absolute;top:586px;width:262px;height:260px}
+        .p06-card .ph{height:136px;display:flex;align-items:center;justify-content:center;font-size:70px}
+        .p06-card h4{margin:10px 0 0;font-size:20px;line-height:1.3;font-weight:800;letter-spacing:-0.04em}
+        .p06-card ul{margin:8px 0 0;padding-left:18px;font-size:14px;line-height:1.55;color:#444}
+        .p06-news img{display:block;width:100%;height:auto;pointer-events:none}
 
         /* 많이 본 뉴스 5줄 — 숫자는 배경에 두고 제목만 얹어 드래그함 */
         .p06-list{left:932px;width:218px}
@@ -28,22 +53,17 @@
         .p06-list-4{top:472px}
         .p06-list-5{top:538px}
 
-        /* 보관함 폴더(드롭 영역) — 배경의 폴더 위에 투명하게 겹침 */
-        .p06-folder{position:absolute;left:1160px;top:350px;width:740px;height:545px;border-radius:40px}
+        /* 보관함 폴더(드롭 영역) — 디자인 9p의 노란 폴더를 CSS로 */
+        .p06-folder{position:absolute;left:1146px;top:360px;width:730px;height:670px;z-index:30}
+        .p06-folder-art{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+        .p06-folder-star{position:absolute;left:608px;top:-60px;width:126px;height:auto;pointer-events:none}
         .p06-folder.is-over{outline:10px solid var(--c-yellow);outline-offset:-10px}
 
         /* 폴더 위에서 터지는 별 효과 */
-        .p06-star{position:absolute;left:1470px;top:560px;width:120px;height:120px;
-          background:url('img/p02_star.png') 0 0 / contain no-repeat;
-          opacity:0;pointer-events:none;z-index:70}
-        .p06-star.is-pop{animation:p06-pop .7s ease-out}
-        @keyframes p06-pop{
-          0%{opacity:1;transform:scale(.3) rotate(0deg)}
-          70%{opacity:1;transform:scale(1.5) rotate(200deg)}
-          100%{opacity:0;transform:scale(1.9) rotate(260deg)}
-        }
+        .p06-star{left:1470px;top:640px}
 
-        /* 모달 배경은 정답/오답을 따로 씀 — 각각 다른 이미지로 교체할 수 있게 분리 */
+        .p06-guide{left:1264px;top:75px;bottom:auto;margin:0;width:566px;height:200px;box-sizing:border-box;padding:12px 18px 8px;font-size:46px;line-height:1.3}
+        .p06-tip{position:absolute;left:1160px;top:180px;font-size:120px;line-height:1;pointer-events:none}
     </style>
 </head>
 <body>
@@ -51,10 +71,28 @@
   <div id="viewport" class="viewport">
     <div id="stage-spacer">
       <div id="stage" class="stage">
-        <main>
+        <main class="bg-default">
 
-          <div class="p06-folder" id="p06Folder"></div>
-          <div class="p06-star" id="p06Star"></div>
+          <div class="p06-site">
+            <p class="p06-aside">많이 본 뉴스</p>
+            <span class="p06-no" style="top:246px">1</span><span class="p06-no" style="top:311px">2</span><span class="p06-no" style="top:375px">3</span><span class="p06-no" style="top:438px">4</span><span class="p06-no" style="top:504px">5</span>
+            <div class="p06-more">10위까지 더보기 ⌄</div>
+            <div class="p06-site-head">
+              <span class="p06-logo">News</span>
+              <div class="p06-top"><span>YTN브랜드채널</span><span>장애인 서비스</span><span>제보</span><span><b>LIVE ●</b></span><span>로그인</span><span>회원가입</span></div>
+              <div class="p06-menu"><span>정치</span><span>경제</span><span>사회</span><span>전국</span><span>국제</span><span>문화</span><span>스포츠</span><span>연예</span><span>비즈</span><span>날씨</span><span>이슈</span><span>시리즈</span><span>TV프로그램</span></div>
+              <span class="p06-ic">🔍☰</span>
+            </div>
+          </div>
+
+          <div class="p06-folder drop-zone" id="p06Folder"><svg class="p06-folder-art" viewBox="0 0 730 670" width="730" height="670" aria-hidden="true">
+            <path d="M144,85 L384,85 Q400,85 410,75 L444,32 Q454,15 478,15 L674,15 Q719,15 719,60 L719,545 L114,545 L114,115 Q114,85 144,85 Z" fill="#ffc20e" stroke="#fff" stroke-width="10" stroke-linejoin="round" paint-order="stroke"/>
+            <rect x="172" y="123" width="457" height="400" rx="20" fill="#fde7bd"/>
+            <rect x="199" y="150" width="460" height="400" rx="20" fill="#fff1d6"/>
+            <path d="M60,202 L574,202 Q594,202 600,220 L714,545 L104,545 L10,262 Q-6,236 20,214 Q36,202 60,202 Z" fill="#ffd876" stroke="#fff" stroke-width="10" stroke-linejoin="round" paint-order="stroke"/>
+            <path d="M544,95 Q540,14 640,10" fill="none" stroke="#f4887a" stroke-width="13" stroke-linecap="round"/>
+          </svg><img class="p06-folder-star" src="../../img/common/icon_gauge_star.png" alt=""></div>
+          <div class="fx-star p06-star" id="p06Star"><img src="../../img/common/icon_gauge_star.png" alt=""></div>
 
           <button class="p06-news p06-news-main" data-correct="true">
             <img src="img/p06_news_main.png" alt="전국 흐리고 오후부터 비, 강수 확률 70%"></button>
@@ -73,6 +111,8 @@
             <img src="img/p06_list_04.png" alt="빗길 교통사고 주의, 운전자 감속 운행 당부"></button>
           <button class="p06-news p06-list p06-list-5" data-correct="false">
             <img src="img/p06_list_05.png" alt="주말까지 잦은 비 소식, 농작물 관리에 유의"></button>
+
+          <p class="guide-bubble is-center is-tail-right p06-guide">날씨 정보가 담긴 기사를<br>끌어다 놓아 주세요!</p>
 
           <!-- 오답: 2초 노출 후 자동으로 닫힘(기획서 10p) -->
           <div class="avatar-modal is-off" id="p06Wrong">

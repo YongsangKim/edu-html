@@ -5,6 +5,13 @@
   font-style: normal;
   font-display: swap;
 }
+@font-face {
+  font-family: 'Pretendard';
+  src: url('../fonts/Pretendard-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: medium;
+  font-display: swap;
+}
 /* 300(Light), 600(SemiBold), 700(Bold), 800(ExtraBold)도 같은 방식으로 추가해뒀습니다 */
 :root{
   --c-ink:#1b1738;
@@ -19,6 +26,7 @@
   --c-indigo:#31248a;
   --c-pale:#eef3fb;
   --c-mist:#dfe7f5;
+  --c-navy:#023187;
 }
 @font-face {
   font-family: 'Cafe24 Ssurround';
@@ -580,8 +588,10 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 .card-btn.is-wide {
   width: 100%;
 }
-.card-btn:hover {
-  color: var(--c-violet);
+@media (hover: hover) {
+  .card-btn:hover {
+    color: var(--c-violet);
+  }
 }
 .card-btn.is-selected {
   color: #d168fb;
@@ -879,9 +889,11 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
      크기7px)를 CSS box-shadow로 환산한 값(오프셋 7px/10px, 블러6px+스프레드2px)
    - 좌표(left/bottom/top 등)는 지금까지 쓰인 화면에서 전부 동일해 그대로 공용화했고,
      다른 좌표가 필요하면 페이지 쪽 CSS에서 덮어쓰면 됨 */
-.guide-bubble{position:absolute;left:60px;bottom:560px;width:610px;background:var(--c-cream);border:solid 5px var(--c-purple);border-radius:18px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);box-sizing:border-box;padding:30px 10px;
+.guide-bubble{position:absolute;left:60px;bottom:560px;width:610px;background:#fff;border:solid 5px var(--c-purple);border-radius:18px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);box-sizing:border-box;padding:30px 10px;
   font-family:'Cafe24 Ssurround';font-size:48px;line-height:1.25;color:var(--c-purple);letter-spacing:-0.06em;text-align:center;z-index:1;word-break:keep-all}
 .guide-bubble.is-center{display:flex;align-items:center;justify-content:center}
+/* 꼬리를 오른쪽에 두는 변형(꼬리 끝은 왼쪽 아래를 향함): gwa/01 page06·07 안내 말풍선 */
+.guide-bubble.is-tail-right::before{left:auto;right:135px}
 .guide-bubble::before{content:'';position:absolute;left:230px;bottom:-58px;width:100px;height:70px;
   background:url('../img/common/p_guide_tail.png') no-repeat;background-size:contain}
 /* 캐릭터 자리(위치/크기)만 공용화. 이미지는 페이지마다 다를 수 있어 각 페이지
@@ -986,8 +998,9 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 /* ---------------- 다음 버튼 위치 — intro 화면 전용 ----------------
    - sa/01/page01, sa/04/page12처럼 설명 이미지 한 장짜리 intro 화면에서만
      쓰는 위치. 이미지 안 내용에 맞춰 .next-btn보다 안쪽(왼쪽/위)에 놓임 */
-.next-btn-intro{position:absolute;left:1080px;top:700px}
+.next-btn-intro{position:absolute;left:1080px;top:730px;text-decoration:none}
 .next-btn-intro.is-off{display:none}
+.intro-panel ~ .next-btn-intro{left:1032px}
 
 /* ---------------- 시작 버튼 위치 — 과학 활동 시작 화면 전용 ----------------
    - 차시 첫 화면·사회 활동 시작은 .next-btn-intro, 과학 활동 시작(오른쪽 아래)은 이것 */
@@ -997,34 +1010,53 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 /* ---------------- 마무리(미션 성공) 화면 버튼 — 다시하기 / 다음 차시 학습하기 ----------------
    - 다음 차시 버튼 이미지는 img/common/btn_next_lesson(_on/_over).png */
 .end-btn-retry{position:absolute;left:750px;top:776px;z-index:20}
-.end-btn-next-lesson{position:absolute;left:1240px;top:776px;z-index:20}
+.end-btn-next-lesson{position:absolute;left:1210px;top:776px;z-index:20}
 .end-btn-retry img, .end-btn-next-lesson img{height:122px;width:auto;display:block}
 /* ---------------- 활동 도입(게임 방법) 화면 — 통이미지 대신 글자로(sa/03·05·06). 디자인 기준: sa/01 직업 퀴즈 게임 도입 화면. 시작 버튼은 .next-btn-intro ---------------- */
-.intro-character{position:absolute;left:0;bottom:0;width:856px;height:884px;z-index:2;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
+.intro-character{position:absolute;left:0;bottom:0;width:856px;max-width:735px;height:884px;z-index:2;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
 .intro-character img{max-width:100%;max-height:100%;object-fit:contain}
-.intro-panel{position:absolute;left:715px;top:110px;width:1140px;height:800px;box-sizing:border-box;padding:70px 70px 170px 85px;display:flex;flex-direction:column;justify-content:center;gap:50px;
-  background:var(--c-white);border:solid 15px var(--c-ink);border-radius:25px;box-shadow:0 0 0 5px var(--c-white);font-family:'Cafe24 Ssurround';color:var(--c-ink);letter-spacing:-0.04em;word-break:keep-all}
+.intro-character.is-large{max-width:840px}
+.intro-panel{position:absolute;left:615px;top:110px;width:1240px;height:800px;box-sizing:border-box;padding:70px 70px 170px 85px;display:flex;flex-direction:column;justify-content:center;gap:50px;
+  background:var(--c-white);border:solid 15px var(--c-ink);border-radius:25px;box-shadow:0 0 0 5px var(--c-white);font-family:'Cafe24 Ssurround';color:var(--c-ink);letter-spacing:-0.08em;word-break:keep-all}
 /* 활동 방법 안내 화면(.intro-panel.p-how-panel): 리드 문구 + 파란 테두리 안내 박스(.p-how, 제목 b, 목록, 팁).
    글자 크기·여백이 다른 페이지는 같은 선택자로 그 값만 페이지 CSS에서 덮어쓴다 */
 .intro-panel.p-how-panel{gap:40px;justify-content:flex-start;padding:100px 60px 170px 70px}
-.p-how-lead{margin:0;font-size:40px;line-height:1.3;color:var(--c-ink);letter-spacing:-0.06em}
-.p-how{position:relative;margin:0;padding:46px 40px 22px;border:solid 5px #023187;border-radius:12px;background:#dff4fc}
-.p-how b{position:absolute;left:50%;top:-34px;transform:translateX(-50%);height:66px;padding:4px 50px 0;box-sizing:border-box;display:flex;align-items:center;white-space:nowrap;
-  font-weight:normal;background:#023187;border-radius:33px;font-size:40px;color:var(--c-white)}
-.p-how .intro-list{font-size:38px;color:#023187}
-.p-how .intro-list li + li{margin-top:8px}
-.p-how-tip{margin:14px 0 0;font-family:'Cafe24 Ssurround';font-size:30px;line-height:1.3;color:var(--c-purple);letter-spacing:-0.05em}
-.intro-tab{position:absolute;left:50%;top:-47px;transform:translateX(-50%);width:867px;height:122px;margin:0;box-sizing:border-box;padding-top:2px;display:flex;align-items:flex-start;justify-content:center;
-  background:url('../img/common/intro-tab_bg.png') no-repeat;font-size:70px;line-height:1.5em;color:var(--c-ink);white-space:nowrap}
-.intro-lead{margin:0;text-align:center;font-size:56px;line-height:1.2}
+.intro-panel.p-how-panel:where(:has(.intro-tab)){gap:30px;padding:80px 60px 170px 70px}
+.p-how-lead{margin:0;font-family:'Cafe24 Ssurround';font-size:40px;line-height:1.2;color:var(--c-ink);letter-spacing:-0.08em}
+.p-how-lead.is-center{text-align:center}
+.p-how-lead.is-large{font-size:50px}
+.p-how{position:relative;margin:0;padding:46px 40px 22px;border:solid 5px var(--c-navy);border-radius:12px;background:#dff4fc}
+.p-how b{position:absolute;left:10px;top:-34px;height:64px;padding:3px 50px 0;box-sizing:border-box;display:flex;align-items:center;white-space:nowrap;
+  font-weight:normal;background:var(--c-navy);border-radius:33px;font-size:40px;color:var(--c-white)}
+.p-how .intro-list{font-size:42px;color:var(--c-navy)}
+.p-how .intro-list li + li{margin-top:15px}
+.p-how-tip{margin:14px 0 0;font-family:'Cafe24 Ssurround';font-size:40px;line-height:1.3;color:var(--c-ink);letter-spacing:-0.05em}
+.p-how + .p-how-tip{margin-top:-15px}
+.p-how-tip b{display:inline-block;width:104px;height:48px;margin-right:20px;box-sizing:border-box;border:solid 3px #91b9e7;border-radius:24px;background:#789ce0;font-weight:normal;font-size:30px;line-height:42px;text-align:center;color:var(--c-white);vertical-align:middle;letter-spacing:0}
+/* 캐릭터 오른쪽 위 변형(gwa/01:05·08, gwa/03:06·08): 패널을 넓게 쓰고 캐릭터가 패널 위로 겹침, 시작 버튼은 패널 오른쪽 아래(.next-btn-intro.is-box) */
+.intro-panel.is-wide{left:130px;width:1660px}
+.intro-panel.is-wide .p-how-lead{font-size:54px;line-height:1.45}
+.intro-panel.is-wide .p-how{width:980px}
+.intro-panel.is-wide .p-how b{left:50%;transform:translateX(-50%)}
+.intro-panel.is-wide .p-how .intro-list{font-size:52px;line-height:1.15}
+.intro-character.is-right{left:auto;right:47px;top:60px;bottom:auto;width:616px;max-width:none;height:708px;z-index:3}
+.intro-character.is-right img{object-position:center top}
+.next-btn-intro.is-box{left:auto;top:auto;right:180px;bottom:110px}
+.intro-tab{position:absolute;left:50%;top:-60px;transform:translateX(-50%);min-width:867px;height:121px;margin:0;box-sizing:border-box;padding:0 48px 10px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(rgba(86,148,231,.17),rgba(86,148,231,.17)) 49px 104px/calc(100% - 98px) 17px no-repeat,linear-gradient(180deg,#fff 0 5px,#dff6ff 5px 99px,#fff 99px 104px) 46px 0/calc(100% - 92px) 104px no-repeat;
+  font-size:70px;line-height:1.5em;letter-spacing:-0.08em;color:var(--c-ink);white-space:nowrap}
+.intro-tab::before,.intro-tab::after{content:'';position:absolute;top:0;width:49px;height:121px;z-index:-1;background:url('../img/common/intro-tab_bg.png') no-repeat}
+.intro-tab::before{left:0}
+.intro-tab::after{right:0;background-position:right top}
+.intro-lead{margin:0;text-align:center;font-size:56px;line-height:1.2;letter-spacing:-0.08em}
 .intro-list{margin:0;padding:0;list-style:none;font-size:58px;line-height:1.25;color:var(--c-ink);letter-spacing:-0.05em}
 .intro-list li{padding-left:1.05em;text-indent:-1.05em}
 .intro-list li + li{margin-top:56px}
 /* 디자인 화면엔 안내 문장(.intro-lead)이 없음. 있는 차시는 두 줄 목록까지 들어가도록 글자·간격을 줄임 */
-.intro-panel:has(.intro-lead){gap:34px}
-.intro-panel:has(.intro-lead) .intro-lead{font-size:60px}
-.intro-panel:has(.intro-lead) .intro-list{font-size:46px}
-.intro-panel:has(.intro-lead) .intro-list li + li{margin-top:8px}
+.intro-panel:where(:has(.intro-lead.is-large)){gap:34px}
+.intro-lead.is-large{font-size:60px}
+.intro-panel:where(:has(.intro-lead.is-large)) .intro-list{font-size:46px}
+.intro-panel:where(:has(.intro-lead.is-large)) .intro-list li + li{margin-top:8px}
 /* 목록 문장이 길어 넘칠 때(한 항목이 세 줄 넘게) */
 .intro-panel.is-long .intro-list{font-size:46px}
 .intro-panel.is-long .intro-list li + li{margin-top:30px}
@@ -1047,10 +1079,10 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 .gauge.is-thin .gauge-fill:after{top:8px;height:8px}
 
 .end-title{position:absolute;left:750px;top:65px;width:1100px;margin:0;text-align:left;font-family:'Cafe24 Ssurround';font-size:100px;background:linear-gradient(180deg,#02185c,#0362d7);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-0.06em}
-.end-panel{position:absolute;left:750px;top:185px;width:962px;min-height:540px;background:var(--c-cream);border:solid 15px #023b95;border-radius:30px;box-shadow:0 0 0 5px var(--c-white);box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;padding:30px}
+.end-panel{position:absolute;left:750px;top:185px;width:930px;min-height:540px;background:var(--c-cream);border:solid 15px var(--c-navy);border-radius:30px;box-shadow:0 0 0 5px var(--c-white);box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;padding:30px}
 .end-desc{margin:0;font-family:'Cafe24 Ssurround';font-size:70px;line-height:1.4;color:#3b1e87;text-align:center;letter-spacing:-0.04em;word-break:keep-all}
 /* end-panel 안 desc 앞에 오는 강조 문구 */
-.end-lead{margin:0;font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.3;color:#023b95;text-align:center;letter-spacing:-0.04em;word-break:keep-all}
+.end-lead{margin:0;font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.3;color:var(--c-navy);text-align:center;letter-spacing:-0.04em;word-break:keep-all}
 
 /* ---------------- 다음 버튼 위치 — 가운데 아래 ----------------
    - 영상 화면(.video-box 바로 아래)과, 다음 버튼이 화면 가운데 아래에 오는 활동 화면 공용.
@@ -1130,6 +1162,8 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 .card-btn.is-quiz.is-long{font-size:50px;line-height:1.05}
 /* 팝업(카드) 안에 들어가는 작은 버튼(예: 다시 해보기) */
 .card-btn.is-popup{height:100px;font-size:55px}
+/* 시작하기 버튼(btn_start.png 407x131 대신 글자 버튼): 그림자까지 합쳐 이미지와 같은 크기 */
+.card-btn.is-start{display:block;min-width:0;width:387px;height:107px;margin-left:10px;padding:14px 0 0;border-radius:22px;font-size:70px}
 
 /* ---------------- 감정 -> 표현 고르기 채팅(sa/04 page06~08) ----------------
    JS는 common.js의 initEmotionPickFlow. 마무리 모달은 sa/04/page08에만 있어 로컬 유지 */
@@ -1278,3 +1312,93 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 .cv .cv-tab.is-target i{animation:cv-target 1.2s ease-in-out infinite}
 .cv .cv-tabs.is-target{animation:cv-target-in 1.2s ease-in-out infinite}
 @keyframes cv-target-in{50%{box-shadow:inset 0 0 0 5px rgba(255,79,139,.75)}}
+
+/* ---------------- Gemini Notebook 폰 화면(gwa/01 page10~25) ----------------
+   폰 틀은 .phone-frame, 안쪽 화면 427x877 좌표계. 눌러야 할 곳은 .gn-hl(분홍 강조)을 붙이고 손가락은 pointFingerAt이 붙임.
+   그림은 샘플 이모지. 말풍선·캐릭터는 공용 .guide-bubble / .guide-character를 위치만 덮어씀 */
+.gn-phone{left:710px;top:37px;width:455px;height:905px;padding:14px;border-radius:64px}
+.gn-screen{position:relative;width:100%;height:100%;border-radius:50px;overflow:hidden;background:#fff;font-family:'Pretendard';font-size:21px;color:#1b1b1f;font-weight:500}
+.gn-screen:before{content:'';position:absolute;left:50%;top:14px;width:24px;height:24px;margin-left:-12px;border-radius:50%;background:#000;z-index:6}
+.gn-screen.is-dark{background:#0f0f0f;color:#fff}
+.gn-status{position:absolute;left:0;top:0;right:0;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:22px;font-weight:500;z-index:5}
+.gn-status .is-red{padding:3px 14px;border-radius:14px;background:#e5333a;color:#fff}
+.gn-status b{padding:0 6px;border-radius:6px;background:#ffc700;color:#1b1b1f;font-size:17px}
+.gn-sys{display:inline-flex;align-items:center;gap:8px;color:#1b1b1f}
+.is-dark .gn-sys{color:#fff}
+.gn-sys svg{display:block}
+.gn-hd{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;padding:0 4px;border:2px solid currentColor;border-radius:4px;line-height:1}
+.gn-hd b{padding:0;border-radius:0;background:none;color:inherit;font-size:9px;font-weight:800;letter-spacing:0}
+.gn-hd i{font-style:normal;font-size:8px;font-weight:700;letter-spacing:0}
+.gn-sys .gn-bat{padding:2px 9px 1px;border-radius:15px;background:#2b2b2b;color:#fff;font-size:16px;font-weight:500;line-height:1.25}
+.gn-nav{position:absolute;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;justify-content:space-around;font-size:31px;color:#444;z-index:5}
+.gn-nav span{display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:18px}
+.is-dark .gn-nav{color:#ddd}
+.gn-nav.is-white{background:#fff}
+.is-dark .gn-nav.is-white{color:#444}
+.gn-bar{position:absolute;left:0;right:0;top:46px;height:58px;display:flex;align-items:center;gap:16px;padding:0 20px;font-size:21px;font-weight:500;border-bottom:1px solid #e8e8ec}
+.gn-bar em{flex:1 1 auto;font-style:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gn-bar span{font-size:26px}
+.gn-bar .gn-ico{display:block;width:26px;height:auto}
+.gn-hl{outline:4px solid #ff4ff9;outline-offset:2px}
+a.gn-hl, button.gn-hl{cursor:pointer}
+.gn-off{display:none !important}
+.gn-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:52px;padding:0 22px;border:0;border-radius:26px;background:#111;color:#fff;font-family:inherit;font-size:20px;font-weight:600;text-decoration:none}
+.gn-cam{display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:50%;background:#111;font-size:29px}
+.gn-fab{position:absolute;left:0;right:0;display:flex;align-items:center;justify-content:center;gap:12px}
+.gn-tabs{position:absolute;left:0;right:0;bottom:56px;height:76px;display:flex;background:#f3effc;font-size:17px;z-index:4}
+.gn-tabs div{flex:1 1 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#555}
+.gn-tabs div i{font-style:normal;font-size:29px}
+.gn-tab-ico{display:block;width:32px;height:32px;object-fit:contain}
+.gn-tabs div:not(.is-on) .gn-tab-ico.is-src{filter:invert(.6)}
+.gn-tabs .is-on .gn-tab-ico{filter:brightness(.15)}
+.gn-tabs div.is-on{color:#1b1b1f;font-weight:700}
+.gn-tabs div.is-cur{background:#dcd6f5}
+.gn-sheet{position:absolute;left:0;right:0;top:60px;bottom:0;z-index:2;border-radius:36px 36px 0 0;background:#fff;box-shadow:0 -4px 20px rgba(0,0,0,.18)}
+.gn-dim{position:absolute;left:0;top:0;right:0;bottom:0;background:rgba(60,60,60,.55);z-index:1}
+.gn-sheet-x{position:absolute;right:26px;top:26px;font-size:34px}
+.gn-sheet-title{margin:104px 0 0;text-align:center;font-size:23px}
+.gn-sheet-sub{margin:10px 0 0;text-align:center;font-size:22px;color:#1fe04d}
+.gn-search{display:flex;align-items:center;justify-content:space-between;height:52px;margin:38px 26px 0;padding:0 8px 0 20px;border:1px solid #d6d6dd;border-radius:26px;font-size:20px;color:#aaa}
+.gn-search i{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:#8e8e93;color:#fff;font-style:normal;font-size:21px}
+.gn-note{margin:34px 0 8px;text-align:center;font-size:17px;color:#444}
+.gn-list a, .gn-list div{display:flex;align-items:center;justify-content:center;gap:10px;height:52px;margin:0 26px 8px;border:1px solid #d6d6dd;border-radius:26px;font-size:21px;color:#1b1b1f;text-decoration:none}
+.gn-list img{display:block;height:34px;width:auto;margin-top:4px}
+.gn-foot{margin:6px 0 0;text-align:center;font-size:16px;color:#555}
+.gn-disc{margin:0;text-align:center;font-size:14px;color:#666}
+.gn-chat-in{position:absolute;left:14px;right:14px;display:flex;align-items:center;justify-content:space-between;height:50px;padding:0 16px;border:1px solid #e3e3e8;border-radius:16px;background:#fff;color:#aaa;font-size:17px}
+.gn-chat-in span{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:16px;background:#eef0f7;color:#333}
+/* 말풍선은 캐릭터 위: bottom을 고정해 줄 수가 늘면 위로 자라고, 캐릭터와의 거리는 그대로 */
+.guide-bubble.gn-bubble{left:150px;top:auto;bottom:520px;width:540px;min-height:224px;padding:22px 14px;font-size:44px;line-height:1.3}
+.guide-bubble.gn-bubble.is-sm{font-size:40px}
+
+/* ---------------- 정답을 부탁해! 게임(gwa/01 page28~29): 시계(그림만) ---------------- */
+.gm-clock{display:block;font-size:150px;line-height:1;text-align:center;z-index:5;filter:drop-shadow(0 8px 0 rgba(0,0,0,.12))}
+
+/* ---------------- 폴더에 담을 때 뜨는 별(gwa/01 page06·07): 회전 없이 튀어 올랐다가 사라짐 ----------------
+   .fx-star(위치는 페이지에서) 안에 <img>를 두고, 스크립트가 .is-pop을 붙였다 뗌 */
+.fx-star{position:absolute;width:130px;pointer-events:none;opacity:0;z-index:70}
+.fx-star img{display:block;width:100%;height:auto}
+.fx-star.is-pop{animation:fx-star-pop .9s ease-out}
+@keyframes fx-star-pop{
+  0%{opacity:0;transform:translateY(30px) scale(.5)}
+  30%{opacity:1;transform:translateY(-34px) scale(1.15)}
+  55%{opacity:1;transform:translateY(-22px) scale(1)}
+  100%{opacity:0;transform:translateY(-70px) scale(1)}
+}
+
+/* 소스 목록의 업로드 중 표시(파일명 앞에서 도는 원) → 완료되면 .gn-thumb(사진)으로 교체 */
+.gn-spin{flex:0 0 auto;width:30px;height:30px;box-sizing:border-box;border-radius:50%;border:4px solid #d9d9e3;border-top-color:#5b5be6;animation:gn-spin .9s linear infinite}
+@keyframes gn-spin{to{transform:rotate(360deg)}}
+.gn-thumb{flex:0 0 auto;display:block;width:40px;height:40px;object-fit:contain}
+
+.gn-ln .gn-ai{display:inline-block;width:26px;height:26px;margin:-4px 8px 0 0;vertical-align:middle}
+
+/* 답변 생성 중(gwa/01 page25): 질문 말풍선 아래에서 아이콘이 깜빡이고 막대가 반짝이며 흐름 */
+.gn-think{position:absolute;left:30px;right:30px;display:flex;flex-direction:column;gap:12px}
+.gn-think-head{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:700;color:#5b5be6}
+.gn-think-head img{width:30px;height:30px;animation:gn-pulse 1.1s ease-in-out infinite}
+.gn-think-head span:after{content:'';display:inline-block;width:1.4em;text-align:left;animation:gn-dots 1.2s steps(4,end) infinite}
+.gn-think i{display:block;height:14px;border-radius:7px;background:linear-gradient(90deg,#ececf6 20%,#cfd0f3 50%,#ececf6 80%) 0 0 / 220% 100%;animation:gn-shimmer 1.4s linear infinite}
+@keyframes gn-pulse{0%,100%{transform:scale(1);opacity:.65}50%{transform:scale(1.25);opacity:1}}
+@keyframes gn-dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+@keyframes gn-shimmer{from{background-position:120% 0}to{background-position:-120% 0}}

@@ -28,6 +28,12 @@
         /* 보드 패널 비교용(모서리는 칸마다 style로) */
         .g-board{position:absolute;box-sizing:border-box;background:#fefbf9;border:solid 6px #48159c;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
         .g-board-inner{background:#eef3fb;border:solid 5px #1b1738;border-radius:26px;box-shadow:none}
+        .g-cmp .g-view{width:640px;height:320px}
+        .g-cmp .g-stage{transform:scale(.3333)}
+        .g-cmp .g-item{width:672px}
+        .g-diff{width:100%;border-collapse:collapse;font-size:15px;background:#fff}
+        .g-diff th, .g-diff td{padding:8px 12px;border:1px solid #cfd6e2;text-align:left;vertical-align:top;line-height:1.5}
+        .g-diff th{background:#eef1f6}
     </style>
 </head>
 <body>
@@ -61,7 +67,7 @@
       배경 <code>&lt;main class="quiz-stage"&gt;</code>, 질문은 <code>.quiz-ask-box</code>(아바타 <code>img/common/avatar_quiz.png</code>),
       선택지는 <code>&lt;button class="answer-pick card-btn is-quiz"&gt;</code> — 6글자 넘는 선택지는 <code>.is-long</code>(50px, <code>&lt;br&gt;</code>로 두 줄).
       페이지에는 선택지 좌표만 둠(버튼 그림자 폭만큼 <code>margin-left:10px</code>).<br>
-      적용: sa/01:16 · sa/02:12 · gwa/03:11 (sa/04:20은 원래 CSS, 선택지를 가로로 흘려 배치). sa/07:15(O/X 아이콘형), gwa/01:26(배경 이미지 + 페이지 전용 버튼)은 아직 따로.
+      적용: sa/01:16 · sa/02:12 · gwa/03:11 · gwa/01:26(2지선다·OX·3지선다를 한 페이지에서 문항 데이터로 그림) (sa/04:20은 원래 CSS, 선택지를 가로로 흘려 배치). sa/07:15(O/X 아이콘형)는 아직 따로. 유형별 비교는 아래 <a href="#sec3">2-1</a> 참고.
     </p>
     <div class="g-list">
       <div class="g-item">
@@ -82,13 +88,69 @@
         </div></div>
       </div>
     </div>
+
+    <h2>2-1. 퀴즈 풀기 유형 비교 — 문항 형태별(공용 틀 그대로)</h2>
+    <p class="g-note">
+      모든 퀴즈는 <b>같은 틀</b>: <code>main.quiz-stage</code> + <code>.quiz-ask-box</code>(아바타 · Q번호 · 질문) + 선택지. 유형은 <b>선택지 모양과 개수</b>로 나뉨. 한 페이지 안에서 문항을 <code>.step-flow</code>로 넘기는 방식(sa/01:16 · gwa/03:11)과, 스크립트로 문항 데이터를 바꿔 그리는 방식(gwa/01:26)이 있음.<br>
+      <b>공통 규칙</b>: 정답이면 정답음 후 다음 문항 / 오답이면 오답음 + 힌트 팝업(공용 알약형 <code>.avatar-popup-panel</code>)이 2초 뒤 자동으로 닫힘(버튼 없음). 선택지는 모두 같은 높이의 공용 <code>.card-btn.is-quiz</code>(464×155), 6글자를 넘으면 <code>.is-long</code> + <code>&lt;br&gt;</code>.
+    </p>
+    <div class="g-list g-cmp">
+      <div class="g-item">
+        <p class="g-meta"><b>① 2지선다</b> 글자 선택지 2개<br>gwa/01:26 Q1 · gwa/02:11 · gwa/03:11</p>
+        <div class="g-view"><div class="g-stage quiz-stage">
+          <div class="quiz-ask-box"><div class="quiz-ask-row"><div class="quiz-avatar"><img src="../img/common/avatar_quiz.png" alt=""></div><span class="quiz-qnum">Q1.</span><p class="quiz-ask">인터넷에서 날씨 정보를 모으는 행동을 뭐라고 할까요?</p></div></div><button class="card-btn is-quiz g-abs" style="left:330px;top:600px">데이터 제거</button><button class="card-btn is-quiz g-abs" style="left:1010px;top:600px">데이터 수집</button>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta"><b>② 3지선다</b> 글자 선택지 3개<br>gwa/01:26 Q5 · sa/02:12 · sa/05:11</p>
+        <div class="g-view"><div class="g-stage quiz-stage">
+          <div class="quiz-ask-box"><div class="quiz-ask-row"><div class="quiz-avatar"><img src="../img/common/avatar_quiz.png" alt=""></div><span class="quiz-qnum">Q5.</span><p class="quiz-ask">내일의 부산 날씨에 대해 물어볼 때, 어떻게 질문해야 똑똑하게 답할까요?</p></div></div><button class="card-btn is-quiz is-long g-abs" style="left:90px;top:600px">내일 부산의<br>날씨는 어때?</button><button class="card-btn is-quiz is-long g-abs" style="left:700px;top:600px">내일 서울의<br>날씨는 어때?</button><button class="card-btn is-quiz g-abs" style="left:1310px;top:600px">날씨</button>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta"><b>③ 다중 선택 5지선다</b> 정답 여러 개, 다 고르면 자동 진행<br>sa/01:16 Q1 (기능 V <code>initAnswerPickQuiz</code>)</p>
+        <div class="g-view"><div class="g-stage quiz-stage">
+          <div class="quiz-ask-box"><div class="quiz-ask-row"><div class="quiz-avatar"><img src="../img/common/avatar_quiz.png" alt=""></div><span class="quiz-qnum">Q1.</span><p class="quiz-ask">어른이 되어 하고 싶은 일을 결정할 때, 중요하게 생각해야 할 것은 무엇일까요? 모두 골라보세요.</p></div></div><button class="card-btn is-quiz g-abs" style="left:430px;top:500px">적성</button><button class="card-btn is-quiz is-long g-abs" style="left:990px;top:500px">친구가<br>좋아하는 것</button><button class="card-btn is-quiz g-abs" style="left:150px;top:720px">멋있는 일</button><button class="card-btn is-quiz is-long g-abs" style="left:710px;top:720px">내가<br>좋아하는 것</button><button class="card-btn is-quiz g-abs" style="left:1310px;top:720px">잘하는 일</button>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta"><b>④ OX</b> 큰 아이콘 2개(360×360)<br>gwa/01:26 Q2·Q4 · gwa/03:11 · sa/01:16 (sa/01은 435px)</p>
+        <div class="g-view"><div class="g-stage quiz-stage">
+          <div class="quiz-ask-box"><div class="quiz-ask-row"><div class="quiz-avatar"><img src="../img/common/avatar_quiz.png" alt=""></div><span class="quiz-qnum">Q2.</span><p class="quiz-ask">단어를 표에 깔끔하게 정리하면 AI가 잘 이해할까요?</p></div></div><img class="g-abs" style="left:480px;top:470px;width:360px;height:360px;object-fit:contain" src="../img/common/icon_o.png" alt="O"><img class="g-abs" style="left:1080px;top:470px;width:360px;height:360px;object-fit:contain" src="../img/common/icon_x.png" alt="X">
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta"><b>⑤ 정답 팝업 + OX 선택 표시</b> 누른 O가 파란색 눌린 이미지로 바뀌고 알약형 팝업이 뜸<br>모든 퀴즈 공통(gwa/03:11 · gwa/01:26 …)</p>
+        <div class="g-view"><div class="g-stage quiz-stage">
+          <div class="quiz-ask-box"><div class="quiz-ask-row"><div class="quiz-avatar"><img src="../img/common/avatar_quiz.png" alt=""></div><span class="quiz-qnum">Q2.</span><p class="quiz-ask">단어를 표에 깔끔하게 정리하면 AI가 잘 이해할까요?</p></div></div><img class="g-abs" style="left:480px;top:470px;width:360px;height:360px;object-fit:contain" src="../img/common/icon_o_on.png" alt="O"><img class="g-abs" style="left:1080px;top:470px;width:360px;height:360px;object-fit:contain" src="../img/common/icon_x.png" alt="X"><div class="g-fill" style="background:rgba(30,20,70,.6)"><div class="avatar-modal"><div class="avatar-popup-panel"><div class="avatar-popup-avatar"><img src="../img/common/avatar_correct_gwa.png" alt=""></div><p class="avatar-popup-text">정답이에요!</p><div class="avatar-popup-extra"><img src="../img/common/icon_correct.png" alt=""></div></div></div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta"><b>⑥ 오답 힌트 팝업</b> 공용 알약형, 2초 뒤 자동 닫힘<br>모든 퀴즈 공통(문항마다 힌트 문구만 다름)</p>
+        <div class="g-view"><div class="g-stage quiz-stage">
+          <div class="quiz-ask-box"><div class="quiz-ask-row"><div class="quiz-avatar"><img src="../img/common/avatar_quiz.png" alt=""></div><span class="quiz-qnum">Q2.</span><p class="quiz-ask">단어를 표에 깔끔하게 정리하면 AI가 잘 이해할까요?</p></div></div><img class="g-abs" style="left:480px;top:470px;width:360px;height:360px;object-fit:contain" src="../img/common/icon_o.png" alt="O"><img class="g-abs" style="left:1080px;top:470px;width:360px;height:360px;object-fit:contain" src="../img/common/icon_x.png" alt="X"><div class="g-fill" style="background:rgba(30,20,70,.6)"><div class="avatar-modal">
+            <div class="avatar-popup-panel"><div class="avatar-popup-avatar"><img src="../img/common/avatar_incorrect.png" alt=""></div><p class="avatar-popup-text is-pill">데이터의 정리가 잘 되어 있으면 AI도 쉽게 읽을 수 있어요!</p></div>
+          </div></div>
+        </div></div>
+      </div>
+    </div>
+    <table class="g-diff" style="margin-top:20px">
+      <tr><th>유형</th><th>선택지</th><th>사용 화면</th><th>판정</th></tr>
+      <tr><td>2지선다</td><td>카드 버튼 2개(가로)</td><td>gwa/01:26 · gwa/02:11 · gwa/03:11</td><td>1개 정답, 오답이면 힌트 팝업</td></tr>
+      <tr><td>3지선다</td><td>카드 버튼 3개(가로)</td><td>gwa/01:26 · sa/02:12 · sa/05:11</td><td>1개 정답</td></tr>
+      <tr><td>다중 선택</td><td>카드 버튼 5개(2줄)</td><td>sa/01:16 · sa/02:12</td><td>정답 여러 개, 다 고르면 자동 진행</td></tr>
+      <tr><td>OX</td><td>O·X 아이콘 360px(사회 1차시는 435px)</td><td>gwa/01:26 · gwa/03:11 · sa/01:16 · sa/06:10 · sa/07:10</td><td>O 또는 X</td></tr>
+      <tr><td>정답 팝업</td><td>알약형 아바타 팝업 + 체크 아이콘(<code>avatar_correct_gwa.png</code>)</td><td>전체(OX는 눌린 이미지 <code>icon_o_on.png</code> · <code>icon_x_on.png</code>로 바뀜)</td><td>2초 뒤 다음 문항</td></tr>
+      <tr><td>오답 힌트</td><td>알약형 아바타 팝업</td><td>전체</td><td>2초 뒤 자동 닫힘(버튼 없음)</td></tr>
+    </table>
+
     <h2>3. 활동 도입(게임 방법) 화면 <code>.intro-*</code> — 공용화 완료</h2>
     <p class="g-note">
       활동 시작 전 "게임 방법" 화면. 디자인 기준은 sa/01 직업 퀴즈 게임 도입 화면(통이미지)이고, 같은 모양을 글자로 만든 공용 틀.<br>
       마크업: <code>&lt;div class="intro-character"&gt;&lt;img src="img/p_character_main.png"&gt;&lt;/div&gt;</code> +
       <code>&lt;div class="intro-panel"&gt;</code>(<code>.intro-tab</code> "게임 방법" 리본은 선택 · <code>.intro-lead</code> 안내 문장은 선택 · <code>.intro-list</code> 번호 목록) +
       시작 버튼 <code>&lt;a class="js-nav-effect next-btn-intro"&gt;</code>. 페이지에는 CSS가 필요 없음(<code>main</code>에 <code>bg-default</code>만).<br>
-      안내 문장이 있으면 목록까지 패널에 들어가도록 글자·간격이 자동으로 줄어듦(<code>.intro-panel:has(.intro-lead)</code>). 목록 문장이 길어 넘치면 <code>.intro-panel.is-long</code>(sa/02:13). 리본 없이 안내 문장을 제목처럼 위에 크게 두려면 <code>.intro-panel.is-title</code>(sa/03:04·06·08 · sa/05:04·06·09 · sa/06:04·06·08·11).
+      안내 문장을 크게(60px) 쓰고 목록까지 패널에 들어가도록 글자·간격을 줄이려면 문장에 <code>.intro-lead.is-large</code>를 붙임(패널의 <code>:has(.intro-lead.is-large)</code>가 목록·간격을 함께 조정). <code>.intro-lead</code>만 쓰면 56px 그대로. 목록 문장이 길어 넘치면 <code>.intro-panel.is-long</code>(sa/02:13). 리본 없이 안내 문장을 제목처럼 위에 크게 두려면 <code>.intro-panel.is-title</code>(sa/03:04·06·08 · sa/05:04·06·09 · sa/06:04·06·08·11).
     </p>
     <div class="g-list">
       <div class="g-item">
@@ -102,7 +164,7 @@
               <li>2. ‘다른 힌트 보기’를 클릭하면 직업에 대한 힌트를 더 얻을 수 있어요.</li>
             </ol>
           </div>
-          <a href="javascript:;" class="next-btn-intro"><img src="../img/common/btn_start.png" alt="시작하기"></a>
+          <a href="javascript:;" class="next-btn-intro"><span class="card-btn is-start">시작하기</span></a>
         </div></div>
       </div>
       <div class="g-item">
@@ -111,13 +173,13 @@
           <div class="intro-character"><img src="../sa/04/img/p_character_main.png" alt=""></div>
           <div class="intro-panel">
             <p class="intro-tab">게임 방법</p>
-            <p class="intro-lead">우리 동네 지도를 살펴보고,<br>학생에게 필요한 장소를 찾아줘요.</p>
+            <p class="intro-lead is-large">우리 동네 지도를 살펴보고,<br>학생에게 필요한 장소를 찾아줘요.</p>
             <ol class="intro-list">
               <li>1. 말풍선을 읽고 무엇이 필요한지 생각해요.</li>
               <li>2. 주인공을 알맞은 장소로 드래그해서 옮기면 미션 성공!</li>
             </ol>
           </div>
-          <a href="javascript:;" class="next-btn-intro"><img src="../img/common/btn_start.png" alt="시작하기"></a>
+          <a href="javascript:;" class="next-btn-intro"><span class="card-btn is-start">시작하기</span></a>
         </div></div>
       </div>
       <div class="g-item">
@@ -125,17 +187,17 @@
         <div class="g-view"><div class="g-stage bg-default">
           <div class="intro-character"><img src="../sa/04/img/p_character_main.png" alt=""></div>
           <div class="intro-panel is-title">
-            <p class="intro-lead">재화와 서비스를 구분해요!</p>
+            <p class="intro-lead is-large">재화와 서비스를 구분해요!</p>
             <ol class="intro-list">
               <li>1. 컨베이어 벨트에 올려진 아이콘을 확인해요.</li>
               <li>2. 아이콘을 드래그 앤 드롭하여, 재화 상자와 서비스 상자에 알맞게 분류해요.</li>
             </ol>
           </div>
-          <a href="javascript:;" class="next-btn-intro"><img src="../img/common/btn_start.png" alt="시작하기"></a>
+          <a href="javascript:;" class="next-btn-intro"><span class="card-btn is-start">시작하기</span></a>
         </div></div>
       </div>
     </div>
-    <p class="g-note">아직 통이미지인 도입 화면: sa/01:04·07·09(번호 목록 없이 보물상자·설명 문장만 있는 다른 구성이라 제외) · gwa/01:01 · gwa/03:01(과학).</p>
+    <p class="g-note">아직 통이미지인 도입 화면: sa/01:04(보물상자 구성이라 제외). 과학 도입·마무리 화면은 모두 글자로 교체했고, 사회 1차시·과학 1·3차시 비교는 <a href="intro.html">도입·마무리 화면</a> 페이지에 있음.</p>
 
     <h2>4. 보드 패널 — 공용화 후보 <span class="g-local">페이지 전용 스타일</span></h2>
     <p class="g-note">
@@ -166,6 +228,73 @@
           <div class="g-board" style="left:1010px;top:160px;width:800px;height:700px;border-radius:60px"></div>
         </div></div>
       </div>
+    </div>
+
+    <h2>5. 마무리(미션 성공) 화면 <code>.end-title</code> + <code>.end-panel</code> + <code>.end-btn-*</code> — 공용</h2>
+    <p class="g-note">
+      마크업: <code>&lt;p class="end-title"&gt;미션 성공!&lt;/p&gt;</code> + <code>&lt;div class="end-panel"&gt;&lt;p class="end-desc"&gt;설명&lt;/p&gt;&lt;/div&gt;</code>(강조 문구는 <code>.end-lead</code>, 보조 문구는 <code>.p-how-lead.is-center.is-large</code>) +
+      <code>&lt;a class="js-nav-effect end-btn-retry"&gt;</code> · <code>&lt;a class="js-nav-effect end-btn-next-lesson"&gt;</code>. 왼쪽 캐릭터는 페이지 CSS(<code>.char-box</code>)로 위치만 지정. 배경은 <code>main.bg-default</code>.
+    </p>
+    <div class="g-list">
+      <div class="g-item">
+        <p class="g-meta"><b>제목 + 설명 패널 + 다시하기 / 다음 차시</b><br>sa/02:15 · sa/03:13 · sa/04:23 등 각 차시 마지막 화면</p>
+        <div class="g-view"><div class="g-stage bg-default">
+          <div class="char-box" style="left:150px;top:260px;width:480px;height:560px"><img src="../sa/04/img/p_character_main.png" alt=""></div>
+          <p class="end-title">미션 성공!</p>
+          <div class="end-panel"><p class="end-desc">친구의 마음을 잘 채워주었어요!</p></div>
+          <a href="javascript:;" class="end-btn-retry"><img src="../img/common/btn_retry.png" alt="다시하기"></a>
+          <a href="javascript:;" class="end-btn-next-lesson"><img src="../img/common/btn_next_lesson.png" alt="다음차시 학습하기"></a>
+        </div></div>
+      </div>
+    </div>
+
+    <h2>6. 활동 방법 안내 <code>.intro-panel.p-how-panel</code> — 공용</h2>
+    <p class="g-note">
+      도입 화면의 변형. 리드 문구(<code>.p-how-lead</code>) + 파란 테두리 안내 박스(<code>.p-how</code>, 제목은 <code>&lt;b&gt;</code>, 목록은 <code>.intro-list</code>, 팁은 <code>.p-how-tip</code>).
+      팁에 <code>&lt;b&gt;TIP&lt;/b&gt;</code>을 넣으면 알약 모양. 리드 문구는 기본 왼쪽 정렬이고 <code>.is-center</code>(가운데) · <code>.is-large</code>(50px)로 분기. 시작 버튼은 글자 버튼 <code>&lt;span class="card-btn is-start"&gt;</code>을 <code>.next-btn-intro</code> 안에 넣음.<br>캐릭터가 오른쪽 위에 오는 변형: <code>.intro-panel.is-wide</code> + <code>.intro-character.is-right</code> + 시작 버튼 <code>.next-btn-intro.is-box</code>(gwa/01:05·08, gwa/03:06·08). 글자 크기가 다르면 같은 선택자로 그 값만 페이지 CSS에서 덮어씀.
+    </p>
+    <div class="g-list">
+      <div class="g-item">
+        <p class="g-meta"><b>리드 + 안내 박스 + 팁</b><br>sa/02:01·09 · sa/08:01·05·07</p>
+        <div class="g-view"><div class="g-stage bg-default">
+          <div class="intro-character"><img src="../sa/04/img/p_character_main.png" alt=""></div>
+          <div class="intro-panel p-how-panel">
+            <p class="p-how-lead">활동을 시작하기 전에 방법을 알아봐요.</p>
+            <div class="p-how">
+              <b>활동 방법</b>
+              <ol class="intro-list">
+                <li>1. 화면의 안내를 읽어요.</li>
+                <li>2. 알맞은 답을 골라요.</li>
+              </ol>
+              <p class="p-how-tip">다 고르면 다음으로 넘어가요.</p>
+            </div>
+          </div>
+          <a href="javascript:;" class="next-btn-intro"><span class="card-btn is-start">시작하기</span></a>
+        </div></div>
+      </div>
+    </div>
+
+    <h2>7. 폰 틀 <code>.phone-frame</code> — 공용</h2>
+    <p class="g-note">
+      어두운 테두리 + 회색 윤곽의 휴대폰 화면 틀. left/top/width/height는 페이지 CSS에서 지정하고, 틀 두께가 다르면 <code>padding</code>·<code>border-radius</code>만 덮어씀.
+      사용: sa/07:07·09 · sa/08:08·10·13 · gwa/05:08 · gwa/07:09·10. (Canva 앱 화면 <code>.cv-*</code>은 별도 공용 틀)
+    </p>
+    <div class="g-list">
+      <div class="g-item">
+        <p class="g-meta"><b>기본 틀</b></p>
+        <div class="g-view"><div class="g-stage bg-default">
+          <div class="phone-frame" style="left:700px;top:60px;width:520px;height:840px"><div style="width:100%;height:100%;border-radius:52px;background:#fff"></div></div>
+        </div></div>
+      </div>
+    </div>
+
+    <h2>8. 배경 <code>main.bg-*</code> — 공용</h2>
+    <p class="g-note"><code>&lt;main class="..."&gt;</code>에 붙이는 배경. 위치·크기(1920×960)는 공용 <code>main</code>이 처리하므로 페이지에는 배경만 지정.</p>
+    <div class="g-list">
+      <div class="g-item"><p class="g-meta"><b>.bg-default</b> 기본(위→아래 그라데이션)</p><div class="g-view"><div class="g-stage bg-default"></div></div></div>
+      <div class="g-item"><p class="g-meta"><b>.bg-sky</b> 옅은 하늘</p><div class="g-view"><div class="g-stage bg-sky"></div></div></div>
+      <div class="g-item"><p class="g-meta"><b>.bg-mist</b> 안개 하늘(<code>#c2d9e9</code>)</p><div class="g-view"><div class="g-stage bg-mist"></div></div></div>
+      <div class="g-item"><p class="g-meta"><b>.bg-stage</b> 스테이지 배경 이미지(<code>stage_bg_04.png</code>)</p><div class="g-view"><div class="g-stage bg-stage"></div></div></div>
     </div>
 
   </div>
