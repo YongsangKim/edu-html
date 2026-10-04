@@ -12,7 +12,13 @@
         .p12-step3{background-image:url('img/p12_bg_guide3.png')}
         .p12-step4{background-image:url('img/p12_bg_guide4.png')}
         .p12-step5{background-image:url('img/p12_bg_guide5.png')}
+        .p12-step6{background-image:url('img/p12_bg_gen.png')}
         .p12-step7{background-image:url('img/p12_bg_guide6.png')}
+        .p12-prompt-bubble{position:absolute;right:782px;top:172px;max-width:300px;box-sizing:border-box;padding:16px 18px;border-radius:26px;background:#e6effa;font-family:'Pretendard';font-size:14px;line-height:1.6;color:#1a2a4a;text-align:left}
+        .p12-prompt-bubble .prompt-value{color:inherit}
+        .p12-gen{position:absolute;left:745px;top:340px;width:288px;height:288px}
+        .p12-result{position:absolute;left:745px;top:340px;display:block;width:330px}
+        .p12-result img{display:block;width:100%;height:auto;border-radius:24px}
 
         .p12-choice{position:absolute;left:1251px;width:591px;height:160px}
         .p12-choice1{top:245px}
@@ -31,9 +37,7 @@
 
         .p12-send{position:absolute;left:1090px;top:518px;width:36px;height:36px;z-index:2}
 
-        .p12-loading{display:block;width:1920px;height:960px}
 
-        .p12-final-btn{position:absolute;left:730px;top:340px;width:340px;height:300px}
 
         /* 화면(디자인 22p) — 이미지는 자리만 잡아둠, 실제 좌표는 이미지 넣고 조정 필요 */
         .p12-opt{position:absolute;left:1251px;width:591px;height:160px}
@@ -168,13 +172,17 @@
               </div>
 
               <div class="step-panel p12-step p12-step6" data-step="6">
-                <img class="loading-sequence p12-loading" src="img/p12_bg_ani1.png"
-                     data-frames="img/p12_bg_ani1.png,img/p12_bg_ani2.png,img/p12_bg_ani3.png,img/p12_bg_ani4.png"
+                <div class="p12-prompt-bubble"></div>
+                <img class="loading-sequence p12-gen" src="img/p12_gen1.png"
+                     data-frames="img/p12_gen1.png,img/p12_gen2.png,img/p12_gen3.png,img/p12_gen4.png"
                      data-duration="2000" data-next="page13.html" alt="">
               </div>
 
               <div class="step-panel p12-step p12-step7" data-step="7">
-                <a href="page13.html" class="js-nav-effect js-sfx hit-area p12-final-btn" data-sound="sound/click.mp3" aria-label="다음"></a>
+                <div class="p12-prompt-bubble"></div>
+                <a href="page13.html" class="js-nav-effect js-sfx p12-result" data-sound="sound/click.mp3" aria-label="다음">
+                  <img id="p12Result" src="img/p12_result_store_m.png" alt="">
+                </a>
               </div>
 
             </div>
@@ -191,8 +199,21 @@
   <script>
   // 고른 성별·직업을 page15 결과 이미지(img/p15_result_{직업}_{m|f}.png)에 넘김
   // TODO: 직업 10개 디자인이 나오면 조합(좋아하는 것×잘하는 것)별 3개로 — 작업본은 _backup_page12_combo/page12.html
+  // 결과 이미지는 직업 3 × 성별 2 = 6종(img/p12_result_{직업}_{m|f}.png), 폰 속 문구는 고른 프롬프트를 복사해 보여줌
+  var pick = {};
+  var result = document.getElementById('p12Result');
+  var builder = document.querySelector('.prompt-builder');
+  var preview = builder.querySelector('.prompt-preview');
+  new MutationObserver(function () {
+    var step = Number(builder.dataset.currentStep);
+    if (step < 6) return;
+    document.querySelectorAll('.p12-prompt-bubble').forEach(function (el) { el.innerHTML = preview.innerHTML; });
+  }).observe(builder, { attributes: true, attributeFilter: ['data-current-step'] });
   document.querySelectorAll('.p12-choice[data-gender], .p12-job[data-job]').forEach(function (btn) {
     btn.addEventListener('click', function () {
+      if (btn.dataset.gender) pick.gender = btn.dataset.gender;
+      if (btn.dataset.job) pick.job = btn.dataset.job;
+      if (pick.gender && pick.job) result.src = 'img/p12_result_' + pick.job + '_' + pick.gender + '.png';
       try {
         if (btn.dataset.gender) sessionStorage.setItem('sa01_gender', btn.dataset.gender);
         if (btn.dataset.job) sessionStorage.setItem('sa01_job', btn.dataset.job);
