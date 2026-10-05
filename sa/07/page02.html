@@ -6,85 +6,149 @@
     <title>하루 속 이웃 찾기 미션!</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        main{background:url('img/stage_bg_03.png') no-repeat}
-        .page03 a:nth-child(1){position:absolute;left:1060px;top:670px}
-        .dnd-zone {
-          position: absolute;
-          width: 420px; height: 420px;
-
-          border-radius: 12px;
-        }
-        .dnd-card {
-          position: absolute;
-          width: 268px; height: 268px;
-          cursor: grab;
-          touch-action: none;
-          user-select: none;
-          -webkit-user-drag: none;
-          z-index:10;
-        }
-        .dnd-card img {
-          width: 100%; height: 100%;
-          -webkit-user-drag: none;
-          user-select: none;
-          pointer-events: none;
-        }
-        .dnd-card[data-placed="true"] {
-          width:410px;
-          height:410px;
-          cursor: default;
-        }
-        .dnd-card[data-placed="true"]:after {
-          content: '';
-          position:absolute;
-          right:16px;
-          top:15px;
-          width: 69px;
-          height:65px;
-          background:url(../../img/common/icon_star_on.png) 0 0 / contain no-repeat;
-        }
-        .dnd-result-wrong {
-          position: absolute;
-          top: 0; left: 0;
-          width: 1920px; height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: rgba(27, 23, 56, 0.5);
-          z-index:20;
-        }
+        main{background:linear-gradient(180deg,#d6ddee 0%,#c3dae9 100%)}
+        .p02-tabs{position:absolute;left:82px;top:33px;width:1160px;height:88px;z-index:5}
+        .p02-tab{position:absolute;top:0;width:386px;height:88px;box-sizing:border-box;border:solid 5px var(--c-ink);border-bottom:0;border-radius:30px 30px 0 0;background:var(--c-sky);color:var(--c-white);font-family:'Cafe24 Ssurround';font-size:50px;line-height:88px;text-align:center;cursor:pointer;padding:0}
+        .p02-tab:nth-child(1){left:0}
+        .p02-tab:nth-child(2){left:387px}
+        .p02-tab:nth-child(3){left:775px}
+        .p02-tab.is-active{background:var(--c-navy)}
+        .p02-panel{position:absolute;left:0;top:0;width:1920px;height:960px;display:none}
+        .p02-panel.is-active{display:block}
+        .p02-scene{position:absolute;left:70px;top:121px;width:1188px;height:388px;box-sizing:border-box;border:solid 6px var(--c-ink);border-radius:20px;overflow:hidden;background:var(--c-white)}
+        .p02-scene img{display:block;width:100%;height:100%;object-fit:cover}
+        .p02-tray{position:absolute;left:73px;top:572px;width:1180px;height:336px;border-radius:14px;background:var(--c-navy)}
+        .p02-tray-label{position:absolute;left:486px;top:492px;width:352px;height:65px;border-radius:33px;background:var(--c-sky);color:var(--c-white);font-family:'Cafe24 Ssurround';font-size:46px;line-height:65px;text-align:center}
+        .p02-card{position:absolute;top:625px;width:259px;height:259px;cursor:grab;touch-action:none;user-select:none;z-index:10;background:#fff;border-radius:15px}
+        .p02-card img{display:block;width:100%;height:100%;pointer-events:none;-webkit-user-drag:none;border:solid 4px #fff;border-radius:15px;box-sizing:border-box}
+        .p02-card.is-dragging{cursor:grabbing;z-index:1000;outline:solid 6px #f23df0;outline-offset:-2px;border-radius:18px}
+        .p02-zone{position:absolute;left:1388px;width:410px;height:410px;box-sizing:border-box;border:solid 8px var(--c-blue);border-radius:20px;background:var(--c-white)}
+        
+        .p02-zone.is-first{top:40px}
+        .p02-zone.is-second{top:507px}
+        .p02-zone:before{content:'';position:absolute;right:2px;top:2px;width:69px;height:65px;background:url(../../img/common/icon_star.png) 0 0 / contain no-repeat;z-index:2}
+        .p02-zone[data-filled]:before{background-image:url(../../img/common/icon_star_on.png)}
+        .p02-hint{position:absolute;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:58px;line-height:1.25;color:var(--c-blue)}
+        .p02-zone[data-filled] .p02-hint{display:none}
+        .p02-zone .p02-card{left:0 !important;top:0;width:100%;height:100%;cursor:default;z-index:1}
+        .p02-zone .p02-card img{border:0}
+        .p02-wrong{position:absolute;left:0;top:0;width:1920px;height:960px;display:flex;align-items:center;justify-content:center;background:rgba(27,23,56,0.5);z-index:50}
+        .p02-wrong.is-off{display:none}
     </style>
 </head>
 <body>
   <div id="page-fade"></div>
   <div id="viewport" class="viewport">
-    <div id="stage-spacer"><div id="stage" class="stage">
-      <main>
-          <div class="page03">
-              <div class="dnd-card" data-correct="true"  style="left:90px; top:620px;"><img src="img/drag_page03_01.png" alt=""></div>
-              <div class="dnd-card" data-correct="false" style="left:380px; top:620px;"><img src="img/drag_page03_02.png" alt=""></div>
-              <div class="dnd-card" data-correct="false"  style="left:670px; top:620px;"><img src="img/drag_page03_03.png" alt=""></div>
-              <div class="dnd-card" data-correct="true" style="left:960px; top:620px;"><img src="img/drag_page03_04.png" alt=""></div>
-
-              <div class="dnd-zone" data-next="page03.html" style="left:1383px; top:50px;"></div>
-              <div class="dnd-zone" data-next="page03.html" style="left:1383px; top:495px;"></div>
-
-              <div class="dnd-result-wrong is-off" data-sound="sound/incorrect.mp3">
-                <div class="avatar-popup-panel">
-                  <div class="avatar-popup-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
-                  <p class="avatar-popup-text is-medium">이 장면에서 만날 수 있는 이웃을<br>다시 찾아볼까요?</p>
-                </div>
-              </div>
-
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main>
+          <div class="p02-tabs">
+            <button type="button" class="p02-tab is-active" data-panel="p02Panel1">학교 가는 길</button>
+            <button type="button" class="p02-tab" data-panel="p02Panel2">학교 주변</button>
+            <button type="button" class="p02-tab" data-panel="p02Panel3">집 가는 길</button>
           </div>
-      </main>
 
-    </div></div>
+          <div class="p02-panel is-active" id="p02Panel1">
+            <div class="p02-scene"><img src="img/p02_scene_1.png" alt="학교 가는 길"></div>
+            <div class="p02-tray"></div>
+            <p class="p02-tray-label">이웃카드</p>
+            <div class="p02-card" data-ok="1" style="left:110px"><img src="img/p02_card_guard.png" alt="교통안전 도우미"></div>
+            <div class="p02-card" data-ok="0" style="left:392px"><img src="img/p02_card_park.png" alt="공원관리인"></div>
+            <div class="p02-card" data-ok="0" style="left:674px"><img src="img/p02_card_pharmacist.png" alt="약사"></div>
+            <div class="p02-card" data-ok="1" style="left:956px"><img src="img/p02_card_bus.png" alt="버스기사"></div>
+            <div class="p02-zone is-first"><p class="p02-hint">이곳에<br>이웃카드를<br>놓아주세요</p></div>
+            <div class="p02-zone is-second"><p class="p02-hint">이곳에<br>이웃카드를<br>놓아주세요</p></div>
+          </div>
+
+          <div class="p02-panel" id="p02Panel2">
+            <div class="p02-scene"><img src="img/p02_scene_2.png" alt="학교 주변"></div>
+            <div class="p02-tray"></div>
+            <p class="p02-tray-label">이웃카드</p>
+            <div class="p02-card" data-ok="1" style="left:110px"><img src="img/p02_card_stationery.png" alt="문구점 직원"></div>
+            <div class="p02-card" data-ok="0" style="left:392px"><img src="img/p02_card_librarian.png" alt="사서"></div>
+            <div class="p02-card" data-ok="1" style="left:674px"><img src="img/p02_card_clerk.png" alt="편의점 직원"></div>
+            <div class="p02-card" data-ok="0" style="left:956px"><img src="img/p02_card_exercise.png" alt="운동하는 이웃"></div>
+            <div class="p02-zone is-first"><p class="p02-hint">이곳에<br>이웃카드를<br>놓아주세요</p></div>
+            <div class="p02-zone is-second"><p class="p02-hint">이곳에<br>이웃카드를<br>놓아주세요</p></div>
+          </div>
+
+          <div class="p02-panel" id="p02Panel3">
+            <div class="p02-scene"><img src="img/p02_scene_3.png" alt="집 가는 길"></div>
+            <div class="p02-tray"></div>
+            <p class="p02-tray-label">이웃카드</p>
+            <div class="p02-card" data-ok="0" style="left:110px"><img src="img/p02_card_bus.png" alt="버스 기사"></div>
+            <div class="p02-card" data-ok="1" style="left:392px"><img src="img/p02_card_exercise.png" alt="운동하는 이웃"></div>
+            <div class="p02-card" data-ok="1" style="left:674px"><img src="img/p02_card_park.png" alt="공원 관리인"></div>
+            <div class="p02-card" data-ok="0" style="left:956px"><img src="img/p02_card_stationery.png" alt="문구점 직원"></div>
+            <div class="p02-zone is-first"><p class="p02-hint">이곳에<br>이웃카드를<br>놓아주세요</p></div>
+            <div class="p02-zone is-second"><p class="p02-hint">이곳에<br>이웃카드를<br>놓아주세요</p></div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p02Done">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">좋아요!</p>
+                <p class="avatar-popup-sub">나의 하루 속에서 만날 수 있는 이웃을 찾았어요.</p>
+                <a href="page03.html" class="js-nav-effect avatar-popup-next">
+                  <img src="../../img/common/btn_next_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_small_on.png" data-src-over="../../img/common/btn_next_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="p02-wrong is-off" id="p02Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+              <p class="avatar-popup-text is-medium">이 장면에서 만날 수 있는 이웃을<br>다시 찾아볼까요?</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
   </div>
   <div class="zoom-info" id="zoomInfo"></div>
 
   <script src="../../js/header.js" data-title="하루 속 이웃 찾기 미션!" data-next="page03.html"></script>
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
+  <script>
+    (function () {
+      var tabs = Array.from(document.querySelectorAll('.p02-tab'));
+      var panels = Array.from(document.querySelectorAll('.p02-panel'));
+      var wrong = $('p02Wrong');
+
+      function show(id) {
+        tabs.forEach(function (t) { t.classList.toggle('is-active', t.dataset.panel === id); });
+        panels.forEach(function (p) { p.classList.toggle('is-active', p.id === id); });
+      }
+
+      tabs.forEach(function (t) {
+        t.addEventListener('click', function () { sfx.click(); show(t.dataset.panel); });
+      });
+
+      function tabOf(panel) {
+        return tabs.find(function (t) { return t.dataset.panel === panel.id; });
+      }
+
+      panels.forEach(function (panel) {
+        initMatchDrag({
+          cards: Array.from(panel.querySelectorAll('.p02-card')),
+          zones: Array.from(panel.querySelectorAll('.p02-zone')),
+          match: function (card) { return card.dataset.ok === '1'; },
+          onWrong: function () { sfx.wrong(); flashLayer(wrong); },
+          onRight: function () { sfx.correct(); },
+          onDone: function () {
+            tabOf(panel).classList.add('is-done');
+            var next = tabs.find(function (t) { return !t.classList.contains('is-done'); });
+            setTimeout(function () {
+              if (next) show(next.dataset.panel);
+              else $('p02Done').classList.remove('is-off');
+            }, 1200);
+          }
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
