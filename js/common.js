@@ -2350,7 +2350,8 @@ function clearFingers() {
 /* 카드를 "짝이 정해진" 칸에 끌어 넣기(기능 F는 아무 빈 칸이나 받음). 페이지에서 직접 호출.
    cards/zones: data-key가 같은 카드-칸이 짝. 맞으면 카드가 칸 안으로 들어가고 onRight(card, zone),
    틀리거나 칸 밖이면 제자리로 돌아가고 onWrong(card, zone|null). 칸이 전부 차면 onDone().
-   slop(스테이지 px): 칸 바깥 이만큼까지 놓아도 그 칸으로 침, 여러 칸이 걸리면 중심이 가장 가까운 칸 */
+   slop(스테이지 px): 칸 바깥 이만큼까지 놓아도 그 칸으로 침, 여러 칸이 걸리면 중심이 가장 가까운 칸
+   match(card, zone): 주면 data-key 비교 대신 이 함수로 짝을 판정(정답 카드 아무거나 아무 빈 칸에 넣는 경우 등) */
 function initMatchDrag(opts) {
   const { cards, zones, onRight, onWrong, onDone } = opts;
   const stage = document.getElementById('stage');
@@ -2394,7 +2395,7 @@ function initMatchDrag(opts) {
         card.style.transform = '';
         zones.forEach((z) => z.classList.remove('is-over'));
         const zone = zoneAt(ev.clientX, ev.clientY);
-        if (zone && zone.dataset.key === card.dataset.key) {
+        if (zone && (opts.match ? opts.match(card, zone) : zone.dataset.key === card.dataset.key)) {
           card.dataset.placed = '1';
           zone.dataset.filled = '1';
           zone.appendChild(card);
