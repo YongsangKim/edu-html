@@ -12,7 +12,7 @@
         .p26-opt.is-wrong{animation:fix-word-shake .3s ease}
         .p26-opt img{display:block;width:360px;height:360px;object-fit:contain}
         .p26-opt.is-icon{padding:0;border:none;background:none;cursor:pointer}
-        .p26-opts.is-ox{top:470px;height:360px;gap:240px}
+        .p26-opts.is-ox{top:470px;height:360px;gap:320px}
         #p26Hint{max-width:1000px;word-break:keep-all}
     </style>
 </head>
@@ -84,7 +84,9 @@
     const hintEl = document.getElementById('p26Hint');
 
 
-    let index = 0;
+    // 주소에 ?q=N 이 있으면 N번째 문항부터(UI 가이드의 퀴즈 나열용)
+    const wantQ = parseInt(new URLSearchParams(window.location.search).get('q'), 10);
+    let index = wantQ >= 1 && wantQ <= QUIZ.length ? wantQ - 1 : 0;
     let locked = false;
 
     function render() {

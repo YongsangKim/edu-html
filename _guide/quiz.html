@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI 가이드 - 퀴즈 풀기</title>
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="guide.css">
+    <style>
+        .g-diff{width:100%;border-collapse:collapse;font-size:15px;background:#fff}
+        .g-diff th, .g-diff td{padding:8px 12px;border:1px solid #cfd6e2;text-align:left;vertical-align:top;line-height:1.5}
+        .g-diff th{background:#eef1f6}
+        .q-grid{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+        .q-item{background:#fff;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+        .q-meta{margin:0 0 8px;font-size:15px;line-height:1.5}
+        .q-meta b{font-size:17px}
+        .q-tag{display:inline-block;margin-left:6px;padding:1px 9px;border-radius:10px;background:#eceaf5;font-size:13px;color:#4b3f9c}
+        .q-thumb{position:relative;width:634px;height:357px;overflow:hidden;border:1px solid #cfd6e2;background:#c2d9e9}
+        .q-thumb iframe{position:absolute;left:0;top:0;width:1920px;height:1080px;border:0;transform:scale(.33);transform-origin:0 0;pointer-events:none}
+        .q-thumb a{position:absolute;left:0;top:0;width:100%;height:100%;z-index:2}
+        .q-thumb a:hover{box-shadow:inset 0 0 0 4px #ffd83d}
+    </style>
+</head>
+<body>
+  <div class="g-wrap">
+    <h1>퀴즈 풀기</h1>
+    <p class="g-note">
+      제목이 "퀴즈 풀기"인 13개 페이지의 문항을 하나씩 나열한 페이지. 미리보기를 누르면 그 문항이 열린 실제 페이지가 새 탭에서 열림
+      (주소 끝에 <code>?step=N</code> — gwa/01:26만 <code>?q=N</code>).<br>
+      <b>구조</b>는 두 갈래: ① <b>정적 마크업</b> — <code>.step-flow</code> 안에 문항마다 <code>.step-panel</code>, 보기는 <code>.answer-pick</code>(공용 기능 V), 보기 위치는 페이지마다 자기 CSS ·
+      ② <b>JS가 그리는 방식</b> — gwa/01:26 하나(문항 배열을 돌며 보기 영역 하나를 다시 채움).
+    </p>
+    <ul class="g-toc"></ul>
+
+    <h2>문항 유형 한눈에 보기</h2>
+    <table class="g-diff">
+      <tr><th>유형</th><th>해당 문항</th></tr>
+      <tr><td>2지선다</td><td>sa/06:Q1 · gwa/01:Q1 · gwa/02:Q1·Q3(① ②) · gwa/03:Q1 · gwa/05:Q1·Q5 · gwa/07:Q2·Q4(맞아요/아니에요)</td></tr>
+      <tr><td>3지선다</td><td>sa/01:Q2 · sa/02:Q2 · sa/03:Q1~Q3 · sa/04:Q2 · sa/05:Q3 · sa/07:Q2·Q3 · sa/08:Q2 · gwa/01:Q5 · gwa/02:Q5 · gwa/07:Q1·Q5</td></tr>
+      <tr><td>4지선다</td><td>sa/02:Q1·Q3 · sa/04:Q1 · sa/05:Q1·Q2 · sa/06:Q3 · sa/08:Q1·Q3 · gwa/03:Q3 · gwa/05:Q2~Q4(Q2·Q3은 파도 그림)</td></tr>
+      <tr><td>5지선다</td><td>sa/01:Q1</td></tr>
+      <tr><td>O/X</td><td>sa/01:Q3 · sa/06:Q2 · sa/07:Q1 · gwa/01:Q2·Q4 · gwa/02:Q2·Q4 · gwa/03:Q2·Q4·Q5</td></tr>
+      <tr><td>정답이 여러 개("모두 골라보세요")</td><td>sa/01:Q1 · sa/02:Q1 · sa/04:Q3 · sa/05:Q1·Q2 · sa/06:Q3 · sa/08:Q1·Q3</td></tr>
+      <tr><td>끌어 놓기(빈칸)</td><td>gwa/07:Q3</td></tr>
+      <tr><td>상황 설명 박스가 붙는 문항</td><td>sa/04:Q1</td></tr>
+    </table>
+
+    <div id="qList"></div>
+  </div>
+  <script src="guide.js"></script>
+  <script>
+  (function () {
+    // type: 문항 유형 설명. param: 주소 끝 ?step=N 인지 ?q=N 인지
+    const PAGES = [
+      { path: 'sa/01/page16', name: 'sa/01:16', structure: '정적 마크업', param: 'step',
+        steps: ['5지선다 · 모두 골라보세요', '3지선다', 'O/X'] },
+      { path: 'sa/02/page12', name: 'sa/02:12', structure: '정적 마크업', param: 'step',
+        steps: ['4지선다 · 모두 골라보세요', '3지선다', '4지선다'] },
+      { path: 'sa/03/page10', name: 'sa/03:10', structure: '정적 마크업', param: 'step',
+        steps: ['3지선다', '3지선다', '3지선다'] },
+      { path: 'sa/04/page20', name: 'sa/04:20', structure: '정적 마크업', param: 'step',
+        steps: ['4지선다 · 상황 설명 박스', '3지선다(긴 글)', '4지선다 · 모두 골라보세요'] },
+      { path: 'sa/05/page11', name: 'sa/05:11', structure: '정적 마크업', param: 'step',
+        steps: ['4지선다 · 모두 골라보세요', '4지선다 · 모두 골라보세요', '3지선다'] },
+      { path: 'sa/06/page10', name: 'sa/06:10', structure: '정적 마크업', param: 'step',
+        steps: ['2지선다', 'O/X', '4지선다 · 2개 고르기'] },
+      { path: 'sa/07/page10', name: 'sa/07:10', structure: '정적 마크업', param: 'step',
+        steps: ['O/X', '3지선다', '3지선다'] },
+      { path: 'sa/08/page11', name: 'sa/08:11', structure: '정적 마크업', param: 'step',
+        steps: ['4지선다 · 모두 골라보세요', '3지선다', '4지선다 · 모두 골라보세요'] },
+      { path: 'gwa/01/page26', name: 'gwa/01:26', structure: 'JS가 그림(문항 배열)', param: 'q',
+        steps: ['Q1 · 2지선다', 'Q2 · O/X', 'Q4 · O/X', 'Q5 · 3지선다'] },
+      { path: 'gwa/02/page11', name: 'gwa/02:11', structure: '정적 마크업', param: 'step',
+        steps: ['2지선다', 'O/X', '2지선다 · 그래프 그림 ① ②', 'O/X', '3지선다'] },
+      { path: 'gwa/03/page11', name: 'gwa/03:11', structure: '정적 마크업', param: 'step',
+        steps: ['2지선다', 'O/X', '4지선다', 'O/X', 'O/X'] },
+      { path: 'gwa/05/page09', name: 'gwa/05:09', structure: '정적 마크업', param: 'step',
+        steps: ['2지선다', '4지선다 · 파도 그림', '4지선다 · 파도 그림', '4지선다', '2지선다'] },
+      { path: 'gwa/07/page11', name: 'gwa/07:11', structure: '정적 마크업', param: 'step',
+        steps: ['3지선다', '2지선다(맞아요/아니에요)', '끌어 놓기(빈칸)', '2지선다(맞아요/아니에요)', '3지선다'] }
+    ];
+
+    const list = document.getElementById('qList');
+    PAGES.forEach((p) => {
+      const sec = document.createElement('section');
+      const items = p.steps.map((label, i) => {
+        const url = '../' + p.path + '.html?' + p.param + '=' + (i + 1);
+        const no = p.param === 'q' ? label.split(' · ')[0] : 'Q' + (i + 1);
+        const desc = p.param === 'q' ? label.split(' · ')[1] : label;
+        return '<div class="q-item"><p class="q-meta"><b>' + p.name + ' ' + no + '</b><span class="q-tag">' + desc + '</span></p>' +
+          '<div class="q-thumb"><iframe loading="lazy" src="' + url + '" title="' + p.name + ' ' + no + '"></iframe><a href="' + url + '" target="_blank" rel="noopener" aria-label="' + p.name + ' ' + no + ' 열기"></a></div></div>';
+      }).join('');
+      sec.innerHTML = '<h2>' + p.name + ' <span style="font-size:18px">— ' + p.steps.length + '문항 · ' + p.structure + '</span></h2><div class="q-grid">' + items + '</div>';
+      list.appendChild(sec);
+    });
+    // guide.js가 h2 목차를 만든 뒤 실행되도록 목차를 다시 만듦
+    const toc = document.querySelector('.g-toc');
+    toc.innerHTML = '';
+    document.querySelectorAll('.g-wrap h2').forEach((h, i) => {
+      h.id = h.id || 'sec' + (i + 1);
+      const li = document.createElement('li');
+      li.innerHTML = '<a href="#' + h.id + '">' + h.textContent.replace(/\s+—.*$/, '') + '</a>';
+      toc.appendChild(li);
+    });
+  })();
+  </script>
+</body>
+</html>

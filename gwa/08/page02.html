@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>차례대로 맞추는 몸속 퍼즐 게임</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 3p 구조대로: ① 배경 일러스트(img/p02_bg.png) ② 맨 아래 안내문구(아로 얼굴 아이콘 + 문구) ③ 가운데 상반신 인체실루엣(img/p02_body.png, 입·위·장 자리는 흐릿한 점선)
+           ④ 오른쪽 퍼즐 조각 3개(세로로 맞물리게) ⑤ 왼쪽 위 별 게이지. 조각을 맞는 점선 칸으로 끌어 놓기, 입→위→장 순서 3문제.
+           맞으면 조각은 사라지고 그 기관이 초록빛, 게이지 30·30·40%(오답은 줄지 않음). 틀리면 조각이 흔들리고 제자리, 안내 문구가 힌트로 바뀜.
+           위치는 기획서 슬라이드 좌표를 1920 화면으로 옮긴 값. 아로 얼굴 img/p02_aro_face.png, 조각 그림 img/p02_piece_{mouth|stomach|intestine}.png */
+        .p02-gauge{left:62px;top:36px;width:757px;z-index:5}
+
+        .p02-panel{position:absolute;left:90px;top:100px;width:1755px;height:598px;box-sizing:border-box;border:solid 5px var(--c-navy);border-radius:24px;background:#bfe0f7 url('img/p02_bg.png') center / cover no-repeat;overflow:hidden}
+        .p02-body{position:absolute;left:565px;top:22px;width:591px;height:540px}
+        .p02-body:before{content:'';position:absolute;left:0;top:0;width:100%;height:100%;background:url('img/p02_body.png') center / contain no-repeat}
+        .p02-zone{position:absolute;box-sizing:border-box;border:dashed 5px var(--c-purple);border-radius:22px;background:rgba(72,21,156,.12);transition:all .4s;
+          display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:36px;color:rgba(72,21,156,.45)}
+        .p02-zone[data-key="mouth"]{left:269px;top:126px;width:104px;height:60px}
+        .p02-zone[data-key="stomach"]{left:306px;top:298px;width:90px;height:90px}
+        .p02-zone[data-key="intestine"]{left:239px;top:391px;width:164px;height:142px}
+        .p02-zone.is-done{border-color:#2fbf71;border-style:solid;background:rgba(47,191,113,.3);color:#1f9d5a;box-shadow:0 0 30px 8px rgba(47,191,113,.65)}
+        .p02-zone .p02-piece{display:none}
+
+        .p02-tray{position:absolute;left:1275px;top:17px;width:450px;height:554px;box-sizing:border-box;border-radius:30px;background:rgba(255,255,255,.55);border:solid 4px rgba(255,255,255,.9)}
+        .p02-piece{position:absolute;left:55px;width:340px;height:150px;--blk-hole:rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;gap:16px;padding-top:4px;cursor:grab;touch-action:none;font-size:60px}
+        .p02-piece[data-key="mouth"]{top:52px;--blk-c:#ffd56a;z-index:9}
+        .p02-piece[data-key="stomach"]{top:202px;--blk-c:#f59a9a;z-index:8}
+        .p02-piece[data-key="intestine"]{top:352px;--blk-c:#8fdcb8;z-index:7}
+        .p02-piece i{position:absolute;left:34px;top:50%;width:76px;height:76px;margin-top:-38px;background:center / contain no-repeat;pointer-events:none}
+        .p02-piece[data-key="mouth"] i{background-image:url('img/p02_piece_mouth.png')}
+        .p02-piece[data-key="stomach"] i{background-image:url('img/p02_piece_stomach.png')}
+        .p02-piece[data-key="intestine"] i{background-image:url('img/p02_piece_intestine.png')}
+        .p02-piece.is-dragging{cursor:grabbing;z-index:60}
+        .p02-piece.is-picked{box-shadow:0 0 0 8px rgba(255,216,61,.95),inset 0 -6px 0 rgba(0,0,0,.1),inset 0 4px 0 rgba(255,255,255,.35)}
+        .p02-piece.is-wrong{animation:fix-word-shake .3s ease}
+        .p02-zone.is-pickable{cursor:pointer;box-shadow:0 0 0 6px rgba(255,216,61,.9)}
+        .p02-order.is-hint{color:#d6336c}
+
+        /* 아래 줄: 과학 3차시 page09의 말풍선(흰 알약 + 왼쪽에 걸친 원형 아바타) 그대로. 아바타 그림 img/p02_aro_face.png */
+        .p02-icon{position:absolute;left:40px;top:710px;width:236px;height:236px;box-sizing:border-box;border-radius:50%;border:solid 6px var(--c-purple);background:var(--c-purple) url('img/p02_aro_face.png') center bottom / contain no-repeat;box-shadow:0 12px 0 0 rgba(72,21,156,.18);z-index:1}
+        .p02-order{position:absolute;left:175px;top:755px;width:1210px;height:156px;box-sizing:border-box;padding:0 40px 0 120px;display:flex;align-items:center;margin:0;
+          background:var(--c-white);border:solid 6px var(--c-purple);border-radius:78px;box-shadow:0 12px 0 0 rgba(72,21,156,.18);
+          font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.15;color:var(--c-purple);letter-spacing:-0.05em;word-break:keep-all;text-align:left}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="gauge p02-gauge"><div class="gauge-fill" id="p02Fill"></div></div>
+
+          <div class="p02-panel">
+            <div class="p02-body" id="p02Body">
+              <div class="p02-zone" data-key="mouth"></div>
+              <div class="p02-zone" data-key="stomach"></div>
+              <div class="p02-zone" data-key="intestine"></div>
+            </div>
+            <div class="p02-tray" id="p02Tray"></div>
+          </div>
+
+          <div class="p02-icon"></div>
+          <p class="p02-order" id="p02Ask"><span id="p02AskText"></span></p>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="차례대로 맞추는 몸속 퍼즐 게임" data-next="page03.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const STEPS = [
+      { key: 'mouth', name: '입', ask: '음식이 가장 먼저 들어가는 곳은 어디일까?', hint: '음식은 가장 먼저 입으로 들어가요. 입 퍼즐을 찾아볼까요?', gauge: 30 },
+      { key: 'stomach', name: '위', ask: '입에서 잘게 씹은 음식은 다음으로 어디에 도착할까?', hint: '입 다음에 음식이 도착하는 곳을 다시 찾아보세요!', gauge: 60 },
+      { key: 'intestine', name: '장', ask: '위를 지난 음식은 마지막으로 어디로 이동할까?', hint: '음식은 입과 위를 지나 장으로 이동해요. 장 퍼즐을 찾아볼까요?', gauge: 100 }
+    ];
+    let step = 0;
+    let picked = null;
+
+    const ask = $('p02Ask');
+    const showAsk = (text, isHint) => { $('p02AskText').textContent = text; ask.classList.toggle('is-hint', !!isHint); };
+
+    const tray = $('p02Tray');
+    const cards = STEPS.map((s) => {
+      const c = document.createElement('div');
+      c.className = 'p02-piece blk';
+      c.dataset.key = s.key;
+      c.innerHTML = '<i></i>' + s.name;
+      tray.appendChild(c);
+      return c;
+    });
+    const zones = Array.from(document.querySelectorAll('.p02-zone'));
+
+    const isRight = (card, zone) => card.dataset.key === zone.dataset.key && card.dataset.key === STEPS[step].key;
+    function right(card, zone) {
+      zone.classList.add('is-done');
+      $('p02Fill').style.width = STEPS[step].gauge + '%';
+      step += 1;
+      if (step >= STEPS.length) {
+        setTimeout(() => { playCorrect(); }, 300);
+        setTimeout(() => navigateTo('page03.html'), 1800);
+        return;
+      }
+      showAsk(STEPS[step].ask);
+    }
+    function wrong(card) {
+      playWrong();
+      card.classList.remove('is-wrong');
+      void card.offsetWidth;
+      card.classList.add('is-wrong');
+      showAsk(STEPS[step].hint, true);
+    }
+
+    /* 끌어 놓기(기획서 3p: 퍼즐을 알맞은 곳으로 드래그 앤 드롭) */
+    initMatchDrag({ cards, zones, slop: 40, match: isRight, onRight: right, onWrong: wrong });
+
+    /* 조각을 누르면 고른 표시, 이어서 칸을 누르면 그 칸에 놓기(터치로 쉽게 고를 수 있게) */
+    cards.forEach((card) => {
+      let moved = false;
+      let sx = 0;
+      let sy = 0;
+      card.addEventListener('pointerdown', (e) => { moved = false; sx = e.clientX; sy = e.clientY; });
+      card.addEventListener('pointermove', (e) => { if (Math.hypot(e.clientX - sx, e.clientY - sy) > 8) moved = true; });
+      card.addEventListener('click', () => {
+        if (moved || card.dataset.placed) return;
+        playClick();
+        if (picked) picked.classList.remove('is-picked');
+        picked = picked === card ? null : card;
+        if (picked) picked.classList.add('is-picked');
+        zones.forEach((z) => z.classList.toggle('is-pickable', !!picked && !z.dataset.filled));
+      });
+    });
+    zones.forEach((zone) => zone.addEventListener('click', () => {
+      if (!picked || zone.dataset.filled) return;
+      const card = picked;
+      picked.classList.remove('is-picked');
+      picked = null;
+      zones.forEach((z) => z.classList.remove('is-pickable'));
+      if (isRight(card, zone)) {
+        card.dataset.placed = '1';
+        zone.dataset.filled = '1';
+        zone.appendChild(card);
+        playDrag();
+        right(card, zone);
+      } else {
+        wrong(card);
+      }
+    }));
+
+    showAsk(STEPS[0].ask);
+  })();
+  </script>
+</body>
+</html>

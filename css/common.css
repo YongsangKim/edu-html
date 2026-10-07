@@ -1112,6 +1112,12 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
   animation: fix-word-shake 0.3s ease;
 }
 
+/* O/X 퀴즈 버튼(기능 V의 .answer-pick과 함께): <button class="answer-pick ox-pick is-o"><img ...></button>, X는 is-x */
+.ox-pick{position:absolute;top:470px;width:360px;height:360px;padding:0;border:0;background:none;cursor:pointer}
+.ox-pick img{width:100%;height:100%;object-fit:contain;display:block}
+.ox-pick.is-o{left:440px}
+.ox-pick.is-x{left:1120px}
+
 /* ---------------- 퀴즈 질문 박스(알약형, 아바타+Q번호+문구) ----------------
    sa/04/page20 Q1~Q3에서 3번 반복 쓰던 걸 공용화. 상황 설명이 필요한 문항만
    .quiz-case를 안에 추가로 둠(급식실 상황 예시처럼). 아바타 이미지(<img>)는
@@ -1406,3 +1412,41 @@ a.gn-hl, button.gn-hl{cursor:pointer}
 @keyframes gn-pulse{0%,100%{transform:scale(1);opacity:.65}50%{transform:scale(1.25);opacity:1}}
 @keyframes gn-dots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
 @keyframes gn-shimmer{from{background-position:120% 0}to{background-position:-120% 0}}
+
+
+/* ---------------- 블록 코딩 모양 조각(.blk) — 과학 8차시 단계 칸·카드. 기획서 8p 예시(노랑·분홍·초록·보라 직소 조각)를 본뜸:
+   양옆 가운데에 살짝 네모난 홈, 위쪽 가운데에 홈(진짜로 파여 있어 뒤 배경이 보임), 아래쪽 가운데에 돌기(.blk:after), 안쪽 입체 음영 + 바깥 그림자.
+   세로로 딱 붙여 쌓으면(.blk-col) 위 조각의 돌기가 아래 조각 홈에 끼워짐(위 조각이 위에 오도록 z-index를 역순으로 줌).
+   색 --blk-c, 돌기·위쪽 홈 폭 --tab(기본 80px). .is-empty: 빈 칸(베이지), .is-now: 지금 놓을 칸 반짝임, .is-flat: 돌기·홈 없는 납작한 카드 */
+.blk{--blk-c:#ffd56a;--tab:80px;position:relative;box-sizing:border-box;border:0;border-radius:18px;
+  background:
+    linear-gradient(rgba(255,255,255,.42),rgba(255,255,255,.42)) left top / calc(50% - var(--tab) / 2) 5px no-repeat,
+    linear-gradient(rgba(255,255,255,.42),rgba(255,255,255,.42)) right top / calc(50% - var(--tab) / 2) 5px no-repeat,
+    linear-gradient(rgba(0,0,0,.12),rgba(0,0,0,.12)) left bottom / 100% 7px no-repeat,
+    radial-gradient(circle at 100% 0,transparent 16px,var(--blk-c) 16.5px) calc(50% - (var(--tab) - 16px) / 2) 6px / 16px 16px no-repeat,
+    radial-gradient(circle at 0 0,transparent 16px,var(--blk-c) 16.5px) calc(50% + (var(--tab) - 16px) / 2) 6px / 16px 16px no-repeat,
+    linear-gradient(var(--blk-c),var(--blk-c)) 50% 100% / var(--tab) calc(100% - 22px) no-repeat,
+    linear-gradient(var(--blk-c),var(--blk-c)) left top / calc(50% - var(--tab) / 2 + 1px) 36% no-repeat,
+    linear-gradient(var(--blk-c),var(--blk-c)) left bottom / calc(50% - var(--tab) / 2 + 1px) 36% no-repeat,
+    linear-gradient(var(--blk-c),var(--blk-c)) left 26px center / calc(50% - var(--tab) / 2 - 26px + 1px) 32% no-repeat,
+    radial-gradient(circle at 0 100%,transparent 12px,var(--blk-c) 12.5px) left 14px top calc(35% + 4.2px) / 12px 12px no-repeat,
+    radial-gradient(circle at 0 0,transparent 12px,var(--blk-c) 12.5px) left 14px top calc(65% - 4.2px) / 12px 12px no-repeat,
+    linear-gradient(var(--blk-c),var(--blk-c)) right top / calc(50% - var(--tab) / 2 + 1px) 36% no-repeat,
+    linear-gradient(var(--blk-c),var(--blk-c)) right bottom / calc(50% - var(--tab) / 2 + 1px) 36% no-repeat,
+    linear-gradient(var(--blk-c),var(--blk-c)) right 26px center / calc(50% - var(--tab) / 2 - 26px + 1px) 32% no-repeat,
+    radial-gradient(circle at 100% 100%,transparent 12px,var(--blk-c) 12.5px) right 14px top calc(35% + 4.2px) / 12px 12px no-repeat,
+    radial-gradient(circle at 100% 0,transparent 12px,var(--blk-c) 12.5px) right 14px top calc(65% - 4.2px) / 12px 12px no-repeat;
+  filter:drop-shadow(0 2px 0 rgba(0,0,0,.2));font-family:'Cafe24 Ssurround';color:var(--c-ink)}
+.blk:after{content:'';position:absolute;left:50%;bottom:-22px;width:var(--tab);height:29px;margin-left:calc(var(--tab) / -2);z-index:3;border-radius:0 0 16px 16px;background:var(--blk-c);box-shadow:inset 0 -5px 0 rgba(0,0,0,.12)}
+.blk.is-flat{background:var(--blk-c)}
+.blk.is-flat:after{display:none}
+.blk.is-empty{--blk-c:#efe7d8}
+.blk.is-now{animation:blk-glow 1s ease-in-out infinite}
+.blk-col{display:flex;flex-direction:column}
+.blk-col > .blk:nth-child(1){--blk-c:#ffd56a;z-index:9}
+.blk-col > .blk:nth-child(2){--blk-c:#f59a9a;z-index:8}
+.blk-col > .blk:nth-child(3){--blk-c:#8fdcb8;z-index:7}
+.blk-col > .blk:nth-child(4){--blk-c:#c4a8f0;z-index:6}
+.blk-col > .blk:nth-child(5){--blk-c:#9cc8f5;z-index:5}
+.blk-col > .blk.is-empty{--blk-c:#efe7d8}
+@keyframes blk-glow{0%,100%{filter:drop-shadow(0 2px 0 rgba(0,0,0,.2))}50%{filter:drop-shadow(0 0 0 rgba(255,216,61,0)) drop-shadow(0 0 10px rgba(255,200,0,1)) drop-shadow(0 0 4px rgba(255,200,0,1))}}

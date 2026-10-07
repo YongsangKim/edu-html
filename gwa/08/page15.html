@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>퀴즈 풀기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 32~36p. Q1 입·위·장 조각을 1~3단계 칸에 끌어 놓기, Q2 1.순차/2.알고리즘, Q3 초성 칸(ㅇㄱㄹㅈ)에 글자 카드 끌어 놓기(힌트 버튼),
+           Q4 엔트리 캡처 + 3지선다, Q5 알고리즘 그림 + 3지선다. 오답은 문항별 힌트(data-wrong). 이미지 img/p15_body.png, p15_entry.png */
+        .quiz-ask-box{padding:30px 60px 30px 30px}
+
+        .q1-body{position:absolute;left:100px;top:440px;width:560px;height:480px;border-radius:30px;background:var(--c-white) url('img/p15_body.png') center / contain no-repeat;box-shadow:0 8px 0 0 var(--c-sky-pale)}
+        .q1-piece{position:absolute;width:210px;height:100px;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;cursor:grab;touch-action:none;font-size:50px}
+        .q1-piece[data-key="mouth"]{--blk-c:#ffd56a}.q1-piece[data-key="stomach"]{--blk-c:#f59a9a}.q1-piece[data-key="intestine"]{--blk-c:#8fdcb8}
+        .q1-piece[data-key="mouth"]{left:290px;top:120px}
+        .q1-piece[data-key="stomach"]{left:50px;top:320px}
+        .q1-piece[data-key="intestine"]{left:60px;top:50px}
+        .q1-piece.is-dragging{cursor:grabbing;z-index:60}
+        .q1-piece.is-wrong{animation:fix-word-shake .3s ease}
+        .q1-slots{position:absolute;left:800px;top:450px;width:900px;--blk-hole:#d4dff0}
+        .q1-slot{height:140px;display:block}
+        .q1-no{position:absolute;left:30px;top:50%;transform:translateY(-46%);font-family:'Cafe24 Ssurround';font-size:52px;color:var(--c-violet)}
+        .q1-slot .q1-piece{position:absolute;left:230px;top:0;right:0;bottom:0;width:auto;height:auto;margin:0;border:0;border-radius:0;background:none;box-shadow:none;filter:none;cursor:default;font-size:56px}
+        .q1-slot .q1-piece:before,.q1-slot .q1-piece:after{display:none}
+        .q1-slot.is-lit .q1-no:after{content:'';display:inline-block;width:26px;height:26px;margin-left:12px;border-radius:50%;background:#2fbf71;vertical-align:middle}
+
+        .q2-opt1,.q2-opt2{position:absolute;top:600px;margin-left:10px}
+        .q2-opt1{left:456px}
+        .q2-opt2{left:1000px}
+
+        .q3-init{position:absolute;left:0;top:470px;width:1920px;display:flex;justify-content:center;gap:60px}
+        .q3-slot{width:210px;height:200px;display:flex;align-items:center;justify-content:center;font-size:90px;color:rgba(123,79,209,.4)}
+        .q3-slot .q3-card{position:absolute;left:0;top:0;width:100%;height:100%;margin:0;border:0;border-radius:0;background:none;cursor:default;font-size:100px}
+        .q3-slot.is-lit{--blk-c:#2fbf71;background:rgba(47,191,113,.2)}
+        .q3-cards{position:absolute;left:0;top:730px;width:1920px;display:flex;justify-content:center;gap:28px}
+        .q3-card{position:relative;width:150px;height:130px;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;cursor:grab;touch-action:none;
+          background:var(--c-white);border:solid 5px var(--c-purple);border-radius:24px;font-family:'Cafe24 Ssurround';font-size:70px;color:var(--c-ink)}
+        .q3-card.is-dragging{cursor:grabbing;z-index:60}
+        .q3-card.is-wrong{animation:fix-word-shake .3s ease}
+        .q3-card.is-hint{animation:blk-glow .5s ease-in-out 3}
+        .q3-hint{position:absolute;left:1640px;top:880px;padding:0}
+
+        .q4-img{position:absolute;left:100px;top:450px;width:640px;height:440px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:20px;background:var(--c-white) url('img/p15_entry.png') center / cover no-repeat}
+        .q4-opt{position:absolute;left:800px;width:1000px;height:110px;font-size:52px}
+        .q4-opt1{top:470px}.q4-opt2{top:620px}.q4-opt3{top:770px}
+
+        .q5-algo{position:absolute;left:100px;top:430px;width:700px;height:490px;box-sizing:border-box;padding:40px 50px;display:flex;flex-direction:column;gap:26px;background:var(--c-white);border:solid 6px var(--c-purple);border-radius:20px;overflow:hidden}
+        .q5-blk{height:62px;padding:8px 20px 0;display:flex;align-items:center;border-radius:10px;font-family:'Cafe24 Ssurround';font-size:30px;color:var(--c-white);letter-spacing:-0.05em;white-space:nowrap}
+        .q5-blk.is-start{background:#1fa89a;border-radius:30px 30px 10px 10px}
+        .q5-blk.is-move{background:#a751e8}
+        .q5-opt{position:absolute;left:860px;width:960px;height:110px;font-size:46px}
+        .q5-opt1{top:470px}.q5-opt2{top:620px}.q5-opt3{top:770px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="quiz-stage">
+          <div class="step-flow">
+
+            <div class="step-panel" id="qPanel1">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q1.</span>
+                  <p class="quiz-ask">밥이 우리 몸속을 지날 때, 지나가는 소화기관을 순서대로 놓아 보세요.</p>
+                </div>
+              </div>
+              <div class="q1-body" id="q1Body">
+                <div class="q1-piece blk is-flat" data-key="intestine">장</div>
+                <div class="q1-piece blk is-flat" data-key="mouth">입</div>
+                <div class="q1-piece blk is-flat" data-key="stomach">위</div>
+              </div>
+              <div class="q1-slots blk-col" id="q1Slots">
+                <div class="q1-slot blk is-empty" data-key="mouth"><span class="q1-no">1단계</span></div>
+                <div class="q1-slot blk is-empty" data-key="stomach"><span class="q1-no">2단계</span></div>
+                <div class="q1-slot blk is-empty" data-key="intestine"><span class="q1-no">3단계</span></div>
+              </div>
+            </div>
+
+            <div class="step-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q2.</span>
+                  <p class="quiz-ask">컴퓨터가 명령을 차례차례 순서대로 실행하는 것을 무엇이라고 할까요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz" data-wrong="위에서 아래로 차례차례 실행하는 것을 부르는 말이에요. 다시 한번 골라 볼까요?">
+                <button class="answer-pick card-btn is-quiz q2-opt1" data-correct="true">1. 순차</button>
+                <button class="answer-pick card-btn is-quiz q2-opt2" data-correct="false">2. 알고리즘</button>
+              </div>
+            </div>
+
+            <div class="step-panel" id="qPanel3">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q3.</span>
+                  <p class="quiz-ask">컴퓨터가 일을 처리하기 위해 순서대로 정리해 둔 규칙의 이름을 완성해 보세요.</p>
+                </div>
+              </div>
+              <div class="q3-init" id="q3Init">
+                <div class="q3-slot blk is-flat is-empty" data-key="a">ㅇ</div>
+                <div class="q3-slot blk is-flat is-empty" data-key="b">ㄱ</div>
+                <div class="q3-slot blk is-flat is-empty" data-key="c">ㄹ</div>
+                <div class="q3-slot blk is-flat is-empty" data-key="d">ㅈ</div>
+              </div>
+              <div class="q3-cards" id="q3Cards">
+                <div class="q3-card" data-key="b">고</div>
+                <div class="q3-card" data-key="x1">얼</div>
+                <div class="q3-card" data-key="a">알</div>
+                <div class="q3-card" data-key="x2">구</div>
+                <div class="q3-card" data-key="d">즘</div>
+                <div class="q3-card" data-key="x3">라</div>
+                <div class="q3-card" data-key="c">리</div>
+                <div class="q3-card" data-key="x4">좀</div>
+              </div>
+              <button class="card-btn q3-hint js-sfx" id="q3Hint" data-sound="sound/click.mp3" style="min-width:0;width:240px;height:90px;font-size:44px;padding:8px 10px 0">힌트</button>
+            </div>
+
+            <div class="step-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q4.</span>
+                  <p class="quiz-ask">엔트리와 같이 블록을 조립하여 컴퓨터에게 일을 시키는 방법을 뭐라고 할까요?</p>
+                </div>
+              </div>
+              <div class="q4-img"></div>
+              <div class="answer-pick-quiz" data-wrong="다시 한번 해볼까요?">
+                <button class="answer-pick card-btn q4-opt q4-opt1" data-correct="true">1. 블록코딩</button>
+                <button class="answer-pick card-btn q4-opt q4-opt2" data-correct="false">2. 알고리즘</button>
+                <button class="answer-pick card-btn q4-opt q4-opt3" data-correct="false">3. 순차</button>
+              </div>
+            </div>
+
+            <div class="step-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q5.</span>
+                  <p class="quiz-ask">아래의 알고리즘을 봤을 때 아로가 오른쪽으로 10cm 이동을 마친 뒤 해야 하는 행동은 무엇일까요?</p>
+                </div>
+              </div>
+              <div class="q5-algo">
+                <div class="q5-blk is-start">시작하기 버튼을 클릭했을 때</div>
+                <div class="q5-blk is-move">오른쪽으로 10cm 이동</div>
+                <div class="q5-blk is-move">아래쪽으로 10cm 이동</div>
+                <div class="q5-blk is-move">위쪽으로 10cm 이동</div>
+                <div class="q5-blk is-move">왼쪽으로 10cm 이동</div>
+              </div>
+              <div class="answer-pick-quiz" data-wrong="다시 한번 해볼까요?" data-next="page16.html">
+                <button class="answer-pick card-btn q5-opt q5-opt1" data-correct="false">1. 왼쪽으로 10cm 이동</button>
+                <button class="answer-pick card-btn q5-opt q5-opt2" data-correct="true">2. 아래쪽으로 10cm 이동</button>
+                <button class="answer-pick card-btn q5-opt q5-opt3" data-correct="false">3. 오른쪽으로 10cm 이동</button>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="ox-result-correct is-avatar is-off" data-sound="sound/correct.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct_gwa.png" alt=""></div>
+              <p class="avatar-popup-text">정답이에요!</p>
+              <div class="avatar-popup-extra"><img src="../../img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div>
+          <div class="ox-result-wrong is-avatar is-off" data-sound="sound/incorrect.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text is-small">다시 해볼까요?</p>
+            </div>
+          </div>
+          <div class="ox-result-correct is-avatar is-off" id="qRight">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct_gwa.png" alt=""></div>
+              <p class="avatar-popup-text is-medium" id="qRightText">맞아요!</p>
+            </div>
+          </div>
+          <div class="ox-result-wrong is-avatar is-off" id="qWrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text is-medium" id="qWrongText">다시 해볼까요?</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="퀴즈 풀기" data-next="page16.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const rightLayer = $('qRight');
+    const wrongLayer = $('qWrong');
+    const next = (el) => advancePanelOrNavigate(el, null);
+    const wrongPop = (card, text) => {
+      playWrong();
+      card.classList.remove('is-wrong');
+      void card.offsetWidth;
+      card.classList.add('is-wrong');
+      $('qWrongText').textContent = text;
+      flashLayer(wrongLayer, 'is-off', 3000);
+    };
+
+    /* Q1: 입(1) → 위(2) → 장(3) 순서대로만 놓기 */
+    const ORDER = ['mouth', 'stomach', 'intestine'];
+    const RIGHT1 = {
+      mouth: '맞아요! 음식물은 입에서 가장 먼저 잘게 씹혀요.',
+      stomach: '맞아요! 입에서 잘게 씹힌 음식물은 위로 이동해요.',
+      intestine: '맞아요! 위를 지난 음식물은 장으로 이동해요.'
+    };
+    let q1 = 0;
+    const q1Slots = Array.from(document.querySelectorAll('#q1Slots .q1-slot'));
+    q1Slots[0].classList.add('is-now');
+    initMatchDrag({
+      cards: Array.from(document.querySelectorAll('#q1Body .q1-piece')),
+      zones: q1Slots, slop: 40,
+      match: (card, zone) => card.dataset.key === zone.dataset.key && card.dataset.key === ORDER[q1],
+      onRight: (card, zone) => {
+        zone.classList.remove('is-now', 'is-empty');
+        zone.classList.add('is-lit');
+        $('qRightText').textContent = RIGHT1[ORDER[q1]];
+        playCorrect();
+        flashLayer(rightLayer, 'is-off', 3000);
+        q1 += 1;
+        if (q1 < ORDER.length) q1Slots[q1].classList.add('is-now');
+      },
+      onWrong: (card) => wrongPop(card, '다시 해볼까요?'),
+      onDone: () => {
+        q1Slots.forEach((s, i) => setTimeout(() => { s.classList.remove('is-now'); void s.offsetWidth; s.classList.add('is-now'); }, 3200 + i * 600));
+        setTimeout(() => next(q1Slots[0]), 3200 + q1Slots.length * 600 + 800);
+      }
+    });
+
+    /* Q3: ㅇㄱㄹㅈ 칸에 알·고·리·즘 */
+    const q3Cards = Array.from(document.querySelectorAll('#q3Cards .q3-card'));
+    initMatchDrag({
+      cards: q3Cards,
+      zones: Array.from(document.querySelectorAll('#q3Init .q3-slot')), slop: 30,
+      onRight: (card, zone) => { zone.classList.remove('is-empty'); zone.classList.add('is-lit'); },
+      onWrong: (card, zone) => { if (zone) wrongPop(card, '조금 다른 글자예요. 다시 찾아볼까요?'); else { card.classList.remove('is-wrong'); void card.offsetWidth; card.classList.add('is-wrong'); } },
+      onDone: () => {
+        $('qRightText').textContent = '정답이에요!';
+        playCorrect();
+        flashLayer(rightLayer);
+        setTimeout(() => next($('q3Init')), 2000);
+      }
+    });
+    $('q3Hint').addEventListener('click', () => {
+      q3Cards.forEach((c) => {
+        if (c.dataset.placed || c.dataset.key.charAt(0) === 'x') return;
+        c.classList.remove('is-hint'); void c.offsetWidth; c.classList.add('is-hint');
+      });
+    });
+  })();
+  </script>
+</body>
+</html>
