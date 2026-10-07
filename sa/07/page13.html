@@ -7,33 +7,45 @@
     <link rel="stylesheet" href="../../css/common.css">
     <style>
         /* 디자인 없음 - 기획서 66~73p. 앨범 앞표지(앨범 보기) → 장소 6장(◀ ▶로 넘김) → 마지막 장에서 ▶ → page14(뒤표지·마무리).
-           표지 삽화 img/p13_cover.png, 장소 사진은 page12와 같은 img/p12_place_{key}.png, 이웃 사진 img/p05_job_{key}.png */
+           표지 삽화 img/p13_cover.png, 장소 사진은 page12와 같은 img/p12_place_{key}.png, 이웃 사진 img/p12_job_{key}.png */
         .p13-view.is-off{display:none}
 
-        .p13-book{position:absolute;left:210px;top:40px;width:1500px;height:860px;box-sizing:border-box;padding:30px;border-radius:40px;background:#8b5a3c;box-shadow:0 16px 0 0 #5e3a24;display:flex;gap:8px}
-        .p13-page{flex:1 1 0;position:relative;border-radius:22px;background:#fffaf0;box-shadow:inset 0 0 30px rgba(139,90,60,.15);overflow:hidden;box-sizing:border-box;padding:40px}
+        .p13-book{position:absolute;left:210px;top:50px;width:1500px;height:860px;box-sizing:border-box;padding:14px 48px 22px;border-radius:26px;background:#86a6e4;box-shadow:0 9px 0 0 #abbde0;display:flex}
+        .p13-book:before{content:'';position:absolute;left:16px;right:16px;top:10px;bottom:12px;border-radius:18px;background:#b5c8f6;box-shadow:0 -5px 2px 0 #dbe4fd, 0 2px 10px 2px #6788be;}
+        .p13-page{flex:1 1 0;position:relative;box-sizing:border-box;padding:40px;background:#fbf9ff;overflow:hidden}
+        .p13-binding{flex:0 0 136px;position:relative;background:linear-gradient(90deg,#d7d9fa,#d7d9fa 35%,#b2baef 36%,#b2baef 65%,#d7d9fa 66%,#d7d9fa);box-shadow:0px 2px 2px 0px #9db2e1}
+        .p13-binding:before{content:'';position:absolute;left:55%;top:0;width:20px;height:100%;margin-left:-18px;background:linear-gradient(90deg,#3d7fb4,#2d6799 25%,#2d6799 75%,#3a79ad)}
+        .p13-binding:after{content:'';position:absolute;left:0;top:0;width:100%;height:100%;
+        background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27107%27%20height%3D%2776%27%20viewBox%3D%270%200%20107%2076%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27t%27%20gradientUnits%3D%27userSpaceOnUse%27%20x1%3D%270%27%20y1%3D%272%27%20x2%3D%270%27%20y2%3D%2729%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%23d9f4fe%27%2F%3E%3Cstop%20offset%3D%27.3%27%20stop-color%3D%27%23b4e4f9%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%2372bdec%27%2F%3E%3C%2FlinearGradient%3E%3ClinearGradient%20id%3D%27h%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%270%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%2341419a%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%2332328a%27%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cellipse%20cx%3D%279%27%20cy%3D%2721.5%27%20rx%3D%278%27%20ry%3D%278.4%27%20fill%3D%27url(%23h)%27%20stroke%3D%27%23e9e9fd%27%20stroke-opacity%3D%27.7%27%20stroke-width%3D%27.6%27%2F%3E%3Cellipse%20cx%3D%2798%27%20cy%3D%2721.5%27%20rx%3D%278%27%20ry%3D%278.4%27%20fill%3D%27url(%23h)%27%20stroke%3D%27%23e9e9fd%27%20stroke-opacity%3D%27.7%27%20stroke-width%3D%27.6%27%2F%3E%3Cellipse%20cx%3D%2717%27%20cy%3D%2727.2%27%20rx%3D%275.4%27%20ry%3D%272.8%27%20fill%3D%27%23a9ddf7%27%2F%3E%3Cellipse%20cx%3D%2790%27%20cy%3D%2727.2%27%20rx%3D%275.4%27%20ry%3D%272.8%27%20fill%3D%27%23a9ddf7%27%2F%3E%3Cpath%20d%3D%27M8%2028.5C9.5%2012%2032%202.4%2053.5%202.4S97.5%2012%2099%2028.5C95%2030%2089.5%2029.5%2087%2027C85%2017%2070%208.8%2053.5%208.8S22%2017%2020%2027C17.5%2029.5%2012%2030%208%2028.5Z%27%20fill%3D%27url(%23t)%27%2F%3E%3Cpath%20d%3D%27M16%2021C20%2011.5%2036%205.6%2053.5%205.6S87%2011.5%2091%2021%27%20fill%3D%27none%27%20stroke%3D%27%23fff%27%20stroke-opacity%3D%27.32%27%20stroke-width%3D%271.2%27%20stroke-linecap%3D%27round%27%2F%3E%3C%2Fsvg%3E");
+        background-position: center 20px;
+        background-size: 107px 76px;
+        background-repeat: repeat-y}
 
-        .p13-cover{position:absolute;left:760px;top:40px;width:800px;height:860px;box-sizing:border-box;padding:60px 50px;border-radius:30px 50px 50px 30px;background:var(--c-purple);box-shadow:inset 22px 0 0 var(--c-indigo),0 16px 0 0 var(--c-ink);
-          display:flex;flex-direction:column;align-items:center;gap:30px;font-family:'Cafe24 Ssurround';color:var(--c-white);text-align:center}
-        .p13-cover h2{margin:0;font-weight:normal;font-size:80px;letter-spacing:-0.05em}
-        .p13-cover i{flex:1 1 auto;width:100%;border-radius:24px;background:#e6dafe url('img/p13_cover.png') center / cover no-repeat}
+        .p13-cover{position:absolute;left:887px;top:60px;width:800px;height:860px;box-sizing:border-box;padding:88px 66px 88px 146px;
+          display:flex;flex-direction:column;align-items:center;gap:45px;font-family:'Cafe24 Ssurround';color:var(--c-white);text-align:center;background:url(img/p13_album.png) no-repeat}
+        .p13-cover h2{margin:0;font-weight:normal;font-size:48px;letter-spacing:-0.05em;color:var(--c-ink)}
+        .p13-cover i{width:100%;height:50%;border-radius:24px;background:#e6dafe url('img/p13_cover.png') center / cover no-repeat;border:solid 5px var(--c-navy);border-radius:12px}
         .p13-cover p{margin:0;font-size:44px;line-height:1.3}
-        .p13-cover .card-btn{min-width:0;width:400px;white-space:nowrap}
+        .p13-cover .card-btn{min-width:0;width:300px;height:88px;font-size:52px;white-space:nowrap;margin-top:100px}
         /* 기획서 66p: 안내 문구는 캐릭터 위 말풍선(공용 .guide-bubble) */
-        .p13-front-bubble{width:560px;font-size:50px}
-        .p13-character{left:60px;top:380px;width:460px;height:560px}
+        .p13-front-bubble{width:560px;font-size:50px;bottom:650px;left:174px}
+        .p13-character{left:60px;top:239px;width:682px;height:726px}
 
-        .p13-photo{width:100%;height:100%;border:solid 12px var(--c-white);box-sizing:border-box;border-radius:10px;background:var(--c-mist) center / cover no-repeat;box-shadow:0 6px 16px rgba(0,0,0,.2);transform:rotate(-1.5deg)}
+        .p13-photo{width:100%;height:100%;border:solid 5px var(--c-ink);box-sizing:border-box;border-radius:10px;background:var(--c-mist) center / cover no-repeat}
         .p13-right{display:flex;flex-direction:column;gap:22px;font-family:'Cafe24 Ssurround';color:var(--c-ink);letter-spacing:-0.05em}
         /* 기획서 67p: 장소 이름은 사진 아래 */
         .p13-left{display:flex;flex-direction:column;align-items:center;gap:26px}
         .p13-left .p13-photo{flex:1 1 auto;height:auto}
-        .p13-place{margin:0;font-family:'Cafe24 Ssurround';font-size:56px;color:var(--c-purple);letter-spacing:-0.05em}
-        .p13-right{justify-content:center}
-        .p13-label{margin:10px 0 0;font-size:56px;color:var(--c-violet)}
-        .p13-job{display:flex;align-items:center;gap:24px;font-size:48px}
-        .p13-job i{width:200px;height:200px;border-radius:24px;border:solid 5px var(--c-sky);background:var(--c-mist) center top / cover no-repeat}
-        .p13-role{margin:0;font-size:44px;line-height:1.3;word-break:keep-all}
+        .p13-placebox{position:relative;width:100%;box-sizing:border-box;margin-top:24px;padding:50px 30px 20px;border:solid 4px #2f6fed;border-radius:16px;background:var(--c-white);text-align:center}
+        .p13-place{margin:0;font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.2;color:var(--c-navy);letter-spacing:-0.05em}
+        .p13-right{justify-content:center;align-items:center;gap:50px}
+        .p13-jobwrap{position:relative;padding-top:40px;margin-top:30px}
+        .p13-job{display:flex;flex-direction:column;width:380px;height:430px;box-sizing:border-box;border:solid 5px #2f6fed;border-radius:18px;background:var(--c-white);overflow:hidden;font-size:48px}
+        .p13-job i{flex:1 1 auto;background:var(--c-mist) center top / cover no-repeat}
+        .p13-job span{flex:0 0 78px;display:flex;align-items:center;justify-content:center;padding-top:6px}
+        .p13-rolebox{position:relative;width:100%;box-sizing:border-box;padding:58px 36px 30px;border:solid 4px #2f6fed;border-radius:16px;background:#e3f5ff}
+        .p13-label{position:absolute;left:50%;top:0;transform:translate(-50%,-50%);margin:0;font-family:'Cafe24 Ssurround';letter-spacing:-0.05em;padding:8px 40px 2px;border-radius:30px;background:var(--c-navy);color:var(--c-white);font-size:36px;white-space:nowrap}
+        .p13-role{margin:0;font-size:44px;line-height:1.3;word-break:keep-all;color:var(--c-navy)}
         /* 동그라미 안 세모(▶◀ 글자가 글꼴에 없어서 CSS로 그림) */
         .p13-arrow{position:absolute;top:410px;width:110px;height:110px;padding:0;border:solid 5px var(--c-ink);border-radius:50%;background:var(--c-white);cursor:pointer;font-size:0;z-index:3;box-shadow:0 8px 0 0 var(--c-sky-pale)}
         .p13-arrow:hover{background:#eee8ff}
@@ -53,7 +65,7 @@
         <main class="bg-default">
           <div class="p13-view" id="p13Front">
             <p class="guide-bubble p13-front-bubble">앨범을 완성했어요!<br>함께 확인해볼까요?</p>
-            <div class="char-box p13-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+            <div class="char-box p13-character"><img src="img/p13_character.png" alt="메인 캐릭터"></div>
             <div class="p13-cover">
               <h2>우리 동네 이웃 앨범</h2>
               <i></i>
@@ -63,12 +75,17 @@
 
           <div class="p13-view is-off" id="p13Album">
             <div class="p13-book">
-              <div class="p13-page p13-left"><div class="p13-photo" id="p13Photo"></div><p class="p13-place" id="p13Place"></p></div>
+              <div class="p13-page p13-left"><div class="p13-photo" id="p13Photo"></div><div class="p13-placebox"><p class="p13-label">장소 이름</p><p class="p13-place" id="p13Place"></p></div></div>
+              <div class="p13-binding"></div>
               <div class="p13-page p13-right">
-                <p class="p13-label">만날 수 있는 이웃</p>
-                <div class="p13-job"><i id="p13JobImg"></i><span id="p13Job"></span></div>
-                <p class="p13-label">이웃의 역할</p>
-                <p class="p13-role" id="p13Role"></p>
+                <div class="p13-jobwrap">
+                  <p class="p13-label">만날 수 있는 이웃</p>
+                  <div class="p13-job"><i id="p13JobImg"></i><span id="p13Job"></span></div>
+                </div>
+                <div class="p13-rolebox">
+                  <p class="p13-label">이웃의 역할</p>
+                  <p class="p13-role" id="p13Role"></p>
+                </div>
               </div>
             </div>
             <button class="p13-arrow p13-prev js-sfx" id="p13Prev" data-sound="sound/click.mp3" aria-label="이전 장">◀</button>
@@ -101,8 +118,8 @@
     function render() {
       const p = PAGES[i];
       $('p13Photo').style.backgroundImage = "url('img/p12_place_" + p.key + ".png')";
-      $('p13Place').textContent = '장소 이름: ' + p.place;
-      $('p13JobImg').style.backgroundImage = "url('img/p05_job_" + p.img + ".png')";
+      $('p13Place').textContent = p.place;
+      $('p13JobImg').style.backgroundImage = "url('img/p12_job_" + p.img + ".png')";
       $('p13Job').textContent = p.job;
       $('p13Role').textContent = p.role;
       $('p13Prev').classList.toggle('is-off', i === 0);
