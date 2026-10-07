@@ -118,12 +118,13 @@
             <div class="toc-accordion">
               <button class="toc-accordion-toggle js-sfx" data-sound="sound/click.mp3">8차시</button>
               <div class="toc-accordion-panel">
-                <a href="javascript:;" class="toc-sub-item">01</a>
-                <a href="javascript:;" class="toc-sub-item">02</a>
-                <a href="javascript:;" class="toc-sub-item">03</a>
-                <a href="javascript:;" class="toc-sub-item">04</a>
-                <a href="javascript:;" class="toc-sub-item">05</a>
-                <a href="javascript:;" class="toc-sub-item">06</a>
+                <a href="${BASE}gwa/08/page01.html" class="toc-sub-item">1) 차례대로 맞추는 몸속 퍼즐 게임</a>
+                <a href="${BASE}gwa/08/page04.html" class="toc-sub-item">2) 순서대로 차례차례, 순차와 알고리즘</a>
+                <a href="${BASE}gwa/08/page05.html" class="toc-sub-item">3) 일상생활 속 순차 찾기</a>
+                <a href="${BASE}gwa/08/page08.html" class="toc-sub-item">4) 컴퓨터도 알고리즘 순차대로</a>
+                <a href="${BASE}gwa/08/page13.html" class="toc-sub-item">5) 첫 블록 코딩, 엔트리로 배우는 순차</a>
+                <a href="${BASE}gwa/08/page15.html" class="toc-sub-item">6) 퀴즈 풀기</a>
+                <a href="${BASE}gwa/08/page16.html" class="toc-sub-item">7) 블록 코딩 순서대로 캐릭터 움직이기</a>
               </div>
             </div>
 

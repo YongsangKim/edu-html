@@ -1230,9 +1230,13 @@ function initStepFlow() {
     const panels = Array.from(flow.querySelectorAll('.step-panel'));
     if (panels.length < 2) return; // 스텝이 하나뿐이면 할 일 없음
 
+    // 주소에 ?step=N 이 있으면 N번째 스텝부터 보여줌(UI 가이드의 퀴즈 나열용)
+    const wantStep = parseInt(new URLSearchParams(window.location.search).get('step'), 10);
+    const startIndex = wantStep >= 1 && wantStep <= panels.length ? wantStep - 1 : 0;
+
     panels.forEach((panel, index) => {
-      // 첫 번째 스텝만 보이고 나머지는 숨김
-      panel.classList.toggle('is-hidden', index !== 0);
+      // 시작 스텝만 보이고 나머지는 숨김
+      panel.classList.toggle('is-hidden', index !== startIndex);
 
       const nextPanel = panels[index + 1];
       if (!nextPanel) return; // 마지막 스텝: 실제 이동이 되게 그대로 둠
@@ -2410,6 +2414,36 @@ function initMatchDrag(opts) {
       card.addEventListener('pointerup', up);
       card.addEventListener('pointercancel', up);
     });
+  });
+}
+
+/* 단계 순서대로 카드 놓기(gwa/08 page06·07 라면 끓이기·양치하기). 페이지 <script>에서 직접 호출.
+   o.cards: 카드(data-step=이 카드의 정답 단계 0부터), o.zones: 단계 순서대로의 칸(data-step 같은 번호)
+   o.steps[i].wrong: i단계에서 틀렸을 때 문구, o.wrongModal/o.wrongText: 오답 팝업(.ox-result-wrong 계열)과 문구 칸
+   o.onStep(다음단계번호): 한 칸이 맞게 채워질 때마다, o.onDone(): 전부 채워졌을 때
+   지금 놓을 칸에는 .is-now(블록 반짝임)가 붙고, 채워진 칸은 .is-filled(.is-empty가 빠짐). 현재 단계가 아닌 칸에 놓으면 오답 */
+function initStepOrder(o) {
+  let step = 0;
+  o.zones[0].classList.add('is-now');
+  initMatchDrag({
+    cards: o.cards, zones: o.zones, slop: 40,
+    match: (card, zone) => card.dataset.step === zone.dataset.step && Number(zone.dataset.step) === step,
+    onRight: (card, zone) => {
+      zone.classList.remove('is-now', 'is-empty');
+      zone.classList.add('is-filled');
+      step += 1;
+      if (o.onStep) o.onStep(step);
+      if (step < o.zones.length) o.zones[step].classList.add('is-now');
+    },
+    onWrong: (card) => {
+      playWrong();
+      card.classList.remove('is-wrong');
+      void card.offsetWidth;
+      card.classList.add('is-wrong');
+      o.wrongText.textContent = o.steps[step].wrong;
+      flashLayer(o.wrongModal);
+    },
+    onDone: o.onDone
   });
 }
 

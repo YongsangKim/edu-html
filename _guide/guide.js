@@ -8,7 +8,8 @@
     { file: 'progress.html', label: '진행도(게이지·별·배지)' },
     { file: 'characters.html', label: '안내 캐릭터·말풍선' },
     { file: 'drag.html', label: '끌어 놓기' },
-    { file: 'intro.html', label: '도입·마무리 화면' }
+    { file: 'intro.html', label: '도입·마무리 화면' },
+    { file: 'quiz.html', label: '퀴즈 풀기' }
   ];
 
   const here = location.pathname.split('/').pop() || 'index.html';
