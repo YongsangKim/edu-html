@@ -9,7 +9,8 @@
     { file: 'characters.html', label: '안내 캐릭터·말풍선' },
     { file: 'drag.html', label: '끌어 놓기' },
     { file: 'intro.html', label: '도입·마무리 화면' },
-    { file: 'quiz.html', label: '퀴즈 풀기' }
+    { file: 'quiz.html', label: '퀴즈 풀기' },
+    { file: 'wide-intro.html', label: '넓은 활동 방법 안내' }
   ];
 
   const here = location.pathname.split('/').pop() || 'index.html';
