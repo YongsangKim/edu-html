@@ -26,7 +26,7 @@
         .p13-cover h2{margin:0;font-weight:normal;font-size:48px;letter-spacing:-0.05em;color:var(--c-ink)}
         .p13-cover i{width:100%;height:50%;border-radius:24px;background:#e6dafe url('img/p13_cover.png') center / cover no-repeat;border:solid 5px var(--c-navy);border-radius:12px}
         .p13-cover p{margin:0;font-size:44px;line-height:1.3}
-        .p13-cover .card-btn{min-width:0;width:300px;height:88px;font-size:52px;white-space:nowrap;margin-top:100px}
+        .p13-cover .card-btn{min-width:0;width:400px;height:110px;padding:10px 10px 4px;font-size:64px;letter-spacing:.2em;white-space:nowrap;margin-top:100px}
         /* 기획서 66p: 안내 문구는 캐릭터 위 말풍선(공용 .guide-bubble) */
         .p13-front-bubble{width:560px;font-size:50px;bottom:650px;left:174px}
         .p13-character{left:60px;top:239px;width:682px;height:726px}
@@ -46,13 +46,10 @@
         .p13-rolebox{position:relative;width:100%;box-sizing:border-box;padding:58px 36px 30px;border:solid 4px #2f6fed;border-radius:16px;background:#e3f5ff}
         .p13-label{position:absolute;left:50%;top:0;transform:translate(-50%,-50%);margin:0;font-family:'Cafe24 Ssurround';letter-spacing:-0.05em;padding:8px 40px 2px;border-radius:30px;background:var(--c-navy);color:var(--c-white);font-size:36px;white-space:nowrap}
         .p13-role{margin:0;font-size:44px;line-height:1.3;word-break:keep-all;color:var(--c-navy)}
-        /* 동그라미 안 세모(▶◀ 글자가 글꼴에 없어서 CSS로 그림) */
-        .p13-arrow{position:absolute;top:410px;width:110px;height:110px;padding:0;border:solid 5px var(--c-ink);border-radius:50%;background:var(--c-white);cursor:pointer;font-size:0;z-index:3;box-shadow:0 8px 0 0 var(--c-sky-pale)}
-        .p13-arrow:hover{background:#eee8ff}
-        .p13-arrow:after{content:'';position:absolute;top:50%;left:50%;margin-top:-22px;border-style:solid;border-width:22px 0 22px 34px;border-color:transparent transparent transparent var(--c-purple);margin-left:-12px}
-        .p13-prev:after{border-width:22px 34px 22px 0;border-color:transparent var(--c-purple) transparent transparent;margin-left:-22px}
+        .p13-arrow{position:absolute;top:410px;width:124px;height:119px;padding:0;border:0;background:none;cursor:pointer;z-index:3}
+        .p13-arrow img{width:100%;height:100%;display:block}
         .p13-prev{left:60px}
-        .p13-next{left:1750px}
+        .p13-next{left:1736px}
         .p13-arrow.is-off{display:none}
 
     </style>
@@ -88,8 +85,8 @@
                 </div>
               </div>
             </div>
-            <button class="p13-arrow p13-prev js-sfx" id="p13Prev" data-sound="sound/click.mp3" aria-label="이전 장">◀</button>
-            <button class="p13-arrow p13-next js-sfx" id="p13Next" data-sound="sound/click.mp3" aria-label="다음 장">▶</button>
+            <button class="p13-arrow p13-prev" id="p13Prev"><img class="js-img-swap js-sfx" data-swap-reset="200" src="img/p13_btn_arrow_left.png" data-src-alt="img/p13_btn_arrow_left_on.png" data-src-over="img/p13_btn_arrow_left_over.png" data-sound="sound/click.mp3" alt="이전 장"></button>
+            <button class="p13-arrow p13-next" id="p13Next"><img class="js-img-swap js-sfx" data-swap-reset="200" src="img/p13_btn_arrow_right.png" data-src-alt="img/p13_btn_arrow_right_on.png" data-src-over="img/p13_btn_arrow_right_over.png" data-sound="sound/click.mp3" alt="다음 장"></button>
           </div>
 
         </main>
@@ -125,7 +122,12 @@
       $('p13Prev').classList.toggle('is-off', i === 0);
     }
 
-    $('p13Open').addEventListener('click', () => { i = 0; render(); view('p13Album'); });
+    $('p13Open').addEventListener('click', () => {
+      const btn = $('p13Open');
+      if (btn.classList.contains('is-pressed')) return;
+      btn.classList.add('is-pressed');
+      setTimeout(() => { btn.classList.remove('is-pressed'); i = 0; render(); view('p13Album'); }, 250);
+    });
     $('p13Prev').addEventListener('click', () => { if (i > 0) { i -= 1; render(); } });
     $('p13Next').addEventListener('click', () => {
       if (i < PAGES.length - 1) { i += 1; render(); return; }

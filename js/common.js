@@ -319,6 +319,7 @@ function initImageSwap() {
       img.addEventListener('pointerenter', (e) => {
         if (e.pointerType === 'touch') return; // 터치는 호버 개념이 없음
         if (img.classList.contains('is-swapped')) return;
+        if (img.closest('button:disabled, .is-disabled')) return; // 비활성 버튼은 오버 이미지 없음
         img.src = img.dataset.srcOver;
       });
       img.addEventListener('pointerleave', () => {
@@ -343,6 +344,14 @@ function initImageSwap() {
       if (!img.classList.contains('is-swapped')) {
         img.classList.add('is-swapped');
         img.src = img.dataset.srcAlt;
+      }
+
+      // data-swap-reset="ms"가 있으면 같은 버튼을 계속 누르는 용도(이전/다음 화살표 등): 누름 이미지를 잠깐 보여준 뒤 원래(마우스가 올려져 있으면 오버)로 돌림
+      if (img.dataset.swapReset) {
+        setTimeout(() => {
+          img.classList.remove('is-swapped');
+          img.src = img.matches(':hover') && img.dataset.srcOver ? img.dataset.srcOver : img.dataset.originalSrc;
+        }, Number(img.dataset.swapReset) || 200);
       }
     });
   });
@@ -390,6 +399,7 @@ function initLinkEffect() {
   document.querySelectorAll('a.js-nav-effect').forEach((link) => {
     link.addEventListener('click', (e) => {
       e.preventDefault(); // 실제 이동은 아래에서 수동으로
+      if (link.classList.contains('card-btn')) link.classList.add('is-pressed'); // 효과음이 끝나 이동하기 전까지 눌린 모습 유지
 
       const rawHref = link.getAttribute('href');
       if (!rawHref) return;

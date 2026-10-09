@@ -8,17 +8,17 @@
     <style>
         /* 디자인 없음 - 기획서 3~6p. 파도 4가지(높이 높/낮 × 간격 넓/좁)를 무작위 순서로 4문제. 관측 모니터의 파도(SVG, 흐르는 애니메이션)를 보고
            높이·간격 버튼을 하나씩 고르면 확성기 활성 → 누르면 삑 소리 뒤 정답/오답. 맞힐 때마다 확성기 아이콘 하나씩 켜짐, 다 맞히면 마무리 안내 3단계.
-           파도 소리 sound/p02_wave_{high|low}_{wide|narrow}.mp3, 삑 sound/p02_beep.mp3, 대피 성공 그림 img/p02_success.png */
+           삑 sound/p02_beep.wav, 대피 성공 그림 img/p02_success.png */
 
         /* 배치(기획서 3p): 왼쪽 위 알림 아이콘 + 안내 바, 오른쪽 위 성공 확성기 4개, 왼쪽 관측 모니터, 오른쪽 파도 분석 버튼 2×2, 오른쪽 아래 큰 확성기.
-           버튼 그림 img/p02_btn_{high|low|wide|narrow}.png(없으면 글자), 확성기 img/p02_horn.png, 성공 표시 img/p02_life(_on).png */
+           확성기와 성공 표시는 이모지 📢(꺼짐은 회색·반투명) */
         .p02-alert{position:absolute;left:58px;top:35px;width:1062px;height:110px;margin:0;box-sizing:border-box;padding:6px 30px 0 120px;display:flex;align-items:center;
           background:var(--c-white);border:solid 5px var(--c-ink);border-radius:55px;font-family:'Cafe24 Ssurround';font-size:48px;color:var(--c-ink);letter-spacing:-0.05em}
         .p02-alert:before{content:'!';position:absolute;left:10px;top:50%;width:84px;height:84px;margin-top:-42px;border-radius:50%;background:#ff5a5a;color:var(--c-white);font-size:60px;line-height:92px;text-align:center}
 
         .p02-lives{position:absolute;left:1396px;top:40px;width:480px;height:105px;display:flex;align-items:center;justify-content:space-around}
-        .p02-lives i{width:100px;height:100px;background:url('img/p02_life.png') center / contain no-repeat;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:64px;filter:grayscale(1);opacity:.5;transition:all .3s}
-        .p02-lives i.is-on{background-image:url('img/p02_life_on.png');filter:none;opacity:1;transform:scale(1.1)}
+        .p02-lives i{width:100px;height:100px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:50%;background:var(--c-white);display:flex;align-items:center;justify-content:center;font-style:normal;font-size:64px;filter:grayscale(1);opacity:.5;transition:all .3s}
+        .p02-lives i.is-on{background:var(--c-yellow);filter:none;opacity:1;transform:scale(1.1)}
 
         .p02-monitor{position:absolute;left:58px;top:192px;width:1142px;height:686px;box-sizing:border-box;border:solid 12px var(--c-ink);border-radius:30px;background:var(--c-white);overflow:hidden}
         .p02-monitor-title{position:absolute;left:26px;top:20px;margin:0;font-family:'Cafe24 Ssurround';font-size:38px;color:var(--c-ink);z-index:2}
@@ -32,12 +32,9 @@
         @keyframes p02-flow{to{transform:translateX(var(--shift))}}
 
         .p02-btns{position:absolute;left:1240px;top:192px;width:622px;height:400px;box-sizing:border-box;padding:0 0 12px;display:grid;grid-template-columns:1fr 1fr;gap:30px 36px}
-        .p02-opt{padding:0;box-sizing:border-box;border:solid 6px var(--c-ink);border-radius:24px;background:var(--c-white) center / contain no-repeat;cursor:pointer;
-          font-family:'Cafe24 Ssurround';font-size:60px;color:var(--c-indigo);letter-spacing:-0.05em;box-shadow:0 12px 0 0 var(--c-sky-pale);transition:transform .15s,border-color .15s}
-        .p02-opt:hover{border-color:var(--c-purple);transform:translateY(-4px)}
-        .p02-opt.is-on{border-color:#ff2fc2;box-shadow:0 0 0 6px #ff2fc2,0 12px 0 0 var(--c-sky-pale);color:#d168fb}
+        .p02-opt.card-btn{min-width:0;height:auto;padding:0;font-size:60px}
 
-        .p02-horn{position:absolute;left:1594px;top:596px;width:268px;height:328px;padding:0;border:0;background:url('img/p02_horn.png') center / contain no-repeat;cursor:pointer;font-size:200px;line-height:1;transition:transform .15s,filter .15s}
+        .p02-horn{position:absolute;left:1594px;top:596px;width:268px;height:328px;padding:0;border:0;background:none;cursor:pointer;font-size:200px;line-height:1;transition:transform .15s,filter .15s}
         .p02-horn:hover{transform:scale(1.06) rotate(-4deg)}
         .p02-horn:active{transform:scale(.95)}
         .p02-horn:disabled{filter:grayscale(1) opacity(.5);cursor:default;transform:none}
@@ -63,10 +60,10 @@
           </div>
 
           <div class="p02-btns">
-            <button class="p02-opt js-sfx" data-sound="sound/click.mp3" data-group="height" data-val="high" style="background-image:url('img/p02_btn_high.png')">높아요</button>
-            <button class="p02-opt js-sfx" data-sound="sound/click.mp3" data-group="height" data-val="low" style="background-image:url('img/p02_btn_low.png')">낮아요</button>
-            <button class="p02-opt js-sfx" data-sound="sound/click.mp3" data-group="gap" data-val="wide" style="background-image:url('img/p02_btn_wide.png')">넓어요</button>
-            <button class="p02-opt js-sfx" data-sound="sound/click.mp3" data-group="gap" data-val="narrow" style="background-image:url('img/p02_btn_narrow.png')">좁아요</button>
+            <button class="card-btn p02-opt js-sfx" data-sound="sound/click.mp3" data-group="height" data-val="high">높아요</button>
+            <button class="card-btn p02-opt js-sfx" data-sound="sound/click.mp3" data-group="height" data-val="low">낮아요</button>
+            <button class="card-btn p02-opt js-sfx" data-sound="sound/click.mp3" data-group="gap" data-val="wide">넓어요</button>
+            <button class="card-btn p02-opt js-sfx" data-sound="sound/click.mp3" data-group="gap" data-val="narrow">좁아요</button>
           </div>
 
           <button class="p02-horn" id="p02Horn" disabled aria-label="확성기로 안내하기">📢</button>
@@ -150,8 +147,7 @@
 
     const horn = $('p02Horn');
     const lives = Array.from(document.querySelectorAll('#p02Lives i'));
-    const beep = new Audio('sound/p02_beep.mp3');
-    let waveSound = null;
+    const beep = new Audio('sound/p02_beep.wav');
     let round = 0;
     const picked = {};
 
@@ -163,21 +159,17 @@
       el.style.width = (W + W / w.cycles) + 'px';
       el.style.setProperty('--shift', (-W / w.cycles) + 'px');
       el.style.animationDuration = (w.gap === 'narrow' ? 1.2 : 2.6) + 's';
-      document.querySelectorAll('.p02-opt').forEach((b) => b.classList.remove('is-on'));
+      document.querySelectorAll('.p02-opt').forEach((b) => b.classList.remove('is-selected'));
       delete picked.height;
       delete picked.gap;
       horn.disabled = true;
-      if (waveSound) waveSound.pause();
-      waveSound = new Audio('sound/p02_wave_' + w.height + '_' + w.gap + '.mp3');
-      waveSound.loop = true;
-      waveSound.play().catch(() => {});
     }
 
     // 높이(높아요/낮아요)·간격(넓어요/좁아요) 짝끼리 하나만 선택
     const opts = Array.from(document.querySelectorAll('.p02-opt'));
     opts.forEach((btn) => {
       btn.addEventListener('click', () => {
-        opts.filter((b) => b.dataset.group === btn.dataset.group).forEach((b) => b.classList.toggle('is-on', b === btn));
+        opts.filter((b) => b.dataset.group === btn.dataset.group).forEach((b) => b.classList.toggle('is-selected', b === btn));
         picked[btn.dataset.group] = btn.dataset.val;
         horn.disabled = !(picked.height && picked.gap);
       });
@@ -202,7 +194,6 @@
           $('p02Right').classList.add('is-off');
           round += 1;
           if (round >= WAVES.length) {
-            if (waveSound) waveSound.pause();
             $('p02Done').classList.remove('is-off');
             return;
           }
