@@ -11,16 +11,20 @@
            블록 쌓는 소리 sound/p03_block.mp3(page03과 같은 소리) */
 
         .p08-ask{position:absolute;left:60px;top:30px;width:1800px;height:100px;margin:0;box-sizing:border-box;padding:6px 40px 0;display:flex;align-items:center;justify-content:center;
-          background:var(--c-white);border:solid 5px var(--c-ink);border-radius:50px;box-shadow:0 10px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:46px;color:var(--c-ink);letter-spacing:-0.05em}
-        .p08-ask small{margin-left:24px;font-size:34px;color:var(--c-violet)}
+          background:var(--c-white);border:solid 5px var(--c-ink);border-radius:50px;box-shadow:0 10px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:60px;color:var(--c-ink);letter-spacing:-0.05em}
 
         .temp-table{position:absolute;left:60px;top:170px;width:340px;border-collapse:separate;border-spacing:0;border:solid 5px var(--c-ink);border-radius:20px;overflow:hidden;background:var(--c-white);
           font-family:'Cafe24 Ssurround';font-size:34px;color:var(--c-ink);text-align:center}
-        .temp-table th{height:66px;background:var(--c-sky);color:var(--c-white);font-weight:normal;font-size:32px}
-        .temp-table td{height:72px;border-top:solid 3px var(--c-mist)}
+        .temp-table th{height:56px;background:var(--c-sky);color:var(--c-white);font-weight:normal;font-size:32px}
+        .temp-table td{height:56px;border-top:solid 3px var(--c-mist)}
         .temp-table td + td, .temp-table th + th{border-left:solid 3px var(--c-mist)}
         .temp-table tr.is-now td{background:#fff3b0}
 
+        .p08-talk{position:absolute;left:40px;top:790px;width:600px;height:150px}
+        .p08-talk-bar{position:absolute;left:84px;top:36px;width:516px;height:100px;box-sizing:border-box;padding:0 24px 0 74px;display:flex;align-items:center;
+          background:var(--c-white);border:solid 5px var(--c-purple);border-radius:50px;box-shadow:0 8px 0 0 rgba(72,21,156,.18)}
+        .p08-talk-bar p{margin:0;font-family:'Cafe24 Ssurround';font-size:30px;line-height:1.15;color:var(--c-purple);letter-spacing:-0.05em;word-break:keep-all}
+        .p08-talk-avatar{position:absolute;left:0;top:0;width:150px;height:150px;border-radius:50%;background:var(--c-purple) url('img/p08_character.png') center bottom / contain no-repeat;box-shadow:0 8px 0 0 rgba(72,21,156,.18);z-index:1;border:solid 5px var(--c-purple)}
         .p08-ctrl{position:absolute;left:430px;top:390px;width:200px;display:flex;flex-direction:column;align-items:center;gap:20px;font-family:'Cafe24 Ssurround';color:var(--c-ink);text-align:center}
         .p08-ctrl.is-off{visibility:hidden}
         .p08-ctrl .unit{width:150px;height:50px;border:solid 4px #b85a00;border-radius:8px;background:#ff8a1f;color:var(--c-white);font-size:28px;display:flex;align-items:center;justify-content:center;box-sizing:border-box}
@@ -54,14 +58,19 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <p class="p08-ask"><span id="p08Ask">기온표를 보고 알맞은 높이까지 블록을 쌓아 보세요!</span><small id="p08Sub">시작 버튼을 누른 뒤 +, - 버튼을 클릭해요.</small></p>
+          <p class="p08-ask"><span id="p08Ask">기온표를 보고 알맞은 높이까지 블록을 쌓아 보세요!</span></p>
 
           <table class="temp-table"><thead><tr><th>시간</th><th>기온(<span class="deg">℃</span>)</th></tr></thead><tbody id="p08Rows"></tbody></table>
 
+          <div class="p08-talk">
+            <div class="p08-talk-avatar"></div>
+            <div class="p08-talk-bar"><p id="p08Sub">시작 버튼을 누른 뒤 +, - 버튼을 클릭해요.</p></div>
+          </div>
+
           <div class="p08-ctrl is-off" id="p08Ctrl">
             <div class="unit">1도</div>
-            <button type="button" class="card-btn" id="p08Plus" aria-label="1도 올리기">+</button>
-            <button type="button" class="card-btn" id="p08Minus" aria-label="1도 내리기">-</button>
+            <button type="button" class="card-btn js-sfx" data-sound="sound/click.mp3" id="p08Plus" aria-label="1도 올리기">+</button>
+            <button type="button" class="card-btn js-sfx" data-sound="sound/click.mp3" id="p08Minus" aria-label="1도 내리기">-</button>
           </div>
 
           <div class="p08-chart">
@@ -167,12 +176,12 @@
       const i = FIXED + k;
       const b = document.createElement('button');
       b.type = 'button';
-      b.className = 'card-btn p08-start js-sfx';
-      b.dataset.sound = 'sound/click.mp3';
+      b.className = 'card-btn p08-start';
       b.textContent = '시작';
       b.style.left = (660 + 90 + gap * i + gap / 2) + 'px';
       b.style.top = (170 + 60 + 540 + 60) + 'px';
       b.addEventListener('click', () => {
+        playClick();
         active = c;
         cols.forEach((x) => x.el.classList.toggle('is-active', x === c));
         rows.forEach((r, ri) => r.classList.toggle('is-now', ri === i));

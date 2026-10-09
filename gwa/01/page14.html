@@ -3,11 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>내가 모은 데이터로 AI에게 질문하기</title>
+    <title>정답을 부탁해!</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        .gn-src div{display:flex;align-items:center;gap:12px;height:60px;font-size:18px;white-space:nowrap}
-        .gn-src div span{overflow:hidden;text-overflow:ellipsis}
+        /* 기획서 44p(game02_02) + 45p(정답) + 46p(오답). 디자인 없음 → 기획서 구조대로 CSS와 샘플 이모지 */
+        .p29-guide{position:absolute;left:330px;top:80px;width:1260px;height:120px;margin:0;box-sizing:border-box;
+          display:flex;align-items:center;justify-content:center;background:#fff;border:solid 5px var(--c-ink);border-radius:60px;box-shadow:0 8px 0 0 var(--c-sky-pale);
+          font-family:'Cafe24 Ssurround';font-size:70px;letter-spacing:-0.06em;color:var(--c-ink);padding-top:6px}
+
+        .p29-mail{position:absolute;left:80px;top:268px;width:860px;height:340px;box-sizing:border-box;background:#fff;border:solid 6px var(--c-ink);border-radius:26px;box-shadow:0 10px 0 var(--c-sky-pale);overflow:hidden}
+        .p29-mail-head{display:flex;align-items:center;gap:16px;height:84px;padding:0 26px;background:#ffd23f;border-bottom:solid 6px var(--c-ink);font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-ink);letter-spacing:-0.06em}
+        .p29-mail-head i{font-style:normal;font-size:56px}
+        .p29-mail-body{display:flex;align-items:center;justify-content:center;height:250px;padding:0 40px;text-align:center;font-family:'Cafe24 Ssurround';font-size:50px;line-height:1.35;letter-spacing:-0.06em;color:var(--c-ink);word-break:keep-all}
+
+        .p29-map{position:absolute;left:980px;top:268px;width:860px;height:340px;box-sizing:border-box;background:linear-gradient(135deg,#d9f1ff,#bfe3f7);border:solid 6px var(--c-ink);border-radius:26px;box-shadow:0 10px 0 var(--c-sky-pale)}
+        .p29-map h4{position:absolute;left:24px;top:14px;margin:0;font-family:'Cafe24 Ssurround';font-size:34px;font-weight:normal;color:var(--c-navy);letter-spacing:-0.06em}
+        .p29-city{position:absolute;display:flex;align-items:center;gap:6px;padding:2px 12px 0 8px;border-radius:14px;background:#fff;border:solid 3px var(--c-sky);font-family:'Cafe24 Ssurround';font-size:25px;line-height:1.1;color:var(--c-ink);letter-spacing:-0.05em;white-space:nowrap}
+        .p29-city i{font-style:normal;font-size:32px}
+        .p29-city b{font-weight:normal;color:#0a57c9}
+
+        .p29-clock{position:absolute;left:1680px;top:62px;font-size:160px}
+
+        .p29-ans{position:absolute;top:670px;width:760px;height:160px;box-sizing:border-box;cursor:pointer;padding:10px 20px 4px;display:flex;align-items:center;justify-content:center;
+          min-width:0;font-size:52px;line-height:1.2;word-break:keep-all}
+        .p29-ans.is-wrong{animation:fix-word-shake .3s ease}
+        .p29-ans-1{left:130px}
+        .p29-ans-2{left:1030px}
     </style>
 </head>
 <body>
@@ -16,24 +37,26 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <p class="guide-bubble is-center gn-bubble is-sm" id="bub">Gemini Notebook에<br>날씨 뉴스 이미지가<br>업로드 중이에요..</p>
-          <div class="guide-character"><img src="img/p14_character.png" alt="메인 캐릭터"></div>
-          <div class="phone-frame gn-phone">
-<div class="gn-screen">
-            <div class="gn-status"><span>10:55</span><span class="gn-sys"><svg class="gn-wifi" viewBox="0 0 24 18" width="24" height="18" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M2 6.6Q12-2 22 6.6"/><path d="M5.6 10.4Q12 4.6 18.4 10.4"/><path d="M9.2 14Q12 11.6 14.8 14"/></g><circle cx="12" cy="16.4" r="1.5" fill="currentColor"/></svg><svg class="gn-sig" viewBox="0 0 18 15" width="18" height="15" aria-hidden="true"><rect x="0" y="9" width="3" height="6" rx="1" fill="currentColor"/><rect x="5" y="6" width="3" height="9" rx="1" fill="currentColor"/><rect x="10" y="3" width="3" height="12" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="15" rx="1" fill="currentColor" opacity=".35"/></svg><span class="gn-bat">84</span></span></div>
-            <div class="gn-bar"><span>←</span><em id="nbTitle">제목 없는 노트북</em><span><img class="gn-ico" src="img/src_icon_share.png" alt="공유"></span><span>⋮</span></div>
-            <div style="position:absolute;left:0;right:0;top:118px;padding:0 24px;font-size:18px">
-              <div style="display:flex;justify-content:space-between;margin-bottom:22px"><span>소스</span><span>⋮</span></div>
-              <div class="gn-src" id="srcList">
-                <div><i class="gn-spin"></i><span>image_picker_081FCDA7-5836-4794-A…</span></div>
-                <div><i class="gn-spin"></i><span>image_picker_4C09E2B1-77AD-4E3C-9…</span></div>
-                <div><i class="gn-spin"></i><span>image_picker_B7F0A3D2-1E5C-4B28-8…</span></div>
-              </div>
-            </div>
-            <div class="gn-fab" style="bottom:146px"><span class="gn-cam"><img src="img/p11_photo.png" alt=""></span><a href="page15.html" class="js-nav-effect js-sfx gn-hl" id="hit" data-sound="sound/click.mp3" style="display:none;align-items:center;gap:8px;height:52px;padding:0 24px;border-radius:26px;background:#111;color:#fff;font-size:20px;text-decoration:none">＋ 소스 추가</a><span class="gn-btn" id="hitDummy">＋ 소스 추가</span></div>
-            <div class="gn-tabs"><div class="is-on"><img class="gn-tab-ico is-src" src="img/src_tab_source.png" alt="">소스</div><div class="" id="tabChat"><img class="gn-tab-ico" src="img/src_tab_chat.png" alt="">채팅</div><div><img class="gn-tab-ico" src="img/src_tab_studio.png" alt="">스튜디오</div></div>
-            <div class="gn-nav"><span>|||</span><span>○</span><span>‹</span></div>
+
+          <p class="p29-guide">어떤 답을 알려줘야 할까요?</p>
+
+          <div class="p29-mail">
+            <div class="p29-mail-head"><i>✉️</i>의뢰 메일</div>
+            <div class="p29-mail-body"><span id="p29Mail"></span></div>
           </div>
+
+          <div class="p29-map" id="p29Map"><h4>전국 날씨 지도</h4></div>
+
+          <div class="gm-clock p29-clock" id="p29Clock">🕘</div>
+
+          <button class="card-btn p29-ans p29-ans-1" id="p29Ans1"></button>
+          <button class="card-btn p29-ans p29-ans-2" id="p29Ans2"></button>
+
+          <div class="avatar-modal is-off" id="p29Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <p class="avatar-popup-text is-pill">날씨 자료를 다시 살펴볼까요?</p>
+            </div>
           </div>
         </main>
       </div>
@@ -41,31 +64,116 @@
   </div>
   <div class="zoom-info" id="zoomInfo"></div>
 
-  <script src="../../js/header.js" data-title="내가 모은 데이터로 AI에게 질문하기" data-next="page15.html"></script>
+  <script src="../../js/header.js" data-title="정답을 부탁해!" data-next="page15.html"></script>
   <script src="../../js/toc-gwa.js"></script>
   <script src="../../js/common.js"></script>
   <script>
+  /* 기획서 44p — 의뢰 메일 5개를 무작위 순서로 풀고, 맞힐 때마다 시계가 2시간씩 진행됨
+     - 답 버튼 위치는 항상 고정(기획서), 메일 등장 순서만 무작위
+     - 정답이면 정답음 + 시계 이동 후 다음 메일, 오답이면 안내가 2초 떴다 닫힘
+     - 5개를 모두 풀면 page30(종료)으로 이동
+     - 날씨 자료는 기획서의 예시 값을 그대로 넣어둠(디자인 나오면 표/지도 이미지로 교체) */
   (function () {
-    var STEP = 2333;   // 한 장 올라가는 시간(3장 합쳐 약 7초)
-    var rows = document.querySelectorAll('#srcList > div');
+    const WEATHER = [
+      { city: '부산', sky: '비',   temp: 20 },
+      { city: '대구', sky: '비',   temp: 27 },
+      { city: '인천', sky: '구름', temp: 26 },
+      { city: '대전', sky: '해',   temp: 23 },
+      { city: '울산', sky: '비',   temp: 25 },
+      { city: '서울', sky: '해',   temp: 28 },
+      { city: '제주', sky: '구름', temp: 24 },
+    ];
 
-    rows.forEach(function (row, i) {
-      setTimeout(function () {
-        row.innerHTML = '<img class="gn-thumb" src="img/src_icon_photo_red.png" alt=""><span>image_날씨뉴스기사' + (i + 1) + '</span>';
-        sfx.upload();
-      }, STEP * (i + 1));
+    const MAILS = [
+      { q: '부산의 기온은 어떻게 될까요?',
+        answers: ['20도입니다.', '27도입니다.'], correct: 0 },
+      { q: '서울의 날씨는 어떻게 될까요?',
+        answers: ['맑아요.', '비가 와요.'], correct: 0 },
+      { q: '제주도로 소풍을 가려고 하는데, 우산이 필요할까요?',
+        answers: ['아니요. 우산이 필요 없어요.', '비가 올 예정이라 우산이 필요해요.'], correct: 0 },
+      { q: '대구와 제주 중 더 따뜻한 곳은 어디일까요?',
+        answers: ['대구입니다.', '제주입니다.'], correct: 0 },
+      { q: '기온이 가장 낮은 곳은 어디일까요?',
+        answers: ['부산입니다.', '서울입니다.'], correct: 0 },
+    ];
+
+    const CLOCK = ['🕘', '🕚', '🕐', '🕒', '🕔', '🕕'];   // 09시 → 11시 → 13시 → 15시 → 17시 → 18시
+
+    const mailEl = document.getElementById('p29Mail');
+    const mapEl = document.getElementById('p29Map');
+    const clockEl = document.getElementById('p29Clock');
+    const ans1 = document.getElementById('p29Ans1');
+    const ans2 = document.getElementById('p29Ans2');
+    const wrongModal = document.getElementById('p29Wrong');
+
+
+
+    const queue = shuffleArray(MAILS);
+    let index = 0;
+    let locked = false;
+
+    const ICON = { '비': '🌧️', '구름': '☁️', '해': '☀️' };
+    const SPOT = {
+      '인천': [60, 40], '서울': [290, 10], '대전': [260, 100], '대구': [470, 100],
+      '울산': [600, 150], '부산': [470, 205], '제주': [120, 200],
+    };
+    WEATHER.forEach((w) => {
+      const el = document.createElement('div');
+      el.className = 'p29-city';
+      el.style.left = SPOT[w.city][0] + 'px';
+      el.style.top = (SPOT[w.city][1] + 56) + 'px';
+      el.innerHTML = '<i>' + ICON[w.sky] + '</i>' + w.city + ' <b>' + w.temp + '°</b>';
+      mapEl.appendChild(el);
     });
 
-    setTimeout(function () {
-      document.getElementById('bub').innerHTML = 'Gemini Notebook에 날씨 뉴스 이미지가 업로드 되었어요!<br>이제 유튜브 링크를 추가해볼까요?';
-      document.getElementById('nbTitle').textContent = '내가 모은 데이터로 AI에게 질문하기';
-      setTimeout(function () {
-        var hit = document.getElementById('hit');
-        document.getElementById('hitDummy').style.display = 'none';
-        hit.style.display = 'inline-flex';
-        pointFingerAt(hit, { onMain: true });
-      }, 1000);
-    }, STEP * 3);
+    function render() {
+      ans1.blur();
+      ans2.blur();
+      ans1.classList.remove('is-selected');
+      ans2.classList.remove('is-selected');
+      const m = queue[index];
+      mailEl.textContent = m.q;
+      ans1.textContent = m.answers[0];
+      ans2.textContent = m.answers[1];
+      clockEl.textContent = CLOCK[index];
+      locked = false;
+    }
+
+    [ans1, ans2].forEach((btn, i) => {
+      btn.addEventListener('click', () => {
+        if (locked) return;
+        const m = queue[index];
+        btn.classList.add('is-selected');
+
+        if (i === m.correct) {
+          locked = true;
+          playCorrect();
+          index += 1;
+          clockEl.textContent = CLOCK[Math.min(index, CLOCK.length - 1)];
+          setTimeout(() => {
+            if (index >= queue.length) {
+              navigateTo('page15.html');
+              return;
+            }
+            render();
+          }, 900);
+          return;
+        }
+
+        playWrong();
+        btn.classList.remove('is-wrong');
+        void btn.offsetWidth;
+        btn.classList.add('is-wrong');
+        wrongModal.classList.remove('is-off');
+        clearTimeout(wrongModal.__hideTimer);
+        wrongModal.__hideTimer = setTimeout(() => {
+          wrongModal.classList.add('is-off');
+          btn.classList.remove('is-selected');
+        }, 2000);
+      });
+    });
+
+    render();
   })();
   </script>
 </body>

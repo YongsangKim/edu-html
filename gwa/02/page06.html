@@ -10,35 +10,32 @@
            맞으면 카드 고정 + 단계 설명(5초, 설명 음성 sound/p06_step{1~3}.mp3), 틀리면 2초 오답 팝업 후 제자리. 3단계 끝나면 반짝 테두리 → 정리 3단계 → page07.
            카드 그림 img/p06_card_{measure|record|visual}.png(없으면 이모지) */
 
-        .p06-ask{position:absolute;left:160px;top:34px;width:1600px;height:100px;margin:0;box-sizing:border-box;padding:6px 40px 0;display:flex;align-items:center;justify-content:center;
-          background:var(--c-white);border:solid 5px var(--c-ink);border-radius:50px;box-shadow:0 10px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-ink);letter-spacing:-0.05em}
+        .p06-ask{position:absolute;left:140px;top:43px;width:1640px;height:102px;margin:0;box-sizing:border-box;padding:8px 40px 0;white-space:nowrap;display:flex;align-items:center;justify-content:center;
+          background:var(--c-white);border:solid 5px var(--c-ink);border-radius:51px;box-shadow:0 10px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:60px;color:var(--c-ink);letter-spacing:-0.06em}
 
-        .p06-steps{position:absolute;left:160px;top:180px;width:1600px;height:400px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:36px;background:var(--c-white);
-          display:flex;align-items:center;justify-content:space-around;padding:0 40px}
+        .p06-steps{position:absolute;left:520px;top:178px;width:1260px;height:360px;display:flex;align-items:center;justify-content:space-between}
         .p06-steps.is-all{animation:p06-glow 1s ease-in-out 3}
         @keyframes p06-glow{50%{box-shadow:0 0 0 12px var(--c-yellow),0 0 40px 10px var(--c-yellow)}}
         .p06-step{display:flex;flex-direction:column;align-items:center;gap:14px;opacity:.35;transition:opacity .3s}
         .p06-step.is-now, .p06-step.is-done{opacity:1}
         .p06-step b{font-weight:normal;font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-purple)}
-        .p06-slot{width:360px;height:270px;box-sizing:border-box;border:dashed 5px #b9b3dd;border-radius:28px;background:#f6f4ff;display:flex;align-items:center;justify-content:center}
+        .p06-slot{width:306px;height:290px;box-sizing:border-box;border:dashed 5px #b9b3dd;border-radius:28px;background:#f6f4ff;display:flex;align-items:center;justify-content:center}
         .p06-step.is-now .p06-slot{border-color:#ff4ff9;animation:p06-slot 1.2s ease-in-out infinite}
         @keyframes p06-slot{50%{background:#ffe9fb}}
         .p06-step.is-done .p06-slot{border:solid 5px #22a35a;background:#e9f8ee;animation:none}
         .p06-arrow{font-size:70px;color:#b9b3dd}
 
-        .p06-tray{position:absolute;left:160px;top:640px;width:1600px;height:290px;display:flex;justify-content:center;gap:80px}
-        .p06-card{width:330px;height:250px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:24px;background:var(--c-white);box-shadow:0 10px 0 0 var(--c-sky-pale);
-          display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-family:'Cafe24 Ssurround';font-size:52px;color:var(--c-ink);touch-action:none;cursor:grab}
+        .p06-tray{position:absolute;left:710px;top:590px;width:879px;height:300px;display:flex;justify-content:space-between}
+        .p06-card{width:259px;height:280px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:24px;background:var(--c-white);box-shadow:0 10px 0 0 var(--c-sky-pale);
+          display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-ink);touch-action:none;cursor:grab}
         .p06-card i{width:150px;height:130px;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:96px;background:center / contain no-repeat}
         .p06-card i.is-img{font-size:0}
         .p06-card.is-dragging{z-index:50;cursor:grabbing}
         .p06-slot .p06-card{box-shadow:none;border:0;background:transparent;cursor:default}
 
-        .p06-talk{position:absolute;left:160px;top:640px;width:1600px;height:290px;box-sizing:border-box;padding:30px 60px 30px 300px;display:flex;align-items:center;
-          background:var(--c-cream);border:solid 5px var(--c-purple);border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
-          font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.35;color:var(--c-purple);letter-spacing:-0.05em;word-break:keep-all;z-index:20}
-        .p06-talk img{position:absolute;left:30px;top:30px;width:230px}
-        .p06-talk.is-off{display:none}
+        .p06-bubble{left:30px;bottom:500px;width:440px;min-height:224px;padding:22px 14px;font-size:40px;line-height:1.3}
+        .p06-bubble.is-long{font-size:32px}
+        .p06-character{left:20px;top:490px;width:420px;height:460px}
     </style>
 </head>
 <body>
@@ -58,7 +55,8 @@
           </div>
 
           <div class="p06-tray" id="p06Tray"></div>
-          <p class="p06-talk is-off" id="p06Talk"><img src="../../img/common/avatar_correct_gwa.png" alt=""><span id="p06TalkText"></span></p>
+          <p class="guide-bubble is-center p06-bubble" id="p06Bubble">데이터 처리의 순서에 맞게 카드를 올려보세요</p>
+          <div class="guide-character p06-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
 
           <div class="ox-result-wrong is-avatar is-off" id="p06Wrong">
             <div class="avatar-popup-panel">
@@ -82,7 +80,23 @@
                 </div>
                 <div class="step-panel">
                   <div class="avatar-card-body is-side">
-                    <p class="avatar-card-text">1단계는 도구로 수치를 ‘측정’하는 단계!<br>2단계는 측정한 값을 기록하는 단계!<br>3단계는 그래프로 시각화하는 단계예요!</p>
+                    <p class="avatar-card-text">1단계는 도구로 수치를 ‘측정’하는 단계!</p>
+                  </div>
+                  <a href="page07.html" class="js-nav-effect avatar-card-btn">
+                    <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">2단계는 측정한 값을 기록하는 단계!</p>
+                  </div>
+                  <a href="page07.html" class="js-nav-effect avatar-card-btn">
+                    <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">3단계는 그래프로 시각화하는 단계예요!</p>
                   </div>
                   <a href="page07.html" class="js-nav-effect avatar-card-btn">
                     <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
@@ -115,10 +129,8 @@
       { key: 'record', name: '기록·정리', emoji: '📋', text: '잘했어! 두번째 단계는 ‘기록·정리’야. 측정한 숫자를 표의 알맞은 칸에 적고 다듬는 것을 ‘기록·정리’라고 해.' },
       { key: 'visual', name: '시각화', emoji: '📊', text: '마지막 단계는 ‘시각화’야. 복잡한 숫자를 그림이나 그래프로 바꾸어 한눈에 보기 쉽게 만드는 것을 ‘시각화’라고 해.' }
     ];
-    const ASK = '온습도계가 데이터를 처리하는 순서에 맞게 카드를 올려보세요!';
-    const ask = $('p06Ask');
     const tray = $('p06Tray');
-    const talk = $('p06Talk');
+    const bubble = $('p06Bubble');
     const steps = Array.from(document.querySelectorAll('.p06-step'));
     const zones = steps.map((s) => s.querySelector('.p06-slot'));
 
@@ -140,9 +152,12 @@
     function activate() {
       steps.forEach((s, i) => s.classList.toggle('is-now', i === now));
       zones.forEach((z, i) => { if (i === now) delete z.dataset.filled; else z.dataset.filled = '1'; });
-      ask.textContent = ASK;
       clearTimeout(hintTimer);
-      hintTimer = setTimeout(() => { ask.textContent = (now + 1) + '단계에 와야 할 카드는 무엇일까요?'; }, 3000);
+      const showHint = () => {
+        bubble.textContent = (now + 1) + '단계에 와야 할 카드는 무엇일까요?';
+        bubble.classList.remove('is-long');
+      };
+      if (now === 0) hintTimer = setTimeout(showHint, 3000); else showHint();
     }
 
     initMatchDrag({
@@ -156,15 +171,13 @@
         steps[now].classList.remove('is-now');
         steps[now].classList.add('is-done');
         zones.forEach((z) => { z.dataset.filled = '1'; });
-        $('p06TalkText').textContent = step.text;
-        talk.classList.remove('is-off');
+        bubble.textContent = step.text;
+        bubble.classList.add('is-long');
         const voice = new Audio('sound/p06_step' + (now + 1) + '.mp3');
         voice.play().catch(() => {});
         setTimeout(() => {
-          talk.classList.add('is-off');
           now += 1;
           if (now < STEPS.length) { activate(); return; }
-          ask.textContent = ASK;
           $('p06Steps').classList.add('is-all');
           setTimeout(() => $('p06Done').classList.remove('is-off'), 3200);
         }, 5000);

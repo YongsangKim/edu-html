@@ -34,8 +34,8 @@
                 <a href="${BASE}gwa/01/page05.html" class="toc-sub-item">3) 다양한 매체에서 날씨 데이터 수집하기</a>
                 <a href="${BASE}gwa/01/page08.html" class="toc-sub-item">4) 정보를 깔끔하게 데이터로 정리하기</a>
                 <a href="${BASE}gwa/01/page10.html" class="toc-sub-item">5) 내가 모은 데이터로 AI에게 질문하기</a>
-                <a href="${BASE}gwa/01/page26.html" class="toc-sub-item">6) 퀴즈 풀기</a>
-                <a href="${BASE}gwa/01/page27.html" class="toc-sub-item">7) 정답을 부탁해!</a>
+                <a href="${BASE}gwa/01/page11.html" class="toc-sub-item">6) 퀴즈 풀기</a>
+                <a href="${BASE}gwa/01/page12.html" class="toc-sub-item">7) 정답을 부탁해!</a>
               </div>
             </div>
 

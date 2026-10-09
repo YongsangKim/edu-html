@@ -3,16 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>내가 모은 데이터로 AI에게 질문하기</title>
+    <title>정답을 부탁해!</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        .gn-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin:18px 0 0}
-        .gn-photo{position:relative;height:142px;padding:0;border:0;font-size:56px;cursor:pointer;overflow:hidden}
-        .gn-photo img{display:block;width:100%;height:100%;object-fit:cover;pointer-events:none}
-        .gn-photo.is-on{outline:5px solid #ff4ff9;outline-offset:-3px}
-        .gn-photo.is-on:after{content:'✓';position:absolute;left:8px;top:8px;width:30px;height:30px;border-radius:50%;background:#1a73e8;color:#fff;font-size:23px;line-height:30px}
-        .gn-check{display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;background:#c9c9cf;color:#fff;font-size:29px;text-decoration:none}
-        .gn-check.is-ready{background:#1a73e8}
+        /* 기획서 43p(game02_01): 탐정사무소 책상에서 컴퓨터로 의뢰 메일 5통이 도착한 것을 확인. 디자인 없음 → 기획서 구조대로 CSS와 샘플 이모지 */
+        .p28-room{position:absolute;left:0;top:0;width:1920px;height:960px;overflow:hidden;
+          background:linear-gradient(180deg,#dcc9a5 0%,#e9dbbb 52%,#b88b5a 52%,#a37747 100%)}
+        .p28-wall{position:absolute;left:90px;top:60px;width:300px;height:340px;border-radius:14px;background:#fff8e6;border:solid 8px #8a6a43;box-shadow:inset 0 0 0 10px #f3e3b9}
+        .p28-wall b{position:absolute;left:0;right:0;top:130px;text-align:center;font-size:90px;font-weight:normal}
+        .p28-shelf{position:absolute;left:1560px;top:480px;width:300px;height:30px;border-radius:8px;background:#8a6a43}
+        .p28-shelf span{position:absolute;top:-80px;font-size:76px}
+        .p28-desk{position:absolute;left:120px;top:690px;width:1680px;height:270px;border-radius:30px 30px 0 0;background:linear-gradient(180deg,#8d5d32,#6d4423)}
+        .p28-pc{position:absolute;left:250px;top:240px;width:820px;height:520px;box-sizing:border-box;border:solid 18px #2d2a4a;border-radius:30px;background:linear-gradient(135deg,#27b1ff,#0a7bd6)}
+        .p28-pc:after{content:'';position:absolute;left:50%;bottom:-86px;margin-left:-120px;width:240px;height:70px;background:#2d2a4a;border-radius:0 0 20px 20px}
+        .p28-mail{position:absolute;display:flex;align-items:center;justify-content:center;width:240px;height:180px;border-radius:20px;background:#ffd23f;font-size:110px;box-shadow:0 10px 0 #e0a800}
+        .p28-mail i{position:absolute;right:-18px;top:-20px;width:58px;height:58px;border-radius:50%;background:#e5333a;color:#fff;font-size:36px;font-style:normal;line-height:58px;text-align:center;font-family:'Pretendard';font-weight:700}
+        .p28-back{left:1000px;top:520px;width:500px;height:440px;z-index:4}
+        .p28-clock{position:absolute;left:1700px;top:132px;font-size:160px}
+        .p28-think{left:940px;top:150px;bottom:auto;width:660px;height:350px;margin:0;box-sizing:border-box;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;font-size:50px;line-height:1.25;z-index:6}
+        .p28-think p{margin:0;padding-top:6px}
+        .p28-think:before{left:292px;bottom:-58px}
+        .p28-btn{position:static;min-width:0;width:230px;height:64px;font-size:30px;text-decoration:none;display:flex;align-items:center;justify-content:center;padding:10px 10px 4px;margin:0 0 8px}
     </style>
 </head>
 <body>
@@ -21,39 +32,19 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <p class="guide-bubble is-center gn-bubble is-sm" id="bub">뉴스 기사 이미지만 선택해볼까요?</p>
-          <div class="guide-character"><img src="img/p13_character.png" alt="메인 캐릭터"></div>
-          <div class="phone-frame gn-phone">
-<div class="gn-screen" style="background:#8b8b8b">
-            <div class="gn-status"><span class="">11:55</span><span class="gn-sys"><svg class="gn-wifi" viewBox="0 0 24 18" width="24" height="18" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M2 6.6Q12-2 22 6.6"/><path d="M5.6 10.4Q12 4.6 18.4 10.4"/><path d="M9.2 14Q12 11.6 14.8 14"/></g><circle cx="12" cy="16.4" r="1.5" fill="currentColor"/></svg><svg class="gn-sig" viewBox="0 0 18 15" width="18" height="15" aria-hidden="true"><rect x="0" y="9" width="3" height="6" rx="1" fill="currentColor"/><rect x="5" y="6" width="3" height="9" rx="1" fill="currentColor"/><rect x="10" y="3" width="3" height="12" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="15" rx="1" fill="currentColor" opacity=".35"/></svg><span class="gn-bat">77</span></span></div>
-            <div class="gn-sheet" style="top:68px;background:#fff">
-              <p style="margin:22px 0 0;text-align:center;font-size:18px">최대 10장의 사진을 선택합니다.</p>
-              <div style="display:flex;align-items:center;justify-content:space-between;margin:12px 12px 0">
-                <span style="display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;background:#f1f1f4;font-size:26px">✕</span>
-                <span style="display:flex;background:#f1f1f4;border-radius:22px;font-size:18px"><b style="padding:10px 14px;border-radius:22px;background:#dcdce2;font-weight:500">사진</b><b style="padding:10px 14px;font-weight:500">모음</b></span>
-                <a href="javascript:;" class="js-sfx gn-check" id="p13Check" data-sound="sound/click.mp3" aria-label="선택 완료">✓</a>
-              </div>
-              <div style="display:flex;gap:12px;margin:18px 12px 0;padding:14px;border-radius:16px;background:#f4f4f6;font-size:17px;line-height:1.5;color:#555">
-                <span style="font-size:34px"><img src="img/p13_photo.png" alt=""></span>
-                <span><b style="color:#1b1b1f;font-weight:600">사진에 비공개 접근</b><br>사용자의 사진 보관함이 여기에 나타나지만 ‘Notebook’ 앱은 오직 사용자가 선택한 항목에만 접근할 수 있습니다.<br><span style="color:#1a73e8">더 알아보기...</span></span>
-              </div>
-              <div class="gn-grid">
-                <button class="gn-photo c1r1" data-correct="true" aria-label="청소년 과학 체험 교실 뉴스"><img src="img/p13_photo_news1.png" alt=""></button>
-                <button class="gn-photo c2r1" data-correct="false" aria-label="강아지 사진"><img src="img/p13_photo_news2.png" alt=""></button>
-                <button class="gn-photo c3r1" data-correct="true" aria-label="깨끗한 바다 뉴스"><img src="img/p13_photo_news3.png" alt=""></button>
-                <button class="gn-photo c1r2" data-correct="false" aria-label="떡볶이 사진"><img src="img/p13_photo_news4.png" alt=""></button>
-                <button class="gn-photo c2r2" data-correct="true" aria-label="오늘 전국 날씨 뉴스"><img src="img/p13_photo_news5.png" alt=""></button>
-                <button class="gn-photo c3r2" data-correct="false" aria-label="야경 사진"><img src="img/p13_photo_news6.png" alt=""></button>
-              </div>
+          <div class="p28-room">
+            <div class="p28-wall"><b>🕵️</b></div>
+            <div class="p28-shelf"><span style="left:10px">🔍</span><span style="left:110px">📁</span><span style="left:210px">🪴</span></div>
+            <div class="p28-desk"></div>
+            <div class="p28-pc">
+                                                                      <div class="p28-mail" style="left:292px;top:160px">✉️<i>5</i></div>
             </div>
           </div>
-          </div>
-
-          <div class="avatar-modal is-off" id="p13Wrong">
-            <div class="avatar-popup-panel">
-              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
-              <p class="avatar-popup-text is-pill">뉴스 기사 이미지만 선택해볼까요?</p>
-            </div>
+          <div class="char-box p28-back"><img src="img/p27_character.png" alt="아로 뒷모습"></div>
+          <div class="p28-clock gm-clock">🕘</div>
+          <div class="guide-bubble p28-think">
+            <p>오늘의 의뢰메일을<br>확인해볼까~?</p>
+            <a href="page14.html" class="js-nav-effect js-sfx card-btn is-start p28-btn" data-sound="sound/click.mp3">메일 보기</a>
           </div>
         </main>
       </div>
@@ -61,55 +52,8 @@
   </div>
   <div class="zoom-info" id="zoomInfo"></div>
 
-  <script src="../../js/header.js" data-title="내가 모은 데이터로 AI에게 질문하기" data-next="page14.html"></script>
+  <script src="../../js/header.js" data-title="정답을 부탁해!" data-next="page14.html"></script>
   <script src="../../js/toc-gwa.js"></script>
   <script src="../../js/common.js"></script>
-  <script>
-  (function () {
-    const photos = Array.from(document.querySelectorAll('.gn-photo'));
-    const check = document.getElementById('p13Check');
-    const wrongModal = document.getElementById('p13Wrong');
-    const NEED = photos.filter((p) => p.dataset.correct === 'true').length;
-    let locked = false;
-  
-    function guideFinger() {
-      clearFingers();
-      const on = (p) => p.classList.contains('is-on');
-      const allDone = photos.every((p) => (p.dataset.correct === 'true') === on(p));
-      if (allDone) pointFingerAt(check, { onMain: true });
-    }
-  
-    photos.forEach((p) => {
-      p.addEventListener('click', () => {
-        if (locked) return;
-        p.classList.toggle('is-on');
-        check.classList.toggle('is-ready', photos.some((x) => x.classList.contains('is-on')));
-        guideFinger();
-        playClick();
-      });
-    });
-  
-    check.addEventListener('click', () => {
-      if (locked) return;
-      const picked = photos.filter((p) => p.classList.contains('is-on'));
-      if (!picked.length) return;
-      const allCorrect = picked.length === NEED && picked.every((p) => p.dataset.correct === 'true');
-  
-      if (allCorrect) {
-        locked = true;
-        playCorrect();
-        setTimeout(() => navigateTo('page14.html'), 700);
-        return;
-      }
-      playWrong();
-      photos.forEach((p) => p.classList.remove('is-on'));
-      check.classList.remove('is-ready');
-      guideFinger();
-      wrongModal.classList.remove('is-off');
-      clearTimeout(wrongModal.__hideTimer);
-      wrongModal.__hideTimer = setTimeout(() => wrongModal.classList.add('is-off'), 2000);
-    });
-  })();
-  </script>
 </body>
 </html>

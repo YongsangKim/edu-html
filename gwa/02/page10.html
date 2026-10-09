@@ -21,7 +21,6 @@
         .gp-home{background:linear-gradient(160deg,#a6e1f5,#b7b0f7 55%,#f5c1df)}
         .gp-app{position:absolute;left:50%;top:44%;width:110px;margin-left:-55px;padding:0;border:0;background:none;cursor:pointer;font-size:20px;font-weight:600;color:var(--c-white) !important;text-shadow:0 1px 3px rgba(0,0,0,.3)}
         .gp-app i{display:flex;align-items:center;justify-content:center;width:110px;height:110px;margin-bottom:8px;border-radius:28px;background:#000;box-shadow:0 6px 14px rgba(0,0,0,.2)}
-        .gp-app i svg{width:70px;height:70px}
 
         .gp-head{position:absolute;left:0;top:0;width:100%;height:84px;display:flex;align-items:center;gap:14px;padding:0 18px;box-sizing:border-box;z-index:3;background:linear-gradient(var(--c-white) 70%,rgba(255,255,255,0))}
         .gp-round{width:52px;height:52px;border-radius:50%;background:var(--c-white);box-shadow:0 2px 10px rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center}
@@ -107,7 +106,7 @@
 
           <div class="gp" id="p10Phone" data-screen="home">
             <div class="gp-scr gp-home">
-              <button type="button" class="gp-app" data-hit="app"><i><svg class="ic" viewBox="0 0 24 24" style="color:#fff;stroke-width:1.6"><path d="M12 3.5a4 4 0 014 3.2 4 4 0 013.4 5.9 4 4 0 01-2.4 6.3 4 4 0 01-6.3 1.6 4 4 0 01-6-3.4 4 4 0 01-.6-6.5A4 4 0 018 4.4a4 4 0 014-.9z"/><path d="M9 8.5l6 3.5v5M15 8l-6 3.5v5M8 13.5l4 2.3 4-2.3"/></svg></i>ChatGPT</button>
+              <button type="button" class="gp-app" data-hit="app"><i><img src="img/p10_icon_chatgpt.svg" alt="" width="64" height="64"></i>ChatGPT</button>
             </div>
 
             <div class="gp-scr gp-chat">
@@ -224,7 +223,13 @@
     $('p10Thumb').innerHTML = tableHtml;
     $('p10TableBig').innerHTML = tableHtml;
 
-    function say(html) { bubble.innerHTML = html; }
+    // 말풍선은 아래가 고정이라 글이 길면 위로 늘어남 → 위쪽 끝(30px)을 넘으면 글자를 2px씩 줄임
+    function say(html) {
+      bubble.style.fontSize = '';
+      bubble.innerHTML = html;
+      let size = parseFloat(getComputedStyle(bubble).fontSize);
+      while (bubble.offsetTop < 30 && size > 28) { size -= 2; bubble.style.fontSize = size + 'px'; }
+    }
     function target(hit) {
       clearFingers();
       phone.querySelectorAll('[data-hit]').forEach((h) => h.classList.toggle('is-target', h.dataset.hit === hit));
@@ -246,17 +251,17 @@
     }
 
     // 1) 홈 → ChatGPT
-    say('기온표 이미지를 ChatGPT에 첨부하고,<br>원하는 그래프를 만들어 달라고<br>부탁해 보세요!');
+    say('기온표 이미지를 ChatGPT에 첨부하고, 원하는 그래프를 만들어 달라고 부탁해 보세요!');
     target('app');
     onHit('app', () => {
       phone.dataset.screen = 'chat';
-      say('아래의 + 버튼을<br>클릭해보세요.');
+      say('아래의 + 버튼을 클릭해보세요.');
       target('plus');
     });
     // 2) + → 사진 → 기온표 고르기(다른 사진은 오답)
     onHit('plus', () => {
       $('p10Menu').classList.remove('is-off');
-      say('‘사진’ 버튼을 눌러,<br>하루 기온 표 파일을<br>선택해주세요.');
+      say('‘사진’ 버튼을 눌러, 하루 기온 표 파일을 선택해주세요.');
       target('photo');
     });
     onHit('photo', () => {
