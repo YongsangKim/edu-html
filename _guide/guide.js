@@ -9,8 +9,7 @@
     { file: 'characters.html', label: '안내 캐릭터·말풍선' },
     { file: 'drag.html', label: '끌어 놓기' },
     { file: 'intro.html', label: '도입·마무리 화면' },
-    { file: 'quiz.html', label: '퀴즈 풀기' },
-    { file: 'wide-intro.html', label: '넓은 활동 방법 안내' }
+    { file: 'quiz.html', label: '퀴즈 풀기' }
   ];
 
   const here = location.pathname.split('/').pop() || 'index.html';
@@ -80,3 +79,13 @@ window.initGuideTabs = function (secs) {
   const start = m && frameSecs[Number(m[1]) - 1] ? Number(m[1]) - 1 : 0;
   show(start);
 };
+
+/* 미리보기 칸(.g-view > .g-stage, .w-thumb/.q-thumb > iframe)의 안쪽 1920px 화면을 칸 폭에 맞춰 축소.
+   칸 크기가 바뀔 때(창 크기·탭 전환) 다시 계산 */
+window.addEventListener('load', function () {
+  const ro = new ResizeObserver((entries) => entries.forEach((e) => {
+    const inner = e.target.querySelector(':scope > .g-stage, :scope > iframe');
+    if (inner && e.contentRect.width) inner.style.transform = 'scale(' + (e.contentRect.width / 1920) + ')';
+  }));
+  document.querySelectorAll('.g-view, .w-thumb, .q-thumb').forEach((el) => ro.observe(el));
+});
