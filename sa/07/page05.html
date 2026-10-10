@@ -49,7 +49,10 @@
           <div class="ox-result-wrong is-avatar is-off" id="p05Wrong">
             <div class="avatar-popup-panel">
               <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
-              <p class="avatar-popup-text is-medium">생활 속 문제 상황을 다시 한번 살펴보고<br>어떤 도움이 필요할지 생각해 봐요.</p>
+              <div class="avatar-popup-body">
+                <p class="hint-title">힌트</p>
+                <p class="avatar-popup-text is-small" id="p05HintText"></p>
+              </div>
             </div>
           </div>
 
@@ -58,10 +61,8 @@
               <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
               <div class="avatar-popup-body is-finish">
                 <p class="avatar-popup-text">좋아요!</p>
-                <p class="avatar-popup-sub">생활 속에서 만나고, 도움을 받을 수 있는<br>이웃을 찾았어요.</p>
-                <a href="page06.html" class="js-nav-effect avatar-popup-next">
-                  <img src="../../img/common/btn_next_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_small_on.png" data-src-over="../../img/common/btn_next_small_over.png" data-sound="sound/click.mp3" alt="다음">
-                </a>
+                <p class="avatar-popup-sub">생활 속에서 만나고, 도움을 받을 수 있는 이웃을 찾았어요.</p>
+                <a href="page06.html" class="js-nav-effect avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
               </div>
             </div>
           </div>
@@ -93,6 +94,15 @@
       { answer: 'hair', text: '앞머리가 너무 길어서 눈을 자꾸 가려요. 머리를 자르고 싶어요.' }
     ];
 
+    const HINTS = {
+      bus: '가는 곳을 알려주고 안전하게 이동하도록 도와주는 분이 필요해요.',
+      librarian: '책을 찾고 빌릴 수 있도록 도와주는 분이 필요해요.',
+      clerk: '물건을 살 수 있도록 계산과 안내를 도와주는 분이 필요해요.',
+      park: '공원을 깨끗하게 관리해 주는 분이 필요해요.',
+      guard: '길을 안전하게 건널 수 있도록 신호를 안내해 주는 분이 필요해요.',
+      hair: '머리카락을 잘라 주고 원하는 스타일을 도와주는 분이 필요해요.'
+    };
+
     const cardsBox = $('p05Cards');
     let index = 0;
 
@@ -116,6 +126,7 @@
     function pick(card, right) {
       if (!right) {
         playWrong();
+        $('p05HintText').textContent = HINTS[QUESTIONS[index].answer];
         card.classList.remove('is-wrong');
         void card.offsetWidth;
         card.classList.add('is-wrong');

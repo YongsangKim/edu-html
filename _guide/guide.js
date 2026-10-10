@@ -5,6 +5,7 @@
     { file: 'buttons.html', label: '버튼' },
     { file: 'screens.html', label: '화면 틀' },
     { file: 'modals.html', label: '팝업·모달' },
+    { file: 'modals-all.html', label: '모달 전체 점검' },
     { file: 'progress.html', label: '진행도(게이지·별·배지)' },
     { file: 'characters.html', label: '안내 캐릭터·말풍선' },
     { file: 'drag.html', label: '끌어 놓기' },

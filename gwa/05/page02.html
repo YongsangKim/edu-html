@@ -39,9 +39,6 @@
         .p02-horn:active{transform:scale(.95)}
         .p02-horn:disabled{filter:grayscale(1) opacity(.5);cursor:default;transform:none}
 
-        .p02-success{justify-content:center;padding-top:0}
-        .p02-success .photo-card{height:auto;padding-bottom:40px}
-        #p02Wrong .avatar-popup-text{font-size:60px}
     </style>
 </head>
 <body>
@@ -68,7 +65,7 @@
 
           <button class="p02-horn" id="p02Horn" disabled aria-label="확성기로 안내하기">📢</button>
 
-          <div class="photo-modal p02-success is-off" id="p02Right">
+          <div class="photo-modal is-center is-off" id="p02Right">
             <div class="photo-card">
               <img class="photo-card-img" src="img/p02_success.png" alt="">
               <p class="photo-card-title">대피 성공!</p>
@@ -78,7 +75,10 @@
           <div class="ox-result-wrong is-avatar is-off" id="p02Wrong">
             <div class="avatar-popup-panel">
               <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
-              <p class="avatar-popup-text">파도의 높이와 간격을<br>다시 확인해 볼까요?</p>
+              <div class="avatar-popup-body">
+                <p class="hint-title">힌트</p>
+                <p class="avatar-popup-text is-small" id="p02HintText"></p>
+              </div>
             </div>
           </div>
 
@@ -91,25 +91,19 @@
                     <p class="avatar-card-title">정말 잘했어요!</p>
                     <p class="avatar-card-text">파도의 높이와 간격을 정확하게 분석해서<br>시민들을 안전하게 지켜냈어요.</p>
                   </div>
-                  <a href="page03.html" class="js-nav-effect avatar-card-btn">
-                    <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
-                  </a>
+                  <a href="page03.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
                 </div>
                 <div class="step-panel">
                   <div class="avatar-card-body is-side">
                     <p class="avatar-card-text">신기하게도, 우리가 귀로 듣는 소리도<br>마이크를 통과하면 바다의 파도 모양처럼 바뀌어요!</p>
                   </div>
-                  <a href="page03.html" class="js-nav-effect avatar-card-btn">
-                    <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
-                  </a>
+                  <a href="page03.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
                 </div>
                 <div class="step-panel">
                   <div class="avatar-card-body is-side">
                     <p class="avatar-card-text">컴퓨터와 AI가 소리 파도를<br>어떻게 분석하는지 알아볼까요?</p>
                   </div>
-                  <a href="page03.html" class="js-nav-effect avatar-card-btn">
-                    <img src="../../img/common/btn_next_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_small_on.png" data-src-over="../../img/common/btn_next_small_over.png" data-sound="sound/click.mp3" alt="다음">
-                  </a>
+                  <a href="page03.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
                 </div>
               </div>
             </div>
@@ -183,6 +177,8 @@
       setTimeout(() => {
         if (picked.height !== w.height || picked.gap !== w.gap) {
           playWrong();
+          const hHint = picked.height !== w.height, gHint = picked.gap !== w.gap;
+          $('p02HintText').textContent = hHint && gHint ? '파도의 높이와 간격을 각각 다시 살펴보세요.' : hHint ? '파도가 위 아래로 얼마나 높은지 다시 살펴보세요.' : '파도 사이가 넓은지 촘촘한지 다시 살펴보세요.';
           flashLayer($('p02Wrong'));
           horn.disabled = false;
           return;
