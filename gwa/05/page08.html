@@ -28,6 +28,10 @@
         .p08-bar .mic{flex:0 0 auto;width:56px;height:56px;border-radius:50%;background:#e8e8ec;color:#121316;display:flex;align-items:center;justify-content:center;font-size:30px}
         .p08-bar .wave{flex:1 1 auto;display:flex;align-items:center;justify-content:center;gap:6px;height:50px}
         .p08-bar .wave i{display:block;width:5px;border-radius:3px;background:#e8e8ec;animation:p08-wave .8s ease-in-out infinite}
+        .p08-bar .dots{font-weight:inherit} .p08-bar .dots i{font-style:normal;opacity:0;animation:p08-dot 1.2s steps(1) infinite} .p08-bar .dots i:nth-child(2){animation-name:p08-dot2} .p08-bar .dots i:nth-child(3){animation-name:p08-dot3}
+        @keyframes p08-dot{0%{opacity:1}100%{opacity:1}}
+        @keyframes p08-dot2{0%{opacity:0}33%{opacity:1}}
+        @keyframes p08-dot3{0%{opacity:0}66%{opacity:1}}
         .p08-bar .stop{flex:0 0 auto;width:56px;height:56px;border-radius:50%;background:#e8e8ec;display:flex;align-items:center;justify-content:center}
         .p08-bar .stop:after{content:'';width:20px;height:20px;border-radius:5px;border:solid 4px #121316;box-sizing:border-box}
         @keyframes p08-wave{50%{height:34px}}
@@ -92,17 +96,13 @@
                   <div class="avatar-card-body is-side">
                     <p class="avatar-card-text">‘오케이 구글’로 핸드폰을 깨우고, 구체적으로 명령하니까 AI가 우리가 원하는 일을 정확하게 처리해 주었어요.</p>
                   </div>
-                  <a href="page09.html" class="js-nav-effect avatar-card-btn">
-                    <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
-                  </a>
+                  <a href="page09.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
                 </div>
                 <div class="step-panel">
                   <div class="avatar-card-body is-side">
                     <p class="avatar-card-text">이렇게 AI 비서에게는 정확한 호출어와 구체적인 질문을 전달하는 것이 아주 중요해요. 이제 퀴즈를 풀며 배운 내용을 확인해 볼까요?</p>
                   </div>
-                  <a href="page09.html" class="js-nav-effect avatar-card-btn">
-                    <img src="../../img/common/btn_next_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_small_on.png" data-src-over="../../img/common/btn_next_small_over.png" data-sound="sound/click.mp3" alt="다음">
-                  </a>
+                  <a href="page09.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
                 </div>
               </div>
             </div>
@@ -162,7 +162,7 @@
         for (let i = 0; i < 15; i++) bars += '<i></i>';
         bar.innerHTML = '<span class="plus">+</span><span class="wave">' + bars + '</span><span class="mic">🎤</span>';
       } else if (kind === 'wait') {
-        bar.innerHTML = '<span class="say">' + label + '</span><span class="stop"></span>';
+        bar.innerHTML = '<span class="say">' + label.replace(/…$/, '<b class="dots"><i>.</i><i>.</i><i>.</i></b>') + '</span><span class="stop"></span>';
       } else {
         bar.innerHTML = '<span class="plus">+</span><span class="say">Assistant에게 물어보기</span><span class="mic">🎤</span>';
       }

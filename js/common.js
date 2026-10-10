@@ -1882,13 +1882,15 @@ function initAnswerPickQuiz() {
   };
   const correctSound = prepareSound(correctLayer);
   const wrongSound = prepareSound(wrongLayer);
-  // 문제(.answer-pick-quiz)나 보기에 data-wrong="문구"가 있으면 그 오답만 문구를 바꿔 띄움(긴 문구라 60px .is-medium). 없으면 원래 문구
+  // 문제(.answer-pick-quiz)나 보기에 data-wrong="문구"가 있으면 그 오답만 문구를 바꿔 띄움(긴 문구라 60px .is-small). 없으면 원래 문구
   const wrongText = wrongLayer ? wrongLayer.querySelector('.avatar-popup-text') : null;
   const wrongDefault = wrongText ? { html: wrongText.innerHTML, cls: wrongText.className } : null;
+  const hintBadge = wrongLayer ? wrongLayer.querySelector('.hint-title') : null;
   const setWrongText = (html) => {
     if (!wrongText) return;
+    if (hintBadge) hintBadge.style.display = html ? '' : 'none';
     wrongText.innerHTML = html || wrongDefault.html;
-    wrongText.className = html ? 'avatar-popup-text is-medium' : wrongDefault.cls;
+    wrongText.className = html ? 'avatar-popup-text is-small' : wrongDefault.cls;
   };
   // 정답도 같은 방식: data-right="문구"가 있는 문제는 정답 팝업 문구를 바꿈
   const rightText = correctLayer ? correctLayer.querySelector('.avatar-popup-text') : null;
@@ -1896,7 +1898,7 @@ function initAnswerPickQuiz() {
   const setRightText = (html) => {
     if (!rightText) return;
     rightText.innerHTML = html || rightDefault.html;
-    rightText.className = html ? 'avatar-popup-text is-medium' : rightDefault.cls;
+    rightText.className = html ? 'avatar-popup-text is-small' : rightDefault.cls;
   };
   // 정답이 여러 개인 문제에서, 마지막 정답 전까지는 정답 레이어/사운드가 안 뜨다 보니
   // 첫 번째 정답을 골랐을 때 아무 소리도 안 나던 문제 — 클릭음만 짧게 얹어줌

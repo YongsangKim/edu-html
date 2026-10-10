@@ -61,7 +61,10 @@
           <div class="ox-result-wrong is-avatar is-off" id="p06Wrong">
             <div class="avatar-popup-panel">
               <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
-              <p class="avatar-popup-text is-medium">아직 이 단계가 아니에요.<br>데이터 처리 순서를 다시 생각해 보세요!</p>
+              <div class="avatar-popup-body">
+                <p class="hint-title">힌트</p>
+                <p class="avatar-popup-text is-small" id="p06HintText"></p>
+              </div>
             </div>
           </div>
 
@@ -74,41 +77,31 @@
                     <p class="avatar-card-title">잘했어요!</p>
                     <p class="avatar-card-text">데이터를 처리하기 위한 3단계를 잘 확인했나요?</p>
                   </div>
-                  <a href="page07.html" class="js-nav-effect avatar-card-btn">
-                    <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
-                  </a>
+                  <a href="page07.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
                 </div>
                 <div class="step-panel">
                   <div class="avatar-card-body is-side">
                     <p class="avatar-card-text">1단계는 도구로 수치를 ‘측정’하는 단계!</p>
                   </div>
-                  <a href="page07.html" class="js-nav-effect avatar-card-btn">
-                    <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
-                  </a>
+                  <a href="page07.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
                 </div>
                 <div class="step-panel">
                   <div class="avatar-card-body is-side">
                     <p class="avatar-card-text">2단계는 측정한 값을 기록하는 단계!</p>
                   </div>
-                  <a href="page07.html" class="js-nav-effect avatar-card-btn">
-                    <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
-                  </a>
+                  <a href="page07.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
                 </div>
                 <div class="step-panel">
                   <div class="avatar-card-body is-side">
                     <p class="avatar-card-text">3단계는 그래프로 시각화하는 단계예요!</p>
                   </div>
-                  <a href="page07.html" class="js-nav-effect avatar-card-btn">
-                    <img src="../../img/common/btn_arrow_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_arrow_small_on.png" data-src-over="../../img/common/btn_arrow_small_over.png" data-sound="sound/click.mp3" alt="다음">
-                  </a>
+                  <a href="page07.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
                 </div>
                 <div class="step-panel">
                   <div class="avatar-card-body is-side">
                     <p class="avatar-card-text">이제 우리 그래프로 시각화하는 3단계를 조금 더 연습해 볼까요?</p>
                   </div>
-                  <a href="page07.html" class="js-nav-effect avatar-card-btn">
-                    <img src="../../img/common/btn_next_small.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_small_on.png" data-src-over="../../img/common/btn_next_small_over.png" data-sound="sound/click.mp3" alt="다음">
-                  </a>
+                  <a href="page07.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
                 </div>
               </div>
             </div>
@@ -124,6 +117,7 @@
   <script src="../../js/common.js"></script>
   <script>
   (function () {
+    const HINTS = ['처음에는 도구로 수치를 재는 일을 해요.', '잰 숫자를 표에 적고 다듬는 단계예요.', '숫자를 그림이나 그래프로 바꾸는 마지막 단계예요.'];
     const STEPS = [
       { key: 'measure', name: '측정', emoji: '🌡️', text: '잘했어! 첫번째 단계는 ‘측정’이야. 온도계나 습도계 같은 도구로 수치를 재는 것을 ‘측정’이라고 해.' },
       { key: 'record', name: '기록·정리', emoji: '📋', text: '잘했어! 두번째 단계는 ‘기록·정리’야. 측정한 숫자를 표의 알맞은 칸에 적고 다듬는 것을 ‘기록·정리’라고 해.' },
@@ -185,6 +179,7 @@
       onWrong: (card, zone) => {
         if (!zone) return;
         playWrong();
+        $('p06HintText').textContent = HINTS[now];
         flashLayer($('p06Wrong'));
       }
     });
