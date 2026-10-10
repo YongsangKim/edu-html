@@ -27,6 +27,7 @@
   --c-pale:#eef3fb;
   --c-mist:#dfe7f5;
   --c-navy:#023187;
+  --c-pink:#ff4ff9;
 }
 @font-face {
   font-family: 'Cafe24 Ssurround';
@@ -927,6 +928,8 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 .avatar-popup-avatar img{width:100%;height:100%;object-fit:contain}
 .avatar-popup-text{flex:1 1 auto;min-height:224px;display:flex;flex-direction:column;justify-content:center;margin:0;font-family:'Cafe24 Ssurround';font-size:80px;line-height:1.25;color:var(--c-purple);letter-spacing:-0.04em}
 .avatar-popup-text.is-center{text-align:center}
+/* 문구 속 강조(분홍): 줄이 중간에서 끊기지 않는 한 덩어리 */
+.text-em{color:var(--c-pink);white-space:nowrap}
 
 /* ---------------- 정답/오답 결과 레이어(딤+아바타 팝업, 기능 E/V 공용) ----------------
    기존엔 페이지마다 통이미지(ox_correct.png 등)를 꽉 채우는 방식이었는데,
@@ -955,6 +958,7 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 .avatar-card-title{margin:0 0 65px;font-family:'Cafe24 Ssurround';font-size:80px;line-height:1.2;color:var(--c-purple);text-align:center;letter-spacing:-0.04em;padding:0 170px}
 .avatar-card-text{margin:0;font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.2;color:var(--c-purple);letter-spacing:-0.06em;text-align:center}
 .avatar-card.is-side .avatar-card-body{padding-left:200px}
+.avatar-card.is-side .avatar-card-body .avatar-card-title{text-align:left;padding:0}
 .avatar-card.is-side .avatar-card-body .avatar-card-text{text-align:left}
 .avatar-card-btn{position:absolute;right:80px;bottom:36px}
 .avatar-card-btn img{display:block}
@@ -969,7 +973,7 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
   display:flex;flex-direction:column;align-items:center;gap:8px;z-index:10}
 .photo-modal.is-off{display:none}
 .photo-modal button img{display:block}
-.photo-modal.is-center{justify-content:center;padding-top:0}
+.photo-modal.is-middle{justify-content:center;padding-top:0}
 .photo-card{width:1147px;box-sizing:border-box;padding:59px 55px 36px;background:var(--c-white);border:solid 5px var(--c-purple);border-radius:32px;
   box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);text-align:center;font-family:'Cafe24 Ssurround';color:var(--c-purple);letter-spacing:-0.04em}
 .photo-card-img{display:block;width:1028px;height:462px;margin:0 auto;border-radius:20px;background:var(--c-purple);object-fit:cover}
@@ -983,15 +987,12 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 .photo-card-title{margin:22px 0 0;font-size:60px;line-height:1.2}
 .photo-card-text{margin:6px 0 0;font-size:52px;line-height:1.13;letter-spacing:-0.04em}
 /* 카드 안에서 문구를 단계별로 넘길 때(.step-flow > .step-panel)는 제자리에 놓이게.
-   제목 없는 단계만 본문을 아바타 옆에서 시작하려면 .avatar-card-body.is-side, 본문까지 가운데 정렬은 .avatar-card.is-center */
+   제목 없는 단계만 본문을 아바타 옆에서 시작하려면 .avatar-card-body.is-side */
 .avatar-card .step-flow{position:static}
 .avatar-card .step-panel{position:static;width:auto;height:auto}
 .avatar-card-body.is-side{padding-left:200px}
+.avatar-card-body.is-side .avatar-card-text{text-align:left}
 .avatar-card-title.is-left{text-align:left}
-.avatar-card.is-middle{display:flex;flex-direction:column;justify-content:center}
-.avatar-card.is-side .avatar-card-body.is-center, .avatar-card-body.is-center{padding-left:0}
-.avatar-card-body.is-center .avatar-card-text{text-align:center}
-.avatar-card.is-center .avatar-card-text{text-align:center}
 /* 제목 없이 본문 한두 줄만 있는 카드(오답 힌트 등)는 높이를 줄임 */
 /* 작은 카드(.is-small): 아바타가 원 안에 들어간 일반 원형(avatar_correct 계열), 제목은 카드 가운데,
    본문은 아바타 오른쪽부터 */
@@ -1007,15 +1008,15 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 /* 아래쪽 여백: 버튼(.avatar-card-btn)이 없는 카드는 60px, 있는 카드는 150px — 클래스 없이 :has()로 구분 */.avatar-card:has(.avatar-card-btn){padding-bottom:150px}
 .avatar-card:has(.avatar-card-btn){padding-bottom:150px}
 .ox-result-wrong .avatar-popup-text, .ox-result-wrong .avatar-popup-sub{text-align:left}
-/* 모달 글자 크기는 두 단계만: 제목·짧은 한 줄 80px(기본) / 본문·힌트·긴 문구 60px(.is-small·.is-pill 같은 60px) */
+/* 모달 글자 크기는 두 단계만: 제목·짧은 한 줄 80px(기본) / 본문·힌트·긴 문구 60px(.is-small) */
 .avatar-popup-text.is-small{font-size:60px}
 /* 팝업 문구는 단어 중간에서 끊기지 않게(긴 힌트가 가로로 너무 넓어지지 않게 위 panel 최대 폭 1500px), 오답 힌트는 왼쪽 정렬 */
 /* 모달·팝업 글자는 단어 중간에서 끊기지 않게(공용) */
 .avatar-modal, .photo-modal, .ox-result-correct, .ox-result-wrong, .confirm-quiz{word-break:keep-all}
 .avatar-popup-text, .avatar-popup-sub, .avatar-card-title, .avatar-card-text, .photo-card-title, .photo-card-text, .confirm-quiz-title, .confirm-quiz-text, .confirm-quiz-choice{word-break:keep-all}
 /* 알약 오답·안내(gwa/01 · sa/01): 왼쪽 정렬 */
-.avatar-popup-text.is-pill{font-size:60px;text-align:left}
 .ox-result-correct .avatar-popup-panel{justify-content:space-between}
+.ox-result-correct .avatar-popup-panel .avatar-popup-text{text-align:center}
 /* 오답 모달(.avatar-modal.is-wrong)은 결과 레이어(.ox-result-wrong)처럼 문구 왼쪽 정렬 */
 .avatar-modal.is-wrong .avatar-popup-text, .avatar-modal.is-wrong .avatar-popup-sub{text-align:left}
 .avatar-popup-extra{flex:0 0 auto;width:224px;height:224px;margin-right:-60px}
@@ -1116,6 +1117,14 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 .gauge.is-thin:before{left:-34px;top:-22px;width:100px;height:94px}
 .gauge.is-thin .gauge-fill{border-radius:28px}
 .gauge.is-thin .gauge-fill:after{top:8px;height:8px}
+/* 세로 게이지(.is-vertical): 가로 게이지를 세워 놓은 모양. 별은 아래쪽, 채움은 아래에서 위로. 위치·세로 길이만 페이지에서(left/top/height), 채움은 style.height='%' */
+.gauge.is-vertical{height:auto;width:94px}
+.gauge.is-vertical:before{left:-24px;top:auto;bottom:-36px}
+.gauge.is-vertical .gauge-fill{top:auto;bottom:0;left:0;width:100%;height:0;background:linear-gradient(0deg,#a3104a 0%,#d81f55 30%,#f2605a 55%,#ffc25a 80%,#fff06e 100%);box-shadow:inset 8px 0 0 rgba(120,0,40,.18);transition:height .4s ease}
+.gauge.is-vertical .gauge-fill:after{left:12px;right:auto;top:36px;bottom:24px;width:10px;height:auto;background:linear-gradient(180deg,rgba(255,255,255,.65),rgba(255,255,255,.2))}
+.gauge.is-thin.is-vertical{width:64px;height:auto}
+.gauge.is-thin.is-vertical:before{left:-18px;top:auto;bottom:-34px}
+.gauge.is-thin.is-vertical .gauge-fill:after{left:8px;top:24px;bottom:16px;width:8px;height:auto}
 
 .end-title{position:absolute;left:750px;top:65px;width:1100px;margin:0;text-align:left;font-family:'Cafe24 Ssurround';font-size:100px;background:linear-gradient(180deg,#02185c,#0362d7);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-0.06em}
 .end-panel{position:absolute;left:750px;top:185px;width:930px;min-height:540px;background:var(--c-cream);border:solid 15px var(--c-navy);border-radius:30px;box-shadow:0 0 0 5px var(--c-white);box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;padding:30px}
@@ -1152,6 +1161,18 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 .ox-pick img{width:100%;height:100%;object-fit:contain;display:block}
 .ox-pick.is-o{left:440px}
 .ox-pick.is-x{left:1120px}
+
+/* 퀴즈 선택지(글자 버튼) 배치: <div class="answer-pick-quiz quiz-opts is-row|is-grid|is-list"> — 좌표 없이 가운데 정렬
+   is-row 한 줄(2·3개 464px, 4개 380px, 5개는 3+2 두 줄) / is-grid 2×2 / is-list 세로 목록(.is-left는 글자 왼쪽 정렬, 긴 보기용) */
+.quiz-opts{position:absolute;left:0;width:1920px;display:flex;justify-content:center}
+.quiz-opts .card-btn{margin:0}
+.quiz-opts.is-row{top:560px;flex-wrap:wrap;gap:40px 70px}
+.quiz-opts.is-row:has(> :nth-child(4)):not(:has(> :nth-child(5))) .card-btn{width:380px}
+.quiz-opts.is-grid{top:500px;display:grid;grid-template-columns:repeat(2,740px);gap:40px 80px}
+.quiz-opts.is-grid .card-btn{width:100%;min-width:0}
+.quiz-opts.is-list{top:470px;flex-direction:column;align-items:center;gap:40px}
+.quiz-opts.is-list .card-btn{width:1500px;min-width:0;height:110px;font-size:52px}
+.quiz-opts.is-list.is-left .card-btn{padding:10px 50px 4px;font-size:50px;text-align:left}
 
 /* ---------------- 퀴즈 질문 박스(알약형, 아바타+Q번호+문구) ----------------
    sa/04/page20 Q1~Q3에서 3번 반복 쓰던 걸 공용화. 상황 설명이 필요한 문항만
@@ -1200,9 +1221,6 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 .jig-piece.is-wrong{animation:fix-word-shake .3s ease}
 .jig-next.is-off{display:none}
 
-.bg-sky{background:var(--c-mist)}
-.bg-mist{background:#c2d9e9}
-.bg-stage{background:url('../img/common/stage_bg_04.png') no-repeat}
 .card-btn.is-quiz{width:464px;min-width:0;padding:12px 10px 8px;font-size:64px}
 .card-btn.is-quiz.is-long{font-size:50px;line-height:1.05}
 /* 팝업(카드) 안에 들어가는 작은 버튼(예: 다시 해보기) */

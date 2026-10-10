@@ -7,8 +7,7 @@
     <link rel="stylesheet" href="../../css/common.css">
     <style>
         /* 디자인 없음 - 기획서 13~15p. 왼쪽 기온표(0~24시), 오른쪽 막대그래프. 0~12시는 채워져 있고 15·18·21·24시는 테두리만.
-           막대 아래 [시작] → 왼쪽 [+]/[-]로 1도씩 쌓기, 기온과 같아지면 자동 완성(오답 없음). 4개 끝나면 미니퀴즈 2개(가장 높은/낮은 시간 막대 클릭) → 정리 3단계 → page09.
-           블록 쌓는 소리 sound/p03_block.mp3(page03과 같은 소리) */
+           막대 아래 [시작] → 왼쪽 [+]/[-]로 1도씩 쌓기, 기온과 같아지면 자동 완성(오답 없음). 4개 끝나면 미니퀴즈 2개(가장 높은/낮은 시간 막대 클릭) → 정리 3단계 → page09. */
 
         .p08-ask{position:absolute;left:60px;top:30px;width:1800px;height:100px;margin:0;box-sizing:border-box;padding:6px 40px 0;display:flex;align-items:center;justify-content:center;
           background:var(--c-white);border:solid 5px var(--c-ink);border-radius:50px;box-shadow:0 10px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:60px;color:var(--c-ink);letter-spacing:-0.05em}
@@ -128,7 +127,6 @@
     ];
     const plot = $('p08Plot');
     const ctrl = $('p08Ctrl');
-    const playBlock = makeSfx('sound/p03_block.mp3');
 
     for (let v = 0; v <= MAX; v += 5) {
       const l = document.createElement('span');
@@ -190,7 +188,6 @@
       if (!active) return;
       active.now = Math.max(0, Math.min(MAX, active.now + d));
       draw(active);
-      playBlock();
       if (active.now !== active.target) return;
       const i = cols.indexOf(active);
       const b = starts[i - FIXED];

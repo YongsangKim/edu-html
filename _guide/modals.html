@@ -1,367 +1,1087 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UI 가이드 - 팝업·모달</title>
-    <link rel="stylesheet" href="../css/common.css">
-    <link rel="stylesheet" href="guide.css">
-    <style>
-        .g-stage{background:#dbe9f7}
-        .g-group{margin:34px 0 10px;font-family:'Cafe24 Ssurround';font-size:22px;font-weight:normal;color:#48159c}
-
-        /* ---- 페이지 전용 스타일 복사본(여기서 고쳐도 원래 페이지엔 반영 안 됨) ---- */
-        /* sa/04/page10 카드 오답 */
-        .p10-popup{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:110;background:rgba(27,23,56,.5);display:flex;align-items:center;justify-content:center}
-        .p10-popup .avatar-popup-text{text-align:left;letter-spacing:-0.08em}
-        /* sa/04/page02 온도계 모달 */
-        .p02-modal{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:100;background:rgba(27,23,56,.55)}
-        .p02-modal-panel{position:absolute;left:560px;top:150px;width:800px;height:660px;background:#fefbf9;border:solid 6px #1b1738;border-radius:48px;box-sizing:border-box;padding:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px}
-        .p02-thermo{position:relative;width:110px;height:320px;border:solid 6px #1b1738;border-radius:55px;background:#eef3fb;overflow:hidden}
-        .p02-thermo-fill{position:absolute;left:0;bottom:0;width:100%}
-        .p02-modal-text{margin:0;font-family:'Cafe24 Ssurround';font-size:48px;line-height:1.3;color:#3b1e87;text-align:center}
-        /* sa/04/page22 스테이지 클리어 */
-        .p22-clear{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:120;background:rgba(27,23,56,.7);display:flex;align-items:center;justify-content:center;
-          font-family:'Cafe24 Ssurround';font-size:130px;color:#ffd83d;text-align:center}
-        /* sa/07/page05 선잇기 정답 다음 버튼 */
-        .line-result-next{align-self:center;border:0;background:transparent;padding:0}
-        /* sa/02 와이어프레임 */
-        .g2-box{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;border-radius:16px;padding:40px 60px;font-size:28px;box-shadow:0 0 30px rgba(0,0,0,.3)}
-        .g2-feedback{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#fff;border-radius:16px;padding:30px 50px;font-size:28px;font-weight:bold;box-shadow:0 0 30px rgba(0,0,0,.3);color:#d9534f}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UI 가이드 - 팝업·모달</title>
+<link rel="stylesheet" href="../css/common.css">
+<link rel="stylesheet" href="guide.css">
+<style>.g-fill-js{font-style:normal;font-size:.5em;color:#9a8fc4}.g-stage{background:#dbe9f7}.m-stage .hidden{display:none}.g-tabs button small{font-weight:400;color:#6a7488}.m-sec .g-meta{font-size:14px}.q-thumb{position:relative;overflow:hidden;border:1px solid #cfd6e2;background:#c2d9e9}.q-thumb iframe{position:absolute;left:0;top:0;width:1920px;height:1080px;border:0;transform-origin:0 0}</style>
 </head>
 <body>
-  <div class="g-wrap">
-    <h1>팝업·모달</h1>
-    <p class="g-note">
-      실제 화면(1920×960)을 절반 크기로 보여줌. 공용 <code>css/common.css</code>를 고치면 실제 페이지에도 그대로 반영됨.
-      <span class="g-local">페이지 전용 스타일</span> 표시가 있는 항목은 그 페이지 &lt;style&gt;의 복사본이라 여기서 고친 뒤 원래 페이지에도 옮겨야 함.<br>
-      모양(스타일)별로 묶음. 같은 모양은 한 칸만 두고 문구·아바타만 다른 페이지는 설명에 적음.
-    </p>
-    <ul class="g-toc"></ul>
-
-    <!-- =================================================================== -->
-    <h2>1. 알약형 아바타 팝업 <code>.avatar-popup-panel</code></h2>
-    <p class="g-note">
-      아바타 원 + 문구(+ 정답은 오른쪽 체크 <code>.avatar-popup-extra</code>). 패널 폭은 문구 길이대로 늘어남.
-      딤은 <code>.ox-result-*.is-avatar</code>(정답/오답 결과) 또는 <code>.avatar-modal</code>(일반 모달)이 맡음.
-      아바타: 정답 사회 <code>avatar_correct</code> · 과학 <code>avatar_correct_gwa</code> / 오답 <code>avatar_incorrect</code> / 퀴즈 <code>avatar_quiz</code>.
-    </p>
-
-    <h3 class="g-group">1-1. 정답 — 문구 한 줄 + 체크 (80px 가운데)</h3>
-    <div class="g-list">
-      <div class="g-item">
-        <p class="g-meta"><b>정답이에요!</b> <code>.ox-result-correct.is-avatar</code><br>사회 sa/01:16 · sa/02:12 · sa/04:20 · sa/07:15 / 과학 gwa/03:02·04·11(아바타만 avatar_correct_gwa) · gwa/03:12 "코디 완성!"</p>
-        <div class="g-view"><div class="g-stage">
-          <div class="ox-result-correct is-avatar"><div class="avatar-popup-panel">
-            <div class="avatar-popup-avatar"><img src="../img/common/avatar_correct.png" alt=""></div>
-            <p class="avatar-popup-text">정답이에요!</p>
-            <div class="avatar-popup-extra"><img src="../img/common/icon_correct.png" alt=""></div>
-          </div></div>
-        </div></div>
-      </div>
-    </div>
-
-    <h3 class="g-group">1-2. 정답 — 제목 + 보조 문구 (<code>.avatar-popup-body</code>)</h3>
-    <div class="g-list">
-      <div class="g-item">
-        <p class="g-meta"><b>좋아요! + 설명 + 체크</b> 결과 레이어<br>sa/07:07 찾기 정답 (같은 모양: sa/07:05 선잇기 정답 — 제목 없이 설명 + 그 아래 다음 버튼)</p>
-        <div class="g-view"><div class="g-stage">
-          <div class="avatar-modal"><div class="avatar-popup-panel">
-            <div class="avatar-popup-avatar"><img src="../img/common/avatar_correct.png" alt=""></div>
-            <div class="avatar-popup-body">
-              <p class="avatar-popup-text">좋아요!</p>
-              <p class="avatar-popup-sub">구글 렌즈는 사진 속 장소와 관련된 정보를<br>찾는 데 도움을 줄 수 있어요.</p>
+<div class="g-wrap">
+<h1>팝업·모달</h1>
+<p class="g-note">모든 차시 페이지의 모달 소스를 그대로 가져와 종류별 탭으로 정리했습니다(총 154개, 구조가 같은 것은 한 칸). 공용 CSS가 적용된 모습입니다. 페이지 전용 CSS는 빠져 있어 일부는 실제와 조금 다를 수 있고, JS가 나중에 채우는 문구는 페이지 코드에서 찾은 실제 문구를 넣었고(첫 번째 문구와, 달라 보이면 가장 긴 문구), 못 찾으면 그 페이지 스크립트의 가장 긴 문구를 대신 넣었습니다.</p>
+<div class="g-tabs"><button type="button" data-t="pillok" class="is-on">알약 · 정답 <small>4종/26곳</small></button><button type="button" data-t="pillno">알약 · 오답 <small>12종/46곳</small></button><button type="button" data-t="pillgen">알약 · 일반 모달 <small>30종/58곳</small></button><button type="button" data-t="card">카드형 <small>18종/18곳</small></button><button type="button" data-t="cardstep">카드형 · 단계 <small>21종/23곳</small></button><button type="button" data-t="photo">사진 카드 <small>5종/5곳</small></button><button type="button" data-t="confirm">판단 퀴즈 <small>7종/7곳</small></button></div>
+<section class="m-sec" id="sec-pillok"><p class="g-note"><b>알약 · 정답</b> — ox-result-correct is-avatar — 정답 결과 레이어(체크 포함). 모양(구조)이 같은 것은 한 칸에 모았고, 쓰는 페이지를 표시했습니다.</p><div class="g-list"><div class="g-item"><p class="g-meta"><b>18곳</b> · sa/01/p16 · sa/02/p12 · sa/03/p10 · sa/04/p20 · sa/05/p11 · sa/06/p10 · sa/07/p10 · sa/08/p11 · gwa/02/p09 · gwa/02/p11 · gwa/03/p02 · gwa/03/p03 · gwa/03/p04 · gwa/03/p11 · gwa/05/p09 · gwa/07/p11 · gwa/08/p15 ×2</p><div class="g-view"><div class="g-stage m-stage"><div class="ox-result-correct is-avatar" data-sound="sound/correct.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">정답이에요!</p>
+              </div>
+              <div class="avatar-popup-extra"><img loading="lazy" src="../img/common/icon_correct.png" alt=""></div>
             </div>
-            <div class="avatar-popup-extra"><img src="../img/common/icon_correct.png" alt=""></div>
-          </div></div>
-        </div></div>
-      </div>
-      <div class="g-item">
-        <p class="g-meta"><b>좋아요! + 설명</b> <code>.avatar-modal.talk-popup</code> (왼쪽 정렬)<br>sa/04:06 · 07 표현 단계 정답 안내 <code>#talkPopupCorrect</code> — 설명은 스크립트가 넣음</p>
-        <div class="g-view"><div class="g-stage">
-          <div class="avatar-modal talk-popup"><div class="avatar-popup-panel">
-            <div class="avatar-popup-avatar"><img src="../img/common/avatar_correct.png" alt=""></div>
-            <div class="avatar-popup-body">
-              <p class="avatar-popup-text">좋아요!</p>
-              <p class="avatar-popup-sub">상황에 맞는 감정과 말을<br>선택하면 마음을 더 잘 전할 수 있어요.</p>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>6곳</b> · sa/02/p14 · sa/03/p02 · sa/05/p07 · gwa/02/p02 · gwa/02/p03 · gwa/02/p08<br><span class="g-local">JS가 채우는 실제 문구(첫 번째)</span></p><div class="g-view"><div class="g-stage m-stage"><div class="ox-result-correct is-avatar">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">GOOD!</p>
+                <p class="avatar-popup-sub">안전한 기사예요</p>
+              </div>
+              <div class="avatar-popup-extra"><img loading="lazy" src="../img/common/icon_correct.png" alt=""></div>
             </div>
-          </div></div>
-        </div></div>
-      </div>
-      <div class="g-item">
-        <p class="g-meta"><b>좋아요! + 설명 + 다음 버튼</b> <code>.avatar-popup-body.is-finish</code> + <code>.avatar-popup-next</code> — 공용<br>sa/03:02 · sa/04:08 · sa/06:02 · sa/06:05</p>
-        <div class="g-view"><div class="g-stage">
-          <div class="avatar-modal"><div class="avatar-popup-panel">
-            <div class="avatar-popup-avatar"><img src="../img/common/avatar_correct.png" alt=""></div>
-            <div class="avatar-popup-body is-finish">
-              <p class="avatar-popup-text">좋아요!</p>
-              <p class="avatar-popup-sub">친구의 감정을 살펴보고<br>알맞은 표현을 선택했어요!</p>
-              <a href="javascript:;" class="avatar-popup-next"><img src="../img/common/btn_next_small.png" alt="다음"></a>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · sa/02/p14<br><span class="g-local">JS 문구 중 가장 긴 것</span></p><div class="g-view"><div class="g-stage m-stage"><div class="ox-result-correct is-avatar">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">GOOD!</p>
+                <p class="avatar-popup-sub">기사에 개인정보가 포함되어 있어요</p>
+              </div>
+              <div class="avatar-popup-extra"><img loading="lazy" src="../img/common/icon_correct.png" alt=""></div>
             </div>
-          </div></div>
-        </div></div>
-      </div>
-    </div>
-
-    <h3 class="g-group">1-3. 오답 결과 레이어 — 80px 왼쪽 (<code>.ox-result-wrong.is-avatar</code>)</h3>
-    <div class="g-list">
-      <div class="g-item">
-        <p class="g-meta"><b>다시 한번 살펴볼까요?</b><br>gwa/03:02·03·04·12 (같은 모양: sa/04:20 "다시 한번 생각해봐요!", sa/04:02 "친구의 메시지를 다시 살펴볼까요?")</p>
-        <div class="g-view"><div class="g-stage">
-          <div class="ox-result-wrong is-avatar"><div class="avatar-popup-panel">
-            <div class="avatar-popup-avatar"><img src="../img/common/avatar_incorrect.png" alt=""></div>
-            <p class="avatar-popup-text">다시 한번 살펴볼까요?</p>
-          </div></div>
-        </div></div>
-      </div>
-      <div class="g-item">
-        <p class="g-meta"><b>문장을 다시 한 번 잘 읽어봐요.</b> + <code>.is-small</code>(70px, 긴 문구)<br>sa/01:16 · sa/02:12 · sa/07:15 · gwa/03:11</p>
-        <div class="g-view"><div class="g-stage">
-          <div class="ox-result-wrong is-avatar"><div class="avatar-popup-panel">
-            <div class="avatar-popup-avatar"><img src="../img/common/avatar_incorrect.png" alt=""></div>
-            <p class="avatar-popup-text is-small">문장을 다시 한 번 잘 읽어봐요.</p>
-          </div></div>
-        </div></div>
-      </div>
-      <div class="g-item">
-        <p class="g-meta"><b>제목 + 보조 문구</b> <code>.avatar-popup-body</code><br>gwa/03:07</p>
-        <div class="g-view"><div class="g-stage">
-          <div class="ox-result-wrong is-avatar"><div class="avatar-popup-panel">
-            <div class="avatar-popup-avatar"><img src="../img/common/avatar_incorrect.png" alt=""></div>
-            <div class="avatar-popup-body">
-              <p class="avatar-popup-text">다시 생각해볼까요?</p>
-              <p class="avatar-popup-sub">다른 날짜의 데이터가 들어가면<br>AI가 틀린 분석 결과를 낼 수 있어요.</p>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · sa/05/p02<br><span class="g-local">JS가 채우는 실제 문구(첫 번째)</span> <span class="g-local">페이지 전용 클래스 있음</span></p><div class="g-view"><div class="g-stage m-stage"><div class="ox-result-correct is-avatar p02-good">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">잘했어요!</p>
+                <p class="avatar-popup-sub">모든 문제를 맞혔어요.</p>
+              </div>
+              <div class="avatar-popup-extra"><img loading="lazy" src="../img/common/icon_correct.png" alt=""></div>
             </div>
-          </div></div>
-        </div></div>
-      </div>
-    </div>
-
-    <h3 class="g-group">1-4. 오답·안내 모달 — 80px 왼쪽 (기본 크기)</h3>
-    <div class="g-list">
-      <div class="g-item">
-        <p class="g-meta"><b>친구의 마음을 다시 생각해볼까요?</b> <code>.avatar-modal</code> <code>#talkPopupWarn</code><br>sa/04:06·07·08 감정 단계 오답</p>
-        <div class="g-view"><div class="g-stage">
-          <div class="avatar-modal" id="talkPopupWarn"><div class="avatar-popup-panel">
-            <div class="avatar-popup-avatar"><img src="../img/common/avatar_incorrect.png" alt=""></div>
-            <p class="avatar-popup-text">친구의 마음을 다시 생각해볼까요?</p>
-          </div></div>
-        </div></div>
-      </div>
-      <div class="g-item">
-        <p class="g-meta"><b>친구의 메시지를 다시 한 번 읽어봐요.</b> <code>.avatar-modal</code> <code>#chatappPopup</code> · <code>#p22Popup</code><br>sa/04:14~17 감정 오답 · sa/04:22 게임 오답</p>
-        <div class="g-view"><div class="g-stage">
-          <div class="avatar-modal" id="chatappPopup"><div class="avatar-popup-panel">
-            <div class="avatar-popup-avatar"><img src="../img/common/avatar_incorrect.png" alt=""></div>
-            <p class="avatar-popup-text">친구의 메시지를 다시 한 번 읽어봐요.</p>
-          </div></div>
-        </div></div>
-      </div>
-    </div>
-
-    <h3 class="g-group">1-5. 오답·안내 모달 — 70px 왼쪽 (<code>.is-pill</code>)</h3>
-    <div class="g-list">
-      <div class="g-item">
-        <p class="g-meta"><b>뉴스 기사를 다시 한 번 읽어볼까요?</b> <code>.avatar-modal</code><br>gwa/01:06 (같은 모양: 07 "영상을 다시 한번 살펴볼까요?", 09 낱말 찾기 오답 — 문구는 스크립트가 바꿈)</p>
-        <div class="g-view"><div class="g-stage">
-          <div class="avatar-modal"><div class="avatar-popup-panel">
-            <div class="avatar-popup-avatar"><img src="../img/common/avatar_incorrect.png" alt=""></div>
-            <p class="avatar-popup-text is-pill">뉴스 기사를 다시 한 번 읽어볼까요?</p>
-          </div></div>
-        </div></div>
-      </div>
-      <div class="g-item">
-        <p class="g-meta"><b>나와 맞는 선택지를 클릭해요.</b> <code>.select-warning</code><br>sa/01:12 선택 경고 (같은 모양: sa/01:18 "이미지와 프롬프트를 다시 한 번 비교해보세요." <code>.prompt-fix-popup</code>)</p>
-        <div class="g-view"><div class="g-stage">
-          <div class="select-warning"><div class="avatar-popup-panel">
-            <div class="avatar-popup-avatar"><img src="../img/common/avatar_incorrect.png" alt=""></div>
-            <p class="avatar-popup-text is-pill">나와 맞는 선택지를 클릭해요.</p>
-          </div></div>
-        </div></div>
-      </div>
-    </div>
-
-    <h3 class="g-group">1-6. 오답·안내 모달 — 60px 왼쪽 (<code>.is-small</code>)</h3>
-    <div class="g-list">
-      <div class="g-item">
-        <p class="g-meta"><b>표현 단계 오답</b> <code>.avatar-modal.talk-popup</code> <code>#talkPopup</code><br>sa/04:06·07·08 — 문구는 스크립트가 넣음</p>
-        <div class="g-view"><div class="g-stage">
-          <div class="avatar-modal talk-popup"><div class="avatar-popup-panel">
-            <div class="avatar-popup-avatar"><img src="../img/common/avatar_incorrect.png" alt=""></div>
-            <p class="avatar-popup-text is-small">이 말을 들으면 친구의 기분이 어떨까요?<br>따뜻한 마음을 전하는 다른 말을 찾아볼까요?</p>
-          </div></div>
-        </div></div>
-      </div>
-      <div class="g-item">
-        <p class="g-meta"><b>퀴즈 아바타 오답</b> <code>.hint-quiz-wrong</code><br>sa/01:02 힌트 오답 (같은 모양·퀴즈 아바타: sa/07:03·05 드래그·선잇기 오답, sa/04:10 카드 오답 <span class="g-local">페이지 전용 스타일</span>)</p>
-        <div class="g-view"><div class="g-stage">
-          <div class="hint-quiz-wrong"><div class="avatar-popup-panel">
-            <div class="avatar-popup-avatar"><img src="../img/common/avatar_quiz.png" alt=""></div>
-            <p class="avatar-popup-text is-small">다시 한 번 힌트를 확인하고<br>알맞은 직업을 찾아볼까요?</p>
-          </div></div>
-        </div></div>
-      </div>
-      <div class="g-item">
-        <p class="g-meta"><b>카드 오답</b> <code>.p10-popup</code> (자간 -0.08em) <span class="g-local">페이지 전용 스타일</span><br>sa/04:10 — 단계마다 "감정 / 표정 / 문구" 한 단어만 바뀜</p>
-        <div class="g-view"><div class="g-stage">
-          <div class="p10-popup"><div class="avatar-popup-panel">
-            <div class="avatar-popup-avatar"><img src="../img/common/avatar_quiz.png" alt=""></div>
-            <p class="avatar-popup-text is-small">친구의 메시지를 잘 읽고<br>어떤 감정을 담아야 하는지 다시 생각해봐요.</p>
-          </div></div>
-        </div></div>
-      </div>
-    </div>
-
-    <!-- =================================================================== -->
-    <h2>2. 카드형 팝업 <code>.avatar-card</code> / <code>.photo-card</code></h2>
-    <p class="g-note">
-      큰 카드: 아바타(<code>avatar_finish</code>)가 카드 왼쪽 위에 걸침. 옵션 — <code>.is-side</code>(제목 없이 본문이 아바타 옆),
-      <code>.is-center</code>(본문까지 가운데). 버튼 자리 <code>.avatar-card-btn</code>(카드 오른쪽 아래),
-      팝업용 작은 글자 버튼 <code>.card-btn.is-popup</code>. 카드 안에서 문구를 단계별로 넘길 땐 <code>.step-flow &gt; .step-panel</code>을 그대로 넣으면 됨.
-    </p>
-
-    <h3 class="g-group">2-1. 큰 카드</h3>
-    <div class="g-list">
-      <div class="g-item">
-        <p class="g-meta"><b>기본 — 제목 가운데 + 본문 왼쪽</b> <code>.avatar-card</code><br>gwa/03:03 "정보 분석 완료!" · gwa/03:10 "잘 했어요."</p>
-        <div class="g-view"><div class="g-stage">
-          <div class="avatar-modal"><div class="avatar-card">
-            <img class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
-            <div class="avatar-card-body">
-              <p class="avatar-card-title">정보 분석 완료!</p>
-              <p class="avatar-card-text">각각의 음식 하나하나를 데이터 조각으로 볼 수 있고,<br>이런 음식들이 담긴 접시를 여러 데이터 조각이 담긴<br>‘빅데이터’라고 볼 수 있어요.</p>
-            </div>
-            <a href="javascript:;" class="avatar-card-btn"><img src="../img/common/btn_arrow_small.png" alt="다음"></a>
-          </div></div>
-        </div></div>
-      </div>
-      <div class="g-item">
-        <p class="g-meta"><b>제목 없는 안내</b> <code>.avatar-card.is-side</code><br>gwa/03:03 "우리는 하나의 빅데이터…" · gwa/03:10 "참! AI가…"</p>
-        <div class="g-view"><div class="g-stage">
-          <div class="avatar-modal"><div class="avatar-card is-side">
-            <img class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
-            <div class="avatar-card-body">
-              <p class="avatar-card-text">우리는 하나의 빅데이터 안의<br>데이터 조각을 살펴보며<br>다양한 정보를 확인할 수 있어요.<br>이번에는 여러 개의 접시 속에 담긴 음식을<br>살펴볼까요?</p>
-            </div>
-            <a href="javascript:;" class="avatar-card-btn"><img src="../img/common/btn_start_small.png" alt="시작하기"></a>
-          </div></div>
-        </div></div>
-      </div>
-      <div class="g-item">
-        <p class="g-meta"><b>가운데 정렬</b> <code>.avatar-card.is-center</code><br>gwa/01:02 수집 완료 · 03 정리 완료 · 06 정답 · 07·09 종료 안내 (문구를 단계별로 넘김)</p>
-        <div class="g-view"><div class="g-stage">
-          <div class="avatar-modal"><div class="avatar-card is-center">
-            <img class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
-            <div class="avatar-card-body">
-              <p class="avatar-card-title">과일 수집 완료!</p>
-              <p class="avatar-card-text">이렇게 필요한 것을 모으는 것을<br>‘수집’이라고 해요.</p>
-            </div>
-            <a href="javascript:;" class="avatar-card-btn"><img src="../img/common/btn_arrow_small.png" alt="다음"></a>
-          </div></div>
-        </div></div>
-      </div>
-      <div class="g-item">
-        <p class="g-meta"><b>짧은 오답 힌트 + 다시 해보기</b> <code>.avatar-card</code> + 본문 <code>.is-side</code> + <code>.card-btn.is-popup</code><br>gwa/01:11 (같은 모양, 버튼 없이: 10(흐름 안)·14 오답)</p>
-        <div class="g-view"><div class="g-stage">
-          <div class="avatar-modal"><div class="avatar-card">
-            <img class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
-            <div class="avatar-card-body is-side"><p class="avatar-card-text">날씨 정보를 ‘차곡차곡’ 모으는 행동을 뭐라고 할까요?</p></div>
-            <button class="card-btn is-popup avatar-card-btn">다시 해보기</button>
-          </div></div>
-        </div></div>
-      </div>
-    </div>
-
-    <h3 class="g-group">2-2. 작은 카드 · 사진 카드</h3>
-    <div class="g-list">
-      <div class="g-item">
-        <p class="g-meta"><b>작은 카드 정답</b> <code>.avatar-card.is-small</code> (아바타 avatar_correct_gwa + 보라 원)<br>gwa/03:09 "잘했어요!" · gwa/03:07 "정말 잘했어요!"</p>
-        <div class="g-view"><div class="g-stage">
-          <div class="avatar-modal"><div class="avatar-card is-small">
-            <img class="avatar-card-avatar" src="../img/common/avatar_correct_gwa.png" alt="">
-            <div class="avatar-card-body">
-              <p class="avatar-card-title">잘했어요!</p>
-              <p class="avatar-card-text">10일간 비가 오는 날은 8일,<br>해가 뜬 날은 2일이었고,<br>눈이 온 날은 없었어요.</p>
-            </div>
-            <a href="javascript:;" class="avatar-card-btn"><img src="../img/common/btn_next_small.png" alt="다음"></a>
-          </div></div>
-        </div></div>
-      </div>
-      <div class="g-item">
-        <p class="g-meta"><b>사진 카드 정답</b> <code>.photo-modal</code> + <code>.photo-card</code><br>sa/01:02 힌트 퀴즈 — 직업 6종 문구는 스크립트 데이터, 사진은 <code>img/p02_photo_{직업}.png</code>(아직 없어서 보라 칸 더미)</p>
-        <div class="g-view"><div class="g-stage">
-          <div class="photo-modal">
-            <div class="photo-card">
-              <div class="photo-card-img"></div>
-              <p class="photo-card-title">정답이에요!</p>
-              <p class="photo-card-text">소방관은 불을 끄고 사람들을 안전하게 도와줘요.</p>
-            </div>
-            <img src="../img/common/btn_confirm.png" alt="확인">
-          </div>
-        </div></div>
-      </div>
-    </div>
-
-    <!-- =================================================================== -->
-    <h2>3. 판단 퀴즈 팝업 <code>.confirm-quiz</code> — 그대로 사용(확정)</h2>
-    <p class="g-note">알약·카드 모양과 다르지만 이 모양 그대로 씀. 질문 → 정답(잘했어요) / 오답(다시 한 번 생각해요) 패널을 한 팝업 안에서 바꿔 보여주고, 여러 세트를 이어 붙일 수 있음(기능 Z).</p>
-    <div class="g-list">
-      <div class="g-item">
-        <p class="g-meta"><b>판단 퀴즈</b> <code>.confirm-quiz</code><br>sa/01:14 (3세트)</p>
-        <div class="g-view"><div class="g-stage">
-          <div class="confirm-quiz">
-            <div class="confirm-quiz-panel confirm-quiz-question">
-              <p class="confirm-quiz-title"><img class="confirm-quiz-icon" src="../img/common/icon_warning.png" alt="">주의</p>
-              <p class="confirm-quiz-text">AI로 만든 사진을 실제 나의 모습인 것처럼<br>다른 사람을 속여도 될까요?</p>
-              <div class="confirm-quiz-choices">
-                <button class="confirm-quiz-choice"><img src="../sa/01/img/p14_btn_yes.png" alt="예"></button>
-                <button class="confirm-quiz-choice"><img src="../sa/01/img/p14_btn_no.png" alt="아니오"></button>
+          </div></div></div></div></div></section><section class="m-sec is-tab-off" id="sec-pillno"><p class="g-note"><b>알약 · 오답</b> — ox-result-wrong is-avatar — 오답·힌트 결과 레이어. 모양(구조)이 같은 것은 한 칸에 모았고, 쓰는 페이지를 표시했습니다.</p><div class="g-list"><div class="g-item"><p class="g-meta"><b>17곳</b> · sa/01/p16 · sa/03/p02 · sa/03/p09 · sa/04/p02 · sa/04/p20 · sa/05/p11 · sa/05/p13 · sa/06/p10 · sa/07/p10 · sa/08/p11 · gwa/02/p13 · gwa/03/p02 · gwa/03/p03 · gwa/03/p04 · gwa/07/p08 · gwa/08/p15 ×2</p><div class="g-view"><div class="g-stage m-stage"><div class="ox-result-wrong is-avatar" data-sound="sound/incorrect.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">문장을 다시 한 번 잘 읽어봐요.</p>
               </div>
             </div>
-          </div>
-        </div></div>
-      </div>
-    </div>
-
-    <!-- =================================================================== -->
-    <h2>4. 아직 통일 안 됨 · 보류</h2>
-    <p class="g-note">디자인을 보고 정할 것들. 지금 모양은 와이어프레임용 임시 모양.</p>
-    <div class="g-list">
-      <div class="g-item">
-        <p class="g-meta"><b>온도계 모달</b> <code>.p02-modal</code> <span class="g-local">페이지 전용 스타일</span><br>sa/04:02 (1~3번째 정답 "잘 찾아냈어요!", 4번째 "모두 찾아냈어요!")</p>
-        <div class="g-view"><div class="g-stage">
-          <div class="p02-modal">
-            <div class="p02-modal-panel">
-              <div class="p02-thermo"><div class="p02-thermo-fill" style="background:#ffd83d;height:50%"></div></div>
-              <p class="p02-modal-text">메시지에 숨은 마음을<br>잘 찾아냈어요!</p>
-              <a href="javascript:;"><img src="../img/common/btn_next_small.png" alt="다음"></a>
-            </div>
-          </div>
-        </div></div>
-      </div>
-      <div class="g-item">
-        <p class="g-meta"><b>스테이지 클리어</b> <code>.p22-clear</code> <span class="g-local">페이지 전용 스타일</span><br>sa/04:22 — <b>보류: 디자인 나오면 결정</b></p>
-        <div class="g-view"><div class="g-stage">
-          <div class="p22-clear">STAGE 1 CLEAR!</div>
-        </div></div>
-      </div>
-      <div class="g-item">
-        <p class="g-meta"><b>sa/02 팝업 → 공용 스타일로 교체</b><br>sa/02:03 이모지 안내 · 10 개인정보 경고 → 알약 <code>.is-pill</code>(avatar_quiz) / sa/02:14 GOOD!·TRY AGAIN → 결과 레이어 + <code>.avatar-popup-body</code>·<code>.avatar-popup-sub</code> / sa/02:03 취재 카드 → <code>.photo-card</code> 변형 / sa/02:10 개인정보 탐지 패널은 <span class="g-local">페이지 전용 스타일</span></p>
-        <div class="g-view"><div class="g-stage">
-          <div class="avatar-modal" style="position:absolute">
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · sa/02/p12<br><span class="g-local">힌트 문구는 그 페이지 첫 문항(data-wrong)</span></p><div class="g-view"><div class="g-stage m-stage"><div class="ox-result-wrong is-avatar" data-sound="sound/incorrect.mp3">
             <div class="avatar-popup-panel">
-              <div class="avatar-popup-avatar"><img src="../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="hint-title">힌트</p>
+                <p class="avatar-popup-text is-small"><span>집주소, 전화번호, 학교 이름은 소중한 개인정보라서<br>다른 사람에게 함부로 알려주면 안 돼요!</span></p>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>6곳</b> · sa/02/p14 · sa/07/p07 · gwa/08/p06 · gwa/08/p07 · gwa/08/p10 · gwa/08/p12</p><div class="g-view"><div class="g-stage m-stage"><div class="ox-result-wrong is-avatar">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_incorrect.png" alt=""></div>
               <div class="avatar-popup-body">
                 <p class="avatar-popup-text">TRY AGAIN</p>
                 <p class="avatar-popup-sub">기사를 다시 읽어보세요</p>
               </div>
             </div>
-          </div>
-        </div></div>
-      </div>
-    </div>
-  </div>
-  <script src="guide.js"></script>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · sa/03/p10<br><span class="g-local">힌트 문구는 그 페이지 첫 문항(data-wrong)</span></p><div class="g-view"><div class="g-stage m-stage"><div class="ox-result-wrong is-avatar" data-sound="sound/incorrect.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="hint-title">힌트</p>
+                <p class="avatar-popup-text is-small"><span>조금 더 따뜻한 위로의 말을 찾아볼까요?</span></p>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · sa/05/p02<br><span class="g-local">이 칸 문구는 코드에서 못 찾아, 페이지 스크립트의 가장 긴 문구로 대신함</span> <span class="g-local">페이지 전용 클래스 있음</span></p><div class="g-view"><div class="g-stage m-stage"><div class="ox-result-wrong is-avatar p02-wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small">걸어 가기, 버스 타기, 지하철 타기 중<br>어떤 것의 장단점인지 다시 한 번 생각해봐요.</p>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>5곳</b> · sa/07/p05 · gwa/02/p06 · gwa/05/p02 · gwa/05/p09 · gwa/07/p11<br><span class="g-local">JS가 채우는 실제 문구(첫 번째)</span></p><div class="g-view"><div class="g-stage m-stage"><div class="ox-result-wrong is-avatar">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="hint-title">힌트</p>
+                <p class="avatar-popup-text is-small">가는 곳을 알려주고 안전하게 이동하도록 도와주는 분이 필요해요.</p>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>3곳</b> · sa/07/p05 · gwa/02/p06 · gwa/05/p02<br><span class="g-local">JS 문구 중 가장 긴 것</span></p><div class="g-view"><div class="g-stage m-stage"><div class="ox-result-wrong is-avatar">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="hint-title">힌트</p>
+                <p class="avatar-popup-text is-small">길을 안전하게 건널 수 있도록 신호를 안내해 주는 분이 필요해요.</p>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>3곳</b> · sa/07/p07 · gwa/08/p10 · gwa/08/p12<br><span class="g-local">JS 문구 중 가장 긴 것</span></p><div class="g-view"><div class="g-stage m-stage"><div class="ox-result-wrong is-avatar">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">다시 생각해볼까요?</p>
+                <p class="avatar-popup-sub">길을 안전하게 건널 수 있도록 도와주는 이웃을 찾아보세요.</p>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>4곳</b> · gwa/02/p02 · gwa/02/p11 · gwa/03/p11 · gwa/05/p11</p><div class="g-view"><div class="g-stage m-stage"><div class="ox-result-wrong is-avatar">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="hint-title">힌트</p>
+                <p class="avatar-popup-text is-small">저울의 바늘이 가리키는<br>눈금의 숫자를 정확히 읽어 보세요.</p>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>3곳</b> · gwa/02/p03 · gwa/02/p09 · gwa/02/p10<br><span class="g-local">JS가 채우는 실제 문구(첫 번째)</span></p><div class="g-view"><div class="g-stage m-stage"><div class="ox-result-wrong is-avatar">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small">g이에요. 100g 블록 개를 쌓아 주세요.</p>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/02/p09<br><span class="g-local">JS 문구 중 가장 긴 것</span></p><div class="g-view"><div class="g-stage m-stage"><div class="ox-result-wrong is-avatar">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small">꺾은선 그래프를 다시 확인해보세요.</p>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/03/p07</p><div class="g-view"><div class="g-stage m-stage"><div class="ox-result-wrong is-avatar" data-sound="sound/incorrect.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">다시 생각해볼까요?</p>
+                <p class="avatar-popup-sub">다른 날짜의 데이터가 들어가면<br>AI가 틀린 분석 결과를 낼 수 있어요.</p>
+              </div>
+            </div>
+          </div></div></div></div></div></section><section class="m-sec is-tab-off" id="sec-pillgen"><p class="g-note"><b>알약 · 일반 모달</b> — avatar-modal 안의 avatar-popup-panel — 안내·마무리·단계형. 모양(구조)이 같은 것은 한 칸에 모았고, 쓰는 페이지를 표시했습니다.</p><div class="g-list"><div class="g-item"><p class="g-meta"><b>12곳</b> · sa/02/p03 · sa/04/p06 · sa/04/p07 · sa/04/p08 · sa/04/p14 · sa/04/p15 · sa/04/p16 · sa/04/p17 · gwa/01/p06 · gwa/01/p07 · gwa/01/p10 · gwa/01/p14</p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_quiz.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small">이모지를 눌러 스스로를 칭찬해봐요.</p>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · sa/02/p10</p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_quiz.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small"><span>영상을 만들 때는 <span class="text-em">이름, 집 주소, 전화번호, 학교 이름</span>과 같은 개인정보가 포함되어 있지 않은 지 확인해야 해요!</span></p>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · sa/03/p02</p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-sub">친구의 마음을 살펴 빙고를 완성했어요!</p>
+                <a href="#" class="js-nav-effect avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>2곳</b> · sa/03/p07 · sa/03/p09</p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_quiz.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small"><span>앗, 다른 곳을 선택했어요!<br>안내된 부분을 선택해주세요.</span></p>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>2곳</b> · sa/03/p09 · sa/06/p12</p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_quiz.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small"><span>학습한 기능을 사용해 카드를 꾸며봐요.</span></p>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · sa/03/p12</p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small">친구에게 힘이 되는 말을 모두 받지 못했어요.</p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">다시 해보기</button>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>3곳</b> · sa/04/p06 · sa/04/p07 · sa/04/p08<br><span class="g-local">JS가 채우는 실제 문구(첫 번째)</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal talk-popup">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small">친구의 마음을 다시 생각해볼까요?</p>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>3곳</b> · sa/04/p06 · sa/04/p07 · sa/04/p08<br><span class="g-local">JS 문구 중 가장 긴 것</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal talk-popup">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small">이 말을 들으면 친구의 기분이 어떨까요?<br>따뜻한 마음을 전하는 다른 말을 찾아볼까요?</p>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>2곳</b> · sa/04/p06 · sa/04/p07</p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal talk-popup">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">좋아요!</p>
+                <p class="avatar-popup-sub"></p>
+              </div>
+              <div class="avatar-popup-extra"><img loading="lazy" src="../img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>3곳</b> · sa/04/p06 · sa/04/p07 · sa/04/p08<br><span class="g-local">JS 문구 중 가장 긴 것</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small">이 말을 들으면 친구의 기분이 어떨까요?<br>따뜻한 마음을 전하는 다른 말을 찾아볼까요?</p>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>7곳</b> · sa/04/p08 · sa/06/p02 · sa/06/p05 · sa/07/p02 · sa/07/p05 · sa/07/p07 · sa/07/p09</p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">좋아요!</p>
+                <p class="avatar-popup-sub">친구의 감정을 살펴보고 알맞은 표현을 선택했어요!</p>
+                <a href="#" class="js-nav-effect avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>3곳</b> · sa/04/p10 · sa/04/p22 · sa/07/p02<br><span class="g-local">이 칸 문구는 코드에서 못 찾아, 페이지 스크립트의 가장 긴 문구로 대신함</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal is-wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_quiz.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small">친구의 메시지를 잘 읽고<br>어떤 감정을 담아야 하는지 다시 생각해봐요.</p>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · sa/07/p07<br><span class="g-local">JS가 채우는 실제 문구(첫 번째)</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">맞아요.</p>
+                <p class="avatar-popup-sub">약사는 우리가 약을 구매할 수 있도록 도와줘요.</p>
+                <button class="avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</button>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · sa/07/p07<br><span class="g-local">JS 문구 중 가장 긴 것</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">맞아요.</p>
+                <p class="avatar-popup-sub">편의점 판매원은 우리가 물건이나 간식을 구매할 수 있도록 도와줘요.</p>
+                <button class="avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</button>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/01/p09<br><span class="g-local">JS가 채우는 실제 문구(첫 번째)</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small">문장 속에서  나타내는 낱말을<br>찾아볼까요?</p>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/01/p11</p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_correct_gwa.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">정답이에요!</p>
+              </div>
+              <div class="avatar-popup-extra"><img loading="lazy" src="../img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/01/p11<br><span class="g-local">JS가 채우는 실제 문구(첫 번째)</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="hint-title">힌트</p>
+                <p class="avatar-popup-text is-small">날씨 정보를 ‘차곡차곡’ 모으는 행동을 뭐라고 할까요?</p>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/01/p11<br><span class="g-local">JS 문구 중 가장 긴 것</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="hint-title">힌트</p>
+                <p class="avatar-popup-text is-small">필요한 정보에 대해 자세하게 물어볼수록 AI가 원하는 답을 잘 찾아줘요!</p>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/02/p10 <span class="g-local">페이지 전용 클래스 있음</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal p10-hint-pop">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_quiz.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small">첨부한 기온 표 이미지를 막대 그래프로 시각화해 줘.</p>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/03/p13</p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_correct_gwa.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-sub">오늘 코디 너무 멋진데요?<br>날씨 데이터를 보고 패턴을 잘 파악했군요!</p>
+                <button class="avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</button>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/03/p13</p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-sub">날씨 데이터를 다시 살펴볼까요?</p>
+                <button type="button" class="card-btn is-popup js-sfx avatar-popup-next" data-sound="sound/click.mp3">다시 해보기</button>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/07/p03<br><span class="g-local">JS가 채우는 실제 문구(첫 번째)</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_correct_gwa.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">잘했어요!</p>
+                <p class="avatar-popup-sub">스마트 TV는 평소 내가 즐겨 보던 영상을 분석하여, 내가 좋아할 만한 영상을<br>추천해 줘요.</p>
+                <button class="p03-ok avatar-popup-next card-btn is-popup js-sfx" data-close="p03Right" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/07/p03<br><span class="g-local">JS 문구 중 가장 긴 것</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_correct_gwa.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">잘했어요!</p>
+                <p class="avatar-popup-sub">AI 허브는 여러 센서가 보낸 정보를 모아 상황을 판단하고, 알맞은 스마트 가전이 작동하도록 해요.</p>
+                <button class="p03-ok avatar-popup-next card-btn is-popup js-sfx" data-close="p03Right" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/07/p03</p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal is-wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">다시 한번 해볼까요?</p>
+                <p class="avatar-popup-sub">삼촌의 말을 다시 한번 확인해봐!</p>
+                <button class="p03-ok avatar-popup-next card-btn is-popup js-sfx" data-close="p03Wrong" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/07/p06<br><span class="g-local">JS가 채우는 실제 문구(첫 번째)</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_correct_gwa.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">잘했어요!</p>
+                <p class="avatar-popup-sub">온습도 센서는 온도와 습도를 감지하는 입력 장치예요</p>
+                <button class="p06-ok avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/07/p06<br><span class="g-local">JS 문구 중 가장 긴 것</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_correct_gwa.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">잘했어요!</p>
+                <p class="avatar-popup-sub">스마트 공기청정기는 AI의 명령을 받아 공기를 깨끗하게 하는 실행 장치예요</p>
+                <button class="p06-ok avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/07/p06<br><span class="g-local">JS가 채우는 실제 문구(첫 번째)</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal is-wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small">온습도 센서는 바람을 내보내거나 직접 움직이기보다 집 안의 온도와 습도를 감지하는 입력 장치(센서)에 가까워요. 다시 옮겨볼까요?</p>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/07/p06<br><span class="g-local">JS 문구 중 가장 긴 것</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal is-wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small">AI 스마트 허브는 주변 환경을 직접 감지하거나 가전을 움직이기보다 센서가 보낸 정보를 모아 상황을 판단하는 판단 장치(AI 허브)에 가까워요. 다시 옮겨볼까요?</p>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/07/p13<br><span class="g-local">JS 문구 중 가장 긴 것</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_correct_gwa.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">미션성공!</p>
+                <p class="avatar-popup-sub">현관 CCTV가 낯선 움직임을 감지해서 경보음이 울리고 스마트폰 알림이 전송됐네. 이제 안심이야!</p>
+                <button class="p13-ok avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</button>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/07/p13</p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img loading="lazy" src="../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">땡-</p>
+                <p class="avatar-popup-sub">AI 판단 오류! 센서가 보낸 실시간 데이터를 <br>다시 분석해 보세요.</p>
+                <button class="p13-ok avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div></div></div></div></div></section><section class="m-sec is-tab-off" id="sec-card"><p class="g-note"><b>카드형</b> — avatar-card (단일 문구) — 완료·안내. 모양(구조)이 같은 것은 한 칸에 모았고, 쓰는 페이지를 표시했습니다.</p><div class="g-list"><div class="g-item"><p class="g-meta"><b>1곳</b> · sa/05/p02<br><span class="g-local">JS가 채우는 실제 문구(첫 번째)</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card is-small p02-pc">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_correct.png" alt="">
+              <p class="avatar-card-title">정답이에요!</p>
+              <p class="avatar-card-text">다음 중, 버스 타기의 장점과 단점을 선택해봐요.</p>
+              <div class="p02-pc-opts"></div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · sa/05/p02<br><span class="g-local">JS 문구 중 가장 긴 것</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card is-small p02-pc">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_correct.png" alt="">
+              <p class="avatar-card-title">정답이에요!</p>
+              <p class="avatar-card-text">다음 중, 식당에서 식사를 할 때의 장점과 단점을 선택해봐요.</p>
+              <div class="p02-pc-opts"></div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · sa/08/p10</p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <p class="avatar-card-title">여행 계획 세우기 완료!</p>
+                <p class="avatar-card-text">네이버 지도의 기능을 익히고 활용해서<br>나의 여행 계획을 세웠어요.<br>즐거운 여행을 떠나요!</p>
+              </div>
+              <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/01/p06</p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+            <div class="avatar-card-body">
+<p class="avatar-card-title">잘했어요!</p>
+<p class="avatar-card-text">이제 영상 매체에서 자료를 수집해볼까요?</p>
+</div>
+            <a href="#" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/01/p10</p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <p class="avatar-card-title">AI와 함께 날씨 정보를<br>분석하고, 요약했어요!</p>
+                <p class="avatar-card-text">이제 퀴즈를 풀며 배운 내용을<br>확인해볼까요?</p>
+              </div>
+              <a href="#" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/03/p03 <span class="g-local">페이지 전용 클래스 있음</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal p03-popup1">
+            <div class="avatar-card">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <p class="avatar-card-title">정보 분석 완료!</p>
+                <p class="avatar-card-text">각각의 음식 하나하나를 데이터 조각으로 볼 수 있고,<br>이런 음식들이 담긴 접시를 여러 데이터 조각이 담긴<br>‘빅데이터’라고 볼 수 있어요.</p>
+              </div>
+              <a href="javascript:;" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/03/p03 <span class="g-local">페이지 전용 클래스 있음</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal p03-popup2">
+            <div class="avatar-card is-side">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <p class="avatar-card-text">우리는 하나의 빅데이터 안에서<br>데이터 조각을 살펴보며<br>다양한 정보를 확인할 수 있어요.<br>이번에는 여러 개의 접시 속에 담긴 음식을<br>살펴볼까요?</p>
+              </div>
+              <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">시작하기</a>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/03/p09 <span class="g-local">페이지 전용 클래스 있음</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal p09-popup" data-sound="sound/correct.mp3">
+            <div class="avatar-card is-small is-left">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_correct_gwa.png" alt="">
+              <p class="avatar-card-title">잘했어요!</p>
+              <p class="avatar-card-text">10일간 비가 오는 날은 8일,<br>해가 뜬 날은 2일이었고,<br>눈이 온 날은 없었어요.</p>
+              <button class="avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</button>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/03/p10 <span class="g-local">페이지 전용 클래스 있음</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal p10-popup11">
+                <div class="avatar-card">
+                  <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-title">잘 했어요.</p>
+                    <p class="avatar-card-text">날씨 뿐만 아니라 여러가지 빅데이터 사이에서<br>패턴을 찾을 때도 대화형 AI를 유용하게 이용할 수 있어요.</p>
+                  </div>
+                  <a href="javascript:;" class="avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+              </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/03/p10 <span class="g-local">페이지 전용 클래스 있음</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal p10-popup11b">
+                <div class="avatar-card is-side">
+                  <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">참! AI가 정확하게 데이터 마이닝을 하려면<br>빅데이터를 구성하기 전<br>데이터 조각들이 먼저 바르고<br>정확해야 한다는 거 잊지 않았죠?</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/05/p05<br><span class="g-local">JS가 채우는 실제 문구(첫 번째)</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card is-small">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_correct_gwa.png" alt="">
+              <p class="avatar-card-title">스마트 스피커</p>
+              <p class="avatar-card-text">마이크로 사람의 목소리를 듣고 음악을 틀거나 집 안 가전을 제어해요.</p>
+              <button class="avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</button>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/05/p05<br><span class="g-local">JS 문구 중 가장 긴 것</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card is-small">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_correct_gwa.png" alt="">
+              <p class="avatar-card-title">음성 인식 TV 리모컨</p>
+              <p class="avatar-card-text">방문객의 목소리를 마이크로 전달하거나, 등록된 목소리를 인식해 문을 열어줘요.</p>
+              <button class="avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</button>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/07/p03</p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card is-side">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <p class="avatar-card-text">그런데 스마트 기기는<br>어떻게 주변 상황을 알아차릴까요?<br>센서와 AI 허브의 비밀을<br>영상으로 확인해 봐요!</p>
+              </div>
+              <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/07/p06<br><span class="g-local">JS가 채우는 실제 문구(첫 번째)</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card is-small is-left">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_correct_gwa.png" alt="">
+              <p class="avatar-card-title">센서 상자 완료!</p>
+              <p class="avatar-card-text">센서는 집 안의 환경 정보를 감지해요.</p>
+              <button class="avatar-card-btn p06-ok card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</button>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/07/p06<br><span class="g-local">JS 문구 중 가장 긴 것</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card is-small is-left">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_correct_gwa.png" alt="">
+              <p class="avatar-card-title">AI스마트홈 연동 준비 완료!</p>
+              <p class="avatar-card-text">AI 허브는 센서 정보를 모아 판단해요.</p>
+              <button class="avatar-card-btn p06-ok card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</button>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/07/p10<br><span class="g-local">JS가 채우는 실제 문구(첫 번째)</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card is-side">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <p class="avatar-card-text">이번에는 하나의 조건으로 두 가지 스마트 가전을 동시에 작동시켜 볼 거야!<br>집 안 온도가 30도 이상이 되면 스마트 에어컨과 스마트 선풍기가 함께 켜지도록 자동화 루틴을 만들어 보자!</p>
+              </div>
+              <button class="avatar-card-btn p10-ok is-popup js-sfx card-btn" data-sound="sound/click.mp3">확인</button>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/07/p10<br><span class="g-local">JS 문구 중 가장 긴 것</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card is-side">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <p class="avatar-card-text">이제 마지막 과제가 남아있어!<br>이번에는 두 가지 조건을 모두 확인해야 해!<br>미세먼지 수치가 ‘나쁨’이고 창문이 닫혀 있을 때 스마트 공기청정기가 작동하도록 자동화 루틴을 만들어 보자!</p>
+              </div>
+              <button class="avatar-card-btn p10-ok is-popup js-sfx card-btn" data-sound="sound/click.mp3">확인</button>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/08/p06</p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal so-modal">
+            <div class="avatar-card is-left">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <div>
+                  <div class="step-panel">
+                    <p class="avatar-card-title">잘했어요!</p><p class="avatar-card-text">순서대로 하니까 라면이 맛있게 완성됐어요! 이번에는 양치하기 임무를 해볼까요?</p>
+                    <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div></div></div></div></div></section><section class="m-sec is-tab-off" id="sec-cardstep"><p class="g-note"><b>카드형 · 단계</b> — avatar-card 안에 step-flow — 첫 단계만 표시. 모양(구조)이 같은 것은 한 칸에 모았고, 쓰는 페이지를 표시했습니다.</p><div class="g-list"><div class="g-item"><p class="g-meta"><b>2곳</b> · gwa/01/p02 · gwa/01/p09 <span class="g-local">2단계 중 1단계</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card is-side">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+            <div class="step-flow">
+
+              <div class="step-panel">
+                <div class="avatar-card-body">
+                  <p class="avatar-card-title">과일 수집 완료!</p>
+                  <p class="avatar-card-text">이렇게 필요한 것을 모으는 것을<br>‘수집’이라고 해요.</p>
+                </div>
+                <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup is-arrow" data-sound="sound/click.mp3">→</a>
+              </div>
+
+              <div class="step-panel is-hidden is-hidden">
+                <div class="avatar-card-body"><p class="avatar-card-text">이제 수집한 과일들을 가지고<br>종류별로 분류하러 가볼까요?</p></div>
+                <a href="#" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup" data-sound="sound/click.mp3">시작하기</a>
+              </div>
+
+            </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/01/p03 <span class="g-local">5단계 중 1단계</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card is-side">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+            <div class="step-flow">
+
+              <div class="step-panel">
+                <div class="avatar-card-body">
+                  <p class="avatar-card-title">정말 잘했어요!</p>
+                  <p class="avatar-card-text">과일을 종류별로 완벽하게 정리했어요.</p>
+                </div>
+                <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup is-arrow" data-sound="sound/click.mp3">→</a>
+              </div>
+
+              <div class="step-panel is-hidden is-hidden">
+                <div class="avatar-card-body"><p class="avatar-card-text">정리는 여러가지가 섞여 있는 것을 비슷한 것끼리 모으는 것을 의미해요.</p></div>
+                <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup is-arrow" data-sound="sound/click.mp3">→</a>
+              </div>
+
+              <div class="step-panel is-hidden is-hidden">
+                <div class="avatar-card-body"><p class="avatar-card-text">게임에서 했던 정리와 수집을 AI도 똑같이 하고 있다는 사실, 알고 있었나요?</p></div>
+                <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup is-arrow" data-sound="sound/click.mp3">→</a>
+              </div>
+
+              <div class="step-panel is-hidden is-hidden">
+                <div class="avatar-card-body"><p class="avatar-card-text">AI는 과일 대신 정보를 수집하고 정리해요. 우리가 일을 정확하게 해서 보상을 받았듯이, AI도 데이터가 잘 정리될수록 더 똑똑한 답을 할 수 있어요.</p></div>
+                <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup is-arrow" data-sound="sound/click.mp3">→</a>
+              </div>
+
+              <!-- 기획서 5번: 마지막 단계에서 문구와 버튼이 함께 바뀜(화살표 → 다음) -->
+              <div class="step-panel is-hidden is-hidden">
+                <div class="avatar-card-body"><p class="avatar-card-text">AI는 어떻게 일하는지,<br>지금 만나러 가볼까요?</p></div>
+                <a href="#" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+              </div>
+
+            </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/01/p07 <span class="g-local">2단계 중 1단계</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card is-side">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+            <div class="step-flow">
+              <div class="step-panel">
+                <div class="avatar-card-body"><p class="avatar-card-text">신문과 영상에서 필요한<br>날씨 데이터를 모두 모았어요.</p></div>
+                <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup is-arrow" data-sound="sound/click.mp3">→</a>
+              </div>
+              <div class="step-panel is-hidden is-hidden">
+                <div class="avatar-card-body"><p class="avatar-card-text">AI는 어떻게 일하는지,<br>지금 만나러 가볼까요?</p></div>
+                <a href="#" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+              </div>
+            </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/02/p02 <span class="g-local">2단계 중 1단계</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-title">측정과 기록 완료!</p>
+                    <p class="avatar-card-text">도구를 사용해 무게나 수치를 확인하는 것을 ‘측정’이라고 해요.</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">이번에는 생선의 무게만큼<br>블록을 쌓아 올려<br>한눈에 알기 쉽게 표현해볼까?</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">시작하기</a>
+                </div>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/02/p03 <span class="g-local">3단계 중 1단계</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side"><p class="avatar-card-text">이렇게 숫자를 그림이나 블록으로 한눈에 알아보기 쉽게 나타내는 것을 ‘시각화’라고 해요.</p></div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side"><p class="avatar-card-text">측정한 값을 시각화하면, 어떤 생선이 가장 무거운지, 어떤 생선이 가장 가벼운지 등 다양한 정보를 한눈에 알아볼 수 있어요.</p></div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side"><p class="avatar-card-text">이제 데이터의 측정과 시각화에 대해 더 자세히 알아볼까요?</p></div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/02/p06 <span class="g-local">5단계 중 1단계</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-title">잘했어요!</p>
+                    <p class="avatar-card-text">데이터를 처리하기 위한 3단계를 잘 확인했나요?</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">1단계는 도구로 수치를 ‘측정’하는 단계!</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">2단계는 측정한 값을 기록하는 단계!</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">3단계는 그래프로 시각화하는 단계예요!</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">이제 우리 그래프로 시각화하는 3단계를 조금 더 연습해 볼까요?</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/02/p08 <span class="g-local">3단계 중 1단계</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side"><p class="avatar-card-text">막대그래프는 수치의 크기를 한눈에 비교하기 좋아요.</p></div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side"><p class="avatar-card-text">막대의 높이를 비교하니 15시가 가장 덥고, 6시가 가장 춥다는 것을 한눈에 알 수 있어요!</p></div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side"><p class="avatar-card-text">이번엔, 막대그래프의 점을 이어 꺾은선 그래프로 표현해볼까요?</p></div>
+                  <a href="#" class="js-nav-effect avatar-card-btn is-popup js-sfx card-btn" data-sound="sound/click.mp3">확인</a>
+                </div>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/02/p09 <span class="g-local">4단계 중 1단계</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side"><p class="avatar-card-text">점을 선으로 연결하니 꺾은선그래프가 완성되었어요!<br>낮에는 기온이 올라가고, 저녁에는 다시 내려가는 모습이 한눈에 보여요.</p></div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side"><p class="avatar-card-text">숫자만 있을 때보다 그래프로 나타내니 기온이 올라가고 내려가는 모습이 한눈에 보여요!</p></div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side"><p class="avatar-card-text">막대그래프는 수치의 크기를 비교해요.<br>꺾은선그래프는 시간에 따른 변화 모습을 알아봐요.</p></div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side"><p class="avatar-card-text">숫자를 그림이나 그래프로 한눈에 보기 쉽게 나타내는 것을 ‘시각화’라고 해요.<br>이제 AI에게 그래프 만들기를 부탁해 볼까요?</p></div>
+                  <a href="#" class="js-nav-effect avatar-card-btn is-popup js-sfx card-btn" data-sound="sound/click.mp3">확인</a>
+                </div>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/02/p10 <span class="g-local">3단계 중 1단계</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-title">다운로드 완료!</p>
+                    <p class="avatar-card-text">다운로드 단추를 누르니 AI가 만든 멋진 그래프가 핸드폰에 png 그림 파일로 안전하게 저장되었네요.</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side"><p class="avatar-card-text">이미지 첨부부터 프롬프트 전송, 파일 다운로드까지! AI를 활용하니, 복잡한 데이터 시각화 자료를 순식간에 만들고 저장이 가능해요.</p></div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side"><p class="avatar-card-text">이제 퀴즈를 풀며 배운 내용을 확인해볼까요?</p></div>
+                  <a href="#" class="js-nav-effect avatar-card-btn is-popup js-sfx card-btn" data-sound="sound/click.mp3">확인</a>
+                </div>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/03/p04 <span class="g-local">3단계 중 1단계</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-title">정말 잘했어요!</p>
+                    <p class="avatar-card-text">각각의 접시에 담긴 음식들을 살펴보고<br>비교해보며 새로운 정보를 찾을 수 있었어요.</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">이처럼 하나의 빅데이터를 살펴보거나,<br>여러 개의 빅데이터를 비교하며<br>새로운 정보를 찾는 걸 데이터 마이닝이라고 해요.</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">빅데이터가 많으면 많을수록 더 다양한<br>정보를 확인할 수 있어요.<br><br>날씨를 통해 더 자세한 내용을 확인해볼까요?</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/03/p07 <span class="g-local">2단계 중 1단계</span> <span class="g-local">페이지 전용 클래스 있음</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal p07-popup" data-sound="sound/correct.mp3">
+            <div class="avatar-card is-side">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-title is-left">정말 잘했어요!</p>
+                    <p class="avatar-card-text">8월 1일부터 10일까지의 데이터 조각을<br>모아서 빅데이터를 완성했어요.</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-title is-left">바른 데이터만 모아야 AI가<br>정확한 규칙을 찾아낼 수 있어요.</p>
+                    <p class="avatar-card-text">이제 10일간의 날씨 속 패턴을 찾아볼까요?</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/03/p09 <span class="g-local">4단계 중 1단계</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card is-side">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body"><p class="avatar-card-text">이처럼, 우리가 모은 날씨 데이터 조각을 토대로 만든 데이터를 데이터 마이닝하여 지난 날씨에 대한 패턴을 확인해볼 수 있었어요.</p></div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body"><p class="avatar-card-text">우리는 간단하게 10일간의 데이터를 분석해보았지만, 사실 정확한 날씨 패턴을 찾기 위해서는 수천 개가 넘는 수많은 데이터를 참고해야 해요.</p></div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body"><p class="avatar-card-text">이렇게 엄청난 양의 데이터 속에서 사람이 일일이 규칙을 찾아내는 것은 아주 힘든 일이에요.</p></div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body"><p class="avatar-card-text">하지만 인공지능의 힘을 빌리면 훨씬 쉽고 빠르게 데이터 마이닝을 할 수 있고, 우리에게 필요한 다양한 추가 정보까지 추천 받을 수 있어요!<br><br>그럼, 이제 실습 활동을 통해 ChatGPT와 직접 데이터 마이닝을 진행해볼까요?</p></div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/05/p02 <span class="g-local">3단계 중 1단계</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-title">정말 잘했어요!</p>
+                    <p class="avatar-card-text">파도의 높이와 간격을 정확하게 분석해서<br>시민들을 안전하게 지켜냈어요.</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">신기하게도, 우리가 귀로 듣는 소리도<br>마이크를 통과하면 바다의 파도 모양처럼 바뀌어요!</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">컴퓨터와 AI가 소리 파도를<br>어떻게 분석하는지 알아볼까요?</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/05/p05 <span class="g-local">2단계 중 1단계</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">집 안 곳곳에서 마이크가 달린<br>물건을 모두 찾았어요.</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">마이크로 들어온 소리를 컴퓨터는<br>어떻게 알아듣는지 살펴볼까요?</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/05/p07 <span class="g-local">3단계 중 1단계</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">음파의 높이와 간격에 따라<br>소리가 어떻게 달라졌는지 알아봤어요.</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">컴퓨터는 소리의 크기와 높낮이를 살펴보고,<br>입력된 소리가 어떤 소리인지 확인해요.</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">이제 소리로 소통하는<br>AI를 직접 사용해볼까요?</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/05/p08 <span class="g-local">2단계 중 1단계</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">‘오케이 구글’로 핸드폰을 깨우고, 구체적으로 명령하니까 AI가 우리가 원하는 일을 정확하게 처리해 주었어요.</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">이렇게 AI 비서에게는 정확한 호출어와 구체적인 질문을 전달하는 것이 아주 중요해요. 이제 퀴즈를 풀며 배운 내용을 확인해 볼까요?</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/07/p06 <span class="g-local">2단계 중 1단계</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card is-side">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">완벽해! 센서는 집 안에서 AI의 눈, 귀, 피부가 되어 정보를 수집해. AI 허브는 모인 정보를 보고 상황을 판단하지. 그 다음 스마트 가전에게 명령을 보내 집 안 환경을 알맞게 조절하는 거야.</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">이렇게 AI가 움직일 규칙을 정해 주는 것을 ‘조건문 코딩’이라고 해.<br>다음 활동에서 AI 스마트홈 코딩을 알아볼까?</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn is-popup js-sfx card-btn" data-sound="sound/click.mp3">확인</a>
+                </div>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/07/p08 <span class="g-local">2단계 중 1단계</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal">
+            <div class="avatar-card">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-title">조건문 코딩을 모두 완료했어!</p>
+                    <p class="avatar-card-text">이렇게 센서가 알려주는 [~가 ~하면] 조건에 맞춰, 우리가 [~를 한다]라는 규칙을 AI 허브에 코딩해 두면 AI 허브는 실시간으로 분석받고 판단해!</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">이제 사물인터넷(IOT)의 작동 원리를 완벽하게 익혔으니, 스마트홈 앱을 사용하여 코딩을 직접 해보도록 할까?</p>
+                  </div>
+                  <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/08/p03 <span class="g-local">3단계 중 1단계</span> <span class="g-local">페이지 전용 클래스 있음</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal p03-modal">
+            <div class="avatar-card is-left">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <div class="step-flow">
+                  <div class="step-panel is-title">
+                    <p class="avatar-card-title">몸속 퍼즐 완료!</p>
+                    <p class="avatar-card-text">음식이 [입] <span style="font-family:Pretendard">→</span> [위] <span style="font-family:Pretendard">→</span> [장] 으로 이동하는<br>소화과정 퍼즐을 완성했어요.</p>
+                    <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                  </div>
+                  <div class="step-panel is-hidden">
+                    <p class="avatar-card-text">음식이 정해진 순서대로 이동하는 것처럼,<br>컴퓨터도 입력된 명령을 차례차례 실행해.</p>
+                    <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                  </div>
+                  <div class="step-panel is-hidden">
+                    <p class="avatar-card-text">이것을 컴퓨터 용어로 ‘순차’라고 해.<br>컴퓨터는 어떻게 순서대로 일하는지<br>조금 더 자세히 알아보자!</p>
+                    <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/08/p07 <span class="g-local">3단계 중 1단계</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal so-modal">
+            <div class="avatar-card is-left">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <div class="step-flow">
+                  <div class="step-panel">
+                    <p class="avatar-card-title">잘했어요!</p><p class="avatar-card-text">양치를 완료했어요. 우리가 먹은 음식이 입, 위, 장의 순서로 이동하는 것처럼 라면 끓이기와 양치하기도 정해진 순서대로 해야 해요.</p>
+                    <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                  </div>
+                  <div class="step-panel is-hidden">
+                    <p class="avatar-card-text">컴퓨터도 마찬가지로 정해진 순서대로 <br>일을 처리해요.</p>
+                    <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                  </div>
+                  <div class="step-panel is-hidden">
+                    <p class="avatar-card-text">컴퓨터는 어떻게 순서대로 일을 처리하는지<br> 알아보러 가볼까요?</p>
+                    <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>2곳</b> · gwa/08/p10 · gwa/08/p12 <span class="g-local">3단계 중 1단계</span></p><div class="g-view"><div class="g-stage m-stage"><div class="avatar-modal fi-modal">
+            <div class="avatar-card is-left">
+              <img loading="lazy" class="avatar-card-avatar" src="../img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <div class="step-flow">
+                  <div class="step-panel">
+                    <p class="avatar-card-title">잘했어!</p><p class="avatar-card-text">컴퓨터가 일을 할 때 미리 정해 놓은 일의 순서를 ‘알고리즘’이라고 해.</p>
+                    <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                  </div>
+                  <div class="step-panel is-hidden">
+                    <p class="avatar-card-text">알고리즘에 따라 차례대로 일하는 것을<br>‘순차’라고 해.</p>
+                    <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                  </div>
+                  <div class="step-panel is-hidden">
+                    <p class="avatar-card-text">이번에는 AI가 그림을 만드는 과정도<br>순서대로 알아볼까?</p>
+                    <a href="#" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div></div></div></div></div></section><section class="m-sec is-tab-off" id="sec-photo"><p class="g-note"><b>사진 카드</b> — photo-modal / hint-quiz 정답. 모양(구조)이 같은 것은 한 칸에 모았고, 쓰는 페이지를 표시했습니다.</p><div class="g-list"><div class="g-item"><p class="g-meta"><b>1곳</b> · sa/01/p02<br><span class="g-local">JS가 채우는 실제 문구(첫 번째)</span></p><div class="g-view"><div class="g-stage m-stage"><div class="hint-quiz-correct photo-modal" data-sound="sound/correct.mp3">
+            <div class="photo-card">
+              <div style="background:url(../sa/01/img/p02_photo_barista.png) center / cover no-repeat" class="photo-card-img"></div>
+              <p class="photo-card-title">정답이에요!</p>
+              <p class="photo-card-text">소방관은 불을 끄고 사람들을 안전하게 도와줘요.</p>
+            </div>
+            <button type="button" class="hint-quiz-confirm js-sfx card-btn is-popup" data-sound="sound/click.mp3">확인</button>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · sa/01/p02<br><span class="g-local">JS 문구 중 가장 긴 것</span></p><div class="g-view"><div class="g-stage m-stage"><div class="hint-quiz-correct photo-modal" data-sound="sound/correct.mp3">
+            <div class="photo-card">
+              <div style="background:url(../sa/01/img/p02_photo_webtoon.png) center / cover no-repeat" class="photo-card-img"></div>
+              <p class="photo-card-title">정답이에요!</p>
+              <p class="photo-card-text">바리스타는 카페에서 커피와 여러 가지 음료를 만들어 손님에게 제공해요.</p>
+            </div>
+            <button type="button" class="hint-quiz-confirm js-sfx card-btn is-popup" data-sound="sound/click.mp3">확인</button>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/05/p02</p><div class="g-view"><div class="g-stage m-stage"><div class="photo-modal is-middle">
+            <div class="photo-card">
+              <img loading="lazy" class="photo-card-img" src="../gwa/05/img/p02_success.png" alt="">
+              <p class="photo-card-title">대피 성공!</p>
+            </div>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/07/p08<br><span class="g-local">JS가 채우는 실제 문구(첫 번째)</span></p><div class="g-view"><div class="g-stage m-stage"><div class="photo-modal">
+            <div class="photo-card is-contain">
+              <img loading="lazy" src="../gwa/07/img/p08_illust_r1.png" class="photo-card-img" alt="">
+              <p class="photo-card-title">정답!</p>
+              <p class="photo-card-text">“온도가 30도가 넘으면 에어컨이 자동으로 켜지게 하고 싶어.”</p>
+            </div>
+            <button class="card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</button>
+          </div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · gwa/07/p08<br><span class="g-local">JS 문구 중 가장 긴 것</span></p><div class="g-view"><div class="g-stage m-stage"><div class="photo-modal">
+            <div class="photo-card is-contain">
+              <img loading="lazy" src="../gwa/07/img/p08_illust_r5.png" class="photo-card-img" alt="">
+              <p class="photo-card-title">정답!</p>
+              <p class="photo-card-text">“음식 냄새가 나면 공기청정기가 강력 모드로 작동하게 하고 싶어.”</p>
+            </div>
+            <button class="card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</button>
+          </div></div></div></div></div></section><section class="m-sec is-tab-off" id="sec-confirm"><p class="g-note"><b>판단 퀴즈</b> — confirm-quiz 팝업. 모양(구조)이 같은 것은 한 칸에 모았고, 쓰는 페이지를 표시했습니다.</p><div class="g-list"><div class="g-item"><p class="g-meta"><b>1곳</b> · sa/01/p14 <span class="g-local">페이지 전용 클래스 있음</span></p><div class="g-view"><div class="g-stage m-stage"><div class="confirm-quiz p14-confirm-quiz"><div class="confirm-quiz-panel confirm-quiz-question">
+              <p class="confirm-quiz-title"><img loading="lazy" class="confirm-quiz-icon" src="../img/common/icon_warning.png" alt="">주의</p>
+              <p class="confirm-quiz-text">AI로 만든 사진을 실제 나의 모습인 것처럼<br>다른 사람을 속여도 될까요?</p>
+              <div class="confirm-quiz-choices">
+                <button class="confirm-quiz-choice" data-correct="false">
+                  <img loading="lazy" src="../sa/01/img/p14_btn_yes.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_yes_on.png" data-src-over="img/p14_btn_yes_over.png" data-sound="sound/click.mp3" alt="예">
+                </button>
+                <button class="confirm-quiz-choice" data-correct="true">
+                  <img loading="lazy" src="../sa/01/img/p14_btn_no.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_no_on.png" data-src-over="img/p14_btn_no_over.png" data-sound="sound/click.mp3" alt="아니오">
+                </button>
+              </div>
+            </div></div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · sa/01/p14 <span class="g-local">페이지 전용 클래스 있음</span></p><div class="g-view"><div class="g-stage m-stage"><div class="confirm-quiz p14-confirm-quiz"><div class="confirm-quiz-panel confirm-quiz-correct">
+              <p class="confirm-quiz-title">잘했어요</p>
+              <p class="confirm-quiz-text">맞아요! AI로 만들어진 모습은 실제 내 모습이 아니예요.<br>다른 사람에게 AI로 만든 모습이라고 말해야 해요.</p>
+              <button class="confirm-quiz-choice confirm-quiz-ok" data-next-quiz=".p14-confirm-quiz-2">
+                <img loading="lazy" src="../sa/01/img/p14_btn_confirm.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_confirm_on.png" data-src-over="img/p14_btn_confirm_over.png" data-sound="sound/click.mp3" alt="확인">
+              </button>
+            </div></div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · sa/01/p14 <span class="g-local">페이지 전용 클래스 있음</span></p><div class="g-view"><div class="g-stage m-stage"><div class="confirm-quiz p14-confirm-quiz"><div class="confirm-quiz-panel confirm-quiz-wrong">
+              <p class="confirm-quiz-title">다시 한 번 생각해요.</p>
+              <p class="confirm-quiz-text">AI 이미지를 실제인 것처럼 다른 사람을 속여서는 안 돼요.</p>
+              <button class="confirm-quiz-choice confirm-quiz-ok">
+                <img loading="lazy" src="../sa/01/img/p14_btn_confirm.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_confirm_on.png" data-src-over="img/p14_btn_confirm_over.png" data-sound="sound/click.mp3" alt="확인">
+              </button>
+            </div></div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · sa/01/p14 <span class="g-local">페이지 전용 클래스 있음</span></p><div class="g-view"><div class="g-stage m-stage"><div class="confirm-quiz p14-confirm-quiz-2"><div class="confirm-quiz-panel confirm-quiz-question">
+              <p class="confirm-quiz-title"><img loading="lazy" class="confirm-quiz-icon" src="../img/common/icon_warning.png" alt="">주의</p>
+              <p class="confirm-quiz-text">다른 사람의 얼굴을 허락 없이 AI로 만들어서는 안 돼요.<br>나의 모습을 상상하며 만들었나요?</p>
+              <div class="confirm-quiz-choices">
+                <button class="confirm-quiz-choice" data-correct="true">
+                  <img loading="lazy" src="../sa/01/img/p14_btn_yes.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_yes_on.png" data-src-over="img/p14_btn_yes_over.png" data-sound="sound/click.mp3" alt="예">
+                </button>
+                <button class="confirm-quiz-choice" data-correct="false">
+                  <img loading="lazy" src="../sa/01/img/p14_btn_no.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_no_on.png" data-src-over="img/p14_btn_no_over.png" data-sound="sound/click.mp3" alt="아니오">
+                </button>
+              </div>
+            </div></div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · sa/01/p14 <span class="g-local">페이지 전용 클래스 있음</span></p><div class="g-view"><div class="g-stage m-stage"><div class="confirm-quiz p14-confirm-quiz-2"><div class="confirm-quiz-panel confirm-quiz-correct">
+              <p class="confirm-quiz-title">잘했어요</p>
+              <p class="confirm-quiz-text">참 잘했어요! 다른 사람의 얼굴을 지켜주는<br>멋진 디지털 시민이예요.</p>
+              <button class="confirm-quiz-choice confirm-quiz-ok" data-next-quiz=".p14-confirm-quiz-3">
+                <img loading="lazy" src="../sa/01/img/p14_btn_confirm.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_confirm_on.png" data-src-over="img/p14_btn_confirm_over.png" data-sound="sound/click.mp3" alt="확인">
+              </button>
+            </div></div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · sa/01/p14 <span class="g-local">페이지 전용 클래스 있음</span></p><div class="g-view"><div class="g-stage m-stage"><div class="confirm-quiz p14-confirm-quiz-2"><div class="confirm-quiz-panel confirm-quiz-wrong">
+              <p class="confirm-quiz-text">다른 사람의 얼굴을 허락 없이 AI로 만드는 것은<br>불법이에요!</p>
+              <button class="confirm-quiz-choice confirm-quiz-ok">
+                <img loading="lazy" src="../sa/01/img/p14_btn_confirm.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_confirm_on.png" data-src-over="img/p14_btn_confirm_over.png" data-sound="sound/click.mp3" alt="확인">
+              </button>
+            </div></div></div></div></div><div class="g-item"><p class="g-meta"><b>1곳</b> · sa/01/p14 <span class="g-local">페이지 전용 클래스 있음</span></p><div class="g-view"><div class="g-stage m-stage"><div class="confirm-quiz p14-confirm-quiz-3"><div class="confirm-quiz-panel confirm-quiz-correct">
+              <p class="confirm-quiz-title"><img loading="lazy" class="confirm-quiz-icon" src="../img/common/icon_warning.png" alt="">주의</p>
+              <p class="confirm-quiz-text">실제 나의 모습이 아닌 AI로 만든 이미지임을<br>반드시 표기해야 해요!</p>
+              <button class="confirm-quiz-choice confirm-quiz-ok" data-next-href="#">
+                <img loading="lazy" src="../sa/01/img/p14_btn_confirm.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_confirm_on.png" data-src-over="img/p14_btn_confirm_over.png" data-sound="sound/click.mp3" alt="확인">
+              </button>
+            </div></div></div></div></div></div></section>
+</div>
+<script src="guide.js"></script>
+<script>
+
+(function(){
+  const btns=[...document.querySelectorAll(".g-tabs button")],secs=[...document.querySelectorAll(".m-sec")];
+  function loadFrames(sec){sec.querySelectorAll("iframe[data-srcdoc]").forEach(f=>{f.srcdoc=f.dataset.srcdoc;f.removeAttribute("data-srcdoc");});}
+  function scaleViews(){document.querySelectorAll(".g-view").forEach(v=>{const st=v.firstElementChild;if(st&&v.offsetWidth)st.style.transform="scale("+(v.offsetWidth/1920)+")";});}
+  function scaleViews(){document.querySelectorAll(".g-view").forEach(v=>{const st=v.firstElementChild;if(st&&v.offsetWidth)st.style.transform="scale("+(v.offsetWidth/1920)+")";});}
+  function scaleThumbs(){document.querySelectorAll(".q-thumb").forEach(t=>{const f=t.querySelector("iframe");if(f&&t.offsetWidth)f.style.transform="scale("+(t.offsetWidth/1920)+")";});}
+  window.addEventListener("resize",()=>{scaleThumbs();scaleViews();});scaleViews();
+  function show(k){btns.forEach(b=>b.classList.toggle("is-on",b.dataset.t===k));secs.forEach(s=>s.classList.toggle("is-tab-off",s.id!=="sec-"+k));try{history.replaceState(null,"","#"+k)}catch(e){}const on=document.getElementById("sec-"+k);if(on){loadFrames(on);scaleThumbs();scaleViews();}}
+  btns.forEach(b=>b.addEventListener("click",()=>show(b.dataset.t)));
+  const h=location.hash.slice(1);if(h&&document.getElementById("sec-"+h))show(h);
+  const run=()=>{};
+  (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(run);
+})();
+</script>
 </body>
 </html>
