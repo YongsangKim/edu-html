@@ -72,6 +72,8 @@
     caption.textContent = article;
 
     playBtn.addEventListener('click', () => {
+      if (playBtn.disabled) return;
+      playBtn.disabled = true;
       playBtn.classList.add('is-selected');
       const dur = isFinite(tts.duration) && tts.duration > 0 ? tts.duration : 8;
       caption.style.setProperty('--dur', dur + 's');
@@ -85,6 +87,7 @@
     caption.addEventListener('animationend', () => {
       caption.classList.remove('is-playing');
       playBtn.classList.remove('is-selected');
+      playBtn.disabled = false;
     });
     document.getElementById('p11Next').addEventListener('click', (e) => e.currentTarget.classList.add('is-selected'));
   })();
