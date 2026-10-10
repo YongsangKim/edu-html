@@ -157,6 +157,9 @@
     const labels = document.querySelectorAll('.p13-label');
     const wears = {};
     CATS.forEach((c) => { wears[c] = document.querySelector('.p13-wear-' + c); });
+    // 입히는 그림을 미리 받아 두고, 새 그림이 준비된 뒤에 바꿔서 갈아입을 때 캐릭터가 잠깐 사라지지 않게 함
+    const wearImgs = {};
+    Object.keys(ITEMS).forEach((id) => { const im = new Image(); im.src = 'img/p13_wear_' + id + '.png'; wearImgs[id] = im; });
 
     const order = shuffleArray(ROUNDS);
     let roundNo = 0;
@@ -229,9 +232,13 @@
     function wear(card) {
       const cat = card.dataset.cat;
       card.hidden = true;
-      $('p13Char').querySelectorAll('img').forEach((img) => { img.hidden = true; });
-      wears[cat].src = 'img/p13_wear_' + card.dataset.id + '.png';
-      wears[cat].hidden = false;
+      const nextImg = wears[cat];
+      const swap = () => {
+        $('p13Char').querySelectorAll('img').forEach((img) => { img.hidden = true; });
+        nextImg.hidden = false;
+      };
+      nextImg.src = 'img/p13_wear_' + card.dataset.id + '.png';
+      if (nextImg.decode) nextImg.decode().then(swap, swap); else swap();
       step += 1;
       const deactivate = () => board.querySelectorAll('.p13-item.is-active').forEach((el) => el.classList.remove('is-active'));
       if (step < CATS.length) {
