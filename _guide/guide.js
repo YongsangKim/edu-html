@@ -3,9 +3,8 @@
 (function () {
   const CATEGORIES = [
     { file: 'buttons.html', label: '버튼' },
-    { file: 'screens.html', label: '화면 틀' },
+    { file: 'screens.html', label: '레이아웃' },
     { file: 'modals.html', label: '팝업·모달' },
-    { file: 'modals-all.html', label: '모달 전체 점검' },
     { file: 'progress.html', label: '진행도(게이지·별·배지)' },
     { file: 'characters.html', label: '안내 캐릭터·말풍선' },
     { file: 'drag.html', label: '끌어 놓기' },
@@ -53,8 +52,17 @@ window.wrapH2Sections = function (wrap) {
   return out;
 };
 
+/* 미리보기 칸(.g-view > .g-stage)을 칸 폭에 맞춰 바로 줄임(그림 로딩이 끝나기를 기다리지 않음) */
+window.scaleGuideViews = function () {
+  document.querySelectorAll('.g-view').forEach((v) => {
+    const st = v.firstElementChild;
+    if (st && v.offsetWidth) st.style.transform = 'scale(' + (v.offsetWidth / 1920) + ')';
+  });
+};
+window.addEventListener('resize', () => window.scaleGuideViews());
+
 window.initGuideTabs = function (secs) {
-  const frameSecs = secs.filter((s) => s.querySelector('iframe'));
+  const frameSecs = secs.filter((s) => s.querySelector('iframe, .g-view'));
   const load = (s) => s.querySelectorAll('iframe[data-src]').forEach((f) => { f.src = f.dataset.src; f.removeAttribute('data-src'); });
   if (frameSecs.length < 2) { frameSecs.forEach(load); return; }
   frameSecs.forEach((s) => s.querySelectorAll('iframe').forEach((f) => { f.dataset.src = f.getAttribute('src'); f.removeAttribute('src'); }));
@@ -74,6 +82,7 @@ window.initGuideTabs = function (secs) {
   function show(i) {
     frameSecs.forEach((s, j) => { s.classList.toggle('is-tab-off', j !== i); btns[j].classList.toggle('is-on', j === i); });
     load(frameSecs[i]);
+    if (window.scaleGuideViews) window.scaleGuideViews();
     history.replaceState(null, '', '#t=' + (i + 1));
   }
   const m = /#t=(\d+)/.exec(location.hash);
