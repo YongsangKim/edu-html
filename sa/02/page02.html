@@ -8,21 +8,24 @@
     <style>
         /* 디자인 없음 - 기획서 2~3p 배치에 기존 스타일 적용(말풍선: guide-bubble). 룰렛 회전은 이 페이지 전용 스크립트 */
 
-        .roulette-wrap{position:absolute;left:218px;top:60px;width:828px;height:828px}
-        .roulette-wheel{position:absolute;left:0;top:0;width:100%;height:100%;border-radius:50%;box-sizing:border-box;border:solid 14px var(--c-purple);
-          box-shadow:0 0 0 8px var(--c-cream),-7px 16px 10px 10px rgba(92,61,240,.2);transition:transform 3s cubic-bezier(0.2,0.8,0.2,1);
-          background:conic-gradient(#fff3b8 0deg 90deg,#cfe6ff 90deg 180deg,#d6f5c8 180deg 270deg,#ffd6e2 270deg 360deg)}
-        .roulette-wheel:before{content:'';position:absolute;left:0;top:0;width:100%;height:100%;border-radius:50%;
-          background:repeating-conic-gradient(var(--c-purple) 0deg 0.8deg,transparent 0.8deg 89.2deg,var(--c-purple) 89.2deg 90deg)}
-        .roulette-label{position:absolute;left:50%;top:50%;width:300px;margin:-60px 0 0 -150px;height:120px;display:flex;align-items:center;justify-content:center;
-          text-align:center;font-family:'Cafe24 Ssurround';font-size:50px;line-height:1.15;color:var(--c-purple);letter-spacing:-0.06em;word-break:keep-all}
-        .roulette-label1{transform:rotate(45deg) translateY(-215px) rotate(-45deg)}
-        .roulette-label2{transform:rotate(135deg) translateY(-215px) rotate(-135deg)}
-        .roulette-label3{transform:rotate(225deg) translateY(-215px) rotate(-225deg)}
-        .roulette-label4{transform:rotate(315deg) translateY(-215px) rotate(-315deg)}
-        .roulette-hub{position:absolute;left:50%;top:50%;width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;background:var(--c-cream);border:solid 12px var(--c-purple);box-sizing:border-box;z-index:2}
-        .roulette-pointer{position:absolute;left:50%;top:-40px;width:0;height:0;margin-left:-50px;border-left:50px solid transparent;border-right:50px solid transparent;border-top:90px solid #ff4f8b;
-          filter:drop-shadow(0 6px 0 var(--c-purple));z-index:3}
+        /* 디자인 사회 2차시 2p: 4색 룰렛(위 노랑 노력해서 이룬 일 / 오른쪽 분홍 칭찬받은 일 / 아래 연두 내가 잘하는 것 / 왼쪽 파랑 누군가를 도운 일), 칸마다 사진+글자. 사진은 img/p02_roulette_{주제}.png */
+        .roulette-wrap{position:absolute;left:212px;top:58px;width:836px;height:836px}
+        .roulette-wrap:before{content:'';position:absolute;inset:0;border-radius:50%;box-shadow:10px 18px 0 0 rgba(115,146,184,.5)}
+        .roulette-wheel{position:absolute;left:0;top:0;width:100%;height:100%;border-radius:50%;box-sizing:border-box;border:solid 14px #032a63;transform:rotate(-45deg);transition:transform 3s cubic-bezier(0.2,0.8,0.2,1);
+          background:conic-gradient(from -45deg,#fcd84a 0 90deg,#f55db9 90deg 180deg,#98cf2a 180deg 270deg,#2a98cd 270deg 360deg)}
+        .roulette-wheel:before{content:'';position:absolute;inset:0;border-radius:50%;
+          background:repeating-conic-gradient(from -46deg,rgba(255,255,255,.45) 0deg 2deg,transparent 2deg 90deg)}
+        .roulette-wheel:after{content:'';position:absolute;inset:0;border-radius:50%;box-shadow:inset 0 0 0 16px #faf7fb,inset 0 0 0 19px #0a3a7a}
+        .roulette-seg{position:absolute;left:50%;top:50%;width:0;height:0}
+        .roulette-seg.is-right{transform:rotate(90deg)}
+        .roulette-seg.is-bottom{transform:rotate(180deg)}
+        .roulette-seg.is-left{transform:rotate(270deg)}
+        .roulette-seg-in{position:absolute;left:-150px;top:-350px;width:300px;display:flex;flex-direction:column;align-items:center;gap:10px}
+        .roulette-photo{display:block;width:220px;height:124px;box-sizing:border-box;border:solid 5px var(--c-white);border-radius:20px;background:#dfe6f3 center / cover no-repeat}
+        .roulette-label{margin:0;font-family:'Cafe24 Ssurround';font-size:54px;line-height:1.1;color:#0a3a8a;text-align:center;letter-spacing:-0.04em;word-break:keep-all}
+        .roulette-hub{position:absolute;left:50%;top:50%;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;box-sizing:border-box;border:solid 5px #123c85;
+          background:radial-gradient(circle at 50% 30%,#59d0ff,#1b7be0);box-shadow:0 8px 6px rgba(3,42,99,.25);z-index:2}
+        .roulette-pointer{position:absolute;left:50%;top:-18px;width:66px;height:113px;margin-left:-33px;z-index:3;background:url('img/p02_roulette_pointer.png') center / 100% 100% no-repeat}
 
         .p02-bubble{left:1143px;top:150px;bottom:auto;width:520px;padding:40px 20px}
 
@@ -38,10 +41,10 @@
         <main class="bg-default">
           <div class="roulette-wrap">
             <div class="roulette-wheel" id="rouletteWheel">
-              <div class="roulette-label roulette-label1">칭찬받은 일</div>
-              <div class="roulette-label roulette-label2">내가<br>잘하는 것</div>
-              <div class="roulette-label roulette-label3">누군가를<br>도운 일</div>
-              <div class="roulette-label roulette-label4">노력해서<br>이룬 일</div>
+              <div class="roulette-seg"><div class="roulette-seg-in"><i class="roulette-photo" style="background-image:url('img/p02_roulette_effort.png')"></i><p class="roulette-label">노력해서<br>이룬 일</p></div></div>
+              <div class="roulette-seg is-right"><div class="roulette-seg-in"><i class="roulette-photo" style="background-image:url('img/p02_roulette_praise.png')"></i><p class="roulette-label">칭찬받은<br>일</p></div></div>
+              <div class="roulette-seg is-bottom"><div class="roulette-seg-in"><i class="roulette-photo" style="background-image:url('img/p02_roulette_strength.png')"></i><p class="roulette-label">내가<br>잘하는 것</p></div></div>
+              <div class="roulette-seg is-left"><div class="roulette-seg-in"><i class="roulette-photo" style="background-image:url('img/p02_roulette_help.png')"></i><p class="roulette-label">누군가를<br>도운 일</p></div></div>
             </div>
             <div class="roulette-hub"></div>
             <div class="roulette-pointer"></div>
@@ -75,18 +78,18 @@
     const spinBtn = document.getElementById('rouletteSpinBtn');
     const retryBtn = document.getElementById('rouletteRetryBtn');
     const nextBtn = document.getElementById('p02NextBtn');
-    let currentAngle = 0;
+    let currentAngle = -45;
 
-    // 포인터는 위쪽(0deg) 고정, 구역 중심은 시계방향 45/135/225/315deg
+    // 포인터는 위쪽(0deg) 고정, 구역 중심은 시계방향 위 0(노력)/오른쪽 90(칭찬)/아래 180(잘하는 것)/왼쪽 270(도움)deg
     function spin(activeBtn) {
       activeBtn.classList.add('is-disabled');
       nextBtn.classList.add('hidden');
 
       const SEGMENTS = [
-        { center: 45, topic: 'praise' },
-        { center: 135, topic: 'strength' },
-        { center: 225, topic: 'help' },
-        { center: 315, topic: 'effort' }
+        { center: 90, topic: 'praise' },
+        { center: 180, topic: 'strength' },
+        { center: 270, topic: 'help' },
+        { center: 0, topic: 'effort' }
       ];
       const seg = SEGMENTS[Math.floor(Math.random() * SEGMENTS.length)];
       const targetCenter = seg.center;

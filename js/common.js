@@ -1803,46 +1803,6 @@ function initPromptBuilder() {
 }
 
 /* ==========================================================
-   기능 U: 프롬프트를 고쳐라 — 오답 단어는 흔들리고, 정답 단어를
-           고르면 다음 문제(또는 마지막이면 성공 화면)로 넘어감
-   - .fix-prompt-quiz(=.step-flow) 안에 .step-panel(문제 하나씩)을 두고,
-     각 패널 안의 .fix-word-option 중 data-correct="true"를 클릭하면
-     advancePanelOrNavigate로 다음 패널(또는 .fix-prompt-quiz의
-     data-next 페이지, 마지막 패널일 때)로 넘어감
-   - data-correct="false"를 클릭하면 그 버튼만 잠깐 흔들리는 표시(CSS
-     is-wrong)만 뜨고 그대로 남아있어 다시 고를 수 있음
-   예시 마크업:
-     <div class="step-flow fix-prompt-quiz" data-next="page01.html">
-       <div class="step-panel">
-         <img src="img/photo1.png" alt="">
-         <div class="fix-word-options">
-           <button class="fix-word-option" data-correct="true">소방관</button>
-           <button class="fix-word-option" data-correct="false">요리사</button>
-         </div>
-       </div>
-       <!-- 다음 문제 .step-panel, 그다음 성공 화면 .step-panel 순으로 추가 -->
-     </div>
-   - 다른 기능(js-sfx 등)을 몰라도 되는 독립적인 모듈. initStepFlow가
-     먼저 실행돼 있어야 정답 클릭 시 다음 문제/페이지로 넘어감
-========================================================== */
-function initFixPromptGame() {
-  const quiz = document.querySelector('.fix-prompt-quiz');
-  if (!quiz) return;
-
-  quiz.querySelectorAll('.fix-word-option').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      if (btn.dataset.correct === 'true') {
-        advancePanelOrNavigate(btn, quiz.dataset.next);
-      } else {
-        btn.classList.remove('is-wrong');
-        void btn.offsetWidth; // 강제 리플로우: 같은 오답을 연달아 눌러도 흔들림이 다시 재생되게
-        btn.classList.add('is-wrong');
-      }
-    });
-  });
-}
-
-/* ==========================================================
    기능 V: 정답이 여러 개인 고르기 퀴즈 — "다음" 버튼 없이, 정답
            버튼을 전부(순서 상관없이) 고르면 잠깐 뒤 자동으로 다음
            스텝(또는 페이지)으로 넘어감
@@ -1998,9 +1958,9 @@ function initAnswerPickQuiz() {
            <span class="prompt-fix-word">요리사</span>의 모습을 사진으로 만들어줘.
          </div>
          <div class="prompt-fix-choices hidden">
-           <button class="fix-word-option prompt-fix-choice" data-correct="false">진료실</button>
-           <button class="fix-word-option prompt-fix-choice" data-correct="false">소방서</button>
-           <button class="fix-word-option prompt-fix-choice" data-correct="true">주방</button>
+           <button class="card-btn prompt-fix-choice" data-correct="false">진료실</button>
+           <button class="card-btn prompt-fix-choice" data-correct="false">소방서</button>
+           <button class="card-btn prompt-fix-choice" data-correct="true">주방</button>
          </div>
          <div class="prompt-fix-feedback hidden">정답이에요!</div>
        </div>
@@ -2833,17 +2793,17 @@ function initEmotionChatFlow(config) {
        <div class="confirm-quiz-panel confirm-quiz-question">
          <p class="confirm-quiz-text">질문...</p>
          <div class="confirm-quiz-choices">
-           <button class="fix-word-option confirm-quiz-choice" data-correct="false">예</button>
-           <button class="fix-word-option confirm-quiz-choice" data-correct="true">아니오</button>
+           <button class="card-btn confirm-quiz-choice" data-correct="false">예</button>
+           <button class="card-btn confirm-quiz-choice" data-correct="true">아니오</button>
          </div>
        </div>
        <div class="confirm-quiz-panel confirm-quiz-correct hidden">
          <p class="confirm-quiz-text">정답 설명...</p>
-         <button class="fix-word-option confirm-quiz-ok">확인</button>
+         <button class="card-btn confirm-quiz-ok">확인</button>
        </div>
        <div class="confirm-quiz-panel confirm-quiz-wrong hidden">
          <p class="confirm-quiz-text">오답 설명...</p>
-         <button class="fix-word-option confirm-quiz-ok">확인</button>
+         <button class="card-btn confirm-quiz-ok">확인</button>
        </div>
      </div>
    - 트리거에는 일부러 js-nav-effect를 안 붙임(실제 이동은 이 모듈이 직접
@@ -3105,7 +3065,6 @@ initHintQuiz();
 initMultiSelectGate();
 initClausePreview();
 initPromptBuilder();
-initFixPromptGame();
 initAnswerPickQuiz();
 initPromptFixQuiz();
 initLoadingSequence();
