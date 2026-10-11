@@ -330,6 +330,16 @@ function initImageSwap() {
 
     if (!img.dataset.srcAlt) return;
 
+    if (img.dataset.swapReset) {
+      img.addEventListener('pointerdown', () => {
+        if (img.closest('button:disabled, .is-disabled')) return;
+        img.src = img.dataset.srcAlt;
+      });
+      img.addEventListener('pointercancel', () => {
+        if (!img.classList.contains('is-swapped')) img.src = img.dataset.originalSrc;
+      });
+    }
+
     img.addEventListener('click', () => {
 
       // 나 자신을 제외한, 활성화(스왑)돼 있던 다른 이미지들은 원복

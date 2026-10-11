@@ -35,7 +35,7 @@
         /* 조이스틱: 레버를 클릭하면 아래로 내려가는 효과만 CSS로 표현. 생성 영역과
            나란히 놓이도록 position:relative로 바꾸고(내부 절대좌표 기준점은 유지),
            안내는 라벨 텍스트 대신 위의 스와이프 가이드 손가락으로 대신함 */
-        .p11-joystick{position:relative;flex:0 0 260px;height:300px;background:none;border:0;padding:0;cursor:pointer}
+        .p11-joystick{touch-action:none;position:relative;flex:0 0 260px;height:300px;background:none;border:0;padding:0;cursor:pointer}
         .p11-joystick-base{position:absolute;left:30px;top:180px;width:200px;height:100px;background:var(--c-cream);border:solid 6px var(--c-ink);border-radius:50px}
         .p11-joystick-stick{position:absolute;left:113px;top:35px;width:26px;height:160px;background:var(--c-sky-pale);border:solid 5px var(--c-ink);border-radius:13px;transition:top .25s ease,height .25s ease}
         .p11-joystick-knob{position:absolute;left:75px;top:0;width:100px;height:100px;background:#ff2f7b;border:solid 6px var(--c-ink);border-radius:50%;transition:top .25s ease}
@@ -107,6 +107,16 @@
       textEl.textContent = PROMPT.slice(0, i);
       if (i >= PROMPT.length) clearInterval(typer);
     }, 70);
+
+    let dragY = null;
+    joystick.addEventListener('pointerdown', (e) => { dragY = e.clientY; joystick.setPointerCapture(e.pointerId); });
+    joystick.addEventListener('pointermove', (e) => {
+      if (dragY === null) return;
+      const scale = joystick.getBoundingClientRect().height / joystick.offsetHeight || 1;
+      if ((e.clientY - dragY) / scale > 40) { dragY = null; joystick.click(); }
+    });
+    joystick.addEventListener('pointerup', () => { dragY = null; });
+    joystick.addEventListener('pointercancel', () => { dragY = null; });
 
     joystick.addEventListener('click', () => {
       if (joystick.classList.contains('is-pulled')) return;
