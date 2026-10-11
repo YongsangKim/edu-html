@@ -20,14 +20,8 @@
         .p09-plain{font-family:'Cafe24 Ssurround';font-size:70px;color:var(--c-white);letter-spacing:-0.04em;
           display:flex;align-items:center}
 
-        /* 낱말 칩 — sa/01/page18의 fix-word-option 스타일(common.css)을 그대로 씀.
-           문장 안에서는 칩 사이 간격을 .p09-sentence의 gap이 정하므로 margin만 뺌 */
-        .p09-word{margin:0}
+        .p09-word{min-width:0;padding:6px 20px 6px;height:100px;margin:0 10px 10px}
         .p09-word.is-done{cursor:default;pointer-events:none}
-        .p09-word.is-done .fix-word-option-face{box-shadow:none;color:#d168fb;padding:21px 16px 11px 16px}
-
-        .p09-word.fix-word-option.is-wrong{background:linear-gradient(180deg, var(--c-ink), #0361d5)}
-        .p09-word.fix-word-option.is-wrong .fix-word-option-face{box-shadow:none;padding:21px 16px 11px 16px}
 
         .p09-tray{position:absolute;left:47px;top:677px;width:1827px;height:246px;box-sizing:border-box;background:var(--c-ink);border-radius:18px}
         /* 디자인의 사진 칸(테두리·글자 포함)을 원래 배경 이미지에서 같은 좌표로 잘라 씀 */
@@ -168,9 +162,8 @@
           return;
         }
         const b = document.createElement('button');
-        b.className = 'fix-word-option p09-word';
-        b.innerHTML = '<span class="fix-word-option-face"></span>';
-        b.firstChild.textContent = p.w;
+        b.className = 'card-btn p09-word';
+        b.textContent = p.w;
         if (p.cat) b.dataset.cat = p.cat;
         b.addEventListener('click', () => onPick(b));
         sentence.appendChild(b);
@@ -187,7 +180,7 @@
       const want = currentCat();
 
       if (btn.dataset.cat === want) {
-        btn.classList.add('is-done');
+        btn.classList.add('is-done', 'is-selected');
         CATS[want].el.classList.add('is-on');
         playCorrect();
 
