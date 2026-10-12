@@ -6,30 +6,36 @@
     <title>나의 자랑거리 기사문 작성하기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 11~14p. 3번 질문 보기가 2번 선택에 따라 달라져서 페이지 전용 스크립트로 진행.
-           완성한 기사문 본문(제목 제외)은 sessionStorage 'sa02_article'에 저장해 뒤 활동에서 씀. 신문지 재질은 img/p06_paper.png */
+        /* 디자인 사회 2차시 6p: 왼쪽 남색 패널(연필 게이지 + 리본 제목 + 보기 4개) / 오른쪽 신문 틀(리본 제목 + 흰 본문 칸). 완성하면 틀이 가운데로 커짐(.p06-done).
+           완성한 기사문 본문(제목 제외)은 sessionStorage 'sa02_article'에 저장해 뒤 활동에서 씀. 게이지 연필 img/p03_pencil.png(page03 연필 재사용) */
 
-        .p06-panel{position:absolute;left:48px;top:54px;width:761px;height:820px;box-sizing:border-box;background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:48px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
-        .p06-gauge{left:110px;top:100px;width:637px;height:56px;border-width:5px;border-radius:28px}
-        .p06-gauge:before{left:-30px;top:-20px;width:90px;height:85px}
+        .p06-panel{position:absolute;left:47px;top:56px;width:764px;height:860px;background:var(--c-navy);border-radius:12px}
+        .p06-gauge{left:120px;top:100px;width:631px;height:56px;border-width:5px;border-radius:28px}
+        .p06-gauge:before{left:-56px;top:-30px;width:110px;height:110px;background-image:url('img/p03_pencil.png')}
         .p06-gauge .gauge-fill{border-radius:24px}
         .p06-gauge .gauge-fill:after{top:7px;height:7px}
-        .p06-title{position:absolute;left:48px;top:185px;width:761px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:60px;color:var(--c-purple);letter-spacing:-0.04em}
+        .p06-title.intro-tab{left:98px;top:213px;min-width:1008px;transform:scale(.66);transform-origin:0 0;font-family:'Cafe24 Ssurround';font-size:83px}
 
-        .p06-opts{position:absolute;left:130px;top:295px;width:597px;display:flex;flex-direction:column;gap:38px}
-        .p06-opts .emotion-option{width:100%;height:100px;padding:4px 20px 0;font-size:46px;line-height:1.15;letter-spacing:-0.06em}
+        .p06-opts{position:absolute;left:105px;top:340px;width:652px;display:flex;flex-direction:column;gap:36px}
+        .p06-opts .card-btn{width:100%;min-width:0;height:106px;padding:8px 20px 4px;font-size:50px;letter-spacing:-0.06em}
 
-        .p06-paper{position:absolute;left:847px;top:54px;width:995px;height:700px;box-sizing:border-box;padding:70px 90px;background:#f7f2e6 url('img/p06_paper.png') center / cover no-repeat;
-          border:solid 6px var(--c-ink);border-radius:24px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);font-family:'Cafe24 Ssurround';color:var(--c-ink);letter-spacing:-0.04em}
-        .p06-paper-title{min-height:90px;margin:0 0 40px;padding-bottom:20px;border-bottom:solid 5px var(--c-ink);text-align:center;font-size:72px;line-height:1.2;color:#02185c}
-        .p06-paper-body{margin:0;font-size:50px;line-height:1.5;word-break:keep-all}
+        .p06-frame{position:absolute;left:848px;top:77px;width:995px;height:698px;box-sizing:border-box;isolation:isolate;background:var(--c-sky);border:solid 5px var(--c-ink);border-radius:14px}
+        .p06-ribbon{position:absolute;left:116px;top:-32px;width:752px;height:105px;margin:0;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;background:#dff6ff;border:solid 3px #fff;box-shadow:0 14px 0 -4px rgba(54,98,170,.35);
+          font-family:'Cafe24 Ssurround';font-size:70px;color:var(--c-ink);letter-spacing:-0.05em;white-space:nowrap}
+        .p06-ribbon:before,.p06-ribbon:after{content:'';position:absolute;top:49px;width:150px;height:120px;z-index:-1;background-repeat:no-repeat}
+        .p06-ribbon:before{left:-93px;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,36% 50%);background:linear-gradient(to bottom left,#5b84d6 50%,transparent 50%) 100% 55px / 55px 47px no-repeat,#719fdc}
+        .p06-ribbon:after{right:-93px;clip-path:polygon(0 0,100% 0,64% 50%,100% 100%,0 100%);background:linear-gradient(to bottom right,#5b84d6 50%,transparent 50%) 0 55px / 55px 47px no-repeat,#719fdc}
+        .p06-paper{position:absolute;left:57px;top:145px;width:871px;height:498px;box-sizing:border-box;padding:40px 50px;overflow:hidden;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:16px}
+        .p06-paper-body{margin:0;font-family:'Cafe24 Ssurround';font-size:50px;line-height:1.5;color:var(--c-ink);letter-spacing:-0.04em;word-break:keep-all}
 
         .p06-next{position:absolute;left:1141px;top:790px}
 
         .p06-done .p06-panel, .p06-done .p06-gauge, .p06-done .p06-title, .p06-done .p06-opts, .p06-done .p06-next{display:none}
         .p06-done-title{position:absolute;left:0;top:40px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:80px;letter-spacing:-0.06em;
           background:linear-gradient(180deg,#02185c,#0362d7);-webkit-background-clip:text;background-clip:text;color:transparent}
-        .p06-done .p06-paper{left:360px;top:160px;width:1200px;height:590px}
+        .p06-done .p06-frame{left:372px;top:177px;width:1175px;height:600px}
+        .p06-done .p06-ribbon{left:206px;top:-52px}
+        .p06-done .p06-paper{left:100px;top:123px;width:967px;height:428px}
         .p06-done .p06-paper-body{text-align:center}
         .p06-done-next{position:absolute;left:756px;top:790px}
         .p06-done-title, .p06-done-next{display:none}
@@ -45,13 +51,13 @@
         <main class="bg-default" id="p06Main">
           <div class="p06-panel"></div>
           <div class="gauge p06-gauge"><div class="gauge-fill" id="p06GaugeFill"></div></div>
-          <p class="p06-title" id="p06Title"></p>
+          <p class="intro-tab p06-title" id="p06Title"></p>
           <div class="p06-opts" id="p06Opts"></div>
 
           <p class="p06-done-title">나의 자랑거리 기사문 완성!</p>
-          <div class="p06-paper">
-            <p class="p06-paper-title" id="p06PaperTitle"></p>
-            <p class="p06-paper-body" id="p06PaperBody"></p>
+          <div class="p06-frame">
+            <p class="p06-ribbon" id="p06PaperTitle"></p>
+            <div class="p06-paper"><p class="p06-paper-body" id="p06PaperBody"></p></div>
           </div>
 
           <a href="javascript:;" class="js-sfx p06-next is-disabled" id="p06Next" data-sound="sound/click.mp3">
@@ -97,7 +103,7 @@
     ];
     const CLOSING = '매우 자랑스러운 기분이라고 전해왔습니다.';
     const STEPS = [
-      { title: '제목을 골라요' },
+      { title: '제목을 골라요.' },
       { title: '어떤 행동을 했나요?' },
       { title: '어떤 결과를 얻었나요?' }
     ];
@@ -140,11 +146,11 @@
       optionsFor(step).forEach((text, i) => {
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'emotion-option' + (picks[step] === i ? ' is-selected' : '');
+        btn.className = 'card-btn' + (picks[step] === i ? ' is-selected' : '');
         btn.textContent = text;
         btn.addEventListener('click', () => {
           playClick();
-          optsBox.querySelectorAll('.emotion-option').forEach((b) => b.classList.toggle('is-selected', b === btn));
+          optsBox.querySelectorAll('.card-btn').forEach((b) => b.classList.toggle('is-selected', b === btn));
           picks[step] = i;
           renderPaper();
           nextBtn.classList.remove('is-disabled');
@@ -157,6 +163,7 @@
 
     function finish() {
       try { sessionStorage.setItem('sa02_article', bodyLines().join(' ')); } catch (e) {}
+      paperBody.textContent = bodyLines().join(' ');
       main.classList.add('p06-done');
       fx.classList.remove('is-hidden');
       fx.dispatchEvent(new CustomEvent('step:visible'));

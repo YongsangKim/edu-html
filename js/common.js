@@ -360,7 +360,8 @@ function initImageSwap() {
       if (img.dataset.swapReset) {
         setTimeout(() => {
           img.classList.remove('is-swapped');
-          img.src = img.matches(':hover') && img.dataset.srcOver ? img.dataset.srcOver : img.dataset.originalSrc;
+          const canHover = window.matchMedia('(hover: hover)').matches; // 터치 기기는 손을 떼도 :hover가 남아 오버 이미지에 멈추므로 제외
+          img.src = canHover && img.matches(':hover') && img.dataset.srcOver ? img.dataset.srcOver : img.dataset.originalSrc;
         }, Number(img.dataset.swapReset) || 200);
       }
     });

@@ -8,15 +8,14 @@
     <style>
         /* 디자인 없음 - 기획서 15p. 상황 소개 대화: 확인 버튼을 누를 때마다 다음 대사로 바뀌고 마지막 확인에서 page10.html로 이동.
            배경 img/p09_bg.png(거실 · 소파에 앉은 아로와 로운이 · TV와 인공지능 스피커) */
-        .tk-banner{position:absolute;left:460px;top:30px;width:1000px;height:96px;margin:0;box-sizing:border-box;padding:8px 30px 0;display:flex;align-items:center;justify-content:center;
-          background:var(--c-white);border:solid 5px var(--c-purple);border-radius:48px;box-shadow:0 10px 0 0 var(--c-sky-pale);
-          font-family:'Cafe24 Ssurround';font-size:48px;color:var(--c-purple);letter-spacing:-0.05em;word-break:keep-all}
-        .tk-scene{position:absolute;left:40px;top:150px;width:1840px;height:520px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:30px;background:var(--c-mist) url('img/p09_bg.png') center / cover no-repeat}
-        .tk-box{position:absolute;left:40px;top:700px;width:1840px;height:210px;box-sizing:border-box;padding:34px 260px 0 60px;
-          background:var(--c-cream);border:solid 5px var(--c-purple);border-radius:36px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
-        .tk-name{position:absolute;left:50px;top:-30px;margin:0;padding:8px 36px 0;height:60px;box-sizing:border-box;border-radius:30px;background:var(--c-navy);font-family:'Cafe24 Ssurround';font-size:36px;color:var(--c-white)}
-        .tk-text{margin:0;font-family:'Cafe24 Ssurround';font-size:40px;line-height:1.35;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all}
-        .tk-ok{position:absolute;right:50px;bottom:28px;padding:0;border:0;background:none;cursor:pointer}
+        .tk-banner{position:absolute;left:50%;top:20px;transform:translateX(-50%);min-height:100px;margin:0;box-sizing:border-box;padding:12px 60px 6px;display:flex;align-items:center;justify-content:center;white-space:nowrap;
+          background:var(--c-cream);border:solid 6px var(--c-ink);border-radius:56px;box-shadow:0 14px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:64px;line-height:1.2;color:var(--c-ink);text-align:center;letter-spacing:-0.05em}
+        .tk-scene{position:absolute;left:65px;top:170px;width:1790px;height:770px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:30px;background:var(--c-mist) url('img/p09_bg.png') center / cover no-repeat}
+        .tk-bubble{left:20px;top:auto;bottom:598px;width:630px;padding:26px 40px 16px;display:flex;flex-direction:column;align-items:flex-start;letter-spacing:-0.08em}
+        .tk-bubble::before{left:110px;transform: scaleX(-1)}
+        .tk-text{margin:0;font-family:'Cafe24 Ssurround';font-size:38px;line-height:1.35;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all;text-align:left}
+        .tk-bubble .card-btn{align-self:center;min-width:0;width:200px;padding-left:10px;padding-right:10px;font-size:40px;height:70px;position:absolute;right:25px;bottom:33px}
+        .tk-bubble .card-btn.is-arrow{font-family:'Pretendard','Malgun Gothic',sans-serif;font-weight:700;font-size:64px;line-height:1;padding-top:0}
     </style>
 </head>
 <body>
@@ -26,11 +25,11 @@
       <div id="stage" class="stage">
         <main class="bg-default">
           <p class="tk-banner">인공지능 스피커의 작동 과정을 알아봐요.</p>
-          <div class="tk-scene"></div>
-          <div class="tk-box">
-            <p class="tk-name" id="tkName"></p>
-            <p class="tk-text" id="tkText"></p>
-            <button class="tk-ok card-btn is-popup js-sfx" id="tkOk" data-sound="sound/click.mp3">확인</button>
+          <div class="tk-scene">
+            <div class="guide-bubble tk-bubble">
+              <p class="tk-text" id="tkText"></p>
+              <button class="card-btn is-popup is-arrow js-sfx" id="tkOk" data-sound="sound/click.mp3">→</button>
+            </div>
           </div>
         </main>
       </div>
@@ -43,11 +42,12 @@
   <script src="../../js/common.js"></script>
   <script>
   (function () {
-    const LINES = [["아로","로운아, 집에 인공지능 스피커 있지?<br>사용해 본 경험을 들려줄래?"],["로운","처음에 ‘오케이 구글, 티비 켜줘!’라고 하면, 스피커가 내 말을 듣고, 내가 한 말을 액정에 보여줘. 그리고 조금 시간이 지난 뒤에, “티비를 켭니다!”라고 대답하고 티비를 켜주더라고."],["아로","오! 맞아! 우리 이 과정을 블록으로 정리해 볼까?"]];
+    const LINES = ["집에 인공지능 스피커 있지? 사용해 본 경험을 알려줄께.<br>&nbsp;","처음에 ‘오케이 구글, 티비 켜줘!’ 라고 하면, 스피커가 내 말을 듣고, 내가 한 말을 액정에 <br>보여줘.","그리고 조금 시간이 지난 뒤에, “티비를 켭니다!”라고 대답하고 티비를 켜주더라고.<br>&nbsp;","이 과정을 블록으로 정리해 볼까?<br>&nbsp;<br>&nbsp;"];
     let i = 0;
     function show() {
-      $('tkName').textContent = LINES[i][0];
-      $('tkText').innerHTML = LINES[i][1];
+      $('tkText').innerHTML = LINES[i];
+      $('tkOk').textContent = i < LINES.length - 1 ? '→' : '확인';
+      $('tkOk').classList.toggle('is-arrow', i < LINES.length - 1);
     }
     $('tkOk').addEventListener('click', () => {
       resetImageSwap($('tkOk'));

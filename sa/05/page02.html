@@ -215,21 +215,27 @@
       pc.classList.remove('is-off');
     }
 
+    let finishing = false;
     function finishStage() {
+      if (finishing) return;
+      finishing = true;
       const last = index === STAGES.length - 1;
-      playCorrect();
-      $('p02GoodTitle').textContent = last ? '좋아요!' : '잘했어요!';
-      $('p02GoodText').textContent = last ? '모든 문제를 맞혔어요.' : '문제를 계속 풀어봐요.';
-      pc.classList.add('is-off');
-      flashLayer(good);
       setTimeout(() => {
-        if (last) {
-          navigateTo('page03.html');
-          return;
-        }
-        index += 1;
-        render();
-      }, 2000);
+        playCorrect();
+        $('p02GoodTitle').textContent = last ? '좋아요!' : '잘했어요!';
+        $('p02GoodText').textContent = last ? '모든 문제를 맞혔어요.' : '문제를 계속 풀어봐요.';
+        pc.classList.add('is-off');
+        flashLayer(good);
+        setTimeout(() => {
+          finishing = false;
+          if (last) {
+            navigateTo('page03.html');
+            return;
+          }
+          index += 1;
+          render();
+        }, 2000);
+      }, 500);
     }
 
     // 기획서 화면에 다음 버튼이 없어 보기를 누르면 바로 확인
