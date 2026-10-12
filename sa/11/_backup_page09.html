@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인권 존중 포스터 제작소</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서 26~68p. Canva로 인권 존중 포스터 만들기 실습. 휴대폰 화면은 기획서에 들어 있는 실제 Canva 앱 캡처(img/p09_img{기획서 그림 번호}.png)를 그대로 쓰고,
+           고른 값(프롬프트 · 초안 이미지 · 문구)이 보여야 하는 자리는 기획서 슬라이드처럼 위에 얹음(좌표는 휴대폰 화면 기준 %). 누를 곳(.p09-hot)은 투명 — 올리면 초록 테두리, 왼쪽 손가락이 위치를 알려줌.
+           흐름: 홈에서 Canva → 포스터(세로형 A2) → Magic Media 세로형 → 프롬프트(3가지 중 선택) → 이미지 생성(2초) → 초안 4장 보기(화살표)·고르기(프롬프트에 맞는 2장만 통과) → 포스터 제작 확인 → 크기 조정 → 문구 넣기(3가지 중 선택, 글꼴 바꾸기, 위로 옮기기) → AI 문구 넣기(아래로 옮기기) → 완성 → 다운로드 → 완성 포스터(68p).
+           초안 이미지 img/p09_draft_{1~4}.png(1·2번이 프롬프트에 맞는 초안, 3·4번은 맞지 않는 초안 — 지금은 임시(흐린 회색), 실제 이미지가 오면 같은 파일명으로 덮어쓰기) */
+
+        .p09-bubble{position:absolute;left:30px;top:auto;bottom:560px;width:600px;margin:0;box-sizing:border-box;padding:30px;background:var(--c-cream);border:solid 5px var(--c-purple);border-radius:30px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';font-size:38px;line-height:1.35;color:var(--c-purple);text-align:center;letter-spacing:-0.05em;word-break:keep-all;z-index:3}
+        .p09-bubble:before{content:'';position:absolute;left:230px;bottom:-58px;width:100px;height:70px;background:url('../../img/common/p_guide_tail.png') 0 0 / contain no-repeat}
+        .p09-bubble img{height:1em;vertical-align:-0.15em;margin:0 6px}
+        .p09-character{left:40px;top:470px;width:540px;height:470px}
+
+        .p09-phone{left:740px;top:24px;width:439px;height:910px}
+        .p09-screen{position:relative;width:100%;height:100%;border-radius:54px;overflow:hidden;background:#fff;font-family:'Pretendard';color:#111}
+        .p09-base{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
+        .p09-home{position:absolute;inset:0;background:linear-gradient(180deg,#4a6fa5 0%,#8fb4d9 55%,#d6c8e8 100%)}
+        .p09-home img{position:absolute;left:38.75%;top:44%;width:22.5%;border-radius:25%;box-shadow:0 6px 14px rgba(0,0,0,.2)}
+        .p09-ov{position:absolute;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;white-space:nowrap}
+        .p09-ov.is-white{background:#fff}
+        .p09-ov.is-left{justify-content:flex-start;text-align:left}
+        .p09-ov.is-wrap{white-space:normal;line-height:1.35}
+        .p09-pic{position:absolute;background:center / cover no-repeat;overflow:hidden}
+
+        .p09-hot{position:absolute;box-sizing:border-box;padding:0;border:solid 3px transparent;border-radius:14px;background:transparent;cursor:pointer;transition:box-shadow .15s,border-color .15s;z-index:4}
+        .p09-hot:hover{border-color:#03c75a;box-shadow:0 0 0 4px rgba(3,199,90,.28)}
+        .p09-hot.is-drag{cursor:grab;touch-action:none}
+
+        .p09-car{position:absolute;left:0;top:18.5%;width:100%;height:35.5%;background:#fff;overflow:hidden;z-index:2}
+        .p09-card{position:absolute;top:2%;width:74.4%;height:96%;border-radius:14px;background:#e9eef6 center / cover no-repeat;transition:left .35s ease}
+        .p09-arrow{position:absolute;top:36%;width:9%;height:19%;margin-top:0;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.28);z-index:3;padding:0;border:solid 3px transparent;cursor:pointer}
+        .p09-arrow:before{content:'';position:absolute;left:34%;top:30%;width:34%;height:34%;border:solid #222;border-width:0 3px 3px 0;transform:rotate(-45deg)}
+        .p09-arrow.is-prev{left:5%}
+        .p09-arrow.is-prev:before{left:40%;transform:rotate(135deg)}
+        .p09-arrow.is-next{right:1.4%}
+        .p09-arrow:hover{border-color:#03c75a}
+        .p09-pick{position:absolute;left:12%;top:0;width:50%;height:100%;z-index:2;border:solid 3px transparent;border-radius:14px;background:transparent;padding:0;cursor:pointer}
+        .p09-pick:hover{border-color:#03c75a;box-shadow:0 0 0 4px rgba(3,199,90,.28)}
+        .p09-tobj{position:absolute;z-index:3;transform:translateX(-50%);touch-action:none}
+        .p09-tobj-t{border:solid 2px #7c3aed;padding:4px 12px 2px;background:#fff;text-align:center;white-space:nowrap;line-height:1.25;color:#111}
+        .p09-tobj-b{display:flex;gap:12px;justify-content:center;margin-top:12px}
+        .p09-tobj-b i{width:30px;height:30px;border-radius:50%;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center}
+        .p09-tobj-b svg{width:16px;height:16px;stroke:#222;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+        .p09-tobj-b .mv{cursor:grab;touch-action:none;transition:box-shadow .15s}
+        .p09-tobj-b .mv:hover{box-shadow:0 0 0 4px rgba(3,199,90,.35),0 1px 6px rgba(0,0,0,.3)}
+        .p09-clip{position:absolute;overflow:hidden;z-index:2}
+        .p09-clip.is-dim{filter:brightness(.55)}
+        .p09-mp{position:absolute;left:0;top:0;width:100%;container-type:size;background:#fff center / cover no-repeat}
+        .p09-mp b{position:absolute;left:0;width:100%;text-align:center;line-height:1.2;font-weight:normal}
+        .p09-mp .t{top:7%;font-family:'Cafe24 Ssurround';font-size:6.6cqw;color:#1b1738;text-shadow:0 0 8px #fff,0 0 4px #fff}
+        .p09-mp .c{bottom:2.5%;font-family:'Pretendard';font-weight:600;font-size:3.3cqw;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7)}
+        .p09-strip{position:absolute;overflow:hidden;z-index:3}
+        .p09-track{display:flex;width:200%;height:100%}
+        .p09-track i{flex:0 0 50%;height:100%;background:#fff no-repeat;background-size:100% auto;background-position:0 95.2%}
+        .p09-bar{position:absolute;background:#e1e3ea;border-radius:99px;overflow:hidden}
+        .p09-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3cc5c9,#7b3fe4)}
+        .p09-bar.is-run i{width:100%;transition:width 2s linear}
+
+        .p09-right{position:absolute;left:1290px;top:200px;width:560px;display:flex;flex-direction:column;gap:30px}
+        .p09-right.is-off{display:none}
+        .p09-right .card-btn{width:100%;min-width:0;height:auto;min-height:130px;padding:18px 30px 12px;font-size:44px;line-height:1.2}
+        .p09-right .card-btn.is-small{font-size:38px}
+        .p09-next.card-btn{display:flex;align-items:center;justify-content:center;min-width:0;width:300px;height:110px;margin-bottom:20px;padding:8px 10px 0;font-size:56px;z-index:7}
+        .is-hide{display:none!important}
+
+        .p09-poster{position:absolute;left:719px;top:232px;width:470px;height:650px;box-sizing:border-box;border:solid 4px var(--c-ink);background:#fff center / cover no-repeat;overflow:hidden;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p09-poster b{position:absolute;left:0;width:100%;text-align:center;font-family:'Pretendard';font-weight:800;letter-spacing:-0.03em;line-height:1.2}
+        .p09-poster .is-top{top:7%;font-size:46px;font-family:'Cafe24 Ssurround';font-weight:normal;color:#1b1738;text-shadow:0 0 8px #fff,0 0 4px #fff}
+        .p09-poster .is-bot{bottom:2.5%;font-size:19px;font-weight:600;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7)}
+        .p09-end-title{position:absolute;left:300px;top:30px;width:1320px;margin:0;font-family:'Cafe24 Ssurround';font-size:56px;line-height:1.3;color:var(--c-ink);text-align:center;letter-spacing:-0.05em}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="p09-bubble" id="p09Bubble"></p>
+          <div class="char-box p09-character" id="p09Char"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+          <div class="phone-frame p09-phone" id="p09Phone"><div class="p09-screen" id="p09Screen"></div></div>
+          <div class="p09-right is-off" id="p09Right"></div>
+          <button class="card-btn js-sfx next-btn p09-next is-hide" id="p09Next" data-sound="sound/click.mp3">다음</button>
+
+          <p class="p09-end-title is-hide" id="p09EndTitle">AI의 도움을 받아<br>나만의 인권 존중 포스터를 만들었어요!</p>
+          <div class="p09-poster is-hide" id="p09Poster"><b class="is-top" id="p09PosterTop"></b><b class="is-bot">AI로 만든 그림을 사용했어요.</b></div>
+
+          <div class="avatar-modal is-wrong is-off" id="p09Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small">생성된 이미지가 프롬프트와 알맞나요?<br>다시 한번 확인해보세요.</p>
+                <p class="avatar-popup-sub" id="p09WrongPrompt"></p>
+                <button class="avatar-popup-next card-btn is-popup js-sfx" id="p09WrongOk" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="인권 존중 포스터 제작소" data-next="page10.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const CASES = [
+      { t: '휠체어를 탄 학생과 친구들이<br>경사로로 함께 학교에 들어가는 그림', v: '휠체어를 탄 학생과 친구들이 경사로로 함께 학교에 들어가는 그림', q: '[휠체어를 탄 학생과 친구들이 경사로로 함께 학교에 들어가는 사진]' },
+      { t: '다양한 친구들이<br>놀이터에서 손잡고 웃는 그림', v: '다양한 친구들이 놀이터에서 손잡고 웃는 그림', q: '[다양한 친구들이 놀이터에서 손잡고 웃는 사진]' },
+      { t: '다양한 친구들이 교실에서<br>친구의 말을 잘 들어주는 그림', v: '다양한 친구들이 교실에서 친구의 말을 잘 들어주는 그림', q: '[다양한 친구들이 교실에서 친구의 말을 잘 들어주는 사진]' }
+    ];
+    const PHRASES = ['누구나 함께할 수 있어요', '우리는 모두 소중해요', '서로 다름을 존중해요'];
+    const CREDIT = 'AI로 만든 그림을 사용했어요.';
+    const OKDRAFT = [true, true, false, false];
+    const MOVE = '<img src="img/p09_ic_move.png" alt="이동">';
+    const UP = '<img src="img/p09_ic_up.png" alt="더보기">';
+    const st = { c: null, phrase: '', draft: 0, car: 0 };
+
+    const screen = $('p09Screen');
+    const bubble = $('p09Bubble');
+    const right = $('p09Right');
+    const nextBtn = $('p09Next');
+    const show = (el, on) => el.classList.toggle('is-hide', !on);
+    const pct = (a) => 'left:' + a[0] + '%;top:' + a[1] + '%;width:' + a[2] + '%;height:' + a[3] + '%';
+    const SW = 439, SH = 910;
+
+    // 얹는 조각들(화면 기준 %)
+    const txt = (box, t, fs, o) => '<div class="p09-ov ' + ((o && o.cls !== undefined) ? o.cls : 'is-white') + '" style="' + pct(box) + ';font-size:' + fs + 'px;' + ((o && o.bold) ? 'font-weight:700;' : '') + ((o && o.f && st.font) ? "font-family:'Cafe24 Ssurround';" : '') + ((o && o.color) ? 'color:' + o.color + ';' : '') + '">' + t + '</div>';
+    const draftPic = (box) => '<div class="p09-pic" style="' + pct(box) + ';background-image:url(img/p09_draft_' + (st.draft + 1) + '.png)"></div>';
+    const phrase = (box, fs, o) => txt(box, st.phrase || PHRASES[1], fs, Object.assign({ f: true }, o));
+    const cover = (box, gray) => '<div class="p09-ov" style="' + pct(box) + ';background:' + (gray ? '#f3f4f7' : '#fff') + '"></div>';
+    const ROT = '<svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg>';
+    const MV = '<svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg>';
+    const tobj = (cx, top, t, fs, f) => '<div class="p09-tobj" style="left:' + cx + '%;top:' + top + '%"><div class="p09-tobj-t" style="font-size:' + fs + 'px;' + ((f && st.font) ? "font-family:'Cafe24 Ssurround';" : '') + '">' + t + '</div><div class="p09-tobj-b"><i>' + ROT + '</i><i class="mv">' + MV + '</i></div></div>';
+    const credit = (box, fs, o) => txt(box, CREDIT, fs, o);
+    const POSTER = [4.2, 15.6, 92, 60.4];
+    const POSTER2 = [20.3, 10.9, 59.4, 38.7];
+    const TOOL_TEXT = [36, 90, 16, 7];
+    const INSERT = [3, 14.5, 94, 5.8];
+    const CHECK = [86, 51.5, 12, 6];
+    const MIDTXT = [14.6, 42.6, 71.5, 6];
+    const mini = (x, y, w, h, clipH, dim) => '<div class="p09-clip' + (dim ? ' is-dim' : '') + '" style="left:' + x + '%;top:' + y + '%;width:' + w + '%;height:' + clipH + '%"><div class="p09-mp" style="height:' + (h / clipH * 100) + '%;background-image:url(img/p09_draft_' + (st.draft + 1) + '.png)"><b class="t">' + (st.phrase || PHRASES[1]) + '</b><b class="c">' + CREDIT + '</b></div></div>';
+    const HANDLE = [49, 50.3, 10, 5];
+
+    const STEPS = [
+      { home: true, bubble: 'Canva를 클릭해요.', hot: [[38.75, 44, 22.5, 10.4]] },
+      { img: 8, bubble: '검색창을 클릭해요.', hot: [[3, 21.8, 94, 5.8]] },
+      { img: 9, bubble: '오른쪽의 버튼을 클릭해<br>포스터를 검색해요.', btns: [{ t: '포스터' }] },
+      { img: 10, bubble: '세로형 포스터를 만들어볼까요?<br>포스터(세로형 A2)를 클릭해요.', hot: [[3, 36, 24, 13]] },
+      { img: 11, bubble: '좋아요!<br>이제 AI를 활용해 포스터를<br>디자인해봐요.', next: true },
+      { img: 11, bubble: '아래의 메뉴 탭을<br>오른쪽으로 슬라이드 해요.', swipe: [0, 88.5, 100, 7.2], swipeTo: 12 },
+      { img: 12, bubble: 'Magic Media를 클릭해요.', hot: [[64, 90, 18, 7]] },
+      { img: 13, bubble: '이미지의 비율을 먼저 정해봐요.<br>정사각형 버튼을 클릭해요.', hot: [[30, 37.2, 26, 4.6]] },
+      { img: 14, bubble: '세로형 버튼을 클릭해요.', hot: [[71, 18, 22, 10]] },
+      { img: 15, bubble: '좋아요!<br>세로형 포스터에 맞도록<br>이미지 비율을 설정했어요.', next: true },
+      { img: 15, bubble: '이제 프롬프트를 입력해봐요.<br>입력창을 클릭해요.', hot: [[3, 22.3, 94, 10]] },
+      { img: 17, bubble: '오른쪽 버튼을 클릭해<br>내가 조립한 프롬프트를<br>불러와봐요.', btns: [{ t: '인권 존중 포스터<br>프롬프트 불러오기' }] },
+      { img: 17, bubble: '세 가지 경우 중 하나를 클릭해<br>내가 만들고 싶은 포스터의<br>프롬프트를 입력해요.', cases: true },
+      { img: 18, bubble: '이미지 생성 버튼을<br>클릭해요.', hot: [[3, 43, 94, 4.8]], ov: () => txt([4, 23.6, 72, 5.4], st.c.v, 15, { cls: 'is-white is-left' }) },
+      { img: 19, bubble: '내가 요청한 디자인을<br>AI가 만들어주고 있어요.', loading: true },
+      { img: 21, bubble: '포스터 초안이 완성되었어요!<br>화살표를 클릭해 4장을 모두<br>확인해봐요.', car: 'view' },
+      { img: 21, bubble: '어떤 이미지를 사용할까요?<br>프롬프트와 맞는 초안을 골라<br>이미지를 클릭해봐요.', car: 'pick' },
+      { img: 24, bubble: '해당 이미지로 포스터를<br>제작할까요?', ov: () => draftPic([33.3, 21.8, 33.3, 16]), btns: [{ t: '다시하기', back: 'pick', cls: 'is-small' }, { t: '결정하기' }] },
+      { img: 24, bubble: '오른쪽의 버튼을 눌러<br>이미지의 크기를 알맞게 조정해요.', ov: () => draftPic([33.3, 21.8, 33.3, 16]), btns: [{ t: '크기 조정하기' }] },
+      { img: 25, bubble: '초안 이미지를 선택했어요!<br>이제 포스터에 들어갈 문구를<br>정해봐요.', ov: () => draftPic(POSTER), next: true },
+      { img: 25, bubble: '텍스트를 클릭해요.', ov: () => draftPic(POSTER), hot: [TOOL_TEXT] },
+      { img: 26, bubble: '텍스트 상자 추가<br>버튼을 클릭해요.', hot: [INSERT] },
+      { img: 27, bubble: '포스터와 어울리는 문구를<br>입력해볼까요? 오른쪽 버튼 중<br>원하는 문구를 선택해봐요.', phrases: true, ov: () => st.phrase ? txt([28.5, 28, 43, 4.8], st.phrase, 13, { cls: 'is-white' }) : '' },
+      { img: 28, bubble: '확인 버튼을 눌러<br>문구를 입력해요.', ov: () => draftPic(POSTER2) + phrase([20.8, 27.3, 58, 6], 24, { bold: true }), hot: [CHECK] },
+      { img: 29, bubble: '위치를 포스터의 상단으로<br>옮겨 봐요. 문구를 클릭해요.', ov: () => phrase(MIDTXT, 13), hot: [MIDTXT] },
+      { img: 30, bubble: MOVE + '이동 버튼을 꾹 눌러<br>위쪽으로 드래그 해보세요.', drag: { text: () => st.phrase || PHRASES[1], fs: 24, cx: 46, top: 41.2, end: 18.8, zone: [15.6, 31.6], cover: [4, 35, 92, 22], f: true } },
+      { img: 32, bubble: '좋아요! 이번에는<br>문구의 글씨체를 바꿔봐요.<br>글꼴을 클릭해요.', ov: () => cover([4, 12.3, 92, 4], true) + cover([4, 15.8, 92, 17]) + tobj(46, 18.8, st.phrase || PHRASES[1], 24, true), hot: [[15, 90, 20, 7]] },
+      { img: 33, bubble: UP + '더보기 버튼을 클릭해요.', ov: () => cover([4, 12.3, 92, 4], true) + cover([4, 15.8, 92, 17]) + tobj(46, 18.8, st.phrase || PHRASES[1], 24, true), hot: [[38.5, 81, 11, 6]] },
+      { img: 36, bubble: '포스터를 만들 때는 대부분<br>눈에 잘 띄는 굵은 글씨를 사용해요.<br>추천 폰트를 사용해볼까요?', ov: () => phrase([20, 11.4, 60, 5.6], 14), hot: [[2, 89.3, 96, 4.8]], setFont: true },
+      { img: 38, bubble: '좋아요! 확인 버튼을 클릭해<br>편집을 완료해요.', ov: () => phrase([20, 11.4, 60, 5.6], 14), hot: [[86, 50.5, 12, 5.5]] },
+      { img: 25, bubble: '마지막으로 AI를 활용한 제작물임을<br>밝히는 문구를 추가해야 해요.<br>다시 한번 텍스트를 클릭해요.', ov: () => draftPic(POSTER), hot: [TOOL_TEXT] },
+      { img: 26, bubble: '텍스트 상자 추가<br>버튼을 클릭해요.', hot: [INSERT] },
+      { img: 27, bubble: '오른쪽 버튼을 눌러<br>문구를 입력해요.', ov: () => '', btns: [{ t: 'AI로 만든 그림을<br>사용했어요.', credit: true }] },
+      { img: 28, bubble: '확인 버튼을 클릭해요.', ov: () => draftPic(POSTER2) + credit([21.5, 27.3, 58, 5], 17), hot: [CHECK] },
+      { img: 29, bubble: '위치를 포스터의 하단으로<br>옮겨 봐요. 문구를 클릭해요.', ov: () => credit([13.8, 42.6, 73, 5], 13), hot: [MIDTXT] },
+      { img: 30, bubble: MOVE + '이동 버튼을 꾹 눌러<br>아래쪽으로 드래그 해보세요.', drag: { text: () => CREDIT, fs: 16, cx: 50, top: 44, end: 71.6, zone: [66, 76.3], cover: [4, 35, 92, 22] } },
+      { img: 39, bubble: '좋아요! 확인 버튼을 클릭해<br>포스터 만들기를 완료해요.', ov: () => credit([21.5, 71.6, 57, 4], 12), hot: [[83, 88.5, 15, 6]] },
+      { img: 40, bubble: '인권 존중 포스터를<br>완성했어요!', ov: () => draftPic(POSTER) + phrase([10, 17.5, 80, 6], 22, { cls: '', bold: true, color: '#1b1738' }) + credit([21.5, 71.6, 57, 4], 11, { cls: '', color: '#fff' }), next: true },
+      { img: 40, bubble: '오른쪽 위의 버튼을 클릭해<br>포스터를 다운로드 해봐요.', ov: () => draftPic(POSTER) + phrase([10, 17.5, 80, 6], 22, { cls: '', bold: true, color: '#1b1738' }) + credit([21.5, 71.6, 57, 4], 11, { cls: '', color: '#fff' }), hot: [[87, 3, 12, 6]] },
+      { img: 41, bubble: '아래의 다운로드 버튼을<br>클릭해요.', ov: () => mini(4.2, 15.6, 92, 60.4, 17, true) + mini(33.9, 52.6, 33.3, 21.5, 21.5, false), hot: [[3, 87.2, 94, 4.8]] },
+      { img: 42, bubble: '아래의 다운로드 버튼을<br>클릭해요.', ov: () => mini(4.2, 15.6, 92, 60.4, 14, true), hot: [[3, 83, 94, 4.6]] },
+      { img: 43, bubble: '내가 만든 인권 존중 포스터를<br>저장했어요!', ov: () => mini(4.2, 15.6, 92, 60.4, 28, true) + mini(34.4, 52.6, 31, 20.3, 20.3, false), next: true },
+      { end: true }
+    ];
+
+    let i = 0;
+    let lock = false;
+
+    function go(n) { clearFingers(); i = typeof n === 'number' ? n : i + 1; render(); }
+
+    function fingerTo(el) { setTimeout(() => { if (el && el.isConnected) pointFingerAt(el, { onMain: true, x: 0.6 }); }, 350); }
+
+    function hotButton(box, extra) {
+      const b = document.createElement('button');
+      b.className = 'p09-hot' + (extra ? ' ' + extra : '');
+      b.style.cssText = pct(box);
+      screen.appendChild(b);
+      return b;
+    }
+
+    function setRight(list) {
+      right.innerHTML = '';
+      right.classList.toggle('is-off', !list.length);
+      list.forEach((o) => {
+        const b = document.createElement('button');
+        b.className = 'card-btn ' + (o.cls || '');
+        b.innerHTML = o.t;
+        b.addEventListener('click', o.fn);
+        right.appendChild(b);
+      });
+      return right.firstChild;
+    }
+
+    function drag(step) {
+      const d = step.drag;
+      screen.insertAdjacentHTML('beforeend', cover(d.cover) + tobj(d.cx, d.top, d.text(), d.fs, d.f));
+      const obj = screen.lastElementChild;
+      const mv = obj.querySelector('.mv');
+      let on = false, sx = 0, sy = 0, x0 = d.cx, y0 = d.top;
+      const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+      mv.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        clearFingers();
+        on = true; sx = e.clientX; sy = e.clientY; x0 = parseFloat(obj.style.left); y0 = parseFloat(obj.style.top);
+        obj.style.transition = 'none';
+        mv.setPointerCapture(e.pointerId);
+      });
+      mv.addEventListener('pointermove', (e) => {
+        if (!on) return;
+        const r = screen.getBoundingClientRect();
+        obj.style.left = clamp(x0 + (e.clientX - sx) / r.width * 100, 25, 75) + '%';
+        obj.style.top = clamp(y0 + (e.clientY - sy) / r.height * 100, 14, 70) + '%';
+      });
+      const end = () => {
+        if (!on) return;
+        on = false;
+        const mid = parseFloat(obj.style.top) + 2.5;
+        obj.style.transition = 'left .2s ease,top .2s ease';
+        if (mid >= d.zone[0] && mid <= d.zone[1]) {
+          obj.style.left = d.cx + '%';
+          obj.style.top = d.end + '%';
+          playDrag();
+          setTimeout(() => go(), 700);
+        } else {
+          obj.style.left = d.cx + '%';
+          obj.style.top = d.top + '%';
+          playWrong();
+          fingerTo(mv);
+        }
+      };
+      mv.addEventListener('pointerup', end);
+      mv.addEventListener('pointercancel', end);
+      return mv;
+    }
+
+    function swipe(step) {
+      const box = step.swipe;
+      const band = document.createElement('div');
+      band.className = 'p09-strip';
+      band.style.cssText = pct(box);
+      const mk = (n) => '<i style="background-image:url(img/p09_img' + n + '.png)"></i>';
+      band.innerHTML = '<div class="p09-track">' + mk(step.img) + mk(step.swipeTo) + '</div>';
+      screen.appendChild(band);
+      const track = band.firstChild;
+      const z = hotButton(box, 'is-drag');
+      let sx = 0, on = false, prog = 0;
+      const W = () => screen.getBoundingClientRect().width;
+      const set = (p, anim) => { prog = p; track.style.transition = anim ? 'transform .3s ease' : 'none'; track.style.transform = 'translateX(' + (-p * 50) + '%)'; };
+      z.addEventListener('pointerdown', (e) => { e.preventDefault(); clearFingers(); sx = e.clientX; on = true; z.setPointerCapture(e.pointerId); });
+      z.addEventListener('pointermove', (e) => { if (on) set(Math.min(1, Math.abs(e.clientX - sx) / (W() * 0.6)), false); });
+      const end = () => {
+        if (!on) return;
+        on = false;
+        if (prog > 0.35) { set(1, true); playDrag(); setTimeout(() => go(), 350); }
+        else { set(0, true); playWrong(); fingerTo(z); }
+      };
+      z.addEventListener('pointerup', end);
+      z.addEventListener('pointercancel', end);
+      return z;
+    }
+
+    function carousel(mode) {
+      const car = document.createElement('div');
+      car.className = 'p09-car';
+      screen.appendChild(car);
+      const cards = [0, 1, 2, 3].map((n) => {
+        const c = document.createElement('div');
+        c.className = 'p09-card';
+        c.style.backgroundImage = "url('img/p09_draft_" + (n + 1) + ".png')";
+        car.appendChild(c);
+        return c;
+      });
+      const prev = document.createElement('button');
+      prev.className = 'p09-arrow is-prev';
+      const nxt = document.createElement('button');
+      nxt.className = 'p09-arrow is-next';
+      car.appendChild(prev); car.appendChild(nxt);
+      const seen = new Set([0]);
+      const pickZone = document.createElement('button');
+      pickZone.className = 'p09-pick';
+      if (mode === 'pick') car.appendChild(pickZone);
+
+      function layout() {
+        cards.forEach((c, n) => { c.style.left = (3.9 + (n - st.car) * 77) + '%'; });
+        prev.style.display = st.car > 0 ? '' : 'none';
+        nxt.style.display = st.car < cards.length - 1 ? '' : 'none';
+        if (mode === 'view') show(nextBtn, seen.size === cards.length);
+      }
+      function to(n) {
+        playClick();
+        clearFingers();
+        st.car = n;
+        seen.add(n);
+        layout();
+      }
+      prev.addEventListener('click', () => to(st.car - 1));
+      nxt.addEventListener('click', () => to(st.car + 1));
+      pickZone.addEventListener('click', () => {
+        if (!OKDRAFT[st.car]) {
+          playWrong();
+          $('p09WrongPrompt').textContent = st.c.q;
+          $('p09Wrong').classList.remove('is-off');
+          return;
+        }
+        playCorrect();
+        st.draft = st.car;
+        setTimeout(() => go(), 600);
+      });
+      st.car = 0;
+      if (mode === 'view') nextBtn.onclick = () => go();
+      layout();
+      fingerTo(nxt);
+      return car;
+    }
+
+    function render() {
+      lock = false;
+      const s = STEPS[i];
+      right.classList.add('is-off');
+      right.innerHTML = '';
+      show(nextBtn, false);
+      nextBtn.onclick = null;
+
+      if (s.end) { end(); return; }
+
+      show($('p09Phone'), true);
+      show($('p09Char'), true);
+      bubble.innerHTML = s.bubble;
+      screen.innerHTML = '';
+
+      if (s.home) {
+        screen.innerHTML = '<div class="p09-home"><img src="img/p09_canva_icon.png" alt="Canva"></div>';
+      } else {
+        const base = document.createElement('img');
+        base.className = 'p09-base';
+        base.src = 'img/p09_img' + s.img + '.png';
+        base.alt = '';
+        screen.appendChild(base);
+      }
+      if (s.ov) screen.insertAdjacentHTML('beforeend', s.ov());
+
+      let first = null;
+      (s.hot || []).forEach((box) => {
+        const h = hotButton(box);
+        h.addEventListener('click', () => { playClick(); if (s.setFont) st.font = true; go(); });
+        if (!first) first = h;
+      });
+      if (s.swipe) first = swipe(s);
+      if (s.drag) first = drag(s);
+      if (s.next) {
+        show(nextBtn, true);
+        nextBtn.onclick = () => go();
+        first = null;
+        fingerTo(nextBtn);
+      }
+
+      if (s.btns) {
+        const b = setRight(s.btns.map((o) => ({
+          t: o.t, cls: o.cls,
+          fn: () => {
+            if (o.back) { go(STEPS.findIndex((x) => x.car === o.back)); return; }
+            if (o.credit) st.credit = true;
+            go();
+          }
+        })));
+        fingerTo(right.lastChild);
+      }
+      if (s.cases) {
+        setRight(CASES.map((c) => ({ t: c.t, cls: 'is-small', fn: () => { st.c = c; go(); } })));
+      }
+      if (s.phrases) {
+        const list = PHRASES.map((p) => ({ t: p, fn: () => { st.phrase = p; render(); } }));
+        const btns = setRight(list);
+        if (st.phrase) {
+          Array.from(right.children).forEach((b, n) => b.classList.toggle('is-selected', PHRASES[n] === st.phrase));
+          show(nextBtn, true);
+          nextBtn.onclick = () => go();
+        }
+      }
+      if (s.loading) {
+        const bar = document.createElement('div');
+        bar.className = 'p09-bar';
+        bar.style.cssText = pct([4, 76.8, 92, 2.2]);
+        bar.innerHTML = '<i></i>';
+        screen.appendChild(bar);
+        screen.insertAdjacentHTML('beforeend', txt([2, 57.4, 96, 9], 'Canva가 “<b>' + st.c.v + '</b>”에<br>따라 그래픽을 생성하는 동안 기다려 주세요', 14, { cls: 'is-white is-wrap' }));
+        setTimeout(() => bar.classList.add('is-run'), 50);
+        setTimeout(() => go(), 2100);
+        return;
+      }
+      if (s.car) { carousel(s.car); return; }
+      if (first && !s.btns) fingerTo(first);
+    }
+
+    function end() {
+      show($('p09Phone'), false);
+      show($('p09Char'), false);
+      bubble.innerHTML = '';
+      bubble.classList.add('is-hide');
+      right.classList.add('is-off');
+      $('p09EndTitle').classList.remove('is-hide');
+      const p = $('p09Poster');
+      p.style.backgroundImage = "url('img/p09_draft_" + (st.draft + 1) + ".png')";
+      $('p09PosterTop').textContent = st.phrase || PHRASES[1];
+      p.classList.remove('is-hide');
+      show(nextBtn, true);
+      nextBtn.onclick = () => navigateTo('page10.html');
+    }
+
+    $('p09WrongOk').addEventListener('click', () => $('p09Wrong').classList.add('is-off'));
+    st.c = CASES[1];
+    render();
+  })();
+  </script>
+</body>
+</html>
