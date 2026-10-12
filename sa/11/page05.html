@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>존중을 전하는 문장 만들기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서 12~17p. 인권 존중 포스터 2장의 빈칸(문구 일부를 가린 ?)에 들어갈 말을 보기 3개 중 고르기. 맞으면 빈칸이 사라지며 포스터 원본이 보이고 2초 뒤 다음 문제, 틀리면 카드 흔들림 + 오답 팝업(확인). 두 문제 뒤 활동 종료 팝업.
+           포스터 img/p05_poster_{1,2}.png(기획서 그림, 문구가 그림에 들어 있음). 빈칸 위치는 그림 속 문구 자리 기준 % */
+
+        .p05-ask{position:absolute;left:50%;top:30px;transform:translateX(-50%);height:100px;margin:0;box-sizing:border-box;padding:6px 60px 0;display:flex;align-items:center;justify-content:center;white-space:nowrap;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:50px;box-shadow:0 15px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:60px;color:var(--c-ink);letter-spacing:-0.05em}
+        .p05-poster{position:absolute;left:92px;top:181px;width:1228px;height:690px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:20px;background:var(--c-white) center / cover no-repeat;overflow:hidden}
+        .p05-blank{position:absolute;display:flex;align-items:center;justify-content:center;background:var(--c-white);border-radius:14px;font-family:'Cafe24 Ssurround';font-size:110px;color:var(--c-purple);transition:opacity .4s}
+        .p05-blank.is-off{opacity:0;pointer-events:none}
+
+        .p05-opts{position:absolute;left:1386px;top:204px;width:452px;height:630px;box-sizing:border-box;padding:34px 40px;display:flex;flex-direction:column;justify-content:space-between;background:var(--c-navy);border-radius:15px}
+        .p05-opts.is-locked{pointer-events:none}
+        .p05-opts .card-btn{width:100%;min-width:0;height:130px;padding:6px 10px 0;font-size:48px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="p05-ask">빈칸에 들어갈 알맞은 말을 선택해보세요.</p>
+          <div class="p05-poster" id="p05Poster"><div class="p05-blank" id="p05Blank">?</div></div>
+          <div class="p05-opts" id="p05Opts"></div>
+
+          <div class="avatar-modal is-wrong is-off" id="p05Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small" id="p05Hint"></p>
+                <button class="avatar-popup-next card-btn is-popup js-sfx" id="p05WrongOk" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p05Done">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small">서로 존중하는 말을 골라<br>문장을 완성했어요!</p>
+                <a href="page06.html" class="js-nav-effect avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="존중을 전하는 문장 만들기" data-next="page06.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const QUESTIONS = [
+      { poster: 'p05_poster_1', blank: [56.5, 6, 39, 19], opts: [
+        { t: '키가 커요', hint: '사람마다 키와 힘은 달라요.<br>키나 힘에 관계없이 우리는 모두 소중해요.' },
+        { t: '힘이 세요', hint: '사람마다 키와 힘은 달라요.<br>키나 힘에 관계없이 우리는 모두 소중해요.' },
+        { t: '소중해요', right: true }
+      ] },
+      { poster: 'p05_poster_2', blank: [55, 5.5, 35, 20], opts: [
+        { t: '고쳐봐요', hint: '나와 다르다고 잘못된 것은 아니에요.<br>꼭 고칠 필요는 없어요.' },
+        { t: '존중해요', right: true },
+        { t: '숨겨봐요', hint: '나와 다르다는 이유로 친구의 모습을<br>숨기게 할 필요는 없어요.' }
+      ] }
+    ];
+    const poster = $('p05Poster');
+    const blank = $('p05Blank');
+    const box = $('p05Opts');
+    let index = 0;
+
+    function show() {
+      const q = QUESTIONS[index];
+      poster.style.backgroundImage = "url('img/" + q.poster + ".png')";
+      blank.style.cssText = 'left:' + q.blank[0] + '%;top:' + q.blank[1] + '%;width:' + q.blank[2] + '%;height:' + q.blank[3] + '%';
+      blank.classList.remove('is-off');
+      box.classList.remove('is-locked');
+      box.innerHTML = '';
+      q.opts.forEach((o) => {
+        const b = document.createElement('button');
+        b.className = 'card-btn is-quiz';
+        b.textContent = o.t;
+        b.addEventListener('click', () => pick(b, o));
+        box.appendChild(b);
+      });
+    }
+
+    function pick(b, o) {
+      if (!o.right) {
+        playWrong();
+        b.classList.remove('is-wrong');
+        void b.offsetWidth;
+        b.classList.add('is-wrong');
+        $('p05Hint').innerHTML = o.hint;
+        $('p05Wrong').classList.remove('is-off');
+        return;
+      }
+      playCorrect();
+      b.classList.add('is-selected');
+      box.classList.add('is-locked');
+      blank.classList.add('is-off');
+      setTimeout(() => {
+        if (index === QUESTIONS.length - 1) { $('p05Done').classList.remove('is-off'); return; }
+        index += 1;
+        show();
+      }, 2000);
+    }
+
+    $('p05WrongOk').addEventListener('click', () => $('p05Wrong').classList.add('is-off'));
+    show();
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리가 만드는 행복한 동네</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서 3~9p. 생활 속 장면 2개(도서관 · 운동장)를 차례로: 왼쪽 장면을 보고 오른쪽 해결 방법 카드 3장(순서 무작위) 중 알맞은 것 고르기. 맞으면 정답 효과음 + 정답 삽화로 바뀌고 다음 버튼, 틀리면 흔들림 + 오답 팝업(확인). 두 번째 장면 뒤 활동 종료 팝업.
+           장면 삽화 img/p02_scene_{1,2}.png · 정답 삽화 img/p02_scene_{1,2}_ok.png · 카드 사진 img/p02_card_{장면}_{ramp|sign|wait|play|other|later}.png */
+
+        .p02-scene{position:absolute;left:48px;top:32px;width:1130px;height:878px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:30px;background:var(--c-mist) center / cover no-repeat;overflow:hidden}
+        .p02-bar{position:absolute;left:0;top:0;width:100%;height:118px;margin:0;box-sizing:border-box;padding:12px 20px 0;display:flex;align-items:center;justify-content:center;background:var(--c-white);border-bottom:solid 6px var(--c-purple);
+          font-family:'Cafe24 Ssurround';font-size:56px;color:var(--c-ink);letter-spacing:-0.05em}
+
+        .p02-ask{position:absolute;left:1250px;top:32px;width:620px;margin:0;font-family:'Cafe24 Ssurround';font-size:48px;line-height:1.3;color:var(--c-ink);text-align:center;letter-spacing:-0.05em;word-break:keep-all}
+        .p02-cards{position:absolute;left:1240px;top:168px;width:640px;height:742px;box-sizing:border-box;padding:24px 26px;display:flex;flex-direction:column;gap:20px;background:var(--c-navy);border-radius:15px}
+        .p02-cards.is-off{display:none}
+        .p02-card{flex:1 1 0;min-height:0;box-sizing:border-box;padding:0;border:solid 6px var(--c-white);border-radius:24px;background:var(--c-white);cursor:pointer;overflow:hidden;display:flex;flex-direction:column;transition:border-color .15s}
+        .p02-card:hover{border-color:var(--c-sky)}
+        .p02-card.is-selected{border-color:#ff2fc2}
+        .p02-card.is-wrong{animation:fix-word-shake .3s ease}
+        .p02-card i{flex:1 1 auto;min-height:0;background:var(--c-mist) center / cover no-repeat}
+        .p02-card b{flex:0 0 auto;display:block;padding:12px 10px 4px;font-family:'Cafe24 Ssurround';font-weight:normal;font-size:36px;color:var(--c-purple);text-align:center;letter-spacing:-0.06em;word-break:keep-all}
+        .p02-cards.is-locked{pointer-events:none}
+
+        .p02-ok{position:absolute;left:1240px;top:168px;width:640px;height:742px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:80px}
+        .p02-ok.is-off{display:none}
+        .p02-ok p{margin:0;font-family:'Cafe24 Ssurround';font-size:90px;color:var(--c-purple);letter-spacing:-0.05em}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p02-scene" id="p02Scene"><p class="p02-bar" id="p02Bar"></p></div>
+          <p class="p02-ask">알맞은 해결 방법을 찾아<br>클릭해 보세요.</p>
+          <div class="p02-cards" id="p02Cards"></div>
+          <div class="p02-ok is-off" id="p02Ok">
+            <p>정답이에요!</p>
+            <button class="card-btn is-popup js-sfx" id="p02Next" data-sound="sound/click.mp3">다음</button>
+          </div>
+
+          <div class="avatar-modal is-wrong is-off" id="p02Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">다시 한번 생각해보세요.</p>
+                <p class="avatar-popup-sub" id="p02Hint"></p>
+                <button class="avatar-popup-next card-btn is-popup js-sfx" id="p02WrongOk" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p02Done">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small">우리의 일상생활 속에서<br>서로를 존중하는 방법을 찾았어요!</p>
+                <a href="page03.html" class="js-nav-effect avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="우리가 만드는 행복한 동네" data-next="page03.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const ROUNDS = [
+      { bar: '도서관에 들어갈 수 있도록 도와주세요.', scene: 'p02_scene_1', ok: 'p02_scene_1_ok', hint: '입구에 계단만 있어서<br>휠체어로 들어가기 어려워요.',
+        cards: [
+          { img: 'p02_card_1_ramp', label: '경사로 설치하기', right: true },
+          { img: 'p02_card_1_sign', label: '도서관 입구 안내판 크게 만들기' },
+          { img: 'p02_card_1_wait', label: '친구들이 계단 앞에서 기다려주기' }
+        ] },
+      { bar: '친구와 함께 놀 수 있도록 도와주세요.', scene: 'p02_scene_2', ok: 'p02_scene_2_ok', hint: '친구는 지금 이 놀이에<br>함께 참여하고 싶어 해요.',
+        cards: [
+          { img: 'p02_card_2_play', label: '지금 함께 놀자고 해요.', right: true },
+          { img: 'p02_card_2_other', label: '다른 놀이를 하라고 해요' },
+          { img: 'p02_card_2_later', label: '나중에 둘이 놀자고 해요.' }
+        ] }
+    ];
+    const bg = (name) => "url('img/" + name + ".png')";
+    const scene = $('p02Scene');
+    const cardsBox = $('p02Cards');
+    let round = 0;
+
+    function show() {
+      const r = ROUNDS[round];
+      $('p02Bar').textContent = r.bar;
+      scene.style.backgroundImage = bg(r.scene);
+      $('p02Ok').classList.add('is-off');
+      cardsBox.classList.remove('is-off', 'is-locked');
+      cardsBox.innerHTML = '';
+      shuffleArray(r.cards).forEach((c) => {
+        const card = document.createElement('button');
+        card.className = 'p02-card';
+        card.innerHTML = '<i style="background-image:' + bg(c.img) + '"></i><b>' + c.label + '</b>';
+        card.addEventListener('click', () => pick(card, c));
+        cardsBox.appendChild(card);
+      });
+    }
+
+    function pick(card, c) {
+      const r = ROUNDS[round];
+      if (!c.right) {
+        playWrong();
+        card.classList.remove('is-wrong');
+        void card.offsetWidth;
+        card.classList.add('is-wrong');
+        $('p02Hint').innerHTML = r.hint;
+        $('p02Wrong').classList.remove('is-off');
+        return;
+      }
+      playCorrect();
+      card.classList.add('is-selected');
+      cardsBox.classList.add('is-locked');
+      scene.style.backgroundImage = bg(r.ok);
+      setTimeout(() => {
+        cardsBox.classList.add('is-off');
+        $('p02Ok').classList.remove('is-off');
+      }, 800);
+    }
+
+    $('p02WrongOk').addEventListener('click', () => $('p02Wrong').classList.add('is-off'));
+    $('p02Next').addEventListener('click', () => {
+      if (round === ROUNDS.length - 1) { $('p02Done').classList.remove('is-off'); return; }
+      round += 1;
+      show();
+    });
+    show();
+  })();
+  </script>
+</body>
+</html>

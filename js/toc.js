@@ -155,12 +155,13 @@
             <div class="toc-accordion">
               <button class="toc-accordion-toggle js-sfx" data-sound="sound/click.mp3">11차시</button>
               <div class="toc-accordion-panel">
-                <a href="javascript:;" class="toc-sub-item">01</a>
-                <a href="javascript:;" class="toc-sub-item">02</a>
-                <a href="javascript:;" class="toc-sub-item">03</a>
-                <a href="javascript:;" class="toc-sub-item">04</a>
-                <a href="javascript:;" class="toc-sub-item">05</a>
-                <a href="javascript:;" class="toc-sub-item">06</a>
+                <a href="${BASE}sa/11/page01.html" class="toc-sub-item">1) 우리가 만드는 행복한 동네</a>
+                <a href="${BASE}sa/11/page03.html" class="toc-sub-item">2) 개념 이해 영상</a>
+                <a href="${BASE}sa/11/page04.html" class="toc-sub-item">3) 존중을 전하는 문장 만들기</a>
+                <a href="${BASE}sa/11/page06.html" class="toc-sub-item">4) 인권 존중 포스터 프롬프트</a>
+                <a href="${BASE}sa/11/page08.html" class="toc-sub-item">5) 인권 존중 포스터 제작소</a>
+                <a href="${BASE}sa/11/page10.html" class="toc-sub-item">6) 퀴즈 풀기</a>
+                <a href="${BASE}sa/11/page11.html" class="toc-sub-item">7) 배려와 존중의 갈림길</a>
               </div>
             </div>
 

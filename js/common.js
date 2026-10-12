@@ -2004,6 +2004,7 @@ function initPromptFixQuiz() {
     const choicesBox = panel.querySelector('.prompt-fix-choices');
     const feedback = panel.querySelector('.prompt-fix-feedback');
     let picked = null; // 이 스테이지에서 클릭해 고른 "틀린 단어" 요소
+    let choosing = false;
 
     words.forEach((word) => {
       word.addEventListener('click', () => {
@@ -2033,20 +2034,26 @@ function initPromptFixQuiz() {
           return;
         }
 
-        picked.textContent = btn.textContent;
-        picked.classList.remove('is-picked');
-        picked.classList.add('is-fixed');
-        if (sentence) sentence.classList.remove('is-dimmed');
-        choicesBox.classList.add('hidden');
-
+        if (choosing) return;
+        choosing = true;
+        btn.classList.add('is-selected');
         playSound(correctSound);
-        lightNextStar();
 
-        if (feedback) feedback.classList.remove('hidden');
+        // 누른 모습을 잠깐 보여준 뒤 다음으로
         setTimeout(() => {
-          if (feedback) feedback.classList.add('hidden');
-          advancePanelOrNavigate(panel, quiz.dataset.next);
-        }, 2000);
+          picked.textContent = btn.textContent;
+          picked.classList.remove('is-picked');
+          picked.classList.add('is-fixed');
+          if (sentence) sentence.classList.remove('is-dimmed');
+          choicesBox.classList.add('hidden');
+          lightNextStar();
+
+          if (feedback) feedback.classList.remove('hidden');
+          setTimeout(() => {
+            if (feedback) feedback.classList.add('hidden');
+            advancePanelOrNavigate(panel, quiz.dataset.next);
+          }, 2000);
+        }, 400);
       });
     });
   });
