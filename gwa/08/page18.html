@@ -8,45 +8,38 @@
     <style>
         /* 디자인 없음 - 기획서 39p. 왼쪽 명령 블록(★이 지금 실행할 블록)을 보고 화살표 버튼(또는 키보드 방향키)으로 아로를 한 칸씩 이동: 오른쪽 → 위 → 오른쪽.
            맞으면 걷는 소리와 함께 한 칸 이동하고 별이 다음 블록으로, 틀리면 아로가 고개를 젓듯 흔들리고 현재 블록이 반짝임(문구 변경).
-           도착하면 만세와 컨페티, 문구 두 번 바뀐 뒤 page19로. 이미지 img/p17_aro.png, p17_gift.png, p17_floor.png(page17과 같음), 도착한 아로 img/p18_aro_gift.png */
-        .gm-msg{position:absolute;left:40px;top:30px;width:1840px;min-height:120px;margin:0;box-sizing:border-box;padding:14px 50px 8px;display:flex;align-items:center;justify-content:center;text-align:center;
-          background:var(--c-white);border:solid 5px var(--c-purple);border-radius:60px;box-shadow:0 10px 0 0 var(--c-sky-pale);
-          font-family:'Cafe24 Ssurround';font-size:44px;line-height:1.25;color:var(--c-purple);letter-spacing:-0.05em;word-break:keep-all}
+           도착하면 만세와 컨페티, 문구 두 번 바뀐 뒤 page19로. 이미지 아로 img/p_character_main.png(전신), 선물상자 img/p17_gift.svg(page17과 같음) */
+        .gm-msg{position:absolute;left:50%;top:24px;transform:translateX(-50%);width:max-content;min-width:1124px;max-width:1840px;min-height:108px;margin:0;box-sizing:border-box;padding:12px 60px 6px;display:flex;align-items:center;justify-content:center;text-align:center;
+          background:var(--c-cream);border:solid 6px var(--c-ink);border-radius:80px;box-shadow:0 14px 0 0 var(--c-sky-pale);
+          font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.2;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all}
         .gm-msg.is-hint{color:#d6336c}
 
-        .gm-blocks{position:absolute;left:60px;top:210px;width:640px;--blk-hole:#cddcea}
-        .gm-block{height:130px;display:flex;align-items:center;padding:8px 20px 0 100px;font-size:40px;line-height:1.1;letter-spacing:-0.05em}
-        .gm-block .gm-no{position:absolute;left:24px;top:50%;transform:translateY(-46%);font-size:44px;color:var(--c-violet)}
-        .gm-star{position:absolute;left:-30px;top:50%;width:70px;height:70px;margin-top:-35px;background:url('../../img/common/icon_star_on.png') center / contain no-repeat;opacity:0;transition:opacity .3s}
+        .gm-blocks{position:absolute;left:90px;top:350px;width:640px;--blk-hole:#cddcea}
+        .gm-block{height:130px;display:flex;align-items:center;padding:8px 24px 0 170px;font-size:50px;line-height:1.1;letter-spacing:-0.05em}
+        .gm-block .gm-no{position:absolute;left:44px;top:50%;transform:translateY(-46%);font-size:52px;color:var(--c-violet)}
+        .gm-star{position:absolute;left:182px;top:415px;z-index:20;pointer-events:none;width:56px;height:56px;margin-top:-28px;background:url('../../img/common/icon_star_on.png') center / contain no-repeat;transition:top .5s ease-in-out,opacity .3s}
         .gm-block.is-now{animation:blk-glow 1s ease-in-out infinite}
-        .gm-block.is-now .gm-star{opacity:1}
-        .gm-block.is-done .gm-no:after{content:'';display:inline-block;width:24px;height:24px;margin-left:10px;border-radius:50%;background:#2fbf71;vertical-align:middle}
         .gm-block.is-blink{animation:blk-glow .35s ease-in-out 3}
 
-        .gm-floor{position:absolute;left:780px;top:190px;width:600px;height:600px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:8px;padding:8px;box-sizing:border-box;border-radius:24px;background:#8e9fd0 url('img/p17_floor.png') center / cover no-repeat;box-shadow:0 12px 0 0 #6b7db3}
-        .gm-cell{border-radius:12px;background:#dfe6f7}
-        .gm-cell:nth-child(even){background:#cfd9f0}
-        .gm-item{position:absolute;width:184px;height:184px;background:center / contain no-repeat;display:flex;align-items:flex-end;justify-content:center;font-family:'Cafe24 Ssurround';font-size:34px;color:var(--c-ink);transition:left .6s ease,top .6s ease}
-        .gm-aro{background-image:url('img/p17_aro.png');z-index:3}
+        .gm-floor{position:absolute;left:810px;top:250px;width:600px;height:600px;box-sizing:border-box;padding:16px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:16px;
+          background:#9eadc7;border-radius:28px;box-shadow:0 14px 0 0 #7d8dad}
+        .gm-cell{border-radius:22px;background:#f4f0e4;box-shadow:inset 0 -6px 0 0 #e3dccb}
+        .gm-cell.is-gift{background:#fde8a0;box-shadow:inset 0 -6px 0 0 #f2cf66,0 0 0 6px rgba(255,214,90,.55)}
+        .gm-item{position:absolute;width:164px;height:164px;background:center / contain no-repeat;display:flex;align-items:flex-end;justify-content:center;font-family:'Cafe24 Ssurround';font-size:34px;color:var(--c-ink);transition:left .6s ease,top .6s ease}
+        .gm-aro{background-image:url('img/p_character_main.png');z-index:3}
         .gm-aro.is-no{animation:fix-word-shake .35s ease}
-        .gm-aro.is-cheer{animation:gm-cheer .5s ease-in-out 4;background-image:url('img/p18_aro_gift.png')}
+        .gm-aro.is-cheer{animation:gm-cheer .5s ease-in-out 4}
         @keyframes gm-cheer{0%,100%{transform:translateY(0)}50%{transform:translateY(-30px)}}
-        .gm-gift{background-image:url('img/p17_gift.png');z-index:2;transition:opacity .4s}
+        .gm-gift{background-image:url('img/p17_gift.svg');z-index:2;transition:opacity .4s}
         .gm-gift.is-held{opacity:0}
 
-        .gm-pad{position:absolute;left:1440px;top:340px;width:360px;height:360px}
-        .gm-key{position:absolute;width:116px;height:116px;padding:0;box-sizing:border-box;border:solid 5px var(--c-purple);border-radius:28px;background:var(--c-white);box-shadow:0 8px 0 0 var(--c-sky-pale);cursor:pointer;font-size:0}
-        .gm-key:after{content:'';position:absolute;left:50%;top:50%;border-style:solid}
-        .gm-key[data-dir="up"]{left:122px;top:0}
-        .gm-key[data-dir="left"]{left:0;top:122px}
-        .gm-key[data-dir="right"]{left:244px;top:122px}
-        .gm-key[data-dir="down"]{left:122px;top:244px}
-        .gm-key[data-dir="up"]:after{margin:-22px 0 0 -26px;border-width:0 26px 44px 26px;border-color:transparent transparent var(--c-purple) transparent}
-        .gm-key[data-dir="down"]:after{margin:-22px 0 0 -26px;border-width:44px 26px 0 26px;border-color:var(--c-purple) transparent transparent transparent}
-        .gm-key[data-dir="left"]:after{margin:-26px 0 0 -22px;border-width:26px 44px 26px 0;border-color:transparent var(--c-purple) transparent transparent}
-        .gm-key[data-dir="right"]:after{margin:-26px 0 0 -22px;border-width:26px 0 26px 44px;border-color:transparent transparent transparent var(--c-purple)}
-        .gm-key.is-press{animation:gm-press .25s ease}
-        @keyframes gm-press{0%{transform:scale(1)}50%{transform:scale(.88);background:#ece6ff}100%{transform:scale(1)}}
+        .gm-pad{position:absolute;left:1426px;top:350px;width:404px;height:399px}
+        .gm-key{position:absolute;width:124px;height:119px;padding:0;border:0;background:none;cursor:pointer}
+        .gm-key img{display:block;width:100%;height:100%}
+        .gm-key[data-dir="up"]{left:140px;top:0}
+        .gm-key[data-dir="left"]{left:0;top:140px}
+        .gm-key[data-dir="right"]{left:280px;top:140px}
+        .gm-key[data-dir="down"]{left:140px;top:280px}
     </style>
 </head>
 <body>
@@ -57,25 +50,26 @@
         <main class="bg-default" id="gmMain">
           <p class="gm-msg" id="gmMsg"></p>
 
+          <i class="gm-star" id="gmStar"></i>
           <div class="gm-blocks blk-col" id="gmBlocks">
-            <div class="gm-block blk" data-dir="right"><i class="gm-star"></i><span class="gm-no">1</span>오른쪽으로 1칸 가기</div>
-            <div class="gm-block blk" data-dir="up"><i class="gm-star"></i><span class="gm-no">2</span>위로 1칸 가기</div>
-            <div class="gm-block blk" data-dir="right"><i class="gm-star"></i><span class="gm-no">3</span>오른쪽으로 1칸 가기</div>
+            <div class="gm-block blk" data-dir="right"><span class="gm-no">1</span>오른쪽으로 1칸 가기</div>
+            <div class="gm-block blk" data-dir="up"><span class="gm-no">2</span>위로 1칸 가기</div>
+            <div class="gm-block blk" data-dir="right"><span class="gm-no">3</span>오른쪽으로 1칸 가기</div>
           </div>
 
           <div class="gm-floor">
             <div class="gm-cell"></div><div class="gm-cell"></div><div class="gm-cell"></div>
-            <div class="gm-cell"></div><div class="gm-cell"></div><div class="gm-cell"></div>
+            <div class="gm-cell"></div><div class="gm-cell"></div><div class="gm-cell is-gift"></div>
             <div class="gm-cell"></div><div class="gm-cell"></div><div class="gm-cell"></div>
           </div>
-          <div class="gm-item gm-gift" id="gmGift">♥</div>
-          <div class="gm-item gm-aro" id="gmAro">아로</div>
+          <div class="gm-item gm-gift" id="gmGift"></div>
+          <div class="gm-item gm-aro" id="gmAro"></div>
 
           <div class="gm-pad" id="gmPad">
-            <button class="gm-key" data-dir="up" aria-label="위"></button>
-            <button class="gm-key" data-dir="left" aria-label="왼쪽"></button>
-            <button class="gm-key" data-dir="right" aria-label="오른쪽"></button>
-            <button class="gm-key" data-dir="down" aria-label="아래"></button>
+            <button class="gm-key" data-dir="up" aria-label="위"><img class="js-img-swap" src="../../img/common/btn_arrow_up.png" data-src-alt="../../img/common/btn_arrow_up_on.png" data-src-over="../../img/common/btn_arrow_up_over.png" data-swap-reset="200" alt=""></button>
+            <button class="gm-key" data-dir="left" aria-label="왼쪽"><img class="js-img-swap" src="../../img/common/btn_arrow_left.png" data-src-alt="../../img/common/btn_arrow_left_on.png" data-src-over="../../img/common/btn_arrow_left_over.png" data-swap-reset="200" alt=""></button>
+            <button class="gm-key" data-dir="right" aria-label="오른쪽"><img class="js-img-swap" src="../../img/common/btn_arrow_right.png" data-src-alt="../../img/common/btn_arrow_right_on.png" data-src-over="../../img/common/btn_arrow_right_over.png" data-swap-reset="200" alt=""></button>
+            <button class="gm-key" data-dir="down" aria-label="아래"><img class="js-img-swap" src="../../img/common/btn_arrow_down.png" data-src-alt="../../img/common/btn_arrow_down_on.png" data-src-over="../../img/common/btn_arrow_down_over.png" data-swap-reset="200" alt=""></button>
           </div>
         </main>
       </div>
@@ -88,10 +82,12 @@
   <script src="../../js/common.js"></script>
   <script>
   (function () {
-    const GRID_LEFT = 780 + 8;
-    const GRID_TOP = 190 + 8;
-    const CELL = (600 - 16 - 16) / 3 + 8;
-    const cellPos = (c, r) => [GRID_LEFT + c * CELL + (CELL - 8 - 184) / 2, GRID_TOP + r * CELL + (CELL - 8 - 184) / 2];
+    const GRID_LEFT = 810 + 16;
+    const GRID_TOP = 250 + 16;
+    const CELL_W = (600 - 32 - 32) / 3;
+    const ITEM = 164;
+    const CELL = CELL_W + 16;
+    const cellPos = (c, r) => [GRID_LEFT + c * CELL + (CELL_W - ITEM) / 2, GRID_TOP + r * CELL + (CELL_W - ITEM) / 2];
     const DIR = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
     const aro = $('gmAro');
     const gift = $('gmGift');
@@ -104,14 +100,18 @@
     place(aro, 0, 2);
     place(gift, 2, 1);
     const msg = (t, hint) => { $('gmMsg').innerHTML = t; $('gmMsg').classList.toggle('is-hint', !!hint); };
-    const mark = () => blocks.forEach((b, i) => b.classList.toggle('is-now', i === step));
+    const star = $('gmStar');
+    const mark = () => {
+      blocks.forEach((b, i) => b.classList.toggle('is-now', i === step));
+      const cur = blocks[step];
+      star.style.opacity = cur ? 1 : 0;
+      if (cur) star.style.top = ($('gmBlocks').offsetTop + cur.offsetTop + cur.offsetHeight / 2) + 'px';
+    };
     mark();
     msg('왼쪽에 있는 블록이 아로가 따라야 할 알고리즘이에요.<br>노란 별(★)이 붙은 블록부터 하나씩 차례대로 따라가봐요.');
 
     function press(dir) {
       if (busy || step >= blocks.length) return;
-      const key = document.querySelector('.gm-key[data-dir="' + dir + '"]');
-      key.classList.remove('is-press'); void key.offsetWidth; key.classList.add('is-press');
       if (dir !== blocks[step].dataset.dir) {
         playWrong();
         aro.classList.remove('is-no'); void aro.offsetWidth; aro.classList.add('is-no');
@@ -156,7 +156,13 @@
     document.querySelectorAll('.gm-key').forEach((k) => k.addEventListener('click', () => press(k.dataset.dir)));
     document.addEventListener('keydown', (e) => {
       const m = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' }[e.key];
-      if (m) { e.preventDefault(); press(m); }
+      if (m) {
+        e.preventDefault();
+        const im = document.querySelector('.gm-key[data-dir="' + m + '"] img');
+        im.src = im.dataset.srcAlt;
+        setTimeout(() => { im.src = im.dataset.originalSrc; }, 200);
+        press(m);
+      }
     });
   })();
   </script>
