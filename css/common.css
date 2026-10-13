@@ -12,6 +12,13 @@
   font-style: medium;
   font-display: swap;
 }
+@font-face {
+  font-family: 'Pretendard';
+  src: url('../fonts/Pretendard-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
 /* 300(Light), 600(SemiBold), 700(Bold), 800(ExtraBold)도 같은 방식으로 추가해뒀습니다 */
 :root{
   --c-ink:#1b1738;
@@ -998,6 +1005,10 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 .avatar-popup-body.is-finish{margin-left:-264px;padding-left:60px}
 .avatar-popup-body.is-finish .avatar-popup-text{text-align:center}
 .avatar-popup-body.is-finish .avatar-popup-sub{text-align:left;margin-left:204px}
+/* 제목이 길어 캐릭터와 겹칠 때: 제목도 캐릭터 오른쪽 영역 안에서 시작 */
+.avatar-popup-body.is-finish.is-side{margin-left:0;padding-left:0}
+.avatar-popup-body.is-finish.is-side .avatar-popup-sub{margin-left:0}
+.avatar-popup-body.is-finish.is-side .avatar-popup-text{text-align:left}
 .avatar-popup-next{align-self:flex-end}
 .avatar-popup-next img{display:block}
 .avatar-popup-sub{margin:0;font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.3;color:var(--c-purple);text-align:center;letter-spacing:-0.04em}
@@ -1099,7 +1110,7 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 .gauge.is-thin.is-vertical:before{left:-18px;top:auto;bottom:-34px}
 .gauge.is-thin.is-vertical .gauge-fill:after{left:8px;top:24px;bottom:16px;width:8px;height:auto}
 
-.end-title{position:absolute;left:750px;top:65px;width:1100px;margin:0;text-align:left;font-family:'Cafe24 Ssurround';font-size:100px;background:linear-gradient(180deg,#02185c,#0362d7);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-0.06em}
+.end-title{position:absolute;left:750px;top:65px;width:930px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:100px;background:linear-gradient(180deg,#02185c,#0362d7);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-0.06em}
 .end-panel{position:absolute;left:750px;top:185px;width:930px;min-height:540px;background:var(--c-cream);border:solid 15px var(--c-navy);border-radius:30px;box-shadow:0 0 0 5px var(--c-white);box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;padding:30px}
 .end-desc{margin:0;font-family:'Cafe24 Ssurround';font-size:70px;line-height:1.4;color:#3b1e87;text-align:center;letter-spacing:-0.04em;word-break:keep-all}
 /* end-panel 안 desc 앞에 오는 강조 문구 */
@@ -1164,8 +1175,44 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
   font-family:'Cafe24 Ssurround';font-size:48px;text-align:center;line-height:1.3;color:var(--c-ink);letter-spacing:-0.04em}
 /* 퀴즈 화면 배경(디자인 통이미지와 같은 위→아래 그라데이션)과 선택지 크기(디자인 선택지 이미지 484×155, 그림자 포함) */
 .quiz-stage, .bg-default{background:linear-gradient(180deg,#d9ddeb 0%,#cddcea 50%,#c2d9e9 100%)}
-/* 폰 틀(어두운 테두리 + 회색 윤곽): left/top/width/height는 페이지 CSS에서, 틀 두께가 다르면 padding·border-radius만 덮어씀 */
-.phone-frame{position:absolute;box-sizing:border-box;padding:18px;background:var(--c-ink);border-radius:70px;box-shadow:0 0 0 6px #c9c4bb}
+/* 폰 틀 기본(얇은 틀): 테두리 8px · 모서리 40px · 바깥 회색 윤곽 4px. left/top/width/height는 페이지 CSS에서.
+   div:where()로 감싸 페이지 CSS(padding·border-radius 덮어쓰기)가 항상 이기고, 공용 초기화(div{padding:0})와는 순서로 이김.
+   .is-thick은 옛 굵은 틀(안쪽 여백 18px · 모서리 70px · 회색 윤곽 6px) — 기존 페이지용, 새 페이지는 쓰지 않음(차례로 기본 틀로 옮기는 중) */
+div:where(.phone-frame){position:absolute;box-sizing:border-box;padding:0;border:solid 8px var(--c-ink);border-radius:40px;background:var(--c-ink);box-shadow:0 0 0 4px #c9c4bb;overflow:hidden}
+div:where(.phone-frame.is-thick){padding:18px;border:0;border-radius:70px;box-shadow:0 0 0 6px #c9c4bb;overflow:visible}
+/* 카메라 홀: .phone-frame에 .has-cam을 붙이면 화면 위쪽 가운데에 지름 22px 점(기본 틀·is-thick 모두). 위치가 다르면 --cam-top */
+.phone-frame.has-cam:after{content:'';position:absolute;left:50%;top:var(--cam-top,9px);width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#3a3b45;z-index:8}
+.phone-frame.is-thick.has-cam{--cam-top:27px}
+/* 앱 첫 화면(앱 아이콘 하나만 가운데): 폰 화면 안에 .app-home(배경은 페이지에서) > .phone-status + .app-icon + .phone-nav.
+   .app-icon은 <button class="app-icon"><i><img></i>앱이름</button> — 아이콘 110px · 모서리 28px · 이름 20px(밝은 배경은 .is-dark). 카메라 홀은 .app-home 위에 자동(이후 단계 화면에도 홀만 넣으려면 폰 틀에 .cam-hole, .phone-frame은 .has-cam). 손가락은 pointFingerAt(el,{dx:15,dy:-37}) */
+.app-home{position:absolute;inset:0;overflow:hidden;z-index:2}
+.app-home:after{content:'';position:absolute;left:50%;top:9px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#3a3b45;z-index:8}
+.cam-hole:after{content:'';position:absolute;left:50%;top:9px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#3a3b45;z-index:50;pointer-events:none}
+.app-home .app-icon{position:absolute;left:50%;top:44%;width:110px;margin-left:-55px;padding:0;border:0;background:none;cursor:pointer;display:block;text-align:center;font-family:'Pretendard';font-size:20px;font-weight:600;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.3);z-index:3}
+.app-home .app-icon.is-dark{color:#111;text-shadow:none}
+.app-home .app-icon i{display:flex;align-items:center;justify-content:center;width:110px;height:110px;margin-bottom:8px;border-radius:28px;box-shadow:0 6px 14px rgba(0,0,0,.2);overflow:hidden;transition:transform .15s}
+.app-home .app-icon i img{display:block;width:100%;height:100%;object-fit:cover}
+.app-home .app-icon:hover i{transform:scale(1.06)}
+/* 눌러서 넘어가는 아이콘이 아닐 때(안내용): 올려도 커지지 않고 손모양도 안 바뀜 */
+.app-home .app-icon.is-static{cursor:default}
+.app-home .app-icon.is-static:hover i{transform:none}
+/* 폰 화면 위·아래 기본 표시줄(화면 폭 약 420px 기준, sa/11:09에서 쓰는 모양): 위는 시간 + 음소거·와이파이·신호·배터리, 아래는 버튼 3개(최근앱 | 홈 | 뒤로).
+   마크업: <div class="phone-status"><span>13:13</span><span class="sys">아이콘svg들<em>68</em></span></div> · <div class="phone-nav"><i></i><b></b><u></u></div>
+   밝은 배경 위에서는 .phone-status.is-dark(글자 검정), 어두운 화면에서는 .phone-nav.is-dark(검정 바탕 + 밝은 버튼) */
+.phone-status{position:absolute;left:0;top:0;width:100%;height:40px;display:flex;align-items:center;justify-content:space-between;padding:0 14px 0 18px;box-sizing:border-box;font-family:'Pretendard';font-size:16px;font-weight:500;color:#fff;z-index:6}
+.phone-status.is-dark{color:#111}
+.phone-status.is-dark em{background:#333;color:#fff}
+.phone-status .sys{display:flex;align-items:center;gap:6px;font-size:14px}
+.phone-status svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.phone-status em{font-style:normal;font-weight:700;padding:0 7px;border-radius:10px;background:rgba(255,255,255,.88);color:#333;font-size:13px}
+.phone-nav{position:absolute;left:0;bottom:0;width:100%;height:46px;background:#fff;z-index:6}
+.phone-nav i{position:absolute;left:21%;top:14px;width:19px;height:18px;background:repeating-linear-gradient(90deg,#666 0 2px,transparent 2px 8.5px)}
+.phone-nav b{position:absolute;left:50%;top:14px;width:18px;height:18px;margin-left:-9px;box-sizing:border-box;border:solid 2px #666;border-radius:6px}
+.phone-nav.is-dark{background:#111}
+.phone-nav.is-dark i{background:repeating-linear-gradient(90deg,#ddd 0 2px,transparent 2px 8.5px)}
+.phone-nav.is-dark b{border-color:#ddd}
+.phone-nav.is-dark u{border-color:#ddd}
+.phone-nav u{position:absolute;left:77%;top:18px;width:10px;height:10px;border:solid #666;border-width:0 0 2px 2px;transform:rotate(45deg)}
 
 /* 지그소 조건 퍼즐(initJigsawPuzzle): 퍼즐판·조각 트레이. 말풍선·캐릭터·다음 버튼 위치만 페이지 CSS에서 */
 .jig-board{position:absolute;left:670px;top:16px;width:620px;height:620px;border-radius:30px;background:var(--c-white);box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}

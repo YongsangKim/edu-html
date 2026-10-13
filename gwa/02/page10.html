@@ -19,8 +19,6 @@
         .gp[data-screen="home"] .gp-home, .gp[data-screen="chat"] .gp-chat{display:block}
 
         .gp-home{background:linear-gradient(160deg,#a6e1f5,#b7b0f7 55%,#f5c1df)}
-        .gp-app{position:absolute;left:50%;top:44%;width:110px;margin-left:-55px;padding:0;border:0;background:none;cursor:pointer;font-size:20px;font-weight:600;color:var(--c-white) !important;text-shadow:0 1px 3px rgba(0,0,0,.3)}
-        .gp-app i{display:flex;align-items:center;justify-content:center;width:110px;height:110px;margin-bottom:8px;border-radius:28px;background:#000;box-shadow:0 6px 14px rgba(0,0,0,.2)}
 
         .gp-head{position:absolute;left:0;top:0;width:100%;height:84px;display:flex;align-items:center;gap:14px;padding:0 18px;box-sizing:border-box;z-index:3;background:linear-gradient(var(--c-white) 70%,rgba(255,255,255,0))}
         .gp-round{width:52px;height:52px;border-radius:50%;background:var(--c-white);box-shadow:0 2px 10px rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center}
@@ -104,9 +102,11 @@
           <p class="guide-bubble" id="p10Bubble"></p>
           <div class="guide-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
 
-          <div class="gp" id="p10Phone" data-screen="home">
-            <div class="gp-scr gp-home">
-              <button type="button" class="gp-app" data-hit="app"><i><img src="img/p10_icon_chatgpt.svg" alt="" width="64" height="64"></i>ChatGPT</button>
+          <div class="gp cam-hole" id="p10Phone" data-screen="home">
+            <div class="gp-scr gp-home app-home">
+              <div class="phone-status"></div>
+              <button type="button" class="app-icon" data-hit="app"><i style="background:#000"><img src="img/p10_icon_chatgpt.svg" alt="" width="64" height="64" style="width:64px;height:64px"></i>ChatGPT</button>
+              <div class="phone-nav"></div>
             </div>
 
             <div class="gp-scr gp-chat">
@@ -234,7 +234,7 @@
       const el = phone.querySelector('[data-hit="' + hit + '"]');
       if (el) setTimeout(() => {
         if (!el.classList.contains('is-target')) return;
-        pointFingerAt(el, { onMain: true });
+        pointFingerAt(el, hit === 'app' ? { onMain: true, dx: 15, dy: -37 } : { onMain: true });
         document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.top = Math.min(parseFloat(f.style.top), 850) + 'px'; });
       }, 50);
     }

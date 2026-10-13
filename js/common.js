@@ -3080,3 +3080,16 @@ initConfirmQuiz();
 initRevealStagger();
 initParticleEffect();
 initIdlePreload();
+/* 폰 화면 위·아래 표시줄 자동 채우기: 비어 있는 <div class="phone-status"></div> / <div class="phone-nav"></div>에
+   시간·상태 아이콘·배터리(data-time 기본 13:13, data-bat 기본 64), 하단 버튼 3개를 넣음. 스타일은 css/common.css의 .phone-status·.phone-nav */
+function initPhoneBars() {
+  const svg = (d) => '<svg viewBox="0 0 24 24">' + d + '</svg>';
+  const icons = svg('<path d="M4 9v6h4l5 4V5L8 9zM17 9l4 6M21 9l-4 6"/>') +
+    svg('<path d="M2 9a15 15 0 0120 0M5 12.5a10 10 0 0114 0M8.5 16a5 5 0 017 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/>') +
+    svg('<path d="M4 20V14M9 20V10M14 20V6M19 20V3"/>');
+  document.querySelectorAll('.phone-status:empty').forEach((el) => {
+    el.innerHTML = '<span>' + (el.dataset.time || '13:13') + '</span><span class="sys">' + icons + '<em>' + (el.dataset.bat || '64') + '</em></span>';
+  });
+  document.querySelectorAll('.phone-nav:empty').forEach((el) => { el.innerHTML = '<i></i><b></b><u></u>'; });
+}
+initPhoneBars();
