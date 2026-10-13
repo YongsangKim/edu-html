@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI 가이드 - 리본 제목</title>
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="guide.css">
+    <style>
+        /* 이 페이지 안에서만 쓰는 복사본(실제 페이지 CSS 그대로 옮겨 모양 비교용). 공용 클래스로 합칠 때 기준이 됨 */
+        .rb-row{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+        .rb-item{box-sizing:border-box;padding:16px;background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+        .rb-item .g-meta{margin:12px 0 0}
+        .rb-stage{position:relative;overflow:hidden;border-radius:10px;background:#c2d9e9}
+        .rb-scale{position:absolute;left:0;top:0;transform-origin:0 0}
+
+        /* A. 겹 리본(sa/02:06 .p06-ribbon) — 하늘색 판 + 흰 테두리 + 접힌 꼬리, 꼬리는 바깥으로 100px */
+        .rb-a-frame{position:absolute;left:100px;top:100px;width:995px;height:340px;box-sizing:border-box;isolation:isolate;background:var(--c-sky);border:solid 5px var(--c-ink);border-radius:14px}
+        .rb-a{position:absolute;left:116px;top:-32px;width:752px;height:105px;margin:0;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;background:#dff6ff;border:solid 5px #fff;box-shadow:0 32px 0 -16px rgba(54,98,170,.2);
+          font-family:'Cafe24 Ssurround';font-size:70px;color:var(--c-ink);letter-spacing:-0.05em;white-space:nowrap}
+        .rb-a:before,.rb-a:after{content:'';position:absolute;top:47px;width:150px;height:102px;z-index:-1;background-repeat:no-repeat}
+        .rb-a:before{left:-100px;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,36% 50%);background:linear-gradient(to bottom left,#5b84d6 50%,transparent 50%) 100% 55px / 55px 47px no-repeat,#719fdc}
+        .rb-a:after{right:-100px;clip-path:polygon(0 0,100% 0,64% 50%,100% 100%,0 100%);background:linear-gradient(to bottom right,#5b84d6 50%,transparent 50%) 0 55px / 55px 47px no-repeat,#719fdc}
+
+        /* B. 카드 위 겹 리본(sa/02:14 .p14-article-head + .p14-ribbon) — A와 같은 모양, 카드 폭 안쪽(꼬리 -16px) */
+        .rb-b-card{position:absolute;left:100px;top:100px;width:738px;height:320px;box-sizing:border-box;background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:36px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .rb-b{height:121px;width:600px;margin:-50px auto 40px;position:relative;display:flex;align-items:center;justify-content:center;padding:0;font-family:'Cafe24 Ssurround';font-size:44px;line-height:1.15;color:#053c85;letter-spacing:-0.08em;text-align:center;word-break:keep-all;background:#dff6ff;border:solid 5px #fff;box-shadow:0 32px 0 -16px rgba(54,98,170,.2)}
+        .rb-b:before,.rb-b:after{content:'';position:absolute;top:15px;width:130px;height:102px;z-index:-1;background-repeat:no-repeat}
+        .rb-b:before{left:-16px;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,36% 50%);background:linear-gradient(to bottom left,#5b84d6 50%,transparent 50%) 100% 55px / 55px 47px no-repeat,#719fdc}
+        .rb-b:after{right:-16px;clip-path:polygon(0 0,100% 0,64% 50%,100% 100%,0 100%);background:linear-gradient(to bottom right,#5b84d6 50%,transparent 50%) 0 55px / 55px 47px no-repeat,#719fdc}
+
+        /* C. 남색 리본(sa/04:03 .p03-ribbon) — 한 장짜리 판을 clip-path로 오려 양끝에 홈, 흰 글자 */
+        .rb-c{position:absolute;left:50%;top:60px;width:870px;height:130px;transform:translateX(-50%);margin:0;display:flex;align-items:center;justify-content:center;background:var(--c-navy);
+          clip-path:polygon(0 0,100% 0,95% 50%,100% 100%,0 100%,5% 50%);font-family:'Cafe24 Ssurround';font-size:56px;color:var(--c-white);letter-spacing:-0.04em}
+    </style>
+</head>
+<body>
+  <div class="g-wrap">
+    <h1>리본 제목</h1>
+    <p class="g-note">화면 제목 판(리본)이 페이지마다 따로 그려져 있어서 모양을 모아 비교하는 가이드. 지금 CSS로 그린 리본은 3종이며, 같은 모양(A·B)은 폭·꼬리 위치만 다르고 색·테두리·접힘 무늬가 같습니다.
+      아래 그림은 각 페이지 CSS를 그대로 옮긴 복사본(공용 클래스 아님). 공용화할 때 기준으로 삼으세요.</p>
+    <ul class="g-toc"></ul>
+
+    <h2>A. 겹 리본 <code>.p06-ribbon</code> — sa/02:06</h2>
+    <div class="rb-row">
+      <div class="rb-item" style="width:640px">
+        <div class="rb-stage" style="width:608px;height:300px"><div class="rb-scale" style="transform:scale(.5);width:1215px;height:600px">
+          <div class="rb-a-frame"><p class="rb-a">연필 기사 제목</p></div>
+        </div></div>
+        <p class="g-meta"><b>sa/02:06 (신문 틀 위)</b> · 752×105px · 글자 70px · 꼬리 150px가 판 바깥으로 100px 나옴<br>
+          판 <code>#dff6ff</code> + 흰 테두리 5px + 아래 그림자(<code>0 32px 0 -16px</code>) · 꼬리 <code>#719fdc</code>, 접힌 삼각 <code>#5b84d6</code> · 완성 화면은 <code>left:206px;top:-52px</code></p>
+      </div>
+    </div>
+
+    <h2>B. 카드 위 겹 리본 <code>.p14-ribbon</code> — sa/02:14</h2>
+    <div class="rb-row">
+      <div class="rb-item" style="width:640px">
+        <div class="rb-stage" style="width:608px;height:300px"><div class="rb-scale" style="transform:scale(.62);width:980px;height:480px">
+          <div class="rb-b-card"><div class="rb-b">김모 군, 줄넘기 대회에서 수상</div></div>
+        </div></div>
+        <p class="g-meta"><b>sa/02:14 (기사 카드 위)</b> · 600×121px · 글자 44px · 꼬리 130px가 판 안쪽 -16px<br>
+          A와 같은 색·테두리·그림자. 카드 위쪽에 -50px 걸쳐 놓고, 글자색 <code>#053c85</code>, 줄바꿈은 <code>word-break:keep-all</code></p>
+      </div>
+    </div>
+
+    <h2>C. 남색 리본 <code>.p03-ribbon</code> — sa/04:03</h2>
+    <div class="rb-row">
+      <div class="rb-item" style="width:640px">
+        <div class="rb-stage" style="width:608px;height:190px"><div class="rb-scale" style="transform:scale(.62);width:980px;height:300px">
+          <p class="rb-c">마음 표현 준비 완료 배지 획득!</p>
+        </div></div>
+        <p class="g-meta"><b>sa/04:03 (큰 패널 위)</b> · 870×130px · 글자 56px 흰색 · 판 <code>var(--c-navy)</code><br>
+          한 장짜리 판을 <code>clip-path:polygon(0 0,100% 0,95% 50%,100% 100%,0 100%,5% 50%)</code>로 오려 양끝에 홈을 만든 단순 리본. 그림자·테두리 없음</p>
+      </div>
+    </div>
+
+    <table class="g-diff" style="margin-top:30px;width:100%;border-collapse:collapse;font-size:15px;background:#fff">
+      <tr><th>종류</th><th>쓰이는 곳</th><th>판 색</th><th>테두리 · 그림자</th><th>꼬리 방식</th><th>크기</th><th>글자</th></tr>
+      <tr><td>A 겹 리본</td><td>sa/02:06 (신문 틀·완성 화면)</td><td>#dff6ff</td><td>흰 5px · 아래 그림자</td><td>:before/:after, 바깥 -100px, 접힘 무늬</td><td>752×105</td><td>70px #1b1738</td></tr>
+      <tr><td>B 카드 위 겹 리본</td><td>sa/02:14 (기사 제목)</td><td>#dff6ff</td><td>흰 5px · 아래 그림자</td><td>:before/:after, 안쪽 -16px, 접힘 무늬</td><td>600×121</td><td>44px #053c85</td></tr>
+      <tr><td>C 남색 리본</td><td>sa/04:03 (배지 획득)</td><td>var(--c-navy)</td><td>없음</td><td>clip-path 홈 (양끝 5%)</td><td>870×130</td><td>56px 흰색</td></tr>
+    </table>
+
+    <p class="g-note" style="margin-top:24px">그 밖의 리본 제목(<code>gwa/02:05</code>, <code>gwa/03:12~13</code>, <code>sa/01:06</code>, <code>sa/08:12</code>)은 통이미지 배경 안에 들어 있거나 도입 화면 이미지라 CSS로 그린 리본이 아닙니다. 공용화하면 이 이미지들도 CSS 리본으로 바꿀 수 있습니다.</p>
+  </div>
+  <script src="guide.js"></script>
+</body>
+</html>
