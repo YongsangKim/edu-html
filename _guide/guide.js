@@ -9,6 +9,7 @@
     { file: 'characters.html', label: '안내 캐릭터·말풍선' },
     { file: 'drag.html', label: '끌어 놓기' },
     { file: 'phone.html', label: '폰 화면 틀' },
+    { file: 'ribbon.html', label: '리본 제목' },
     { file: 'intro.html', label: '도입·마무리 화면' },
     { file: 'quiz.html', label: '퀴즈 풀기' }
   ];
