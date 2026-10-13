@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="../../css/common.css">
     <style>
         /* 디자인 없음 - 기획서 42~43p. TV 목업은 img/p11_tv.png, 화면은 page08 뉴스데스크 이미지 재사용.
-           재생하기: 파란 그라데이션 자막바 안에서 기사문이 오른쪽→왼쪽으로 흐르고 고른 음성(sound/p11_tts_{minjun|yuna}.mp3)이 같이 재생.
+           재생하기: 파란 그라데이션 자막바 안에서 기사문이 오른쪽→왼쪽으로 흐르고 음성 sound/p11_tts.m4a(고른 음성과 상관없이 한 개)가 같이 재생.
            자막 속도는 음성 길이에 맞추고, 음성이 없으면 8초 */
 
         .p11-title{position:absolute;left:0;top:30px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:80px;letter-spacing:-0.06em;
@@ -61,12 +61,12 @@
     const read = (k) => { try { return sessionStorage.getItem(k); } catch (e) { return null; } };
     const article = read('sa02_article') || '오늘의 주인공은 매일 꾸준히 노력하여 스스로 세운 목표를 이뤘다고 합니다. 매우 자랑스러운 기분이라고 전해왔습니다.';
     const desk = read('sa02_desk') || 'a1';
-    const voice = read('sa02_voice') || 'yuna';
 
     const screen = document.getElementById('p11Screen');
     const caption = document.getElementById('p11CaptionText');
     const playBtn = document.getElementById('p11PlayBtn');
-    const tts = new Audio('sound/p11_tts_' + voice + '.mp3');
+    const tts = new Audio('sound/p11_tts.m4a');
+    tts.preload = 'auto';
 
     screen.style.background = "url('img/p08_sticker_" + desk.charAt(1) + ".png') 0 36% / 66% auto no-repeat, url('img/p08_tpl_" + desk.charAt(0) + ".png') center / cover no-repeat";
     caption.textContent = article;
