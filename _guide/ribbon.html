@@ -12,6 +12,7 @@
         .rb-item{box-sizing:border-box;padding:16px;background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
         .rb-item .g-meta{margin:12px 0 0}
         .rb-stage{position:relative;overflow:hidden;border-radius:10px;background:#c2d9e9}
+        .rb-stage .ribbon{box-sizing:border-box}
         .rb-scale{position:absolute;left:0;top:0;transform-origin:0 0}
 
         /* A. 겹 리본(sa/02:06 .p06-ribbon) — 하늘색 판 + 흰 테두리 + 접힌 꼬리, 꼬리는 바깥으로 100px */
@@ -23,11 +24,7 @@
         .rb-a:after{right:-100px;clip-path:polygon(0 0,100% 0,64% 50%,100% 100%,0 100%);background:linear-gradient(to bottom right,#5b84d6 50%,transparent 50%) 0 55px / 55px 47px no-repeat,#719fdc}
 
         /* B. 카드 위 겹 리본(sa/02:14 .p14-article-head + .p14-ribbon) — A와 같은 모양, 카드 폭 안쪽(꼬리 -16px) */
-        .rb-b-card{position:absolute;left:100px;top:100px;width:738px;height:320px;box-sizing:border-box;background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:36px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
-        .rb-b{height:121px;width:600px;margin:-50px auto 40px;position:relative;display:flex;align-items:center;justify-content:center;padding:0;font-family:'Cafe24 Ssurround';font-size:44px;line-height:1.15;color:#053c85;letter-spacing:-0.08em;text-align:center;word-break:keep-all;background:#dff6ff;border:solid 5px #fff;box-shadow:0 32px 0 -16px rgba(54,98,170,.2)}
-        .rb-b:before,.rb-b:after{content:'';position:absolute;top:15px;width:130px;height:102px;z-index:-1;background-repeat:no-repeat}
-        .rb-b:before{left:-16px;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,36% 50%);background:linear-gradient(to bottom left,#5b84d6 50%,transparent 50%) 100% 55px / 55px 47px no-repeat,#719fdc}
-        .rb-b:after{right:-16px;clip-path:polygon(0 0,100% 0,64% 50%,100% 100%,0 100%);background:linear-gradient(to bottom right,#5b84d6 50%,transparent 50%) 0 55px / 55px 47px no-repeat,#719fdc}
+        .rb-b-card{isolation:isolate;position:absolute;left:100px;top:100px;width:738px;height:320px;box-sizing:border-box;background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:36px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
 
         /* C. 남색 리본(sa/04:03 .p03-ribbon) — 한 장짜리 판을 clip-path로 오려 양끝에 홈, 흰 글자 */
         .rb-c{position:absolute;left:50%;top:60px;width:870px;height:130px;transform:translateX(-50%);margin:0;display:flex;align-items:center;justify-content:center;background:var(--c-navy);
@@ -38,8 +35,47 @@
   <div class="g-wrap">
     <h1>리본 제목</h1>
     <p class="g-note">화면 제목 판(리본)이 페이지마다 따로 그려져 있어서 모양을 모아 비교하는 가이드. 지금 CSS로 그린 리본은 3종이며, 같은 모양(A·B)은 폭·꼬리 위치만 다르고 색·테두리·접힘 무늬가 같습니다.
-      아래 그림은 각 페이지 CSS를 그대로 옮긴 복사본(공용 클래스 아님). 공용화할 때 기준으로 삼으세요.</p>
+      A·B는 이제 공용 <code>.ribbon</code> 템플릿(맨 위 섹션)으로 만들어 sa/02:06·14에 적용했고, 아래 A·B 그림은 공용화 전 페이지 CSS를 옮긴 복사본(비교용)입니다. C는 아직 페이지 전용입니다.</p>
     <ul class="g-toc"></ul>
+
+    <h2>공용 템플릿 <code>.ribbon</code> — 변수로 크기·색·꼬리 조절</h2>
+    <p class="g-note">공용 CSS(<code>css/common.css</code>)에 <code>.ribbon</code> 클래스를 만들었습니다. 위 A·B처럼 같은 모양에서 가로·높이·글자 크기·색·꼬리 길이를 CSS 변수로 바꿔 씁니다.
+      마크업 <code>&lt;div class="ribbon-wrap"&gt;&lt;p class="ribbon" style="--rb-bg:#fff4d6"&gt;제목&lt;/p&gt;&lt;/div&gt;</code> — 꼬리가 판 뒤로 들어가려면 부모가 새 층을 만들어야 해서 <code>.ribbon-wrap</code>(isolation:isolate) 또는 기존 틀(z-index가 있는 카드)이 필요합니다. 위치(left/top)는 페이지 CSS에서.</p>
+    <table class="g-diff" style="margin:0 0 20px;width:100%;border-collapse:collapse;font-size:14px;background:#fff">
+      <tr><th>변수</th><th>기본값</th><th>뜻</th></tr>
+      <tr><td><code>--rb-w</code> · <code>--rb-h</code></td><td>752px · 105px</td><td>판 가로·높이(꼬리의 접힘 삼각은 꼬리 높이에 비례해 같이 커짐)</td></tr>
+      <tr><td><code>--rb-fs</code> · <code>--rb-ls</code> · <code>--rb-color</code></td><td>70px · -0.05em · var(--c-ink)</td><td>글자 크기·자간·색</td></tr>
+      <tr><td><code>--rb-bg</code> · <code>--rb-bd</code> · <code>--rb-shadow</code></td><td>#dff6ff · #fff · rgba(54,98,170,.2)</td><td>판 색 · 테두리 색 · 아래 그림자 색</td></tr>
+      <tr><td><code>--rb-tail</code> · <code>--rb-fold</code></td><td>#719fdc · #5b84d6</td><td>꼬리 색 · 접힌 삼각 색(꼬리보다 진한 색)</td></tr>
+      <tr><td><code>--rb-tw</code> · <code>--rb-th</code></td><td>150px · 102px</td><td>꼬리 가로·높이</td></tr>
+      <tr><td><code>--rb-ext</code> · <code>--rb-drop</code></td><td>100px · 44px</td><td>꼬리가 판 바깥으로 나온 길이 · 판 아래로 내려온 길이(음수면 판에 가려짐)</td></tr>
+    </table>
+    <div class="rb-row">
+      <div class="rb-item" style="width:592px">
+        <div class="rb-stage ribbon-wrap" style="width:560px;height:200px"><div class="rb-scale" style="transform:scale(.45);width:1244px;height:444px">
+          <p class="ribbon" style="position:absolute;left:260px;top:90px;">기본(sa/02:06)</p>
+        </div></div>
+        <p class="g-meta"><b>기본값</b> · 변수 없이 <code>.ribbon</code>만</p>
+      </div>
+      <div class="rb-item" style="width:592px">
+        <div class="rb-stage ribbon-wrap" style="width:560px;height:200px"><div class="rb-scale" style="transform:scale(.45);width:1244px;height:444px">
+          <p class="ribbon" style="position:absolute;left:260px;top:90px;--rb-w:600px;--rb-h:121px;--rb-fs:44px;--rb-ls:-0.08em;--rb-color:#053c85;--rb-tw:130px;--rb-ext:70px;--rb-drop:44px;left:150px">카드 위 리본(sa/02:14)</p>
+        </div></div>
+        <p class="g-meta"><b>B 값</b> · 가로 600 · 높이 121 · 글자 44 · 꼬리 바깥 70px</p>
+      </div>
+      <div class="rb-item" style="width:592px">
+        <div class="rb-stage ribbon-wrap" style="width:560px;height:200px"><div class="rb-scale" style="transform:scale(.45);width:1244px;height:444px">
+          <p class="ribbon" style="position:absolute;left:260px;top:90px;--rb-w:620px;--rb-h:84px;--rb-fs:52px;--rb-drop:36px;--rb-th:84px;--rb-tw:120px;left:200px">높이를 낮게</p>
+        </div></div>
+        <p class="g-meta"><b>높이 84px</b> · <code>--rb-h:84px; --rb-th:84px; --rb-tw:120px</code> 로 꼬리도 작게</p>
+      </div>
+      <div class="rb-item" style="width:592px">
+        <div class="rb-stage ribbon-wrap" style="width:560px;height:200px"><div class="rb-scale" style="transform:scale(.45);width:1244px;height:444px">
+          <p class="ribbon" style="position:absolute;left:260px;top:90px;--rb-bg:#fff4d6;--rb-bd:#ffe08a;--rb-shadow:rgba(150,110,20,.22);--rb-tail:#f2b84b;--rb-fold:#d79a2c;--rb-color:#6b3d00;left:240px">색 바꾸기(노랑)</p>
+        </div></div>
+        <p class="g-meta"><b>색만 바꿈</b> · <code>--rb-bg / --rb-bd / --rb-shadow / --rb-tail / --rb-fold / --rb-color</code></p>
+      </div>
+    </div>
 
     <h2>A. 겹 리본 <code>.p06-ribbon</code> — sa/02:06</h2>
     <div class="rb-row">
@@ -56,10 +92,21 @@
     <div class="rb-row">
       <div class="rb-item" style="width:640px">
         <div class="rb-stage" style="width:608px;height:300px"><div class="rb-scale" style="transform:scale(.62);width:980px;height:480px">
-          <div class="rb-b-card"><div class="rb-b">김모 군, 줄넘기 대회에서 수상</div></div>
+          <div class="rb-b-card"><div class="ribbon" style="--rb-w:600px;--rb-h:121px;--rb-fs:44px;--rb-ls:-0.08em;--rb-color:#053c85;--rb-tw:130px;--rb-ext:70px;--rb-drop:44px;margin:-50px auto 40px;padding:0;line-height:1.15;text-align:center;word-break:keep-all;white-space:normal">김모 군, 줄넘기 대회에서 수상</div></div>
         </div></div>
-        <p class="g-meta"><b>sa/02:14 (기사 카드 위)</b> · 600×121px · 글자 44px · 꼬리 130px가 판 안쪽 -16px<br>
+        <p class="g-meta"><b>sa/02:14 (기사 카드 위)</b> · 공용 <code>.ribbon</code> + 변수 · 600×121px · 글자 44px · 꼬리 130px, 바깥 70px · 아래 44px<br>
           A와 같은 색·테두리·그림자. 카드 위쪽에 -50px 걸쳐 놓고, 글자색 <code>#053c85</code>, 줄바꿈은 <code>word-break:keep-all</code></p>
+      </div>
+    </div>
+
+    <h2>D. 작은 카드 안 리본 — sa/02:10 (기사문 내용)</h2>
+    <div class="rb-row">
+      <div class="rb-item" style="width:640px">
+        <div class="rb-stage" style="width:608px;height:240px"><div class="rb-scale" style="transform:scale(.9);width:680px;height:270px">
+          <div style="position:absolute;left:60px;top:50px;width:447px;height:200px;box-sizing:border-box;padding:24px 30px;background:#dff6ff;border:solid 4px #053c85;border-radius:28px;z-index:1"><div class="ribbon" style="--rb-w:300px;--rb-h:67px;--rb-fs:36px;--rb-ls:0;--rb-color:#053c85;--rb-bg:#d3e7ff;--rb-bd:#91b9e7;--rb-shadow:transparent;--rb-tail:#91b9e7;--rb-fold:#799ce0;--rb-tw:70px;--rb-th:60px;--rb-ext:50px;--rb-drop:15px;margin:0 auto 14px;top:-33px;padding-top:4px">기사문 내용</div></div>
+        </div></div>
+        <p class="g-meta"><b>sa/02:10 (개인정보 탐지 화면의 기사문 카드)</b> · 공용 <code>.ribbon</code> + 변수 · 300×67px · 글자 36px · 꼬리 70×60px, 바깥 50px · 아래 15px<br>
+          그림자 없음(<code>--rb-shadow:transparent</code>), 판 <code>#d3e7ff</code> · 테두리·꼬리 <code>#91b9e7</code> · 접힘 <code>#799ce0</code>. 카드가 <code>z-index:1</code>이라 별도 wrap 없이 꼬리가 판 뒤로 들어감</p>
       </div>
     </div>
 
@@ -77,7 +124,8 @@
     <table class="g-diff" style="margin-top:30px;width:100%;border-collapse:collapse;font-size:15px;background:#fff">
       <tr><th>종류</th><th>쓰이는 곳</th><th>판 색</th><th>테두리 · 그림자</th><th>꼬리 방식</th><th>크기</th><th>글자</th></tr>
       <tr><td>A 겹 리본</td><td>sa/02:06 (신문 틀·완성 화면)</td><td>#dff6ff</td><td>흰 5px · 아래 그림자</td><td>:before/:after, 바깥 -100px, 접힘 무늬</td><td>752×105</td><td>70px #1b1738</td></tr>
-      <tr><td>B 카드 위 겹 리본</td><td>sa/02:14 (기사 제목)</td><td>#dff6ff</td><td>흰 5px · 아래 그림자</td><td>:before/:after, 안쪽 -16px, 접힘 무늬</td><td>600×121</td><td>44px #053c85</td></tr>
+      <tr><td>B 카드 위 겹 리본</td><td>sa/02:14 (기사 제목)</td><td>#dff6ff</td><td>흰 5px · 아래 그림자</td><td>.ribbon 변수(바깥 70px·아래 44px), 접힘 무늬</td><td>600×121</td><td>44px #053c85</td></tr>
+      <tr><td>D 작은 카드 안 리본</td><td>sa/02:10 (기사문 내용)</td><td>#d3e7ff</td><td>#91b9e7 5px · 그림자 없음</td><td>.ribbon 변수(바깥 50px·아래 15px), 접힘 무늬</td><td>300×67</td><td>36px #053c85</td></tr>
       <tr><td>C 남색 리본</td><td>sa/04:03 (배지 획득)</td><td>var(--c-navy)</td><td>없음</td><td>clip-path 홈 (양끝 5%)</td><td>870×130</td><td>56px 흰색</td></tr>
     </table>
 

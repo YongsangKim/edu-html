@@ -1112,6 +1112,19 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 .gauge.is-thin.is-vertical:before{left:-18px;top:auto;bottom:-34px}
 .gauge.is-thin.is-vertical .gauge-fill:after{left:8px;top:24px;bottom:16px;width:8px;height:auto}
 
+/* 겹 리본 제목 템플릿(.ribbon): 크기·색·꼬리 모양을 CSS 변수로 받음. 위치(left/top)는 페이지 CSS에서, 글자는 안에 쓴 문구.
+   변수(기본값): --rb-w 가로(752px) · --rb-h 높이(105px) · --rb-fs 글자(70px) · --rb-ls 자간(-0.05em) · --rb-color 글자색
+     --rb-bg 판 색(#dff6ff) · --rb-bd 테두리 색(#fff) · --rb-shadow 아래 그림자 색 · --rb-tail 꼬리 색(#719fdc) · --rb-fold 접힌 삼각 색(#5b84d6)
+     --rb-tw 꼬리 가로(150px) · --rb-th 꼬리 높이(102px) · --rb-ext 꼬리가 판 바깥으로 나온 길이(100px) · --rb-drop 꼬리가 판 아래로 내려온 길이(44px, 음수면 가려짐)
+   꼬리는 z-index:-1이라 부모가 새 층을 만들어야 판 뒤로 들어감: 부모에 isolation:isolate(.ribbon-wrap). 접힌 삼각은 꼬리 높이에 비례.
+   마크업: <div class="ribbon-wrap"><p class="ribbon" style="--rb-bg:#fff4d6">제목</p></div> */
+.ribbon-wrap{isolation:isolate}
+.ribbon{--rb-w:752px;--rb-h:105px;--rb-fs:70px;--rb-ls:-0.05em;--rb-color:var(--c-ink);--rb-bg:#dff6ff;--rb-bd:#fff;--rb-shadow:rgba(54,98,170,.2);--rb-tail:#719fdc;--rb-fold:#5b84d6;--rb-tw:150px;--rb-th:102px;--rb-ext:100px;--rb-drop:44px;
+  position:relative;width:var(--rb-w);height:var(--rb-h);margin:0;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;background:var(--rb-bg);border:solid 5px var(--rb-bd);box-shadow:0 32px 0 -16px var(--rb-shadow);
+  font-family:'Cafe24 Ssurround';font-size:var(--rb-fs);color:var(--rb-color);letter-spacing:var(--rb-ls);white-space:nowrap}
+.ribbon:before,.ribbon:after{content:'';position:absolute;top:calc(var(--rb-h) + var(--rb-drop) - var(--rb-th));width:var(--rb-tw);height:var(--rb-th);z-index:-1;background-repeat:no-repeat}
+.ribbon:before{left:calc(var(--rb-ext) * -1);clip-path:polygon(0 0,100% 0,100% 100%,0 100%,36% 50%);background:linear-gradient(to bottom left,var(--rb-fold) 50%,transparent 50%) 100% calc(var(--rb-th) * .54) / calc(var(--rb-th) * .54) calc(var(--rb-th) * .46) no-repeat,var(--rb-tail)}
+.ribbon:after{right:calc(var(--rb-ext) * -1);clip-path:polygon(0 0,100% 0,64% 50%,100% 100%,0 100%);background:linear-gradient(to bottom right,var(--rb-fold) 50%,transparent 50%) 0 calc(var(--rb-th) * .54) / calc(var(--rb-th) * .54) calc(var(--rb-th) * .46) no-repeat,var(--rb-tail)}
 .end-title{position:absolute;left:750px;top:65px;width:930px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:100px;background:linear-gradient(180deg,#02185c,#0362d7);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-0.06em}
 .end-panel{position:absolute;left:750px;top:185px;width:930px;min-height:540px;background:var(--c-cream);border:solid 15px var(--c-navy);border-radius:30px;box-shadow:0 0 0 5px var(--c-white);box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;padding:30px}
 .end-desc{margin:0;font-family:'Cafe24 Ssurround';font-size:70px;line-height:1.4;color:#3b1e87;text-align:center;letter-spacing:-0.04em;word-break:keep-all}
