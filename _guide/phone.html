@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI 가이드 - 폰 화면 틀</title>
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="guide.css">
+    <style>
+        /* 이 페이지 안에서만 쓰는 데모 배치(틀 모양은 공용 .phone-frame 그대로). 폰은 실제 크기(422×895) 그대로 보여줌 */
+        .ph-row{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+        .ph-item{width:500px;box-sizing:border-box;padding:16px;background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+        .ph-box{position:relative;width:462px;height:930px;margin:0 auto 14px;background:#c2d9e9;border-radius:10px;overflow:hidden}
+        .ph-box .phone-frame{left:20px;top:17px;width:422px;height:895px}
+        .ph-screen{position:relative;width:100%;height:100%;box-sizing:border-box;background:#fff;overflow:hidden;font-family:'Pretendard';color:#111}
+        .ph-screen.is-round{border-radius:54px;background:var(--c-pale)}
+        .ph-bar{position:absolute;left:0;top:0;width:100%;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;box-sizing:border-box;font-size:22px}
+        .ph-dots{display:flex;gap:7px}.ph-dots i{width:10px;height:10px;border-radius:50%;background:#555}
+        .ph-sig{display:flex;align-items:flex-end;gap:4px;height:18px}.ph-sig i{width:6px;background:#555}.ph-sig i:nth-child(1){height:5px}.ph-sig i:nth-child(2){height:9px}.ph-sig i:nth-child(3){height:13px}.ph-sig b{width:9px;height:16px;margin-left:6px;background:#555;border-radius:2px}
+        .ph-app{position:absolute;left:0;top:0;width:100%;height:110px;box-sizing:border-box;background:linear-gradient(90deg,#4cc3c8,#5b63d9 55%,#7b3fe0);color:#fff}
+        .ph-app-ico{position:absolute;left:0;top:44px;width:100%;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;box-sizing:border-box;font-size:30px}
+        .ph-tabs{position:absolute;left:0;bottom:46px;width:100%;height:70px;display:flex;justify-content:space-around;align-items:center;box-sizing:border-box;background:#f6f7fb;border-top:solid 1px #ddd;font-size:15px;color:#555}
+        .ph-tabs span{display:flex;flex-direction:column;align-items:center;gap:6px}
+        .ph-tabs span:before{content:'';width:24px;height:24px;border:solid 2px #666;border-radius:6px}
+        .ph-row.is-s .ph-item{width:292px}
+        .ph-row.is-s .ph-box{width:262px;height:520px}
+        .ph-row.is-s .ph-box .phone-frame{left:12px;top:10px;transform:scale(.55);transform-origin:0 0}
+        .ph-home{position:absolute;inset:0}
+        .ph-ic{position:absolute;left:50%;display:flex;flex-direction:column;align-items:center;transform:translateX(-50%)}
+        .ph-ic img,.ph-ic i{display:block}
+        .ph-ic span{margin-top:8px;font-size:20px;font-weight:600;white-space:nowrap}
+        .ph-fg{position:absolute;width:110px;pointer-events:none;z-index:9}
+        .ph-row.is-m{flex-wrap:nowrap}
+        .ph-row.is-m .ph-item{width:410px!important}
+        .ph-row.is-m .ph-box{width:380px!important;height:740px}
+        .ph-row.is-m .ph-box .phone-frame{transform:scale(.78);transform-origin:0 0;left:12px!important;top:12px!important}
+    </style>
+</head>
+<body>
+  <div class="g-wrap">
+    <h1>폰 화면 틀</h1>
+    <p class="g-note">폰 모양 화면(Canva·검색 앱 등)을 그릴 때 쓰는 틀·상단·하단 모양을 모아둔 가이드. 틀은 공용 <code>.phone-frame</code>(left·top·width·height는 페이지 CSS에서),
+      얇게 하려면 <code>.phone-frame.is-thin</code>을 더 붙임. 아래 폰은 실제 크기 그대로 보여주는 데모이며, 상태바·하단은 페이지마다 따로 그림(공용 아님).</p>
+    <ul class="g-toc"></ul>
+
+    <h2>폰 화면 — 틀 + 상단 + 하단 한 세트</h2>
+    <p class="g-note">각 폰은 틀 · 카메라 홀 · 상단 · 하단을 모두 붙인 완성 모양. 카메라 홀은 모든 폰에 기본으로 들어가며 <code>.phone-frame.has-cam</code>(공용)으로 붙임. 나머지 클래스도 공용 부품.</p>
+    <div class="ph-row is-m">
+      <div class="ph-item">
+        <div class="ph-box"><div class="phone-frame is-thin has-cam"><div class="ph-screen"><div class="ph-app"><div class="phone-status"><span>13:13</span><span class="sys"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM17 9l4 6M21 9l-4 6"/></svg><svg viewBox="0 0 24 24"><path d="M2 9a15 15 0 0120 0M5 12.5a10 10 0 0114 0M8.5 16a5 5 0 017 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg><svg viewBox="0 0 24 24"><path d="M4 20V14M9 20V10M14 20V6M19 20V3"/></svg><em>64</em></span></div><div class="ph-app-ico"><span>⌂</span><span>···&nbsp;&nbsp;♛&nbsp;&nbsp;⇧</span></div></div><div class="ph-tabs"><span>추천</span><span>요소</span><span>텍스트</span><span>갤러리</span><span>브랜드</span></div><div class="phone-nav"><i></i><b></b><u></u></div></div></div></div>
+        <p class="g-meta"><b>① 앱 화면(Canva 앱바 + 하단 탭)</b><br>틀 <code>.phone-frame.is-thin</code> + 상단 <code>.phone-status</code> + 앱바(페이지 전용) + 하단 탭(페이지 전용) + 하단 버튼 3개 <code>.phone-nav</code><br>sa/11:09 · (sa/02·03은 상태바·버튼 없이 같은 앱바·탭)</p>
+      </div>
+      <div class="ph-item">
+        <div class="ph-box"><div class="phone-frame is-thin has-cam"><div class="ph-screen"><div class="phone-status is-dark"><span>13:13</span><span class="sys"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM17 9l4 6M21 9l-4 6"/></svg><svg viewBox="0 0 24 24"><path d="M2 9a15 15 0 0120 0M5 12.5a10 10 0 0114 0M8.5 16a5 5 0 017 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg><svg viewBox="0 0 24 24"><path d="M4 20V14M9 20V10M14 20V6M19 20V3"/></svg><em>64</em></span></div><div class="phone-nav"><i></i><b></b><u></u></div></div></div></div>
+        <p class="g-meta"><b>② 기본 세트(밝은 화면)</b><br>틀 <code>.phone-frame.is-thin</code> + 상단 <code>.phone-status.is-dark</code>(글자 검정) + 하단 버튼 3개 <code>.phone-nav</code><br>sa/11:09 앱 홈 · 입력 화면</p>
+      </div>
+      <div class="ph-item">
+        <div class="ph-box"><div class="phone-frame is-thin has-cam"><div class="ph-screen" style="background:#111"><div class="phone-status"><span>13:13</span><span class="sys"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM17 9l4 6M21 9l-4 6"/></svg><svg viewBox="0 0 24 24"><path d="M2 9a15 15 0 0120 0M5 12.5a10 10 0 0114 0M8.5 16a5 5 0 017 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg><svg viewBox="0 0 24 24"><path d="M4 20V14M9 20V10M14 20V6M19 20V3"/></svg><em>64</em></span></div><div class="phone-nav is-dark"><i></i><b></b><u></u></div></div></div></div>
+        <p class="g-meta"><b>③ 기본 세트(어두운 화면)</b><br>틀 <code>.phone-frame.is-thin</code> + 상단 <code>.phone-status</code>(글자 흰색, 배터리 알약 흰색) + 하단 버튼 3개 <code>.phone-nav.is-dark</code>(검정 바탕 + 밝은 버튼)<br>어두운 화면(영상·갤러리 등)용. ②와 틀·카메라 홀은 같음</p>
+      </div>
+    </div>
+
+    <h2>앱 첫 화면 — 앱 아이콘만 가운데</h2>
+    <p class="g-note">활동 시작 때 폰 가운데에 앱 아이콘 하나만 놓고 손가락으로 누르게 하는 화면. <b>gwa/02:10 기준으로 아이콘 크기(110px · 모서리 28px)와 아래 앱 이름(20px · 굵게)을 모두 통일</b>했고, 틀은 모두 <code>.phone-frame.is-thin</code>으로 통일, 배경은 각 페이지 그대로. 이름 글자색은 어두운 배경에서는 흰색(+그림자), 밝은 배경에서는 검정. 모든 폰에 상단 정보(<code>.phone-status</code>)와 하단 버튼 3개(<code>.phone-nav</code>)를 붙임. 손가락은 공용 <code>pointFingerAt</code>처럼 아이콘 오른쪽 아래.</p>
+    <div class="ph-row is-s">
+      <div class="ph-item">
+        <div class="ph-box"><div class="phone-frame is-thin has-cam"><div class="ph-screen"><div class="phone-status"><span>13:13</span><span class="sys"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM17 9l4 6M21 9l-4 6"/></svg><svg viewBox="0 0 24 24"><path d="M2 9a15 15 0 0120 0M5 12.5a10 10 0 0114 0M8.5 16a5 5 0 017 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg><svg viewBox="0 0 24 24"><path d="M4 20V14M9 20V10M14 20V6M19 20V3"/></svg><em>64</em></span></div><div class="phone-nav"><i></i><b></b><u></u></div><div class="ph-home" style="background:linear-gradient(160deg,#9fd8f0,#b9a8f5 55%,#f3b6d8)"><div class="ph-ic" style="top:44%"><img src="../sa/02/img/p10_canva_icon.png" style="width:110px;height:110px;border-radius:28px;box-shadow:0 6px 14px rgba(0,0,0,.2)" alt=""><span style="color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.3)">Canva</span></div></div><img class="ph-fg" src="../img/common/img_finger01.png" style="left:253px;top:482px" alt=""></div></div></div>
+        <p class="g-meta"><b>sa/02:10 Canva</b><br>틀 얇음 · 보라 그라데이션 · 아이콘 110px + 이름표 추가</p>
+      </div>
+      <div class="ph-item">
+        <div class="ph-box"><div class="phone-frame is-thin has-cam"><div class="ph-screen"><div class="phone-status"><span>13:13</span><span class="sys"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM17 9l4 6M21 9l-4 6"/></svg><svg viewBox="0 0 24 24"><path d="M2 9a15 15 0 0120 0M5 12.5a10 10 0 0114 0M8.5 16a5 5 0 017 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg><svg viewBox="0 0 24 24"><path d="M4 20V14M9 20V10M14 20V6M19 20V3"/></svg><em>64</em></span></div><div class="phone-nav"><i></i><b></b><u></u></div><div class="ph-home" style="background:linear-gradient(160deg,#a6e1f5,#b7b0f7 55%,#f5c1df)"><div class="ph-ic" style="top:44%"><i style="width:110px;height:110px;border-radius:28px;box-shadow:0 6px 14px rgba(0,0,0,.2);background:#000;display:flex;align-items:center;justify-content:center"><img src="../gwa/02/img/p10_icon_chatgpt.svg" width="64" height="64" alt=""></i><span style="color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.3)">ChatGPT</span></div></div><img class="ph-fg" src="../img/common/img_finger01.png" style="left:253px;top:482px" alt=""></div></div></div>
+        <p class="g-meta"><b>gwa/02:10 ChatGPT</b> (기준)<br>틀 얇음 · 보라 그라데이션 · 아이콘 110px + 이름표 — 변경 없음</p>
+      </div>
+      <div class="ph-item">
+        <div class="ph-box"><div class="phone-frame is-thin has-cam"><div class="ph-screen"><div class="phone-status is-dark"><span>13:13</span><span class="sys"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM17 9l4 6M21 9l-4 6"/></svg><svg viewBox="0 0 24 24"><path d="M2 9a15 15 0 0120 0M5 12.5a10 10 0 0114 0M8.5 16a5 5 0 017 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg><svg viewBox="0 0 24 24"><path d="M4 20V14M9 20V10M14 20V6M19 20V3"/></svg><em>64</em></span></div><div class="phone-nav"><i></i><b></b><u></u></div><div class="ph-home" style="background:#fff"><div class="ph-ic" style="top:44%"><i style="width:110px;height:110px;border-radius:28px;box-shadow:0 6px 14px rgba(0,0,0,.2);overflow:hidden"><img src="../sa/06/img/p09_icon_suno.png" style="width:100%;height:100%;object-fit:cover;transform:scale(1.08)" alt=""></i><span style="color:#111">Suno</span></div></div><img class="ph-fg" src="../img/common/img_finger01.png" style="left:253px;top:482px" alt=""></div></div></div>
+        <p class="g-meta"><b>sa/06:09 Suno</b><br>틀 얇음 · 흰 배경 · 아이콘 138px → 110px로 줄이고 이름표 추가. 아이콘은 새로 받은 그림(sa/06/img/p09_icon_suno.png, 둥근 사각형 + SUNO)을 씀. 지금 페이지는 아이콘이 화면 그림 한 장에 포함돼 있어 적용 시 아이콘만 분리 필요</p>
+      </div>
+      <div class="ph-item">
+        <div class="ph-box"><div class="phone-frame is-thin has-cam"><div class="ph-screen"><div class="phone-status is-dark"><span>13:13</span><span class="sys"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM17 9l4 6M21 9l-4 6"/></svg><svg viewBox="0 0 24 24"><path d="M2 9a15 15 0 0120 0M5 12.5a10 10 0 0114 0M8.5 16a5 5 0 017 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg><svg viewBox="0 0 24 24"><path d="M4 20V14M9 20V10M14 20V6M19 20V3"/></svg><em>64</em></span></div><div class="phone-nav"><i></i><b></b><u></u></div><div class="ph-home" style="background:linear-gradient(180deg,#dcecff,#f3f8ff)"><div class="ph-ic" style="top:44%"><i style="width:110px;height:110px;border-radius:28px;background:#fff;box-shadow:0 6px 14px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;overflow:hidden"><img src="../sa/08/img/p08_naver_map.png" style="width:100%;height:100%;object-fit:contain" alt=""></i><span style="color:#111">네이버 지도</span></div></div><img class="ph-fg" src="../img/common/img_finger01.png" style="left:253px;top:482px" alt=""></div></div></div>
+        <p class="g-meta"><b>sa/08:10 네이버 지도</b><br>틀 얇음 · 흰 배경 → 연한 파랑 배경(#dcecff→#f3f8ff, 흰 아이콘이 묻히지 않게) · 핀 그림(155px)을 흰 정사각 아이콘 110px(모서리 28px) 안에 넣고 이름표 추가</p>
+      </div>
+      <div class="ph-item">
+        <div class="ph-box"><div class="phone-frame is-thin has-cam"><div class="ph-screen"><img class="ph-fg" src="../img/common/img_finger01.png" style="left:253px;top:482px" alt=""><div class="phone-status is-dark"><span>13:13</span><span class="sys"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM17 9l4 6M21 9l-4 6"/></svg><svg viewBox="0 0 24 24"><path d="M2 9a15 15 0 0120 0M5 12.5a10 10 0 0114 0M8.5 16a5 5 0 017 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg><svg viewBox="0 0 24 24"><path d="M4 20V14M9 20V10M14 20V6M19 20V3"/></svg><em>64</em></span></div><div class="phone-nav"><i></i><b></b><u></u></div><div class="ph-home" style="background:var(--c-pale)"><div class="ph-ic" style="top:44%"><i style="width:110px;height:110px;border-radius:28px;box-shadow:0 6px 14px rgba(0,0,0,.2);background:url(../gwa/07/img/p09_app_icon_new.png) center / cover no-repeat;box-shadow:0 6px 14px rgba(30,124,242,.3)"></i><span style="color:#111">SmartThings</span></div></div></div></div></div>
+        <p class="g-meta"><b>gwa/07:09 SmartThings</b><br>틀 얇음(굵음에서 변경) · 연한 파랑 · 아이콘 150px → 110px, 이름표 20px(검정). 손가락 추가</p>
+      </div>
+      <div class="ph-item">
+        <div class="ph-box"><div class="phone-frame is-thin has-cam"><div class="ph-screen"><img class="ph-fg" src="../img/common/img_finger01.png" style="left:253px;top:482px" alt=""><div class="phone-status"><span>13:13</span><span class="sys"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM17 9l4 6M21 9l-4 6"/></svg><svg viewBox="0 0 24 24"><path d="M2 9a15 15 0 0120 0M5 12.5a10 10 0 0114 0M8.5 16a5 5 0 017 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg><svg viewBox="0 0 24 24"><path d="M4 20V14M9 20V10M14 20V6M19 20V3"/></svg><em>64</em></span></div><div class="phone-nav"><i></i><b></b><u></u></div><div class="ph-home" style="background:linear-gradient(180deg,#4a7cb0,#8fc0ee 60%,#b8d9f7)"><div class="ph-ic" style="top:44%"><i style="width:110px;height:110px;border-radius:28px;box-shadow:0 6px 14px rgba(0,0,0,.2);background:#fff url(../gwa/05/img/p08_assistant_logo.png) center / 92% no-repeat"></i><span style="color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.3)">Assistant</span></div></div></div></div></div>
+        <p class="g-meta"><b>gwa/05:08 Assistant</b><br>틀 얇음(굵음에서 변경) · 파란 그라데이션 · 아이콘 130px/34px → 110px/28px, 이름표 20px(흰색). 손가락 추가(실제 페이지는 옆의 마이크를 누름)</p>
+      </div>
+    </div>
+
+    <table class="g-diff" style="margin:24px 0 0;width:100%;border-collapse:collapse;font-size:15px;background:#fff">
+      <tr><th>화면</th><th>틀</th><th>배경</th><th>아이콘(통일 전 → 후)</th><th>이름표(통일 전 → 후)</th></tr>
+      <tr><td>sa/02:10</td><td>얇음</td><td>보라 그라데이션</td><td>110px · 28px → 같음</td><td>없음 → 20px 흰색</td></tr>
+      <tr><td>gwa/02:10 (기준)</td><td>얇음</td><td>보라 그라데이션</td><td>110px · 28px</td><td>20px 흰색</td></tr>
+      <tr><td>sa/06:09</td><td>얇음</td><td>흰색</td><td>138px → 110px · 28px</td><td>없음 → 20px 검정</td></tr>
+      <tr><td>sa/08:10</td><td>얇음</td><td>흰색 → 연한 파랑</td><td>핀만 155px → 흰 정사각 110px · 28px 안에 핀</td><td>없음 → 20px 검정</td></tr>
+      <tr><td>gwa/07:09</td><td>굵음 → 얇음</td><td>연한 파랑</td><td>150px · 62px → 110px · 28px</td><td>22px 검정 → 20px 검정</td></tr>
+      <tr><td>gwa/05:08</td><td>굵음 → 얇음</td><td>파란 그라데이션</td><td>130px · 34px → 110px · 28px</td><td>흰색 → 20px 흰색</td></tr>
+    </table>
+
+    <table class="g-diff" style="margin-top:30px;width:100%;border-collapse:collapse;font-size:15px;background:#fff">
+      <tr><th>화면</th><th>틀</th><th>크기(틀 전체)</th><th>카메라 홀(has-cam 적용 전 현황)</th></tr>
+      <tr><td>sa/02:08·10 · sa/03:07·09</td><td>얇음(<code>.cv</code>)</td><td>504×895</td><td>없음</td></tr>
+      <tr><td>sa/06:09</td><td>얇음</td><td>468×895</td><td>없음</td></tr>
+      <tr><td>sa/11:09</td><td>얇음 <code>.phone-frame.is-thin</code></td><td>422×895 (화면 비율 540:1170)</td><td>없음</td></tr>
+      <tr><td>sa/07:07</td><td>굵음</td><td>455×905</td><td>없음</td></tr>
+      <tr><td>sa/08:08</td><td>굵음</td><td>434×900</td><td>없음</td></tr>
+      <tr><td>gwa/07:09</td><td>굵음</td><td>500×910</td><td>있음</td></tr>
+    </table>
+  </div>
+  <script src="guide.js"></script>
+</body>
+</html>

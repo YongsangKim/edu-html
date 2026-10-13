@@ -15,15 +15,11 @@
         .p08-ok.card-btn{position:absolute;right:20px;bottom:34px;min-width:0;width:170px;height:68px;padding:6px 0 0;font-size:40px;line-height:1}
         .p08-ok.is-off{display:none}
 
-        .p08-phone{left:710px;top:24px;width:500px;height:910px}
-        .p08-screen{position:relative;width:100%;height:100%;border-radius:54px;overflow:hidden;background:linear-gradient(160deg,#3a6ea5,#7fb3e8 45%,#c9e2f7);font-family:'Pretendard'}
-        .p08-screen:before{content:'';position:absolute;left:50%;top:18px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:var(--c-ink);z-index:3}
-        .p08-app{position:absolute;left:50%;top:38%;width:150px;margin-left:-75px;display:flex;flex-direction:column;align-items:center;gap:12px;font-size:26px;font-weight:600;color:var(--c-white);text-shadow:0 1px 3px rgba(0,0,0,.4)}
-        .p08-app i{display:block;width:130px;height:130px;border-radius:34px;background:var(--c-white) url('img/p08_assistant_logo.png') center / 92% no-repeat;box-shadow:0 6px 14px rgba(0,0,0,.2)}
-        .p08-nav{position:absolute;left:0;right:0;bottom:22px;display:flex;justify-content:space-around;font-size:36px;color:rgba(255,255,255,.85)}
+        .p08-phone{left:749px;top:21px;width:422px;height:895px}
+        .p08-screen{position:relative;width:100%;height:100%;overflow:hidden;background:linear-gradient(160deg,#3a6ea5,#7fb3e8 45%,#c9e2f7);font-family:'Pretendard'}
 
-        .p08-bar{position:absolute;left:24px;right:24px;bottom:84px;height:92px;box-sizing:border-box;padding:0 18px;display:flex;align-items:center;gap:16px;border-radius:46px;background:#121316;color:var(--c-white);font-size:24px;z-index:2}
-        .p08-bar .plus{flex:0 0 auto;font-size:44px;font-weight:300;line-height:1}
+        .p08-bar{position:absolute;left:24px;right:24px;bottom:84px;height:92px;box-sizing:border-box;padding:0 18px;display:flex;align-items:center;gap:16px;border-radius:46px;background:#121316;color:var(--c-white);font-size:20px;z-index:2}
+        .p08-bar .plus{flex:0 0 auto;font-size:44px;font-weight:100;line-height:1;padding-bottom:7px}
         .p08-bar .say{flex:1 1 auto;min-width:0;line-height:1.15}
         .p08-bar .mic{flex:0 0 auto;width:56px;height:56px;border-radius:50%;background:#e8e8ec;color:#121316;display:flex;align-items:center;justify-content:center;font-size:30px}
         .p08-bar .wave{flex:1 1 auto;display:flex;align-items:center;justify-content:center;gap:6px;height:50px}
@@ -38,7 +34,7 @@
         .p08-bar .wave i{height:10px}
         .p08-bar .wave i:nth-child(3n+1){animation-delay:.1s} .p08-bar .wave i:nth-child(3n+2){animation-delay:.3s} .p08-bar .wave i:nth-child(3n){animation-delay:.5s}
 
-        .p08-card{position:absolute;left:24px;right:24px;bottom:196px;box-sizing:border-box;padding:26px 28px 22px;border-radius:34px;background:#121316;color:var(--c-white);font-size:25px;line-height:1.45;z-index:2}
+        .p08-card{position:absolute;left:24px;right:24px;bottom:196px;box-sizing:border-box;padding:26px 28px 22px;border-radius:34px;background:#121316;color:var(--c-white);font-size:22px;line-height:1.45;z-index:4}
         .p08-card small{display:block;margin-top:12px;font-size:19px;color:#a8aab3}
         .p08-card .big{margin:0;font-size:56px;font-weight:300;line-height:1.2}
         .p08-card .tag{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:22px;color:#c9cad2}
@@ -72,11 +68,12 @@
           <div class="guide-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
 
           <div class="phone-frame p08-phone">
-            <div class="p08-screen">
-              <div class="p08-app"><i></i>Assistant</div>
+            <div class="p08-screen app-home">
+              <div class="phone-status"></div>
+              <div class="app-icon is-static"><i style="background:#fff url(img/p08_assistant_logo.png) center / 92% no-repeat"></i>Assistant</div>
               <div class="p08-card is-off" id="p08Card"></div>
               <div class="p08-bar is-off" id="p08Bar"></div>
-              <div class="p08-nav"><span>|||</span><span>○</span><span>‹</span></div>
+              <div class="phone-nav"></div>
             </div>
           </div>
 
@@ -160,11 +157,11 @@
       if (kind === 'listen') {
         let bars = '';
         for (let i = 0; i < 15; i++) bars += '<i></i>';
-        bar.innerHTML = '<span class="plus">+</span><span class="wave">' + bars + '</span><span class="mic">🎤</span>';
+        bar.innerHTML = '<span class="plus">+</span><span class="wave">' + bars + '</span><span class="mic"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21"/></svg></span>';
       } else if (kind === 'wait') {
         bar.innerHTML = '<span class="say">' + label.replace(/…$/, '<b class="dots"><i>.</i><i>.</i><i>.</i></b>') + '</span><span class="stop"></span>';
       } else {
-        bar.innerHTML = '<span class="plus">+</span><span class="say">Assistant에게 물어보기</span><span class="mic">🎤</span>';
+        bar.innerHTML = '<span class="plus">+</span><span class="say">Assistant에게 물어보기</span><span class="mic"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21"/></svg></span>';
       }
     }
     const setCard = (html) => {

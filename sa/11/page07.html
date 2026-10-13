@@ -10,7 +10,7 @@
            맞게 놓으면 벨트에서 사라지고 아래 칸에 조립, 틀리면(정위치가 아닌 곳·오답 블록) 벨트로 돌아감. 어디서 칸에는 정답 블록이 둘인 라운드가 있어(놀이터/운동장 · 교실/동아리실) 고른 쪽이 문장에 들어감.
            세 칸이 다 차면 완성 팝업(문장 + 다음) */
 
-        .p07-ask{position:absolute;left:50%;top:22px;transform:translateX(-50%);min-height:130px;margin:0;box-sizing:border-box;padding:16px 70px 8px;display:block;text-align:center;white-space:nowrap;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:60px;box-shadow:0 15px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:50px;line-height:1.3;color:var(--c-ink);letter-spacing:-0.05em}
+        .p07-ask{position:absolute;left:50%;top:22px;transform:translateX(-50%);min-height:130px;margin:0;box-sizing:border-box;padding:16px 70px 8px;display:block;text-align:center;white-space:nowrap;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:60px;box-shadow:0 15px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.3;color:var(--c-ink);letter-spacing:-0.05em}
         .p07-ask b{font-weight:normal;color:var(--c-purple)}
         .p07-belt{position:absolute;left:70px;top:250px;width:1780px;height:230px;box-sizing:border-box;border:solid 6px var(--c-ink);border-radius:30px;
           background:repeating-linear-gradient(90deg,#5b5f73 0 60px,#6c7087 60px 120px);box-shadow:inset 0 -12px 0 rgba(0,0,0,.25)}
@@ -18,24 +18,38 @@
         .p07-blocks.is-slide{animation:p07-in .7s cubic-bezier(.2,.8,.2,1)}
         @keyframes p07-in{from{transform:translateX(-1900px)}to{transform:none}}
 
-        .p07-block{position:absolute;top:30px;height:170px;box-sizing:border-box;padding:6px 20px 0;border-radius:24px;background:var(--c-cream);border:solid 5px var(--c-ink);cursor:grab;touch-action:none;z-index:5;
+        .p07-block{--t:20px;position:absolute;top:30px;height:170px;box-sizing:border-box;border-radius:28px;padding:6px 14px 0;background:var(--c-ink);cursor:grab;touch-action:none;z-index:5;
           display:flex;align-items:center;justify-content:center;text-align:center;font-family:'Cafe24 Ssurround';font-size:44px;line-height:1.2;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all}
         .p07-block.is-dragging{cursor:grabbing;z-index:60}
         .p07-block.is-wrong{animation:fix-word-shake .3s ease}
+        .p07-slot > .p07-block.s-who,.p07-slot[data-slot="who"]:before{clip-path:polygon(0 0,calc(100% - var(--t)) 0,calc(100% - var(--t)) 30%,100% 30%,100% 70%,calc(100% - var(--t)) 70%,calc(100% - var(--t)) 100%,0 100%)}
+        .p07-slot > .p07-block.s-where,.p07-slot[data-slot="where"]:before{clip-path:polygon(0 0,calc(100% - var(--t)) 0,calc(100% - var(--t)) 30%,100% 30%,100% 70%,calc(100% - var(--t)) 70%,calc(100% - var(--t)) 100%,0 100%,0 70%,var(--t) 70%,var(--t) 30%,0 30%)}
+        .p07-slot > .p07-block.s-what,.p07-slot[data-slot="what"]:before{clip-path:polygon(0 0,100% 0,100% 100%,0 100%,0 70%,var(--t) 70%,var(--t) 30%,0 30%)}
+        .p07-block:before{content:'';position:absolute;inset:5px;border-radius:23px;z-index:-1;background:linear-gradient(var(--c-cream) 88%,#e3cf98 88%)}
+        .p07-slot > .p07-block.s-who{padding-right:calc(var(--t) + 14px)}
+        .p07-slot > .p07-block.s-where{padding:6px calc(var(--t) + 14px) 0}
+        .p07-slot > .p07-block.s-what{padding-left:calc(var(--t) + 14px)}
 
-        .p07-slots{position:absolute;left:260px;top:620px;width:1400px;height:216px;display:flex;gap:0}
-        .p07-slot{position:relative;flex:1 1 0;box-sizing:border-box;border:dashed 6px #b4b8cc;border-radius:26px;background:rgba(255,255,255,.55);transition:background .15s,border-color .15s}
-        .p07-slot + .p07-slot{margin-left:34px}
-        .p07-slot.is-over{border-color:var(--c-yellow);background:rgba(255,216,61,.25)}
-        .p07-slot[data-slot="who"].is-filled{--c:#9cc8f5}
-        .p07-slot[data-slot="where"].is-filled{--c:#8fdcb8}
-        .p07-slot[data-slot="what"].is-filled{--c:#f59a9a}
-        .p07-slot.is-filled{border-style:solid;border-color:var(--c-ink);background:var(--c)}
-        .p07-slot > .p07-block{position:absolute;left:0!important;top:0!important;width:100%!important;height:100%;border:0;border-radius:20px;background:transparent;cursor:default;font-size:46px}
+        .p07-slots{position:absolute;left:260px;top:620px;width:1436px;height:216px;display:flex;gap:0}
+        .p07-slot{--t:20px;position:relative;flex:1 1 0}
+        .p07-slot:before{content:'';position:absolute;inset:0;z-index:1;background:rgba(255,255,255,.5);transition:background .15s}
+        .p07-slot:after{content:'';position:absolute;inset:0;z-index:3;pointer-events:none}
+        .p07-slot.is-over:before{background:#ffe27a}
+        .p07-slot[data-slot="who"].is-filled:before{background:#9cc8f5}
+        .p07-slot[data-slot="where"].is-filled:before{background:#8fdcb8}
+        .p07-slot[data-slot="what"].is-filled:before{background:#f59a9a}
+        .p07-slot[data-slot="who"]:after{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='452' height='216'%3E%3Cpath d='M3 3H429V65H449V151H429V213H3Z' fill='none' stroke='%23959cbb' stroke-width='6' stroke-dasharray='18 11' stroke-linejoin='miter'/%3E%3C/svg%3E")}
+        .p07-slot[data-slot="who"].is-filled:after{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='452' height='216'%3E%3Cpath d='M3 3H429V65H449V151H429V213H3Z' fill='none' stroke='%231b1738' stroke-width='6' stroke-linejoin='miter'/%3E%3C/svg%3E")}
+        .p07-slot[data-slot="where"]:after{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='452' height='216'%3E%3Cpath d='M3 3H429V65H449V151H429V213H3V151H23V65H3Z' fill='none' stroke='%23959cbb' stroke-width='6' stroke-dasharray='18 11' stroke-linejoin='miter'/%3E%3C/svg%3E")}
+        .p07-slot[data-slot="where"].is-filled:after{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='452' height='216'%3E%3Cpath d='M3 3H429V65H449V151H429V213H3V151H23V65H3Z' fill='none' stroke='%231b1738' stroke-width='6' stroke-linejoin='miter'/%3E%3C/svg%3E")}
+        .p07-slot[data-slot="what"]:after{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='452' height='216'%3E%3Cpath d='M3 3H449V213H3V151H23V65H3Z' fill='none' stroke='%23959cbb' stroke-width='6' stroke-dasharray='18 11' stroke-linejoin='miter'/%3E%3C/svg%3E")}
+        .p07-slot[data-slot="what"].is-filled:after{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='452' height='216'%3E%3Cpath d='M3 3H449V213H3V151H23V65H3Z' fill='none' stroke='%231b1738' stroke-width='6' stroke-linejoin='miter'/%3E%3C/svg%3E")}
+        .p07-slot + .p07-slot{margin-left:40px;transition:transform .4s}
+        .p07-slots.is-joined .p07-slot:nth-child(2){transform:translateX(-60px)}
+        .p07-slots.is-joined .p07-slot:nth-child(3){transform:translateX(-120px)}
+        .p07-slot > .p07-block{position:absolute;left:0!important;top:0!important;width:100%!important;height:100%;border-radius:0;background:none;cursor:default;font-size:46px}
+        .p07-slot > .p07-block:before{display:none}
         .p07-label{position:absolute;top:-82px;left:0;width:100%;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:48px;color:var(--c-purple);letter-spacing:-0.05em}
-        .p07-slots .p07-slot:after{content:'';position:absolute;right:-37px;top:78px;width:34px;height:56px;border-radius:0 10px 10px 0;background:#b4b8cc;z-index:-1}
-        .p07-slots .p07-slot:last-child:after{display:none}
-        .p07-slot.is-filled:after{background:var(--c-ink)}
 
         #p07Done{z-index:120}
     </style>
@@ -49,7 +63,7 @@
           <p class="p07-ask"><b>[누가, 어디서, 무엇을 하는지]</b> 구조에 맞춰<br>단어 블록을 알맞은 위치에 드래그해 보세요.</p>
           <div class="p07-belt"></div>
           <div class="p07-blocks" id="p07Blocks"></div>
-          <div class="p07-slots">
+          <div class="p07-slots" id="p07Slots">
             <div class="p07-slot" data-slot="who"><p class="p07-label">누가</p></div>
             <div class="p07-slot" data-slot="where"><p class="p07-label">어디서</p></div>
             <div class="p07-slot" data-slot="what"><p class="p07-label">무엇을 하는지</p></div>
@@ -58,8 +72,8 @@
           <div class="avatar-modal is-off" id="p07Done">
             <div class="avatar-popup-panel">
               <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
-              <div class="avatar-popup-body is-finish">
-                <p class="avatar-popup-text is-small">인권 존중 포스터를 위한<br>프롬프트를 완성했어요!</p>
+              <div class="avatar-popup-body is-finish is-side">
+                <p class="avatar-popup-text is-small">인권 존중 포스터를 위한 프롬프트를<br>완성했어요!</p>
                 <p class="avatar-popup-sub" id="p07Sentence"></p>
                 <button class="avatar-popup-next card-btn is-popup js-sfx" id="p07Next" data-sound="sound/click.mp3">다음</button>
               </div>
@@ -106,6 +120,7 @@
     let round = 0;
 
     function show() {
+      $('p07Slots').classList.remove('is-joined');
       slots.forEach((s) => {
         s.classList.remove('is-filled', 'is-over');
         delete s.dataset.filled;
@@ -119,6 +134,7 @@
         el.className = 'p07-block';
         el.innerHTML = it.t;
         el.dataset.slot = it.slot || '';
+        el.classList.add('s-' + (it.slot || 'what'));
         el.dataset.text = plain(it.t);
         const w = Math.min(gap - 24, 320);
         el.style.width = w + 'px';
@@ -140,9 +156,10 @@
           card.classList.add('is-wrong');
         },
         onDone: () => {
+          $('p07Slots').classList.add('is-joined');
           const w = slots.map((s) => '[' + s.querySelector('.p07-block').dataset.text + ']');
           $('p07Sentence').innerHTML = w[0] + '+' + w[1] + '<br>+' + w[2] + ' 그려줘';
-          setTimeout(() => $('p07Done').classList.remove('is-off'), 600);
+          setTimeout(() => $('p07Done').classList.remove('is-off'), 900);
         }
       });
     }

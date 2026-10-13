@@ -10,7 +10,7 @@
            왼쪽 캐릭터 말풍선, 가운데 스마트폰 앱 화면(HTML로 그림), 오른쪽 상황 그림(세로형 img/p10_scene_{t1|t1_on|t2|t2_on|t3|t3_on}.png, 마지막 정리 화면만 _on의 가로형 img/p10_scene_{t1|t2|t3}_on_wide.png). page09와 같은 배치.
            실제 연출 화면(성공)은 3초 뒤 자동으로 다음 과제 안내 팝업을 띄움(기획서에 넘어가는 방법 없음). 앱 아이콘 img/p10_icon_{key}.png. 캐릭터는 임시로 sa/06 캐릭터 복사본 */
 
-        .p10-bubble{position:absolute;margin:0;left:30px;top:30px;width:500px;min-height:280px;box-sizing:border-box;padding:28px 26px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;text-align:center;
+        .p10-bubble{position:absolute;margin:0;left:30px;top:auto;bottom:580px;width:500px;box-sizing:border-box;padding:28px 26px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;text-align:center;
           background:var(--c-cream);border:solid 5px var(--c-purple);border-radius:30px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
           font-family:'Cafe24 Ssurround';font-size:36px;line-height:1.3;color:var(--c-purple);letter-spacing:-0.05em;word-break:keep-all;z-index:2}
         .p10-bubble:before{content:'';position:absolute;left:200px;bottom:-58px;width:100px;height:70px;background:url('../../img/common/p_guide_tail.png') 0 0 / contain no-repeat}
@@ -32,9 +32,8 @@
         .p10-done-banner{position:absolute;left:667px;top:720px;width:565px;height:140px;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;
           background:var(--c-ink);border:solid 6px var(--c-yellow);border-radius:55px;font-family:'Cafe24 Ssurround';font-size:40px;color:var(--c-yellow);z-index:5}
 
-        .p10-phone{left:710px;top:24px;width:500px;height:910px}
-        .p10-screen{position:relative;width:100%;height:100%;box-sizing:border-box;padding:70px 22px 20px;border-radius:54px;background:var(--c-pale);font-family:'Pretendard';color:var(--c-ink)}
-        .p10-screen:before{content:'';position:absolute;left:50%;top:18px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:var(--c-ink)}
+        .p10-phone{left:749px;top:21px;width:422px;height:895px}
+        .p10-screen{position:relative;width:100%;height:100%;box-sizing:border-box;padding:56px 18px 60px;background:var(--c-pale);font-family:'Pretendard';color:var(--c-ink)}
         .p10-head{display:flex;align-items:center;justify-content:space-between;height:60px;margin-bottom:14px;font-size:32px;font-weight:700}
         .p10-head span:before{content:'‹';margin-right:16px;font-weight:400}
         .p10-head b{position:relative;font-size:30px;color:var(--c-blue);padding:6px 10px;border-radius:12px;cursor:pointer}
@@ -55,9 +54,9 @@
         .p10-power-row div.is-on{background:#e3edff;border-color:var(--c-blue);color:var(--c-blue)}
         .p10-power-row div.is-on:after{border:0;background:var(--c-blue)}
         .p10-power p{margin:0;font-size:20px;color:#6b7080}
-        .p10-row{display:flex;align-items:center;gap:16px;height:112px;margin-bottom:12px;padding:0 20px;box-sizing:border-box;background:var(--c-white);border-radius:22px;font-size:26px;font-weight:600;line-height:1.3}
+        .p10-row{display:flex;align-items:center;gap:14px;height:112px;margin-bottom:12px;padding:0 16px;box-sizing:border-box;background:var(--c-white);border-radius:22px;font-size:24px;font-weight:600;line-height:1.3}
         .p10-row i{flex:0 0 auto;width:60px;height:60px;border-radius:14px;background:var(--c-mist) center / contain no-repeat}
-        .p10-row div{flex:1 1 auto}
+        .p10-row div{flex:1 1 auto;min-width:0;white-space:nowrap}
         .p10-row em{display:inline-block;margin-left:8px;padding:2px 10px;border-radius:10px;background:#ffe1e1;color:#e5484d;font-size:18px;font-style:normal;vertical-align:middle}
         .p10-toggle{flex:0 0 auto;position:relative;width:78px;height:44px;border-radius:22px;background:#c4c9d4;transition:background .3s}
         .p10-toggle:after{content:'';position:absolute;left:5px;top:5px;width:34px;height:34px;border-radius:50%;background:var(--c-white);transition:left .3s}
@@ -87,7 +86,7 @@
           </div>
           <div class="p10-done-banner is-off" id="p10Banner">스마트 홈 시스템 구축 완료!</div>
 
-          <div class="phone-frame p10-phone"><div class="p10-screen" id="p10Screen"></div></div>
+          <div class="phone-frame has-cam p10-phone"><div class="p10-screen" id="p10Screen"></div><div class="phone-status is-dark"></div><div class="phone-nav"></div></div>
 
           <div class="avatar-modal is-off" id="p10Modal">
             <div class="avatar-card is-side">
@@ -202,7 +201,7 @@
       $('p10Banner').classList.toggle('is-off', !s.banner);
       clearFingers();
 
-      if (s.tap) pointFingerAt(screen.querySelector('[data-act="' + s.tap[0] + '"]'));
+      if (s.tap) pointFingerAt(screen.querySelector('[data-act="' + s.tap[0] + '"]'), { onMain: true, x: 0.5 });
       if (s.window) pointFingerAt(win);
       if (s.next) pointFingerAt($('p10Next'));
       if (s.modal || s.auto) {
@@ -223,7 +222,7 @@
       if (el.dataset.act === 'on') el.classList.add('is-on');
       tapIndex += 1;
       if (tapIndex < s.tap.length) {
-        pointFingerAt(screen.querySelector('[data-act="' + s.tap[tapIndex] + '"]'));
+        pointFingerAt(screen.querySelector('[data-act="' + s.tap[tapIndex] + '"]'), { onMain: true, x: 0.5 });
         return;
       }
       clearFingers();

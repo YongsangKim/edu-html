@@ -6,39 +6,98 @@
     <title>Suno와 함께 뚝딱! 나도 경제 뮤지션</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 27~42p. 가운데 Suno 화면은 img/p09_screen_{이름}.png(468x895), 노래 표지 img/p09_cover.png.
-           가사는 앞 활동(sessionStorage 'sa06_lyrics'), 없으면 기획서 30p 가사. 노래는 가사 버전(1·2) x 장르 4 = 8곡 sound/p09_song_v{1|2}_{hiphop|kpop|trot|rock}.mp3.
-           클릭 영역 좌표는 화면 이미지 나오면 조정 */
+        /* 디자인 없음 - 기획서 27~42p. 가운데 Suno 화면은 기획서 캡처를 보고 CSS로 직접 그림(.s6, 497x1075 좌표를 폰 화면 폭에 맞춰 축소), 노래 표지 img/p09_cover.png. 이전 캡처 이미지 방식: _backup_page09.html.
+           가사는 앞 활동(sessionStorage 'sa06_lyrics'), 없으면 기획서 30p 가사. 노래는 가사 버전(1·2) x 장르 4 = 8곡 sound/p09_song_v{1|2}_{hiphop|kpop|trot|rock}.mp3. */
 
         .p09-bubble{left:132px;bottom:620px;width:553px;padding:30px 16px;font-size:42px;z-index:5}
         .p09-character{left:170px;top:360px;width:480px;height:580px}
 
-        .p09-screen{position:absolute;left:721px;top:21px;width:468px;height:895px;box-sizing:border-box;border:solid 8px var(--c-ink);border-radius:40px;background:var(--c-white) center / cover no-repeat;overflow:hidden}
-        .p09-field{position:absolute;left:739px;width:432px;box-sizing:border-box;padding:14px 18px;background:var(--c-pale);border:solid 3px #b9b3dd;border-radius:14px;
-          font-family:'Pretendard';font-size:24px;line-height:1.45;font-weight:600;color:var(--c-ink);white-space:pre-line;overflow:hidden}
-        .p09-lyrics{top:287px;height:180px}
-        .p09-lyrics:after{content:'⛶';position:absolute;right:8px;bottom:6px;width:46px;height:46px;border-radius:12px;background:var(--c-white);border:2px solid #b9b3dd;display:flex;align-items:center;justify-content:center;font-size:30px;line-height:1;color:var(--c-ink)}
-        .p09-style{top:603px;height:77px;display:flex;align-items:center;font-size:30px}
-        .p09-full{position:absolute;left:737px;top:40px;width:436px;height:770px;box-sizing:border-box;padding:24px 26px;background:var(--c-white);border-radius:24px;overflow-y:auto;
-          font-family:'Pretendard';font-size:23px;line-height:1.55;font-weight:600;color:var(--c-ink);white-space:pre-line}
-        .p09-tool{position:absolute;width:80px;height:80px;border:solid 4px var(--c-ink);border-radius:50%;background:var(--c-cream);font-size:40px;line-height:1;cursor:pointer;padding:0;z-index:6}
-        .p09-tool:disabled{opacity:.3;cursor:default}
+        .p09-phone{left:749px;top:21px;width:422px;height:895px}
+        .p09-home{left:757px;top:29px;width:406px;height:879px;border-radius:32px;background:#fff}
+
+        /* Suno 앱 화면을 CSS로 다시 그림(기획서 캡처 기준 497x1075 좌표, 폰 화면 폭 406px에 맞춰 .817배) */
+        .s6{position:absolute;inset:0;overflow:hidden;font-family:'Pretendard';color:#111;background:#f7f3ee}
+        .s6-ui{position:absolute;left:0;top:0;width:497px;height:1075px;transform:scale(.8169);transform-origin:0 0;letter-spacing:-0.01em}
+        .s6-ui .a{position:absolute;box-sizing:border-box}
+        .s6 svg{display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+        .s6-bg{background:linear-gradient(180deg,#dac9c7 0%,#d6cad2 45%,#e3dde7 78%,#f2eef0 100%)}
+        .s6-cream{background:#f7f3ee}
+        .s6-st{left:0;top:0;width:497px;height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 25px;font-size:19px;font-weight:500}
+        .s6-st .sys{display:flex;align-items:center;gap:7px}
+        .s6-st .sys svg{width:21px;height:21px}
+        .s6-st em{font-style:normal;font-size:14px;font-weight:700;padding:1px 9px;border-radius:12px;background:#7a7678;color:#fff}
+        .s6-st .rec{display:inline-block;width:44px;height:26px;border-radius:13px;background:#d5252d;margin:0 10px 0 8px;position:relative;vertical-align:-6px}
+        .s6-st .rec:after{content:'';position:absolute;left:14px;top:6px;width:14px;height:14px;border-radius:50%;border:solid 3px #fff;box-sizing:border-box}
+        .s6-pill{display:flex;align-items:center;justify-content:center;gap:6px;border-radius:24px;background:rgba(255,255,255,.32);border:1px solid rgba(0,0,0,.07);font-size:19px;font-weight:500}
+        .s6-pill svg{width:20px;height:20px}
+        .s6-card{border-radius:26px;background:rgba(140,118,115,.1);border:1px solid rgba(255,255,255,.35);box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+        .s6-card .lab{position:absolute;left:47px;top:38px;font-size:15px;font-weight:500;color:#333}
+        .s6-card .chev{position:absolute;left:22px;top:38px;width:20px;height:20px;color:#444}
+        .s6-ic{position:absolute;width:48px;height:48px;border-radius:50%;background:rgba(0,0,0,.07);display:flex;align-items:center;justify-content:center;color:#222}
+        .s6-ic svg{width:23px;height:23px}
+        .s6-ic.is-wand{background:#14131a;color:#fff}
+        .s6-ic.is-lg{width:50px;height:50px}
+        .s6-ph{position:absolute;left:18px;width:420px;font-size:17px;line-height:26px;color:rgba(0,0,0,.27)}
+        .s6-tx{position:absolute;left:20px;width:420px;font-size:17px;line-height:26px;color:#1a1a1a;overflow:hidden;white-space:pre-line}
+        .s6-chip{position:absolute;height:48px;border-radius:24px;background:rgba(0,0,0,.065);display:flex;align-items:center;justify-content:center;gap:9px;font-size:14px;color:#333}
+        .s6-chip svg{width:22px;height:22px}
+        .s6-make{display:flex;align-items:center;justify-content:center;gap:9px;height:68px;border-radius:34px;font-size:20px;font-weight:500;border:0;padding:0}
+        .s6-make svg{width:23px;height:23px}
+        .s6-nav{left:0;top:944px;width:497px;height:76px}
+        .s6-nav i{position:absolute;top:21px;width:36px;height:34px;color:#444;display:flex;align-items:center;justify-content:center}
+        .s6-nav i svg{width:30px;height:30px}
+        .s6-nav .on{position:absolute;top:10px;width:66px;height:58px;border-radius:29px;background:rgba(0,0,0,.15)}
+        .s6-nav .me{position:absolute;left:431px;top:20px;width:38px;height:38px;border-radius:50%;background:conic-gradient(from 20deg,#f0457f,#f6a43a,#8d5ee8,#f0457f)}
+        .s6-sys{left:0;top:1018px;width:497px;height:57px;color:#444}
+        .s6-sys i{position:absolute;top:16px;width:2px;height:24px;border-radius:2px;background:#555}
+        .s6-sys b{position:absolute;left:236px;top:15px;width:22px;height:22px;box-sizing:border-box;border:solid 2px #555;border-radius:8px}
+        .s6-sys u{position:absolute;left:380px;top:18px;width:14px;height:14px;box-sizing:border-box;border:solid #555;border-width:0 0 2px 2px;transform:rotate(45deg)}
+        .s6-hot{cursor:pointer}
+        .s6-hot:hover{outline:solid 4px #03c75a;outline-offset:3px}
+        .s6-sheet{left:0;top:43px;width:497px;height:1032px;border-radius:28px 28px 0 0;background:#f7f5f0}
+        .s6-fulltx{left:22px;top:169px;width:455px;height:748px;overflow-y:auto;scrollbar-width:none;font-size:17.5px;line-height:26px;white-space:pre-line;color:#111}
+        .s6-fulltx::-webkit-scrollbar{display:none}
+        .s6-tb{left:33px;top:940px;width:366px;height:58px;border-radius:29px;background:#e8e5e3;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+        .s6-tb i{position:absolute;top:13px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:#222;border-radius:50%;cursor:pointer}
+        .s6-tb i svg{width:25px;height:25px}
+        .s6-tb i.is-dis{opacity:.3;pointer-events:none}
+        .s6-check{left:414px;top:944px;width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#f58a3b,#ee3b66);display:flex;align-items:center;justify-content:center;color:#fff;border:0;padding:0;cursor:pointer}
+        .s6-check svg{width:26px;height:26px;stroke-width:2.6}
+        .s6-banner{left:20px;top:53px;width:457px;height:87px;border-radius:44px;color:#fff;font-size:14.5px}
+        .s6-banner .tx{position:absolute;top:0;height:87px;display:flex;align-items:center}
+        .s6-banner .ring{position:absolute;left:397px;top:23px;width:40px;height:40px;box-sizing:border-box;border-radius:50%;border:solid 4px #f0457f;border-top-color:transparent;animation:p09-spin 1s linear infinite}
+        .s6-banner .th{position:absolute;left:25px;top:18px;width:52px;height:52px;border-radius:10px;background:var(--c-purple) url('img/p09_cover.png') center / cover no-repeat}
+        .s6-banner .pl{position:absolute;left:381px;top:15px;width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#f7a41d,#f0457f);display:flex;align-items:center;justify-content:center;color:#fff}
+        .s6-banner .pl svg{width:24px;height:24px;fill:#fff;stroke:none}
+        .s6-tile{top:155px;width:198px;height:158px;border-radius:24px;overflow:hidden;color:#fff;font-size:19px;font-weight:700}
+        .s6-tile span{position:absolute;left:15px;bottom:14px}
+        .s6-tile svg{position:absolute;left:68px;top:40px;width:64px;height:64px;fill:#fff;stroke:none}
+        .s6-row{left:10px;width:478px;height:87px}
+        .s6-row .th{position:absolute;left:20px;top:10px;width:67px;height:67px;border-radius:12px;background:var(--c-purple) url('img/p09_cover.png') center / cover no-repeat}
+        .s6-row .t{position:absolute;left:102px;top:14px;font-size:15.5px;font-weight:500;color:#1a1a1a;white-space:nowrap}
+        .s6-row .t small{margin-left:8px;font-size:11px;font-weight:500;letter-spacing:.06em;color:#9a9aa2}
+        .s6-row .d{position:absolute;left:102px;top:40px;font-size:14px;color:#8d8a90;white-space:nowrap}
+        .s6-row.is-playing .t{color:#e0327b}
+        .s6-row .more{border-radius:50%;position:absolute;left:432px;top:20px;width:40px;height:44px;border:0;background:none;padding:0;color:#222;display:flex;align-items:center;justify-content:center}
+        .s6-row .more svg{width:22px;height:22px;fill:currentColor;stroke:none}
+        .s6-row .more.is-off{display:none}
+        .s6-sk{left:0;width:497px;height:87px}
+        .s6-sk i{position:absolute;left:20px;top:9px;width:67px;height:67px;border-radius:14px;background:#e4e1e1}
+        .s6-sk i:after{content:'';position:absolute;left:21px;top:20px;width:20px;height:26px;border-radius:50%;border:solid 4px #f0457f;border-right-color:transparent;box-sizing:border-box}
+        .s6-sk b{position:absolute;left:102px;top:19px;width:134px;height:14px;border-radius:7px;background:#e4e1e1}
+        .s6-sk u{position:absolute;left:102px;top:43px;width:226px;height:14px;border-radius:7px;background:#e4e1e1}
+        .s6-opt{left:20px;width:457px;height:67px;border-radius:14px;background:rgba(0,0,0,.045);display:flex;align-items:center;padding:0 20px;font-size:16.5px}
+        .s6-opt.is-on{background:#fff;border:solid 2px #1a1a1a;justify-content:space-between}
+        .s6-opt svg{width:22px;height:22px;stroke-width:2.6}
+        .s6-dl{left:20px;top:863px;width:457px;height:68px;border-radius:34px;background:#0c0c0e;color:#fff;font-size:16px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;border:0;padding:0}
+        .s6-dl svg{width:17px;height:17px;fill:currentColor;stroke:none}
         .p09-pulse{animation:p09-pulse .7s ease-in-out 3}
         @keyframes p09-pulse{50%{transform:scale(1.25);box-shadow:0 0 0 12px rgba(255,79,139,.45)}}
 
-        .p09-load{position:absolute;left:1300px;top:407px;width:420px;height:117px;font-size:50px;white-space:nowrap}
-        .p09-genres{position:absolute;left:1384px;top:169px;width:383px;display:flex;flex-direction:column;gap:50px}
-        .p09-genres .card-btn{width:100%;height:117px;font-size:56px}
+        .p09-load{position:absolute;left:1300px;top:50%;transform:translateY(-50%);width:420px;height:90px;padding-top:6px;font-size:48px;white-space:nowrap}
+        .p09-genres{position:absolute;left:1384px;top:50%;transform:translateY(-50%);width:383px;display:flex;flex-direction:column;gap:30px}
+        .p09-genres .card-btn{width:100%;height:90px;padding-top:6px;font-size:52px}
 
-        .p09-ring{position:absolute;left:885px;top:400px;width:140px;height:140px;box-sizing:border-box;border-radius:50%;border:solid 16px #ffd6e2;border-top-color:#ff4f8b;animation:p09-spin .8s linear infinite}
-        @keyframes p09-spin{to{transform:rotate(360deg)}}
-
-        .p09-songs{position:absolute;left:737px;top:340px;width:436px;display:flex;flex-direction:column;gap:14px}
-        .p09-song{position:relative;display:flex;align-items:center;gap:16px;height:70px;padding:0 90px 0 4px;border:0;border-radius:14px;background:var(--c-pale);cursor:pointer;
-          font-family:'Pretendard';font-size:26px;font-weight:700;color:var(--c-ink);text-align:left}
-        .p09-song i{flex:0 0 73px;height:64px;border-radius:10px;background:var(--c-purple) url('img/p09_cover.png') center / cover no-repeat}
-        .p09-song.is-playing{background:#ffd6e2}
-        .p09-song-more{position:absolute;right:8px;top:7px;width:56px;height:56px;border:0;border-radius:50%;background:var(--c-white);font-size:30px;font-weight:700;cursor:pointer;z-index:2}
 
         .p09-final{position:absolute;left:314px;top:196px;width:1293px;height:685px;box-sizing:border-box;background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:60px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
         .p09-final-title{position:absolute;left:0;top:44px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.2;letter-spacing:-0.06em;
@@ -46,7 +105,7 @@
         .p09-final-cover{position:absolute;left:226px;top:92px;width:385px;height:385px;border-radius:30px;background:var(--c-purple) url('img/p09_cover.png') center / cover no-repeat;
           display:flex;align-items:flex-end;justify-content:center;padding-bottom:26px;box-sizing:border-box;font-family:'Cafe24 Ssurround';font-size:46px;color:var(--c-white)}
         .p09-player{position:absolute;left:645px;top:172px;width:518px;height:262px;box-sizing:border-box;padding:30px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;
-          background:var(--c-pale);border:solid 4px var(--c-ink);border-radius:28px;font-family:'Cafe24 Ssurround';font-size:36px;color:var(--c-purple)}
+          background:var(--c-purple);border:solid 4px var(--c-purple);border-radius:28px;font-family:'Cafe24 Ssurround';font-size:36px;color:var(--c-purple)}
         .p09-final-next{position:absolute;left:756px;top:710px}
 
         .p09 .is-off{display:none}
@@ -62,17 +121,12 @@
             <p class="guide-bubble is-center p09-bubble" id="p09Bubble"></p>
             <div class="char-box p09-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
 
-            <div class="p09-screen" id="p09Screen"></div>
-            <div class="p09-field p09-lyrics is-off" id="p09Lyrics"></div>
-            <div class="p09-field p09-style is-off" id="p09Style"></div>
-            <div class="p09-full is-off" id="p09Full"></div>
-            <button type="button" class="p09-tool is-off" id="p09Prev" style="left:754px;top:830px" aria-label="이전 가사">&#9664;</button>
-            <button type="button" class="p09-tool is-off" id="p09Wand" style="left:915px;top:830px" aria-label="마법봉">&#10024;</button>
-            <button type="button" class="p09-tool is-off" id="p09Next2" style="left:1000px;top:830px" aria-label="다음 가사">&#9654;</button>
-            <button type="button" class="p09-tool is-off" id="p09Check" style="left:1090px;top:830px" aria-label="체크">&#10004;</button>
-
-            <div class="p09-ring is-off" id="p09Ring"></div>
-            <div class="p09-songs is-off" id="p09Songs"></div>
+            <div class="phone-frame has-cam p09-phone"><div class="s6" id="p09Screen"></div></div>
+            <div class="app-home p09-home is-off" id="p09Home">
+              <div class="phone-status is-dark"></div>
+              <button type="button" class="app-icon is-dark" id="p09App"><i><img src="img/p09_icon_suno.png" alt="" style="transform:scale(1.08)"></i>Suno</button>
+              <div class="phone-nav"></div>
+            </div>
 
             <button type="button" class="card-btn p09-load is-off" id="p09Load">가사 불러오기</button>
             <div class="p09-genres is-off" id="p09Genres">
@@ -82,7 +136,6 @@
               <button type="button" class="card-btn" data-genre="rock">락</button>
             </div>
 
-            <button type="button" class="hit-area is-off" id="p09Hit" aria-label="클릭"></button>
             <a href="javascript:;" class="js-sfx next-btn is-off" id="p09Next" data-sound="sound/click.mp3">
               <img src="../../img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" alt="다음">
             </a>
@@ -91,9 +144,8 @@
           <div class="is-off" id="p09FinalView">
             <p class="p09-final-title">Suno와 함께 뚝딱!<br>재화와 서비스를 노래로 만들었어요!</p>
             <div class="p09-final">
-              <div class="p09-final-cover">재화와 서비스</div>
+              <div class="p09-final-cover"></div>
               <div class="p09-player">
-                <span>재화와 서비스</span>
                 <img class="video-play-btn" style="position:static;transform:none" src="../../img/common/btn_play.png" id="p09FinalPlay" alt="재생">
               </div>
             </div>
@@ -123,30 +175,186 @@
 
     const bubble = $('p09Bubble');
     const screen = $('p09Screen');
-    const lyricsEl = $('p09Lyrics');
-    const styleEl = $('p09Style');
-    const full = $('p09Full');
-    const hit = $('p09Hit');
     const nextBtn = $('p09Next');
-    const tools = { prev: $('p09Prev'), wand: $('p09Wand'), next: $('p09Next2'), check: $('p09Check') };
 
     const state = { ver: 0, shownVer: 0, genre: '' };
     let audio = null;
 
-    const ALL = ['p09Lyrics', 'p09Style', 'p09Full', 'p09Prev', 'p09Wand', 'p09Next2', 'p09Check', 'p09Ring', 'p09Songs', 'p09Load', 'p09Genres', 'p09Hit', 'p09Next'];
-    function show(bubbleHtml, screenName, ids) {
+    const ALL = ['p09Load', 'p09Genres', 'p09Next'];
+    const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const sv = (d, extra) => '<svg viewBox="0 0 24 24"' + (extra || '') + '>' + d + '</svg>';
+    const IC = {
+      chev: sv('<path d="M6 9l6 6 6-6"/>'),
+      plus: sv('<path d="M12 5v14M5 12h14"/>'),
+      wand: sv('<path d="M4 20L14 10"/><path d="M13 7l4 4"/><path d="M18 3v4M16 5h4M21 11v3M19.5 12.5h3M8 3v3M6.5 4.5h3"/>'),
+      undo: sv('<path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/>'),
+      redo: sv('<path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 000 12h3"/>'),
+      mark: sv('<path d="M7 4h10v17l-5-4-5 4z"/>'),
+      trash: sv('<path d="M5 7h14M9 7V4h6v3M7 7l1 13h8l1-13M10 11v6M14 11v6"/>'),
+      lib: sv('<path d="M5 4v16M9 4v16M13 5l5 15"/>'),
+      expand: sv('<path d="M4 9V4h5M20 15v5h-5M20 9V4h-5M4 15v5h5"/>'),
+      refresh: sv('<path d="M20 12a8 8 0 01-14 5.3M4 12a8 8 0 0114-5.3M18 3v4h-4M6 21v-4h4"/>'),
+      note: sv('<path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/>'),
+      noteStar: sv('<path d="M9 19V6l9-2v13"/><circle cx="6.5" cy="19" r="2.5"/><circle cx="15.5" cy="17" r="2.5"/><path d="M20 3v3M18.5 4.5h3"/>'),
+      play: sv('<rect x="3.5" y="4.5" width="17" height="15" rx="3"/><path d="M10 9l5 3-5 3z"/>'),
+      search: sv('<circle cx="11" cy="11" r="6.5"/><path d="M16 16l5 5"/>'),
+      mute: sv('<path d="M4 9v6h4l5 4V5L8 9zM17 9l4 6M21 9l-4 6"/>'),
+      wifi: sv('<path d="M2 9a15 15 0 0120 0M5 12.5a10 10 0 0114 0M8.5 16a5 5 0 017 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/>'),
+      sig: sv('<path d="M4 20V14M9 20V10M14 20V6M19 20V3"/>'),
+      check: sv('<path d="M5 12.5l4.5 4.5L19 7"/>'),
+      dots: sv('<circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>'),
+      lock: sv('<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>'),
+      share: sv('<circle cx="6" cy="12" r="2.2"/><circle cx="17" cy="6" r="2.2"/><circle cx="17" cy="18" r="2.2"/><path d="M8 11l7-4M8 13l7 4"/>'),
+      funnel: sv('<path d="M3 5h18l-7 8v6l-4-2v-4z"/>'),
+      thumb: sv('<path d="M7 11v9H4v-9zM7 11l4-7c1.6 0 2.6 1.1 2.1 3l-.6 3H19a2 2 0 012 2.3l-1 6A2 2 0 0118 20H7"/>')
+    };
+
+    const A = (cls, style, inner) => '<div class="a ' + (cls || '') + '" style="' + (style || '') + '">' + (inner || '') + '</div>';
+    const circ = (cls, left, top, ic, id) => '<button type="button" class="a s6-ic ' + cls + '" ' + (id ? 'id="' + id + '" ' : '') + 'style="left:' + left + 'px;top:' + top + 'px;border:0;padding:0">' + ic + '</button>';
+
+    function status(time, rec) {
+      return A('s6-st', '', '<span>' + time + (rec ? '<i class="rec"></i>' + IC.expand.replace('<svg', '<svg style="display:inline-block;width:20px;height:20px;vertical-align:-4px"') : '') + '</span><span class="sys">' + IC.mute + IC.wifi + IC.sig + '<em>64</em></span>');
+    }
+    function nav(active) {
+      const xs = [46, 147, 248, 349];
+      const icons = [IC.play, IC.search, IC.noteStar, IC.lib];
+      const pos = { create: 248, lib: 349 }[active];
+      let h = '<div class="a s6-nav">';
+      h += '<div class="on" style="left:' + (pos - 33) + 'px"></div>';
+      xs.forEach((x, k) => { h += '<i style="left:' + (x - 18) + 'px">' + icons[k] + '</i>'; });
+      return h + '<div class="me"></div></div>';
+    }
+    function sysnav() {
+      return A('s6-sys', '', '<i style="left:99px"></i><i style="left:107px"></i><i style="left:115px"></i><b></b><u></u>');
+    }
+
+    // 만들기 화면: o.lyr(가사 글), o.sty(스타일 글), o.dim(전체화면 가사 뒤 어둡게)
+    function createUI(o) {
+      o = o || {};
+      const filled = !!o.lyr;
+      const H1 = filled ? 348 : 270;
+      const T2 = 227 + H1 + 20;
+      const T3 = T2 + 250 + 20;
+      const hasSty = !!o.sty;
+      let h = status('13:13');
+      h += A('', 'left:145px;top:62px;width:200px;height:40px;display:flex;align-items:center;justify-content:center;gap:5px;font-size:21px;font-weight:600', '고급의' + IC.chev.replace('<svg', '<svg style="width:20px;height:20px"'));
+      h += A('s6-pill', 'left:370px;top:60px;width:105px;height:45px;font-size:14px;font-weight:500', 'v6-mini' + IC.chev.replace('<svg', '<svg style="width:16px;height:16px"'));
+      h += A('s6-pill', 'left:20px;top:140px;width:223px;height:67px', IC.plus + '오디오');
+      h += A('s6-pill', 'left:254px;top:140px;width:223px;height:67px', IC.plus + '목소리');
+
+      // 가사 카드
+      let c1 = '<div class="chev">' + IC.chev + '</div><div class="lab">가사</div>';
+      if (filled) {
+        c1 += circ('', 223, 24, IC.undo) + circ('', 279, 24, IC.mark) + circ('', 337, 24, IC.trash);
+        c1 += '<div class="s6-tx" id="s6LyrTx" style="top:93px;height:156px">' + esc(o.lyr) + '</div>';
+      } else {
+        c1 += '<div class="s6-ph" style="top:80px">가사나 주제를 적어보세요</div>';
+      }
+      c1 += circ('is-wand', 396, 24, IC.wand, 's6Wand1');
+      const br1 = filled ? 275 : 197;
+      c1 += A('s6-ic', 'left:22px;top:' + br1 + 'px;width:50px;height:50px', IC.lib);
+      c1 += A('s6-chip', 'left:87px;top:' + (br1 + 1) + 'px;width:146px;background:rgba(255,255,255,.4);border:1px solid rgba(0,0,0,.08)', '<svg viewBox="0 0 24 24" style="fill:#111;stroke:none"><circle cx="12" cy="12" r="10"/><path d="M7 12.5l3.5 3.5L17 9" stroke="#fff" stroke-width="2.6" fill="none"/></svg>인스트루멘탈');
+      c1 += '<button type="button" id="s6Exp1" class="a s6-ic" style="left:388px;top:' + br1 + 'px;width:50px;height:50px;border:0;padding:0;background:none">' + IC.expand + '</button>';
+      h += A('s6-card s6-lyr', 'left:20px;top:227px;width:457px;height:' + H1 + 'px', c1).replace('class="a s6-card s6-lyr"', 'class="a s6-card' + (o.lyrHot ? ' s6-hot' : '') + '" id="s6Lyr"');
+
+      // 스타일 카드
+      let c2 = '<div class="chev">' + IC.chev + '</div><div class="lab">스타일</div>';
+      if (hasSty) {
+        c2 += circ('', 223, 24, IC.undo) + circ('', 279, 24, IC.mark) + circ('', 337, 24, IC.trash);
+        c2 += '<div class="s6-tx" style="top:94px;height:80px">' + esc(o.sty) + '</div>';
+      } else {
+        c2 += '<div class="s6-ph" style="top:80px">당신이 만들고 싶은 노래가 어떤 느낌이었으면 좋겠는지 설명해주세요.</div>';
+      }
+      c2 += circ('is-wand', 396, 24, IC.wand);
+      c2 += A('s6-ic', 'left:22px;top:178px;width:50px;height:50px', IC.lib);
+      c2 += A('s6-ic', 'left:86px;top:178px;width:50px;height:50px', IC.refresh);
+      c2 += A('s6-chip', 'left:152px;top:179px;width:98px', 'hip hop');
+      c2 += A('s6-chip', 'left:262px;top:179px;width:123px', 'acoustic guitar');
+      c2 += A('s6-ic', 'left:388px;top:178px;width:50px;height:50px;background:none', IC.expand);
+      h += A('s6-card' + (o.styHot ? ' s6-hot' : ''), 'left:20px;top:' + T2 + 'px;width:457px;height:250px', c2).replace('<div class="a s6-card', '<div id="s6Sty" class="a s6-card');
+
+      // 곡 제목
+      if (!filled) h += A('s6-card', 'left:20px;top:' + T3 + 'px;width:457px;height:58px;border-radius:22px;background:rgba(140,118,115,.07)', '<div style="position:absolute;left:22px;top:17px;width:24px;height:24px;color:#222">' + IC.note + '</div><div style="position:absolute;left:60px;top:0;height:58px;display:flex;align-items:center;font-size:15px;color:rgba(0,0,0,.35)">곡 제목</div>');
+
+      // 만들기 버튼
+      if (hasSty) {
+        h += circ('', 20, 872, IC.trash).replace('style="', 'style="width:68px;height:68px;background:#76757a;color:#111;');
+        h += '<button type="button" id="s6Make" class="a s6-make' + (o.makeHot ? ' s6-hot' : '') + '" style="left:98px;top:872px;width:379px;background:linear-gradient(90deg,#f6b43a,#f58a3b 55%,#ee3b66);color:#fff">' + IC.noteStar + '만들기</button>';
+      } else {
+        h += A('s6-make', 'left:19px;top:872px;width:458px;background:#4c4c4f;color:#b6b6ba', IC.noteStar + '만들기');
+      }
+      h += nav('create') + sysnav();
+      if (o.dim) h += A('', 'left:0;top:0;width:497px;height:1075px;background:rgba(75,64,74,.6)');
+      return h;
+    }
+
+    // 전체화면 가사: v(0|1), 두 번째 버전을 비교할 때 이전·다음 버튼이 켜짐
+    function fullUI(v, o) {
+      o = o || {};
+      let h = A('', 'left:0;top:0;width:497px;height:1075px;background:#938b90') + status('13:13');
+      h += A('s6-sheet', '', '');
+      h += A('', 'left:230px;top:64px;width:38px;height:5px;border-radius:3px;background:#d4d0d0');
+      h += A('', 'left:22px;top:106px;font-size:28px;font-weight:600', '가사');
+      h += '<div class="a s6-fulltx" id="s6FullTx">' + esc(VERSIONS[v]) + '</div>';
+      const ic = [['s6Prev', IC.undo, 73], ['s6Next2', IC.redo, 130], [null, IC.lib, 188], [null, IC.mark, 246], [null, IC.trash, 304], ['s6Wand', IC.wand, 362]];
+      h += '<div class="a s6-tb">' + ic.map((t) => '<i ' + (t[0] ? 'id="' + t[0] + '" ' : '') + 'style="left:' + (t[2] - 33 - 16) + 'px">' + t[1] + '</i>').join('') + '</div>';
+      h += '<button type="button" id="s6Check" class="a s6-check">' + IC.check + '</button>';
+      h += A('', 'left:0;top:1018px;width:497px;height:57px;background:#fff') + sysnav();
+      return h;
+    }
+
+    function bannerUI(ready) {
+      let h = '<div class="a s6-banner" style="background:' + (ready ? 'linear-gradient(90deg,#6c3112,#7a5a14)' : '#7a2517') + '">';
+      if (ready) h += '<div class="th"></div><div class="tx" style="left:97px">노래가 준비되었습니다. 탭하여 재생하세요!</div><div class="pl">' + sv('<path d="M8 5v14l11-7z"/>') + '</div>';
+      else h += '<div class="tx" style="left:29px">멋진 그루브가 탄생하고 있어요</div><div class="ring"></div>';
+      return h + '</div>';
+    }
+
+    function songsUI(o) {
+      o = o || {};
+      let h = status('13:13', true) + bannerUI(!o.loading);
+      h += A('s6-tile', 'left:40px;background:radial-gradient(circle at 28% 22%,#33b86a 0,transparent 52%),radial-gradient(circle at 80% 90%,#2b80ee 0,transparent 62%),#1f6fe2', IC.thumb + '<span>좋아요</span>');
+      h += A('s6-tile', 'left:252px;background:linear-gradient(135deg,#6a1aa8,#a31f95);', '<div style="position:absolute;left:96px;top:30px;width:92px;height:140px;border-radius:14px;background:linear-gradient(135deg,rgba(255,150,120,.7),rgba(180,40,120,.5));transform:rotate(-12deg)"></div><span>플레이리스트</span>');
+      h += A('', 'left:20px;top:336px;font-size:19px;font-weight:500', '내 노래');
+      h += A('', 'left:416px;top:338px;display:flex;align-items:center;gap:5px;font-size:14px;color:#444', '필터' + IC.funnel.replace('<svg', '<svg style="width:18px;height:18px;fill:#444"'));
+      if (o.loading) {
+        [0, 1, 2, 3].forEach((k) => { h += A('s6-sk', 'top:' + (357 + k * 87) + 'px', '<i></i><b></b><u></u>'); });
+      } else {
+        const desc = GENRE_NAME[state.genre] || '';
+        [1, 2].forEach((n, k) => {
+          h += '<div class="a s6-row s6-hot p09-song" data-n="' + n + '" style="top:' + (367 + k * 87) + 'px"><div class="th"></div><div class="t">재화와 서비스<small>V6-MINI</small></div><div class="d">' + esc(desc) + '</div><button type="button" class="more is-off" aria-label="더보기">' + IC.dots + '</button></div>';
+        });
+      }
+      h += nav('lib') + sysnav();
+      return h;
+    }
+
+    function downloadUI() {
+      let h = status('13:13', true) + bannerUI(true);
+      h += A('', 'left:166px;top:150px;width:168px;height:168px;border-radius:12px;background:var(--c-purple) url(img/p09_cover.png) center / cover no-repeat');
+      h += A('', 'left:0;top:332px;width:497px;text-align:center;font-size:19px;font-weight:500', '재화와 서비스');
+      h += A('', 'left:20px;top:389px;font-size:13.5px;color:#777', '다운로드 형식');
+      ['M4A', 'MP3', 'WAV', 'MP4 비디오'].forEach((t, k) => {
+        h += A('s6-opt' + (k === 0 ? ' is-on' : ''), 'top:' + (418 + k * 77) + 'px', t + (k === 0 ? IC.check : ''));
+      });
+      h += '<button type="button" id="s6Dl" class="a s6-dl s6-hot">' + IC.lock + '잠금 해제 및 다운로드</button>';
+      h += A('', 'left:0;top:953px;width:497px;display:flex;align-items:center;justify-content:center;gap:9px;font-size:15.5px;color:#222', IC.share.replace('<svg', '<svg style="width:17px;height:17px"') + '노래 링크로 공유하기');
+      h += sysnav();
+      return h;
+    }
+
+    function show(bubbleHtml, ids, html, bg) {
       bubble.innerHTML = bubbleHtml;
-      screen.style.backgroundImage = "url('img/p09_screen_" + screenName + ".png')";
+      $('p09Home').classList.toggle('is-off', html !== null);
+      screen.innerHTML = html === null ? '' : '<div class="s6-ui ' + (bg || 's6-bg') + '">' + html + '</div>';
       ALL.forEach((id) => $(id).classList.toggle('is-off', !ids.includes(id)));
-      Object.values(tools).forEach((t) => t.classList.remove('p09-pulse'));
       clearFingers();
       resetImageSwap(nextBtn);
     }
-    function guide(rect, then) {
-      hit.style.cssText = 'left:' + rect[0] + 'px;top:' + rect[1] + 'px;width:' + rect[2] + 'px;height:' + rect[3] + 'px';
-      hit.classList.remove('is-off');
-      pointFingerAt(hit);
-      hit.onclick = () => { playClick(); then(); };
+    function on(el, fn, fo) {
+      el.classList.add('s6-hot');
+      el.onclick = (e) => { e.stopPropagation(); playClick(); fn(); };
+      if (fo !== false) pointFingerAt(el, Object.assign({ onMain: true }, fo));
     }
     function pulse(el) {
       el.classList.remove('p09-pulse');
@@ -155,83 +363,77 @@
     }
 
     function stepHome() {
-      show('Suno를 클릭해요.', 'home', []);
-      guide([880, 377, 151, 151], stepLyricsField);
+      show('Suno를 클릭해요.', [], null);
+      $('p09App').onclick = () => { playClick(); stepLyricsField(); };
+      pointFingerAt($('p09App'), { onMain: true, dx: 15, dy: -37 });
     }
     function stepLyricsField() {
-      show('가사 입력창을 클릭해요.', 'create', ['p09Lyrics']);
-      lyricsEl.textContent = '';
-      guide([739, 287, 432, 180], stepLoad);
+      show('가사 입력창을 클릭해요.', [], createUI({}));
+      on($('s6Lyr'), stepLoad, { x: 0.5, dx:120, dy: -50 });
     }
     function stepLoad() {
-      show('재화와 서비스에 대한<br>가사를 만들어볼게요.<br>내가 조립한 가사를 불러와요.', 'create', ['p09Lyrics', 'p09Load']);
-      $('p09Load').onclick = () => { playClick(); lyricsEl.textContent = lyrics; stepWand(); };
+      show('재화와 서비스에 대한<br>가사를 만들어볼게요.<br>내가 조립한 가사를 불러와요.', ['p09Load'], createUI({}));
+      $('p09Load').onclick = () => { playClick(); stepWand(); };
     }
     function stepWand() {
-      show('마법봉을 클릭해요.<br>내가 입력한 내용에 맞게<br>Suno가 가사를 만들어줄 거예요.', 'create', ['p09Lyrics']);
-      guide([1110, 230, 70, 60], stepMade);
+      show('마법봉을 클릭해요.<br>내가 입력한 내용에 맞게<br>Suno가 가사를 만들어줄 거예요.', [], createUI({ lyr: lyrics }));
+      on($('s6Wand1'), stepMade, { x: 0.5, dx: 25 });
     }
     function stepMade() {
       state.shownVer = 0;
-      show('가사가 완성됐어요!<br>전체화면 버튼을 클릭해<br>가사를 자세히 읽어봐요.', 'create', ['p09Lyrics']);
-      lyricsEl.textContent = VERSIONS[0];
-      guide([1110, 420, 60, 60], stepReview);
+      show('가사가 완성됐어요!<br>전체화면 버튼을 클릭해<br>가사를 자세히 읽어봐요.', [], createUI({ lyr: VERSIONS[0] }));
+      on($('s6Exp1'), stepReview, { x: 0.5, dx: 25, dy: -10 });
     }
     function showFull(v) {
       state.shownVer = v;
-      full.textContent = VERSIONS[v];
-      full.scrollTop = 0;
-      tools.prev.disabled = v === 0;
-      tools.next.disabled = v === 1;
+      const t = $('s6FullTx');
+      t.textContent = VERSIONS[v];
+      t.scrollTop = 0;
+      $('s6Prev').classList.toggle('is-dis', v === 0);
+      $('s6Next2').classList.toggle('is-dis', v === 1);
     }
     function stepReview() {
-      show('가사를 다시 만들고 싶다면<br>하단의 마법봉 버튼을, 그대로 사용하고 싶다면 체크 버튼을 클릭해요.', 'full', ['p09Full', 'p09Wand', 'p09Check']);
+      show('가사를 다시 만들고 싶다면<br>하단의 마법봉 버튼을, 그대로 사용하고 싶다면 체크 버튼을 클릭해요.', [], fullUI(0));
       showFull(0);
-      pulse(tools.wand);
-      pulse(tools.check);
-      pointFingerAt(tools.check);
-      tools.wand.onclick = () => { playClick(); stepSecond(); };
-      tools.check.onclick = () => { playClick(); choose(0); };
+      on($('s6Wand'), stepSecond, false);
+      on($('s6Check'), () => choose(0), false);
+      pulse($('s6Wand'));
+      pulse($('s6Check'));
+      pointFingerAt($('s6Check'), { onMain: true, x: 0.5, dx: 25, dy: -10 });
     }
     function stepSecond() {
-      show('두 번째 버전의 가사가<br>만들어졌어요!', 'full', ['p09Full', 'p09Next']);
+      show('두 번째 버전의 가사가<br>만들어졌어요!', ['p09Next'], fullUI(1));
       showFull(1);
       nextBtn.onclick = () => setTimeout(stepCompare, 300);
     }
     function stepCompare() {
-      show('아래의 화살표를 클릭해 가사를 비교해서 읽어보고, 체크 버튼을 눌러 무엇을 사용할 지 결정해요.', 'full', ['p09Full', 'p09Prev', 'p09Next2', 'p09Check']);
+      show('아래의 화살표를 클릭해 가사를 비교해서 읽어보고, 체크 버튼을 눌러 무엇을 사용할 지 결정해요.', [], fullUI(1));
       showFull(1);
-      pulse(tools.prev);
-      pulse(tools.next);
-      pointFingerAt(tools.prev);
-      tools.prev.onclick = () => { playClick(); clearFingers(); showFull(0); };
-      tools.next.onclick = () => { playClick(); clearFingers(); showFull(1); };
-      tools.check.onclick = () => { playClick(); choose(state.shownVer); };
+      on($('s6Prev'), () => { clearFingers(); showFull(0); }, false);
+      on($('s6Next2'), () => { clearFingers(); showFull(1); }, false);
+      on($('s6Check'), () => choose(state.shownVer), false);
+      pulse($('s6Prev'));
+      pulse($('s6Next2'));
+      pointFingerAt($('s6Prev'), { onMain: true, x: 0.5, dy: -5 });
     }
     function choose(v) {
       state.ver = v;
-      show('이제 노래 스타일을<br>입력해볼까요?<br>스타일 입력창을 클릭해요.', 'style', ['p09Lyrics', 'p09Style']);
-      lyricsEl.textContent = VERSIONS[v];
-      styleEl.textContent = '';
-      guide([739, 603, 432, 77], stepGenre);
+      show('이제 노래 스타일을<br>입력해볼까요?<br>스타일 입력창을 클릭해요.', [], createUI({ lyr: VERSIONS[v] }));
+      on($('s6Sty'), stepGenre, { x: 0.5, dx:120, dy: -50 });
     }
     function stepGenre() {
-      show('우리는 다양한 스타일의<br>노래를 만들 수있어요!<br>키워드를 클릭해봐요.', 'style', ['p09Lyrics', 'p09Style', 'p09Genres']);
+      show('우리는 다양한 스타일의<br>노래를 만들 수있어요!<br>키워드를 클릭해봐요.', ['p09Genres'], createUI({ lyr: VERSIONS[state.ver] }));
       $('p09Genres').querySelectorAll('.card-btn').forEach((b) => {
         b.onclick = () => {
           playClick();
           state.genre = b.dataset.genre;
-          styleEl.textContent = GENRE_NAME[state.genre];
-          setTimeout(stepMake, 300);
+          show('이제 모든 준비가 끝났어요.<br>만들기 버튼을 눌러<br>노래를 만들어봐요!', [], createUI({ lyr: VERSIONS[state.ver], sty: GENRE_NAME[state.genre] }));
+          on($('s6Make'), stepLoading, { x: 0.5, dx:100, dy: -25 });
         };
       });
     }
-    function stepMake() {
-      show('이제 모든 준비가 끝났어요.<br>만들기 버튼을 눌러<br>노래를 만들어봐요!', 'style', ['p09Lyrics', 'p09Style']);
-      guide([739, 700, 432, 80], stepLoading);
-    }
     function stepLoading() {
-      show('노래가 만들어지고 있어요.', 'songs', ['p09Ring']);
+      show('노래가 만들어지고 있어요.', [], songsUI({ loading: true }), 's6-cream');
       setTimeout(stepSongs, 2000);
     }
     function songSrc() { return 'sound/p09_song_v' + (state.ver + 1) + '_' + state.genre + '.mp3'; }
@@ -241,14 +443,12 @@
       audio.play().catch(() => {});
     }
     function stepSongs() {
-      show('완성됐어요!<br>노래를 클릭해<br>하나씩 들어볼까요?', 'songs', ['p09Songs']);
-      const box = $('p09Songs');
-      box.innerHTML = [1, 2].map((n) => '<div class="p09-song" data-n="' + n + '"><i></i>재화와 서비스<button type="button" class="p09-song-more is-off" aria-label="더보기">&#8942;</button></div>').join('');
-      const rows = Array.from(box.children);
-      pointFingerAt(rows[0]);
+      show('완성됐어요!<br>노래를 클릭해<br>하나씩 들어볼까요?', [], songsUI(), 's6-cream');
+      const rows = Array.from(screen.querySelectorAll('.p09-song'));
+      pointFingerAt(rows[0], { onMain: true, x: 0.4, dx: 70, dy: -45 });
       let played = false;
       rows.forEach((row) => row.addEventListener('click', (e) => {
-        if (e.target.closest('.p09-song-more')) return;
+        if (e.target.closest('.more')) return;
         rows.forEach((r) => r.classList.toggle('is-playing', r === row));
         play();
         if (!played) {
@@ -261,16 +461,16 @@
       bubble.innerHTML = '마음에 드는 노래를<br>선택해 다운로드 해봐요.';
       clearFingers();
       rows.forEach((row) => {
-        const more = row.querySelector('.p09-song-more');
+        const more = row.querySelector('.more');
         more.classList.remove('is-off');
         pulse(more);
-        more.onclick = () => { playClick(); stepDownload(); };
+        more.onclick = (e) => { e.stopPropagation(); playClick(); stepDownload(); };
       });
-      pointFingerAt(rows[0].querySelector('.p09-song-more'));
+      pointFingerAt(rows[0].querySelector('.more'), { onMain: true, x: 0.5, dx: 25, dy: -5 });
     }
     function stepDownload() {
-      show('다운로드 버튼을 클릭해요.', 'download', []);
-      guide([760, 760, 390, 80], stepFinal);
+      show('다운로드 버튼을 클릭해요.', [], downloadUI(), 's6-cream');
+      on($('s6Dl'), stepFinal, { x: 0.8, dy: -25 });
     }
     function stepFinal() {
       if (audio) audio.pause();

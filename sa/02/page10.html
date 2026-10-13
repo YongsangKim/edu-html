@@ -14,9 +14,6 @@
 
         /* 앱 아이콘 크기·위치는 sa/07 page09(Google 렌즈 앱)와 같게 */
         .cv-home{position:absolute;inset:0;z-index:20;background:linear-gradient(160deg,#9fd8f0,#b9a8f5 55%,#f3b6d8)}
-        .cv-home button{position:absolute;left:50%;top:44%;width:110px;height:110px;margin-left:-55px;padding:0;border:0;background:none;border-radius:28px;cursor:pointer}
-        .cv-home button img{display:block;width:100%;height:100%;border-radius:28px;box-shadow:0 6px 14px rgba(0,0,0,.2);transition:transform .15s}
-        .cv-home button:hover img{transform:scale(1.06)}
         .cv-home .is-target{animation:none}
 
         .cv-app{position:absolute;inset:0;z-index:20;background:linear-gradient(180deg,#d8eefa,#efe9ff 30%,var(--c-white) 50%)}
@@ -128,7 +125,7 @@
           <p class="guide-bubble" id="p10Bubble"></p>
           <div class="guide-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
 
-          <div class="cv" id="p10Phone" data-screen="phone">
+          <div class="cv cam-hole" id="p10Phone" data-screen="phone">
             <div class="cv-top">
               <svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-5h4v5"/></svg>
               <svg class="cv-undo" viewBox="0 0 24 24"><path d="M9 13L4 8l5-5"/><path d="M4 8h10a6 6 0 010 12h-3"/></svg>
@@ -224,8 +221,10 @@
               </div>
             </div>
 
-            <div class="cv-home">
-              <button type="button" data-hit="canva"><img src="img/p10_canva_icon.png" alt="Canva"></button>
+            <div class="cv-home app-home">
+              <div class="phone-status"></div>
+              <button type="button" class="app-icon" data-hit="canva"><i><img src="img/p10_canva_icon.png" alt=""></i>Canva</button>
+              <div class="phone-nav"></div>
             </div>
           </div>
 
@@ -348,7 +347,7 @@
         const at = index;
         const point = () => {
           if (index !== at) return;
-          pointFingerAt(target, { onMain: true });
+          pointFingerAt(target, step.hit === 'canva' ? { onMain: true, dx: 15, dy: -37 } : { onMain: true });
           // 하단 탭·버튼을 가리킬 때 손가락이 화면(960px) 아래로 잘리지 않게
           document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.top = Math.min(parseFloat(f.style.top), 850) + 'px'; });
         };
