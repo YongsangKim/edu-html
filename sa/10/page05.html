@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>브이로그에 담을 장면 고르기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서 16~32p. 5문제(도서관·마트·우체국·공원·영화관): 소개할 내용에 맞는 장면 카드 3장 중 고르기(오답 → 힌트 팝업) → 그 장면을 고른 이유 2가지 중 고르기(오답 → 힌트 팝업, 정답 → 설명 팝업 [다음]) → 5문제를 마치면 고른 장면 5장 모아 보기.
+           장면 삽화는 임시 이모지 그림(img/p05_q{문제}_{카드}.jpg, 정답 카드는 2번·2번·3번·2번·3번 — 실제 이미지는 지나가는 행인의 얼굴이 함께 나오도록 제작, 같은 파일명으로 교체) */
+
+        .p05-row{position:absolute;left:0;top:250px;width:1920px;display:flex;justify-content:center;gap:34px}
+        .p05-card{position:relative;display:flex;flex-direction:column;justify-content:flex-start;width:560px;height:456px;box-sizing:border-box;padding:0;overflow:hidden;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:24px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);cursor:pointer;font-family:'Cafe24 Ssurround'}
+        .p05-card img{display:block;width:100%;height:366px;object-fit:cover}
+        .p05-card span{position:absolute;left:0;right:0;bottom:0;height:80px;box-sizing:border-box;padding:6px 16px 0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:40px;line-height:1.2;letter-spacing:-0.1em;color:var(--c-ink);white-space:nowrap}
+        @media (hover:hover){.p05-card:not(.is-fixed):hover{border-color:var(--c-purple);box-shadow:0 0 0 6px rgba(92,61,240,.3)}}
+        .p05-card.is-wrong{animation:fix-word-shake .3s ease}
+        .p05-card.is-selected{border-color:#ff4ff9;box-shadow:0 0 0 6px #ff4ff9}
+        .p05-card.is-fixed{cursor:default}
+
+        .p05-next{position:absolute;right:90px;bottom:60px;min-width:0;width:240px;display:flex;align-items:center;justify-content:center;text-decoration:none}
+        .p05-pick{position:absolute;left:150px;top:210px;width:760px;height:620px}
+        .p05-pick .p05-card{width:760px;height:620px;cursor:default}
+        .p05-pick .p05-card img{height:520px}
+        .p05-pick .p05-card span{height:90px;font-size:48px}
+        .p05-reasons{position:absolute;left:990px;top:210px;width:780px;display:flex;flex-direction:column;gap:30px}
+        .p05-reasons .p05-card{width:780px;height:295px}
+        .p05-reasons .p05-card{flex-direction:row}
+        .p05-reasons .p05-card img{width:380px;height:100%}
+        .p05-reasons .p05-card span{position:static;flex:1;height:auto;padding:6px 16px 0;font-size:44px;line-height:1.25;white-space:normal;word-break:keep-all}
+        .p05-pick .p05-card{border-color:#ff4ff9;box-shadow:0 0 0 6px #ff4ff9}
+
+        .p05-grid{position:absolute;left:0;top:250px;width:1920px;display:flex;flex-direction:column;align-items:center;gap:34px}
+        .p05-grid-row{display:flex;gap:34px}
+        .p05-grid .p05-card{width:450px;height:300px;cursor:default}
+        .p05-grid .p05-card img{height:210px}
+        .p05-grid .p05-card span{height:80px;font-size:30px}
+
+        .p05 .is-off{display:none}
+        #p05Hint,#p05Why,#p05Done{z-index:120}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default p05">
+          <p class="ask-pill is-small is-fit"><span id="p05Ask"></span></p>
+          <div class="p05-row" id="p05Row"></div>
+
+          <div class="p05-pick is-off" id="p05Pick"></div>
+          <div class="p05-reasons is-off" id="p05Reasons"></div>
+
+          <div class="p05-grid is-off" id="p05Grid"></div>
+          <a href="page06.html" class="js-nav-effect js-sfx card-btn is-popup p05-next is-off" id="p05Next" data-sound="sound/click.mp3">다음</a>
+
+          <div class="avatar-modal is-wrong is-off" id="p05Hint">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-sub" id="p05HintText"></p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p05HintOk" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p05Why">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-sub" id="p05WhyText"></p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p05WhyNext" data-sound="sound/click.mp3">다음</button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="브이로그에 담을 장면 고르기" data-next="page06.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const QS = [
+      { ask: '처음 온 친구에게 책을 빌리는 모습을 보여주려고 해요.<br>어떤 장면을 담아볼까요?',
+        cards: ['도서관 이름이 보이는 장면', '대출대에서 책을 빌리는 장면', '책상에서 책을 읽는 장면'], ans: 1,
+        hint: '책을 빌리는 방법을 알려주고 싶어요.<br>대출대에서 책을 빌리는 장면을 찾아보세요.',
+        reasons: [['도서관 이름을 볼 수 있어서', '대출대에서 책을 빌리는 장면에서는 도서관의 이름을 볼 수 없어요.'], ['책을 빌리는 모습을 볼 수 있어서', '']], rans: 1,
+        done: '책을 빌리는 모습을 보여주면<br>처음 온 친구가 도서관을 이용하는 데 도움이 돼요.' },
+      { ask: '친구에게 마트에서 파는 사과의 가격을 알려주려고 해요.<br>어떤 장면을 담아볼까요?',
+        cards: ['마트 이름이 보이는 장면', '사과와 가격표가 함께 보이는 장면', '마트의 장바구니가 놓인 장면'], ans: 1,
+        hint: '친구에게 알려주려는 것은 사과의 가격이에요.<br>가격을 확인할 수 있는 장면을 찾아보세요.',
+        reasons: [['마트의 이름을 확인할 수 있어서', '사과와 가격표가 함께 보이는 장면에서는 마트의 이름을 알 수 없어요.'], ['사과의 가격을 확인할 수 있어서', '']], rans: 1,
+        done: '사과와 가격표를 함께 보여주면<br>어떤 물건이 얼마인지 알 수 있어요.' },
+      { ask: '친구에게 우체국에서 편지를 보내는 모습을 보여주려고 해요. 어떤 장면을 담아볼까요?',
+        cards: ['우체국 건물이 보이는 장면', '우체국의 대기 의자가 보이는 장면', '창구에서 편지를 접수하는 장면'], ans: 2,
+        hint: '이번에는 편지를 보내는 모습을 소개해요.<br>편지를 접수하는 장면을 찾아보세요.',
+        reasons: [['편지를 보내는 모습을 볼 수 있어서', ''], ['기다리는 자리를 볼 수 있어서', '창구에서 편지를 접수하는 장면에서는 기다리는 자리를 볼 수 없어요.']], rans: 0,
+        done: '창구에서 편지를 접수하는 장면을 보여주면<br>편지를 보내는 모습을 알 수 있어요.' },
+      { ask: '친구에게 공원의 산책길이 어떤 모습인지 보여주려고 해요. 어떤 장면을 담아볼까요?',
+        cards: ['꽃 한 송이를 가까이 찍은 장면', '길이 잘 보이는 산책길 장면', '공원 이름이 적힌 표지판'], ans: 1,
+        hint: '이번에는 꽃이나 공원 이름이 아니라 걸어갈 길을 소개해요.<br>길이 잘 보이는 장면을 찾아보세요.',
+        reasons: [['걸어갈 길의 모습을 볼 수 있어서', ''], ['꽃의 모양을 자세히 볼 수 있어서', '길이 잘 보이는 산책길 장면에서는 꽃의 모양을 자세히 보기 어려워요.']], rans: 0,
+        done: '산책길을 보여주면 친구가 어떤 길을 걷게 될지<br>미리 살펴볼 수 있어요.' },
+      { ask: '친구에게 영화관 2관 입구를 보여주려고 해요. 어떤 장면을 담아볼까요?',
+        cards: ['영화 포스터를 가까이 찍은 장면', '팝콘을 파는 매점 장면', '‘2관’ 표시와 출입문이 보이는 장면'], ans: 2,
+        hint: '친구는 2관 입구를 찾고 있어요.<br>상영관 번호와 문이 함께 보이는 장면을 찾아보세요.',
+        reasons: [['어떤 영화를 상영하는지 알 수 있어서', '상영관 번호와 문이 보이는 장면에서는 어떤 영화를 상영하는지 알 수 없어요.'], ['들어갈 상영관을 확인할 수 있어서', '']], rans: 1,
+        done: '2관 표시와 출입문을 함께 보여주면<br>친구가 들어갈 곳을 찾는 데 도움이 돼요.' }
+    ];
+    const SUMMARY = [[0, 1], [4, 2], [3, 1], [1, 1], [2, 2]];
+    const ask = $('p05Ask'), row = $('p05Row'), pick = $('p05Pick'), reasons = $('p05Reasons'), grid = $('p05Grid');
+    let qi = 0, busy = false;
+
+    const img = (q, k) => 'img/p05_q' + (q + 1) + '_' + (k + 1) + '.jpg';
+    const cardEl = (q, k, cls) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'p05-card' + (cls ? ' ' + cls : '');
+      b.innerHTML = '<img src="' + img(q, k) + '" alt=""><span>' + QS[q].cards[k] + '</span>';
+      return b;
+    };
+    const hide = (...els) => els.forEach((e) => e.classList.add('is-off'));
+    const show = (...els) => els.forEach((e) => e.classList.remove('is-off'));
+
+    function showHint(html) {
+      $('p05HintText').innerHTML = html;
+      show($('p05Hint'));
+    }
+
+    function startQuestion() {
+      const Q = QS[qi];
+      busy = false;
+      ask.innerHTML = Q.ask;
+      hide(pick, reasons, grid, $('p05Next'));
+      show(row);
+      row.innerHTML = '';
+      Q.cards.forEach((t, k) => {
+        const c = cardEl(qi, k);
+        c.addEventListener('click', () => {
+          if (busy) return;
+          if (k !== Q.ans) {
+            playWrong();
+            c.classList.add('is-wrong');
+            setTimeout(() => c.classList.remove('is-wrong'), 400);
+            showHint(Q.hint);
+            return;
+          }
+          busy = true;
+          playCorrect();
+          c.classList.add('is-selected');
+          setTimeout(startReason, 1100);
+        });
+        row.appendChild(c);
+      });
+    }
+
+    function startReason() {
+      const Q = QS[qi];
+      busy = false;
+      ask.innerHTML = '이 장면을 고른 이유는 무엇인가요?';
+      hide(row);
+      pick.innerHTML = '';
+      pick.appendChild(cardEl(qi, Q.ans, 'is-fixed'));
+      reasons.innerHTML = '';
+      Q.reasons.forEach(([t, wrong], k) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'p05-card';
+        b.innerHTML = '<img src="img/p05_r' + (qi + 1) + '_' + (k + 1) + '.jpg" alt=""><span>' + t + '</span>';
+        b.addEventListener('click', () => {
+          if (busy) return;
+          if (k !== Q.rans) {
+            playWrong();
+            b.classList.add('is-wrong');
+            setTimeout(() => b.classList.remove('is-wrong'), 400);
+            showHint(wrong);
+            return;
+          }
+          busy = true;
+          playCorrect();
+          b.classList.add('is-selected');
+          setTimeout(() => { $('p05WhyText').innerHTML = Q.done; show($('p05Why')); }, 700);
+        });
+        reasons.appendChild(b);
+      });
+      show(pick, reasons);
+    }
+
+    function summary() {
+      ask.innerHTML = '소개할 내용에 맞는 장면을 골랐어요. 보는 사람에게 필요한 정보를 담으면 더 도움이 되는 브이로그를 만들 수 있어요.';
+      hide(row, pick, reasons);
+      grid.innerHTML = '';
+      [SUMMARY.slice(0, 3), SUMMARY.slice(3)].forEach((r) => {
+        const d = document.createElement('div');
+        d.className = 'p05-grid-row';
+        r.forEach(([q, k]) => d.appendChild(cardEl(q, k, 'is-fixed')));
+        grid.appendChild(d);
+      });
+      show(grid, $('p05Next'));
+    }
+
+    $('p05HintOk').addEventListener('click', () => hide($('p05Hint')));
+    $('p05WhyNext').addEventListener('click', () => {
+      hide($('p05Why'));
+      if (qi < QS.length - 1) { qi++; startQuestion(); } else { summary(); }
+    });
+    startQuestion();
+  })();
+  </script>
+</body>
+</html>

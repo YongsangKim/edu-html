@@ -6,23 +6,14 @@
     <title>나만의 뉴스데스크 꾸미기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
+        /* --desk(이미지 url)는 공용 CSS에서 var()로 쓰면 css/ 기준으로 풀려 깨지므로 이 규칙들은 페이지에 둠 */
+        .cv-canvas, .cv-clips i{background:var(--desk,var(--c-white))}
         /* 디자인 없음 - 기획서 16~25p. 가운데 휴대폰은 기획서 Canva 앱 캡처를 CSS로 그린 것(캡처 이미지 없이 동작).
            템플릿 img/p08_tpl_{a|b|c}.png, 스티커 img/p08_sticker_{1|2}.png는 기획서에 든 이미지. 완성 화면은 템플릿 위에 스티커를 겹침(page10·11도 같은 방식) */
-        .cv-canvas, .cv-clips i{background:var(--desk,var(--c-white))}
         .p08 .is-off{display:none}
 
-        .cv-pick{display:block;width:100%;margin:0 0 14px;padding:0;border:solid 5px transparent;border-radius:10px;background:var(--c-pale) center / cover no-repeat;cursor:pointer}
-        .cv-pick.is-tpl{height:256px}
-        .cv-pick.is-sticker{height:226px;background-size:contain}
-        .cv-pick:hover{border-color:var(--c-violet)}
-        .cv-pick.is-selected{border-color:#ff4ff9}
 
-        .cv-cats{display:grid;grid-template-columns:repeat(4,1fr);gap:22px 8px;text-align:center;font-size:18px}
-        .cv-cats i{display:flex;width:80px;height:80px;margin:0 auto 8px;border-radius:18px;align-items:center;justify-content:center;font-style:normal;font-size:38px;color:var(--c-white);
-          box-shadow:6px -6px 0 rgba(255,255,255,.7),6px -6px 0 2px rgba(27,23,56,.06)}
 
-        .cv-chips{position:absolute;left:16px;top:168px;right:0;display:flex;gap:22px;font-size:20px;font-weight:600;color:#5b5e6e;white-space:nowrap;overflow:hidden}
-        .cv-chips .is-on{color:var(--c-ink);box-shadow:inset 0 -4px 0 #7a45ee;padding-bottom:10px}
         .cv[data-screen="stickers"] .cv-h{top:226px}
         .cv[data-screen="stickers"] .cv-body{top:264px}
 
@@ -35,6 +26,14 @@
         .cv[data-screen="stickers"] .cv-chips{display:flex}
         .cv[data-screen="search"] .cv-kbd{display:block}
         .cv[data-screen="search"] .cv-tabs{display:none}
+        .cv[data-screen="search"]>.phone-nav{background:#dfe2e8}
+        .cv[data-screen="search"] .cv-search, .cv[data-screen="search"] .cv-actions{display:none}
+        .cv[data-screen="search"] .cv-qbox, .cv[data-screen="stickers"] .cv-qbox{display:block}
+        .cv[data-screen="stickers"] .cv-search, .cv[data-screen="stickers"] .cv-actions{display:none}
+        .cv.is-typed .cv-sug{display:block}
+        .cv[data-screen="list"] .cv-actions, .cv[data-screen="elements"] .cv-actions{display:none}
+        .cv[data-screen="list"] .cv-h, .cv[data-screen="elements"] .cv-h{top:116px}
+        .cv[data-screen="list"] .cv-body, .cv[data-screen="elements"] .cv-body{top:154px}
 
 
         .p08-type-btn{position:absolute;left:1374px;top:392px;width:367px;height:161px;font-size:56px;line-height:1.15}
@@ -49,7 +48,8 @@
           <p class="guide-bubble" id="p08Bubble"></p>
           <div class="guide-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
 
-          <div class="cv" id="p08Phone" data-screen="home">
+          <div class="phone-frame is-thin has-cam cv has-nav" id="p08Phone" data-screen="home">
+            <div class="phone-status"><span>13:13</span><span class="sys"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM17 9l4 6M21 9l-4 6"/></svg><svg viewBox="0 0 24 24"><path d="M2 9a15 15 0 0120 0M5 12.5a10 10 0 0114 0M8.5 16a5 5 0 017 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg><svg viewBox="0 0 24 24"><path d="M4 20V14M9 20V10M14 20V6M19 20V3"/></svg><em>64</em></span></div>
             <div class="cv-top">
               <svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-5h4v5"/></svg>
               <svg class="cv-undo" viewBox="0 0 24 24"><path d="M9 13L4 8l5-5"/><path d="M4 8h10a6 6 0 010 12h-3"/></svg>
@@ -64,7 +64,7 @@
             <div class="cv-editor">
               <div class="cv-canvas" id="p08Canvas"></div>
               <div class="cv-play"><b>0:00</b><i></i><span>0:05</span></div>
-              <div class="cv-ruler"><span>0초</span><i style="left:330px"></i><i style="left:400px"></i><i style="left:470px"></i></div>
+              <div class="cv-ruler"><span>0초</span><i style="left:364px"></i><i style="left:434px"></i><i style="left:504px"></i></div>
               <div class="cv-head"></div>
               <div class="cv-row is-el"><svg viewBox="0 0 24 24"><circle cx="7" cy="7" r="3"/><path d="M14 10l3.5-6 3.5 6z"/><rect x="4" y="14" width="6" height="6" rx="1"/><circle cx="17.5" cy="17" r="3"/></svg>요소 추가</div>
               <div class="cv-row is-media"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>미디어 추가</span><b>+</b><div class="cv-clips"><i></i><i></i></div></div>
@@ -79,8 +79,13 @@
               </button>
               <div class="cv-actions">
                 <div class="cv-gen"><span>생성</span><i><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></i></div>
-                <button type="button" class="cv-find" data-hit="search">검색</button>
+                <button type="button" class="cv-find">검색</button>
               </div>
+              <div class="cv-qbox" id="p08QBox">
+                <div class="cv-qrow"><svg viewBox="0 0 24 24"><path d="M20 12H4M10 6l-6 6 6 6"/></svg><span class="cv-qtext" id="p08QText"></span><span class="cv-clear">✕</span></div>
+                <div class="cv-qrow is-tools"><svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg><svg viewBox="0 0 24 24"><path d="M4 8h9M17 8h3M4 16h3M11 16h9"/><circle cx="15" cy="8" r="2"/><circle cx="9" cy="16" r="2"/></svg><button type="button" class="cv-qgo" data-hit="search" aria-label="검색"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
+              </div>
+              <div class="cv-sug"><p>추천</p><div><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>아나운서 마이크</div></div>
               <div class="cv-chips"><span>전체</span><span class="is-on">그래픽</span><span>동영상</span><span>사진</span><span>오디오</span><span>도형</span><span>프레임</span></div>
               <p class="cv-h" id="p08SheetTitle"></p>
               <div class="cv-body" id="p08Body">
@@ -111,13 +116,14 @@
             </div>
 
             <nav class="cv-tabs">
-              <button type="button" class="cv-tab" data-tab="template" data-hit="template"><i><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 3v18M12 12h9"/></svg></i>추천 템플릿</button>
-              <button type="button" class="cv-tab" data-tab="elements" data-hit="elements"><i><svg viewBox="0 0 24 24"><circle cx="7" cy="7" r="3"/><path d="M14 10l3.5-6 3.5 6z"/><rect x="4" y="14" width="6" height="6" rx="1"/><circle cx="17.5" cy="17" r="3"/></svg></i>요소</button>
-              <button type="button" class="cv-tab"><i><svg viewBox="0 0 24 24"><path d="M5 5h14M12 5v15M9 20h6"/></svg></i>텍스트</button>
-              <button type="button" class="cv-tab"><i><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="3"/><circle cx="12" cy="13.5" r="3.5"/><path d="M8 7l2-3h4l2 3"/></svg></i>갤러리</button>
-              <button type="button" class="cv-tab"><i><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="3"/><path d="M7 10a5 5 0 0110 0"/></svg></i>브랜드 센터</button>
-              <button type="button" class="cv-tab"><i><svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 010-8 6 6 0 0111.5 2A3 3 0 0118 18z"/></svg></i>업로드</button>
+              <button type="button" class="cv-tab" data-tab="template" data-hit="template" data-icon="template"><i></i>추천 템플릿</button>
+              <button type="button" class="cv-tab" data-tab="elements" data-hit="elements" data-icon="elements"><i></i>요소</button>
+              <button type="button" class="cv-tab" data-icon="text"><i></i>텍스트</button>
+              <button type="button" class="cv-tab" data-icon="gallery"><i></i>갤러리</button>
+              <button type="button" class="cv-tab" data-icon="brand"><i></i>브랜드 센터</button>
+              <button type="button" class="cv-tab" data-icon="upload"><i></i>업로드</button>
             </nav>
+            <div class="phone-nav"></div>
           </div>
 
           <button type="button" class="card-btn p08-type-btn is-off" id="p08TypeBtn">아나운서<br>입력하기</button>
@@ -153,9 +159,9 @@
       { bubble: '뉴스 데스크를 모두 꾸몄어요!<br>이제 본격적으로 뉴스를<br>만들어볼까요?', screen: 'edit', result: true, next: true, href: 'page09.html' }
     ];
     const SEARCH = {
-      list: { lead: 'plus', text: '원하는 디자인을 설명해 주세요', end: 'mic', title: '추천 템플릿' },
-      elements: { lead: 'plus', text: '원하는 이상적인 요소를 설명해 주세요', end: 'mic', title: '카테고리 둘러보기' },
-      search: { lead: 'back', text: '원하는 이상적인 요소를 설명해 주세요', end: 'mic', focus: true },
+      list: { lead: '', text: '동영상 템플릿 검색', end: 'mic', title: '추천 템플릿' },
+      elements: { lead: 'plus', text: '요소를 검색하세요', end: 'mic', title: '카테고리 둘러보기' },
+      search: { lead: 'back', text: '요소를 검색하세요', end: 'mic', focus: true },
       typed: { lead: 'back', text: '아나운서', end: 'clear', focus: true, filled: true },
       stickers: { lead: 'plus', text: '아나운서', end: 'clear', filled: true, title: '검색 결과' }
     };
@@ -184,17 +190,21 @@
       const step = STEPS[index];
       bubble.innerHTML = step.bubble;
       phone.dataset.screen = step.screen;
+      phone.classList.toggle('is-typed', !!step.typed);
       phone.classList.toggle('is-edited', !!chosen.tpl && step.screen === 'edit');
       phone.style.setProperty('--desk', chosen.tpl ? deskBg(chosen.tpl, step.result && chosen.sticker) : '#fff');
 
       const s = SEARCH[step.typed ? 'typed' : step.screen];
       if (s) {
-        $('p08SearchLead').innerHTML = ICON[s.lead];
+        $('p08SearchLead').innerHTML = ICON[s.lead] || '';
         $('p08SearchText').textContent = s.text;
         $('p08SearchEnd').innerHTML = ICON[s.end];
         search.classList.toggle('is-focus', !!s.focus);
         search.classList.toggle('is-filled', !!s.filled);
         $('p08SheetTitle').textContent = s.title || '';
+        $('p08QText').textContent = s.text;
+        $('p08QBox').classList.toggle('is-filled', !!s.filled);
+        $('p08QBox').classList.toggle('is-idle', step.screen === 'stickers');
       }
       body.scrollTop = 0;
       phone.querySelectorAll('.cv-tab').forEach((t) => t.classList.toggle('is-on',
@@ -208,7 +218,7 @@
       hits.forEach((h) => h.classList.toggle('is-target', h.dataset.hit === step.hit));
       const target = hits.find((h) => h.dataset.hit === step.hit);
       if (target) {
-        pointFingerAt(target, { onMain: true, x: target === search ? 0.5 : 1 });
+        pointFingerAt(target, { onMain: true, beside: true, x: target === search ? 0.5 : 1 });
         // 하단 탭을 가리킬 때 손가락이 화면(960px) 아래로 잘리지 않게
         document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.top = Math.min(parseFloat(f.style.top), 850) + 'px'; });
       }

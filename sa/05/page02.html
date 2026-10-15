@@ -13,8 +13,7 @@
         .p02-steps:before{content:'';position:absolute;left:50px;top:46px;width:512px;height:8px;background:var(--c-ink);z-index:-1}
         .p02-steps .step-dot{width:100px;height:100px;box-sizing:border-box;border:solid 9px var(--c-ink);font-size:60px;padding-top:6px;color:var(--c-ink)}
         .p02-steps .step-dot.is-active{background:var(--c-ink);border-color:var(--c-ink);color:var(--c-white)}
-        .p02-title{left:640px;top:48px;width:1185px;box-sizing:border-box}
-        .p02-title .prompt-fix-badge-question{flex:1 1 auto}
+        .p02-title{left:640px;top:48px;transform:none;width:1185px}
 
         .p02-board{position:absolute;left:59px;top:181px;width:1796px;height:702px;box-sizing:border-box;background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:48px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
         .p02-memo{position:absolute;left:109px;top:235px;width:584px;height:590px;box-sizing:border-box;padding:50px 40px;background:#fff3b8;border-radius:12px;box-shadow:4px 8px 0 0 #e6d487;
@@ -51,7 +50,7 @@
       <div id="stage" class="stage">
         <main class="bg-default">
           <div class="prompt-steps p02-steps"><span class="step-dot">1</span><span class="step-dot">2</span><span class="step-dot">3</span></div>
-          <div class="prompt-fix-badge p02-title" id="p02Title"></div>
+          <p class="ask-pill has-stage p02-title" id="p02Title"></p>
 
           <div class="p02-board"></div>
           <div class="p02-memo">
@@ -173,7 +172,7 @@
       const s = STAGES[index];
       dots.forEach((d, i) => d.classList.toggle('is-active', i === index));
       const cut = s.title.indexOf(' ');
-      $('p02Title').innerHTML = '<span class="prompt-fix-badge-num">' + s.title.slice(0, cut) + '</span><span class="prompt-fix-badge-question">' + s.title.slice(cut + 1) + '</span>';
+      $('p02Title').innerHTML = '<i>' + s.title.slice(0, cut) + '</i><span>' + s.title.slice(cut + 1) + '</span>';
       $('p02Ask').innerHTML = s.ask;
       $('p02Memo').innerHTML = s.memo.map((m) => '<p>' + m + '</p>').join('');
       fitMemo();

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>퍼즐로 완성하는 우리 동네</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서 3~13p. 사진 퍼즐 3단계(공원 4조각 → 도서관 6조각 → 향교 9조각). 사진 보기(5초 또는 [준비됐어요]) → 조각 맞추기(오른쪽 조각을 잡아 왼쪽 칸에 놓기, 힌트로 원본 보기)
+           → 완성하면 "이곳에서는 무엇을 할 수 있나요?" 3지선다 모달(정답 → 다음 단계, 오답 → 카드 흔들림) → 마지막 단계 정답 후 활동 종료 팝업.
+           사진은 임시 이모지 그림(img/p02_photo_{park|library|hanok}.jpg) — 실제 사진이 오면 같은 파일명으로 교체(3:2 비율) */
+
+
+        .p02-board{position:absolute;left:75px;top:220px;width:1020px;height:680px;box-sizing:border-box;border:solid 6px var(--c-ink);background:var(--c-cream) center / 100% 100% no-repeat;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);overflow:hidden}
+        .p02-slot{position:absolute;box-sizing:border-box;border:dashed 3px rgba(27,23,56,.28)}
+        .p02-board.is-look .p02-slot,.p02-board.is-hint .p02-slot{display:none}
+        .p02-orig{position:absolute;inset:0;background:center / 100% 100% no-repeat;display:none;z-index:5}
+        .p02-board.is-look .p02-orig,.p02-board.is-hint .p02-orig{display:block}
+        .p02-tray{position:absolute;left:1145px;top:220px;width:700px;height:680px}
+        .p02-ready{position:absolute;left:1345px;top:455px;z-index:2}
+        .p02-ready.card-btn{min-width:0;width:300px;height:110px;padding:8px 10px 0;font-size:46px}
+        .p02-hint.card-btn{position:absolute;left:97px;top:780px;min-width:0;width:150px;height:84px;padding:6px 10px 0;font-size:42px;z-index:6}
+
+        .p02-piece{position:absolute;left:0;top:0;box-sizing:border-box;background-repeat:no-repeat;box-shadow:inset 0 0 0 3px #fff,0 4px 10px rgba(27,23,56,.35);transform-origin:0 0;cursor:grab;touch-action:none;z-index:4}
+        .p02-piece.is-drag{cursor:grabbing;z-index:60;box-shadow:inset 0 0 0 3px #fff,0 10px 22px rgba(27,23,56,.45)}
+        .p02-piece.is-placed{cursor:default;box-shadow:none;z-index:3;pointer-events:none}
+        .p02-piece.is-back{transition:transform .25s,left .25s,top .25s}
+
+        .p02-modal{position:absolute;left:0;top:0;width:1920px;height:960px;background:rgba(27,23,56,.55);display:flex;align-items:center;justify-content:center;z-index:50}
+        .p02-card{position:relative;width:1180px;box-sizing:border-box;padding:34px 40px 40px;background:var(--c-white);border:solid 6px var(--c-ink);border-radius:30px;display:flex;flex-direction:column;align-items:center;gap:22px}
+        .p02-card-photo{position:relative;width:820px;height:546px;background:center / cover no-repeat;border:solid 4px var(--c-ink)}
+        .p02-card-tag{position:absolute;left:-4px;top:-4px;margin:0;padding:6px 26px 2px;background:var(--c-white);border:solid 4px var(--c-ink);font-family:'Cafe24 Ssurround';font-size:38px;color:var(--c-ink)}
+        .p02-ask{margin:0;font-family:'Cafe24 Ssurround';font-size:50px;color:var(--c-ink);letter-spacing:-0.05em}
+        .p02-opts{display:flex;gap:40px}
+        .p02-opts .card-btn{min-width:0;width:340px;height:110px;padding:8px 10px 0;font-size:46px}
+        .p02 .is-off{display:none}
+        #p02End{z-index:130}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default p02">
+          <p class="ask-pill has-stage is-fit"><i id="p02Stage">STAGE 1</i><span>사진을 잘 살펴보세요.</span></p>
+
+          <div class="p02-board is-look" id="p02Board">
+            <div class="p02-orig" id="p02Orig"></div>
+          </div>
+          <div class="p02-tray" id="p02Tray"></div>
+          <button type="button" class="card-btn js-sfx p02-ready" id="p02Ready" data-sound="sound/click.mp3">준비됐어요</button>
+          <button type="button" class="card-btn js-sfx p02-hint is-off" id="p02Hint" data-sound="sound/click.mp3">힌트</button>
+
+          <div class="p02-modal is-off" id="p02Quiz">
+            <div class="p02-card">
+              <div class="p02-card-photo" id="p02QPhoto"><p class="p02-card-tag" id="p02QTag"></p></div>
+              <p class="p02-ask">이곳에서는 무엇을 할 수 있나요?</p>
+              <div class="p02-opts" id="p02Opts"></div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p02End">
+            <div class="avatar-card is-side">
+              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <p class="avatar-card-text">우리가 살아가는 지역 사회 안의 다양한 장소들을 확인하고,<br>그곳에서 무슨 일을 할 수 있는지 알아보았어요!</p>
+              </div>
+              <a href="page03.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="퍼즐로 완성하는 우리 동네" data-next="page03.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const STAGES = [
+      { photo: 'park', cols: 2, rows: 2, place: '공원', opts: ['생필품 구매', '산책과 휴식', '병원 진료'], ans: 1 },
+      { photo: 'library', cols: 3, rows: 2, place: '도서관', opts: ['책 읽기', '산책과 휴식', '생필품 구매'], ans: 0 },
+      { photo: 'hanok', cols: 3, rows: 3, place: '향교', opts: ['문화유산 관람', '책 읽기', '병원 진료'], ans: 0 }
+    ];
+    const BW = 1020, BH = 680, BORDER = 6;
+    const IW = BW - BORDER * 2, IH = BH - BORDER * 2;
+    const TRAY = { x: 1145, y: 170, w: 700, h: 680 };
+    const main = document.querySelector('main');
+    const board = $('p02Board');
+    const tray = $('p02Tray');
+    let si = 0, pieces = [], placed = 0, timer = 0, busy = false;
+
+    const scale = () => main.getBoundingClientRect().width / 1920;
+    const pos = (e) => { const r = main.getBoundingClientRect(), s = r.width / 1920; return { x: (e.clientX - r.left) / s, y: (e.clientY - r.top) / s }; };
+    const url = (st) => "url('img/p02_photo_" + st.photo + ".jpg')";
+
+    function setup() {
+      const st = STAGES[si];
+      clearTimeout(timer);
+      $('p02Stage').textContent = 'STAGE ' + (si + 1);
+      board.className = 'p02-board is-look';
+      board.style.backgroundImage = url(st);
+      $('p02Orig').style.backgroundImage = url(st);
+      main.querySelectorAll('.p02-slot,.p02-piece').forEach((n) => n.remove());
+      tray.innerHTML = '';
+      pieces = []; placed = 0; busy = false;
+      $('p02Hint').classList.add('is-off');
+      $('p02Hint').textContent = '힌트';
+      $('p02Ready').classList.remove('is-off');
+      $('p02Quiz').classList.add('is-off');
+      timer = setTimeout(startPuzzle, 5000);
+    }
+
+    function startPuzzle() {
+      clearTimeout(timer);
+      if (!board.classList.contains('is-look')) return;
+      const st = STAGES[si];
+      const pw = IW / st.cols, ph = IH / st.rows;
+      board.classList.remove('is-look');
+      board.style.backgroundImage = 'none';
+      $('p02Ready').classList.add('is-off');
+      $('p02Hint').classList.remove('is-off');
+      const n = st.cols * st.rows;
+      const tc = st.cols === 3 && st.rows === 3 ? 3 : 2, tr = Math.ceil(n / tc);
+      const gap = 18;
+      const s = Math.min((TRAY.w - gap * (tc + 1)) / tc / pw, (TRAY.h - gap * (tr + 1)) / tr / ph);
+      const order = shuffleArray([...Array(n).keys()]);
+      for (let i = 0; i < n; i++) {
+        const sl = document.createElement('div');
+        sl.className = 'p02-slot';
+        sl.style.cssText = 'left:' + ((i % st.cols) * pw) + 'px;top:' + (Math.floor(i / st.cols) * ph) + 'px;width:' + pw + 'px;height:' + ph + 'px';
+        board.appendChild(sl);
+      }
+      order.forEach((idx, k) => {
+        const c = k % tc, r = Math.floor(k / tc);
+        const home = {
+          x: TRAY.x + gap + c * (pw * s + gap) + (TRAY.w - gap * (tc + 1) - tc * pw * s) / 2,
+          y: TRAY.y + gap + r * (ph * s + gap) + (TRAY.h - gap * (tr + 1) - tr * ph * s) / 2
+        };
+        const el = document.createElement('div');
+        el.className = 'p02-piece';
+        el.style.cssText = 'width:' + pw + 'px;height:' + ph + 'px;background-image:' + url(st) + ';background-size:' + IW + 'px ' + IH + 'px;background-position:' + (-(idx % st.cols) * pw) + 'px ' + (-Math.floor(idx / st.cols) * ph) + 'px';
+        main.appendChild(el);
+        const p = { el, idx, home, s, pw, ph, cols: st.cols, done: false };
+        place(p, home.x, home.y, s);
+        el.addEventListener('pointerdown', (e) => grab(e, p));
+        pieces.push(p);
+      });
+    }
+
+    function place(p, x, y, s) { p.el.style.left = x + 'px'; p.el.style.top = y + 'px'; p.el.style.transform = 'scale(' + s + ')'; }
+
+    function grab(e, p) {
+      if (p.done || busy || board.classList.contains('is-hint')) return;
+      e.preventDefault();
+      p.el.classList.remove('is-back');
+      p.el.classList.add('is-drag');
+      const m = pos(e);
+      place(p, m.x - p.pw / 2, m.y - p.ph / 2, 1);
+      const move = (ev) => { const q = pos(ev); place(p, q.x - p.pw / 2, q.y - p.ph / 2, 1); };
+      const up = (ev) => {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', up);
+        p.el.classList.remove('is-drag');
+        drop(p, pos(ev));
+      };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', up);
+    }
+
+    function drop(p, q) {
+      const br = board.getBoundingClientRect(), s = scale();
+      const bx = br.left - main.getBoundingClientRect().left, by = br.top - main.getBoundingClientRect().top;
+      const sx = bx / s + BORDER + (p.idx % p.cols) * p.pw, sy = by / s + BORDER + Math.floor(p.idx / p.cols) * p.ph;
+      const cx = q.x - sx - p.pw / 2, cy = q.y - sy - p.ph / 2;
+      if (Math.hypot(cx, cy) < Math.min(p.pw, p.ph) * 0.45) {
+        p.done = true;
+        p.el.classList.add('is-placed');
+        place(p, sx, sy, 1);
+        playDrag();
+        if (++placed === pieces.length) { playCorrect(); busy = true; setTimeout(openQuiz, 900); }
+      } else {
+        playWrong();
+        p.el.classList.add('is-back');
+        place(p, p.home.x, p.home.y, p.s);
+      }
+    }
+
+    function openQuiz() {
+      const st = STAGES[si];
+      $('p02QPhoto').style.backgroundImage = url(st);
+      $('p02QTag').textContent = st.place;
+      const box = $('p02Opts');
+      box.innerHTML = '';
+      st.opts.forEach((t, k) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'card-btn';
+        b.textContent = t;
+        b.addEventListener('click', () => answer(b, k === st.ans));
+        box.appendChild(b);
+      });
+      $('p02Quiz').classList.remove('is-off');
+    }
+
+    function answer(b, ok) {
+      if (busy === 'q') return;
+      if (!ok) {
+        playWrong();
+        b.classList.add('is-wrong');
+        setTimeout(() => b.classList.remove('is-wrong'), 400);
+        return;
+      }
+      busy = 'q';
+      playCorrect();
+      b.classList.add('is-selected');
+      setTimeout(() => {
+        if (si < STAGES.length - 1) { si++; setup(); } else { $('p02End').classList.remove('is-off'); }
+      }, 1200);
+    }
+
+    $('p02Ready').addEventListener('click', startPuzzle);
+    $('p02Hint').addEventListener('click', () => {
+      const on = !board.classList.contains('is-hint');
+      board.classList.toggle('is-hint', on);
+      $('p02Hint').textContent = on ? '닫기' : '힌트';
+    });
+    setup();
+  })();
+  </script>
+</body>
+</html>

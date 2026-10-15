@@ -9,24 +9,25 @@
         /* 디자인 없음 - 기획서 20~31p. 친구 3명에게 알맞은 말 고르기 → 맞으면 마음 전달 화면(게이지가 참) → 다음 친구.
            틀리면 캐릭터 말풍선이 친구 감정 안내로 2초 바뀜. 상황 그림 img/p05_sit{번호}.png, 전달 화면 그림 img/p05_send{번호}.png, 게이지 별 img/p05_star.png */
 
-        .p05-bubble{left:95px;bottom:600px;width:416px;padding:30px 12px;font-size:42px;z-index:5}
-        .p05-character{left:69px;top:300px;width:381px;height:504px}
+        .p05-bubble{left:62px;bottom:655px;width:475px;z-index:5;margin:0}
+        .p05-character{left:70px;top:348px;width:380px;height:582px}
 
-        .p05-photo{position:absolute;left:540px;top:40px;width:1290px;height:500px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:36px;overflow:hidden;background:var(--c-purple) center / cover no-repeat;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
-        .p05-caption{position:absolute;left:0;bottom:0;width:100%;height:100px;display:flex;align-items:center;justify-content:center;background:rgba(27,23,56,.75);
-          font-family:'Cafe24 Ssurround';font-size:46px;color:var(--c-white);letter-spacing:-0.04em}
-        .p05-opts{position:absolute;left:540px;top:600px;width:1290px;display:grid;grid-template-columns:1fr 1fr;gap:40px 40px}
-        .p05-opts .card-btn{min-width:0;height:115px;padding:8px 20px 4px;font-size:44px;line-height:1.15;letter-spacing:-0.05em;word-break:keep-all}
+        .p05-panel{position:absolute;left:512px;top:39px;width:1352px;height:890px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:10px;overflow:hidden;background:#266cc8}
+        .p05-photo{width:100%;height:388px;background:var(--c-purple) center / cover no-repeat}
+        .p05-caption{width:100%;height:126px;margin:0;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;background:#faf8f9;font-family:'Cafe24 Ssurround';font-size:58px;color:var(--c-ink);letter-spacing:-0.05em}
+        .p05-opts{box-sizing:border-box;padding:44px 24px 0;display:grid;grid-template-columns:1fr 1fr;gap:41px 36px}
+        .p05-opts .card-btn{min-width:0;height:115px;padding:8px 20px 4px;font-size:46px;line-height:1.15;letter-spacing:-0.05em;word-break:keep-all}
 
-        .p05-send{position:absolute;left:600px;top:60px;width:720px;height:560px;box-sizing:border-box;padding:30px;display:flex;flex-direction:column;align-items:center;gap:24px;
-          background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
-        .p05-send i{width:612px;height:397px;border-radius:24px;background:var(--c-purple) center / cover no-repeat}
-        .p05-send p{margin:0;font-family:'Cafe24 Ssurround';font-size:44px;line-height:1.25;color:var(--c-purple);text-align:center;letter-spacing:-0.04em;word-break:keep-all}
-        .p05-gauge{left:506px;top:740px;width:908px}
+        .p05-send{position:absolute;left:261px;top:46px;width:1399px;height:595px;box-sizing:border-box;border:solid 5px #2077ec;border-radius:12px;background:var(--c-white);box-shadow:7px 10px 0 0 #bbc9e6}
+        .p05-send i{position:absolute;left:23px;top:22px;width:1345px;height:433px;;background: center / cover no-repeat}
+        .p05-send p{position:absolute;left:0;right:0;top:455px;height:130px;margin:0;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:60px;color:var(--c-ink);letter-spacing:-0.05em}
+        .p05-gauge{left:340px;top:681px;width:1215px;height:70px}
+        .p05-gauge.gauge:before{left:-105px;top:-79px;width:220px;height:213px;background-image:url(img/p05_gauge_robot.png)}
+        .p05-gauge:after{content:'';position:absolute;left:1155px;top:-43px;width:180px;height:137px;background:url(img/p05_gauge_mail.png) 0 0 / contain no-repeat;z-index:1}
         .p05-gauge .gauge-fill{transition:none}
         .p05-gauge .gauge-fill.is-go{width:100%;transition:width 2.5s linear}
-        .p05-status{position:absolute;left:0;top:815px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:52px;color:var(--c-purple);letter-spacing:-0.04em}
-        .p05-send-next{position:absolute;left:1475px;top:800px}
+        .p05-status{position:absolute;left:0;top:775px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:52px;color:var(--c-purple);letter-spacing:-0.04em}
+        .p05-send-next{position:absolute;left:1447px;top:800px;width:383px;min-width:0;height:110px;display:flex;align-items:center;justify-content:center;text-decoration:none}
 
         .p05 .is-off{display:none}
     </style>
@@ -39,18 +40,19 @@
         <main class="bg-default p05">
           <div id="p05Pick">
             <p class="guide-bubble is-center p05-bubble" id="p05Bubble"></p>
-            <div class="char-box p05-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
-            <div class="p05-photo" id="p05Photo"><span class="p05-caption" id="p05Caption"></span></div>
-            <div class="p05-opts" id="p05Opts"></div>
+            <div class="char-box p05-character"><img src="img/p05_character.png" alt="메인 캐릭터"></div>
+            <div class="p05-panel">
+              <div class="p05-photo" id="p05Photo"></div>
+              <p class="p05-caption" id="p05Caption"></p>
+              <div class="p05-opts" id="p05Opts"></div>
+            </div>
           </div>
 
           <div class="is-off" id="p05SendView">
             <div class="p05-send"><i id="p05SendImg"></i><p id="p05SendText"></p></div>
             <div class="gauge is-thin p05-gauge"><div class="gauge-fill" id="p05Fill"></div></div>
             <p class="p05-status" id="p05Status"></p>
-            <a href="javascript:;" class="js-sfx p05-send-next is-off" id="p05Next" data-sound="sound/click.mp3">
-              <img src="../../img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" alt="다음">
-            </a>
+            <a href="javascript:;" class="js-sfx card-btn p05-send-next is-off" id="p05Next" data-sound="sound/click.mp3">다음</a>
           </div>
         </main>
       </div>
@@ -89,6 +91,7 @@
     function renderPick() {
       const r = ROUNDS[index];
       busy = false;
+      bubble.classList.remove('is-small');
       bubble.innerHTML = ASK;
       $('p05Photo').style.backgroundImage = "url('img/p05_sit" + (index + 1) + ".png')";
       $('p05Caption').textContent = r.caption;
@@ -110,9 +113,10 @@
       const r = ROUNDS[index];
       if (k !== r.answer) {
         playWrong();
+        bubble.classList.add('is-small');
         bubble.innerHTML = r.wrong;
         clearTimeout(bubbleTimer);
-        bubbleTimer = setTimeout(() => { bubble.innerHTML = ASK; }, 2000);
+        bubbleTimer = setTimeout(() => { bubble.classList.remove('is-small'); bubble.innerHTML = ASK; }, 2000);
         return;
       }
       busy = true;
@@ -126,10 +130,9 @@
       $('p05Pick').classList.add('is-off');
       $('p05SendView').classList.remove('is-off');
       $('p05SendImg').style.backgroundImage = "url('img/p05_send" + (index + 1) + ".png')";
-      $('p05SendText').innerHTML = message;
+      $('p05SendText').innerHTML = ROUNDS[index].caption;
       $('p05Status').textContent = '마음을 전달하는 중이에요';
       nextBtn.classList.add('is-off');
-      resetImageSwap(nextBtn);
       fill.className = 'gauge-fill';
       void fill.offsetWidth;
       fill.classList.add('is-go');

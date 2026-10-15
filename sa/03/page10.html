@@ -3,81 +3,325 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>퀴즈 풀기</title>
+    <title>마음을 전하는 카드 만들기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 62~65p. sa/05/page11(QUIZ) 구조, 세 문제 모두 긴 보기 3개를 세로로. Q1 오답 문구는 63p */    </style>
+        /* 디자인 없음 - 기획서 50~61p. page09에서 고른 상황·문구(sessionStorage 'sa03p09')로 Canva 카드 만들기: 홈 → Canva 홈 → 모든 프로젝트 → 편집(배경색·글꼴·크기·형식) → 완성하기 →
+           언어 예절 확인(체크 2개) → 다운로드 완료 → 마음 전달 → page11. 카드 삽화 img/p10_illust_{key}.png, 도움말 그림 img/p10_help{1|2}.png, 게이지 별 img/p05_star.png,
+           Canva 아이콘 img/p10_canva_icon.png. 가운데 휴대폰은 sa/02·page07과 같은 공용 Canva 틀(.cv)에 CSS로 그린 것. */
+
+        .p10-bubble{left:90px;bottom:619px;width:607px;padding:30px 16px;font-size:42px;z-index:5}
+        .p10-character{left:170px;top:360px;width:480px;height:580px}
+        .cv9-home,.cv9-app,.cv9-proj,.cv9-edit,.cv9-saved{display:none}
+        .cv[data-screen="home"] .cv9-home,.cv[data-screen="design"] .cv9-app,.cv[data-screen="projects"] .cv9-proj{display:block}
+        .cv[data-screen="edit"] .cv9-edit,.cv[data-screen="saved"] .cv9-edit,.cv[data-screen="saved"] .cv9-saved{display:block}
+        .cv9-home,.cv9-app,.cv9-proj,.cv9-edit{position:absolute;inset:0}
+        .cv[data-screen="home"]>.phone-status,.cv[data-screen="design"]>.phone-status,.cv[data-screen="projects"]>.phone-status{color:#111}
+        .cv[data-screen="home"]>.phone-status em,.cv[data-screen="design"]>.phone-status em,.cv[data-screen="projects"]>.phone-status em{background:#333;color:#fff}
+
+        .cv9-app,.cv9-proj{background:linear-gradient(180deg,#d8eefa,#efe9ff 24%,var(--c-white) 46%)}
+        .cv9-app-title{position:absolute;left:0;top:110px;width:100%;margin:0;text-align:center;font-size:31px;font-weight:700;color:#4b4fe0}
+        .cv9-search{position:absolute;left:16px;width:calc(100% - 32px);height:60px;box-sizing:border-box;border:solid 2px #e6e2f6;border-radius:18px;background:var(--c-white);display:flex;align-items:center;gap:12px;padding:0 16px;font-size:20px;color:#8a8c99}
+        .cv9-search svg{width:26px;height:26px;color:var(--c-ink)}
+        .cv9-h{position:absolute;left:16px;margin:0;font-size:22px;font-weight:700}
+        .cv9-starts{position:absolute;left:16px;display:flex;gap:22px;font-size:17px;font-weight:600;text-align:center;white-space:nowrap}
+        .cv9-starts i{display:flex;width:84px;height:84px;margin-bottom:8px;border-radius:50%;align-items:center;justify-content:center;font-style:normal;font-size:34px;color:var(--c-white)}
+        .cv9-nav{position:absolute;left:0;bottom:0;width:100%;height:84px;display:flex;justify-content:space-around;align-items:center;border-top:solid 2px #eee;background:var(--c-white);font-size:17px;font-weight:600;color:var(--c-ink)}
+        .cv9-nav .is-on{color:#5b3fe8}
+        .cv9-nav button,.cv9-nav span{display:flex;flex-direction:column;align-items:center;gap:4px;padding:0;border:0;background:none;font-size:17px;font-weight:600}
+        .cv9-nav svg{width:28px;height:28px}
+        .cv9-proj-title{position:absolute;left:16px;top:84px;margin:0;font-size:31px;font-weight:700}
+        .cv9-chips{position:absolute;left:16px;top:228px;display:flex;gap:10px;font-size:19px;white-space:nowrap}
+        .cv9-chips span{padding:10px 16px;border:solid 2px #e6e2f6;border-radius:24px;background:var(--c-white)}
+        .cv9-proj-card{position:absolute;left:16px;top:346px;width:215px;padding:0;border:0;background:none;text-align:left;font-size:20px;font-weight:700}
+        .cv9-proj-card i{display:flex;align-items:center;justify-content:center;width:215px;height:161px;margin-bottom:10px;border-radius:20px;background:var(--c-pale)}
+        .cv9-proj-card i svg{width:34px;height:34px}
+        .cv9-proj-card small{display:block;margin-top:6px;font-size:16px;font-weight:400;color:#6b6d7c}
+        .cv9-more{position:absolute;left:50%;top:600px;transform:translateX(-50%);padding:10px 20px;border:solid 2px #d6d8e0;border-radius:24px;background:var(--c-white);font-size:19px;font-weight:600;white-space:nowrap}
+
+        .cv9-top-btn{display:flex;margin:-6px;padding:6px;border:0;background:none;color:inherit;cursor:pointer}
+        .cv7-body{position:absolute;left:0;top:104px;right:0;bottom:0;background:var(--c-pale);overflow:hidden}
+        .p10-card{position:absolute;left:61px;top:26px;width:400px;height:500px;box-sizing:border-box;overflow:hidden;background:var(--c-white);box-shadow:0 6px 18px rgba(27,23,56,.12);transform-origin:50% 0;transition:background-color .3s,transform .3s}
+        .cv.is-fmt .p10-card{transform:scale(.6)}
+        .p10-illust{position:absolute;left:80px;top:60px;width:240px;height:240px;border-radius:20px;background:#d9d3ee center / contain no-repeat}
+        .p10-text{position:absolute;left:10px;top:340px;width:380px;min-height:100px;box-sizing:border-box;padding:6px;display:flex;align-items:center;justify-content:center;text-align:center;
+          font-family:'Pretendard';font-size:34px;line-height:1.2;color:var(--c-ink);word-break:keep-all;border:solid 3px transparent}
+        .p10-text.is-picked{border-color:#8b5cf6}
+        .p10-card.is-picked{box-shadow:inset 0 0 0 3px #8b5cf6,0 6px 18px rgba(27,23,56,.12)}
+        .cv.has-sel .cv-tabs{display:none}
+
+        .cv7-bar{position:absolute;left:8px;right:8px;bottom:16px;height:100px;border-radius:20px;background:var(--c-white);box-shadow:0 2px 12px rgba(27,23,56,.15);z-index:6}
+        .cv7-view{position:absolute;left:0;top:0;right:70px;bottom:0;overflow:hidden;border-radius:20px 0 0 20px}
+        .p10-tools-row{display:flex;height:100%;padding:6px 0;box-sizing:border-box}
+        .p10-tool{flex:0 0 80px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:0;border:0;border-radius:14px;background:none;cursor:pointer;font-size:14px;font-weight:600;white-space:nowrap}
+        .p10-tool i{display:flex;align-items:center;justify-content:center;height:36px;font-style:normal;font-size:30px;line-height:1}
+        .p10-tool i svg{width:32px;height:32px}
+        .p10-tool.is-on{background:#e6e7ec}
+        .p10-dot{display:block;width:40px;height:40px;border-radius:50%;box-shadow:inset 0 0 0 2px rgba(27,23,56,.12)}
+        .cv7-check{position:absolute;right:8px;top:50%;margin-top:-30px;width:60px;height:60px;padding:0;border:0;border-radius:50%;background:var(--c-white);box-shadow:0 2px 8px rgba(27,23,56,.2);display:flex;align-items:center;justify-content:center;cursor:pointer}
+        .cv7-check svg{width:34px;height:34px}
+        .cv7-sub{position:absolute;left:8px;right:8px;bottom:126px;box-sizing:border-box;min-height:100px;padding:14px 16px;border-radius:20px;background:var(--c-white);box-shadow:0 2px 12px rgba(27,23,56,.15);z-index:6;display:flex;align-items:center;gap:10px}
+        .p10-swatch{flex:0 0 52px;height:52px;border:solid 3px #d9d3ee;border-radius:50%;cursor:pointer;padding:0}
+        .p10-swatch.is-on{border-color:#8b5cf6;box-shadow:0 0 0 3px var(--c-white) inset}
+        .p10-chip{flex:0 0 auto;min-width:200px;height:64px;padding:0 20px;border:solid 4px transparent;border-radius:16px;background:var(--c-pale);cursor:pointer;font-size:26px;color:var(--c-ink)}
+        .p10-chip.is-on{border-color:#8b5cf6;background:var(--c-white)}
+        .p10-size{flex-direction:column;align-items:stretch;gap:6px}
+        .p10-size p{margin:0;font-size:22px}
+        .p10-size div{display:flex;align-items:center;gap:16px}
+        .p10-size input{flex:1 1 auto;accent-color:#8b5cf6}
+        .p10-size span{display:flex;align-items:center;justify-content:space-between;flex:0 0 190px;height:56px;padding:0 10px;box-sizing:border-box;border:solid 2px #d9d9e2;border-radius:14px;font-size:24px}
+        .p10-size button{width:40px;height:40px;padding:0;border:0;background:none;font-size:32px;cursor:pointer}
+
+        .cv7-fmt{position:absolute;left:0;right:0;bottom:0;height:400px;box-sizing:border-box;padding:22px 16px 0;border-radius:28px 28px 0 0;background:var(--c-white);z-index:7}
+        .cv7-fmt:before{content:'';position:absolute;left:50%;top:10px;width:46px;height:5px;margin-left:-23px;border-radius:3px;background:#d4d5dc}
+        .cv7-fmt h4{margin:0 0 22px;text-align:center;font-size:21px}
+        .cv7-fmt h4 button{position:absolute;right:16px;top:20px;width:44px;height:44px;padding:0;border:0;background:none;cursor:pointer}
+        .cv7-fmt h4 svg{width:32px;height:32px}
+        .cv7-fmt-row{display:flex;gap:8px;margin-bottom:16px}
+        .cv7-fmt-row button{flex:1;height:62px;padding:0;border:solid 2px #e1e2e8;border-radius:14px;background:var(--c-white);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:26px}
+        .cv7-fmt-row button.is-on{border-color:#8b5cf6;background:#f1e9ff}
+        .cv7-fmt-row button svg{width:30px;height:30px}
+        .cv7-fmt-align{background:var(--c-pale);border-radius:14px;padding:6px}
+        .cv7-fmt-align button{border:0;background:none}
+        .cv7-fmt-align button.is-sel{background:var(--c-white);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+
+        .cv9-saved{position:absolute;inset:0;z-index:8}
+        .cv9-saved:before{content:'';position:absolute;inset:0;background:rgba(27,23,56,.5)}
+        .cv9-saving{display:none;position:absolute;inset:0;z-index:8;background:rgba(27,23,56,.5)}
+        .cv.is-saving .cv9-saving{display:block}
+        .cv9-saving:after{content:'';position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border:solid 8px rgba(255,255,255,.35);border-top-color:var(--c-white);border-radius:50%;animation:p10-spin 1s linear infinite}
+        @keyframes p10-spin{to{transform:rotate(360deg)}}
+        .cv9-sheet{position:absolute;left:0;right:0;bottom:0;height:560px;box-sizing:border-box;padding:24px 16px 0;border-radius:28px 28px 0 0;background:var(--c-white)}
+        .cv9-sheet h4{display:flex;align-items:center;gap:12px;margin:0 0 16px;padding-bottom:14px;border-bottom:solid 2px #eee;font-size:23px}
+        .cv9-sheet h4 b{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:#2e8b3a;color:var(--c-white);font-size:22px}
+        .cv9-sheet h4 em{margin-left:auto;font-style:normal;font-size:26px}
+        .cv9-thumb{position:relative;height:240px;border-radius:18px;background:var(--c-pale);overflow:hidden}
+        .cv9-thumb .p10-snap{position:absolute;left:50%;top:50%;width:150px;height:188px;margin:-94px 0 0 -75px;overflow:hidden}
+        .cv9-sheet p{margin:14px 0 2px;font-size:22px;font-weight:700}
+        .cv9-sheet small{display:block;font-size:17px;color:#6b6d7c}
+        .cv9-sheet .cv9-share{display:block;width:100%;height:52px;margin-top:22px;border:solid 2px #d6d8e0;border-radius:26px;background:var(--c-white);font-size:19px;font-weight:700;cursor:pointer}
+        .cv9-sheet .cv9-open{display:block;width:100%;height:52px;margin-top:12px;border:0;border-radius:26px;background:#7a45ee;color:var(--c-white);font-size:19px;font-weight:700}
+
+        .p10-help{position:absolute;right:36px;top:34px;width:190px;height:83px;font-size:40px;min-width:0;padding:6px 0 0}
+        .p10-finish{position:absolute;left:1496px;top:800px;width:360px;min-width:0;white-space:nowrap}
+        .p10-catch{position:absolute;left:735px;top:21px;width:450px;height:895px;border-radius:40px;z-index:10}
+        .p10-target{position:absolute;z-index:11;padding:0;border:0;border-radius:12px;background:transparent;cursor:pointer;animation:cv-target 1.2s ease-in-out infinite}
+        main:has(#p10Phone[data-screen="home"]) .p10-target{animation:none}
+
+        .p10-helpbox{position:absolute;left:402px;top:120px;width:1117px;height:720px;box-sizing:border-box;background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:48px}
+        .p10-helpshot{position:absolute;left:362px;top:44px;width:368px;height:500px;border-radius:24px;overflow:hidden;background:var(--c-pale);box-shadow:0 0 0 3px #d9d3ee;font-family:'Pretendard';color:var(--c-ink)}
+        .p10-helpshot svg{display:block;width:20px;height:20px;fill:none;stroke:var(--c-white);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+        .hs-top{position:absolute;left:0;top:0;width:100%;height:40px;box-sizing:border-box;padding:0 14px;display:flex;align-items:center;gap:14px;background:linear-gradient(90deg,#4cc3c8,#5b63d9 55%,#7b3fe0)}
+        .hs-top span{flex:1}
+        .hs-card{position:absolute;left:54px;top:90px;width:260px;height:290px;box-shadow:0 4px 12px rgba(27,23,56,.12)}
+        .hs-ill{position:absolute;left:65px;top:26px;width:130px;height:130px;border-radius:14px;background:#d9d3ee center / contain no-repeat}
+        .hs-txt{position:absolute;left:10px;right:10px;top:200px;height:60px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:19px;line-height:1.2;word-break:keep-all}
+        .hs-sel{position:absolute;border:2px solid #8b5cf6}
+        .hs-sel b{position:absolute;width:10px;height:10px;border-radius:50%;background:var(--c-white);border:2px solid #8b5cf6;box-sizing:border-box}
+        .hs-pill{position:absolute;left:50%;margin-left:-70px;width:140px;height:28px;display:flex;justify-content:space-around;align-items:center;border-radius:14px;background:var(--c-white);box-shadow:0 2px 8px rgba(27,23,56,.2);font-size:14px;z-index:2}
+        .hs-ring{position:absolute;box-sizing:border-box;border-radius:8px;z-index:3;animation:cv-target 1.2s ease-in-out infinite}
+        .hs-finger{position:absolute;width:64px;z-index:4}
+        .hs-bar{position:absolute;left:8px;right:8px;bottom:14px;height:64px;border-radius:14px;background:var(--c-white);box-shadow:0 2px 10px rgba(27,23,56,.15);display:flex}
+        .hs-tool{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10px;font-weight:600;white-space:nowrap}
+        .hs-tool em{display:flex;align-items:center;justify-content:center;height:24px;font-style:normal;font-size:19px;line-height:1}
+        .hs-tool em i{font-family:serif}
+        .hs-tool em u{text-decoration:none;border-bottom:3px solid #f08fb0;line-height:1}
+        .hs-tool.is-on{background:#e6e7ec;border-radius:10px}
+        .hs-dot{display:block;width:22px;height:22px;border-radius:50%;box-shadow:inset 0 0 0 2px rgba(27,23,56,.15)}
+        .p10-helpbox p{position:absolute;left:0;top:562px;width:100%;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.3;color:var(--c-purple);letter-spacing:-0.04em}
+        .p10-helpbox button{position:absolute;padding:0;border:0;background:none;cursor:pointer}
+        .p10-helpbox button.is-img img{display:block}
+        .p10-helpbox button:not(.is-img){width:80px;height:80px;border-radius:50%;background:var(--c-purple);color:var(--c-white);font-size:40px}
+
+        .p10-check{position:absolute;left:343px;top:79px;width:1243px;height:721px;box-sizing:border-box;background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:48px}
+        .p10-check-title{position:absolute;left:0;top:40px;width:100%;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:48px;line-height:1.35;color:var(--c-purple);letter-spacing:-0.04em}
+        .p10-check-card{position:absolute;left:153px;top:190px;width:384px;height:484px}
+        .p10-checks{position:absolute;left:565px;top:189px;width:600px;display:flex;flex-direction:column;gap:20px}
+        .p10-checkbox{display:flex;align-items:flex-start;gap:20px;padding:20px 24px;border:solid 4px #eae0fd;border-radius:22px;background:var(--c-white);cursor:pointer;text-align:left;
+          font-family:'Cafe24 Ssurround';font-size:40px;line-height:1.3;color:var(--c-indigo);letter-spacing:-0.04em}
+        .p10-checkbox:before{content:'';flex:0 0 auto;width:44px;height:44px;margin-top:4px;box-sizing:border-box;border:solid 5px var(--c-purple);border-radius:10px;background:var(--c-white) center / 70% no-repeat}
+        .p10-checkbox.is-checked{border-color:#ff4ff9}
+        .p10-checkbox.is-checked:before{background-color:var(--c-purple);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 12l5 5L20 6' fill='none' stroke='%23fff' stroke-width='4'/%3E%3C/svg%3E")}
+        .p10-check-ok{position:absolute;left:990px;top:575px;width:200px;height:100px;min-width:0;padding:8px 0 4px;font-size:50px}
+
+        .p10-send-card{position:absolute;left:740px;top:60px;width:440px;height:560px}
+        .p10-gauge{left:506px;top:680px;width:908px}
+        .p10-gauge .gauge-fill{transition:none}
+        .p10-gauge .gauge-fill.is-go{width:100%;transition:width 2.5s linear}
+        .p10-status{position:absolute;left:0;top:770px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:52px;color:var(--c-purple);letter-spacing:-0.04em}
+
+        #p10Oops, #p10Learn{z-index:130}
+        .p10 .is-off{display:none}
+    </style>
 </head>
 <body>
   <div id="page-fade"></div>
   <div id="viewport" class="viewport">
     <div id="stage-spacer">
       <div id="stage" class="stage">
-        <main class="quiz-stage">
-          <div class="step-flow">
+        <main data-preload-fonts="KCC-DodamDodam,KCC-MurukMuruk" class="bg-default p10">
+          <!-- 3. Canva 편집 -->
+          <div id="p10EditView">
+            <p class="guide-bubble is-center p10-bubble" id="p10Bubble"></p>
+            <div class="char-box p10-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
 
-            <div class="step-panel">
-              <div class="quiz-ask-box">
-                <div class="quiz-ask-row">
-                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
-                  <span class="quiz-qnum">Q1.</span>
-                  <p class="quiz-ask">친구가 슬프거나 힘든 일을 겪었을 때 우리가 해줄 수 있는 가장 올바른 행동은 무엇일까요?</p>
+            <div class="phone-frame is-thin has-cam cv" id="p10Phone" data-screen="home">
+              <div class="phone-status"><span>13:13</span><span class="sys"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM17 9l4 6M21 9l-4 6"/></svg><svg viewBox="0 0 24 24"><path d="M2 9a15 15 0 0120 0M5 12.5a10 10 0 0114 0M8.5 16a5 5 0 017 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg><svg viewBox="0 0 24 24"><path d="M4 20V14M9 20V10M14 20V6M19 20V3"/></svg><em>64</em></span></div>
+              <div class="cv9-home app-home is-purple">
+                <button type="button" class="app-icon" id="p10CanvaIcon"><i><img src="img/p10_canva_icon.png" alt=""></i>Canva</button>
+                <div class="phone-nav"><i></i><b></b><u></u></div>
+              </div>
+
+              <div class="cv9-app">
+                <p class="cv9-app-title">오늘은 무엇을 만들어 볼까요?</p>
+                <div class="cv9-search" style="top:176px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>어떤 걸 만들고 싶으세요?</div>
+                <p class="cv9-h" style="top:266px">시작 방법 선택</p>
+                <div class="cv9-starts" style="top:314px">
+                  <div><i style="background:#ec4d5a">♥</i>SNS</div>
+                  <div><i style="background:#f07a2d">▣</i>프레젠테이션</div>
+                  <div><i style="background:#3fa45a">⤢</i>화이트보드</div>
+                  <div><i style="background:#e9e8ef;color:#5b3fe8">↔</i>맞춤형 크기</div>
+                </div>
+                <div class="cv9-starts" style="top:466px">
+                  <div><i style="background:#d95cea">▶</i>동영상</div>
+                  <div><i style="background:#8a3cf0">▤</i>인쇄 제품</div>
+                  <div><i style="background:#e9e8ef;color:#5b3fe8">☁</i>업로드</div>
+                  <div><i style="background:#3b82f0">▦</i>시트</div>
+                </div>
+                <div class="cv9-nav">
+                  <span class="is-on"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z" fill="currentColor"/></svg>홈</span>
+                  <button type="button" id="p10DesignTab"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>디자인</button>
+                  <span><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 3v18M12 12h9"/></svg>템플릿</span>
+                  <span><svg viewBox="0 0 24 24"><path d="M12 4l1.8 4.2L18 10l-4.2 1.8L12 16l-1.8-4.2L6 10l4.2-1.8z"/></svg>Canva AI</span>
+                  <span><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="19" cy="12" r="1.3" fill="currentColor"/></svg>더 보기</span>
                 </div>
               </div>
-              <div class="answer-pick-quiz quiz-opts is-list" data-wrong="<span>조금 더 따뜻한 위로의 말을 찾아볼까요?</span>">
-                <button class="answer-pick card-btn" data-correct="true" aria-label="친구의 마음을 위로하고 공감해주기">친구의 마음을 위로하고 공감해주기</button>
-                <button class="answer-pick card-btn" data-correct="false" aria-label="친구의 실수를 지적하며 혼내주기">친구의 실수를 지적하며 혼내주기</button>
-                <button class="answer-pick card-btn" data-correct="false" aria-label="친구의 이야기를 무시하고 자리를 피하기">친구의 이야기를 무시하고 자리를 피하기</button>
+
+              <div class="cv9-proj">
+                <p class="cv9-proj-title">모든 프로젝트 ⌄</p>
+                <div class="cv9-search" style="top:150px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>디자인, 폴더, 업로드 항목을 검색해 보세요</div>
+                <div class="cv9-chips"><span>유형 ⌄</span><span>카테고리 ⌄</span><span>소유자 ⌄</span></div>
+                <p class="cv9-h" style="top:300px">최근</p>
+                <button type="button" class="cv9-proj-card" id="p10ProjCard">
+                  <i><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></i>
+                  마음 카드<small>방금 전 편집함</small>
+                </button>
+                <span class="cv9-more">최근 디자인 모두 보기</span>
+                <p class="cv9-h" style="top:680px">모든 항목</p>
+                <div class="cv9-nav">
+                  <span><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-5h4v5"/></svg>홈</span>
+                  <span class="is-on"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z" fill="currentColor"/></svg>디자인</span>
+                  <span><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 3v18M12 12h9"/></svg>템플릿</span>
+                  <span><svg viewBox="0 0 24 24"><path d="M12 4l1.8 4.2L18 10l-4.2 1.8L12 16l-1.8-4.2L6 10l4.2-1.8z"/></svg>Canva AI</span>
+                  <span><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="19" cy="12" r="1.3" fill="currentColor"/></svg>더 보기</span>
+                </div>
+              </div>
+
+              <div class="cv9-edit">
+                <div class="cv-top">
+                  <svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-5h4v5"/></svg>
+                  <svg class="cv-undo" viewBox="0 0 24 24"><path d="M9 13L4 8l5-5"/><path d="M4 8h10a6 6 0 010 12h-3"/></svg>
+                  <svg class="cv-undo is-dim" viewBox="0 0 24 24"><path d="M15 13l5-5-5-5"/><path d="M20 8H10a6 6 0 000 12h3"/></svg>
+                  <span class="is-gap"></span>
+                  <svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="19" cy="12" r="1.3" fill="currentColor"/></svg>
+                  <svg viewBox="0 0 24 24" style="color:#e3d8ff"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z" fill="currentColor"/></svg>
+                  <button type="button" class="cv9-top-btn" id="p10Save" aria-label="저장"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg></button>
+                  <svg viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M5 13v7h14v-7"/></svg>
+                </div>
+
+                <div class="cv7-body">
+                  <div class="p10-card" id="p10Card">
+                    <div class="p10-illust" id="p10Illust"></div>
+                    <p class="p10-text" id="p10Text"></p>
+                  </div>
+                </div>
+
+                <nav class="cv-tabs">
+                  <button type="button" class="cv-tab" data-icon="template"><i></i>추천 템플릿</button>
+                  <button type="button" class="cv-tab" data-icon="elements"><i></i>요소</button>
+                  <button type="button" class="cv-tab" data-icon="text"><i></i>텍스트</button>
+                  <button type="button" class="cv-tab" data-icon="gallery"><i></i>갤러리</button>
+                  <button type="button" class="cv-tab" data-icon="brand"><i></i>브랜드 센터</button>
+                  <button type="button" class="cv-tab" data-icon="upload"><i></i>업로드</button>
+                </nav>
+
+                <div class="cv7-sub is-off" id="p10Sub"></div>
+                <div class="cv7-bar is-off" id="p10Tools">
+                  <div class="cv7-view"><div class="p10-tools-row" id="p10ToolsRow"></div></div>
+                  <button type="button" class="cv7-check" id="p10BarOk" aria-label="완료"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button>
+                </div>
+                <div class="cv7-fmt is-off" id="p10Fmt">
+                  <h4>형식<button type="button" id="p10FmtOk" aria-label="완료"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></button></h4>
+                  <div class="cv7-fmt-row" id="p10FmtRow1"></div>
+                  <div class="cv7-fmt-row cv7-fmt-align" id="p10FmtRow2"></div>
+                  <div class="cv7-fmt-row" id="p10FmtRow3"></div>
+                </div>
+                <div class="cv9-saving"></div>
+              </div>
+
+              <div class="cv9-saved">
+                <div class="cv9-sheet">
+                  <h4><b>✓</b>다운로드 완료<em>✕</em></h4>
+                  <div class="cv9-thumb"><div class="p10-snap" id="p10Thumb"></div></div>
+                  <p>마음 카드</p>
+                  <small>카메라 롤에 저장했어요</small>
+                  <button type="button" class="cv9-share" id="p10Share">공유</button>
+                  <button type="button" class="cv9-open">열기</button>
+                </div>
               </div>
             </div>
 
-            <div class="step-panel">
-              <div class="quiz-ask-box">
-                <div class="quiz-ask-row">
-                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
-                  <span class="quiz-qnum">Q2.</span>
-                  <p class="quiz-ask">캔바에서 글자의 모양을 예쁘게 꾸미거나 다채로운 색상 효과를 넣기 위해 사용하는 기능은 무엇일까요?</p>
-                </div>
-              </div>
-              <div class="answer-pick-quiz quiz-opts is-list">
-                <button class="answer-pick card-btn" data-correct="false" aria-label="영상 추천 템플릿 기능">영상 추천 템플릿 기능</button>
-                <button class="answer-pick card-btn" data-correct="true" aria-label="텍스트 입력 및 텍스트 효과 기능">텍스트 입력 및 텍스트 효과 기능</button>
-                <button class="answer-pick card-btn" data-correct="false" aria-label="배경 색상 변경 기능">배경 색상 변경 기능</button>
-              </div>
-            </div>
-
-            <div class="step-panel">
-              <div class="quiz-ask-box">
-                <div class="quiz-ask-row">
-                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
-                  <span class="quiz-qnum">Q3.</span>
-                  <p class="quiz-ask">디지털 도구를 사용하여 친구에게 보낼 응원 카드를 만들 때 반드시 지켜야 할 약속은 무엇일까요?</p>
-                </div>
-              </div>
-              <div class="answer-pick-quiz quiz-opts is-list" data-next="page11.html">
-                <button class="answer-pick card-btn" data-correct="false" aria-label="친구가 싫어하는 말이라도 재미있으면 자유롭게 사용하기">친구가 싫어하는 말이라도 재미있으면 자유롭게 사용하기</button>
-                <button class="answer-pick card-btn" data-correct="true" aria-label="온라인 공간에서도 욕설을 쓰지 않고 따듯한 언어 예절 실천하기">온라인 공간에서도 욕설을 쓰지 않고 따듯한 언어 예절 실천하기</button>
-                <button class="answer-pick card-btn" data-correct="false" aria-label="온라인에서는 얼굴을 보지 않으니 마음대로 행동하기">온라인에서는 얼굴을 보지 않으니 마음대로 행동하기</button>
-              </div>
-            </div>
-
+            <button type="button" class="card-btn p10-help is-off" id="p10HelpBtn">도움말</button>
+            <button type="button" class="card-btn is-popup p10-finish is-off" id="p10Finish">완성하기</button>
+            <div class="p10-catch is-off" id="p10Catch"></div>
+            <button type="button" class="p10-target is-off" id="p10Target" aria-label="안내된 곳"></button>
           </div>
 
-          <div class="ox-result-correct is-avatar is-off" data-sound="sound/correct.mp3">
-            <div class="avatar-popup-panel">
-              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
-              <div class="avatar-popup-body">
-                <p class="avatar-popup-text">정답이에요!</p>
-              </div>
-              <div class="avatar-popup-extra"><img src="../../img/common/icon_correct.png" alt=""></div>
+          <!-- 4. 마음 전달 -->
+          <div class="is-off" id="p10SendView">
+            <div class="p10-send-card" id="p10SendCard"></div>
+            <div class="gauge is-thin p10-gauge"><div class="gauge-fill" id="p10Fill"></div></div>
+            <p class="p10-status" id="p10Status"></p>
+            <a href="page11.html" class="js-nav-effect next-btn is-off" id="p10SendNext">
+              <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+            </a>
+          </div>
+
+          <div class="avatar-modal is-off" id="p10HelpModal">
+            <div class="p10-helpbox">
+              <div class="p10-helpshot" id="p10HelpImg"></div>
+              <p id="p10HelpText"></p>
+              <button type="button" id="p10HelpClose" style="right:40px;top:30px" aria-label="닫기">&#10005;</button>
+              <button type="button" class="is-img" id="p10HelpPrev" style="left:40px;top:315px" aria-label="이전"><img src="../../img/common/btn_arrow_left.png" class="js-img-swap" data-src-alt="../../img/common/btn_arrow_left_on.png" data-src-over="../../img/common/btn_arrow_left_over.png" data-swap-reset="200" alt=""></button>
+              <button type="button" class="is-img" id="p10HelpNext" style="right:40px;top:315px" aria-label="다음"><img src="../../img/common/btn_arrow_right.png" class="js-img-swap" data-src-alt="../../img/common/btn_arrow_right_on.png" data-src-over="../../img/common/btn_arrow_right_over.png" data-swap-reset="200" alt=""></button>
             </div>
           </div>
-          <div class="ox-result-wrong is-avatar is-off" data-sound="sound/incorrect.mp3">
+
+          <div class="avatar-modal is-off" id="p10CheckModal">
+            <div class="p10-check">
+              <p class="p10-check-title">잠깐!<br>언어 예절을 지킨 올바른 표현인지 다시 한 번 확인해볼까요?</p>
+              <div class="p10-check-card" id="p10CheckCard"></div>
+              <div class="p10-checks">
+                <button type="button" class="p10-checkbox">상대가 처한 상황을<br>생각한 메시지인가요?</button>
+                <button type="button" class="p10-checkbox">이 메시지를 받았을 때<br>상대방의 기분이 나쁘지는<br>않을까요?</button>
+              </div>
+              <button type="button" class="card-btn is-popup p10-check-ok is-disabled" id="p10CheckOk">확인</button>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p10Oops">
             <div class="avatar-popup-panel">
-              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
               <div class="avatar-popup-body">
-                <p class="hint-title">힌트</p>
-                <p class="avatar-popup-text is-small">문장을 다시 한 번 잘 읽어봐요.</p>
+                <p class="avatar-popup-text is-small"><span>앗, 다른 곳을 선택했어요!<br>안내된 부분을 선택해주세요.</span></p>
+              </div>
+            </div>
+          </div>
+          <div class="avatar-modal is-off" id="p10Learn">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small"><span>학습한 기능을 사용해 카드를 꾸며봐요.</span></p>
               </div>
             </div>
           </div>
@@ -87,8 +331,358 @@
   </div>
   <div class="zoom-info" id="zoomInfo"></div>
 
-  <script src="../../js/header.js" data-title="퀴즈 풀기" data-next="page11.html"></script>
+  <script src="../../js/header.js" data-title="마음을 전하는 카드 만들기" data-next="page11.html"></script>
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const COLORS = [
+      { name: '분홍색', value: '#ffc9dc', ink: '#1b1738' }, { name: '노란색', value: '#fff1a8', ink: '#1b1738' },
+      { name: '흰색', value: '#ffffff', ink: '#1b1738' }, { name: '녹색', value: '#2e8b57', ink: '#ffffff' }, { name: '남색', value: '#1f2a6b', ink: '#ffffff' }
+    ];
+    const FONTS = [
+      { name: 'KCC도담도담체', family: "'KCC-DodamDodam','Cafe24 Ssurround'" },
+      { name: 'KCC무럭무럭체', family: "'KCC-MurukMuruk','Pretendard'" }
+    ];
+    const HELP = ['배경을 클릭해 색상을 바꿀 수 있어요.', '텍스트를 클릭해<br>글꼴, 크기, 형식을 변경할 수 있어요.'];
+
+    const bubble = $('p10Bubble');
+    const phone = $('p10Phone');
+    const card = $('p10Card');
+    const text = $('p10Text');
+    const tools = $('p10Tools');
+    const row = $('p10ToolsRow');
+    const catcher = $('p10Catch');
+    const target = $('p10Target');
+    const oops = $('p10Oops');
+    const learn = $('p10Learn');
+    const warn = (layer) => { playWrong(); flashLayer(layer); };
+
+    const saved = JSON.parse(sessionStorage.getItem('sa03p09') || '{"sit":"sports","t":"우승한 거 정말 축하해!"}');
+    const sitKey = saved.sit;
+    const expr = { t: saved.t };
+
+    // 3. Canva 안내
+    const sub = $('p10Sub');
+    const fmt = $('p10Fmt');
+    const SVG = (d) => '<svg viewBox="0 0 24 24">' + d + '</svg>';
+    const ICON = {
+      shape: SVG('<circle cx="8" cy="8" r="4"/><rect x="11" y="11" width="9" height="9" rx="1"/>'),
+      edit: SVG('<rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>'),
+      style: SVG('<path d="M4 8h16M4 16h16" stroke-width="3.2"/>'),
+      corner: SVG('<path d="M5 20v-4a10 10 0 0110-10h2"/><circle cx="19" cy="6" r="1.6" fill="currentColor"/><circle cx="5" cy="20" r="1.6" fill="currentColor"/>'),
+      format: SVG('<path d="M4 5h5a3 3 0 010 6H4zM4 11h6a3.2 3.2 0 010 6.4H4zM15 7h6M15 12h6M15 17h6"/>')
+    };
+    let bgNow = '#ffffff';
+
+    function say(html) { bubble.innerHTML = html; }
+    function nudgeFinger() {
+      document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.top = Math.min(parseFloat(f.style.top), 850) + 'px'; });
+    }
+    function guideTo(el, then) {
+      clearFingers();
+      catcher.classList.remove('is-off');
+      catcher.onclick = () => warn(oops);
+      const pr = el.getBoundingClientRect();
+      const mr = document.querySelector('main').getBoundingClientRect();
+      const s = mr.width / 1920;
+      target.style.cssText = 'left:' + (pr.left - mr.left) / s + 'px;top:' + (pr.top - mr.top) / s + 'px;width:' + pr.width / s + 'px;height:' + pr.height / s + 'px';
+      target.classList.remove('is-off');
+      pointFingerAt(target, el.id === 'p10CanvaIcon' ? { onMain: true, dx: 15, dy: -37 } : { onMain: true, beside: true });
+      nudgeFinger();
+      target.onclick = () => {
+        playClick();
+        target.classList.add('is-off');
+        catcher.classList.add('is-off');
+        clearFingers();
+        then();
+      };
+    }
+    function guideApp() {
+      say('Canva의 편집 기능을 이용하여<br>마음을 전하는 카드를<br>만들어봐요!');
+      phone.dataset.screen = 'home';
+      guideTo($('p10CanvaIcon'), () => {
+        say('디자인 버튼을 클릭해요');
+        phone.dataset.screen = 'design';
+        guideTo($('p10DesignTab'), () => {
+          say('내가 편집할<br>프로젝트를 선택해요.');
+          phone.dataset.screen = 'projects';
+          guideTo($('p10ProjCard'), startEdit);
+        });
+      });
+    }
+
+    // 4. 자유 편집: 배경 색상 / 텍스트 글꼴·크기·형식만
+    let edited = false;
+    let freeEdit = false;
+    function markEdited() {
+      phone.classList.add('is-edited');
+      if (edited) return;
+      edited = true;
+      $('p10Finish').classList.remove('is-off');
+    }
+    function startEdit() {
+      say('학습한 기능을 바탕으로<br>마음 카드를 자유롭게 꾸며봐요!');
+      phone.dataset.screen = 'edit';
+      $('p10Illust').style.backgroundImage = "url('img/p10_illust_" + sitKey + ".png')";
+      text.innerHTML = expr.t.replace(/<br>/g, ' ');
+      $('p10HelpBtn').classList.remove('is-off');
+      freeEdit = true;
+    }
+    phone.addEventListener('click', (e) => {
+      if (!freeEdit) return;
+      if (e.target.closest('.p10-card')) { playClick(); if (e.target.closest('.p10-text')) textTools(); else bgTools(); return; }
+      if (e.target.closest('.cv7-bar,.cv7-sub,.cv7-fmt')) return;
+      warn(learn);
+    });
+    function deselect() {
+      tools.classList.add('is-off');
+      sub.classList.add('is-off');
+      fmt.classList.add('is-off');
+      phone.classList.remove('is-fmt', 'has-sel');
+      text.classList.remove('is-picked');
+      card.classList.remove('is-picked');
+    }
+    $('p10BarOk').addEventListener('click', () => { playClick(); deselect(); });
+    $('p10FmtOk').addEventListener('click', () => { playClick(); fmt.classList.add('is-off'); phone.classList.remove('is-fmt'); textTools(); });
+
+    function toolBtn(label, glyph, fn) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'p10-tool';
+      b.innerHTML = '<i>' + glyph + '</i><span>' + label + '</span>';
+      b.addEventListener('click', () => { if (fn) { playClick(); fn(b); } else warn(learn); });
+      return b;
+    }
+    function showBar(buttons) {
+      row.innerHTML = '';
+      buttons.forEach((b) => row.appendChild(b));
+      tools.classList.remove('is-off');
+      sub.classList.add('is-off');
+      fmt.classList.add('is-off');
+      phone.classList.add('has-sel');
+      phone.classList.remove('is-fmt');
+    }
+    function showSub(cls) {
+      sub.innerHTML = '';
+      sub.className = 'cv7-sub' + (cls ? ' ' + cls : '');
+      return sub;
+    }
+    function bgTools() {
+      text.classList.remove('is-picked');
+      card.classList.add('is-picked');
+      const colorBtn = toolBtn('색상', '<b class="p10-dot" style="background:' + bgNow + '"></b>', () => {
+        colorBtn.classList.add('is-on');
+        showSub();
+        COLORS.forEach((c) => {
+          const sw = document.createElement('button');
+          sw.type = 'button';
+          sw.className = 'p10-swatch';
+          sw.title = c.name;
+          sw.style.background = c.value;
+          sw.addEventListener('click', () => {
+            playClick();
+            sub.querySelectorAll('.p10-swatch').forEach((x) => x.classList.toggle('is-on', x === sw));
+            bgNow = c.value;
+            card.style.backgroundColor = c.value;
+            text.style.color = c.ink;
+            colorBtn.querySelector('.p10-dot').style.background = c.value;
+            markEdited();
+          });
+          sub.appendChild(sw);
+        });
+      });
+      showBar([toolBtn('도형', ICON.shape), toolBtn('편집', ICON.edit), colorBtn, toolBtn('스타일', ICON.style), toolBtn('모서리', ICON.corner)]);
+    }
+    function textTools() {
+      text.classList.add('is-picked');
+      card.classList.remove('is-picked');
+      const fontBtn = toolBtn('글꼴', '<span style="font-family:serif;font-style:italic">Ff</span>', () => { fontBtn.classList.add('is-on'); fontPanel(); });
+      const sizeBtn = toolBtn('글꼴 크기', '<span style="font-size:26px">A<small style="font-size:17px">A</small></span>', () => { sizeBtn.classList.add('is-on'); sizePanel(); });
+      const fmtBtn = toolBtn('형식', ICON.format, formatPanel);
+      showBar([fontBtn, toolBtn('텍스트 스타일', '<span style="font-family:serif">H</span>'), sizeBtn,
+        toolBtn('색상', '<u style="text-decoration:none;border-bottom:5px solid #f08fb0;line-height:1;padding-bottom:1px">A</u>'), fmtBtn]);
+    }
+    function fontPanel() {
+      showSub();
+      FONTS.forEach((f) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'p10-chip';
+        b.textContent = f.name;
+        b.style.fontFamily = f.family;
+        b.addEventListener('click', () => {
+          playClick();
+          sub.querySelectorAll('.p10-chip').forEach((x) => x.classList.toggle('is-on', x === b));
+          text.style.fontFamily = f.family;
+          markEdited();
+        });
+        sub.appendChild(b);
+      });
+    }
+    function sizePanel() {
+      showSub('p10-size');
+      const cur = parseInt(getComputedStyle(text).fontSize, 10);
+      sub.innerHTML = '<p>글꼴 크기</p><div><input type="range" min="20" max="64" value="' + cur + '"><span><button type="button">−</button><b>' + cur + '</b><button type="button">+</button></span></div>';
+      const range = sub.querySelector('input');
+      const [minus, plus] = sub.querySelectorAll('button');
+      const apply = (v) => {
+        v = Math.max(20, Math.min(64, v));
+        range.value = v;
+        sub.querySelector('b').textContent = v;
+        text.style.fontSize = v + 'px';
+        markEdited();
+      };
+      range.addEventListener('input', () => apply(+range.value));
+      minus.addEventListener('click', () => { playClick(); apply(+range.value - 2); });
+      plus.addEventListener('click', () => { playClick(); apply(+range.value + 2); });
+    }
+    function formatPanel() {
+      tools.classList.add('is-off');
+      sub.classList.add('is-off');
+      fmt.classList.remove('is-off');
+      phone.classList.add('is-fmt');
+      const on = {
+        B: ['fontWeight', '800', 'normal'],
+        I: ['fontStyle', 'italic', 'normal'],
+        U: ['textDecoration', 'underline', 'none']
+      };
+      const glyph = {
+        B: '<b>B</b>', I: '<i style="font-family:serif">I</i>', U: '<u>U</u>', S: '<s>S</s>', aA: 'aA',
+        dir: SVG('<path d="M5 5h10M10 5v14M16 15l3 4 3-4M19 8v11"/>'),
+        l: SVG('<path d="M4 6h16M4 11h10M4 16h16M4 21h10"/>'), c: SVG('<path d="M4 6h16M7 11h10M4 16h16M7 21h10"/>'),
+        r: SVG('<path d="M4 6h16M10 11h10M4 16h16M10 21h10"/>'), j: SVG('<path d="M4 6h16M4 11h16M4 16h16M4 21h16"/>'),
+        ul: SVG('<circle cx="5" cy="7" r="1.4" fill="currentColor"/><circle cx="5" cy="14" r="1.4" fill="currentColor"/><path d="M10 7h10M10 14h10"/>'),
+        ol: SVG('<path d="M10 7h10M10 14h10M4 5l1.5-1v6M4 13h3l-3 4h3"/>')
+      };
+      const fill = (id, keys, sel) => {
+        const box = $(id);
+        box.innerHTML = '';
+        keys.forEach((k) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.innerHTML = glyph[k];
+          if (sel === k) b.classList.add('is-sel');
+          if (on[k]) {
+            const [prop, yes] = on[k];
+            if (text.style[prop] === yes) b.classList.add('is-on');
+            b.addEventListener('click', () => {
+              playClick();
+              const now = !b.classList.contains('is-on');
+              b.classList.toggle('is-on', now);
+              text.style[prop] = now ? yes : on[k][2];
+              markEdited();
+            });
+          } else {
+            b.addEventListener('click', () => warn(learn));
+          }
+          box.appendChild(b);
+        });
+      };
+      fill('p10FmtRow1', ['B', 'I', 'U', 'S', 'aA', 'dir']);
+      fill('p10FmtRow2', ['l', 'c', 'r', 'j'], 'c');
+      fill('p10FmtRow3', ['ul', 'ol']);
+    }
+
+    // 도움말
+    let helpPage = 0;
+    function helpShot(page) {
+      const tool = (label, glyph, on) => '<span class="hs-tool' + (on ? ' is-on' : '') + '"><em>' + glyph + '</em>' + label + '</span>';
+      const bar = page === 0
+        ? tool('도형', '◇') + tool('편집', '⌨') + tool('색상', '<b class="hs-dot" style="background:' + bgNow + '"></b>', true) + tool('스타일', '☰') + tool('모서리', '⌒')
+        : tool('편집', '⌨') + tool('글꼴', '<i>Ff</i>') + tool('텍스트 스타일', 'H') + tool('글꼴 크기', 'AA') + tool('색상', '<u>A</u>');
+      const handles = '<b style="left:-6px;top:-6px"></b><b style="right:-6px;top:-6px"></b><b style="left:-6px;bottom:-6px"></b><b style="right:-6px;bottom:-6px"></b>';
+      const pill = '<div class="hs-pill" style="top:' + (page === 0 ? 46 : 246) + 'px"><span>💬</span><span>⧉</span><span>🗑</span><span>⋯</span></div>';
+      return '<div class="hs-top"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/></svg><svg viewBox="0 0 24 24"><path d="M9 13L4 8l5-5"/><path d="M4 8h10a6 6 0 010 12h-3"/></svg><span></span>'
+        + '<svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg><svg viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M5 13v7h14v-7"/></svg></div>'
+        + '<div class="hs-card" style="background:' + bgNow + '"><div class="hs-ill" style="background-image:url(\'img/p10_illust_' + sitKey + '.png\')"></div>'
+        + '<div class="hs-txt" style="color:' + (text.style.color || '#1b1738') + '">' + text.textContent + '</div>'
+        + (page === 0 ? '<div class="hs-sel" style="inset:0">' + handles + '</div>' : '<div class="hs-sel" style="left:8px;right:8px;top:196px;height:70px">' + handles + '</div>') + '</div>'
+        + pill
+        + '<div class="hs-ring" style="' + (page === 0 ? 'left:48px;top:84px;width:272px;height:302px' : 'left:58px;top:276px;width:252px;height:78px') + '"></div>'
+        + '<img class="hs-finger" src="../../img/common/img_finger01.png" alt="" style="' + (page === 0 ? 'left:250px;top:330px' : 'left:240px;top:318px') + '">'
+        + '<div class="hs-bar">' + bar + '</div>';
+    }
+    function showHelp() {
+      $('p10HelpImg').innerHTML = helpShot(helpPage);
+      $('p10HelpText').innerHTML = HELP[helpPage];
+      $('p10HelpPrev').classList.toggle('is-off', helpPage === 0);
+      $('p10HelpNext').classList.toggle('is-off', helpPage === HELP.length - 1);
+    }
+    $('p10HelpBtn').addEventListener('click', () => { playClick(); helpPage = 0; showHelp(); $('p10HelpModal').classList.remove('is-off'); });
+    $('p10HelpNext').addEventListener('click', () => { playClick(); helpPage = 1; showHelp(); });
+    $('p10HelpPrev').addEventListener('click', () => { playClick(); helpPage = 0; showHelp(); });
+    $('p10HelpClose').addEventListener('click', () => { playClick(); $('p10HelpModal').classList.add('is-off'); });
+
+    // 5. 완성 → 저장 → 공유
+    $('p10Finish').addEventListener('click', () => {
+      playClick();
+      freeEdit = false;
+      $('p10Finish').classList.add('is-off');
+      $('p10HelpBtn').classList.add('is-off');
+      deselect();
+      say('완성한 카드를 저장하려면<br>오른쪽 위의 저장 버튼을 눌러요.');
+      guideTo($('p10Save'), () => {
+        say('카드를 저장하고 있어요.');
+        phone.classList.add('is-saving');
+        catcher.classList.remove('is-off');
+        catcher.onclick = null;
+        setTimeout(() => {
+          phone.classList.remove('is-saving');
+          cardSnapshot($('p10Thumb'), 150);
+          phone.dataset.screen = 'saved';
+          say('카드를 저장했어요!<br>이제 공유 버튼을 클릭해<br>친구에게 마음을 전달해요.');
+          guideTo($('p10Share'), openCheck);
+        }, 2000);
+      });
+    });
+
+    function cardSnapshot(box, w) {
+      const c = card.cloneNode(true);
+      c.removeAttribute('id');
+      c.style.cssText += ';position:absolute;left:0;top:0;transform-origin:0 0;transform:scale(' + (w / 400) + ');z-index:auto';
+      c.querySelector('.p10-text').classList.remove('is-picked');
+      c.classList.remove('is-picked');
+      box.innerHTML = '';
+      box.appendChild(c);
+    }
+
+    // 6. 언어 예절 확인
+    function openCheck() {
+      cardSnapshot($('p10CheckCard'), 384);
+      $('p10CheckModal').classList.remove('is-off');
+    }
+    const checks = Array.from(document.querySelectorAll('.p10-checkbox'));
+    checks.forEach((c) => c.addEventListener('click', () => {
+      playClick();
+      c.classList.toggle('is-checked');
+      $('p10CheckOk').classList.toggle('is-disabled', !checks.every((x) => x.classList.contains('is-checked')));
+    }));
+    $('p10CheckOk').addEventListener('click', () => {
+      if ($('p10CheckOk').classList.contains('is-disabled')) return;
+      playClick();
+      $('p10CheckModal').classList.add('is-off');
+      send();
+    });
+
+    // 7. 마음 전달
+    function send() {
+      $('p10EditView').classList.add('is-off');
+      $('p10SendView').classList.remove('is-off');
+      cardSnapshot($('p10SendCard'), 440);
+      $('p10Status').textContent = '마음을 전달하는 중이에요';
+      const fill = $('p10Fill');
+      void fill.offsetWidth;
+      fill.classList.add('is-go');
+      setTimeout(() => {
+        playCorrect();
+        $('p10Status').textContent = '마음을 성공적으로 전달했어요!';
+        $('p10SendNext').classList.remove('is-off');
+      }, 2600);
+    }
+
+    guideApp();
+  })();
+  </script>
 </body>
 </html>

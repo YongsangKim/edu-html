@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>브이로그 완성 대작전</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서 86~97p. 브이로그 3편(도서관·마트·공원): 장면의 자막(틀린 설명)을 눌러 알맞은 문구로 고치고, 지나가는 행인 얼굴을 눌러 가리기 도구를 끌어 얼굴(빨간 영역)에 붙이기.
+           둘 다 하면 "편집 성공!" 2초 후 다음 브이로그(자막·모자이크는 순서 상관없음). 공원은 행인 2명 모두 가려야 함. 마지막 브이로그 뒤 page13(미션 성공).
+           장면은 임시 이모지 그림(img/p12_vlog_*.jpg), 행인은 이모지 🧑(기획서 이미지가 오면 교체), 가리기 도구는 모자이크 2종(사각·원) + 스티커 2종(하트·곰, 초상권을 지켜라 소스 재사용) */
+
+        .p12-banner{position:absolute;left:60px;top:22px;width:1800px;height:92px;margin:0;box-sizing:border-box;padding:8px 20px 0;display:flex;align-items:center;justify-content:center;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:46px;
+          box-shadow:0 10px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:46px;color:var(--c-ink);letter-spacing:-0.05em}
+        .p12-scene{position:absolute;left:60px;top:150px;width:1040px;height:693px;box-sizing:border-box;border:solid 5px var(--c-ink);background:#fff center / cover no-repeat;overflow:hidden;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p12-title{position:absolute;left:60px;top:862px;width:1040px;margin:0;font-family:'Cafe24 Ssurround';font-size:46px;color:var(--c-ink);letter-spacing:-0.05em}
+        .p12-fig{position:absolute;width:192px;font-size:240px;line-height:1;text-align:center;white-space:nowrap;font-family:'Segoe UI Emoji','Apple Color Emoji',sans-serif;pointer-events:none}
+        .p12-hit{position:absolute;width:210px;height:210px;box-sizing:border-box;padding:0;border:solid 5px transparent;border-radius:16px;background:transparent;cursor:pointer;z-index:3}
+        @media (hover:hover){.p12-hit:not(.is-done):hover{border-color:#e5342f}}
+        .p12-hit.is-target{border:dashed 5px #e5342f;background:rgba(229,52,47,.12)}
+        .p12-hit.is-over{background:rgba(229,52,47,.3)}
+        .p12-hit.is-done{pointer-events:none;border-color:transparent;background:none}
+        .p12-cover{position:absolute;width:160px;height:160px;z-index:4;background-repeat:no-repeat;pointer-events:none}
+        .p12-cover.is-square{background:repeating-conic-gradient(#8c8c8c 0 25%,#dadada 0 50%) 0 0 / 32px 32px}
+        .p12-cover.is-circle{border-radius:50%;background:repeating-conic-gradient(#8c8c8c 0 25%,#dadada 0 50%) 0 0 / 32px 32px}
+        .p12-sub{position:absolute;left:5%;bottom:5%;width:90%;box-sizing:border-box;padding:14px 20px 10px;margin:0;background:rgba(58,58,62,.88);border-radius:10px;font-family:'Pretendard';font-weight:600;font-size:34px;line-height:1.35;color:#fff;text-align:center;cursor:pointer;z-index:5;transition:font-size .15s}
+        .p12-sub.is-big{font-size:42px;cursor:default}
+        .p12-sub.is-done{cursor:default}
+        .p12-sub b{font-weight:800;color:#ffe27a}
+        @media (hover:hover){.p12-sub:not(.is-done):not(.is-big):hover{outline:4px solid #e5342f}}
+
+        .p12-panel{position:absolute;left:1150px;top:150px;width:710px;height:693px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px}
+        .p12-panel .p12-say{margin:0 0 6px;font-family:'Cafe24 Ssurround';font-size:48px;line-height:1.3;color:var(--c-ink);text-align:center;letter-spacing:-0.05em;word-break:keep-all}
+        .p12-panel .card-btn{width:100%;min-width:0;height:auto;min-height:118px;padding:14px 26px 8px;font-size:38px;line-height:1.25}
+        .p12-tools{display:grid;grid-template-columns:repeat(2,230px);gap:26px}
+        .p12-tool{width:230px;height:230px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:var(--c-cream);border:solid 4px var(--c-ink);border-radius:24px;cursor:grab;touch-action:none}
+        .p12-tool img{max-width:78%;max-height:78%;pointer-events:none}
+        .p12-tool i{display:block;width:150px;height:150px;background:repeating-conic-gradient(#8c8c8c 0 25%,#dadada 0 50%) 0 0 / 30px 30px;pointer-events:none}
+        .p12-tool i.is-circle{border-radius:50%}
+        .p12-ok{margin:0;font-family:'Cafe24 Ssurround';font-size:90px;color:var(--c-purple);letter-spacing:-0.05em}
+        .p12-ghost{position:absolute;z-index:80;pointer-events:none;opacity:.9}
+        .p12 .is-off{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default p12">
+          <p class="p12-banner">잘못된 설명이나, 이웃의 얼굴이 가려지지 않은 부분을 찾아 클릭해요!</p>
+          <div class="p12-scene" id="p12Scene"></div>
+          <p class="p12-title" id="p12Title"></p>
+          <div class="p12-panel" id="p12Panel"></div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="브이로그 완성 대작전" data-next="page13.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const VLOGS = [
+      { img: 'p12_vlog_library', title: 'VLOG | 우리 동네 도서관을 소개합니다', head: '여기는 저희 동네 도서관이고,', bad: '필요한 물건이 있으면 사러 오는 곳이에요.',
+        opts: ['책을 읽으러 오는 곳이에요.', '산책을 하러 오는 곳이에요.', '편지를 부치러 오는 곳이에요.'], ans: 0, people: [{ x: 410, y: 150 }] },
+      { img: 'p12_vlog_mart', title: 'VLOG | 오늘은 마트에 장 보러 가요!', head: '여기는 우리 동네 마트예요.', bad: '편지를 부치러 왔습니다.',
+        opts: ['머리카락을 자르러 왔습니다.', '책을 빌리러 왔습니다.', '생필품을 사러 왔습니다.'], ans: 2, people: [{ x: 410, y: 150 }] },
+      { img: 'p12_vlog_park', title: 'VLOG | 햇살 좋은 날, 공원 한 바퀴', head: '동네 공원에 왔어요.', bad: '배가 아파서 진료를 받으려고요.',
+        opts: ['친구에게 편지를 부치려고요.', '햇살이 좋아서 산책을 하려고요.', '생필품을 구매하려고요.'], ans: 1, people: [{ x: 190, y: 160 }, { x: 600, y: 160 }] }
+    ];
+    const FACE = { x: 170, y: 136 };     // 이모지 얼굴 중심(글자 상자 왼쪽 위 기준)
+    const main = document.querySelector('main');
+    const scene = $('p12Scene'), panel = $('p12Panel');
+    const pos = (e) => { const r = main.getBoundingClientRect(), s = r.width / 1920; return { x: (e.clientX - r.left) / s, y: (e.clientY - r.top) / s }; };
+    let vi = 0, subDone = false, hits = [], busy = false;
+
+    function startVlog() {
+      const V = VLOGS[vi];
+      subDone = false; busy = false; hits = [];
+      scene.innerHTML = '';
+      scene.style.backgroundImage = "url('img/" + V.img + ".jpg')";
+      $('p12Title').textContent = V.title;
+      V.people.forEach((p) => {
+        const fig = document.createElement('div');
+        fig.className = 'p12-fig';
+        fig.style.cssText = 'left:' + p.x + 'px;top:' + p.y + 'px';
+        fig.textContent = '🧑';
+        scene.appendChild(fig);
+        const hit = document.createElement('button');
+        hit.type = 'button';
+        hit.className = 'p12-hit';
+        hit.style.cssText = 'left:' + (p.x + FACE.x - 105) + 'px;top:' + (p.y + FACE.y - 105) + 'px';
+        hit.addEventListener('click', () => { if (!hit.classList.contains('is-done')) { playClick(); faceMode(); } });
+        scene.appendChild(hit);
+        hits.push({ hit, cx: p.x + FACE.x, cy: p.y + FACE.y, done: false });
+      });
+      const sub = document.createElement('p');
+      sub.className = 'p12-sub';
+      sub.id = 'p12Sub';
+      sub.innerHTML = V.head + '<br>' + V.bad;
+      sub.addEventListener('click', () => { if (!subDone && !sub.classList.contains('is-big')) { playClick(); subMode(); } });
+      scene.appendChild(sub);
+      panel.innerHTML = '';
+    }
+
+    function subMode() {
+      const V = VLOGS[vi], sub = $('p12Sub');
+      hits.forEach((h) => h.hit.classList.remove('is-target'));
+      sub.classList.add('is-big');
+      sub.innerHTML = V.head + '<br><b>' + V.bad + '</b>';
+      panel.innerHTML = '<p class="p12-say">알맞은 내용을 선택해<br>편집해보세요.</p>';
+      V.opts.forEach((t, k) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'card-btn';
+        b.textContent = t;
+        b.addEventListener('click', () => {
+          if (k !== V.ans) {
+            playWrong();
+            b.classList.add('is-wrong');
+            setTimeout(() => b.classList.remove('is-wrong'), 400);
+            return;
+          }
+          playCorrect();
+          subDone = true;
+          sub.classList.remove('is-big');
+          sub.classList.add('is-done');
+          sub.innerHTML = V.head + '<br>' + t;
+          panel.innerHTML = '';
+          check();
+        });
+        panel.appendChild(b);
+      });
+    }
+
+    function faceMode() {
+      const sub = $('p12Sub');
+      if (!subDone) { sub.classList.remove('is-big'); sub.innerHTML = VLOGS[vi].head + '<br>' + VLOGS[vi].bad; }
+      hits.forEach((h) => { if (!h.done) h.hit.classList.add('is-target'); });
+      panel.innerHTML = '<p class="p12-say">가리기 도구를 얼굴 위로<br>드래그해 보세요.</p>';
+      const g = document.createElement('div');
+      g.className = 'p12-tools';
+      [{ cls: 'is-square' }, { cls: 'is-circle' }, { src: 'img/stk_heart.png' }, { src: 'img/stk_bear.png' }].forEach((it) => {
+        const o = document.createElement('div');
+        o.className = 'p12-tool';
+        o.innerHTML = it.src ? '<img src="' + it.src + '" alt="">' : '<i class="' + (it.cls === 'is-circle' ? 'is-circle' : '') + '"></i>';
+        o.addEventListener('pointerdown', (e) => drag(e, o, it));
+        g.appendChild(o);
+      });
+      panel.appendChild(g);
+    }
+
+    function drag(e, o, it) {
+      e.preventDefault();
+      playClick();
+      const g = o.cloneNode(true);
+      g.className = 'p12-ghost p12-tool';
+      g.style.cssText = 'width:' + o.offsetWidth + 'px;height:' + o.offsetHeight + 'px;background:transparent;border:0';
+      main.appendChild(g);
+      const place = (ev) => { const q = pos(ev); g.style.left = (q.x - o.offsetWidth / 2) + 'px'; g.style.top = (q.y - o.offsetHeight / 2) + 'px'; };
+      place(e);
+      const overOf = (ev) => hits.find((h) => { if (h.done) return false; const r = h.hit.getBoundingClientRect(); return ev.clientX > r.left && ev.clientX < r.right && ev.clientY > r.top && ev.clientY < r.bottom; });
+      const move = (ev) => { place(ev); const t = overOf(ev); hits.forEach((h) => h.hit.classList.toggle('is-over', h === t)); };
+      const up = (ev) => {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', up);
+        g.remove();
+        const t = overOf(ev);
+        hits.forEach((h) => h.hit.classList.remove('is-over'));
+        if (t) attach(t, it);
+      };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', up);
+    }
+
+    function attach(h, it) {
+      playCorrect();
+      h.done = true;
+      h.hit.classList.remove('is-target');
+      h.hit.classList.add('is-done');
+      const c = document.createElement('div');
+      c.className = 'p12-cover' + (it.cls ? ' ' + it.cls : '');
+      if (it.src) c.style.cssText = "background-image:url('" + it.src + "');background-size:contain;background-position:center;";
+      c.style.left = (h.cx - 80) + 'px';
+      c.style.top = (h.cy - 80) + 'px';
+      scene.appendChild(c);
+      if (hits.every((x) => x.done)) { hits.forEach((x) => x.hit.classList.remove('is-target')); panel.innerHTML = ''; } else faceMode();
+      check();
+    }
+
+    function check() {
+      if (busy || !subDone || !hits.every((h) => h.done)) return;
+      busy = true;
+      panel.innerHTML = '<p class="p12-ok">편집 성공!</p>';
+      setTimeout(() => {
+        if (vi < VLOGS.length - 1) { vi++; startVlog(); } else { location.href = 'page13.html'; }
+      }, 2000);
+    }
+    startVlog();
+  })();
+  </script>
+</body>
+</html>

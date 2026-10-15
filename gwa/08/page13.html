@@ -36,7 +36,7 @@
         .en-list{flex:1 1 auto;position:relative;padding:60px 40px 0;display:flex;flex-direction:column;gap:30px;align-items:flex-start}
         .en-list .en-blk{width:360px;flex:none}
 
-        .en-blk{--b:#a751e8;--blk-c:var(--b);--tab:32px;position:relative;box-sizing:border-box;height:74px;padding:4px 22px 0 34px;display:flex;align-items:center;font-family:'Cafe24 Ssurround';font-size:25px;color:var(--c-white);letter-spacing:-0.05em;white-space:nowrap;touch-action:none;user-select:none}
+        .en-blk{--b:#a751e8;--blk-c:var(--b);--tab:32px;position:relative;box-sizing:border-box;height:74px;padding:4px 22px 0 20px;display:flex;align-items:center;font-family:'Cafe24 Ssurround';font-size:25px;color:var(--c-white);letter-spacing:-0.05em;white-space:nowrap;touch-action:none;user-select:none}
         .en-blk{background:
           linear-gradient(rgba(255,255,255,.42),rgba(255,255,255,.42)) left top / calc(50% - var(--tab) / 2) 3px no-repeat,
           linear-gradient(rgba(255,255,255,.42),rgba(255,255,255,.42)) right top / calc(50% - var(--tab) / 2) 3px no-repeat,
@@ -53,9 +53,13 @@
           linear-gradient(var(--blk-c),var(--blk-c)) right bottom / calc(50% - var(--tab) / 2 + 1px) 36% no-repeat,
           linear-gradient(var(--blk-c),var(--blk-c)) right 13px center / calc(50% - var(--tab) / 2 - 13px + 1px) 32% no-repeat,
           radial-gradient(circle at 100% 100%,transparent 12px,var(--blk-c) 12.5px) right 1px top calc(35% + 4.2px) / 12px 12px no-repeat,
-          radial-gradient(circle at 100% 0,transparent 12px,var(--blk-c) 12.5px) right 1px top calc(65% - 4.2px) / 12px 12px no-repeat;filter:drop-shadow(0 1px 0 rgba(0,0,0,.2))}
+          radial-gradient(circle at 100% 0,transparent 12px,var(--blk-c) 12.5px) right 1px top calc(65% - 4.2px) / 12px 12px no-repeat,
+          var(--fill);filter:drop-shadow(0 1px 0 rgba(0,0,0,.2))}
         .en-blk:after{bottom:-14px;height:21px;border-radius:0 0 12px 12px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.12)}
-        .en-blk.is-start{--b:#1fa89a;z-index:20}
+        .en-blk{--fill:linear-gradient(var(--blk-c),var(--blk-c)) left top / 14px 100% no-repeat,linear-gradient(var(--blk-c),var(--blk-c)) right top / 14px 100% no-repeat}
+        .en-blk.is-start{--b:#1fa89a;--fill:linear-gradient(rgba(255,255,255,.42),rgba(255,255,255,.42)) left top / 100% 3px no-repeat,linear-gradient(var(--blk-c),var(--blk-c)) 50% 0 / calc(var(--tab) + 2px) 20px no-repeat,linear-gradient(var(--blk-c),var(--blk-c)) left top / 14px 100% no-repeat,linear-gradient(var(--blk-c),var(--blk-c)) right top / 14px 100% no-repeat;z-index:20;border-radius:24px 24px 10px 10px}
+        .en-blk.is-start:before{content:'';flex:none;margin-right:12px;border-left:15px solid var(--c-white);border-top:9px solid transparent;border-bottom:9px solid transparent}
+        .en-num{display:inline-block;flex:none;box-sizing:border-box;width:32px;height:32px;min-width:32px;margin-right:2px;border-radius:50%;background:var(--c-white);color:var(--b);line-height:34px;text-align:center;font-style:normal;letter-spacing:0}
         .en-blk.is-pick{cursor:grab}
         .en-blk.is-ghost{position:absolute;z-index:80;opacity:.92;box-shadow:0 8px 16px rgba(0,0,0,.3);pointer-events:none}
         .en-blk.is-blink{animation:en-blink .4s ease-in-out 4}
@@ -125,7 +129,7 @@
   (function () {
     const CATS = ['시작', '흐름', '움직임', '생김새', '소리', '판단', '계산'];
     $('enCats').innerHTML = CATS.map((c) => '<button class="en-cat' + (c === '움직임' ? ' is-on' : '') + '">' + c + '</button>').join('');
-    const names = ['1초 동안 입 위치로 이동하기', '1초 동안 위 위치로 이동하기', '1초 동안 장 위치로 이동하기'];
+    const names = ['<i class="en-num">1</i>초 동안 입 위치로 이동하기', '<i class="en-num">1</i>초 동안 위 위치로 이동하기', '<i class="en-num">1</i>초 동안 장 위치로 이동하기'];
     $('enList').innerHTML = names.map((n) => '<div class="en-blk blk">' + n + '</div>').join('');
 
     $('enNext').addEventListener('click', () => {

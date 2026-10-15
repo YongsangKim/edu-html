@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>초상권을 지켜라!</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서 34~45p. 장면 5장 중 하나 고르기 → 편집 화면: 안내 문구(▶로 넘김) → 모자이크/스티커 고르기 → 가리기 도구를 끌어 이웃 얼굴(빨간 영역)에 놓으면 달라붙음
+           → 얼굴 트래킹(처음엔 오류: 스티커가 얼굴을 놓침 → [다시 수정]으로 정상 트래킹) → [공유 준비 완료] → 모자이크된 영상 재생 확인 → 다음.
+           장면은 임시 이모지 그림(img/p05_q*), 모르는 이웃은 이모지 🧑(기획서 이미지가 오면 교체), 스티커 img/stk_*.png(기획서 그림 5) */
+
+        .p07-pick{position:absolute;left:0;top:210px;width:1920px;display:flex;flex-direction:column;align-items:center;gap:34px}
+        .p07-pick-row{display:flex;gap:34px}
+        .p07-card{position:relative;display:flex;flex-direction:column;justify-content:flex-start;width:450px;height:300px;box-sizing:border-box;padding:0;overflow:hidden;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:24px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);cursor:pointer;font-family:'Cafe24 Ssurround'}
+        .p07-card img{display:block;width:100%;height:210px;object-fit:cover}
+        .p07-card span{position:absolute;left:0;right:0;bottom:0;height:80px;box-sizing:border-box;padding:6px 14px 0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:30px;line-height:1.2;letter-spacing:-0.1em;color:var(--c-ink);white-space:nowrap}
+        @media (hover:hover){.p07-card:hover{border-color:var(--c-purple);box-shadow:0 0 0 6px rgba(92,61,240,.3)}}
+
+        .p07-scene{position:absolute;left:80px;top:24px;width:1050px;height:700px;box-sizing:border-box;border:solid 5px var(--c-ink);background:#fff center / cover no-repeat;overflow:hidden;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p07-npc{position:absolute;left:380px;top:190px;width:240px;height:340px;font-size:300px;line-height:1;text-align:center;font-family:'Segoe UI Emoji','Apple Color Emoji',sans-serif;z-index:2}
+        .p07-npc.is-bottom{display:none}
+        .p07-target{position:absolute;left:462px;top:230px;width:260px;height:260px;box-sizing:border-box;border:dashed 5px #e5342f;border-radius:16px;z-index:3;display:none}
+        .p07-target.is-on{display:block}
+        .p07-target.is-over{background:rgba(229,52,47,.18)}
+        .p07-cover{position:absolute;left:0;top:0;width:200px;height:200px;margin:-100px 0 0 -100px;z-index:4;display:none;background-size:100% 100%;background-repeat:no-repeat}
+        .p07-cover.is-on{display:block}
+        .p07-cover.is-square{background:repeating-conic-gradient(#8c8c8c 0 25%,#dadada 0 50%) 0 0 / 30px 30px}
+        .p07-cover.is-circle{border-radius:50%;background:repeating-conic-gradient(#8c8c8c 0 25%,#dadada 0 50%) 0 0 / 30px 30px}
+        .p07-play{position:absolute;left:150px;top:310px;width:130px;height:130px;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 4px 14px rgba(27,23,56,.4);cursor:pointer;z-index:6;display:none}
+        .p07-play.is-on{display:block}
+        .p07-play:before{content:'';position:absolute;left:50%;top:50%;margin:-32px 0 0 -20px;border-left:56px solid var(--c-ink);border-top:34px solid transparent;border-bottom:34px solid transparent;transform:translateX(-6px)}
+
+        .p07-msg{position:absolute;left:80px;top:752px;width:1050px;height:184px;box-sizing:border-box;padding:0 130px 0 190px;display:flex;align-items:center;background:var(--c-cream);border:solid 5px var(--c-purple);border-radius:30px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p07-msg-av{position:absolute;left:18px;top:50%;width:150px;height:150px;margin-top:-75px}
+        .p07-msg p{margin:0;font-family:'Cafe24 Ssurround';font-size:38px;line-height:1.3;color:var(--c-purple);letter-spacing:-0.05em;word-break:keep-all}
+        .p07-more{position:absolute;right:26px;bottom:24px;width:84px;height:84px;padding:0;border:0;border-radius:50%;background:var(--c-white);box-shadow:0 4px 0 0 #a9a2ff,0 4px 0 6px #035fd3;cursor:pointer}
+        .p07-more:before{content:'';position:absolute;left:50%;top:50%;margin:-18px 0 0 -12px;border-left:34px solid var(--c-ink);border-top:20px solid transparent;border-bottom:20px solid transparent;transform:translateX(-4px)}
+
+        .p07-panel{position:absolute;left:1170px;top:24px;width:700px;height:912px;box-sizing:border-box;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:24px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p07-back{position:absolute;left:24px;top:22px;display:none;padding:6px 26px 0 22px;height:66px;border:0;background:none;font-family:'Cafe24 Ssurround';font-size:38px;color:var(--c-ink);cursor:pointer}
+        .p07-back:before{content:'';display:inline-block;margin-right:12px;border-right:20px solid var(--c-ink);border-top:12px solid transparent;border-bottom:12px solid transparent;vertical-align:-3px}
+        .p07-head{position:absolute;left:0;top:24px;width:100%;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:46px;color:var(--c-ink);display:none}
+        .p07-list{position:absolute;left:0;top:130px;width:100%;display:flex;flex-direction:column;align-items:center;gap:34px}
+        .p07-tool{width:560px;height:200px;box-sizing:border-box;display:flex;align-items:center;gap:30px;padding:0 34px;background:var(--c-cream);border:solid 4px var(--c-ink);border-radius:24px;font-family:'Cafe24 Ssurround';font-size:52px;color:var(--c-ink);letter-spacing:-0.05em;cursor:pointer}
+        .p07-tool.is-dis{opacity:.35;pointer-events:none;filter:grayscale(1)}
+        @media (hover:hover){.p07-tool:not(.is-dis):hover{border-color:var(--c-purple);box-shadow:0 0 0 6px rgba(92,61,240,.3)}}
+        .p07-ico{flex:none;width:130px;height:130px;display:flex;align-items:center;justify-content:center;border:solid 3px var(--c-ink);border-radius:18px;background:var(--c-white);overflow:hidden}
+        .p07-ico img{max-width:86%;max-height:86%}
+        .p07-ico.is-mosaic i{display:block;width:90px;height:90px;background:repeating-conic-gradient(#8c8c8c 0 25%,#dadada 0 50%) 0 0 / 22px 22px}
+        .p07-ico.is-face{font-size:76px;font-family:'Segoe UI Emoji','Apple Color Emoji',sans-serif;line-height:1}
+        .p07-opt{width:260px;height:260px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:var(--c-cream);border:solid 4px var(--c-ink);border-radius:24px;cursor:grab;touch-action:none}
+        .p07-opt img{max-width:78%;max-height:78%;pointer-events:none}
+        .p07-opt i{display:block;width:170px;height:170px;background:repeating-conic-gradient(#8c8c8c 0 25%,#dadada 0 50%) 0 0 / 34px 34px;pointer-events:none}
+        .p07-opt i.is-circle{border-radius:50%}
+        .p07-opts-wrap{display:flex;flex-direction:column;align-items:center;gap:30px}
+        .p07-opts-wrap.is-row{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:24px;padding:0 24px}
+        .p07-opts-wrap.is-row .p07-opt{width:190px;height:190px}
+        .p07-opts-wrap.is-row .p07-opt img{max-width:80%;max-height:80%}
+        .p07-ghost{position:absolute;z-index:80;pointer-events:none;opacity:.9}
+        .p07-hand{position:absolute;left:0;top:0;width:110px;z-index:70;pointer-events:none;opacity:0}
+        .p07-hand.is-run{animation:p07-hand 1.8s ease-in-out 2 both}
+        @keyframes p07-hand{0%{opacity:0;transform:translate(0,0)}12%{opacity:1;transform:translate(0,0)}72%{opacity:1;transform:translate(var(--hx),var(--hy))}90%{opacity:1;transform:translate(var(--hx),var(--hy))}100%{opacity:0;transform:translate(var(--hx),var(--hy))}}
+        .p07-track{position:absolute;left:60px;top:300px;width:580px;text-align:center;font-family:'Cafe24 Ssurround';font-size:50px;color:var(--c-ink);display:none}
+        .p07-bar{height:30px;margin-top:26px;border:solid 3px var(--c-ink);border-radius:18px;background:var(--c-white);overflow:hidden}
+        .p07-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3cc5c9,#7b3fe4)}
+        .p07-share{position:absolute;left:0;bottom:60px;width:100%;display:none;flex-direction:column;align-items:center;gap:34px}
+        .p07-share .card-btn{min-width:0;width:520px;height:96px;padding:8px 20px 2px;font-size:46px}
+        .p07-next{position:absolute;right:90px;bottom:60px;min-width:0;width:240px;display:none;align-items:center;justify-content:center;text-decoration:none}
+
+        .p07 .is-off{display:none}
+        #p07Pop{z-index:120}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default p07">
+          <p class="ask-pill is-fit" id="p07Ask">편집할 장면을 선택하세요.</p>
+          <div class="p07-pick" id="p07Pick"></div>
+
+          <div class="p07-scene is-off" id="p07Scene">
+            <div class="p07-target" id="p07Target"></div>
+            <div class="p07-npc" id="p07Npc">🧑</div>
+            <div class="p07-cover" id="p07Cover"></div>
+            <button type="button" class="p07-play" id="p07Play" aria-label="재생"></button>
+          </div>
+          <div class="p07-msg is-off" id="p07Msg">
+            <img class="p07-msg-av" src="../../img/common/avatar_quiz.png" alt="">
+            <p id="p07Text"></p>
+            <button type="button" class="p07-more js-sfx is-off" id="p07More" data-sound="sound/click.mp3" aria-label="다음 문구"></button>
+          </div>
+          <div class="p07-panel is-off" id="p07Panel">
+            <button type="button" class="p07-back js-sfx" id="p07Back" data-sound="sound/click.mp3">뒤로 가기</button>
+            <p class="p07-head" id="p07Head">얼굴 트래킹</p>
+            <div class="p07-list" id="p07List"></div>
+            <div class="p07-track" id="p07Track"><span id="p07TrackText">트래킹 중</span><div class="p07-bar"><i id="p07Bar"></i></div></div>
+            <div class="p07-share" id="p07Share">
+              <button type="button" class="card-btn js-sfx" id="p07Ready" data-sound="sound/click.mp3">공유 준비 완료</button>
+              <button type="button" class="card-btn js-sfx" id="p07Redo" data-sound="sound/click.mp3">다시 수정</button>
+            </div>
+          </div>
+          <img class="p07-hand" id="p07Hand" src="../../img/common/img_finger01.png" alt="">
+
+          <a href="page08.html" class="js-nav-effect js-sfx card-btn is-popup p07-next" id="p07Next" data-sound="sound/click.mp3">다음</a>
+
+          <div class="avatar-modal is-wrong is-off" id="p07Pop">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small">이웃의 얼굴이 잘 가려졌나요?<br>영상을 다시 한번 확인해보세요.</p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p07PopOk" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="초상권을 지켜라!" data-next="page08.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const SCENES = [
+      { img: 'p05_q1_2', label: '대출대에서 책을 빌리는 장면' }, { img: 'p05_q5_3', label: '‘2관’ 표시와 출입문이 보이는 장면' },
+      { img: 'p05_q4_2', label: '길이 잘 보이는 산책길 장면' }, { img: 'p05_q2_2', label: '사과와 가격표가 함께 보이는 장면' },
+      { img: 'p05_q3_3', label: '창구에서 편지를 접수하는 장면' }
+    ];
+    const HEAD = { x: 592, y: 360 };       // 이웃 얼굴 중심(장면 안 좌표)
+    const MOVE = 300, SEC = 4, STOP = 1.6;  // 트래킹 영상: 이웃이 오른쪽으로 걸어감, 오류 때 스티커는 STOP초에 멈춤
+    const TEXTS = [
+      '내가 찍은 사진이나 영상에 모르는 사람의 얼굴이 함께 찍혔다면, 인터넷에 올리기 전에 꼭 얼굴을 가려야 해요.',
+      '오른쪽의 편집 도구 창에서 ‘모자이크’나 ‘스티커’ 기능을 활용해 얼굴을 가려봐요.',
+      '기능을 클릭하고, 원하는 가리기 도구를 선택해 얼굴 위로 드래그해 보세요.'
+    ];
+    const main = document.querySelector('main');
+    const scene = $('p07Scene'), npc = $('p07Npc'), cover = $('p07Cover'), target = $('p07Target');
+    const list = $('p07List'), more = $('p07More');
+    const st = { tool: '', tracking: false, mode: 'error', ti: 0, played: false, covered: false, anim: 0 };
+    const hide = (...e) => e.forEach((x) => x.classList.add('is-off'));
+    const show = (...e) => e.forEach((x) => x.classList.remove('is-off'));
+    const pos = (e) => { const r = main.getBoundingClientRect(), s = r.width / 1920; return { x: (e.clientX - r.left) / s, y: (e.clientY - r.top) / s }; };
+    const setText = (t) => { $('p07Text').innerHTML = t; };
+    let moreAction = null;
+    function setMore(fn) { moreAction = fn; more.classList.toggle('is-off', !fn); }
+    more.addEventListener('click', () => { if (moreAction) moreAction(); });
+
+    // 1) 장면 고르기
+    const grid = $('p07Pick');
+    [SCENES.slice(0, 3), SCENES.slice(3)].forEach((r) => {
+      const d = document.createElement('div');
+      d.className = 'p07-pick-row';
+      r.forEach((s) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'p07-card';
+        b.innerHTML = '<img src="img/' + s.img + '.jpg" alt=""><span>' + s.label + '</span>';
+        b.addEventListener('click', () => { playClick(); begin(s); });
+        d.appendChild(b);
+      });
+      grid.appendChild(d);
+    });
+
+    function begin(s) {
+      hide(grid, $('p07Ask'));
+      scene.style.backgroundImage = "url('img/" + s.img + ".jpg')";
+      show(scene, $('p07Msg'), $('p07Panel'));
+      tools(false);
+      st.ti = 0;
+      setText(TEXTS[0]);
+      setMore(nextText);
+    }
+    function nextText() {
+      st.ti++;
+      setText(TEXTS[st.ti]);
+      if (st.ti === 2) { setMore(null); tools(true); }
+    }
+
+    // 2) 도구 패널
+    function tools(active, only) {
+      list.innerHTML = '';
+      $('p07Back').style.display = 'none';
+      $('p07Head').style.display = 'none';
+      list.style.display = 'flex';
+      $('p07Track').style.display = 'none';
+      $('p07Share').style.display = 'none';
+      const defs = [
+        { k: 'mosaic', t: '모자이크', ico: '<span class="p07-ico is-mosaic"><i></i></span>' },
+        { k: 'sticker', t: '스티커', ico: '<span class="p07-ico"><img src="img/stk_star.png" alt=""></span>' },
+        { k: 'track', t: '얼굴 트래킹', ico: '<span class="p07-ico is-face">🙂</span>' }
+      ];
+      defs.forEach((d) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'p07-tool';
+        b.innerHTML = d.ico + '<span>' + d.t + '</span>';
+        const on = only ? d.k === only : (active && d.k !== 'track');
+        if (!on) b.classList.add('is-dis');
+        b.addEventListener('click', () => { playClick(); openTool(d.k); });
+        list.appendChild(b);
+      });
+    }
+
+    function openTool(k) {
+      if (k === 'track') { startTracking(); return; }
+      list.innerHTML = '';
+      $('p07Back').style.display = 'block';
+      const w = document.createElement('div');
+      w.className = 'p07-opts-wrap' + (k === 'sticker' ? ' is-row' : '');
+      const items = k === 'mosaic'
+        ? [{ cls: 'is-square' }, { cls: 'is-circle' }]
+        : [{ src: 'img/stk_star.png' }, { src: 'img/stk_heart.png' }, { src: 'img/stk_bear.png' }];
+      items.forEach((it) => {
+        const o = document.createElement('div');
+        o.className = 'p07-opt';
+        o.innerHTML = it.src ? '<img src="' + it.src + '" alt="">' : '<i class="' + (it.cls === 'is-circle' ? 'is-circle' : '') + '"></i>';
+        o.addEventListener('pointerdown', (e) => drag(e, o, it));
+        w.appendChild(o);
+      });
+      list.appendChild(w);
+      target.classList.add('is-on');
+      guide(w.firstChild);
+    }
+    $('p07Back').addEventListener('click', () => { target.classList.remove('is-on'); stopGuide(); tools(true); });
+
+    function guide(el) {
+      const hand = $('p07Hand');
+      const sr = scene.getBoundingClientRect(), s = main.getBoundingClientRect().width / 1920, mr = main.getBoundingClientRect();
+      const er = el.getBoundingClientRect();
+      const sx = (er.left - mr.left) / s + er.width / s / 2 - 20, sy = (er.top - mr.top) / s + er.height / s / 2 - 10;
+      const tx = (sr.left - mr.left) / s + 5 + HEAD.x - 20, ty = (sr.top - mr.top) / s + 5 + HEAD.y - 10;
+      hand.style.left = sx + 'px'; hand.style.top = sy + 'px';
+      hand.style.setProperty('--hx', (tx - sx) + 'px'); hand.style.setProperty('--hy', (ty - sy) + 'px');
+      hand.classList.remove('is-run'); void hand.offsetWidth; hand.classList.add('is-run');
+    }
+    function stopGuide() { $('p07Hand').classList.remove('is-run'); }
+    $('p07Hand').addEventListener('animationend', stopGuide);
+
+    function drag(e, o, it) {
+      e.preventDefault();
+      stopGuide();
+      playClick();
+      const g = o.cloneNode(true);
+      g.className = 'p07-ghost p07-opt';
+      g.style.cssText = 'width:' + o.offsetWidth + 'px;height:' + o.offsetHeight + 'px;background:transparent;border:0';
+      main.appendChild(g);
+      const place = (ev) => { const q = pos(ev); g.style.left = (q.x - o.offsetWidth / 2) + 'px'; g.style.top = (q.y - o.offsetHeight / 2) + 'px'; return q; };
+      place(e);
+      const tr = () => { const r = target.getBoundingClientRect(); return r; };
+      const move = (ev) => {
+        place(ev);
+        const r = tr();
+        target.classList.toggle('is-over', ev.clientX > r.left && ev.clientX < r.right && ev.clientY > r.top && ev.clientY < r.bottom);
+      };
+      const up = (ev) => {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', up);
+        g.remove();
+        const r = tr();
+        const inside = ev.clientX > r.left && ev.clientX < r.right && ev.clientY > r.top && ev.clientY < r.bottom;
+        target.classList.remove('is-over');
+        if (inside) attach(it);
+      };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', up);
+    }
+
+    function setCover(it) {
+      cover.className = 'p07-cover is-on' + (it.cls ? ' ' + it.cls : '');
+      cover.style.backgroundImage = it.src ? "url('" + it.src + "')" : '';
+      cover.style.backgroundSize = it.src ? 'contain' : '';
+      cover.style.backgroundRepeat = it.src ? 'no-repeat' : '';
+      cover.style.backgroundPosition = it.src ? 'center' : '';
+      st.item = it;
+    }
+    function moveCover(dx) { cover.style.left = (HEAD.x + dx) + 'px'; cover.style.top = HEAD.y + 'px'; }
+
+    function attach(it) {
+      playCorrect();
+      setCover(it);
+      moveCover(0);
+      target.classList.remove('is-on');
+      st.covered = true;
+      tools(false);
+      setText('잘했어요!<br>이제 영상이 재생되는 동안에도 얼굴이 잘 가려질 수 있도록 해봐요.');
+      setMore(() => { setMore(null); setText('얼굴 트래킹 기능을 클릭해보세요.'); tools(true, 'track'); });
+    }
+
+    // 3) 영상 재생(트래킹 / 확인)
+    function run(mode, onEnd, bar) {
+      cancelAnimationFrame(st.anim);
+      const t0 = performance.now();
+      const step = (now) => {
+        const t = Math.min((now - t0) / 1000, SEC);
+        const dx = MOVE * t / SEC;
+        npc.style.transform = 'translateX(' + dx + 'px)';
+        moveCover(mode === 'error' ? Math.min(dx, MOVE * STOP / SEC) : dx);
+        if (bar) bar.style.width = (t / SEC * 100) + '%';
+        if (t < SEC) st.anim = requestAnimationFrame(step); else if (onEnd) onEnd();
+      };
+      st.anim = requestAnimationFrame(step);
+    }
+    function reset() { cancelAnimationFrame(st.anim); npc.style.transform = ''; moveCover(0); }
+
+    function startTracking() {
+      reset();
+      list.style.display = 'none';
+      $('p07Head').style.display = 'block';
+      $('p07Track').style.display = 'block';
+      $('p07TrackText').textContent = '트래킹 중';
+      $('p07Bar').style.width = '0';
+      setMore(null);
+      setText('움직이는 동안에도 얼굴이 계속 가려지는지 확인해요.');
+      run(st.mode, () => {
+        $('p07TrackText').textContent = '트래킹 완료';
+        setMore(() => {
+          setMore(null);
+          reset();
+          $('p07Track').style.display = 'none';
+          $('p07Share').style.display = 'flex';
+          $('p07Play').classList.add('is-on');
+          setText('재생 버튼을 눌러 트래킹이 잘 됐는지 확인하고, 영상을 공유할지 트래킹 작업을 다시 할지 결정해요.');
+        });
+      }, $('p07Bar'));
+    }
+
+    $('p07Play').addEventListener('click', () => {
+      playClick();
+      st.played = true;
+      reset();
+      run(st.final ? 'ok' : st.mode, st.final ? () => { $('p07Next').style.display = 'flex'; } : null);
+    });
+    $('p07Redo').addEventListener('click', () => { st.mode = 'ok'; $('p07Play').classList.remove('is-on'); startTracking(); });
+    $('p07Ready').addEventListener('click', () => {
+      if (st.mode === 'error') { show($('p07Pop')); return; }
+      st.final = true;
+      reset();
+      $('p07Panel').classList.add('is-off');
+      setText('영상에 찍힌 이웃의 초상권도 보호했어요! 모자이크가 잘 됐는지 재생 버튼을 눌러 확인해봐요.');
+      $('p07Play').classList.add('is-on');
+    });
+    $('p07PopOk').addEventListener('click', () => hide($('p07Pop')));
+  })();
+  </script>
+</body>
+</html>
