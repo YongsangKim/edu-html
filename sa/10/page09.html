@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="../../css/common.css">
     <style>
         /* 기획서 47~81p. VLLO로 우리 동네 브이로그 만들기 실습. 휴대폰 화면은 기획서에 들어 있는 실제 VLLO 앱 캡처(img/ui/u{기획서 그림 번호}.jpg)를 그대로 쓰고,
-           학생이 고른 장소 장면(미리보기)·자막·모자이크는 기획서 슬라이드처럼 캡처 위에 얹음(좌표는 휴대폰 화면 기준 %). 누를 곳(.p09-hot)은 투명 — 올리면 초록 테두리, 왼쪽 손가락이 따라옴.
+           학생이 고른 장소 장면(미리보기)·자막·모자이크는 기획서 슬라이드처럼 캡처 위에 얹음(좌표는 모두 캡처 픽셀 540x1170 기준). 캡처는 폭에 맞춰 줄이고 하단 시스템 버튼 자리를 위해 빈 띠를 잘라 붙임(CUT_AT). 누를 곳(.p09-hot)은 분홍 깜빡임, 손가락이 가리킴.
            흐름: 홈에서 VLLO → 장소 고르기(마트·우체국·도서관·공원) → 음성 녹음(준비된 목소리 TTS) → 자동 자막 생성 → 음성과 자막 비교해 틀린 단어 찾기 → 자막 수정 → 효과·왜곡(모자이크)·블러 → 얼굴 트래킹 → 추출하기 → 완성 영상 보기.
            장소 장면은 임시 이모지 그림(img/p09_place_*.jpg), 완성 영상은 영상 파일이 없어 이모지 이웃이 걸어가는 짧은 애니메이션으로 대신함. TTS는 브라우저 음성(speechSynthesis) — 음성 파일(m4a)이 오면 교체 */
 
@@ -16,15 +16,16 @@
         .p09-bubble:before{content:'';position:absolute;left:230px;bottom:-58px;width:100px;height:70px;background:url('../../img/common/p_guide_tail.png') 0 0 / contain no-repeat}
         .p09-character{left:40px;top:470px;width:540px;height:470px}
 
-        .p09-phone{left:748px;top:21px;width:422px;height:895px}
+        .p09-phone{left:735px;top:21px;width:450px;height:895px}
         .p09-screen{position:relative;width:100%;height:100%;overflow:hidden;background:#fff;font-family:'Pretendard';color:#111}
-        .p09-base{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
-        .p09-home{position:absolute;inset:0;background:linear-gradient(180deg,#4a6fa5 0%,#8fb4d9 55%,#d6c8e8 100%)}
-        .p09-home img{position:absolute;left:38.75%;top:44%;width:22.5%;border-radius:25%;box-shadow:0 6px 14px rgba(0,0,0,.2)}
+        .p09-base{position:absolute;left:0;top:0;width:100%;height:833px;overflow:hidden}
+        .p09-base i{position:absolute;left:0;width:100%;background-repeat:no-repeat;background-size:100% auto}
         .p09-ov{position:absolute;box-sizing:border-box;overflow:hidden}
         .p09-hot{position:absolute;box-sizing:border-box;padding:0;border:solid 3px transparent;border-radius:14px;background:transparent;cursor:pointer;transition:box-shadow .15s,border-color .15s;z-index:6}
-        .p09-hot:hover{border-color:#03c75a;box-shadow:0 0 0 4px rgba(3,199,90,.28)}
-        .p09-swipe{position:absolute;z-index:6;touch-action:none;cursor:grab}
+        .p09-hot{animation:cv-target 1.2s ease-in-out infinite}
+        .p09-hot.is-in{animation-name:cv-target-in}
+        .app-home ~ .p09-hot{animation:none}
+        .p09-swipe{position:absolute;z-index:6;touch-action:none;cursor:grab;animation:cv-target-in 1.2s ease-in-out infinite}
 
         .vl-prev{position:absolute;z-index:2;overflow:hidden;background:#fff center / cover no-repeat;container-type:size}
         .vl-sub{position:absolute;left:0;width:100%;bottom:9%;margin:0;text-align:center;font-family:'Pretendard';font-weight:800;font-size:5.6cqw;color:#fff;-webkit-text-stroke:.5cqw #111;paint-order:stroke fill;letter-spacing:-0.02em;white-space:nowrap}
@@ -100,7 +101,7 @@
           <div class="avatar-modal is-off" id="p09Done">
             <div class="avatar-popup-panel">
               <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
-              <div class="avatar-popup-body is-finish">
+              <div class="avatar-popup-body is-finish is-side">
                 <p class="avatar-popup-text">멋진 브이로그가 완성 되었어요!</p>
                 <p class="avatar-popup-sub">AI의 도움을 받아 이웃의 초상권을<br>지키며 우리 동네를 소개했어요.</p>
                 <a href="page10.html" class="js-nav-effect avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
@@ -128,49 +129,56 @@
     const screen = $('p09Screen'), bubble = $('p09Bubble'), right = $('p09Right'), nextBtn = $('p09Next');
     const main = document.querySelector('main');
     const show = (el, on) => el.classList.toggle('is-hide', !on);
-    const pct = (a) => 'left:' + a[0] + '%;top:' + a[1] + '%;width:' + a[2] + '%;height:' + a[3] + '%';
-    const PREV = [1.2, 21.8, 97.6, 25.2];
-    const PREV_TRACK = [0, 17.5, 100, 30];
+    // 캡처(540x1170)는 폭 434에 맞춰 줄이고(위·아래 줄임 없음), 폰 하단 시스템 버튼(46px) 자리를 내려고 캡처의 빈 어두운 띠(CUT_AT 위치부터 약 134px)를 잘라 붙임
+    const SW = 434, SH = 879, NAVH = 46, SC = SW / 540, NONAV = { 17: 1 };
+    const cutLen = () => 1170 - (SH - (NONAV[STEPS[st.i].img] ? 0 : NAVH)) / SC;
+    const CUT_AT = { 7: 420, 28: 840 };
+    const cutFrom = () => (STEPS[st.i] && CUT_AT[STEPS[st.i].img]) || 110;
+    // 좌표(box)는 모두 캡처 픽셀(540x1170) 기준 [x, y, 폭, 높이]
+    const mapY = (src) => { const f = cutFrom(); return (src <= f ? src : src >= f + cutLen() ? src - cutLen() : f) * SC / SH * 100; };
+    const mbox = (a) => { const t = mapY(a[1]), b = mapY(a[1] + a[3]); return [a[0] / 5.4, t, a[2] / 5.4, b - t]; };
+    const pct = (a) => { if (STEPS[st.i].home) return 'left:' + a[0] / 5.4 + '%;top:' + a[1] / 11.7 + '%;width:' + a[2] / 5.4 + '%;height:' + a[3] / 11.7 + '%'; const m = mbox(a); return 'left:' + m[0] + '%;top:' + m[1] + '%;width:' + m[2] + '%;height:' + m[3] + '%'; };
+    const PREV = [6, 255, 527, 295];
+    const PREV_TRACK = [0, 205, 540, 351];
     const errWords = () => st.pl.words.map((w, k) => (k === st.pl.bad ? st.pl.err : w));
     const sentence = (ws) => ws.slice(0, 3).join(' ') + ' ' + ws[3] + '입니다.';
     const okText = () => sentence(st.pl.words);
     const errText = () => sentence(errWords());
 
     // 단계 목록: img(캡처 번호) · bubble · 누를 곳(hot) / 스와이프(swipe) / next / right / load 등
-    const DONE = [10, 96, 80, 4];
     const STEPS = [
-      { home: true, bubble: 'VLLO를 클릭해요.', hot: [[38.75, 44, 22.5, 10.4]] },
+      { home: true, bubble: 'VLLO를 클릭해요.', hot: [[201, 515, 137, 164]] },
       { img: 7, bubble: '우리 동네를 소개하는<br>브이로그를 만들어볼까요?<br>원하는 장소를 하나 선택해요.', place: true },
-      { img: 8, prev: 1, bubble: '먼저, 우리 동네를 소개해봐요.<br>음성 녹음을 클릭해요.', hot: [[0, 83, 19, 7.5]] },
-      { img: 9, prev: 1, bubble: '녹음 버튼을 클릭해<br>우리 동네를 소개하는 말을<br>녹음해봐요.', hot: [[41, 83.3, 17, 7.4]], info: true },
-      { img: 10, prev: 1, bubble: '녹음이 완료되면<br>정지 버튼을 클릭해요.', tts: true, hot: [[41, 83.3, 17, 7.4]] },
-      { img: 11, prev: 1, bubble: '완료 버튼을 클릭해요.', hot: [DONE] },
+      { img: 8, prev: 1, bubble: '먼저, 우리 동네를 소개해봐요.<br>음성 녹음을 클릭해요.', hot: [[4, 970, 72, 68]] },
+      { img: 9, prev: 1, bubble: '녹음 버튼을 클릭해<br>우리 동네를 소개하는 말을<br>녹음해봐요.', hot: [[226, 984, 88, 88]], info: true },
+      { img: 10, prev: 1, bubble: '녹음이 완료되면<br>정지 버튼을 클릭해요.', tts: true, hot: [[226, 974, 88, 88]] },
+      { img: 11, prev: 1, bubble: '완료 버튼을 클릭해요.', hot: [[200, 1112, 324, 52]] },
       { img: 12, prev: 1, bubble: '좋아요!<br>이제 녹음한 음성을<br>AI 기능을 활용해 자막으로<br>만들어봐요.', next: true },
-      { img: 12, prev: 1, bubble: '하단의 메뉴 바를<br>오른쪽으로 슬라이드 해요.', swipe: [0, 87, 100, 8] },
-      { img: 13, prev: 1, bubble: '자동 자막을 클릭해요.', hot: [[64, 86.5, 19, 8]] },
-      { img: 14, prev: 1, bubble: '생성하기 버튼을 클릭해요.', hot: [[10, 96, 80, 4]] },
-      { img: 15, bubble: '자막을 생성하는 중이에요.', load: [3.5, 49, 88, 2.2] },
+      { img: 12, prev: 1, bubble: '하단의 메뉴 바를<br>오른쪽으로 슬라이드 해요.', swipe: [0, 1030, 540, 78] },
+      { img: 13, prev: 1, bubble: '자동 자막을 클릭해요.', hot: [[364, 1036, 86, 90]] },
+      { img: 14, prev: 1, bubble: '생성하기 버튼을 클릭해요.', hot: [[278, 1114, 246, 54]] },
+      { img: 15, bubble: '자막을 생성하는 중이에요.', load: [19, 573, 475, 26] },
       { img: 16, prev: 1, sub: 'err', bubble: 'AI 자동 자막을 생성했어요!<br>음성을 알맞게 인식했는지<br>확인해볼까요?', next: true },
       { img: 16, prev: 1, sub: 'err', bubble: '음성 녹음 내용과<br>AI가 만든 자동 자막을 비교해<br>틀린 부분을 클릭해보세요.', cmp: true },
-      { img: 16, prev: 1, sub: 'err', bubble: 'AI는 틀릴 수 있으니<br>꼭 다시 한번 확인해야 해요!<br>아래의 편집을 클릭해요.', hot: [[80, 87, 19, 8]] },
+      { img: 16, prev: 1, sub: 'err', bubble: 'AI는 틀릴 수 있으니<br>꼭 다시 한번 확인해야 해요!<br>아래의 편집을 클릭해요.', hot: [[480, 1038, 50, 76]] },
       { img: 17, prev: 1, sub: 'err', field: 'err', bubble: '오른쪽 버튼을 클릭해<br>틀린 부분을 수정해요.', fix: true },
-      { img: 17, prev: 1, sub: 'fix', field: 'fix', bubble: '좋아요!<br>자막을 올바르게 수정했어요.<br>확인 버튼을 클릭해요.', hot: [[85, 51.5, 13, 6.5]] },
-      { img: 16, prev: 1, sub: 'fix', bubble: '아래의 완료 버튼을 눌러<br>자막 수정을 마무리해요.', hot: [DONE] },
+      { img: 17, prev: 1, sub: 'fix', field: 'fix', bubble: '좋아요!<br>자막을 올바르게 수정했어요.<br>확인 버튼을 클릭해요.', hot: [[478, 616, 54, 54]] },
+      { img: 16, prev: 1, sub: 'fix', bubble: '아래의 완료 버튼을 눌러<br>자막 수정을 마무리해요.', hot: [[16, 1118, 508, 48]] },
       { img: 18, prev: 1, sub: 'fix', bubble: '이제 영상에 찍힌<br>이웃의 얼굴을 가려볼까요?', next: true },
-      { img: 18, prev: 1, sub: 'fix', bubble: '하단의 효과 탭을 클릭해요.', hot: [[76, 95.4, 22, 4.6]] },
-      { img: 19, prev: 1, sub: 'fix', bubble: '왜곡(모자이크)를 클릭해요.', hot: [[0, 83.3, 22, 8.7]] },
-      { img: 20, prev: 1, sub: 'fix', bubble: '얼굴을 흐릿하게 만드는 효과인<br>‘블러’를 클릭해요.', hot: [[2.5, 80.5, 21, 11]] },
-      { img: 21, prev: 1, sub: 'fix', mos: true, bubble: '현재 장면의 얼굴을 가렸어요.<br>완료 버튼을 클릭해요.', hot: [DONE] },
-      { img: 22, prev: 1, sub: 'fix', mos: true, bubble: '이제 모자이크를 이웃의 얼굴에<br>고정시켜 볼까요?<br>하단의 도구 탭을 오른쪽으로<br>슬라이드 해요.', swipe: [0, 87, 100, 8] },
-      { img: 23, prev: 1, sub: 'fix', mos: true, bubble: '얼굴 트래킹을 클릭해요.', hot: [[45, 86.5, 18, 8.5]] },
-      { img: 24, prev: 1, sub: 'fix', mos: true, bubble: '모자이크 효과를 추가한 부분이<br>트래킹 영역으로 설정됐어요.<br>트래킹하기 버튼을 클릭해요.', hot: [[33, 87.5, 36, 6.5]] },
-      { img: 25, prevTrack: 1, bubble: '트래킹하는 중이에요.', load: [3.5, 64, 88, 1.4] },
+      { img: 18, prev: 1, sub: 'fix', bubble: '하단의 효과 탭을 클릭해요.', hot: [[422, 1114, 94, 48]] },
+      { img: 19, prev: 1, sub: 'fix', bubble: '왜곡(모자이크)를 클릭해요.', hot: [[2, 972, 76, 68]] },
+      { img: 20, prev: 1, sub: 'fix', bubble: '얼굴을 흐릿하게 만드는 효과인<br>‘블러’를 클릭해요.', hot: [[28, 944, 114, 146]] },
+      { img: 21, prev: 1, sub: 'fix', mos: true, bubble: '현재 장면의 얼굴을 가렸어요.<br>완료 버튼을 클릭해요.', hot: [[278, 1116, 246, 50]] },
+      { img: 22, prev: 1, sub: 'fix', mos: true, bubble: '이제 모자이크를 이웃의 얼굴에<br>고정시켜 볼까요?<br>하단의 도구 탭을 오른쪽으로<br>슬라이드 해요.', swipe: [0, 1030, 540, 78] },
+      { img: 23, prev: 1, sub: 'fix', mos: true, bubble: '얼굴 트래킹을 클릭해요.', hot: [[250, 1036, 80, 70]] },
+      { img: 24, prev: 1, sub: 'fix', mos: true, bubble: '모자이크 효과를 추가한 부분이<br>트래킹 영역으로 설정됐어요.<br>트래킹하기 버튼을 클릭해요.', hot: [[172, 1026, 196, 54]] },
+      { img: 25, prevTrack: 1, bubble: '트래킹하는 중이에요.', load: [19, 749, 475, 16] },
       { img: 26, prev: 1, sub: 'fix', mos: true, play: true, bubble: '영상 끝까지 얼굴이<br>잘 가려졌나요?', choices: ['잘 가려졌어요.', '다시 한번 확인해볼래요.'] },
-      { img: 26, prev: 1, sub: 'fix', mos: true, bubble: '아래의 완료 버튼을 클릭해<br>얼굴 트래킹을 마무리해보세요.', hot: [DONE] },
+      { img: 26, prev: 1, sub: 'fix', mos: true, bubble: '아래의 완료 버튼을 클릭해<br>얼굴 트래킹을 마무리해보세요.', hot: [[16, 1118, 508, 48]] },
       { img: 27, prev: 1, sub: 'fix', mos: true, bubble: '좋아요!<br>우리 동네 브이로그 편집을<br>완료했어요.', next: true },
-      { img: 27, prev: 1, sub: 'fix', mos: true, bubble: '추출하기 버튼을 클릭해<br>영상을 저장해봐요.', hot: [[77, 5.2, 20, 3.4]] },
-      { img: 28, bubble: '아래의 추출하기 버튼을<br>한 번 더 클릭해요.', hot: [[10, 95.5, 80, 4.5]] },
-      { img: 29, bubble: '비디오를 만드는 중이에요.', load: [3.5, 50.4, 88, 1.2] },
+      { img: 27, prev: 1, sub: 'fix', mos: true, bubble: '추출하기 버튼을 클릭해<br>영상을 저장해봐요.', hot: [[437, 58, 90, 34]] },
+      { img: 28, bubble: '아래의 추출하기 버튼을<br>한 번 더 클릭해요.', hot: [[54, 1040, 432, 90]] },
+      { img: 29, bubble: '비디오를 만드는 중이에요.', load: [19, 590, 475, 14] },
       { img: 30, bubble: '완성했어요!<br>내가 만든 브이로그를<br>한 번 재생해볼까요?', next: true },
       { vlog: true, bubble: '재생 버튼을 눌러<br>내가 만든 브이로그를 확인해요.' }
     ];
@@ -181,7 +189,7 @@
 
     function hotButton(box) {
       const b = document.createElement('button');
-      b.className = 'p09-hot';
+      b.className = 'p09-hot' + (box[2] > 300 || box[0] < 6 || box[0] + box[2] > 534 || box[1] < 54 || box[1] + box[3] > 1100 ? ' is-in' : '');
       b.style.cssText = pct(box);
       screen.appendChild(b);
       return b;
@@ -201,13 +209,18 @@
       if (s.vlog) { vlog(); return; }
 
       if (s.home) {
-        add('<div class="p09-home"><img src="img/ui/vllo_icon.png" alt=""></div>');
+        add('<div class="app-home is-purple"><div class="phone-status is-dark"></div><div class="app-icon is-static"><i><img src="img/ui/vllo_icon.png" alt=""></i>VLLO</div><div class="phone-nav"></div></div>');
+        initPhoneBars();
       } else {
-        const base = document.createElement('img');
+        const f = cutFrom(), bg = 'background-image:url(img/ui/u' + s.img + '.jpg)';
+        const base = document.createElement('div');
         base.className = 'p09-base';
-        base.src = 'img/ui/u' + s.img + '.jpg';
-        base.alt = '';
+        base.style.height = (NONAV[s.img] ? SH : SH - NAVH) + 'px';
+        base.innerHTML = '<i style="' + bg + ';top:0;height:' + f * SC + 'px"></i><i style="' + bg + ';top:' + f * SC + 'px;height:' + (1170 - f - cutLen()) * SC + 'px;background-position:0 -' + (f + cutLen()) * SC + 'px"></i>';
         screen.appendChild(base);
+        add('<div class="phone-status' + (s.img === 7 ? ' is-dark' : '') + '" style="background:' + (s.img === 7 ? '#fff' : s.img === 25 ? '#000' : '#17181c') + '"></div>');
+        if (!NONAV[s.img]) add('<div class="phone-nav is-dark"></div>');
+        initPhoneBars();
       }
       if (s.prev || s.prevTrack) {
         const box = s.prevTrack ? PREV_TRACK : PREV;
@@ -215,7 +228,7 @@
         if (s.mos) p.insertAdjacentHTML('beforeend', '<div class="vl-npc">🧑</div><div class="vl-mos"></div>');
         if (s.sub) p.insertAdjacentHTML('beforeend', '<p class="vl-sub">' + (s.sub === 'err' ? errText() : okText()) + '</p>');
       }
-      if (s.field) add('<div class="vl-field" style="' + pct([2, 51.4, 80, 5.6]) + '">' + (s.field === 'err' ? errText() : okText()) + '</div>');
+      if (s.field) add('<div class="vl-field" style="' + pct([11, 601, 432, 66]) + '">' + (s.field === 'err' ? errText() : okText()) + '</div>');
 
       if (s.place) { placePick(); return; }
       if (s.hot) {
@@ -225,8 +238,9 @@
           if (s.info) { $('p09Info').classList.remove('is-off'); return; }
           advance();
         }));
-        const dy = s.hot[0][1] > 90 ? -70 : 0;
-        if (!s.tts) fingerTo(hots[0], dy); else ttsRun(hots[0]);
+        const dy = s.hot[0][1] > 1050 ? -70 : 0;
+        if (s.home) setTimeout(() => pointFingerAt(screen.querySelector('.app-icon'), { onMain: true, dx: 15, dy: -37 }), 350);
+        else if (!s.tts) fingerTo(hots[0], dy, s.hot[0][2] > 300 ? 0.82 : undefined); else ttsRun(hots[0]);
       }
       if (s.swipe) swipe(s.swipe);
       if (s.next) { show(nextBtn, true); }
@@ -257,7 +271,7 @@
 
     // 장소 고르기(기획서 48p)
     function placePick() {
-      const w = add('<div class="vl-place"></div>');
+      const w = add('<div class="vl-place" style="top:' + mapY(412) + '%;height:auto;bottom:' + NAVH + 'px"></div>');
       Object.keys(PLACES).forEach((k) => {
         const b = document.createElement('button');
         b.type = 'button';
@@ -293,6 +307,7 @@
     function swipe(box) {
       const z = document.createElement('div');
       z.className = 'p09-swipe';
+      const m = mbox(box);
       z.style.cssText = pct(box);
       screen.appendChild(z);
       const sr = screen.getBoundingClientRect(), mr = main.getBoundingClientRect(), sc = mr.width / 1920;
@@ -300,12 +315,34 @@
       hand.className = 'p09-swhand';
       hand.src = '../../img/common/img_finger01.png';
       hand.style.left = ((sr.left - mr.left) / sc + sr.width / sc * 0.28) + 'px';
-      hand.style.top = ((sr.top - mr.top) / sc + sr.height / sc * (box[1] + box[3] / 2) / 100) + 'px';
+      hand.style.top = ((sr.top - mr.top) / sc + sr.height / sc * (m[1] + m[3] / 2) / 100) + 'px';
       main.appendChild(hand);
-      let x0 = null;
-      z.addEventListener('pointerdown', (e) => { x0 = e.clientX; z.setPointerCapture(e.pointerId); });
-      z.addEventListener('pointermove', (e) => { if (x0 !== null && e.clientX - x0 > 70 * sc) { x0 = null; playClick(); advance(); } });
-      z.addEventListener('pointerup', () => { x0 = null; });
+      let x0 = null, ghost = null;
+      const base = screen.querySelector('.p09-base');
+      const arm = () => {
+        ghost = base.cloneNode(true);
+        ghost.style.cssText = 'position:absolute;left:0;top:-' + (m[1] * SH / 100) + 'px;width:' + SW + 'px;height:' + (SH - NAVH) + 'px;overflow:hidden';
+        z.style.overflow = 'hidden';
+        z.style.background = '#232428';
+        z.appendChild(ghost);
+      };
+      const rest = () => {
+        if (!ghost) return;
+        const g = ghost;
+        g.style.transition = 'transform .25s ease';
+        g.style.transform = 'translateX(0)';
+        setTimeout(() => { g.remove(); z.style.background = 'none'; }, 280);
+        ghost = null;
+      };
+      z.addEventListener('pointerdown', (e) => { x0 = e.clientX; z.setPointerCapture(e.pointerId); if (base) arm(); });
+      z.addEventListener('pointermove', (e) => {
+        if (x0 === null) return;
+        const d = e.clientX - x0;
+        if (ghost && d > 0) ghost.style.transform = 'translateX(' + d / sc + 'px)';
+        if (d > 70 * sc) { x0 = null; playClick(); advance(); }
+      });
+      z.addEventListener('pointerup', () => { if (x0 !== null) rest(); x0 = null; });
+      z.addEventListener('pointercancel', () => { if (x0 !== null) rest(); x0 = null; });
     }
 
     // 음성 녹음 내용 ↔ AI 자막 비교(기획서 59p)

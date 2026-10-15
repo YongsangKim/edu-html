@@ -9,32 +9,36 @@
         /* 디자인 없음 - 기획서 67~72p. 3라운드, 라운드마다 메시지 카드 10장(정답 5·오답 5, 같은 종류 3장 연속 없이 무작위)이 떨어짐.
            좌우 방향키(터치 화면은 끌기)로 바구니를 옮겨 받음. 카드 폭 절반 이상이 바구니에 걸치면 받은 것으로 침.
            정답 5장을 다 받아야 라운드 성공, 하나라도 놓치면 그 라운드 다시 시작(팝업 문구는 기획서에 없어 임의).
-           정답 한 장마다 마음 게이지 1/15씩. 친구 img/p13_guest1.png(모든 라운드 공통), 바구니 밑 캐릭터 img/p13_character.png */
+           정답 한 장마다 마음 게이지 1/15씩. 친구 img/p13_guest1.png(모든 라운드 공통), 바구니 밑 캐릭터 img/*/
         main{overflow:hidden}
 
-        .p12-gauge-label{position:absolute;left:560px;top:40px;height:64px;padding:6px 30px 0;box-sizing:border-box;display:flex;align-items:center;border-radius:32px;background:var(--c-purple);
-          font-family:'Cafe24 Ssurround';font-size:40px;color:var(--c-white)}
-        .p12-gauge{left:860px;top:40px;width:953px}
+        .p12-panel{position:absolute;left:513px;top:40px;width:1349px;height:888px;box-sizing:border-box;background:#266cc8;border:solid 4px var(--c-ink);border-radius:20px}
+        .p12-field{position:absolute;left:545px;top:158px;width:1285px;height:675px;background:#def4ff;border-radius:6px}
+        .p12-gauge{left:600px;top:64px;width:1225px;height:70px}
+        .p12-gauge.gauge:before{left:-125px;top:-66px;width:220px;height:213px;background-image:url(img/p05_gauge_robot.png);z-index:2}
+        .p12-gauge:after{content:'';position:absolute;left:1130px;top:-55px;width:180px;height:137px;background:url(img/p05_gauge_mail.png) 0 0 / contain no-repeat;z-index:1}
+        .p12-gauge .gauge-fill{transition:width .4s}
+        .p12-gauge-heart{position:absolute;left:0;top:50%;width:120px;height:auto;margin:-52px 0 0 -60px;z-index:2;transition:left .4s;pointer-events:none}
 
-        .p12-student{position:absolute;left:81px;top:381px;width:377px;height:509px;background:center bottom / contain no-repeat}
-        .p12-student:after{content:'친구';position:absolute;left:70px;top:90px;width:240px;height:380px;border-radius:120px 120px 30px 30px;background:rgba(72,21,156,.2);
-          display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-purple)}
-        .p12-student.has-img:after{display:none}
-        .p12-bubble{left:37px;bottom:562px;width:434px;padding:28px 14px;font-size:40px;z-index:5}
+        .p12-student{position:absolute;left:43px;top:35px;width:447px;height:893px;box-sizing:border-box;border:solid 5px var(--c-purple);border-radius:16px;padding-top:285px;background:var(--c-pale) center bottom / cover no-repeat;background-origin:content-box;background-clip:padding-box}
+        .p12-bubble{left:43px;top:35px;bottom:auto;width:447px;height:290px;margin:0;padding:10px 12px;border-radius:16px;font-size:46px;line-height:1.2;z-index:5}
+        .p12-bubble::before{left:auto;right:45px}
 
-        .p12-card{position:absolute;top:0;left:0;width:395px;height:162px;box-sizing:border-box;padding:6px 24px 0;display:flex;align-items:center;justify-content:center;text-align:center;
-          font-size:34px;line-height:1.25;letter-spacing:-0.05em;word-break:keep-all;will-change:transform;z-index:6;pointer-events:none}
-        .p12-basket{position:absolute;left:1023px;top:611px;width:395px;height:300px;z-index:7;touch-action:none;cursor:grab}
-        .p12-basket-bowl{position:absolute;left:0;top:0;width:395px;height:113px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:14px 14px 84px 84px;
-          background:var(--c-sky) center / contain no-repeat}
-        .p12-basket-char{position:absolute;left:82px;top:91px;width:231px;height:240px;background:url('img/p13_character.png') center top / contain no-repeat;z-index:-1}
-        .p12-heart{position:absolute;left:150px;top:18px;width:95px;height:76px;display:flex;align-items:center;justify-content:center;font-size:67px;line-height:1;color:var(--c-white);
-          text-shadow:0 0 0 var(--c-ink),0 4px 0 rgba(0,0,0,.2);transition:transform .2s}
-        .p12-heart.is-good{color:#ff4f8b;transform:scale(1.25)}
-        .p12-heart.is-bad{transform:scale(1.1) rotate(-10deg);opacity:.8}
+        #p12Cards{position:absolute;inset:0;clip-path:inset(158px 90px 127px 545px);pointer-events:none}
+        .p12-card{position:absolute;top:0;left:0;width:395px;height:162px;box-sizing:border-box;padding:6px 24px 0;display:flex;align-items:center;justify-content:center;text-align:center;border:solid 4px #2a6ecf;border-radius:16px;background:var(--c-white);box-shadow:0 8px 14px rgba(27,23,56,.16);
+          font-family:'Cafe24 Ssurround';font-size:36px;line-height:1.25;color:var(--c-indigo);letter-spacing:-0.05em;word-break:keep-all;will-change:transform;z-index:6;pointer-events:none}
+        .p12-basket{position:absolute;left:1033px;top:607px;width:472px;height:324px;z-index:7;touch-action:none;cursor:grab}
+        .p12-basket-bowl{position:absolute;left:0;top:0;width:377px;height:324px;background:left top / contain no-repeat}
+        .p12-basket-bowl.no-img{height:103px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:14px 14px 84px 84px;background:var(--c-sky)}
+        .p12-heart-bubble{position:absolute;left:287px;top:48px;width:185px;height:115px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border:solid 4px var(--c-purple);border-radius:14px;background:var(--c-white);box-shadow:0 6px 10px rgba(27,23,56,.12)}
+        .p12-heart-bubble:after{content:'';position:absolute;left:13px;bottom:-29px;width:33px;height:29px;background:var(--c-purple);clip-path:polygon(0 0,100% 0,0 100%)}
+        .p12-heart-bubble:before{content:'';position:absolute;left:18px;bottom:-19px;width:20px;height:20px;background:var(--c-white);clip-path:polygon(0 0,100% 0,0 100%);z-index:1}
+        .p12-heart{font-size:80px;line-height:1;color:#ff8fb1;transition:transform .2s}
+        .p12-heart.is-good{color:#ff4f8b;transform:scale(1.2)}
+        .p12-heart.is-bad{transform:scale(1.05) rotate(-8deg);opacity:.85}
 
-        .p12-banner{position:absolute;left:0;top:340px;width:1920px;margin:0;text-align:center;z-index:20}
-        .p12-banner span{display:inline-block;padding:14px 60px 8px;border-radius:50px;background:var(--c-purple);font-family:'Cafe24 Ssurround';font-size:64px;color:var(--c-white);letter-spacing:-0.04em}
+        .p12-banner{position:absolute;left:545px;top:385px;width:1285px;margin:0;text-align:center;z-index:20}
+        .p12-banner span{display:inline-block;min-width:655px;box-sizing:border-box;padding:18px 60px 10px;border:solid 9px #e4f4ff;border-radius:80px;background:#043f9b;font-family:'Cafe24 Ssurround';font-size:76px;color:var(--c-white);letter-spacing:-0.03em}
 
         #p12Retry{z-index:120}
         .p12 .is-off{display:none}
@@ -46,17 +50,17 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default p12" id="p12Main">
-          <div class="p12-gauge-label">마음 게이지</div>
-          <div class="gauge is-thin p12-gauge"><div class="gauge-fill" id="p12Fill"></div></div>
+          <div class="p12-panel"></div>
+          <div class="p12-field"></div>
+          <div class="gauge is-thin p12-gauge"><div class="gauge-fill" id="p12Fill"></div><img class="p12-gauge-heart" id="p12GaugeHeart" src="img/p13_gauge_heart.png" alt="" onerror="this.remove()"></div>
 
           <div class="p12-student" id="p12Student"></div>
           <p class="guide-bubble is-center p12-bubble" id="p12Bubble"></p>
 
           <div id="p12Cards"></div>
           <div class="p12-basket" id="p12Basket">
-            <div class="p12-basket-bowl"></div>
-            <span class="p12-heart" id="p12Heart">&#9829;</span>
-            <div class="p12-basket-char"></div>
+            <div class="p12-basket-bowl no-img" id="p12Bowl"></div>
+            <div class="p12-heart-bubble"><span class="p12-heart" id="p12Heart">&#9829;</span></div>
           </div>
 
           <p class="p12-banner is-off" id="p12Banner"><span id="p12BannerText"></span></p>
@@ -93,10 +97,10 @@
         bad: ['발표를 정말 잘했구나!<br>멋진 발표였어.', '발표하는 게 뭐가 긴장돼?<br>하나도 어렵지 않잖아.', '사람들 앞에서 실수하면<br>정말 창피할 것 같아.', '나는 발표할 때<br>하나도 긴장하지 않아!', '긴장되면 그냥 발표하지<br>않는 게 좋을 것 같아.'] }
     ];
     const TOTAL_GOOD = 15;
-    const AREA = { left: 560, right: 1880, top: 120, catchY: 611 };
+    const AREA = { left: 545, right: 1830, top: 158, catchY: 627 };
     const FALL_SPEED = 95;
     const SPAWN_GAP = 3200;
-    const BASKET_W = 395;
+    const BASKET_W = 377;
 
     const main = $('p12Main');
     const cardsBox = $('p12Cards');
@@ -106,7 +110,7 @@
     const stage = document.getElementById('stage');
 
     let round = 0;
-    let basketX = 1023;
+    let basketX = 1033;
     let caughtTotal = 0;
     let roundGood = 0;
     let running = false;
@@ -120,7 +124,12 @@
       basketX = Math.max(AREA.left, Math.min(AREA.right - BASKET_W, x));
       basket.style.left = basketX + 'px';
     }
-    function setGauge() { fill.style.width = (caughtTotal >= TOTAL_GOOD ? 100 : caughtTotal / TOTAL_GOOD * 100) + '%'; }
+    function setGauge() {
+      const pct = caughtTotal >= TOTAL_GOOD ? 100 : caughtTotal / TOTAL_GOOD * 100;
+      fill.style.width = pct + '%';
+      const gh = $('p12GaugeHeart');
+      if (gh) { gh.style.left = pct + '%'; gh.style.visibility = pct ? 'visible' : 'hidden'; }
+    }
 
     // 같은 종류(정답/오답)가 3장 이상 이어지지 않게 섞기
     function makeQueue(r) {
@@ -142,12 +151,12 @@
       const r = ROUNDS[round];
       $('p12Bubble').innerHTML = r.say;
       const stu = $('p12Student');
-      const src = 'img/p13_guest1.png';
-      stu.classList.remove('has-img');
+      const show = (src) => { stu.style.backgroundImage = "url('" + src + "')"; };
       stu.style.backgroundImage = '';
       const probe = new Image();
-      probe.onload = () => { stu.style.backgroundImage = "url('" + src + "')"; stu.classList.add('has-img'); };
-      probe.src = src;
+      probe.onload = () => show(probe.src);
+      probe.onerror = () => { const fb = new Image(); fb.onload = () => show(fb.src); fb.src = 'img/p13_guest1.png'; };
+      probe.src = 'img/p13_guest' + (round + 1) + '.png';
       cardsBox.innerHTML = '';
       falling = [];
       roundGood = 0;
@@ -163,7 +172,7 @@
     function spawn() {
       const c = queue.shift();
       const el = document.createElement('div');
-      el.className = 'emotion-option p12-card';
+      el.className = 'p12-card';
       el.innerHTML = c.t;
       cardsBox.appendChild(el);
       const x = AREA.left + Math.random() * (AREA.right - AREA.left - 395);
@@ -258,6 +267,10 @@
       basket.addEventListener('pointermove', move);
       basket.addEventListener('pointerup', up);
     });
+
+    const bowlProbe = new Image();
+    bowlProbe.onload = () => { const bw = $('p12Bowl'); bw.classList.remove('no-img'); bw.style.backgroundImage = "url('img/p13_basket.png')"; };
+    bowlProbe.src = 'img/p13_basket.png';
 
     setGauge();
     startRound();
