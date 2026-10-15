@@ -58,8 +58,8 @@
                 <a href="${BASE}sa/03/page04.html" class="toc-sub-item">3) 어떤 말을 전할까?</a>
                 <a href="${BASE}sa/03/page06.html" class="toc-sub-item">4) 마음 카드 디자이너 미션</a>
                 <a href="${BASE}sa/03/page08.html" class="toc-sub-item">5) 마음을 전하는 카드 만들기</a>
-                <a href="${BASE}sa/03/page10.html" class="toc-sub-item">6) 퀴즈 풀기</a>
-                <a href="${BASE}sa/03/page11.html" class="toc-sub-item">7) 마음 배달 작전</a>
+                <a href="${BASE}sa/03/page11.html" class="toc-sub-item">6) 퀴즈 풀기</a>
+                <a href="${BASE}sa/03/page12.html" class="toc-sub-item">7) 마음 배달 작전</a>
               </div>
             </div>
 
@@ -143,12 +143,13 @@
             <div class="toc-accordion">
               <button class="toc-accordion-toggle js-sfx" data-sound="sound/click.mp3">10차시</button>
               <div class="toc-accordion-panel">
-                <a href="javascript:;" class="toc-sub-item">01</a>
-                <a href="javascript:;" class="toc-sub-item">02</a>
-                <a href="javascript:;" class="toc-sub-item">03</a>
-                <a href="javascript:;" class="toc-sub-item">04</a>
-                <a href="javascript:;" class="toc-sub-item">05</a>
-                <a href="javascript:;" class="toc-sub-item">06</a>
+                <a href="${BASE}sa/10/page01.html" class="toc-sub-item">1) 퍼즐로 완성하는 우리 동네</a>
+                <a href="${BASE}sa/10/page03.html" class="toc-sub-item">2) 개념 이해 영상</a>
+                <a href="${BASE}sa/10/page04.html" class="toc-sub-item">3) 장소와 역할 알아보기</a>
+                <a href="${BASE}sa/10/page06.html" class="toc-sub-item">4) 초상권을 지켜라!</a>
+                <a href="${BASE}sa/10/page08.html" class="toc-sub-item">5) 뚝딱! 우리 동네 브이로그 제작소</a>
+                <a href="${BASE}sa/10/page10.html" class="toc-sub-item">6) 퀴즈 풀기</a>
+                <a href="${BASE}sa/10/page11.html" class="toc-sub-item">7) 브이로그 완성 대작전</a>
               </div>
             </div>
 

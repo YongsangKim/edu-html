@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>뚝딱! 우리 동네 브이로그 제작소</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서 47~81p. VLLO로 우리 동네 브이로그 만들기 실습. 휴대폰 화면은 기획서에 들어 있는 실제 VLLO 앱 캡처(img/ui/u{기획서 그림 번호}.jpg)를 그대로 쓰고,
+           학생이 고른 장소 장면(미리보기)·자막·모자이크는 기획서 슬라이드처럼 캡처 위에 얹음(좌표는 휴대폰 화면 기준 %). 누를 곳(.p09-hot)은 투명 — 올리면 초록 테두리, 왼쪽 손가락이 따라옴.
+           흐름: 홈에서 VLLO → 장소 고르기(마트·우체국·도서관·공원) → 음성 녹음(준비된 목소리 TTS) → 자동 자막 생성 → 음성과 자막 비교해 틀린 단어 찾기 → 자막 수정 → 효과·왜곡(모자이크)·블러 → 얼굴 트래킹 → 추출하기 → 완성 영상 보기.
+           장소 장면은 임시 이모지 그림(img/p09_place_*.jpg), 완성 영상은 영상 파일이 없어 이모지 이웃이 걸어가는 짧은 애니메이션으로 대신함. TTS는 브라우저 음성(speechSynthesis) — 음성 파일(m4a)이 오면 교체 */
+
+        .p09-bubble{position:absolute;left:30px;top:auto;bottom:560px;width:600px;margin:0;box-sizing:border-box;padding:30px;background:var(--c-cream);border:solid 5px var(--c-purple);border-radius:30px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';font-size:38px;line-height:1.35;color:var(--c-purple);text-align:center;letter-spacing:-0.05em;word-break:keep-all;z-index:3}
+        .p09-bubble:before{content:'';position:absolute;left:230px;bottom:-58px;width:100px;height:70px;background:url('../../img/common/p_guide_tail.png') 0 0 / contain no-repeat}
+        .p09-character{left:40px;top:470px;width:540px;height:470px}
+
+        .p09-phone{left:748px;top:21px;width:422px;height:895px}
+        .p09-screen{position:relative;width:100%;height:100%;overflow:hidden;background:#fff;font-family:'Pretendard';color:#111}
+        .p09-base{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
+        .p09-home{position:absolute;inset:0;background:linear-gradient(180deg,#4a6fa5 0%,#8fb4d9 55%,#d6c8e8 100%)}
+        .p09-home img{position:absolute;left:38.75%;top:44%;width:22.5%;border-radius:25%;box-shadow:0 6px 14px rgba(0,0,0,.2)}
+        .p09-ov{position:absolute;box-sizing:border-box;overflow:hidden}
+        .p09-hot{position:absolute;box-sizing:border-box;padding:0;border:solid 3px transparent;border-radius:14px;background:transparent;cursor:pointer;transition:box-shadow .15s,border-color .15s;z-index:6}
+        .p09-hot:hover{border-color:#03c75a;box-shadow:0 0 0 4px rgba(3,199,90,.28)}
+        .p09-swipe{position:absolute;z-index:6;touch-action:none;cursor:grab}
+
+        .vl-prev{position:absolute;z-index:2;overflow:hidden;background:#fff center / cover no-repeat;container-type:size}
+        .vl-sub{position:absolute;left:0;width:100%;bottom:9%;margin:0;text-align:center;font-family:'Pretendard';font-weight:800;font-size:5.6cqw;color:#fff;-webkit-text-stroke:.5cqw #111;paint-order:stroke fill;letter-spacing:-0.02em;white-space:nowrap}
+        .vl-npc{position:absolute;left:44%;top:14%;font-size:30cqh;line-height:1;font-family:'Segoe UI Emoji','Apple Color Emoji',sans-serif}
+        .vl-mos{position:absolute;left:46%;top:21%;width:19cqh;height:19cqh;background:repeating-conic-gradient(#8c8c8c 0 25%,#dadada 0 50%) 0 0 / 5cqh 5cqh}
+        .vl-prev.is-play .vl-npc,.vl-prev.is-play .vl-mos{animation:vl-walk 3s linear forwards}
+        @keyframes vl-walk{from{transform:translateX(-60%)}to{transform:translateX(60%)}}
+        .vl-field{position:absolute;z-index:3;background:#fff;display:flex;align-items:center;padding:0 3%;font-size:12.5px;font-weight:600;color:#111;white-space:nowrap}
+        .vl-track{position:absolute;z-index:3;background:#3b3c40;border-radius:99px;overflow:hidden}
+        .vl-track i{display:block;height:100%;width:0;background:#fff}
+        .vl-track.is-run i{width:100%;transition:width 2.4s linear}
+        .vl-place{position:absolute;left:0;top:35%;width:100%;height:65%;background:#fff;z-index:3;display:flex;flex-wrap:wrap;align-content:flex-start;gap:12px;padding:18px 16px}
+        .vl-place button{position:relative;width:calc(50% - 6px);height:166px;padding:0;border:solid 3px #e3e5ea;border-radius:16px;background:#fff;overflow:hidden;cursor:pointer;display:block}
+        .vl-place button:hover{border-color:#03c75a;box-shadow:0 0 0 4px rgba(3,199,90,.28)}
+        .vl-place img{display:block;width:100%;height:122px;object-fit:cover}
+        .vl-place span{position:absolute;left:0;right:0;bottom:0;height:40px;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:700;color:#111}
+
+        .p09-right{position:absolute;left:1290px;top:50%;transform:translateY(-50%);width:560px;display:flex;flex-direction:column;gap:30px}
+        .p09-right.is-off{display:none}
+        .p09-right .card-btn{width:100%;min-width:0;height:auto;min-height:130px;padding:18px 30px 12px;font-size:44px;line-height:1.2}
+        .p09-cmp{width:100%;display:flex;flex-direction:column;gap:6px}
+        .p09-cmp b{align-self:flex-start;margin:18px 0 0;padding:6px 24px 0;height:54px;box-sizing:border-box;background:var(--c-white);border:solid 4px var(--c-ink);border-bottom:0;border-radius:14px 14px 0 0;font-family:'Cafe24 Ssurround';font-weight:normal;font-size:30px;color:var(--c-ink);line-height:46px}
+        .p09-cmp div{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;padding:18px 22px 12px;background:var(--c-white);border:solid 4px var(--c-ink);border-radius:0 18px 18px 18px;font-family:'Pretendard';font-weight:700;font-size:38px;color:var(--c-ink);letter-spacing:-0.03em;min-height:92px}
+        .p09-cmp span{padding:4px 8px 2px;border-radius:10px}
+        .p09-cmp span:last-child{margin-left:-14px}
+        .p09-cmp button{padding:4px 8px 2px;border:0;border-radius:10px;background:none;font:inherit;color:inherit;cursor:pointer}
+        @media (hover:hover){.p09-cmp button:hover{background:#e8dcff}}
+        .p09-cmp button.is-mark,.p09-cmp span.is-mark{background:#ffe27a}
+        .p09-cmp button.is-wrong{animation:fix-word-shake .3s ease}
+        .p09-next.card-btn{display:flex;align-items:center;justify-content:center;min-width:0;width:300px;height:110px;margin-bottom:20px;padding:8px 10px 0;font-size:56px;z-index:7}
+        .is-hide{display:none!important}
+
+        .p09-vlog{position:absolute;left:380px;top:100px;width:1160px;height:653px;box-sizing:border-box;border:solid 6px var(--c-ink);background:#fff center / cover no-repeat;overflow:hidden;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);z-index:2;container-type:size}
+        .p09-vlog .vl-sub{font-size:4.2cqw;bottom:8%}
+        .p09-vlog .vl-npc{font-size:55cqh}
+        .p09-vlog .vl-mos{width:34cqh;height:34cqh;top:21%;left:46%;background-size:8cqh 8cqh}
+        .p09-vlog.is-play .vl-npc,.p09-vlog.is-play .vl-mos{animation:vl-walk 3s linear forwards}
+        .p09-play{position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 4px 14px rgba(27,23,56,.4);cursor:pointer;z-index:4}
+        .p09-play:before{content:'';position:absolute;left:50%;top:50%;margin:-38px 0 0 -24px;border-left:64px solid var(--c-ink);border-top:38px solid transparent;border-bottom:38px solid transparent;transform:translateX(-6px)}
+
+        .p09-swhand{position:absolute;left:0;top:0;width:110px;z-index:30;pointer-events:none;animation:p09-sw 1.6s ease-in-out infinite}
+        @keyframes p09-sw{0%{opacity:0;transform:translateX(0)}15%{opacity:1}70%{opacity:1;transform:translateX(150px)}100%{opacity:0;transform:translateX(150px)}}
+        #p09Info,#p09Done{z-index:120}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="p09-bubble" id="p09Bubble"></p>
+          <div class="char-box p09-character" id="p09Char"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+          <div class="phone-frame p09-phone" id="p09Phone"><div class="p09-screen" id="p09Screen"></div></div>
+          <div class="p09-right is-off" id="p09Right"></div>
+          <button class="card-btn js-sfx next-btn p09-next is-hide" id="p09Next" data-sound="sound/click.mp3">다음</button>
+
+          <div class="p09-vlog is-hide" id="p09Vlog">
+            <div class="vl-npc">🧑</div><div class="vl-mos"></div><p class="vl-sub" id="p09VlogSub"></p>
+            <button type="button" class="p09-play" id="p09Play" aria-label="재생"></button>
+          </div>
+
+          <div class="avatar-modal is-off" id="p09Info">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small">여기에서는 준비된 목소리가 나와요!<br>실제 어플을 사용할 때는 내가 직접 말해요.</p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p09InfoOk" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p09Done">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">멋진 브이로그가 완성 되었어요!</p>
+                <p class="avatar-popup-sub">AI의 도움을 받아 이웃의 초상권을<br>지키며 우리 동네를 소개했어요.</p>
+                <a href="page10.html" class="js-nav-effect avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="뚝딱! 우리 동네 브이로그 제작소" data-next="page10.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const PLACES = {
+      mart: { name: '마트', img: 'p09_place_mart', words: ['여기는', '우리', '동네', '마트'], err: '동내', bad: 2 },
+      post: { name: '우체국', img: 'p09_place_post', words: ['여기는', '우리', '동네', '우체국'], err: '우채국', bad: 3 },
+      library: { name: '도서관', img: 'p09_place_library', words: ['여기는', '우리', '동네', '도서관'], err: '도서간', bad: 3 },
+      park: { name: '공원', img: 'p09_place_park', words: ['여기는', '우리', '동네', '공원'], err: '공언', bad: 3 }
+    };
+    const st = { pl: null, i: 0 };
+    const screen = $('p09Screen'), bubble = $('p09Bubble'), right = $('p09Right'), nextBtn = $('p09Next');
+    const main = document.querySelector('main');
+    const show = (el, on) => el.classList.toggle('is-hide', !on);
+    const pct = (a) => 'left:' + a[0] + '%;top:' + a[1] + '%;width:' + a[2] + '%;height:' + a[3] + '%';
+    const PREV = [1.2, 21.8, 97.6, 25.2];
+    const PREV_TRACK = [0, 17.5, 100, 30];
+    const errWords = () => st.pl.words.map((w, k) => (k === st.pl.bad ? st.pl.err : w));
+    const sentence = (ws) => ws.slice(0, 3).join(' ') + ' ' + ws[3] + '입니다.';
+    const okText = () => sentence(st.pl.words);
+    const errText = () => sentence(errWords());
+
+    // 단계 목록: img(캡처 번호) · bubble · 누를 곳(hot) / 스와이프(swipe) / next / right / load 등
+    const DONE = [10, 96, 80, 4];
+    const STEPS = [
+      { home: true, bubble: 'VLLO를 클릭해요.', hot: [[38.75, 44, 22.5, 10.4]] },
+      { img: 7, bubble: '우리 동네를 소개하는<br>브이로그를 만들어볼까요?<br>원하는 장소를 하나 선택해요.', place: true },
+      { img: 8, prev: 1, bubble: '먼저, 우리 동네를 소개해봐요.<br>음성 녹음을 클릭해요.', hot: [[0, 83, 19, 7.5]] },
+      { img: 9, prev: 1, bubble: '녹음 버튼을 클릭해<br>우리 동네를 소개하는 말을<br>녹음해봐요.', hot: [[41, 83.3, 17, 7.4]], info: true },
+      { img: 10, prev: 1, bubble: '녹음이 완료되면<br>정지 버튼을 클릭해요.', tts: true, hot: [[41, 83.3, 17, 7.4]] },
+      { img: 11, prev: 1, bubble: '완료 버튼을 클릭해요.', hot: [DONE] },
+      { img: 12, prev: 1, bubble: '좋아요!<br>이제 녹음한 음성을<br>AI 기능을 활용해 자막으로<br>만들어봐요.', next: true },
+      { img: 12, prev: 1, bubble: '하단의 메뉴 바를<br>오른쪽으로 슬라이드 해요.', swipe: [0, 87, 100, 8] },
+      { img: 13, prev: 1, bubble: '자동 자막을 클릭해요.', hot: [[64, 86.5, 19, 8]] },
+      { img: 14, prev: 1, bubble: '생성하기 버튼을 클릭해요.', hot: [[10, 96, 80, 4]] },
+      { img: 15, bubble: '자막을 생성하는 중이에요.', load: [3.5, 49, 88, 2.2] },
+      { img: 16, prev: 1, sub: 'err', bubble: 'AI 자동 자막을 생성했어요!<br>음성을 알맞게 인식했는지<br>확인해볼까요?', next: true },
+      { img: 16, prev: 1, sub: 'err', bubble: '음성 녹음 내용과<br>AI가 만든 자동 자막을 비교해<br>틀린 부분을 클릭해보세요.', cmp: true },
+      { img: 16, prev: 1, sub: 'err', bubble: 'AI는 틀릴 수 있으니<br>꼭 다시 한번 확인해야 해요!<br>아래의 편집을 클릭해요.', hot: [[80, 87, 19, 8]] },
+      { img: 17, prev: 1, sub: 'err', field: 'err', bubble: '오른쪽 버튼을 클릭해<br>틀린 부분을 수정해요.', fix: true },
+      { img: 17, prev: 1, sub: 'fix', field: 'fix', bubble: '좋아요!<br>자막을 올바르게 수정했어요.<br>확인 버튼을 클릭해요.', hot: [[85, 51.5, 13, 6.5]] },
+      { img: 16, prev: 1, sub: 'fix', bubble: '아래의 완료 버튼을 눌러<br>자막 수정을 마무리해요.', hot: [DONE] },
+      { img: 18, prev: 1, sub: 'fix', bubble: '이제 영상에 찍힌<br>이웃의 얼굴을 가려볼까요?', next: true },
+      { img: 18, prev: 1, sub: 'fix', bubble: '하단의 효과 탭을 클릭해요.', hot: [[76, 95.4, 22, 4.6]] },
+      { img: 19, prev: 1, sub: 'fix', bubble: '왜곡(모자이크)를 클릭해요.', hot: [[0, 83.3, 22, 8.7]] },
+      { img: 20, prev: 1, sub: 'fix', bubble: '얼굴을 흐릿하게 만드는 효과인<br>‘블러’를 클릭해요.', hot: [[2.5, 80.5, 21, 11]] },
+      { img: 21, prev: 1, sub: 'fix', mos: true, bubble: '현재 장면의 얼굴을 가렸어요.<br>완료 버튼을 클릭해요.', hot: [DONE] },
+      { img: 22, prev: 1, sub: 'fix', mos: true, bubble: '이제 모자이크를 이웃의 얼굴에<br>고정시켜 볼까요?<br>하단의 도구 탭을 오른쪽으로<br>슬라이드 해요.', swipe: [0, 87, 100, 8] },
+      { img: 23, prev: 1, sub: 'fix', mos: true, bubble: '얼굴 트래킹을 클릭해요.', hot: [[45, 86.5, 18, 8.5]] },
+      { img: 24, prev: 1, sub: 'fix', mos: true, bubble: '모자이크 효과를 추가한 부분이<br>트래킹 영역으로 설정됐어요.<br>트래킹하기 버튼을 클릭해요.', hot: [[33, 87.5, 36, 6.5]] },
+      { img: 25, prevTrack: 1, bubble: '트래킹하는 중이에요.', load: [3.5, 64, 88, 1.4] },
+      { img: 26, prev: 1, sub: 'fix', mos: true, play: true, bubble: '영상 끝까지 얼굴이<br>잘 가려졌나요?', choices: ['잘 가려졌어요.', '다시 한번 확인해볼래요.'] },
+      { img: 26, prev: 1, sub: 'fix', mos: true, bubble: '아래의 완료 버튼을 클릭해<br>얼굴 트래킹을 마무리해보세요.', hot: [DONE] },
+      { img: 27, prev: 1, sub: 'fix', mos: true, bubble: '좋아요!<br>우리 동네 브이로그 편집을<br>완료했어요.', next: true },
+      { img: 27, prev: 1, sub: 'fix', mos: true, bubble: '추출하기 버튼을 클릭해<br>영상을 저장해봐요.', hot: [[77, 5.2, 20, 3.4]] },
+      { img: 28, bubble: '아래의 추출하기 버튼을<br>한 번 더 클릭해요.', hot: [[10, 95.5, 80, 4.5]] },
+      { img: 29, bubble: '비디오를 만드는 중이에요.', load: [3.5, 50.4, 88, 1.2] },
+      { img: 30, bubble: '완성했어요!<br>내가 만든 브이로그를<br>한 번 재생해볼까요?', next: true },
+      { vlog: true, bubble: '재생 버튼을 눌러<br>내가 만든 브이로그를 확인해요.' }
+    ];
+
+    function clearOverlays() { screen.innerHTML = ''; right.innerHTML = ''; right.classList.add('is-off'); show(nextBtn, false); clearFingers(); document.querySelectorAll('.p09-swhand').forEach((h) => h.remove()); }
+    function add(html) { const d = document.createElement('div'); d.innerHTML = html; const e = d.firstElementChild; screen.appendChild(e); return e; }
+    const fingerTo = (el, dy, x) => setTimeout(() => { if (el && el.isConnected) pointFingerAt(el, { onMain: true, x: x || 0.6, dy: dy || 0 }); }, 350);
+
+    function hotButton(box) {
+      const b = document.createElement('button');
+      b.className = 'p09-hot';
+      b.style.cssText = pct(box);
+      screen.appendChild(b);
+      return b;
+    }
+
+    function go(n) { st.i = n; render(); }
+    const advance = () => go(st.i + 1);
+
+    function render() {
+      const s = STEPS[st.i];
+      clearOverlays();
+      show($('p09Phone'), !s.vlog);
+      show($('p09Char'), true);
+      show($('p09Vlog'), !!s.vlog);
+      bubble.classList.remove('is-hide');
+      bubble.innerHTML = s.bubble;
+      if (s.vlog) { vlog(); return; }
+
+      if (s.home) {
+        add('<div class="p09-home"><img src="img/ui/vllo_icon.png" alt=""></div>');
+      } else {
+        const base = document.createElement('img');
+        base.className = 'p09-base';
+        base.src = 'img/ui/u' + s.img + '.jpg';
+        base.alt = '';
+        screen.appendChild(base);
+      }
+      if (s.prev || s.prevTrack) {
+        const box = s.prevTrack ? PREV_TRACK : PREV;
+        const p = add('<div class="vl-prev" id="vlPrev" style="' + pct(box) + ';background-image:url(img/' + st.pl.img + '.jpg)"></div>');
+        if (s.mos) p.insertAdjacentHTML('beforeend', '<div class="vl-npc">🧑</div><div class="vl-mos"></div>');
+        if (s.sub) p.insertAdjacentHTML('beforeend', '<p class="vl-sub">' + (s.sub === 'err' ? errText() : okText()) + '</p>');
+      }
+      if (s.field) add('<div class="vl-field" style="' + pct([2, 51.4, 80, 5.6]) + '">' + (s.field === 'err' ? errText() : okText()) + '</div>');
+
+      if (s.place) { placePick(); return; }
+      if (s.hot) {
+        const hots = s.hot.map((box) => hotButton(box));
+        hots.forEach((b) => b.addEventListener('click', () => {
+          playClick();
+          if (s.info) { $('p09Info').classList.remove('is-off'); return; }
+          advance();
+        }));
+        const dy = s.hot[0][1] > 90 ? -70 : 0;
+        if (!s.tts) fingerTo(hots[0], dy); else ttsRun(hots[0]);
+      }
+      if (s.swipe) swipe(s.swipe);
+      if (s.next) { show(nextBtn, true); }
+      if (s.load) load(s.load);
+      if (s.cmp) compare();
+      if (s.fix) {
+        setRight([{ t: '‘' + st.pl.err + '’를 ‘' + st.pl.words[st.pl.bad] + '’로<br>수정하기', fn: () => advance() }]);
+      }
+      if (s.choices) {
+        const prev = $('vlPrev');
+        setRight(s.choices.map((t, k) => ({ t, fn: () => { if (k === 0) advance(); else replay(prev); } })));
+        setTimeout(() => replay(prev), 400);
+      }
+    }
+    function setRight(items) {
+      right.innerHTML = '';
+      items.forEach((it) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'card-btn js-sfx';
+        b.dataset.sound = 'sound/click.mp3';
+        b.innerHTML = it.t;
+        b.addEventListener('click', () => it.fn());
+        right.appendChild(b);
+      });
+      right.classList.remove('is-off');
+    }
+
+    // 장소 고르기(기획서 48p)
+    function placePick() {
+      const w = add('<div class="vl-place"></div>');
+      Object.keys(PLACES).forEach((k) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.innerHTML = '<img src="img/' + PLACES[k].img + '.jpg" alt=""><span>' + PLACES[k].name + '</span>';
+        b.addEventListener('click', () => { playClick(); st.pl = PLACES[k]; advance(); });
+        w.appendChild(b);
+      });
+    }
+
+    // 녹음: TTS가 끝나면 정지 버튼 손가락 안내(기획서 51p)
+    function ttsRun(btn) {
+      let done = false;
+      const end = () => { if (done) return; done = true; if (btn.isConnected) fingerTo(btn); };
+      try {
+        const u = new SpeechSynthesisUtterance('여기는 우리 동네 ' + st.pl.name + '입니다');
+        u.lang = 'ko-KR';
+        u.onend = end;
+        speechSynthesis.cancel();
+        speechSynthesis.speak(u);
+      } catch (e) { /* 음성 합성이 없으면 타이머만 */ }
+      setTimeout(end, 3800);
+    }
+
+    // 로딩 게이지(자동 진행)
+    function load(box) {
+      add('<div class="vl-track" style="' + pct(box) + '"><i></i></div>');
+      const tr = screen.querySelector('.vl-track');
+      setTimeout(() => tr.classList.add('is-run'), 60);
+      setTimeout(() => { if (STEPS[st.i].load === box) advance(); }, 2700);
+    }
+
+    // 하단 메뉴 오른쪽으로 밀기(기획서 54·69p)
+    function swipe(box) {
+      const z = document.createElement('div');
+      z.className = 'p09-swipe';
+      z.style.cssText = pct(box);
+      screen.appendChild(z);
+      const sr = screen.getBoundingClientRect(), mr = main.getBoundingClientRect(), sc = mr.width / 1920;
+      const hand = document.createElement('img');
+      hand.className = 'p09-swhand';
+      hand.src = '../../img/common/img_finger01.png';
+      hand.style.left = ((sr.left - mr.left) / sc + sr.width / sc * 0.28) + 'px';
+      hand.style.top = ((sr.top - mr.top) / sc + sr.height / sc * (box[1] + box[3] / 2) / 100) + 'px';
+      main.appendChild(hand);
+      let x0 = null;
+      z.addEventListener('pointerdown', (e) => { x0 = e.clientX; z.setPointerCapture(e.pointerId); });
+      z.addEventListener('pointermove', (e) => { if (x0 !== null && e.clientX - x0 > 70 * sc) { x0 = null; playClick(); advance(); } });
+      z.addEventListener('pointerup', () => { x0 = null; });
+    }
+
+    // 음성 녹음 내용 ↔ AI 자막 비교(기획서 59p)
+    function compare() {
+      const pl = st.pl, ew = errWords();
+      const box = document.createElement('div');
+      box.className = 'p09-cmp';
+      const rec = document.createElement('div');
+      rec.id = 'cmpRec';
+      pl.words.forEach((w, k) => { const e = document.createElement('span'); e.textContent = w; e.dataset.k = k; rec.appendChild(e); });
+      rec.insertAdjacentHTML('beforeend', '<span>입니다.</span>');
+      const ai = document.createElement('div');
+      ew.forEach((w, k) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = w;
+        b.addEventListener('click', () => {
+          if (k === pl.bad) { playCorrect(); b.classList.add('is-mark'); setTimeout(advance, 900); return; }
+          playWrong();
+          b.classList.add('is-wrong');
+          setTimeout(() => b.classList.remove('is-wrong'), 400);
+          rec.querySelector('[data-k="' + pl.bad + '"]').classList.add('is-mark');
+          ai.children[pl.bad].classList.add('is-mark');
+        });
+        ai.appendChild(b);
+      });
+      ai.insertAdjacentHTML('beforeend', '<span>입니다.</span>');
+      box.innerHTML = '<b>음성 녹음 내용</b>';
+      box.appendChild(rec);
+      box.insertAdjacentHTML('beforeend', '<b>AI 자동 자막</b>');
+      box.appendChild(ai);
+      right.appendChild(box);
+      right.classList.remove('is-off');
+    }
+
+    // 트래킹 영상 재생(이모지 이웃이 걸어가고 모자이크가 따라감)
+    function replay(prev) {
+      if (!prev) return;
+      prev.classList.remove('is-play');
+      void prev.offsetWidth;
+      prev.classList.add('is-play');
+    }
+
+    // 완성 영상(기획서 80~81p)
+    function vlog() {
+      const v = $('p09Vlog');
+      v.style.backgroundImage = "url('img/" + st.pl.img + ".jpg')";
+      $('p09VlogSub').textContent = okText();
+      v.classList.remove('is-play');
+      show($('p09Play'), true);
+    }
+    $('p09Play').addEventListener('click', () => {
+      playClick();
+      show($('p09Play'), false);
+      const v = $('p09Vlog');
+      v.classList.remove('is-play');
+      void v.offsetWidth;
+      v.classList.add('is-play');
+      setTimeout(() => { bubble.innerHTML = '완성했어요!'; $('p09Done').classList.remove('is-off'); }, 3300);
+    });
+
+    nextBtn.addEventListener('click', advance);
+    $('p09InfoOk').addEventListener('click', () => { $('p09Info').classList.add('is-off'); advance(); });
+    render();
+  })();
+  </script>
+</body>
+</html>

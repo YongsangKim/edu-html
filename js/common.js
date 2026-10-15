@@ -2310,16 +2310,24 @@ function resetImageSwap(root) {
    opts.x: 가로 어디를 가리킬지(0=왼쪽 끝 ~ 1=오른쪽 끝, 기본 1). 긴 입력창처럼 오른쪽 끝에 다른 버튼이 있을 때
    opts.dx / opts.dy: 손가락 위치를 px로 더 옮김(예: dy:-50이면 위로)
    opts.w: 손가락 너비(px, 기본 110). 버튼이 화면 맨 아래라 손가락이 잘릴 때 줄여서 씀 */
+/* 버튼 옆에 손가락 안내. opts: dx/dy 보정, w 손가락 폭, onMain(el이 main 안 스케일된 요소일 때 화면 좌표로 환산), x(onMain에서 폭 비율), beside(대상을 가리지 않게 옆에 둠) */
 function pointFingerAt(el, opts) {
   if (opts && opts.onMain) {
     const main = el.closest('main');
     const s = main.getBoundingClientRect().width / main.offsetWidth;
     const r = el.getBoundingClientRect();
     const m = main.getBoundingClientRect();
+    const o = { dx: opts.dx, dy: opts.dy, w: opts.w };
+    /* beside: 눌러야 할 곳을 가리지 않게 손가락 끝을 대상 옆(오른쪽 가장자리, 세로 가운데)에 둠. 폭 300px 넘는 넓은 대상은 아래 가장자리 가운데 */
+    if (opts.beside) {
+      const w = r.width / s, h = r.height / s;
+      if (w > 300) { o.dx = (opts.dx || 0) + w / 2 - w * (opts.x === undefined ? 1 : opts.x) + 20; o.dy = (opts.dy || 0) + 4; }
+      else { o.dx = (opts.dx || 0) + 16; o.dy = (opts.dy || 0) - h / 2 + 10; }
+    }
     pointFingerAt({
       offsetLeft: (r.left - m.left) / s, offsetTop: (r.top - m.top) / s,
       offsetWidth: r.width / s * (opts.x === undefined ? 1 : opts.x), offsetHeight: r.height / s, offsetParent: main
-    }, { dx: opts.dx, dy: opts.dy, w: opts.w });
+    }, o);
     return;
   }
   clearFingers();
@@ -3093,3 +3101,16 @@ function initPhoneBars() {
   document.querySelectorAll('.phone-nav:empty').forEach((el) => { el.innerHTML = '<i></i><b></b><u></u>'; });
 }
 initPhoneBars();
+
+/* 글꼴 미리 불러오기: @font-face 글꼴은 그 글꼴로 글자가 처음 그려질 때에야 내려받아서, 그 순간 대체 글꼴로 보였다가 바뀐다.
+   나중에 쓰는 글꼴이 있는 페이지는 <main data-preload-fonts="KCC-DodamDodam,KCC-MurukMuruk">처럼 써 두면 페이지를 열 때 미리 받음.
+   글꼴 선언(@font-face)은 css/common.css에 있음 */
+function initFontPreload() {
+  const holder = document.querySelector('[data-preload-fonts]');
+  if (!holder || !document.fonts) return;
+  holder.dataset.preloadFonts.split(',').forEach((name) => {
+    name = name.trim();
+    if (name) document.fonts.load('40px "' + name + '"');
+  });
+}
+initFontPreload();

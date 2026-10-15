@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인권 존중 포스터 제작소</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서 26~68p. Canva로 인권 존중 포스터 만들기 실습. 휴대폰 화면은 기획서의 Canva 앱 캡처를 540x1170 좌표로 다시 그린 것(공용 css/common.css의 .cu-ui, 화면 폭에 맞춰 축소) —
+           아이콘·썸네일·시스템 바처럼 그리기 어려운 조각만 캡처에서 오려 img/ui/ 에 둠. 고른 값(프롬프트 · 초안 이미지 · 문구 · 글꼴)은 화면 안에 그대로 그려짐.
+           누를 곳(.p09-hot)은 투명 — 올리면 초록 테두리, 왼쪽 손가락이 위치를 알려줌(좌표는 화면 기준 %).
+           흐름: 홈에서 Canva → 포스터(세로형 A2) → Magic Media 세로형 → 프롬프트(3가지 중 선택) → 이미지 생성(2초) → 초안 4장 보기(화살표)·고르기(프롬프트에 맞는 2장만 통과) → 포스터 제작 확인 → 크기 조정 → 문구 넣기(3가지 중 선택, 글꼴 바꾸기, 위로 옮기기) → AI 문구 넣기(아래로 옮기기) → 완성 → 다운로드 → 완성 포스터(68p).
+           초안 이미지 img/p09_draft_{1~4}.png(1·2번이 프롬프트에 맞는 초안, 3·4번은 맞지 않는 초안 — 3·4는 임시 그림, 실제 이미지가 오면 같은 파일명으로 덮어쓰기). 이전 캡처 방식 버전: _backup_page09.html */
+
+        .p09-bubble{position:absolute;left:30px;top:auto;bottom:560px;width:600px;margin:0;box-sizing:border-box;padding:30px;background:var(--c-cream);border:solid 5px var(--c-purple);border-radius:30px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';font-size:38px;line-height:1.35;color:var(--c-purple);text-align:center;letter-spacing:-0.05em;word-break:keep-all;z-index:3}
+        .p09-bubble:before{content:'';position:absolute;left:230px;bottom:-58px;width:100px;height:70px;background:url('../../img/common/p_guide_tail.png') 0 0 / contain no-repeat}
+        .p09-bubble img{height:1em;vertical-align:-0.15em;margin:0 6px}
+        .p09-character{left:40px;top:470px;width:540px;height:470px}
+
+        .p09-phone .phone-nav.is-kb{background:#e6e8ee}
+        .p09-screen{position:relative;width:100%;height:100%;border-radius:0;overflow:hidden;font-family:'Pretendard';color:#111}
+
+        .p09-hot{position:absolute;box-sizing:border-box;padding:0;border:solid 3px transparent;border-radius:14px;background:transparent;cursor:pointer;transition:box-shadow .15s,border-color .15s;z-index:4}
+        .p09-hot:hover{border-color:#03c75a;box-shadow:0 0 0 4px rgba(3,199,90,.28)}
+        .p09-hot.is-drag{cursor:grab;touch-action:none}
+
+        .p09-car{position:absolute;left:0;top:19%;width:100%;height:34.5%;overflow:hidden;z-index:2}
+        .p09-card{position:absolute;top:2%;width:74.4%;height:96%;border-radius:14px;background:#e9eef6 center / cover no-repeat;transition:left .35s ease}
+        .p09-pick{position:absolute;left:4.1%;top:2%;width:74.8%;height:96%;z-index:2;border:solid 3px transparent;border-radius:14px;background:transparent;padding:0;cursor:pointer}
+        .p09-pick:hover{border-color:#03c75a;box-shadow:0 0 0 4px rgba(3,199,90,.28)}
+        .p09-arrow{position:absolute;top:50%;width:9%;aspect-ratio:1;margin-top:-4.5%;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 2px 8px rgba(0,0,0,.3);z-index:4;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .12s}
+        .p09-arrow svg{width:50%;height:50%;fill:none;stroke:#222;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+        .p09-arrow.is-prev{left:6%}
+        .p09-arrow.is-next{right:3%}
+        .p09-arrow:hover{transform:scale(1.1)}
+        .p09-bar{position:absolute;background:#e1e3ea;border-radius:99px;overflow:hidden;z-index:2}
+        .p09-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3cc5c9,#7b3fe4)}
+        .p09-bar.is-run i{width:100%;transition:width 2s linear}
+
+        .p09-right{position:absolute;left:1290px;top:50%;transform:translateY(-50%);width:560px;display:flex;flex-direction:column;gap:30px}
+        .p09-right.is-off{display:none}
+        .p09-right .card-btn{width:100%;min-width:0;height:auto;min-height:100px;padding:14px 30px 10px;font-size:44px;line-height:1.2}
+        .p09-right .card-btn.is-small{font-size:38px;padding-left:0;padding-right:0;letter-spacing:-0.1em}
+        .p09-next.card-btn{display:flex;align-items:center;justify-content:center;min-width:0;width:300px;height:110px;margin-bottom:20px;padding:8px 10px 0;font-size:56px;z-index:7}
+        .is-hide{display:none!important}
+
+        .p09-poster{position:absolute;left:674px;top:135px;width:572px;height:790px;box-sizing:border-box;border:solid 4px var(--c-ink);background:#fff center / cover no-repeat;overflow:hidden;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p09-poster b{position:absolute;left:0;width:100%;text-align:center;font-family:'Pretendard';font-weight:800;letter-spacing:-0.03em;line-height:1.2}
+        .p09-poster .is-top{top:7%;font-size:56px;font-family:'Black Han Sans';font-weight:normal;color:#1b1738;text-shadow:0 0 8px #fff,0 0 8px #fff}
+        .p09-poster .is-bot{bottom:2.5%;font-size:23px;font-weight:600;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7)}
+        .p09-end-title{position:absolute;left:60px;top:30px;width:1800px;margin:0;font-family:'Cafe24 Ssurround';font-size:68px;line-height:1.3;text-align:center;letter-spacing:-0.06em;white-space:nowrap;background:linear-gradient(180deg,#02185c,#0362d7);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+
+
+
+
+
+
+
+
+        .p09-swipe{position:absolute;width:110px;z-index:30;pointer-events:none;animation:p09-swipe 1.6s ease-in-out infinite}
+        @keyframes p09-swipe{0%{transform:translateX(0);opacity:0}15%{opacity:1}70%{transform:translateX(-240px);opacity:1}85%,100%{transform:translateX(-240px);opacity:0}}
+        .p09-tobj{position:absolute;width:0;height:0;z-index:3;touch-action:none}
+        .p09-tobj .mv{cursor:grab;touch-action:none;border-radius:50%;transition:box-shadow .15s}
+        .p09-tobj .mv:hover{box-shadow:0 0 0 6px rgba(3,199,90,.4)}
+        .p09-tobj .a{pointer-events:none}
+        .p09-tobj .mv{pointer-events:auto}
+        .phone-nav{z-index:2}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main data-preload-fonts="Black Han Sans" class="bg-default">
+          <p class="p09-bubble" id="p09Bubble"></p>
+          <div class="char-box p09-character" id="p09Char"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+          <div class="phone-frame is-thin has-cam cv p09-phone" id="p09Phone"><div class="p09-screen" id="p09Screen"></div></div>
+          <div class="p09-right is-off" id="p09Right"></div>
+          <button class="card-btn js-sfx next-btn p09-next is-hide" id="p09Next" data-sound="sound/click.mp3">다음</button>
+
+          <p class="p09-end-title is-hide" id="p09EndTitle">AI의 도움을 받아 나만의 인권 존중 포스터를 만들었어요!</p>
+          <div class="p09-poster is-hide" id="p09Poster"><b class="is-top" id="p09PosterTop"></b><b class="is-bot">AI로 만든 그림을 사용했어요.</b></div>
+
+          <div class="avatar-modal is-wrong is-off" id="p09Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small">생성된 이미지가 프롬프트와 알맞나요?<br>다시 한번 확인해보세요.</p>
+                <p class="avatar-popup-sub" id="p09WrongPrompt"></p>
+                <button class="avatar-popup-next card-btn is-popup js-sfx" id="p09WrongOk" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="인권 존중 포스터 제작소" data-next="page10.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const CASES = [
+      { d: 'p09_wc_', ok: [true, true, true, true], t: '휠체어를 탄 학생과 친구들이<br>경사로로 함께 학교에 들어가는 그림', v: '휠체어를 탄 학생과 친구들이 경사로로 함께 학교에 들어가는 그림', q: '[휠체어를 탄 학생과 친구들이 경사로로 함께 학교에 들어가는 사진]' },
+      { d: 'p09_pg_', ok: [true, true, true, true], t: '다양한 친구들이<br>놀이터에서 손잡고 웃는 그림', v: '다양한 친구들이 놀이터에서 손잡고 웃는 그림', q: '[다양한 친구들이 놀이터에서 손잡고 웃는 사진]' },
+      { d: 'p09_cl_', ok: [true, true, true, true], t: '다양한 친구들이 교실에서<br>친구의 말을 잘 들어주는 그림', v: '다양한 친구들이 교실에서 친구의 말을 잘 들어주는 그림', q: '[다양한 친구들이 교실에서 친구의 말을 잘 들어주는 사진]' }
+    ];
+    const PHRASES = ['누구나 함께할 수 있어요', '우리는 모두 소중해요', '서로 다름을 존중해요'];
+    const CREDIT = 'AI로 만든 그림을 사용했어요.';
+    const OKDRAFT = [true, true, false, false];
+    const MOVE = '<img src="img/p09_ic_move.png" alt="이동">';
+    const UP = '<img src="img/p09_ic_up.png" alt="더보기">';
+    const st = { c: null, phrase: '', draft: 0, car: 0, font: false, credit: false };
+
+    const phone = $('p09Phone');
+    const screen = $('p09Screen');
+    const bubble = $('p09Bubble');
+    const right = $('p09Right');
+    const nextBtn = $('p09Next');
+    const show = (el, on) => el.classList.toggle('is-hide', !on);
+    const pct = (a) => 'left:' + a[0] + '%;top:' + a[1] + '%;width:' + a[2] + '%;height:' + a[3] + '%';
+
+    // ---- Canva 앱 화면 그리기(540x1170 좌표) ----
+    const I = {
+      home: '<svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-5h4v5"/></svg>',
+      undo: '<svg viewBox="0 0 24 24"><path d="M9 13L4 8l5-5"/><path d="M4 8h10a6 6 0 010 12h-3"/></svg>',
+      redo: '<svg viewBox="0 0 24 24"><path d="M15 13l5-5-5-5"/><path d="M20 8H10a6 6 0 000 12h3"/></svg>',
+      dots: '<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/><circle cx="19" cy="12" r="1.4" fill="currentColor"/></svg>',
+      crown: '<svg viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z" fill="currentColor"/></svg>',
+      down: '<svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 20h14" fill="currentColor"/></svg>',
+      share: '<svg viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M5 13v7h14v-7"/></svg>',
+      search: '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>',
+      tpl: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 3v18M12 12h9"/></svg>',
+      el: '<svg viewBox="0 0 24 24"><circle cx="7" cy="7" r="3"/><path d="M14 10l3.5-6 3.5 6z"/><rect x="4" y="14" width="6" height="6" rx="1"/><circle cx="17.5" cy="17" r="3"/></svg>',
+      txt: '<svg viewBox="0 0 24 24" style="color:#7a3ae8;stroke-width:2.7"><path d="M5.5 9V5.5h13V9M12 5.5v13M8.5 18.5h7"/></svg>',
+      cam: '<svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="3"/><circle cx="12" cy="13.5" r="3.5"/><path d="M8 7l2-3h4l2 3"/></svg>',
+      brand: '<svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="3"/><path d="M7 10a5 5 0 0110 0"/></svg>',
+      up: '<svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 010-8 6 6 0 0111.5 2A3 3 0 0118 18z"/><path d="M12 12v6M9.5 14.5L12 12l2.5 2.5"/></svg>',
+      tool: '<svg viewBox="0 0 24 24"><path d="M15 4l5 5-10 10H5v-5z"/><path d="M4 21h16"/></svg>',
+      proj: '<svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>',
+      apps: '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1.5"/><rect x="14" y="4" width="6" height="6" rx="1.5"/><rect x="4" y="14" width="6" height="6" rx="1.5"/><path d="M17 14v6M14 17h6"/></svg>',
+      mm: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M7 16l4-4 3 3 3-4"/><path d="M17 3v4M15 5h4"/></svg>',
+      voice: '<svg viewBox="0 0 24 24"><rect x="4" y="8" width="11" height="11" rx="2"/><path d="M7.5 11.5h4M9.5 11.5v5M17 6c2 1.5 2 6.5 0 8M19.5 4c3 2.5 3 9.5 0 12"/></svg>',
+      check: '<svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>',
+      rot: '<svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg>',
+      mv: '<svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg>',
+      copy: '<svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 00-1-1H5a1 1 0 00-1 1v10a1 1 0 001 1h3"/></svg>',
+      trash: '<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>',
+      refresh: '<svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5"/></svg>',
+      bulb: '<svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z"/></svg>',
+      imgs: '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M4 18l5-5 4 4 3-3 4 4"/></svg>',
+      crop: '<svg viewBox="0 0 24 24"><path d="M7 3v14h14M3 7h14v14"/></svg>',
+      link: '<svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3A4 4 0 0011 18.7l1-1"/></svg>',
+      kbd: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M11 10h.01M15 10h.01M7 14h10"/></svg>',
+      font: '<svg viewBox="0 0 24 24"><path d="M4 18L9 5l5 13M5.5 14h7M15 12h5M17.5 12v7"/></svg>',
+      style: '<svg viewBox="0 0 24 24"><path d="M5 5h14M12 5v14M8 19h8"/></svg>',
+      size: '<svg viewBox="0 0 24 24"><path d="M3 18l4-11 4 11M4.5 14h5M14 18l3-7 3 7M15 16h4"/></svg>',
+      color: '<svg viewBox="0 0 24 24"><path d="M6 17L12 4l6 13M8 12h8"/><path d="M5 21h14" stroke="#e44" stroke-width="3"/></svg>',
+      chev: '<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>',
+      mute: '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM17 9l4 6M21 9l-4 6"/></svg>',
+      wifi: '<svg viewBox="0 0 24 24"><path d="M2 9a15 15 0 0120 0M5 12.5a10 10 0 0114 0M8.5 16a5 5 0 017 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg>',
+      sig: '<svg viewBox="0 0 24 24"><path d="M4 20V14M9 20V10M14 20V6M19 20V3"/></svg>'
+    };
+    const ROT2 = '<svg viewBox="0 0 24 24"><path d="M4 11a8 8 0 0113-5l2 2M20 4v4h-4M20 13a8 8 0 01-13 5l-2-2M4 20v-4h4"/></svg>';
+    const MVI = I.mv;
+    const TABS = [['추천 템플릿', 'tpl'], ['요소', 'el'], ['텍스트', 'txt'], ['갤러리', 'cam'], ['브랜드 센터', 'brand', 'crown'], ['업로드 항목', 'up'], ['도구', 'tool'], ['프로젝트', 'proj'], ['앱', 'apps'], ['Magic Media', 'mm', 'mm'], ['AI 음성', 'voice']];
+    const TAB_MAX = 527;
+    const W = (cls, style, inner) => '<div class="' + cls + '" style="' + (style || '') + '">' + (inner === undefined ? '' : inner) + '</div>';
+
+        const status = (time, light, rec) => '<i class="u-st" data-time="' + time + '"' + (light ? ' data-light="1"' : '') + (rec ? ' data-rec="1"' : '') + '></i>';
+    const head = (time, o) => {
+      o = o || {};
+      const xs = [[I.home, 20], [I.undo, 76, !o.edited], [I.redo, 132, 1]];
+      return '<div class="u-head' + (o.dark ? ' is-dark' : '') + '">' + status(time, 0, o.rec) +
+        '<div class="u-bar">' + I.home.replace('<svg', '<svg style="left:22px"') +
+        I.undo.replace('<svg', '<svg style="left:73px"' + (o.edited ? '' : ' class="dim"')) +
+        I.redo.replace('<svg', '<svg class="dim" style="left:124px"') +
+        I.dots.replace('<svg', '<svg style="left:334px"') + I.crown.replace('<svg', '<svg style="left:385px;color:#e8dcff"') +
+        I.down.replace('<svg', '<svg style="left:436px"') + I.share.replace('<svg', '<svg style="left:487px"') + '</div></div>';
+    };
+        const sysnav = (kb) => '<i class="u-nv"' + (kb ? ' data-kb="1"' : '') + '></i>';
+    const tabs = (off, on, white) => '<div class="u-tabs' + (white ? ' is-white' : '') + '"><div class="u-track" style="transform:translateX(' + (-(off || 0)) + 'px)">' + TABS.map((t) =>
+      '<div class="u-tab' + (on === t[0] ? ' is-on' : '') + '"><i>' + (((on === t[0] && t[1] === 'txt') || t[1] === 'up') ? I[t[1]] : '<img src="img/ui/t_' + t[1] + '.png" alt="">') + '</i>' + t[0] + '</div>').join('') + '</div></div>';
+
+    const POSTER_T = () => st.phrase || PHRASES[1];
+    const dsrc = (n) => 'img/' + ((st.c && st.c.d) || 'p09_draft_') + n + '.png';
+    const fsPhrase = () => (st.font ? 44 : 41);
+    const tw = (t, fs) => Math.round([...t].reduce((a, c) => a + (c === ' ' ? fs * 0.32 : /[A-Za-z0-9.]/.test(c) ? fs * 0.58 : fs * 0.97), 0) + 16);
+    // 포스터 캔버스: o.draft(초안 그림), o.t(문구 위치 px 또는 null), o.c(AI 문구 위치), o.sel, o.small
+    const poster = (o) => {
+      o = o || {};
+      const cls = 'u-page' + (o.small ? ' is-small' : '') + (st.font ? ' is-f' : '');
+      const bg = o.draft ? ';background-image:url(' + dsrc(st.draft + 1) + ')' : '';
+      const fsT = st.font ? 44 : 41;
+      let h = '<div class="' + cls + '" style="' + (o.style || '') + bg + '">';
+      if (o.t !== undefined && o.t !== null) h += '<b class="t" style="top:' + o.t + 'px;font-size:' + (o.tfs || ((o.small || o.small0) ? 26 : fsT)) + 'px;color:#111;' + (st.font ? "font-family:'Black Han Sans';" : '') + (o.draft ? 'text-shadow:0 0 8px rgba(255,255,255,.8);' : '') + '">' + POSTER_T() + '</b>';
+      if (o.c !== undefined && o.c !== null) h += '<b class="c" style="top:' + o.c + 'px;font-size:' + (o.cfs || ((o.small || o.small0) ? 14 : 24)) + 'px;color:' + (o.draft ? '#fff' : '#111') + ';' + (o.draft ? 'text-shadow:0 1px 4px rgba(0,0,0,.7);' : '') + '">' + CREDIT + '</b>';
+      return h + '</div>';
+    };
+    const selBox = (yc, w) => '<img class="a" src="img/ui/sel_ctx.png" style="left:175px;top:' + (yc - 77 - 25) + 'px;width:192px;height:50px;border-radius:25px" alt="">' +
+      '<div class="a" style="left:' + (270 - w / 2) + 'px;top:' + (yc - 23) + 'px;width:' + w + 'px;height:46px;border:solid 2px #7c3aed"></div>' +
+      '<div class="a" style="left:' + (270 - w / 2 - 9) + 'px;top:' + (yc - 32) + 'px;width:16px;height:16px;border-radius:50%;background:#fff;border:solid 1px #aaa"></div>' +
+      '<div class="a" style="left:' + (270 + w / 2 - 6) + 'px;top:' + (yc - 12) + 'px;width:10px;height:24px;border-radius:5px;background:#fff;border:solid 1px #aaa"></div>' +
+      '<div class="a u-rb" style="left:227px;top:' + (yc + 83 - 19) + 'px">' + ROT2 + '</div><div class="a u-rb" style="left:277px;top:' + (yc + 83 - 19) + 'px">' + MVI + '</div>';
+    const dots = () => '<div class="u-dots"><i></i><i></i></div>';
+    const editBase = (time, o) => {
+      o = o || {};
+      return '<div class="a" style="inset:0;background:#f2f3f7"></div>' + head(time, o) + (o.noBg ? '' : '') + (o.page === undefined ? poster({}) : o.page);
+    };
+
+    // ---- 키보드 ----
+    const krow = (y, keys, cls) => '<div class="row" style="top:' + y + 'px">' + keys.map((k) => '<span' + (k.c ? ' class="' + k.c + '"' : '') + '>' + (k.t === undefined ? k : k.t) + '</span>').join('') + '</div>';
+    const keyboard = (o) => {
+      o = o || {};
+      const tool = !o.sug ? '<img class="a" src="img/ui/kbtool.png" style="left:0;top:0;width:540px;height:50px" alt="">' : '<div class="tool is-sug"><span style="font-size:20px;width:30px;height:24px;border:solid 2px #444;border-radius:6px;font-size:15px">‹</span>' + o.sug.map((s) => '<span>' + s + '</span>').join('') + '<span>···</span></div>';
+      return '<div class="u-kb">' + tool +
+        krow(60, '1234567890'.split('')) + krow(130, 'ㅂㅈㄷㄱㅅㅛㅕㅑㅐㅔ'.split('')) + krow(202, 'ㅁㄴㅇㄹㅎㅗㅓㅏㅣ'.split('')) +
+        krow(272, [{ t: '⇧', c: 'fn' }, 'ㅋ', 'ㅌ', 'ㅊ', 'ㅍ', 'ㅠ', 'ㅜ', 'ㅡ', { t: '⌫', c: 'fn' }]) +
+        krow(344, [{ t: '!#1', c: 'fn' }, { t: '◍', c: 'fn' }, '-', { t: '한국어', c: 'fn sp' }, '.', { t: o.enter || '↵', c: 'go' + (o.enter ? ' is-s' : '') }]) + '</div>' + sysnav(true);
+    };
+
+    // ---- 홈·검색 ----
+    const IC1 = [['SNS', '#ec4d5a', '♥'], ['프레젠테이션', '#f07a2d', '▣'], ['화이트보드', '#3fa45a', '⤢'], ['맞춤형 크기', '#e9e8ef', '▢', '#5b3fe8']];
+    const IC2 = [['동영상', '#e04ad9', '▶'], ['인쇄 제품', '#6b3fe0', '▤'], ['업로드', '#e9e8ef', '☁', '#5b3fe8'], ['시트', '#3f6be0', '▦']];
+    const appHome = (o) => {
+      o = o || {};
+      h = '<div class="u-app u-light">' + status(o.time || '09:54', 1) + '</div>';
+      h += '' + W('u-ttl', o.result ? 'top:88px' : '', '오늘은 무엇을 만들어 볼까요?');
+      if (o.result) {
+        h += W('u-search', 'top:167px;height:72px;border-color:#f0eef8', I.search + '<b>포스터</b><span class="x">×</span>');
+        h += '<div class="a" style="left:22px;top:257px;display:flex;gap:12px">' + ['카테고리', '스타일', '언어'].map((t) => '<div class="u-chip is-pill" style="position:static;height:50px;font-size:19px;gap:10px">' + t + I.chev + '</div>').join('') + '</div>';
+        h += W('u-sec', 'top:371px;font-size:27px;transform:translateY(-50%)', '빈 페이지에서 시작');
+        h += ['p_poster', 'p_pres', 'p_land'].map((n, k) => '<div class="u-sel" style="left:' + (17 + k * 136) + 'px;top:410px"><img src="img/ui/' + n + '.png" style="width:96px;height:96px;margin:0 auto" alt=""><div style="margin-top:' + (k === 2 ? 34 : 20) + 'px">' + ['포스터<br>(세로형 A2)', '프레젠테이션<br>(4:3)', '포스터(가로형)'][k] + '</div></div>').join('');
+        h += W('u-sec', 'top:620px;font-size:27px;transform:translateY(-50%)', '추천 템플릿 더 보기');
+        h += [0, 1, 2, 3, 4, 5].map((n) => '<img class="a" src="img/ui/tp_' + n + '.png" style="left:' + (22 + (n % 3) * 172) + 'px;top:' + (n < 3 ? 660 : 895) + 'px;width:152px;height:' + (n < 3 ? 212 : 136) + 'px;border-radius:6px" alt="">').join('');
+      } else {
+        h += W('u-search' + (o.type ? ' is-focus' : ''), '', I.search + (o.type ? '<span style="display:inline-block;width:2px;height:24px;background:#111;margin-right:-12px"></span>' : '') + '어떤 걸 만들고 싶으세요?');
+        h += W('u-sec', 'top:333px;transform:translateY(-50%)', '시작 방법 선택');
+        h += IC1.map((c, n) => '<div class="u-ic" style="left:' + (26 + n * 116) + 'px;top:368px"><img src="img/ui/ic_' + ['sns', 'pres', 'board', 'custom'][n] + '.png" alt="">' + c[0] + '</div>').join('');
+        h += IC2.map((c, n) => '<div class="u-ic" style="left:' + (26 + n * 116) + 'px;top:542px"><img src="img/ui/ic_' + ['video', 'print', 'upload', 'sheet'][n] + '.png" alt="">' + c[0] + '</div>').join('');
+        h += W('u-sec', 'top:743px;transform:translateY(-50%)', 'Canva 인기 디자인');
+        h += ['프레젠테이션', '인스타그램 게시물', '모바일 동영상', '전단지'].map((t, n) => '<div class="u-th" style="left:' + (26 + n * 116) + 'px;top:777px"><img src="img/ui/th_' + n + '.png" alt="">' + t + '</div>').join('');
+        h += W('u-sec', 'top:977px;transform:translateY(-50%)', '기능 바로가기');
+      }
+      const nav = '<div class="u-anav" style="top:' + 1026 + 'px">' + [['홈', '<img src="img/ui/nav_home.png" alt="">', 1], ['디자인', '<img src="img/ui/nav_design.png" alt="">'], ['템플릿', '<img src="img/ui/nav_tpl.png" alt="">'], ['Canva AI', '<img src="img/ui/nav_ai.png" alt="">'], ['더 보기', '<img src="img/ui/nav_more.png" alt="">']].map((t) => '<span' + (t[2] ? ' class="on"' : '') + '>' + t[1] + t[0] + '</span>').join('') + '</div>';
+      h += nav;
+      h += sysnav();
+      return h;
+    };
+
+    // ---- Magic Media 시트 ----
+    const mmThumbs = (top, hh) => '<div class="a" style="left:0;top:' + top + 'px;width:540px;height:' + hh + 'px;overflow:hidden">' + [26, 163, 300, 430].map((x, n) => '<img class="a" src="img/ui/mmth_' + n + '.png" style="left:' + x + 'px;top:0;width:' + (n === 3 ? 100 : 116) + 'px;height:116px" alt="">').join('') + '</div>';
+    const mmHead = () => W('u-h1', 'top:88px', 'Magic Media') + W('u-info', 'top:89px', 'i') + W('u-line', 'top:148px') +
+      '<div class="u-mtabs" style="top:156px"><span class="on" style="left:57px">이미지</span><span style="left:182px">그래픽</span><span style="left:290px">동영상</span><span style="left:392px">3D<b class="u-new">New</b></span></div>' + W('u-uline', 'top:210px');
+    const mmSheet = (o) => {
+      o = o || {};
+      let h = '' + status(o.time || '16:37') + '<div class="u-sheet" style="top:59px;height:1111px"></div>';
+      h += mmHead();
+      if (o.layout) {
+        return h;
+      }
+      h += W('u-lbl', 'top:224px', '만들고 싶은 그래픽을 설명해 주세요');
+      const typed = o.typed;
+      h += '<div class="u-ta' + (o.focus ? ' is-focus' : '') + (typed ? ' is-typed' : '') + '">' + (typed ? typed + (o.caret ? '<span class="car"></span>' : '') : (o.caret ? '<span class="car"></span>' : '') + '5개 이상의 단어를 입력하여 설명해 주세요.') + '</div>';
+      h += W('u-clear', 'left:449px;top:380px;display:' + (typed ? 'block' : 'none') + ';font-size:17px', '지우기');
+      h += W('u-chip is-pill', 'left:39px;top:371px', I.bulb + '랜덤 생성');
+      h += W('u-chip', 'left:22px;top:441px', I.imgs + '스타일');
+      h += o.tall ? W('u-chip', 'left:159px;top:441px', I.crop + '세로형') : W('u-chip', 'left:159px;top:441px', I.crop + '정사각형');
+      h += W('u-btn' + (o.go ? ' is-on' : ''), 'top:504px', '이미지 생성');
+      if (!o.kb) {
+        h += W('u-lbl', 'top:856px', 'Magic Media 제작') + mmThumbs(897, 116);
+      } else {
+        h += W('u-lbl', 'top:580px;top:588px;font-size:20px', 'Magic Media 제작') + mmThumbs(620, 60);
+      }
+      return h;
+    };
+    const layoutScreen = () => {
+      let h = '' + status('16:37') + '<div class="u-sheet" style="top:59px;height:1111px"></div>';
+      h += W('l', 'left:22px;top:84px;font-size:24px;font-weight:700;gap:18px', '<span style="font-size:30px;font-weight:400">←</span> 레이아웃') + W('u-line', 'top:148px');
+      const box = (x, w, hh, sel) => '<div class="a" style="left:' + x + 'px;top:168px;width:125px;height:125px;border-radius:16px;border:solid ' + (sel ? '3px #7a45ee;background:#f1ecfd' : '2px transparent;background:#eeeff3') + '"><div class="a" style="left:' + ((125 - w) / 2 - 3) + 'px;top:' + ((125 - hh) / 2 - 3) + 'px;width:' + w + 'px;height:' + hh + 'px;border:solid 3px #333;border-radius:6px"></div></div>';
+      h += box(73, 30, 30, 1) + box(211, 40, 22) + box(346, 22, 40);
+      h += W('c', 'left:73px;top:306px;width:125px;font-size:17px;font-weight:500', '정사각형') + W('c', 'left:211px;top:306px;width:125px;font-size:17px;font-weight:500', '가로형') + W('c', 'left:346px;top:306px;width:125px;font-size:17px;font-weight:500', '세로형');
+      return h + sysnav(0, 1);
+    };
+    const mmLoad = () => {
+      let h = '' + status('14:06') + '<div class="u-sheet" style="top:59px;height:1111px"></div>' + mmHead();
+      h += W('a', 'left:22px;top:243px;width:401px;height:401px;border-radius:16px;background:linear-gradient(160deg,#aeb4ee,#d3d1f4 55%,#e7e3f8)');
+      h += W('a', 'left:434px;top:243px;width:130px;height:401px;border-radius:16px;background:linear-gradient(160deg,#c6caf2,#ebe8f9)');
+      h += W('c', 'left:488px;top:428px;width:32px;height:32px;border-radius:50%;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.25)', '<svg viewBox="0 0 24 24" style="width:20px;height:20px"><path d="M9 6l6 6-6 6"/></svg>');
+      h += W('c', 'left:0;top:662px;width:540px;font-size:21px;line-height:1.5;padding:0 14px;text-wrap:balance;word-break:keep-all', '<div>Canva가 “<b>' + (st.c ? st.c.v : '') + '</b>”에 따라 그래픽을 생성하는 동안 기다려 주세요</div>');
+      h += W('u-btn is-line', 'top:950px', '취소');
+      return h + tabs(TAB_MAX, 'Magic Media', 1) + sysnav(0, 1);
+    };
+    const mmResult = () => {
+      let h = '' + status('14:06') + '<div class="u-sheet" style="top:59px;height:1111px"></div>' + mmHead();
+      h += W('a', 'left:22px;top:640px;width:496px;font-size:15px;line-height:1.55;color:#222', 'Canva는 회원님들과 함께 이 새로운 기술을 발전시켜 나가고 있으니, 이미지가 부적절해 보이는 경우 <u>신고</u>해 주세요.');
+      h += W('u-ta', 'top:697px;height:110px;padding:16px 18px;font-size:18px;color:#111;background:#fff', (st.c ? st.c.v : '')) + W('u-clear', 'left:456px;top:758px;font-size:16px', '지우기');
+      h += W('u-chip', 'left:22px;top:817px;height:50px', I.imgs + '스타일') + W('u-chip', 'left:159px;top:817px;height:50px', I.crop + '정사각형');
+      h += W('u-btn is-on', 'top:913px', I.refresh + '다시 생성') + W('u-btn is-line', 'top:977px', '돌아가기');
+      return h + tabs(TAB_MAX, 'Magic Media', 1) + sysnav(0, 1);
+    };
+
+    // ---- 편집기(포스터) ----
+    const editor = (time, o) => {
+      o = o || {};
+      let h = '<div class="a" style="inset:0;background:#f2f3f7"></div>' + head(time, { edited: o.edited, dark: o.dark, rec: o.rec });
+      h += o.page === undefined ? poster({}) : o.page;
+      if (!o.nodots) h += dots();
+      h += o.bottom === undefined ? tabs(o.off || 0, o.on) + sysnav() : o.bottom;
+      return h;
+    };
+    const imgSheet = () => {
+      let h = '<div class="u-sheet" style="top:590px;height:580px"></div>' + W('u-h1', 'top:616px', 'Magic Media') + W('u-info', 'top:617px', 'i') +
+        W('u-line', 'top:676px') + '<div class="u-mtabs" style="top:684px"><span class="on" style="left:57px">이미지</span><span style="left:182px">그래픽</span><span style="left:290px">동영상</span><span style="left:392px">3D<b class="u-new">New</b></span></div>' + W('u-uline', 'top:738px');
+      h += W('a', 'left:22px;top:752px;width:404px;height:258px;border-radius:14px;overflow:hidden;background:#e9eef6 url(' + dsrc(st.draft + 1) + ') center / cover');
+      return h;
+    };
+    const textSheet = () => {
+      let h = '<div class="u-sheet" style="top:59px;height:1111px"></div>' + status('14:17');
+      h += W('u-fsearch', 'top:80px;height:72px;font-size:19px;color:#8a8c99;border-color:#e6e7ec', I.search + '글꼴 및 조합 검색');
+      h += W('c', 'left:22px;top:174px;width:496px;height:52px;border-radius:12px;background:linear-gradient(90deg,#8b5cf6,#7a45ee);color:#fff;font-size:20px;font-weight:700;gap:14px', '<i class="cv-ic" data-icon="textbox" style="margin:0"></i>텍스트 상자 추가');
+      h += W('c', 'left:22px;top:237px;width:496px;height:52px;border-radius:12px;border:solid 2px #e1e2e8;font-size:20px;font-weight:700;gap:12px', '<i class="cv-ic" data-icon="magic" style="width:33px;height:33px;margin:0"></i>Magic Write');
+      h += W('u-fhead', 'top:321px;font-size:20px', '<img src="img/ui/ts_brand.png" style="width:34px;height:34px" alt="">브랜드 키트') + W('a b nw', 'left:452px;top:322px;font-size:18px', '편집') + '<img class="a" src="img/ui/ts_crown.png" style="left:497px;top:322px;width:22px;height:22px" alt="">';
+      h += W('c', 'left:22px;top:361px;width:496px;height:52px;border-radius:12px;border:solid 2px #e1e2e8;font-size:19px;font-weight:700', '브랜드 글꼴 추가');
+      h += W('a b', 'left:22px;top:436px;font-size:18px', '기본 텍스트 스타일');
+      h += W('l', 'left:22px;top:474px;width:496px;height:79px;border:solid 2px #e1e2e8;border-radius:16px;padding:0 20px;font-size:40px;font-weight:800', '제목 추가');
+      h += W('l', 'left:22px;top:566px;width:496px;height:65px;border:solid 2px #e1e2e8;border-radius:16px;padding:0 20px;font-size:26px;font-weight:700', '부제목 추가');
+      h += W('l', 'left:22px;top:643px;width:496px;height:59px;border:solid 2px #e1e2e8;border-radius:16px;padding:0 20px;font-size:17.5px', '약간의 본문 텍스트 추가');
+      h += W('a b', 'left:22px;top:724px;font-size:18px', '동적 텍스트');
+      h += W('l', 'left:22px;top:761px;width:496px;height:114px;border:solid 2px #e1e2e8;border-radius:16px;padding:0 18px;font-size:19px;font-weight:700;gap:28px', '<img src="img/ui/ts_pn.png" style="width:100px;height:100px;border-radius:8px;margin:0 0 0 -4px" alt="">페이지 번호');
+      h += W('a b', 'left:22px;top:900px;font-size:18px', '앱') + W('a b', 'right:22px;top:902px;font-size:17px', '모두 보기');
+      h += '<img class="a" src="img/ui/ts_apps.png" style="left:0;top:940px;width:540px;height:76px" alt="">';
+      return h + tabs(0, '텍스트', 1) + sysnav(0, 1);
+    };
+    const typing = (o) => {
+      let h = editor('17:45', { edited: 1, nodots: 1, page: o.page, bottom: '' });
+      h += W('u-pbar is-edit', 'top:1034px', '<span>↻</span><span style="color:#444">A</span><span>글꼴</span><span>' + (o.pt || '50 pt') + '</span><b style="font-size:21px">B</b><i style="font-size:21px;color:#999">I</i><u style="font-size:21px">U</u><span style="flex:1"></span><span class="u-ok">' + I.check + '</span>');
+      return h + sysnav();
+    };
+    const toolbar = (on) => '<div class="a" style="left:12px;top:1030px;width:516px;height:80px;border-radius:24px;background:#fff;box-shadow:0 6px 20px rgba(27,23,56,.16);overflow:hidden"><img class="a" src="img/ui/' + (on === 'font' ? 'tb_font' : 'tb_all') + '.png" style="left:0;top:-4px;width:500px;height:84px" alt=""></div>' + sysnav();
+    const fontSheet = (o) => {
+      o = o || {};
+      const s = o.scroll ? -43 : 0;
+      let h = '<div class="u-sheet" style="top:590px;height:580px;z-index:1"></div>';
+      h += '<div class="a" style="left:0;top:612px;width:540px;text-align:center;font-size:18px;font-weight:700;z-index:2">글꼴</div><div class="a" style="right:22px;top:610px;z-index:2">' + I.check.replace('<svg', '<svg style="width:32px;height:32px"') + '</div>';
+      h += '<div class="a" style="left:0;top:' + (o.scroll ? 680 : 650) + 'px;width:540px;height:' + (1108 - (o.scroll ? 680 : 650)) + 'px;overflow:hidden;z-index:2"><div class="a" style="left:0;top:' + (o.scroll ? -680 : -650) + 'px;width:540px;height:1170px">';
+      if (!o.scroll) h += W('u-fsearch', 'top:662px;height:52px;font-size:17px', I.search + '“캘리그라피” 또는 “Open Sans” 사용해 보기<span class="f">☰</span>');
+      h += W('u-fchips', 'top:' + (728 + s) + 'px', '<span style="font-weight:800">디스플레이</span><span>필기체</span><span style="font-weight:800">굵게</span><span class="g">멋진</span><span>슬랩 세리프</span><span>···›</span>');
+      h += W('u-fhead', 'top:' + (808 + s) + 'px', '<svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM15 3v4h4"/></svg>문서 글꼴');
+      h += W('u-frow' + (o.sel === 'noto' ? ' is-on' : ''), 'top:' + (847 + s) + 'px;height:50px', 'Noto Sans Kr<em>글꼴 스타일</em>');
+      h += W('a', 'left:0;top:' + (913 + s) + 'px;width:540px;height:1px;background:#e6e7ec');
+      h += W('u-fhead', 'top:' + (934 + s) + 'px', '✦ 추천 폰트') + W('a b', 'right:22px;top:' + (930 + s) + 'px;font-size:22px', '···');
+      h += W('u-frow is-big', 'top:' + (972 + s) + 'px', '<span style="font-family:\'Cafe24 Ssurround\'">210 콤퓨타세탁</span>');
+      h += W('u-frow', 'top:' + (1030 + s) + 'px', 'Tlab 돋움 레귤러');
+      h += W('u-frow is-big' + (o.sel === 'han' ? ' is-on' : ''), 'top:' + (1088 + s) + 'px;height:50px', '<span style="font-family:\'Black Han Sans\';font-weight:400">Black Han Sans</span><em>글꼴 스타일</em>');
+      h += '</div></div>';
+      return h;
+    };
+    const dlPoster = () => poster({ draft: true, t: 52, c: 660 }) + '<div class="a" style="left:0;top:108px;width:540px;height:1062px;background:rgba(40,44,70,.55)"></div>';
+    const shareModal = () => {
+      let h = '<div class="u-modal" style="top:373px;height:797px"></div>';
+      const ic = (x, g, t) => '<div class="u-ico" style="left:' + x + 'px;top:420px"><i>' + g + '</i>' + t + '</div>';
+      h += '<img class="a" src="img/ui/sh_icons.png" style="left:0;top:410px;width:540px;height:120px" alt="">';
+      h += W('a', 'left:20px;top:556px;width:498px;height:370px;border-radius:18px;background:#e9e8dd');
+      h += poster({ draft: true, t: 22, c: 225, tfs: 15, cfs: 9, small: true, style: 'left:181px;top:616px;width:183px;height:252px;box-shadow:none' });
+      h += W('c nw', 'left:400px;top:896px;width:112px;height:22px;border-radius:11px;background:#333;color:#fff;font-size:12px;font-weight:700', '₩17,000부터');
+      h += W('u-btn is-on', 'top:950px;height:52px', 'Canva에서 인쇄') + W('u-btn is-line', 'top:1024px;height:52px;font-weight:700', '다운로드');
+      return h + sysnav(0, 1);
+    };
+    const dlModal = () => {
+      let h = '<div class="u-modal" style="top:342px;height:828px"></div>';
+      h += W('l b', 'left:22px;top:352px;height:40px;font-size:19px;gap:14px', '<span style="font-size:26px;font-weight:400">‹</span>다운로드') + W('u-line', 'top:402px');
+      h += W('a b', 'left:22px;top:428px;font-size:15px', '파일 형식');
+      h += W('l', 'left:22px;top:462px;width:496px;height:52px;border:solid 2px #dcdee6;border-radius:14px;padding:0 18px;font-size:17px;gap:12px', I.imgs.replace('<svg', '<svg style="width:26px;height:26px"') + 'PNG <span style="padding:2px 8px;border-radius:9px;background:#3b5be0;color:#fff;font-size:13px;font-weight:700">추천</span><span style="margin-left:auto">' + I.chev.replace('<svg', '<svg style="width:22px;height:22px"') + '</span>');
+      h += W('a', 'left:22px;top:538px;font-size:14px', '<b>크기</b> <span style="color:#555">• 1,587×2,245 px</span> <span style="color:#f5b53c">♛</span>');
+      h += W('a', 'left:22px;top:592px;width:386px;height:6px;border-radius:3px;background:#ddd') + W('a', 'left:22px;top:592px;width:60px;height:6px;border-radius:3px;background:#7a45ee') + W('a', 'left:70px;top:582px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 5px rgba(0,0,0,.35)');
+      h += W('c', 'left:488px;top:566px;width:50px;height:50px;border:solid 2px #dcdee6;border-radius:12px;font-size:17px', '1');
+      h += W('a b', 'left:22px;top:644px;font-size:15px', '품질 <span style="color:#f5b53c">♛</span> ⓘ');
+      h += W('u-seg', 'top:676px', '<span>압축</span><span class="on">높음</span><span>크기 제한</span>');
+      h += W('a b', 'left:22px;top:756px;font-size:15px', '투명 배경 <span style="color:#f5b53c">♛</span>') + W('u-tg', 'top:750px') + W('a', 'left:22px;top:808px;font-size:15px', '다운로드 설정 저장') + W('u-tg', 'top:804px');
+      h += W('a b', 'left:22px;top:858px;font-size:15px', '페이지 선택');
+      h += W('u-seg', 'top:890px;background:#eef0f4', '<span class="on">전체</span><span>이 페이지(1)</span><span>맞춤형</span>');
+      h += W('u-btn is-on', 'top:972px;height:52px;font-weight:700', '다운로드');
+      return h + sysnav(0, 1);
+    };
+    const doneModal = () => {
+      let h = '<div class="u-modal" style="top:509px;height:661px"></div>';
+      h += W('l b', 'left:22px;top:524px;height:40px;font-size:19px;gap:12px', '<span style="display:flex;width:30px;height:30px;border-radius:50%;background:#22a355;color:#fff;align-items:center;justify-content:center;font-size:18px">✓</span>다운로드 완료') + W('a', 'right:24px;top:526px;font-size:28px', '✕');
+      h += W('a', 'left:22px;top:594px;width:496px;height:278px;border-radius:14px;background:#eef0f3');
+      h += poster({ draft: true, t: 18, c: 212, tfs: 14, cfs: 8, small: true, style: 'left:186px;top:615px;width:168px;height:238px;box-shadow:0 2px 8px rgba(0,0,0,.2)' });
+      h += W('a b', 'left:22px;top:887px;font-size:18px', '단락 텍스트') + W('a', 'left:22px;top:925px;font-size:15px;color:#6a6c7a', '카메라 롤에 저장했어요');
+      h += W('u-btn is-line', 'top:982px;height:52px;font-weight:700', '공유') + W('u-btn is-on', 'top:1045px;height:52px;font-weight:700', '열기');
+      return h + sysnav(0, 1);
+    };
+
+    const UI = {
+      app: () => appHome(),
+      typing: () => (st.phrase ? UI.typingPhrase() : UI.typingNew()),
+      typingCredit: () => (st.credit ? typing({ page: poster({ draft: 1, t: 52, c: 334 }) }) : typing({ page: poster({ draft: 1, t: 52 }) + W('a', 'left:197px;top:518px;width:146px;height:36px;background:#d9e8ff;border-radius:3px;font-size:16px;color:#2b4a8a;display:flex;align-items:center;justify-content:center', '단락 텍스트') })),
+      dragBase: (o) => editor('18:11', { edited: 1, nodots: 1, page: poster({ draft: 1, t: o && o.cred ? 52 : null }), bottom: toolbar('') }),
+      tabsTop: () => editor('14:16', { edited: 1, page: poster({ draft: 1, t: 52 }), off: 0 }),
+      textTop: () => editor('14:17', { edited: 1, page: poster({ draft: 1, t: 52 }), bottom: '' }) + textSheet(),
+      appType: () => appHome({ type: 1, time: '10:33' }),
+      appResult: () => appHome({ result: 1, time: '09:55' }),
+      blank: (o) => editor('09:56', { off: o && o.off, on: null }),
+      mm: () => mmSheet({ time: '13:13' }) + tabs(TAB_MAX, 'Magic Media', 1) + sysnav(0, 1),
+      layout: layoutScreen,
+      mmTall: () => mmSheet({ time: '16:37', tall: 1 }) + tabs(TAB_MAX, 'Magic Media', 1) + sysnav(0, 1),
+      mmFocus: () => mmSheet({ time: '13:13', tall: 1, focus: 1, caret: 1 }) + tabs(TAB_MAX, 'Magic Media', 1) + sysnav(0, 1),
+      mmTyped: () => mmSheet({ time: '14:05', tall: 1, focus: 1, typed: st.c ? st.c.v : '', caret: 1, go: 1 }) + tabs(TAB_MAX, 'Magic Media', 1) + sysnav(0, 1),
+      mmLoad,
+      mmResult,
+      imgSel: () => {
+        let h = editor('14:09', { edited: 1, nodots: 1, page: poster({ small: true }), bottom: '' });
+        h += '<div class="a" style="left:179px;top:259px;width:180px;height:178px;border:solid 2px #7c3aed;background:#e9eef6 url(' + dsrc(st.draft + 1) + ') center / cover"></div>';
+        h += '<div class="u-hb" style="left:398px;top:329px">' + I.rot + '</div>';
+        return h + imgSheet() + tabs(TAB_MAX, 'Magic Media', 1) + sysnav(0, 1);
+      },
+      posterTabs: (o) => editor('14:16', { edited: 1, page: poster({ draft: 1 }), off: 0 }),
+      text: () => editor('14:17', { edited: 1, page: poster({ draft: 1 }), bottom: '' }) + textSheet(),
+      typingNew: () => typing({ page: poster({ draft: 1 }) + W('a', 'left:197px;top:517px;width:146px;height:36px;background:#d9e8ff;border-radius:3px;font-size:16px;color:#2b4a8a;display:flex;align-items:center;justify-content:center', '단락 텍스트') }),
+      typingPhrase: () => typing({ pt: '50 pt', page: poster({ draft: 1, t: 334 }) }),
+      mid: () => editor('17:46', { edited: 1, page: poster({ draft: 1, t: 334 }), off: 0 }),
+      midSel: () => editor('18:11', { edited: 1, nodots: 1, page: poster({ draft: 1, t: 334 }) + selBox(536, tw(POSTER_T(), fsPhrase())), bottom: toolbar('') }),
+      topSel: (o) => editor('18:12', { edited: 1, nodots: 1, page: poster({ draft: 1, t: 52 }) + selBox(256, tw(POSTER_T(), fsPhrase())), bottom: toolbar('') }),
+      fontStart: () => editor('18:18', { edited: 1, nodots: 1, page: poster({ draft: 1, t: 52 }) + selBox(256, tw(POSTER_T(), fsPhrase())), bottom: toolbar('font') + '<img class="a" src="img/ui/fchip.png" style="left:22px;top:947px;width:252px;height:78px" alt="">' }),
+      fontMore: () => editor('18:23', { edited: 1, nodots: 1, page: poster({ draft: 1, t: 36, style: 'left:115px;top:128px;width:310px;height:440px', small0: 1 }) + '<div class="a" style="left:' + (270 - tw(POSTER_T(), 26) / 2) + 'px;top:' + (175 - 17) + 'px;width:' + tw(POSTER_T(), 26) + 'px;height:34px;border:solid 2px #7c3aed"></div><div class="a" style="left:154px;top:150px;width:14px;height:14px;border-radius:50%;background:#fff;border:solid 1px #aaa"></div><div class="a u-rb" style="left:227px;top:229px">' + ROT2 + '</div><div class="a u-rb" style="left:277px;top:229px">' + MVI + '</div>', bottom: fontSheet({ sel: 'noto' }) + sysnav(0, 1) }),
+      fontList: () => editor('18:23', { edited: 1, nodots: 1, page: poster({ draft: 1, t: 36, style: 'left:115px;top:128px;width:310px;height:440px', small0: 1 }) + '<div class="a" style="left:' + (270 - tw(POSTER_T(), 26) / 2) + 'px;top:' + (175 - 17) + 'px;width:' + tw(POSTER_T(), 26) + 'px;height:34px;border:solid 2px #7c3aed"></div><div class="a" style="left:154px;top:150px;width:14px;height:14px;border-radius:50%;background:#fff;border:solid 1px #aaa"></div><div class="a u-rb" style="left:227px;top:229px">' + ROT2 + '</div><div class="a u-rb" style="left:277px;top:229px">' + MVI + '</div>', bottom: fontSheet({ sel: 'noto', scroll: 1 }) + sysnav(0, 1) }),
+      fontPick: () => editor('18:23', { edited: 1, nodots: 1, page: poster({ draft: 1, t: 36, style: 'left:115px;top:128px;width:310px;height:440px', small0: 1 }) + '<div class="a" style="left:' + (270 - tw(POSTER_T(), 26) / 2) + 'px;top:' + (175 - 17) + 'px;width:' + tw(POSTER_T(), 26) + 'px;height:34px;border:solid 2px #7c3aed"></div><div class="a" style="left:154px;top:150px;width:14px;height:14px;border-radius:50%;background:#fff;border:solid 1px #aaa"></div><div class="a u-rb" style="left:227px;top:229px">' + ROT2 + '</div><div class="a u-rb" style="left:277px;top:229px">' + MVI + '</div>', bottom: fontSheet({ sel: 'han', scroll: 1 }) + sysnav(0, 1) }),
+      fontDone: () => editor('18:23', { edited: 1, nodots: 1, page: poster({ draft: 1, t: 52 }) + selBox(256, tw(POSTER_T(), fsPhrase())), bottom: toolbar('') }),
+      credMid: () => editor('19:13', { edited: 1, page: poster({ draft: 1, t: 52, c: 334 }), off: 0 }),
+      credSel: () => editor('19:13', { edited: 1, nodots: 1, page: poster({ draft: 1, t: 52, c: 334 }) + selBox(536, tw(CREDIT, 24)), bottom: toolbar('') }),
+      credBot: () => editor('19:13', { edited: 1, nodots: 1, page: poster({ draft: 1, t: 52, c: 660 }), bottom: toolbar('') }),
+      final: () => editor('14:59', { edited: 1, page: poster({ draft: 1, t: 52, c: 660 }), off: 0 }),
+      share: () => editor('10:09', { edited: 1, dark: 1, rec: 1, page: dlPoster(1), nodots: 1, bottom: '' }) + '<div class="u-dim" style="top:108px;background:rgba(0,0,0,0)"></div>' + shareModal(),
+      dl: () => editor('10:09', { edited: 1, dark: 1, rec: 1, page: dlPoster(1), nodots: 1, bottom: '' }) + dlModal(),
+      done: () => editor('10:09', { edited: 1, dark: 1, rec: 1, page: dlPoster(1), nodots: 1, bottom: '' }) + doneModal()
+    };
+
+    // 글자 상자(드래그용): 가운데 y(%)에 놓고, 이동 버튼(.mv)을 끌어 옮김. 좌표는 화면 폭 540 기준 px
+    const tobj = (cx, yc, t, fsz, w, cred) => '<div class="p09-tobj" style="left:' + cx + '%;top:' + yc + '%">' +
+      '<img class="a" src="img/ui/sel_ctx.png" style="left:-96px;top:-102px;width:192px;height:50px;border-radius:25px" alt="">' +
+      '<div class="a nw" style="left:0;transform:translateX(-50%);top:-23px;width:max-content;padding:0 10px;height:46px;border:solid 2px #7c3aed;display:flex;align-items:center;justify-content:center;font-size:' + fsz + 'px;' + (!cred && st.font ? "font-family:'Black Han Sans';" : '') + (cred ? 'color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7)' : 'color:#111;text-shadow:0 0 8px rgba(255,255,255,.8)') + '">' + t + '</div>' +
+      '<div class="a u-rb" style="left:-44px;top:64px">' + ROT2 + '</div><div class="a mv u-rb" style="left:6px;top:64px">' + MVI + '</div></div>';
+    const HOT = {
+      tabText: [36, 87, 17, 9], insert: [3, 14.8, 94, 4.6], check: [83, 88.8, 13, 5.5], midText: [14, 44.2, 72, 4.6]
+    };
+
+    const STEPS = [
+      { home: true, bubble: 'Canva를 클릭해요.' },
+      { ui: 'app', bubble: '검색창을 클릭해요.', hot: [[3, 18.2, 94, 6.3]] },
+      { ui: 'appType', bubble: '오른쪽의 버튼을 클릭해<br>포스터를 검색해요.', btns: [{ t: '포스터' }] },
+      { ui: 'appResult', bubble: '세로형 포스터를 만들어볼까요?<br>포스터(세로형 A2)를 클릭해요.', hot: [[3, 34.5, 22, 16]] },
+      { ui: 'blank', bubble: '좋아요!<br>이제 AI를 활용해 포스터를<br>디자인해봐요.', next: true },
+      { ui: 'blank', bubble: '아래의 메뉴 탭을<br>오른쪽으로 슬라이드 해요.', swipe: [0, 88.3, 100, 7.5] },
+      { ui: 'blank', o: { off: 527 }, bubble: 'Magic Media를 클릭해요.', hot: [[63, 87, 19, 9]] },
+      { ui: 'mm', bubble: '이미지의 비율을 먼저 정해봐요.<br>정사각형 버튼을 클릭해요.', hot: [[29, 37.5, 25, 4.6]] },
+      { ui: 'layout', bubble: '세로형 버튼을 클릭해요.', hot: [[64, 14.4, 23, 10.6]] },
+      { ui: 'mmTall', bubble: '좋아요!<br>세로형 포스터에 맞도록<br>이미지 비율을 설정했어요.', next: true },
+      { ui: 'mmTall', bubble: '이제 프롬프트를 입력해봐요.<br>입력창을 클릭해요.', hot: [[4, 22.4, 92, 14]] },
+      { ui: 'mmFocus', bubble: '오른쪽 버튼을 클릭해<br>내가 조립한 프롬프트를<br>불러와봐요.', btns: [{ t: '인권 존중 포스터<br>프롬프트 불러오기' }] },
+      { ui: 'mmFocus', bubble: '세 가지 경우 중 하나를 클릭해<br>내가 만들고 싶은 포스터의<br>프롬프트를 입력해요.', cases: true },
+      { ui: 'mmTyped', bubble: '이미지 생성 버튼을<br>클릭해요.', hot: [[3, 43, 94, 4.8]] },
+      { ui: 'mmLoad', bubble: '내가 요청한 디자인을<br>AI가 만들어주고 있어요.', loading: true },
+      { ui: 'mmResult', bubble: '포스터 초안이 완성되었어요!<br>화살표를 클릭해 4장을 모두<br>확인해봐요.', car: 'view' },
+      { ui: 'mmResult', bubble: '어떤 이미지를 사용할까요?<br>프롬프트와 맞는 초안을 골라<br>이미지를 클릭해봐요.', car: 'pick' },
+      { ui: 'imgSel', bubble: '해당 이미지로 포스터를<br>제작할까요?', btns: [{ t: '다시하기', back: 'pick' }, { t: '결정하기' }] },
+      { ui: 'imgSel', bubble: '오른쪽의 버튼을 눌러<br>이미지의 크기를 알맞게 조정해요.', btns: [{ t: '크기 조정하기' }] },
+      { ui: 'posterTabs', bubble: '초안 이미지를 선택했어요!<br>이제 포스터에 들어갈 문구를<br>정해봐요.', next: true },
+      { ui: 'posterTabs', bubble: '텍스트를 클릭해요.', hot: [HOT.tabText] },
+      { ui: 'text', bubble: '텍스트 상자 추가<br>버튼을 클릭해요.', hot: [HOT.insert] },
+      { ui: 'typing', bubble: '포스터와 어울리는 문구를<br>입력해볼까요? 오른쪽 버튼 중<br>원하는 문구를 선택해봐요.', phrases: true },
+      { ui: 'typing', bubble: '확인 버튼을 눌러<br>문구를 입력해요.', hot: [HOT.check] },
+      { ui: 'mid', bubble: '위치를 포스터의 상단으로<br>옮겨 봐요. 문구를 클릭해요.', hot: [HOT.midText] },
+      { ui: 'dragBase', bubble: MOVE + '이동 버튼을 꾹 눌러<br>위쪽으로 드래그 해보세요.', drag: { text: () => st.phrase || PHRASES[1], fs: 41, cx: 50, top: 45.8, end: 21.9, zone: [17, 27], w: 336 } },
+      { ui: 'topSel', bubble: '좋아요! 이번에는<br>문구의 글씨체를 바꿔봐요.<br>글꼴을 클릭해요.', hot: [[17, 88.5, 20, 6.5]] },
+      { ui: 'fontStart', bubble: UP + '더보기 버튼을 클릭해요.', hot: [[38, 82.5, 11, 4.5]] },
+      { ui: 'fontList', bubble: '포스터를 만들 때는 대부분<br>눈에 잘 띄는 굵은 글씨를 사용해요.<br>추천 폰트를 사용해볼까요?', hot: [[2, 89.5, 96, 4.8]], setFont: true },
+      { ui: 'fontPick', bubble: '좋아요! 확인 버튼을 클릭해<br>편집을 완료해요.', hot: [[86.7, 51, 12, 5.5]] },
+      { ui: 'tabsTop', bubble: '마지막으로 AI를 활용한 제작물임을<br>밝히는 문구를 추가해야 해요.<br>다시 한번 텍스트를 클릭해요.', hot: [HOT.tabText] },
+      { ui: 'textTop', bubble: '텍스트 상자 추가<br>버튼을 클릭해요.', hot: [HOT.insert] },
+      { ui: 'typingCredit', bubble: '오른쪽 버튼을 눌러<br>문구를 입력해요.', btns: [{ t: 'AI로 만든 그림을<br>사용했어요.', credit: true }] },
+      { ui: 'typingCredit', bubble: '확인 버튼을 클릭해요.', hot: [HOT.check] },
+      { ui: 'credMid', bubble: '위치를 포스터의 하단으로<br>옮겨 봐요. 문구를 클릭해요.', hot: [HOT.midText] },
+      { ui: 'dragBase', o: { cred: 1 }, bubble: MOVE + '이동 버튼을 꾹 눌러<br>아래쪽으로 드래그 해보세요.', drag: { cred: true, text: () => CREDIT, fs: 24, cx: 50, top: 45.8, end: 73.2, zone: [68, 78], w: 330 } },
+      { ui: 'credBot', bubble: '좋아요! 확인 버튼을 클릭해<br>포스터 만들기를 완료해요.', hot: [[84.5, 88.5, 14, 6.5]] },
+      { ui: 'final', bubble: '인권 존중 포스터를<br>완성했어요!', next: true },
+      { ui: 'final', bubble: '오른쪽 위의 버튼을 클릭해<br>포스터를 다운로드 해봐요.', hot: [[77, 3, 13, 6.8]] },
+      { ui: 'share', bubble: '아래의 다운로드 버튼을<br>클릭해요.', hot: [[3, 87.4, 94, 5]] },
+      { ui: 'dl', bubble: '아래의 다운로드 버튼을<br>클릭해요.', hot: [[3, 83, 94, 5.3]] },
+      { ui: 'done', bubble: '내가 만든 인권 존중 포스터를<br>저장했어요!', next: true },
+      { end: true }
+    ];
+
+    let i = 0;
+    let lock = false;
+
+    function go(n) { clearFingers(); i = typeof n === 'number' ? n : i + 1; render(); }
+
+    function fingerTo(el, dy, x) { setTimeout(() => { if (el && el.isConnected) pointFingerAt(el, { onMain: true, x: x || 0.6, dy: dy || 0 }); }, 350); }
+
+    function hotButton(box, extra) {
+      const b = document.createElement('button');
+      b.className = 'p09-hot' + (extra ? ' ' + extra : '');
+      b.style.cssText = pct(box);
+      screen.appendChild(b);
+      return b;
+    }
+
+    function setRight(list) {
+      right.innerHTML = '';
+      right.classList.toggle('is-off', !list.length);
+      list.forEach((o) => {
+        const b = document.createElement('button');
+        b.className = 'card-btn ' + (o.cls || '');
+        b.innerHTML = o.t;
+        b.addEventListener('click', o.fn);
+        right.appendChild(b);
+      });
+      return right.firstChild;
+    }
+
+    function drag(step, ui) {
+      const d = step.drag;
+      ui.insertAdjacentHTML('beforeend', tobj(d.cx, d.top, d.text(), d.fs, d.w, d.cred));
+      const obj = ui.lastElementChild;
+      const mv = obj.querySelector('.mv');
+      let on = false, sx = 0, sy = 0, x0 = d.cx, y0 = d.top;
+      const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+      mv.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        clearFingers();
+        on = true; sx = e.clientX; sy = e.clientY; x0 = parseFloat(obj.style.left); y0 = parseFloat(obj.style.top);
+        obj.style.transition = 'none';
+        mv.setPointerCapture(e.pointerId);
+      });
+      mv.addEventListener('pointermove', (e) => {
+        if (!on) return;
+        const r = screen.getBoundingClientRect();
+        obj.style.left = clamp(x0 + (e.clientX - sx) / r.width * 100, 25, 75) + '%';
+        obj.style.top = clamp(y0 + (e.clientY - sy) / r.height * 100, 10, 80) + '%';
+      });
+      const end = () => {
+        if (!on) return;
+        on = false;
+        const mid = parseFloat(obj.style.top);
+        obj.style.transition = 'left .2s ease,top .2s ease';
+        if (mid >= d.zone[0] && mid <= d.zone[1]) {
+          obj.style.left = d.cx + '%';
+          obj.style.top = d.end + '%';
+          playDrag();
+          setTimeout(() => go(), 700);
+        } else {
+          obj.style.left = d.cx + '%';
+          obj.style.top = d.top + '%';
+          playWrong();
+          fingerTo(mv);
+        }
+      };
+      mv.addEventListener('pointerup', end);
+      mv.addEventListener('pointercancel', end);
+      return mv;
+    }
+
+    function swipeFinger(el) {
+      setTimeout(() => {
+        if (!el.isConnected) return;
+        const main = el.closest('main');
+        const s = main.getBoundingClientRect().width / main.offsetWidth;
+        const r = el.getBoundingClientRect();
+        const m = main.getBoundingClientRect();
+        const f = document.createElement('img');
+        f.className = 'p09-swipe js-point-finger';
+        f.src = '../../img/common/img_finger01.png';
+        f.alt = '';
+        f.style.left = ((r.left - m.left + r.width) / s - 150) + 'px';
+        f.style.top = ((r.top - m.top + r.height / 2) / s - 20) + 'px';
+        main.appendChild(f);
+      }, 350);
+    }
+
+    function swipe(step, ui) {
+      const box = step.swipe;
+      const track = ui.querySelector('.u-track');
+      track.classList.add('is-drag');
+      const z = hotButton(box, 'is-drag');
+      let sx = 0, on = false, prog = 0;
+      const W = () => screen.getBoundingClientRect().width;
+      const set = (p, anim) => { prog = p; track.classList.toggle('is-drag', !anim); track.style.transform = 'translateX(' + (-p * TAB_MAX) + 'px)'; };
+      z.addEventListener('pointerdown', (e) => { e.preventDefault(); clearFingers(); sx = e.clientX; on = true; z.setPointerCapture(e.pointerId); });
+      z.addEventListener('pointermove', (e) => { if (on) set(Math.min(1, Math.abs(e.clientX - sx) / (W() * 0.6)), false); });
+      const end = () => {
+        if (!on) return;
+        on = false;
+        if (prog > 0.35) { set(1, true); playDrag(); setTimeout(() => go(), 450); }
+        else { set(0, true); playWrong(); swipeFinger(z); }
+      };
+      z.addEventListener('pointerup', end);
+      z.addEventListener('pointercancel', end);
+      swipeFinger(z);
+      return z;
+    }
+
+    function carousel(mode) {
+      const car = document.createElement('div');
+      car.className = 'p09-car';
+      screen.appendChild(car);
+      const cards = [0, 1, 2, 3].map((n) => {
+        const c = document.createElement('div');
+        c.className = 'p09-card';
+        c.style.backgroundImage = "url('" + dsrc(n + 1) + "')";
+        car.appendChild(c);
+        return c;
+      });
+      const prev = document.createElement('button');
+      prev.className = 'p09-arrow is-prev';
+      prev.innerHTML = '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>';
+      const nxt = document.createElement('button');
+      nxt.className = 'p09-arrow is-next';
+      nxt.innerHTML = '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>';
+      car.appendChild(prev); car.appendChild(nxt);
+      const seen = new Set([0]);
+      const pickZone = document.createElement('button');
+      pickZone.className = 'p09-pick';
+      if (mode === 'pick') car.appendChild(pickZone);
+
+      function layout() {
+        cards.forEach((c, n) => { c.style.left = (4.1 + (n - st.car) * 77) + '%'; });
+        prev.style.display = st.car > 0 ? '' : 'none';
+        nxt.style.display = st.car < cards.length - 1 ? '' : 'none';
+        if (mode === 'view') show(nextBtn, seen.size === cards.length);
+      }
+      function to(n) {
+        playClick();
+        clearFingers();
+        st.car = n;
+        seen.add(n);
+        layout();
+      }
+      prev.addEventListener('click', () => to(st.car - 1));
+      nxt.addEventListener('click', () => to(st.car + 1));
+      pickZone.addEventListener('click', () => {
+        if (!(st.c.ok || OKDRAFT)[st.car]) {
+          playWrong();
+          $('p09WrongPrompt').textContent = st.c.q;
+          $('p09Wrong').classList.remove('is-off');
+          return;
+        }
+        playCorrect();
+        st.draft = st.car;
+        setTimeout(() => go(), 600);
+      });
+      st.car = 0;
+      if (mode === 'view') nextBtn.onclick = () => go();
+      layout();
+      fingerTo(nxt, 0, 1);
+      return car;
+    }
+
+    function render() {
+      lock = false;
+      const s = STEPS[i];
+      right.classList.add('is-off');
+      right.innerHTML = '';
+      show(nextBtn, false);
+      nextBtn.onclick = null;
+
+      if (s.end) { end(); return; }
+
+      show($('p09Phone'), true);
+      show($('p09Char'), true);
+      bubble.innerHTML = s.bubble;
+      screen.innerHTML = '';
+      phone.querySelectorAll('.phone-status,.phone-nav').forEach((el) => el.remove());
+
+      let ui = null;
+      if (s.home) {
+        screen.innerHTML = '<div class="app-home is-purple"><button class="app-icon" id="p09CanvaIcon"><i><img src="img/p09_canva_icon.png" alt=""></i>Canva</button></div>';
+        phone.insertAdjacentHTML('afterbegin', '<div class="phone-status is-dark"></div>');
+        phone.insertAdjacentHTML('beforeend', '<div class="phone-nav"></div>');
+        initPhoneBars();
+      } else {
+        screen.innerHTML = '<div class="cu-ui">' + UI[s.ui](s.o) + '</div>';
+        ui = screen.firstChild;
+        ui.style.transform = 'scale(' + (screen.clientWidth / 540) + ',' + (screen.clientHeight / 1170) + ')';
+        const st0 = ui.querySelector('.u-st'), nv0 = ui.querySelector('.u-nv');
+        if (st0) {
+          phone.insertAdjacentHTML('afterbegin', '<div class="phone-status' + (st0.dataset.light ? ' is-dark' : '') + '" data-bat="' + (st0.dataset.rec ? 90 : 68) + '"></div>');
+          initPhoneBars();
+        }
+        if (nv0) {
+          phone.insertAdjacentHTML('beforeend', '<div class="phone-nav' + (nv0.dataset.kb ? ' is-kb' : '') + '"></div>');
+          initPhoneBars();
+        }
+      }
+
+      let first = null;
+      if (s.home) {
+        const ic = $('p09CanvaIcon');
+        ic.addEventListener('click', () => { playClick(); go(); });
+        first = ic;
+      }
+      (s.hot || []).forEach((box) => {
+        const h = hotButton(box);
+        h.addEventListener('click', () => { playClick(); if (s.setFont) st.font = true; go(); });
+        if (!first) first = h;
+      });
+      if (s.swipe) first = swipe(s, ui);
+      if (s.drag) first = drag(s, ui);
+      if (s.next) {
+        show(nextBtn, true);
+        nextBtn.onclick = () => go();
+        first = null;
+        fingerTo(nextBtn, -50, 0.88);
+      }
+
+      if (s.btns) {
+        setRight(s.btns.map((o) => ({
+          t: o.t, cls: o.cls,
+          fn: () => {
+            if (o.back) { go(STEPS.findIndex((x) => x.car === o.back)); return; }
+            if (o.credit) st.credit = true;
+            go();
+          }
+        })));
+        fingerTo(right.lastChild);
+      }
+      if (s.cases) {
+        setRight(CASES.map((c) => ({ t: c.t, cls: 'is-small', fn: () => { st.c = c; go(); } })));
+      }
+      if (s.phrases) {
+        setRight(PHRASES.map((p) => ({ t: p, fn: () => { st.phrase = p; render(); } })));
+        if (st.phrase) {
+          Array.from(right.children).forEach((b, n) => b.classList.toggle('is-selected', PHRASES[n] === st.phrase));
+          show(nextBtn, true);
+          nextBtn.onclick = () => go();
+        }
+      }
+      if (s.loading) {
+        const bar = document.createElement('div');
+        bar.className = 'p09-bar';
+        bar.style.cssText = pct([4, 78.2, 92, 1.1]);
+        bar.innerHTML = '<i></i>';
+        screen.appendChild(bar);
+        setTimeout(() => bar.classList.add('is-run'), 50);
+        setTimeout(() => go(), 2100);
+        return;
+      }
+      if (s.car) { carousel(s.car); return; }
+      if (s.home) { setTimeout(() => pointFingerAt(first, { onMain: true, dx: 15, dy: -37 }), 350); return; }
+      if (first && !s.btns && !s.swipe) fingerTo(first);
+    }
+
+    function end() {
+      show($('p09Phone'), false);
+      show($('p09Char'), false);
+      bubble.innerHTML = '';
+      bubble.classList.add('is-hide');
+      right.classList.add('is-off');
+      $('p09EndTitle').classList.remove('is-hide');
+      const p = $('p09Poster');
+      p.style.backgroundImage = "url('" + dsrc(st.draft + 1) + "')";
+      $('p09PosterTop').textContent = st.phrase || PHRASES[1];
+      p.classList.remove('is-hide');
+      show(nextBtn, true);
+      nextBtn.onclick = () => setTimeout(() => navigateTo('page10.html'), 400);
+    }
+
+    $('p09WrongOk').addEventListener('click', () => $('p09Wrong').classList.add('is-off'));
+    st.c = CASES[1];
+    render();
+  })();
+  </script>
+</body>
+</html>
