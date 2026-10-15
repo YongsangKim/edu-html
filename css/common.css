@@ -1165,13 +1165,14 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 .ox-pick.is-x{left:1120px}
 
 /* 퀴즈 선택지(글자 버튼) 배치: <div class="answer-pick-quiz quiz-opts is-row|is-grid|is-list"> — 좌표 없이 가운데 정렬
-   is-row 한 줄(2·3개 464px, 4개 380px, 5개는 3+2 두 줄) / is-grid 2×2 / is-list 세로 목록(.is-left는 글자 왼쪽 정렬, 긴 보기용) */
+   is-row 한 줄(2·3개 464px, 4개 380px, 5개는 3+2 두 줄) / is-grid 2×2(보기 글이 길면 is-long 을 더 붙임 — 글자 50px·카드 높이 자동) / is-list 세로 목록(.is-left는 글자 왼쪽 정렬, 긴 보기용) */
 .quiz-opts{position:absolute;left:0;width:1920px;display:flex;justify-content:center}
 .quiz-opts .card-btn{margin:0}
 .quiz-opts.is-row{top:560px;flex-wrap:wrap;gap:40px 70px}
 .quiz-opts.is-row:has(> :nth-child(4)):not(:has(> :nth-child(5))) .card-btn{width:380px}
 .quiz-opts.is-grid{top:500px;display:grid;grid-template-columns:repeat(2,740px);gap:40px 80px}
 .quiz-opts.is-grid .card-btn{width:100%;min-width:0}
+.quiz-opts.is-grid.is-long .card-btn{height:auto;min-height:130px;padding:16px 28px 12px;font-size:50px;line-height:1.12;display:flex;align-items:center;justify-content:center}
 .quiz-opts.is-list{top:450px;flex-direction:column;align-items:center;gap:50px}
 .quiz-opts.is-list .card-btn{width:1500px;min-width:0;height:110px;font-size:52px}
 .quiz-opts.is-list.is-left .card-btn{padding:10px 50px 4px;font-size:50px;text-align:left}
@@ -1235,6 +1236,14 @@ div:where(.phone-frame.is-thick){padding:18px;border:0;border-radius:70px;box-sh
 .phone-nav.is-dark b{border-color:#ddd}
 .phone-nav.is-dark u{border-color:#ddd}
 .phone-nav u{position:absolute;left:77%;top:18px;width:10px;height:10px;border:solid #666;border-width:0 0 2px 2px;transform:rotate(45deg)}
+/* 폰 화면 바닥(.phone-frame 안, 앱 화면 전체): 밝은 화면이 기본, 어두운 화면은 .phone-screen.is-dark 하나로 — 배경 #111 · 글자 흰색, 안의 .phone-status(글자·배터리 알약 흰색)와 .phone-nav(검정 바탕 + 밝은 버튼)까지 한 번에 바뀜(안쪽에 따로 is-dark를 붙이지 않음). 기준·예시 _guide/phone.html */
+.phone-screen{position:relative;width:100%;height:100%;box-sizing:border-box;background:#fff;overflow:hidden;font-family:'Pretendard';color:#111}
+.phone-screen.is-dark{background:#111;color:#fff}
+.phone-screen.is-dark .phone-status{color:#fff}
+.phone-screen.is-dark .phone-status em{background:rgba(255,255,255,.88);color:#333}
+.phone-screen.is-dark .phone-nav{background:#111}
+.phone-screen.is-dark .phone-nav i{background:repeating-linear-gradient(90deg,#ddd 0 2px,transparent 2px 8.5px)}
+.phone-screen.is-dark .phone-nav b, .phone-screen.is-dark .phone-nav u{border-color:#ddd}
 
 /* 지그소 조건 퍼즐(initJigsawPuzzle): 퍼즐판·조각 트레이. 말풍선·캐릭터·다음 버튼 위치만 페이지 CSS에서 */
 .jig-board{position:absolute;left:670px;top:16px;width:620px;height:620px;border-radius:30px;background:var(--c-white);box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
