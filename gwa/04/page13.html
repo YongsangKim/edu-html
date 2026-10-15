@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카메라와 이미지 인식 퀴즈!</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 29~34p. 5문제: 설리번 플러스 폰 화면 속 사진(img/p13_photo_1~5.png, 없으면 이모지) + AI 분석 설명 3~4개(음성 듣기 버튼) 중 잘못된 1개의 번호 캐릭터를 선택.
+           정답·오답 화면 없이 바로 다음 문제 → 마지막 뒤 채점 모달(1문제 20점, 틀린 문제 다시 풀기 / 끝내기). 캐릭터 그림은 img/p13_char_1~4.png(없으면 이모지) */
+        .p13-ask{position:absolute;left:680px;top:20px;width:1200px;height:90px;margin:0;box-sizing:border-box;padding:6px 30px 0;display:flex;align-items:center;justify-content:center;
+          background:var(--c-white);border:solid 5px var(--c-purple);border-radius:45px;box-shadow:0 8px 0 0 var(--c-sky-pale);
+          font-family:'Cafe24 Ssurround';font-size:46px;color:var(--c-purple);letter-spacing:-0.05em}
+        .p13-phone{left:120px;top:21px;width:450px;height:895px}
+        .p13-screen{position:absolute;inset:0;background:#e9eef7;overflow:hidden}
+        .p13-photo{position:absolute;left:20px;top:80px;width:394px;height:560px;box-sizing:border-box;border-radius:20px;background:#fff;border:solid 4px #cfd6e4;display:flex;align-items:center;justify-content:center;font-size:240px;line-height:1;overflow:hidden}
+        .p13-photo img{display:block;width:100%;height:100%;object-fit:cover}
+        .p13-opts{position:absolute;left:640px;top:140px;width:1240px;display:flex;flex-direction:column;gap:18px}
+        .p13-opt{height:112px;box-sizing:border-box;padding:10px 20px 0 40px;display:flex;align-items:center;gap:20px;background:var(--c-white);border:solid 5px var(--c-purple);border-radius:56px;
+          font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all}
+        .p13-opt span{flex:1 1 auto}
+        .p13-sound{flex:0 0 auto;width:84px;height:84px;margin-top:-8px;padding:0;border:solid 5px var(--c-purple);border-radius:50%;background:var(--c-cream);font-size:42px;line-height:1;cursor:pointer}
+        .p13-sound:disabled{opacity:.35;cursor:default}
+        .p13-sound.is-playing{background:var(--c-yellow)}
+        .p13-chars{position:absolute;left:640px;top:690px;width:1240px;display:flex;justify-content:space-around}
+        .p13-char{position:relative;width:240px;height:250px;padding:0;border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+        .p13-char .face{flex:1 1 auto;display:flex;align-items:center;justify-content:center;font-size:130px;line-height:1;transition:transform .15s}
+        .p13-char .face img{display:block;max-height:170px;max-width:200px}
+        .p13-char:hover .face{transform:scale(1.08)}
+        .p13-char .no{width:150px;height:70px;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:#1b2230;border:solid 4px #8793a8;font-family:'Cafe24 Ssurround';font-size:50px;color:#ffe15a}
+        .p13-res-score{font-size:110px;line-height:1.1;color:var(--c-violet)}
+        .p13-res-btns{position:absolute;right:90px;bottom:50px;display:flex;gap:30px}
+        .p13-res-btns .avatar-card-btn{position:static;white-space:nowrap;min-width:0;padding-left:50px;padding-right:50px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="p13-ask" id="p13Ask"></p>
+          <div class="phone-frame is-thin has-cam p13-phone">
+            <div class="p13-screen">
+              <div class="phone-status is-dark"></div>
+              <div class="p13-photo" id="p13Photo"></div>
+              <div class="phone-nav"></div>
+            </div>
+          </div>
+          <div class="p13-opts" id="p13Opts"></div>
+          <div class="p13-chars" id="p13Chars"></div>
+
+          <div class="avatar-modal is-off" id="p13Result">
+            <div class="avatar-card is-left">
+              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <div>
+                  <p class="avatar-card-title">채점결과</p>
+                  <p class="avatar-card-text p13-res-score" id="p13Score"></p>
+                  <div class="p13-res-btns">
+                    <a href="javascript:;" class="avatar-card-btn card-btn is-popup js-sfx" id="p13Retry" data-sound="sound/click.mp3">틀린 문제 다시 풀기</a>
+                    <a href="javascript:;" class="avatar-card-btn card-btn is-popup js-sfx" id="p13End" data-sound="sound/click.mp3">끝내기</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="카메라와 이미지 인식 퀴즈!" data-next="page14.html"></script>
+  <script src="../../js/toc-gwa.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const R = [
+      { emoji: '🍎', opts: ['책상 위에 빨간색 사과가 있습니다', '동그란 모양의 과일입니다', '싱싱한 사과 2개가 놓여 있습니다'], wrong: 3 },
+      { emoji: '🍌', opts: ['노란 바나나 3개가 송이로 묶여 있습니다', '선명한 노란색의 바나나입니다', '바나나 표면에 검은 반점이 보입니다'], wrong: 1 },
+      { emoji: '📕', opts: ['선명하고 또렷한 글자 이미지 입니다', '교과서 표지에 글자가 인쇄 되어 있습니다', '‘내일의 날씨’ 라는 글자로 분석 됩니다'], wrong: 3 },
+      { emoji: '😄', opts: ['입을 벌리고 환하게 웃고 있는 얼굴입니다', '화가 나서 눈살을 잔뜩 찌푸리고 있습니다', '단정하게 머리를 빗은 학생 입니다', '10대 학생의 얼굴로 분석 됩니다'], wrong: 2 },
+      { emoji: '🚌', opts: ['파란색 버스입니다', '커다란 바퀴가 달린 이동수단 입니다', '아스팔트 도로 위를 지나가는 있습니다', '노란색 꼬마 유치원 버스가 달리고 있습니다'], wrong: 4 }
+    ];
+    const CHARS = ['🤖', '🦊', '🐻', '🐰'];
+    const picked = [];
+    let queue = [0, 1, 2, 3, 4], pos = 0, speaking = false;
+
+    const sp = (t, btn) => {
+      if (speaking) return;
+      speaking = true;
+      const all = Array.from(document.querySelectorAll('.p13-sound'));
+      all.forEach((b) => { b.disabled = true; });
+      btn.classList.add('is-playing');
+      const done = () => { speaking = false; btn.classList.remove('is-playing'); all.forEach((b) => { b.disabled = false; }); };
+      try {
+        const u = new SpeechSynthesisUtterance(t); u.lang = 'ko-KR'; u.onend = done; u.onerror = done;
+        speechSynthesis.cancel(); speechSynthesis.speak(u);
+      } catch (e) { setTimeout(done, 1500); }
+    };
+
+    function showRound() {
+      const i = queue[pos], d = R[i];
+      speaking = false;
+      $('p13Ask').textContent = '[문제' + (i + 1) + '] 잘못된 분석 1개를 골라 주세요.';
+      $('p13Photo').innerHTML = '<img src="img/p13_photo_' + (i + 1) + '.png" alt="" onerror="this.replaceWith(document.createTextNode(\'' + d.emoji + '\'))">';
+      $('p13Opts').innerHTML = '';
+      d.opts.forEach((t, k) => {
+        const row = document.createElement('div');
+        row.className = 'p13-opt';
+        row.innerHTML = '<span>(' + (k + 1) + ') ' + t + '</span><button class="p13-sound" aria-label="음성 듣기">🔊</button>';
+        row.querySelector('button').addEventListener('click', (e) => sp(t, e.currentTarget));
+        $('p13Opts').appendChild(row);
+      });
+      $('p13Chars').innerHTML = '';
+      d.opts.forEach((t, k) => {
+        const c = document.createElement('button');
+        c.className = 'p13-char';
+        c.setAttribute('aria-label', '캐릭터 ' + (k + 1));
+        c.innerHTML = '<span class="face"><img src="img/p13_char_' + (k + 1) + '.png" alt="" onerror="this.replaceWith(document.createTextNode(\'' + CHARS[k] + '\'))"></span><span class="no">' + (k + 1) + '</span>';
+        c.addEventListener('click', () => {
+          try { speechSynthesis.cancel(); } catch (e) {}
+          playClick();
+          picked[i] = (k + 1) === d.wrong;
+          pos += 1;
+          if (pos < queue.length) showRound(); else showResult();
+        });
+        $('p13Chars').appendChild(c);
+      });
+    }
+
+    function showResult() {
+      const right = picked.filter(Boolean).length;
+      $('p13Score').textContent = right * 20 + '점';
+      $('p13Retry').style.display = right === R.length ? 'none' : '';
+      $('p13Result').classList.remove('is-off');
+      playCorrect();
+    }
+
+    $('p13Retry').addEventListener('click', () => {
+      queue = R.map((d, i) => i).filter((i) => !picked[i]);
+      pos = 0;
+      $('p13Result').classList.add('is-off');
+      showRound();
+    });
+    $('p13End').addEventListener('click', () => navigateTo('page14.html'));
+    showRound();
+  })();
+  </script>
+</body>
+</html>
