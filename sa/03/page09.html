@@ -9,18 +9,20 @@
         /* 디자인 없음 - 기획서 47~49p. 상황 고르기 → 표현 고르기(틀리면 오답 팝업). 맞으면 선택(상황·문구)을 sessionStorage 'sa03p09'에 저장하고 page10(Canva 카드 만들기)으로 이동.
            상황 그림 img/p09_sit_{key}.png, 오답 표현을 골랐을 때 안내는 기획서에 없어 빙고 게임 오답 문구를 씀. */
 
-        .p09-sits{position:absolute;left:180px;top:170px;width:1567px;height:560px;box-sizing:border-box;padding:24px 40px;display:flex;justify-content:space-between;
-          background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:40px}
-        .p09-sit{width:440px;height:500px;padding:0 0 20px;box-sizing:border-box;border:solid 6px #eae0fd;border-radius:30px;background:var(--c-white);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:16px;
-          font-family:'Cafe24 Ssurround';font-size:40px;line-height:1.2;color:var(--c-indigo);letter-spacing:-0.05em;word-break:keep-all}
-        .p09-sit i{flex:1 1 auto;width:100%;border-radius:24px 24px 0 0;background:var(--c-purple) center / cover no-repeat}
-        .p09-sit span{flex:0 0 96px;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 16px}
-        .p09-sit:hover{border-color:var(--c-violet)}
-        .p09-sit.is-selected{border-color:#ff4ff9}
-        .p09-exprs{position:absolute;left:361px;top:183px;width:1207px;height:504px;box-sizing:border-box;padding:36px 35px;display:grid;grid-template-columns:1fr 1fr;gap:28px;align-content:center;
-          background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:40px}
-        .p09-exprs .emotion-option{width:auto;min-width:0;height:190px;box-sizing:border-box;padding:10px 24px 4px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:48px;line-height:1.25;letter-spacing:-0.05em;word-break:keep-all}
-        .p09-step-next{position:absolute;left:756px;top:790px}
+        .p09 .ask-pill.is-fit{max-width:none;letter-spacing:-0.1em}
+        .p09-sits{position:absolute;left:57px;top:165px;width:1806px;height:612px;box-sizing:border-box;padding:0 38px;display:flex;align-items:center;gap:42px;
+          background:#266cc8;border:solid 4px var(--c-ink);border-radius:24px}
+        .p09-sit{flex:1 1 0;min-width:0;height:556px;padding:0;box-sizing:border-box;border:0;border-radius:12px;background:#faf8f9;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;align-items:center;
+          font-family:'Cafe24 Ssurround';font-size:48px;line-height:1.1;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all;box-shadow:0 0 0 6px rgba(255,255,2555,1)}
+        .p09-sit i{flex:1 1 auto;width:100%;background:var(--c-purple) center / cover no-repeat}
+        .p09-sit span{flex:0 0 133px;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 16px}
+        .p09-sit:not(.is-selected):hover{box-shadow:0 0 0 6px rgba(255,79,249,0.5)}
+        .p09-sit.is-selected{box-shadow:0 0 0 9px #ff4ff9}
+        .p09-exprs{position:absolute;left:123px;top:165px;width:1674px;height:612px;box-sizing:border-box;padding:0 70px;display:grid;grid-template-columns:1fr 1fr;gap:62px 68px;align-content:center;
+          background:#266cc8;border:solid 4px var(--c-ink);border-radius:24px}
+        .p09-exprs .card-btn{width:auto;min-width:0;height:220px;padding:10px 30px 4px;display:flex;align-items:center;justify-content:center;font-size:60px;line-height:1.25}
+        .p09-exprs .card-btn.is-selected:hover{color:#d168fb}
+        .p09-step-next{position:absolute;left:756px;top:800px}
 
         #p09Wrong{z-index:130}
         .p09 .is-off{display:none}
@@ -127,11 +129,11 @@
       shuffleArray(s.right.map((t) => ({ t, ok: true })).concat(s.wrong.map((t) => ({ t, ok: false })))).forEach((o) => {
         const b = document.createElement('button');
         b.type = 'button';
-        b.className = 'emotion-option';
+        b.className = 'card-btn';
         b.innerHTML = o.t;
         b.addEventListener('click', () => {
           playClick();
-          box.querySelectorAll('.emotion-option').forEach((x) => x.classList.toggle('is-selected', x === b));
+          box.querySelectorAll('.card-btn').forEach((x) => x.classList.toggle('is-selected', x === b));
           expr = o;
           if (!onStepNext) waitStepNext(checkExpr);
         });
