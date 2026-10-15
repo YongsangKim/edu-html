@@ -84,7 +84,7 @@
           display:flex;flex-direction:column;gap:22px;font-family:'Cafe24 Ssurround'}
         .p10-cards h3{margin:0;font-weight:normal;font-size:36px;color:var(--c-purple);text-align:center}
         .p10-row{display:flex;gap:16px;justify-content:center}
-        .p10-card{flex:1;height:96px;padding:6px 10px 0;box-sizing:border-box;border:solid 5px transparent;border-radius:20px;font:inherit;font-size:32px;color:var(--c-ink);cursor:pointer;
+        .p10-card{flex:1;height:96px;padding:6px 10px 0;line-height:1.1;box-sizing:border-box;border:solid 5px transparent;border-radius:20px;font:inherit;font-size:32px;color:var(--c-ink);cursor:pointer;
           box-shadow:0 8px 0 rgba(0,0,0,.12);transition:transform .15s}
         .p10-card.y{background:#ffe27a} .p10-card.r{background:#ffb0aa} .p10-card.b{background:#a9cbff}
         .p10-card:hover{transform:translateY(-4px)}
@@ -151,7 +151,7 @@
             <h3>프롬프트 카드</h3>
             <div class="p10-row"><button type="button" class="p10-card y" data-color="y">첨부한 기온 표 이미지를</button></div>
             <div class="p10-row"><button type="button" class="p10-card r" data-color="r" data-kind="line">꺾은선 그래프로</button><button type="button" class="p10-card r" data-color="r" data-kind="bar">막대 그래프로</button></div>
-            <div class="p10-row"><button type="button" class="p10-card b" data-color="b">시각화해 줘.</button><button type="button" class="p10-card b" data-color="b">그려줘.</button></div>
+            <div class="p10-row"><button type="button" class="p10-card b" data-color="b">시각화해 줘<br>(그려줘).</button><button type="button" class="p10-card b" data-color="b" data-wrong="1">읽어줘.</button></div>
             <button type="button" class="card-btn p10-hint js-sfx" id="p10Hint" data-sound="sound/click.mp3">힌트</button>
           </div>
 
@@ -159,7 +159,7 @@
             <div class="avatar-popup-panel">
               <div class="avatar-popup-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
               <div class="avatar-popup-body">
-                <p class="avatar-popup-text is-small">첨부한 기온 표 이미지를 막대 그래프로 시각화해 줘.</p>
+                <p class="avatar-popup-text is-small">첨부한 기온 표 이미지를 막대 그래프로 시각화해 줘(그려줘).</p>
               </div>
             </div>
           </div>
@@ -295,6 +295,12 @@
     syncCards();
     cardBtns.forEach((c) => c.addEventListener('click', () => {
       if (c.disabled) return;
+      if (c.dataset.wrong) {
+        playWrong();
+        $('p10WrongText').innerHTML = '‘그려줘’라고 입력해야 해요.';
+        flashLayer($('p10Wrong'), 'is-off', 3000);
+        return;
+      }
       playClick();
       c.classList.add('is-on');
       picked.push({ color: c.dataset.color, text: c.textContent });
