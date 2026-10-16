@@ -61,9 +61,8 @@
 
         .p09-vlog{position:absolute;left:380px;top:100px;width:1160px;height:653px;box-sizing:border-box;border:solid 6px var(--c-ink);background:#fff center / cover no-repeat;overflow:hidden;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);z-index:2;container-type:size}
         .p09-vlog .vl-sub{font-size:4.2cqw;bottom:8%}
-        .p09-vlog .vl-npc{font-size:55cqh}
-        .p09-vlog .vl-npc.is-blur{filter:blur(4.2cqh)}
-        .p09-vlog.is-play .vl-npc{animation:vl-walk-l 3s linear forwards}
+        .p09-vlog .vl-npc.is-blur{filter:blur(1.7cqh)}
+        .p09-vlog.is-play .vl-npc{animation:vl-walk 3s linear forwards}
         .p09-play{position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;padding:0;border:0;background:url('../../img/common/btn_play.png') center / contain no-repeat;cursor:pointer;z-index:4}
 
         .p09-swhand{position:absolute;left:0;top:0;width:110px;z-index:30;pointer-events:none;animation:p09-sw 1.6s ease-in-out infinite}
@@ -454,11 +453,30 @@
       v.classList.remove('is-play');
       void v.offsetWidth;
       v.classList.add('is-play');
-      setTimeout(() => { bubble.innerHTML = '완성했어요!'; $('p09Done').classList.remove('is-off'); }, 3300);
+      let spoke = false, timed = false;
+      const finish = () => { if (spoke && timed) { bubble.innerHTML = '완성했어요!'; $('p09Done').classList.remove('is-off'); } };
+      setTimeout(() => { timed = true; finish(); }, 3300);
+      // 녹음해 둔 내레이션(자막 문장) — 음성 파일이 없어 브라우저 음성 합성으로 재생, 끝나면 완료 안내
+      try {
+        const u = new SpeechSynthesisUtterance(okText());
+        u.lang = 'ko-KR';
+        u.onend = u.onerror = () => { spoke = true; finish(); };
+        speechSynthesis.cancel();
+        speechSynthesis.speak(u);
+        setTimeout(() => { spoke = true; finish(); }, 8000);
+      } catch (e) { spoke = true; }
     });
 
     nextBtn.addEventListener('click', advance);
     $('p09InfoOk').addEventListener('click', () => { $('p09Info').classList.add('is-off'); advance(); });
+    // 화면 전환 때 끊기지 않게 쓰는 그림을 미리 불러와 디코딩해 둠(단계 순서대로, 지금 단계부터)
+    const PRELOAD = [];
+    STEPS.forEach((s) => { if (s.img) PRELOAD.push('img/ui/u' + s.img + '.jpg'); if (s.base) PRELOAD.push('img/ui/u' + s.base + '.jpg'); });
+    PRELOAD.push('img/ui/vllo_icon.png', '../../img/common/img_finger01.png', '../../img/common/img_finger02.png', '../../img/common/btn_play.png');
+    Object.keys(NAVS).forEach((k) => PRELOAD.push('img/ui/' + NAVS[k].del, 'img/ui/' + NAVS[k].slide));
+    Object.keys(PLACES).forEach((k) => PRELOAD.push('img/' + PLACES[k].img + '.jpg'));
+    window.p09Cache = Array.from(new Set(PRELOAD)).map((src) => { const im = new Image(); im.src = src; if (im.decode) im.decode().catch(() => {}); return im; });
+
     BoxEdit.init({
       setup: () => { st.pl = PLACES[Object.keys(PLACES)[0]]; },
       name: (el) => (el.classList.contains('js-point-finger') ? '손가락 finger: ' : '박스 '),

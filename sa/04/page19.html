@@ -6,22 +6,7 @@
     <title>나의 마음 이모티콘 제작소</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 없음 - 와이어프레임. 기획서 52~54p:
-           이모티콘 버튼 클릭 -> 이모티콘 탭 클릭 -> 내가 쓴 이모티콘 수첩(스크롤).
-           page14~18과 같은 3단 구조(왼쪽 안내문구+캐릭터 / 가운데 채팅(폰) / 오른쪽
-           다음버튼)로 맞춤. 실제로는 page14~17에서 고른 이모티콘을 보여줘야 하지만,
-           지금은 선택 결과를 저장/전달하는 규칙이 안 정해져서 예시 이모티콘을 깔아둠.
-           채팅 틀/입력바는 공용 .chatapp-* */
-
-        /* 이모티콘 탭+수첩: 기획서 52~54p처럼 입력바 아래(키보드 자리)에 나옴 */
-        .p19-sheet{flex:0 0 auto;margin-top:16px;width:100%;height:420px;background:var(--c-pale);border:solid 5px var(--c-ink);border-radius:32px;box-sizing:border-box;padding:20px 24px}
-        .p19-sheet.is-off{display:none}
-        .p19-tabs{display:flex;gap:16px;margin-bottom:20px}
-        .p19-tab{height:60px;padding:0 26px;border:solid 4px var(--c-ink);border-radius:30px;background:var(--c-cream);font-family:'Cafe24 Ssurround';font-size:26px;color:var(--c-ink);cursor:pointer}
-        .p19-tab.is-on{background:var(--c-yellow)}
-        .p19-album{height:300px;overflow-y:auto;display:flex;flex-wrap:wrap;gap:20px;align-content:flex-start}
-        .p19-album.is-off{display:none}
-        .p19-album-item{width:150px;height:150px;border:solid 4px var(--c-ink);border-radius:28px;background:#fff3c9;display:flex;align-items:center;justify-content:center;font-size:84px;pointer-events:none}
+        .cf-phone .cf-chat{height:352px}
     </style>
 </head>
 <body>
@@ -32,30 +17,18 @@
         <main class="bg-default">
 
           <p class="guide-bubble" id="p19Guide">이모티콘 버튼을 클릭해요.</p>
-          <div class="guide-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+          <div class="guide-character"><img src="img/new/r14.png" alt="메인 캐릭터"></div>
 
-          <div class="chatapp">
-            <div class="chatapp-body"></div>
+          <div class="phone-frame is-thin has-cam cf-phone"><div class="phone-screen" id="cfScreen">
+            <div class="phone-status is-dark"></div>
+            <div class="cf-head"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="nm"></span><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4-4"/></svg><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.500a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
+            <div class="cf-chat"></div>
+            <div class="cf-input" id="p19Input"></div>
+            <div class="cf-panel" id="p19Panel" style="background-image:url(img/new/ph_kb.png)"></div>
+            <div class="phone-nav is-dark"></div>
+          </div></div>
 
-            <div class="chatapp-input">
-              <span class="chatapp-input-field">메시지를 입력해요</span>
-              <button type="button" class="chatapp-icon-btn js-sfx" id="p19EmojiBtn" data-sound="sound/click.mp3" aria-label="이모티콘">&#128512;</button>
-              <button type="button" class="chatapp-icon-btn" disabled aria-label="보내기">&#10148;</button>
-            </div>
-
-            <div class="p19-sheet is-off" id="p19Sheet">
-              <div class="p19-tabs">
-                <button type="button" class="p19-tab js-sfx" id="p19TabEmoji" data-sound="sound/click.mp3">이모티콘</button>
-                <button type="button" class="p19-tab" disabled>사진</button>
-                <button type="button" class="p19-tab" disabled>파일</button>
-              </div>
-              <div class="p19-album is-off" id="p19Album"></div>
-            </div>
-          </div>
-
-          <a href="page20.html" class="js-nav-effect next-btn is-off" id="p19Next">
-            <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
-          </a>
+          <a href="page20.html" class="js-nav-effect card-btn is-popup next-btn is-off js-sfx" id="p19Next" data-sound="sound/click.mp3">다음</a>
         </main>
       </div>
     </div>
@@ -65,38 +38,62 @@
   <script src="../../js/header.js" data-title="나의 마음 이모티콘 제작소" data-next="page20.html"></script>
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
+  <script src="../../js/box-edit.js"></script>
+  <script>document.getElementById('p19Input').innerHTML = cfUI.bar(false);</script>
   <script>
-  /* 기획서 52~54p. 클릭 가이드를 따라 이모티콘 수첩을 열어보는 화면 */
+  /* 디자인/사회4차시 19p-1~4. 클릭 가이드를 따라 이모티콘 수첩(최근 사용)을 열어보는 화면 */
   (function () {
-    // 상호작용에서 고른 이모티콘 8종 중 4종만 노출(기획서 54p)
-    const USED = ['&#128591;', '&#128522;', '&#128584;', '&#128549;', '&#127881;', '&#127874;', '&#128546;', '&#129394;'];
-
+    const screen = document.getElementById('cfScreen');
     const guide = document.getElementById('p19Guide');
-    const emojiBtn = document.getElementById('p19EmojiBtn');
-    const sheet = document.getElementById('p19Sheet');
-    const tabEmoji = document.getElementById('p19TabEmoji');
-    const album = document.getElementById('p19Album');
-    const nextBtn = document.getElementById('p19Next');
-
-    pointFingerAt(emojiBtn);
-    emojiBtn.addEventListener('click', function once() {
-      emojiBtn.removeEventListener('click', once);
-      emojiBtn.classList.add('is-on');
+    const panel = document.getElementById('p19Panel');
+    const next = document.getElementById('p19Next');
+    const play = makeSfx('sound/click.mp3');
+    // 상호작용에서 고른 이모티콘 중 4종만 노출
+    const USED = ['stk_dog_thanks', 'stk_sad', 'stk_party', 'stk_cry', 'stk_comfort', 'stk_cheer'];
+    // 눌러야 할 곳 좌표 [x, y, 폭, 높이](폰 화면 기준). ?edit 으로 열면 두 곳이 한꺼번에 보이고, 맞춘 값을 여기에 붙여 넣음
+    const HOT = { open: [314, 463, 48, 48], tab: [138, 570, 84, 38, 10] };   // 5번째 값은 모서리(없으면 원)
+    let hot = null;
+    function setHot(name, fn) {
+      const [x, y, w, h, rd] = HOT[name];
+      if (hot) hot.remove();
       clearFingers();
-      sheet.classList.remove('is-off');
+      hot = document.createElement('button');
+      hot.type = 'button';
+      hot.className = 'cf-hot';
+      hot.style.cssText = 'left:' + x + 'px;top:' + y + 'px;width:' + w + 'px;height:' + h + 'px;border-radius:' + (rd === undefined ? '50%' : typeof rd === 'number' ? rd + 'px' : rd);
+      hot.addEventListener('click', () => { play(); hot.remove(); hot = null; clearFingers(); fn(); });
+      screen.appendChild(hot);
+      const mine = hot;
+      setTimeout(() => { if (mine.isConnected) pointFingerAt(mine, { onMain: true }); }, 300);
+    }
+    if (BoxEdit.on) {
+      panel.style.backgroundImage = 'none';
+      panel.innerHTML = cfUI.searchSheet();
+      const NAME = { open: '이모티콘 버튼', tab: '이모티콘 탭' };
+      const place = (el) => { const b = el._ref; el.style.left = b[0] + 'px'; el.style.top = b[1] + 'px'; el.style.width = b[2] + 'px'; el.style.height = b[3] + 'px'; el.style.borderRadius = b[4] === undefined ? '50%' : typeof b[4] === 'number' ? b[4] + 'px' : b[4]; };
+      Object.keys(HOT).forEach((k) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'cf-hot';
+        b.dataset.name = NAME[k];
+        b.style.animation = 'none';
+        BoxEdit.tag(b, HOT[k]);
+        place(b);
+        screen.appendChild(b);
+      });
+      BoxEdit.init({ name: (el) => '[' + el.dataset.name + '] ', apply: place });
+      guide.textContent = '좌표 수정 모드 — 버튼을 클릭해 방향키로 맞춰요(Shift 10px, Alt+방향키 크기)';
+      return;
+    }
+    setHot('open', () => {
+      panel.style.backgroundImage = 'none';
+      panel.innerHTML = cfUI.searchSheet();
       guide.innerHTML = '이모티콘 탭을 클릭해요.';
-      pointFingerAt(tabEmoji);
-    });
-
-    tabEmoji.addEventListener('click', function once() {
-      tabEmoji.removeEventListener('click', once);
-      tabEmoji.classList.add('is-on');
-      clearFingers();
-      album.innerHTML = USED.slice(0, 4).map((e) =>
-        '<span class="p19-album-item">' + e + '</span>').join('');
-      album.classList.remove('is-off');
-      guide.innerHTML = '최근 사용한 이모티콘을<br>한 번에 모아볼 수 있는<br>나만의 이모티콘 수첩이에요!';
-      nextBtn.classList.remove('is-off');
+      setHot('tab', () => {
+        panel.innerHTML = cfUI.emojiSheet() + '<div class="cf-recent">' + USED.map((n) => '<img src="img/new/' + n + '.png" alt="">').join('') + '</div>';
+        guide.innerHTML = '최근 사용한 이모티콘을<br>한 번에 모아볼 수 있는<br>나만의 이모티콘 수첩이에요!';
+        next.classList.remove('is-off');
+      });
     });
   })();
   </script>

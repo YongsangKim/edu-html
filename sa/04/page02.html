@@ -6,56 +6,34 @@
     <title>마음 톡톡! 감정 찾기 게임</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 없음 - 와이어프레임(채팅 UI를 CSS로 직접 그림).
-           기획서 3~10p를 한 페이지로 합침: 채팅 목록 <-> 4개 문제 <-> 온도계 모달.
-           채팅방은 순서 상관없이 다시 들어올 수 있고 온도계 진행도가 유지돼야
-           해서 페이지를 쪼개지 않고 DOM 전환으로 처리 */
+        /* 디자인 반영 - 디자인/사회4차시 02p-1·02p-2. 기획서 3~10p를 한 페이지로 합침: 채팅 목록 <-> 4개 문제 <-> 온도계 모달.
+           채팅방은 순서 상관없이 다시 들어올 수 있고 온도계 진행도가 유지돼야 해서 DOM 전환으로 처리. 얼굴 사진은 샘플 조각(img/new/face_*.png·emo_*.png) */
         .p02-screen{position:absolute;left:0;top:0;width:1920px;height:960px}
         .p02-screen.is-off{display:none}
-
-        .p02-head{position:absolute;left:50%;top:40px;transform:translateX(-50%);min-width:1124px;height:108px;margin:0;box-sizing:border-box;padding:12px 60px 6px;display:flex;align-items:center;justify-content:center;
-          background:var(--c-cream);border:solid 6px var(--c-ink);border-radius:56px;box-shadow:0 14px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:64px;line-height:1.2;color:var(--c-ink);text-align:center;letter-spacing:-0.05em;white-space:nowrap}
-
-        /* ---- 채팅 목록(기획서 3p / 7p): 위 제목 / 패널 상단 '채팅' 바 / 줄마다 이름 원+미리보기 한 줄+보기 버튼 ---- */
-        .p02-list-panel{position:absolute;left:360px;top:190px;width:1200px;height:680px;background:var(--c-cream);border:solid 6px var(--c-navy);border-radius:48px;box-shadow:0 12px 0 0 var(--c-sky-pale);box-sizing:border-box;overflow:hidden}
-        .p02-list-bar{height:90px;margin:0;padding:0 50px;display:flex;align-items:center;background:var(--c-navy);font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-white)}
-        #p02Rows{padding:10px 44px}
-        .p02-row{display:flex;align-items:center;gap:26px;height:136px;border-bottom:solid 3px var(--c-mist)}
-        .p02-row:last-child{border-bottom:0}
-        .p02-avatar{width:92px;height:92px;border-radius:50%;background:var(--c-sky);border:solid 4px var(--c-ink);flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:40px;color:var(--c-white)}
-        .p02-row .p02-avatar{font-size:30px}
-        .p02-avatar.is-boy{background:var(--c-sky)}
-        .p02-avatar.is-girl{background:#f59bbd}
-        .p02-row-preview{flex:1 1 auto;min-width:0;font-family:'Pretendard';font-size:32px;color:var(--c-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
-        /* 보기 버튼은 공용 .card-btn(기본/호버/is-selected 눌림) 모양, 크기만 목록 줄에 맞게 줄임 */
-        .p02-row-btn.card-btn{flex:0 0 auto;min-width:140px;height:70px;padding:4px 24px 2px;font-size:36px}
-        /* 다 푼 대화는 보기 버튼 자리에 체크 표시 */
-        .p02-row-check{flex:0 0 auto;width:140px;text-align:center;font-size:48px;color:#2fa46b}
-
-        /* ---- 감정 찾기 문제(기획서 4p / 8p / 9p / 10p) ---- */
-        /* 위: 이름+흰 말풍선이 든 넓은 대화 패널 / 가운데: 질문 / 아래: 이미지+감정 이름 카드 3개 가로 배치 */
-        .p02-chat{position:absolute;left:220px;top:60px;width:1480px;height:380px;background:#cfe6f2;border:solid 6px var(--c-ink);border-radius:40px;box-shadow:0 12px 0 0 var(--c-sky-pale);box-sizing:border-box;padding:40px 60px}
-        .p02-chat-name{margin:0 0 24px;font-family:'Cafe24 Ssurround';font-size:48px;color:var(--c-ink)}
-        .p02-bubble{display:inline-block;max-width:1260px;background:var(--c-white);border-radius:36px;padding:30px 40px;font-family:'Pretendard';font-size:44px;line-height:1.5;color:var(--c-ink);font-weight:600}
-
-        .p02-head.p02-quiz-ask{top:490px}
-
-        .p02-options{position:absolute;left:220px;top:670px;width:1480px;display:flex;gap:60px}
-        .p02-opt{flex:1 1 0;display:flex;align-items:center;gap:20px;height:220px;padding:0 30px;border:solid 5px var(--c-ink);border-radius:40px;background:var(--c-cream);box-shadow:0 8px 0 0 var(--c-sky-pale);box-sizing:border-box;cursor:pointer}
-        .p02-opt:hover{background:#fff3c9}
-        .p02-opt.is-selected{background:var(--c-yellow)}
+        #p02Quiz .chat-panel-bar:after{top:120px;height:140px}
+        .p02-list{left:140px;top:168px;width:1640px;height:755px}
+        .p02-list .chat-panel-body{padding:26px 15px 30px}
+        .p02-list .chat-row{margin-left:0}
+        .p02-chat{left:140px;top:40px;width:1640px;height:446px;border-radius:100px}
+        .p02-chat .chat-panel-body{padding:44px 74px 0;background:none}
+        .p02-chat .chat-row{height:206px;gap:60px;padding:0 40px 0 10px;font-size:46px;line-height:1.55;white-space:normal}
+        .p02-chat .chat-row .face{width:190px;height:190px}
+        .p02-chat .chat-row .txt{white-space:normal;overflow:visible}
+        .p02-ask{top:500px;z-index:3}
+        .p02-ask.ask-pill{box-shadow:0 15px 0 0 #2264c5}
+        .p02-opts{left:158px;top:555px;width:1604px;height:370px;padding:100px 64px 0;display:flex;justify-content:space-between;gap:46px;border-radius:100px 100px 70px 70px}
+        .p02-opt.card-btn{flex:1 1 0;min-width:0;height:196px;padding:6px 26px 0;display:flex;align-items:center;gap:30px;justify-content:flex-start;font-size:60px;letter-spacing:-0.04em}
+        .p02-opt .face{flex:0 0 auto;width:150px;height:150px;border-radius:40px;object-fit:cover;background:#ffe9b0;display:flex;align-items:center;justify-content:center;font-size:100px;overflow:hidden}
+        .p02-opt .lab{flex:1 1 auto;text-align:center}
         .p02-opt.is-wrong{animation:fix-word-shake .3s ease}
-        .p02-opt-face{flex:0 0 auto;width:170px;height:170px;border-radius:24px;background:#ffe9b0;border:solid 4px var(--c-ink);box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:100px}
-        .p02-opt-label{flex:1 1 auto;text-align:center;font-family:'Cafe24 Ssurround';font-size:50px;color:var(--c-ink)}
 
-        /* ---- 온도계 모달(기획서 6p) — 딤 포함 오버레이 이미지는 임시 복사본 ---- */
+        /* 온도계 모달(기획서 6p) */
         .p02-modal{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:100;background:rgba(27,23,56,.55)}
         .p02-modal.is-off{display:none}
         .p02-modal-panel{position:absolute;left:560px;top:150px;width:800px;height:660px;background:var(--c-cream);border:solid 6px var(--c-ink);border-radius:48px;box-sizing:border-box;padding:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px}
         .p02-thermo{position:relative;width:110px;height:320px;border:solid 6px var(--c-ink);border-radius:55px;background:var(--c-pale);overflow:hidden}
         .p02-thermo-fill{position:absolute;left:0;bottom:0;width:100%;height:0;transition:height .6s ease}
         .p02-modal-text{margin:0;font-family:'Cafe24 Ssurround';font-size:48px;line-height:1.3;color:#3b1e87;text-align:center}
-
     </style>
 </head>
 <body>
@@ -66,20 +44,22 @@
         <main class="bg-default">
 
           <div class="p02-screen" id="p02List">
-            <p class="p02-head">어떤 대화를 살펴볼까요?</p>
-            <div class="p02-list-panel">
-              <p class="p02-list-bar">채팅</p>
-              <div id="p02Rows"></div>
+            <p class="ask-pill">어떤 대화를 살펴볼까요?</p>
+            <div class="chat-panel p02-list">
+              <p class="chat-panel-bar">채팅</p>
+              <div class="chat-panel-body" id="p02Rows"></div>
             </div>
           </div>
 
           <div class="p02-screen is-off" id="p02Quiz">
-            <div class="p02-chat">
-              <p class="p02-chat-name" id="p02QName"></p>
-              <div class="p02-bubble" id="p02QMsg"></div>
+            <div class="chat-panel p02-chat">
+              <p class="chat-panel-bar">채팅</p>
+              <div class="chat-panel-body">
+                <div class="chat-row"><img class="face" id="p02QFace" src="" alt=""><span class="txt" id="p02QMsg"></span></div>
+              </div>
             </div>
-            <p class="p02-head p02-quiz-ask">메시지에 어떤 마음이 숨어 있는지 찾아봐요!</p>
-            <div class="p02-options" id="p02Options"></div>
+            <p class="ask-pill is-fit p02-ask">메시지에 어떤 마음이 숨어 있는지 찾아봐요!</p>
+            <div class="opt-panel p02-opts" id="p02Options"></div>
           </div>
 
           <div class="p02-modal is-off" id="p02Modal">
@@ -117,18 +97,18 @@
   (function () {
     const CHATS = [
       {
-        name: '지우',
+        id: 'jiwoo', name: '지우',
         gender: 'girl',
         preview: '친구가 약속을 바꾸자고 했어. "괜찮아"라고 말했지만...',
         msg: '친구가 약속을 바꾸자고 했어.<br>"괜찮아"라고 말했지만, 사실은 오늘을 많이 기다렸어.',
         options: [
-          { label: '화남', face: '\u{1F620}' },
           { label: '아쉬움', face: '\u{1F61E}', correct: true },
+          { label: '화남', face: '\u{1F620}' },
           { label: '걱정', face: '\u{1F61F}' }
         ]
       },
       {
-        name: '민준',
+        id: 'minjun', name: '민준',
         gender: 'boy',
         preview: '발표 연습을 많이 했어. 그런데 내 차례가 가까워지니까...',
         msg: '발표 연습을 많이 했어.<br>그런데 내 차례가 가까워지니까 손에 땀이 났어.',
@@ -139,7 +119,7 @@
         ]
       },
       {
-        name: '수빈',
+        id: 'subin', name: '수빈',
         gender: 'girl',
         preview: '내가 실수로 친구의 그림을 구겼어. 친구가 괜찮다고 했지만...',
         msg: '내가 실수로 친구의 그림을 구겼어.<br>친구가 괜찮다고 했지만, 미안해서 계속 친구의 표정을 살피게 돼.',
@@ -150,7 +130,7 @@
         ]
       },
       {
-        name: '태우',
+        id: 'taewoo', name: '태우',
         gender: 'boy',
         preview: '친구들이 내 생일을 축하해 줬어. 고맙긴 한데...',
         msg: '친구들이 내 생일을 축하해 줬어.<br>고맙긴 한데, 갑자기 많은 친구들이 나를 쳐다봐서 얼굴이 빨개졌어.',
@@ -174,7 +154,7 @@
     const quizScreen = document.getElementById('p02Quiz');
     const rowsBox = document.getElementById('p02Rows');
     const optionsBox = document.getElementById('p02Options');
-    const qName = document.getElementById('p02QName');
+    const qFace = document.getElementById('p02QFace');
     const qMsg = document.getElementById('p02QMsg');
     const modal = document.getElementById('p02Modal');
     const modalText = document.getElementById('p02ModalText');
@@ -183,6 +163,8 @@
     const wrongLayer = document.querySelector('.ox-result-wrong');
 
 
+    // 감정 이름에 맞는 표정 사진(샘플 조각)이 있으면 어느 대화에서든 그 사진을 씀, 없으면 이모지
+    const EMO_IMG = { '아쉬움': 'emo_regret', '화남': 'emo_angry', '걱정': 'emo_worry' };
     const solved = CHATS.map(() => false);
 
     // 누르면 card-btn 눌림(is-selected) 모양이 잠깐 보인 뒤 문제 화면으로 넘어감
@@ -199,30 +181,31 @@
       rowsBox.innerHTML = '';
       CHATS.forEach((chat, i) => {
         const row = document.createElement('div');
-        row.className = 'p02-row';
+        row.className = 'chat-row';
         row.innerHTML =
-          '<span class="p02-avatar is-' + chat.gender + '">' + chat.name + '</span>' +
-          '<span class="p02-row-preview">' + chat.preview + '</span>' +
+          '<img class="face" src="img/new/face_' + chat.id + '.png" alt="' + chat.name + '">' +
+          '<span class="txt">' + chat.preview + '</span>' +
           (solved[i]
-            ? '<span class="p02-row-check">&#10004;</span>'
-            : '<button type="button" class="card-btn p02-row-btn">보기</button>');
-        if (!solved[i]) bindViewBtn(row.querySelector('.p02-row-btn'), i);
+            ? '<span class="chk"><i class="icon-check"></i></span>'
+            : '<button type="button" class="card-btn">보기</button>');
+        if (!solved[i]) bindViewBtn(row.querySelector('.card-btn'), i);
         rowsBox.appendChild(row);
       });
     }
 
     function openQuiz(index) {
       const chat = CHATS[index];
-      qName.textContent = chat.name;
+      qFace.src = 'img/new/face_' + chat.id + '_big.png';
+      qFace.onerror = function () { this.onerror = null; this.src = 'img/new/face_' + chat.id + '.png'; };
       qMsg.innerHTML = chat.msg;
 
       optionsBox.innerHTML = '';
       chat.options.forEach((opt) => {
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'p02-opt';
-        btn.innerHTML = '<span class="p02-opt-face">' + opt.face + '</span>' +
-                        '<span class="p02-opt-label">' + opt.label + '</span>';
+        btn.className = 'card-btn p02-opt';
+        btn.innerHTML = '<span class="face">' + (EMO_IMG[opt.label] ? '<img src="img/new/' + EMO_IMG[opt.label] + '.png" alt="" style="width:100%;height:100%;object-fit:cover">' : opt.face) + '</span>' +
+                        '<span class="lab">' + opt.label + '</span>';
         btn.addEventListener('click', () => {
           if (opt.correct) {
             if (solved[index]) return;

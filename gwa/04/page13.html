@@ -8,21 +8,18 @@
     <style>
         /* 디자인 없음 - 기획서 29~34p. 5문제: 설리번 플러스 폰 화면 속 사진(img/p13_photo_1~5.png, 없으면 이모지) + AI 분석 설명 3~4개(음성 듣기 버튼) 중 잘못된 1개의 번호 캐릭터를 선택.
            정답·오답 화면 없이 바로 다음 문제 → 마지막 뒤 채점 모달(1문제 20점, 틀린 문제 다시 풀기 / 끝내기). 캐릭터 그림은 img/p13_char_1~4.png(없으면 이모지) */
-        .p13-ask{position:absolute;left:680px;top:20px;width:1200px;height:90px;margin:0;box-sizing:border-box;padding:6px 30px 0;display:flex;align-items:center;justify-content:center;
-          background:var(--c-white);border:solid 5px var(--c-purple);border-radius:45px;box-shadow:0 8px 0 0 var(--c-sky-pale);
-          font-family:'Cafe24 Ssurround';font-size:46px;color:var(--c-purple);letter-spacing:-0.05em}
-        .p13-phone{left:120px;top:21px;width:450px;height:895px}
+        .p13-phone{left:120px;top:175px;width:450px;height:895px;transform:scale(.8);transform-origin:0 0}
         .p13-screen{position:absolute;inset:0;background:#e9eef7;overflow:hidden}
         .p13-photo{position:absolute;left:20px;top:80px;width:394px;height:560px;box-sizing:border-box;border-radius:20px;background:#fff;border:solid 4px #cfd6e4;display:flex;align-items:center;justify-content:center;font-size:240px;line-height:1;overflow:hidden}
         .p13-photo img{display:block;width:100%;height:100%;object-fit:cover}
-        .p13-opts{position:absolute;left:640px;top:140px;width:1240px;display:flex;flex-direction:column;gap:18px}
+        .p13-opts{position:absolute;left:640px;top:185px;width:1240px;display:flex;flex-direction:column;gap:18px}
         .p13-opt{height:112px;box-sizing:border-box;padding:10px 20px 0 40px;display:flex;align-items:center;gap:20px;background:var(--c-white);border:solid 5px var(--c-purple);border-radius:56px;
           font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all}
         .p13-opt span{flex:1 1 auto}
         .p13-sound{flex:0 0 auto;width:84px;height:84px;margin-top:-8px;padding:0;border:solid 5px var(--c-purple);border-radius:50%;background:var(--c-cream);font-size:42px;line-height:1;cursor:pointer}
         .p13-sound:disabled{opacity:.35;cursor:default}
         .p13-sound.is-playing{background:var(--c-yellow)}
-        .p13-chars{position:absolute;left:640px;top:690px;width:1240px;display:flex;justify-content:space-around}
+        .p13-chars{position:absolute;left:640px;top:660px;width:1240px;display:flex;justify-content:space-around}
         .p13-char{position:relative;width:240px;height:250px;padding:0;border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
         .p13-char .face{flex:1 1 auto;display:flex;align-items:center;justify-content:center;font-size:130px;line-height:1;transition:transform .15s}
         .p13-char .face img{display:block;max-height:170px;max-width:200px}
@@ -39,7 +36,7 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <p class="p13-ask" id="p13Ask"></p>
+          <p class="ask-pill has-stage is-fit"><i id="p13Stage">문제 1</i><span>잘못된 분석 1개를 골라 주세요.</span></p>
           <div class="phone-frame is-thin has-cam p13-phone">
             <div class="p13-screen">
               <div class="phone-status is-dark"></div>
@@ -103,7 +100,7 @@
     function showRound() {
       const i = queue[pos], d = R[i];
       speaking = false;
-      $('p13Ask').textContent = '[문제' + (i + 1) + '] 잘못된 분석 1개를 골라 주세요.';
+      $('p13Stage').textContent = '문제 ' + (i + 1);
       $('p13Photo').innerHTML = '<img src="img/p13_photo_' + (i + 1) + '.png" alt="" onerror="this.replaceWith(document.createTextNode(\'' + d.emoji + '\'))">';
       $('p13Opts').innerHTML = '';
       d.opts.forEach((t, k) => {

@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>나의 마음 이모티콘 제작소</title>
     <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        .cf-phone .cf-chat{height:352px}
+    </style>
 </head>
 <body>
   <div id="page-fade"></div>
@@ -13,34 +16,18 @@
       <div id="stage" class="stage">
         <main class="bg-default">
 
-          <div class="guide-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+          <p class="guide-bubble" id="p18Guide">이렇게 이모티콘을 사용하면<br>자신의 마음을 더 분명하게<br>전달할 수 있어요.</p>
+          <div class="guide-character"><img src="img/new/r18.png" alt="메인 캐릭터"></div>
 
-          <div class="chatapp">
-            <div class="chatapp-body"></div>
-            <div class="chatapp-input">
-              <span class="chatapp-input-field">메시지를 입력해요</span>
-              <button type="button" class="chatapp-icon-btn is-dim" aria-label="이모티콘">&#128512;</button>
-              <button type="button" class="chatapp-icon-btn is-dim" aria-label="보내기">&#10148;</button>
-            </div>
-          </div>
+          <div class="phone-frame is-thin has-cam cf-phone"><div class="phone-screen" id="cfScreen">
+            <div class="phone-status is-dark"></div>
+            <div class="cf-head"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="nm"></span><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4-4"/></svg><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.500a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>
+            <div class="cf-chat is-tall"></div>
+            <div class="cf-input is-bottom"></div>
+            <div class="phone-nav is-dark"></div>
+          </div></div>
 
-          <div class="step-flow">
-
-            <div class="step-panel">
-              <p class="guide-bubble">이렇게 이모티콘을 사용하면<br>자신의 마음을 더 분명하게<br>전달할 수 있어요.</p>
-              <a href="page19.html" class="js-nav-effect next-btn">
-                <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
-              </a>
-            </div>
-
-            <div class="step-panel is-hidden">
-              <p class="guide-bubble">내가 사용한 이모티콘도<br>한 번에 모아보는 것도 가능해요.<br>함께 확인해볼까요?</p>
-              <a href="page19.html" class="js-nav-effect next-btn">
-                <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
-              </a>
-            </div>
-
-          </div>
+          <a href="javascript:;" class="card-btn is-popup next-btn js-sfx" id="p18Next" data-sound="sound/click.mp3">다음</a>
         </main>
       </div>
     </div>
@@ -50,5 +37,26 @@
   <script src="../../js/header.js" data-title="나의 마음 이모티콘 제작소" data-next="page19.html"></script>
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
+  <script>document.querySelectorAll('.cf-input').forEach((e) => { e.innerHTML = cfUI.bar(false); });</script>
+  <script>
+  /* 디자인/사회4차시 14p-7. 안내 두 단계 뒤 page19(이모티콘 수첩) */
+  (function () {
+    const guide = document.getElementById('p18Guide');
+    const next = document.getElementById('p18Next');
+    let step = 0;
+    next.addEventListener('click', () => {
+      next.classList.add('is-selected');
+      if (step === 0) {
+        step = 1;
+        setTimeout(() => {
+          next.classList.remove('is-selected');
+          guide.innerHTML = '내가 사용한 이모티콘도<br>한 번에 모아보는 것도 가능해요.<br>함께 확인해볼까요?';
+        }, 300);
+      } else {
+        setTimeout(() => navigateTo('page19.html'), 300);
+      }
+    });
+  })();
+  </script>
 </body>
 </html>
