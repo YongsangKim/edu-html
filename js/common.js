@@ -2491,10 +2491,13 @@ function initEmotionPickFlow(config) {
   const showCorrectPopup = (html) => show(popupCorrect, textOf(popupCorrect), html);
   const showWarnPopup = (html) => show(popupWarn, popupWarnText, html);
 
-  chatBox.innerHTML = CHAT.map((line) =>
+  // 얼굴 사진은 img/new/face_<id>.png 샘플 조각(config.faces: 이름 -> 파일 id), 없으면 이름 첫 글자
+  const FACES = config.faces || {};
+  const body = chatBox.querySelector('.chat-panel-body') || chatBox;
+  body.innerHTML = CHAT.map((line) =>
     '<div class="talk-line' + (line.me ? ' is-me' : '') + '">' +
-      '<span class="talk-avatar">' + line.who.charAt(0) + '</span>' +
-      '<span class="talk-bubble"><span class="talk-who">' + line.who + '</span>' + line.text + '</span>' +
+      '<span class="talk-avatar"' + (FACES[line.who] ? ' style="background-image:url(img/new/face_' + FACES[line.who] + '.png)"' : '') + '>' + (FACES[line.who] ? '' : line.who.charAt(0)) + '</span>' +
+      '<span class="talk-msgwrap"><span class="talk-who">' + line.who + '</span><span class="talk-bubble">' + line.text + '</span></span>' +
     '</div>').join('');
 
   let stepIndex = 0;
@@ -2502,6 +2505,7 @@ function initEmotionPickFlow(config) {
   function renderStep() {
     const step = STEPS[stepIndex];
     askEl.innerHTML = step.ask;
+    askEl.classList.toggle('is-small', step.kind === 'message');
     optionsBox.innerHTML = '';
     optionsBox.classList.toggle('is-grid', step.kind === 'emotion');
 
@@ -2509,7 +2513,7 @@ function initEmotionPickFlow(config) {
     step.options.forEach((opt) => {
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = step.kind === 'emotion' ? 'card-btn talk-card' : 'emotion-option talk-msg';
+      btn.className = step.kind === 'emotion' ? 'card-btn talk-card' : 'card-btn talk-msg';
       btn.innerHTML = opt.text;
       btn.addEventListener('click', () => {
         if (!opt.correct) {
@@ -2572,21 +2576,43 @@ function initEmotionPickFlow(config) {
        nextHref: 'page15.html'
      });
 ========================================================== */
+/* 사회 4차시 폰 채팅 화면 부품(그림 대신 HTML로 그림). 키보드만 샘플 그림(img/new/ph_kb.png)을 씀.
+   페이지의 폰 화면 안 .cf-input / .cf-panel / .cf-find 에 넣어 씀: cfUI.bar(false|true), cfUI.searchSheet(), cfUI.resultSheet(), cfUI.emojiSheet(), cfUI.findScreen() */
+window.cfUI = (function () {
+  const SMILE = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#b9bec7"/><circle cx="8.6" cy="10" r="1.3" fill="#111"/><circle cx="15.4" cy="10" r="1.3" fill="#111"/><path d="M7.5 14c1.2 2.600 7.800 2.600 9 0" fill="none" stroke="#111" stroke-width="1.8" stroke-linecap="round"/></svg>';
+  const LOCK = '<svg class="lk" viewBox="0 0 16 16"><path d="M4 7V5a4 4 0 0 1 8 0v2h1v8H3V7zm2 0h4V5a2 2 0 0 0-4 0z"/></svg>';
+  const MAG = '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.500"/><path d="M20 20l-4.500-4.500"/></svg>';
+  const tabs = (on) => '<div class="cf-tabs">' + ['검색', '이모티콘', '미니', '발견'].map((t, i) => '<span' + (i === on ? ' class="on"' : '') + '>' + t + '</span>').join('') + '</div>';
+  return {
+    bar: (send) => '<div class="cf-bar"><i class="cf-plus">+</i><span class="cf-ph">메시지 입력</span>' +
+      (send ? '<i class="cf-kbd"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2.500"/><path d="M7 10h.01M11 10h.01M15 10h.01M18 10h.01M7 14h.01M11 14h2M18 14h.01"/></svg></i><i class="cf-go"><svg viewBox="0 0 24 24"><path d="M3 20.500L22 12 3 3.500v6.700l12 1.800-12 1.800z"/></svg></i>'
+            : '<i class="cf-smile">' + SMILE + '</i><i class="cf-hash">#</i>') + '</div>',
+    searchSheet: () => '<div class="cf-sheet"><i class="cf-handle"></i>' + tabs(0) +
+      '<div class="cf-sfield">' + LOCK + '모든 이모티콘을 자유롭게!<b>›</b></div><div class="cf-mag">' + MAG + '</div>' +
+      '<span class="cf-lab" style="top:146px">추천 키워드</span>' +
+      '<div class="cf-chips" style="top:172px">' + ['ㅠㅠ', '감사합니다', '화이팅', 'ㅋㅋㅋㅋㅋ', '네', 'ㅎㅎ'].map((c) => '<span>' + c + '</span>').join('') + '</div>' +
+      '<span class="cf-lab" style="top:236px">많이 검색하는 이모티콘</span>' +
+      '<div class="cf-rank"><p style="left:16px;top:0"><em style="background-image:url(img/new/rank_1.png)"></em><b>1</b>안원잘부 ›</p><p style="left:220px;top:0"><em style="background-image:url(img/new/rank_2.png)"></em><b>2</b>우땅이 ›</p>' +
+      '<p style="left:16px;top:40px"><em style="background-image:url(img/new/rank_3.png)"></em><b>3</b>44교시 생존수업 ›</p><p style="left:220px;top:40px"><em style="background-image:url(img/new/rank_4.png)"></em><b>4</b>면작귀 ›</p></div></div>',
+    resultSheet: () => '<div class="cf-sheet"><i class="cf-handle"></i>' + tabs(0) +
+      '<div class="cf-chips" style="top:90px"><span class="back">‹</span><span class="dark">잠금 해제</span><span class="light">감사</span><span class="light">감사합니다</span></div></div>',
+    emojiSheet: () => '<div class="cf-sheet"><i class="cf-handle"></i>' + tabs(1) +
+      '<div class="cf-cats"><i class="on" style="background-image:url(img/new/cat_recent.png)"></i><i class="all">ALL</i><i style="background-image:url(img/new/cat_1.png)"></i><i style="background-image:url(img/new/cat_2.png)"></i><i style="background-image:url(img/new/cat_3.png)"></i><i style="background-image:url(img/new/cat_4.png)"></i><i style="background-image:url(img/new/cat_5.png)"></i><i style="background-image:url(img/new/cat_6.png)"></i></div>' +
+      '<span class="cf-lab" style="top:132px">최근사용</span></div>',
+    findScreen: () => '<i class="cf-handle"></i><div class="cf-ffield"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>찾고싶은 이모티콘을 검색해보세요.</div><div class="cf-fkb" style="background-image:url(img/new/ph_kb.png)"></div>'
+  };
+})();
+
 function initEmotionChatFlow(config) {
   const DATA = config.data;
   const NEXT_HREF = config.nextHref;
   const FINISH_MODAL = config.finishModal || null;
+  const IMG = 'img/new/';
 
-  const chatBox = document.getElementById('chatappChat');
+  const screen = document.getElementById('cfScreen');
   const guideEl = document.getElementById('chatappGuide');
   const emotionsBox = document.getElementById('chatappEmotions');
-  const picker = document.getElementById('chatappPicker');
-  const pickerInput = document.getElementById('chatappPickerInput');
-  const searchBtn = document.getElementById('chatappSearchBtn');
-  const keywordBtn = document.querySelector('.chatapp-keyword-btn');
-  const candidatesBox = document.getElementById('chatappCandidates');
-  const emojiBtn = document.getElementById('chatappEmojiBtn');
-  const sendBtn = document.getElementById('chatappSendBtn');
+  const keywordBtn = document.querySelector('.cf-keyword');
   const nextBtn = document.getElementById('chatappNext');
   const popup = document.getElementById('chatappPopup');
   const popupText = document.getElementById('chatappPopupText');
@@ -2596,7 +2622,27 @@ function initEmotionChatFlow(config) {
   const clickSound = new Audio(ASSET_BASE + 'sound/click.mp3');
   const play = (audio) => audio.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
 
-  let pickedEmoji = null;
+  // 폰 화면(샘플 조각): 머리글(이름) / 채팅 / 입력줄 / 아래 패널(키보드·이모티콘 검색) / 검색 화면 덮개
+  screen.innerHTML =
+    '<div class="phone-status is-dark"></div>' +
+    '<div class="cf-head"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="nm">' + DATA.friend + '</span>' +
+      '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4-4"/></svg><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.500a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></div>' +
+    '<div class="cf-chat" id="cfChat"></div>' +
+    '<div class="cf-prev is-off" id="cfPrev"><svg class="st" viewBox="0 0 24 24"><path d="M12 2l3 6.500 7 .8-5.200 4.800 1.400 7-6.200-3.600-6.200 3.600 1.400-7L2 9.300l7-.8z"/></svg><svg class="cl" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg><img alt=""></div>' +
+    '<div class="cf-input" id="cfInput">' + cfUI.bar(false) + '</div>' +
+    '<div class="cf-panel" id="cfPanel" style="background-image:url(' + IMG + 'ph_kb.png)"></div>' +
+    '<div class="cf-find is-off" id="cfFind">' + cfUI.findScreen() + '</div>' +
+    '<div class="phone-nav is-dark"></div>';
+  const chatBox = document.getElementById('cfChat');
+  const input = document.getElementById('cfInput');
+  const panel = document.getElementById('cfPanel');
+  const find = document.getElementById('cfFind');
+  const prev = document.getElementById('cfPrev');
+  if (typeof initPhoneBars === 'function') initPhoneBars();
+
+  const FACES = config.faces || {};
+  let pickedImg = null;
+  let hot = null;
 
   function showPopup(html) {
     popupText.innerHTML = html;
@@ -2605,35 +2651,49 @@ function initEmotionChatFlow(config) {
     popup.__hideTimer = setTimeout(() => popup.classList.add('is-off'), 2000);
   }
 
-  // 상대방(친구) 말풍선에는 이름을 위에 같이 보여주고, 내 말풍선은 아바타
-  // 이니셜만으로 충분해서 이름 표시를 생략(채팅앱에서 흔한 관례)
-  function addLine(who, html, me, isEmoji) {
+  function addLine(who, html, me, isImg) {
     const line = document.createElement('div');
-    line.className = 'chatapp-line is-new' + (me ? ' is-me' : '');
-    const nameHtml = me ? '' : '<span class="chatapp-who">' + who + '</span>';
-    line.innerHTML =
-      '<span class="chatapp-avatar">' + who.charAt(0) + '</span>' +
-      '<span class="chatapp-bubble' + (isEmoji ? ' is-emoji' : '') + '">' + nameHtml + html + '</span>';
+    line.className = 'cf-line is-new' + (me ? ' is-me' : '');
+    const face = (!me && FACES[who]) ? '<span class="cf-face" style="background-image:url(' + IMG + 'face_' + FACES[who] + '.png)"></span>' : '';
+    const body = isImg ? '<img class="cf-stk" src="' + IMG + html + '.png" alt="">' : '<span class="cf-bubble">' + html + '</span>';
+    line.innerHTML = face + '<span>' + (me ? '' : '<span class="cf-who">' + who + '</span>') + body + '</span>';
     chatBox.appendChild(line);
-    chatBox.scrollTop = chatBox.scrollHeight;
   }
 
-  /* 1단계: 감정 고르기(기획서 34p) */
+  // 눌러야 할 곳(분홍 깜빡임) — 폰 화면 좌표(434x879)
+  // 눌러야 할 곳 좌표 [x, y, 폭, 높이, 모서리(선택: 숫자px 또는 '50%'; 안 적으면 원)](폰 화면 기준). 페이지에서 initEmotionChatFlow({ hot: { open: [...] } })로 덮어씀
+  // ?edit 으로 열면 세 곳이 한꺼번에 보이고 box-edit.js(클릭 → 방향키)로 맞춘 뒤 표시줄 값을 hot 에 붙여 넣음
+  const HOT = Object.assign({ open: [314, 463, 48, 48], search: [372, 614, 50, 50], send: [369, 462, 50, 50] }, config.hot || {});
+  const HOT_NAME = { open: '이모티콘 버튼', search: '검색 버튼', send: '보내기 버튼' };
+  const radiusOf = (b) => (b[4] === undefined ? '50%' : typeof b[4] === 'number' ? b[4] + 'px' : b[4]);
+  const placeHot = (el) => {
+    const b = el._ref;
+    el.style.left = b[0] + 'px'; el.style.top = b[1] + 'px'; el.style.width = b[2] + 'px'; el.style.height = b[3] + 'px';
+    el.style.borderRadius = radiusOf(b);
+  };
+  function setHot(name, fn) {
+    clearHot();
+    hot = document.createElement('button');
+    hot.type = 'button';
+    hot.className = 'cf-hot';
+    const b = HOT[name];
+    hot.style.cssText = 'left:' + b[0] + 'px;top:' + b[1] + 'px;width:' + b[2] + 'px;height:' + b[3] + 'px;border-radius:' + radiusOf(b);
+    hot.addEventListener('click', () => { play(clickSound); clearHot(); fn(); });
+    screen.appendChild(hot);
+    const mine = hot;
+    setTimeout(() => { if (mine.isConnected) pointFingerAt(mine, { onMain: true }); }, 300);
+  }
+  function clearHot() { if (hot) { hot.remove(); hot = null; } clearFingers(); }
+
+  /* 1단계: 감정 고르기 */
   function stageEmotion() {
     guideEl.innerHTML = '친구의 메시지를 읽었을 때<br>어떤 감정이 드나요?';
     emotionsBox.classList.remove('is-off');
     emotionsBox.innerHTML = '';
-
-    const shuffled = DATA.emotions.slice();
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      const t = shuffled[i]; shuffled[i] = shuffled[j]; shuffled[j] = t;
-    }
-
-    shuffled.forEach((label) => {
+    DATA.emotions.forEach((label) => {
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'emotion-option';
+      btn.className = 'card-btn';
       btn.textContent = label;
       btn.addEventListener('click', () => {
         if (label !== DATA.correctEmotion) {
@@ -2646,14 +2706,14 @@ function initEmotionChatFlow(config) {
         }
         play(correctSound);
         btn.classList.add('is-selected');
-        emotionsBox.querySelectorAll('.emotion-option').forEach((b) => { b.disabled = true; });
+        emotionsBox.querySelectorAll('.card-btn').forEach((b) => { b.disabled = true; });
         setTimeout(stageSent, 800);
       });
       emotionsBox.appendChild(btn);
     });
   }
 
-  /* 2단계: 메시지 전송(기획서 36p) */
+  /* 2단계: 메시지 전송 */
   function stageSent() {
     emotionsBox.classList.add('is-off');
     addLine('나', DATA.myMsg, true, false);
@@ -2661,32 +2721,26 @@ function initEmotionChatFlow(config) {
     showNext(stageOpenPicker);
   }
 
-  /* 3단계: 이모티콘 버튼 클릭(기획서 37p) */
+  /* 3단계: 이모티콘 버튼 클릭 */
   function stageOpenPicker() {
     guideEl.innerHTML = '이모티콘 버튼을 클릭해요.';
-    emojiBtn.classList.remove('is-dim');
-    pointFingerAt(emojiBtn);
-    emojiBtn.addEventListener('click', function once() {
-      emojiBtn.removeEventListener('click', once);
-      emojiBtn.classList.add('is-on');
-      clearFingers();
-      picker.classList.remove('is-off');
+    setHot('open', () => {
+      panel.style.backgroundImage = 'none';
+      panel.innerHTML = cfUI.searchSheet();
       stageSearch();
     });
   }
 
-  /* 4단계: 검색 버튼 클릭(기획서 38p) */
+  /* 4단계: 검색 버튼 클릭 */
   function stageSearch() {
     guideEl.innerHTML = '검색 버튼을 클릭해요.';
-    pointFingerAt(searchBtn);
-    searchBtn.addEventListener('click', function once() {
-      searchBtn.removeEventListener('click', once);
-      clearFingers();
+    setHot('search', () => {
+      find.classList.remove('is-off');
       stageKeyword();
     });
   }
 
-  /* 5단계: 감정 키워드 입력(기획서 39p) — 이 버튼만은 손가락 안내 없이 바로 노출 */
+  /* 5단계: 감정 키워드 입력 — 이 버튼만은 손가락 안내 없이 바로 노출 */
   function stageKeyword() {
     guideEl.innerHTML = '어떤 감정을 표현해야 할까요?<br>오른쪽의 버튼을 클릭해 감정 키워드를 입력해요.';
     keywordBtn.textContent = '‘' + DATA.keyword + '’ 검색하기';
@@ -2696,50 +2750,53 @@ function initEmotionChatFlow(config) {
       keywordBtn.classList.add('is-selected');
       setTimeout(() => {
         keywordBtn.classList.add('is-off');
-        pickerInput.textContent = DATA.keyword;
+        keywordBtn.classList.remove('is-selected');
+        find.classList.add('is-off');
         stagePick();
       }, 300);
     });
   }
 
-  /* 6단계: 이모티콘 선택(기획서 40p) — '다음' 누를 때까지 변경 가능 */
+  /* 6단계: 이모티콘 선택 — '다음' 누를 때까지 변경 가능 */
   function stagePick() {
     guideEl.innerHTML = DATA.pickGuide;
-    candidatesBox.classList.remove('is-off');
-    candidatesBox.innerHTML = '';
-
-    DATA.candidates.forEach((emoji) => {
+    panel.style.backgroundImage = 'none';
+    panel.innerHTML = cfUI.resultSheet() + '<div class="cf-result"></div>';
+    const box = panel.querySelector('.cf-result');
+    DATA.stickers.forEach((name) => {
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'chatapp-candidate';
-      btn.innerHTML = emoji;
+      btn.innerHTML = '<img src="' + IMG + name + '.png" alt="">';
       btn.addEventListener('click', () => {
         play(clickSound);
-        candidatesBox.querySelectorAll('.chatapp-candidate').forEach((b) => b.classList.remove('is-selected'));
+        box.querySelectorAll('button').forEach((b) => b.classList.remove('is-selected'));
         btn.classList.add('is-selected');
-        pickedEmoji = emoji;
+        pickedImg = name;
         showNext(stageSend);
       });
-      candidatesBox.appendChild(btn);
+      box.appendChild(btn);
     });
   }
 
-  /* 7단계: 보내기(기획서 41p) */
+  /* 7단계: 보내기 */
   function stageSend() {
     guideEl.innerHTML = '보내기 버튼을 클릭해 마음을 전송해요.';
-    candidatesBox.querySelectorAll('.chatapp-candidate').forEach((b) => { b.disabled = true; });
-    sendBtn.classList.remove('is-dim');
-    pointFingerAt(sendBtn);
-    sendBtn.addEventListener('click', function once() {
-      sendBtn.removeEventListener('click', once);
-      clearFingers();
-      picker.classList.add('is-off');
-      addLine('나', pickedEmoji, true, true);
+    panel.querySelectorAll('.cf-result button').forEach((b) => { b.disabled = true; b.classList.remove('is-selected'); });
+    prev.querySelector('img').src = IMG + pickedImg + '.png';
+    prev.classList.remove('is-off');
+    input.innerHTML = cfUI.bar(true);
+    setHot('send', () => {
+      prev.classList.add('is-off');
+      panel.classList.add('is-off');
+      input.innerHTML = cfUI.bar(false);
+      input.classList.add('is-bottom');
+      chatBox.classList.add('is-tall');
+      addLine('나', pickedImg, true, true);
       stageDone();
     });
   }
 
-  /* 8단계: 전송 완료(기획서 42p) */
+  /* 8단계: 전송 완료 */
   function stageDone() {
     guideEl.innerHTML = '내 마음을 이모티콘으로<br>표현했어요!';
     showNext(() => {
@@ -2752,23 +2809,14 @@ function initEmotionChatFlow(config) {
   }
 
   // 단계마다 같은 '다음' 버튼을 재사용하되, 누를 때 할 일만 갈아 끼움
-  // js-img-swap은 한 번 눌리면 is-swapped가 계속 남는데, 이 버튼은 여러
-  // 단계에서 같은 엘리먼트를 재사용하다 보니 다음번에 다시 나타날 때도
-  // 눌린(_on) 이미지로 보이는 문제가 있어서 보여줄 때마다 원본으로 리셋
   function showNext(handler) {
-    const nextImg = nextBtn.querySelector('.js-img-swap');
-    if (nextImg) {
-      nextImg.classList.remove('is-swapped');
-      nextImg.src = nextImg.dataset.originalSrc || nextImg.src;
-    }
-    nextBtn.classList.remove('is-off');
+    nextBtn.classList.remove('is-off', 'is-selected');
     nextBtn.__handler = handler;
   }
-  // is-off(display:none)를 클릭과 같은 틱에 걸면 클릭 이미지(_on)로 바뀐 게
-  // 화면에 그려지기도 전에 사라져 버려서, 잠깐 보여준 뒤에 숨기고 다음으로 넘어감
   nextBtn.addEventListener('click', () => {
     const handler = nextBtn.__handler;
     nextBtn.__handler = null;
+    nextBtn.classList.add('is-selected');
     setTimeout(() => {
       nextBtn.classList.add('is-off');
       if (handler) handler();
@@ -2776,6 +2824,24 @@ function initEmotionChatFlow(config) {
   });
 
   addLine(DATA.friend, DATA.friendMsg, false, false);
+  if (window.BoxEdit && BoxEdit.on) {
+    // 좌표 수정 모드: 이모티콘 검색 패널을 띄우고 세 눌림 영역을 한꺼번에 보여줌
+    panel.style.backgroundImage = 'none';
+    panel.innerHTML = cfUI.searchSheet();
+    Object.keys(HOT).forEach((name) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'cf-hot';
+      b.dataset.name = HOT_NAME[name];
+      b.style.animation = 'none';
+      BoxEdit.tag(b, HOT[name]);
+      placeHot(b);
+      screen.appendChild(b);
+    });
+    BoxEdit.init({ name: (el) => '[' + el.dataset.name + '] ', apply: placeHot });
+    guideEl.textContent = '좌표 수정 모드 — 버튼을 클릭해 방향키로 맞춰요(Shift 10px, Alt+방향키 크기)';
+    return;
+  }
   stageEmotion();
 }
 

@@ -6,44 +6,40 @@
     <title>AI 이모티콘 문장 만들기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 없음 - 와이어프레임. 기획서 29p:
-           page10에서 고른 카드로 만든 프롬프트가 타이핑되고, 조이스틱 레버를 내리면
-           바로 옆 생성 영역에서 로딩 스피너가 돈 뒤 이모티콘이 나타나고, 그제서야
-           기계 아래 여백에 '다음' 버튼이 나타남(페이지 이동은 없음 — page12는
-           다음 버튼으로만 이동). 기계 폭은 프롬프트 문장이 줄바꿈되지 않을 만큼
-           넓게 잡음(46px 폰트로 한 줄 표시하려면 대략 1200px+ 필요) */
-
-        .p11-machine{position:absolute;left:260px;top:90px;width:1480px;height:700px;background:#3b1e87;border:solid 8px var(--c-cream);border-radius:56px;box-sizing:border-box;padding:44px 60px}
-        .p11-machine-title{margin:0 0 24px 0;font-family:'Cafe24 Ssurround';font-size:52px;color:var(--c-yellow);text-align:center}
-        .p11-screen{height:150px;background:#0f0d26;border:solid 6px var(--c-sky);border-radius:32px;box-sizing:border-box;padding:34px 50px;
-          font-family:'Pretendard';font-size:46px;line-height:1.5;color:var(--c-cream)}
-        .p11-caret{display:inline-block;width:4px;height:48px;margin-left:6px;background:var(--c-yellow);vertical-align:-8px;animation:p11-blink 1s steps(1,end) infinite}
+        /* 디자인 반영 - 디자인/사회4차시 11p-1. 프롬프트 문장이 타이핑되고, 조이스틱 레버를 내리면 왼쪽 화면에서 스피너가 돈 뒤 이모티콘(샘플 조각 img/new/gen_boy.png)이 나타나고
+           그제서야 '다음' 버튼이 나타남(페이지 이동은 없음 — page12는 다음 버튼으로만 이동) */
+        .p11-machine{position:absolute;left:185px;top:87px;width:1550px;height:826px;box-sizing:border-box;background:linear-gradient(#faf8ff 0,#fff 14%,#fff 36%,#e9eaf2 58%,#d5d7ea 82%,#e4e1f4 100%);border:solid 28px #2a6bd0;border-radius:120px;box-shadow:0 14px 0 0 rgba(63,111,181,.25)}
+        .p11-machine .next-btn.card-btn.is-popup{right:128px;bottom:0px;z-index:10}
+        .p11-title{position:absolute;left:50%;top:-70px;width:880px;height:120px;margin:0 0 0 -440px;box-sizing:border-box;padding-top:8px;display:flex;align-items:center;justify-content:center;background:var(--c-white);border:solid 15px #2a6bd0;border-radius:60px;box-shadow:0 15px 0 0 #e0e7fb;font-family:'Cafe24 Ssurround';font-size:70px;color:#053c85;letter-spacing:-0.05em;gap:10px}
+        .p11-title span{color:#266cc8}
+        .p11-prompt{position:absolute;left:50px;top:95px;width:1394px;height:146px;box-sizing:border-box;padding:0 46px;display:flex;align-items:center;background:#1c1840;border: solid 12px #eef0ff;box-shadow: 0 0 0px 2px #8f96cc;border-radius:30px;font-family:'Cafe24 Ssurround';font-size:60px;color:#e9f6ff;letter-spacing:-0.05em;white-space:nowrap}
+        .p11-prompt b{font-weight:normal;color:#8fb5e6}
+        .p11-caret{display:inline-block;width:5px;height:60px;margin-left:6px;background:#8fb5e6;vertical-align:-8px;animation:p11-blink 1s steps(1,end) infinite}
         @keyframes p11-blink{0%,50%{opacity:1}50.01%,100%{opacity:0}}
+        .p11-result{position:absolute;left:50px;top:272px;width:887px;height:455px;box-sizing:border-box;background:#1c1840;border-radius:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 0 0 #fff}
+        .p11-result-hint{margin:0;padding:0 30px;font-family:'Pretendard';font-size:40px;color:#8d97a6;text-align:center}
+        /* 로딩: 16개 막대가 원으로 늘어서 파랑→보라로 이어지고, 하나씩 밝아지며 도는 효과 */
+        .p11-spinner{position:relative;width:260px;height:260px}
+        .p11-spinner i{position:absolute;left:50%;top:50%;width:20px;height:52px;margin:-130px 0 0 -10px;border-radius:10px;transform-origin:50% 130px;animation:p11-fade 1.2s linear infinite}
+        @keyframes p11-fade{0%{opacity:1}100%{opacity:.22}}
+        .p11-gen{display:block;width:440px;height:440px;object-fit:contain}
+        .p11-console{position:absolute;left:959px;top:272px;width:485px;height:455px;box-sizing:border-box;background:#c7d6f2;border-radius:20px;box-shadow:0 6px 0 0 #fff,inset -30px -30px 15px rgba(140,168,224,.30)}
+        /* 콘솔 왼쪽 위의 세로 줄 3개(box-shadow로 31px씩 복제) */
+        .p11-console:before{content:'';position:absolute;left:73px;top:13px;width:12px;height:46px;border-radius:7px;background:#4a6286;box-shadow:31px 0 0 #4a6286,62px 0 0 #4a6286}
+        .p11-console:after{content:'';position:absolute;left:76px;bottom:-70px;width:320px;height:95px;background:linear-gradient(#0a2a73,#0a2a73) right 20px top 14px/16px 64px no-repeat,linear-gradient(#0a2a73,#0a2a73) right 51px top 14px/16px 64px no-repeat,linear-gradient(#0a2a73,#0a2a73) right 82px top 14px/16px 64px no-repeat,#2a6bd0;border:solid 11px #1b4fae;border-radius:36px}
 
-        /* 이모티콘 생성 영역 + 조이스틱을 한 줄에: 생성 영역이 왼쪽, 조이스틱이 오른쪽 */
-        .p11-gen-row{display:flex;align-items:stretch;gap:30px;margin-top:26px}
-
-        .p11-result{flex:1 1 auto;height:300px;background:#0f0d26;border:solid 6px var(--c-sky);border-radius:32px;box-sizing:border-box;
-          display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px}
-        .p11-result-hint{margin:0;padding:0 30px;font-family:'Pretendard';font-size:30px;color:#8d97a6;text-align:center}
-        .p11-spinner{width:110px;height:110px;border-radius:50%;border:14px solid #3b1e87;border-top-color:var(--c-yellow);
-          animation:p11-spin 1s linear infinite}
-        @keyframes p11-spin{to{transform:rotate(360deg)}}
-        .p11-emoji-result{width:200px;height:200px;border-radius:40px;background:#fff3c9;border:solid 6px var(--c-ink);
-          display:flex;align-items:center;justify-content:center;font-size:120px}
-
-        /* 조이스틱: 레버를 클릭하면 아래로 내려가는 효과만 CSS로 표현. 생성 영역과
-           나란히 놓이도록 position:relative로 바꾸고(내부 절대좌표 기준점은 유지),
-           안내는 라벨 텍스트 대신 위의 스와이프 가이드 손가락으로 대신함 */
-        .p11-joystick{touch-action:none;position:relative;flex:0 0 260px;height:300px;background:none;border:0;padding:0;cursor:pointer}
-        .p11-joystick-base{position:absolute;left:30px;top:180px;width:200px;height:100px;background:var(--c-cream);border:solid 6px var(--c-ink);border-radius:50px}
-        .p11-joystick-stick{position:absolute;left:113px;top:35px;width:26px;height:160px;background:var(--c-sky-pale);border:solid 5px var(--c-ink);border-radius:13px;transition:top .25s ease,height .25s ease}
-        .p11-joystick-knob{position:absolute;left:75px;top:0;width:100px;height:100px;background:#ff2f7b;border:solid 6px var(--c-ink);border-radius:50%;transition:top .25s ease}
-        .p11-joystick.is-pulled .p11-joystick-knob{top:95px}
-        .p11-joystick.is-pulled .p11-joystick-stick{top:130px;height:65px}
-
-        /* 기계가 넓어져 오른쪽 여백이 부족해서, '다음' 버튼은 기계 아래
-           빈 공간(세로 790~960px)에 놓음 */
+        /* 조이스틱: 레버를 클릭(또는 아래로 드래그)하면 아래로 내려가는 효과 */
+        .p11-joystick{touch-action:none;position:absolute;left:0;top:0;width:485px;height:455px;background:none;border:0;padding:0;cursor:pointer;z-index:2}
+        .p11-joystick.is-used{cursor:default}
+        .p11-joystick-base{position:absolute;left:128px;top:155px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle at 50% 35%,#46486f 0 24%,transparent 21.4%),radial-gradient(circle at 50% 41%,#3d4066 0 44%,transparent 44.4%),linear-gradient(#383b5c,#2f3252);border:solid 30px #1c1840;box-shadow:0 0 0 15px #c7d6f2,0 0 0 17px #98a6dc}
+        .p11-joystick-stick{position:absolute;left:222px;top:43px;width:34px;height:210px;background:linear-gradient(90deg,#c7d6f2 0 70%,#9db6e6 70%);border-radius:17px;box-shadow:inset 0 16px 0 rgba(110,135,205,.3),inset 0 -16px 0 rgba(110,135,205,.3);transition:top .4s ease,height .4s ease}
+        /* 기둥이 꽂히는 자리의 작은 어두운 원 */
+        .p11-joystick-base:before{content:'';position:absolute;left:52%;top:35%;width:42px;height:42px;margin:-23px 0 0 -23px;border-radius:50%;background:#1c1840}
+        .p11-joystick-knob{position:absolute;left:160px;top:-22px;width:160px;height:160px;background:#fd9709;border-radius:50%;box-shadow:inset -17px -17px 0 #f08c21;transition:top .4s ease}
+        /* 공 왼쪽 위의 작은 하이라이트 원 */
+        .p11-joystick-knob:before{content:'';position:absolute;left:24%;top:24%;width:20%;height:20%;border-radius:50%;background:#fedfab}
+        .p11-joystick.is-pulled .p11-joystick-knob{top:276px}
+        .p11-joystick.is-pulled .p11-joystick-stick{top:226px;height:130px}
     </style>
 </head>
 <body>
@@ -54,34 +50,33 @@
         <main class="bg-default">
 
           <div class="p11-machine">
-            <p class="p11-machine-title">AI 이모티콘 생성기</p>
-            <div class="p11-screen"><span id="p11Text"></span><span class="p11-caret"></span></div>
+            <p class="p11-title"><span>AI</span> 이모티콘 생성기</p>
+            <div class="p11-prompt"><span id="p11Text"></span><span class="p11-caret"></span></div>
 
-            <div class="p11-gen-row">
-              <div class="p11-result" id="p11Result">
-                <p class="p11-result-hint" id="p11ResultHint">레버를 내리면 이모티콘이 생성돼요</p>
-              </div>
+            <div class="p11-result" id="p11Result">
+              <p class="p11-result-hint" id="p11ResultHint">레버를 내리면 이모티콘이 생성돼요</p>
+            </div>
 
+            <div class="p11-console">
               <button type="button" class="p11-joystick" id="p11Joystick" aria-label="조이스틱 레버 내리기">
                 <span class="p11-joystick-base"></span>
                 <span class="p11-joystick-stick"></span>
                 <span class="p11-joystick-knob"></span>
 
                 <!-- 손가락이 레버를 누른 채 아래로 드래그하는 모션(기능 N): 2번 반복 후 사라짐 -->
-                <div class="swipe-guide" style="position:absolute;left:0;top:0;width:260px;height:300px;pointer-events:none;z-index:20">
+                <div class="swipe-guide" style="position:absolute;left:0;top:0;width:485px;height:455px;pointer-events:none;z-index:20">
                   <img class="swipe-guide-finger" src="../../img/common/img_finger01.png" alt=""
-                       style="position:absolute;left:120px;top:-10px;"
-                       data-start-left="120" data-start-top="-10"
-                       data-end-left="120" data-end-top="135"
+                       style="position:absolute;left:215px;top:20px;"
+                       data-start-left="215" data-start-top="20"
+                       data-end-left="215" data-end-top="300"
                        data-repeat="2">
                 </div>
               </button>
             </div>
+            <a href="page12.html" class="js-nav-effect card-btn is-popup next-btn is-off js-sfx" data-sound="sound/click.mp3">다음</a>
           </div>
 
-          <a href="page12.html" class="js-nav-effect next-btn is-off">
-            <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
-          </a>
+          
         </main>
       </div>
     </div>
@@ -94,7 +89,7 @@
   <script>
   /* 기획서 29p. 프롬프트 문장을 한 글자씩 타이핑한 뒤 조이스틱 클릭을 기다림 */
   (function () {
-    const PROMPT = '고마운 마음을 담은 웃는 얼굴 이모티콘을 만들어 줘.';
+    const PROMPT = '고마운 마음을 담은 웃는 얼굴 <b>이모티콘</b>을 만들어 줘.';
     const textEl = document.getElementById('p11Text');
     const joystick = document.getElementById('p11Joystick');
     const result = document.getElementById('p11Result');
@@ -104,7 +99,9 @@
     let i = 0;
     const typer = setInterval(() => {
       i += 1;
-      textEl.textContent = PROMPT.slice(0, i);
+      // 태그(<b>…</b>)는 글자 사이에 끼어 보이지 않게 한 번에 통째로 넘김
+      if (PROMPT.charAt(i - 1) === '<') i = PROMPT.indexOf('>', i) + 1;
+      textEl.innerHTML = PROMPT.slice(0, i);
       if (i >= PROMPT.length) clearInterval(typer);
     }, 70);
 
@@ -118,8 +115,11 @@
     joystick.addEventListener('pointerup', () => { dragY = null; });
     joystick.addEventListener('pointercancel', () => { dragY = null; });
 
+    let pulled = false;
     joystick.addEventListener('click', () => {
-      if (joystick.classList.contains('is-pulled')) return;
+      if (pulled) return;
+      pulled = true;
+      joystick.classList.add('is-used');
       joystick.classList.add('is-pulled');
       playDrag();
       document.querySelectorAll('.swipe-guide').forEach((el) => { el.style.display = 'none'; });
@@ -129,15 +129,24 @@
       resultHint.remove();
       const spinner = document.createElement('div');
       spinner.className = 'p11-spinner';
+      for (let k = 0; k < 16; k++) {
+        const t = document.createElement('i');
+        t.style.transform = 'rotate(' + k * 22.5 + 'deg)';
+        t.style.background = 'hsl(' + (205 + k * 5) + ',90%,' + (66 - k * 1.1) + '%)';
+        t.style.animationDelay = (-1.2 + k * 0.075) + 's';
+        spinner.appendChild(t);
+      }
       result.appendChild(spinner);
 
       setTimeout(() => {
         spinner.remove();
-        const emoji = document.createElement('div');
-        emoji.className = 'p11-emoji-result';
-        emoji.innerHTML = '&#128522;';
-        result.appendChild(emoji);
-        try { sessionStorage.setItem('sa04_emoji', emoji.textContent); } catch (e) {}
+        joystick.classList.remove('is-pulled');
+        const gen = document.createElement('img');
+        gen.className = 'p11-gen';
+        gen.src = 'img/new/gen_boy.png';
+        gen.alt = '';
+        result.appendChild(gen);
+        try { sessionStorage.setItem('sa04_emoji', '😊'); } catch (e) {}
         nextBtn.classList.remove('is-off');
       }, 1800);
     });

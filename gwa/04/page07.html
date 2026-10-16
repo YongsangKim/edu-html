@@ -8,25 +8,20 @@
     <style>
         /* 디자인 없음 - 기획서 12~20p. 3문제(사과·바나나·버스). 한 문제 = 정보 단계(모양·색깔·특징 버튼을 눌러 분석 정보 확인, 물음표만 보임 → 다음) +
            정답 단계(분석 정보 요약을 보고 사물 3개 중 고르기). 정답 모달 2초 뒤 다음 버튼, 3번째는 바로 완료 모달 3단계. 사물 그림은 이모지 임시 */
-        .p07-ask{position:absolute;left:310px;top:20px;width:1300px;height:80px;margin:0;box-sizing:border-box;padding:6px 30px 0;display:flex;align-items:center;justify-content:center;
-          background:var(--c-white);border:solid 5px var(--c-purple);border-radius:40px;box-shadow:0 8px 0 0 var(--c-sky-pale);
-          font-family:'Cafe24 Ssurround';font-size:42px;color:var(--c-purple);letter-spacing:-0.05em}
-        .p07-obj{position:absolute;left:150px;top:150px;width:700px;height:700px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;
-          background:var(--c-white);border:solid 6px var(--c-purple);border-radius:40px;box-shadow:0 8px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:420px;line-height:1;color:var(--c-violet)}
-        .p07-obj.is-open{font-size:360px}
-        .p07-obj img{display:block;width:480px;height:480px;object-fit:contain}
-        .p07-text{position:absolute;left:940px;top:150px;width:830px;height:260px;box-sizing:border-box;padding:26px 40px 0;display:flex;align-items:center;justify-content:center;text-align:center;
-          background:var(--c-white);border:solid 6px var(--c-purple);border-radius:30px;font-family:'Cafe24 Ssurround';font-size:54px;line-height:1.25;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all}
-        .p07-text.is-empty{color:rgba(0,0,0,.25)}
-        .p07-chips{position:absolute;left:940px;top:150px;width:830px;display:flex;flex-direction:column;gap:20px}
-        .p07-chip{height:100px;box-sizing:border-box;padding:12px 40px 0;display:flex;align-items:center;background:var(--c-white);border:solid 5px var(--c-purple);border-radius:50px;font-family:'Cafe24 Ssurround';font-size:50px;color:var(--c-ink);letter-spacing:-0.05em}
-        .p07-btns{position:absolute;left:940px;top:470px;width:830px;display:flex;justify-content:space-between}
-        .p07-btns .card-btn{width:260px;min-width:0;font-size:50px;padding:10px 0 0}
-        .p07-opts{position:absolute;left:940px;top:520px;width:830px;display:flex;justify-content:space-between}
-        .p07-opts .card-btn{width:260px;min-width:0;height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:48px;padding:10px 0 0}
-        .p07-opts .card-btn span{font-size:84px;line-height:1}
-        .p07-next{position:absolute;right:150px;bottom:50px}
+        /* 가운데 상자(물음표 + 아래 설명) 한 칸, 그 아래 버튼 한 줄 — 기획서 12p 배치 */
+        .p07-obj{position:absolute;left:700px;top:170px;width:520px;height:500px;box-sizing:border-box;padding:10px 24px 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+          background:var(--c-white);border:solid 6px var(--c-purple);border-radius:40px;box-shadow:0 8px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';text-align:center;letter-spacing:-0.05em;word-break:keep-all}
+        .p07-q{font-size:280px;line-height:1;color:var(--c-violet);margin-bottom:-20px;padding-top:20px}
+        .p07-q.is-open{font-size:240px}
+        .p07-text{margin:0;min-height:130px;font-size:54px;line-height:1.2;color:var(--c-ink)}
+        .p07-chips{margin:0;min-height:130px;display:flex;flex-direction:column;gap:4px;font-size:40px;line-height:1.2;color:var(--c-ink)}
+        .p07-btns{position:absolute;left:545px;top:710px;width:830px;display:flex;justify-content:space-between}
+        .p07-btns .card-btn{width:250px;min-width:0;font-size:50px;padding:10px 0 0}
+        .p07-opts{position:absolute;left:545px;top:710px;width:830px;display:flex;justify-content:space-between}
+        .p07-opts .card-btn{width:250px;min-width:0;height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;font-size:44px;padding:6px 0 0}
+        .p07-opts .card-btn span{font-size:70px;line-height:1}
         .p07-hide{display:none}
+        .card-btn.p07-hide{display:none}
     </style>
 </head>
 <body>
@@ -35,22 +30,24 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <p class="p07-ask" id="p07Ask">AI가 분석한 이미지 속 사물의 특징을 살펴볼까요?</p>
-          <div class="p07-obj" id="p07Obj">?</div>
+          <p class="ask-pill is-small is-fit"><span id="p07Ask">AI가 분석한 이미지 속 사물의 특징을 살펴볼까요?</span></p>
+          <div class="p07-obj" id="p07Obj">
+            <span class="p07-q" id="p07Q">?</span>
+            <p class="p07-text" id="p07Text"></p>
+            <div class="p07-chips p07-hide" id="p07Chips"></div>
+          </div>
 
           <div id="p07Info">
-            <p class="p07-text is-empty" id="p07Text">?</p>
             <div class="p07-btns">
-              <button class="card-btn js-sfx" data-sound="sound/click.mp3" data-i="0">1. 모양</button>
-              <button class="card-btn js-sfx" data-sound="sound/click.mp3" data-i="1">2. 색깔</button>
-              <button class="card-btn js-sfx" data-sound="sound/click.mp3" data-i="2">3. 특징</button>
+              <button class="card-btn js-sfx" data-sound="sound/click.mp3" data-i="0">모양</button>
+              <button class="card-btn js-sfx" data-sound="sound/click.mp3" data-i="1">색깔</button>
+              <button class="card-btn js-sfx" data-sound="sound/click.mp3" data-i="2">특징</button>
             </div>
           </div>
           <div class="p07-hide" id="p07Ans">
-            <div class="p07-chips" id="p07Chips"></div>
             <div class="p07-opts" id="p07Opts"></div>
           </div>
-          <button class="card-btn p07-next p07-hide js-sfx" id="p07Next" data-sound="sound/click.mp3">다음</button>
+          <button class="card-btn is-start next-btn p07-hide js-sfx" id="p07Next" data-sound="sound/click.mp3">다음</button>
 
           <div class="ox-result-correct is-avatar is-off" id="p07Right">
             <div class="avatar-popup-panel">
@@ -86,7 +83,7 @@
                   </div>
                   <div class="step-panel">
                     <p class="avatar-card-text">설리번 플러스에서 카메라에 비친 모습을<br>AI가 어떻게 설명해 주는지<br>직접 확인해볼까요?</p>
-                    <a href="page08.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+                    <a href="page08.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-start" data-sound="sound/click.mp3">다음</a>
                   </div>
                 </div>
               </div>
@@ -120,26 +117,25 @@
       const d = QS[q];
       seen = new Set();
       $('p07Ask').textContent = 'AI가 분석한 이미지 속 사물의 특징을 살펴볼까요?';
-      $('p07Obj').textContent = '?';
-      $('p07Obj').classList.remove('is-open');
-      $('p07Text').textContent = '?';
-      $('p07Text').classList.add('is-empty');
+      $('p07Q').textContent = '?';
+      $('p07Q').classList.remove('is-open');
+      $('p07Text').textContent = '';
+      show($('p07Text'), true); show($('p07Chips'), false);
       infoBtns.forEach((b) => b.classList.remove('is-selected'));
-      show($('p07Info'), true); show($('p07Ans'), false); show($('p07Next'), false);
+      show($('p07Info'), true); show($('p07Ans'), false);
+      $('p07Next').dataset.phase = 'info'; show($('p07Next'), true);
     }
     infoBtns.forEach((b) => b.addEventListener('click', () => {
       const i = +b.dataset.i;
       $('p07Text').textContent = QS[q].texts[i];
-      $('p07Text').classList.remove('is-empty');
-      b.classList.add('is-selected');
-      seen.add(i);
-      if (seen.size === 3) { show($('p07Next'), true); $('p07Next').dataset.phase = 'info'; }
+      infoBtns.forEach((o) => o.classList.toggle('is-selected', o === b));
     }));
 
     function startAnswer() {
       const d = QS[q];
       $('p07Ask').textContent = 'AI가 분석한 특징을 보고, 어떤 사물인지 맞혀 볼까요?';
-      $('p07Chips').innerHTML = d.chips.map((c) => '<div class="p07-chip">' + c + '</div>').join('');
+      $('p07Chips').innerHTML = d.chips.map((c) => '<span>' + c + '</span>').join('');
+      show($('p07Text'), false); show($('p07Chips'), true);
       $('p07Opts').innerHTML = '';
       d.opts.forEach((o) => {
         const b = document.createElement('button');
@@ -159,8 +155,8 @@
         return;
       }
       playCorrect();
-      $('p07Obj').textContent = QS[q].emoji;
-      $('p07Obj').classList.add('is-open');
+      $('p07Q').textContent = QS[q].emoji;
+      $('p07Q').classList.add('is-open');
       $('p07RightSub').textContent = QS[q].fb;
       flashLayer($('p07Right'), 'is-off', 2000);
       Array.from($('p07Opts').children).forEach((b) => { b.disabled = true; });
