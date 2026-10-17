@@ -6,27 +6,30 @@
     <title>오늘의 선택 미션</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 3~9p. 3 STAGE: 메모지 조건 보고 방법 선택 → 정답이면 그 방법의 장단점 2개 고르기.
+        /* 디자인 반영(02p) - 기획서 3~9p. 3 STAGE: 메모지 조건 보고 방법 선택 → 정답이면 그 방법의 장단점 2개 고르기.
            선택지 삽화는 img/p02_opt_{stage}{번호}.png(없으면 보라 칸) */
 
         .p02-steps{position:absolute;left:80px;top:48px;gap:84px}
         .p02-steps:before{content:'';position:absolute;left:50px;top:46px;width:512px;height:8px;background:var(--c-ink);z-index:-1}
         .p02-steps .step-dot{width:100px;height:100px;box-sizing:border-box;border:solid 9px var(--c-ink);font-size:60px;padding-top:6px;color:var(--c-ink)}
-        .p02-steps .step-dot.is-active{background:var(--c-ink);border-color:var(--c-ink);color:var(--c-white)}
+        .p02-steps .step-dot.is-active{background:linear-gradient(135deg,#023187 0%,#0654c8 100%);border-color:var(--c-ink);color:var(--c-white)}
         .p02-title{left:640px;top:48px;transform:none;width:1185px}
 
-        .p02-board{position:absolute;left:59px;top:181px;width:1796px;height:702px;box-sizing:border-box;background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:48px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
-        .p02-memo{position:absolute;left:109px;top:235px;width:584px;height:590px;box-sizing:border-box;padding:50px 40px;background:#fff3b8;border-radius:12px;box-shadow:4px 8px 0 0 #e6d487;
-          font-family:'Cafe24 Ssurround';color:var(--c-ink);letter-spacing:-0.04em;word-break:keep-all}
-        .p02-memo-ask{margin:0 0 40px;font-size:52px;line-height:1.2;color:var(--c-purple);text-align:center}
-        .p02-memo-text{margin:0;font-size:38px;line-height:1.5}
-        .p02-memo-text p{position:relative;margin:0 0 12px;padding-left:1em;line-height:1.3em}
-        .p02-memo-text p:before{content:'';position:absolute;left:0;top:.4em;width:.3em;height:.3em;border-radius:50%;background:currentColor}
+        .p02-board{position:absolute;left:76px;top:194px;width:1768px;height:703px;box-sizing:border-box;background:var(--c-navy);border-radius:12px}
+        .p02-memo{position:absolute;left:128px;top:247px;width:485px;height:598px;box-sizing:border-box;padding:56px 20px 30px 24px;background:#fff0b3;border-radius:8px 8px 100px 8px / 8px 8px 115px 8px;box-shadow:0 12px 0 0 #022a78;
+          font-family:'Cafe24 Ssurround';color:var(--c-navy);letter-spacing:-0.04em;word-break:keep-all}
+        .p02-memo:after{content:"";position:absolute;right:0;bottom:0;width:100px;height:115px;border-bottom-right-radius:100px 115px;background:radial-gradient(ellipse 130px 89px at -20px 0px,#fff0b3 99%,#ffe45c 100%)}
+        .p02-memo-pin{position:absolute;left:231px;top:-72px;width:100px;height:auto;pointer-events:none}
+        .p02-memo-ask{margin:0 0 22px;padding:0;font-size:50px;line-height:76px;color:#1f5fd0;text-align:left;background:repeating-linear-gradient(to bottom,transparent 0 72px,#c9a24a 72px 74px);letter-spacing:-0.08em}
+        /* .p02-memo-ask br{display:none} */
+        .p02-memo-text{margin:0;font-size:32px;line-height:1.3}
+        .p02-memo-text p{position:relative;margin:0 0 20px;padding-left:60px;line-height:1.25em;letter-spacing:-0.08em}
+        .p02-memo-text p:before{content:'';position:absolute;left:0;top:-10px;width:52px;height:52px;background:url('img/icon_star.png') center / contain no-repeat}
 
-        .p02-opts{position:absolute;left:748px;top:260px;width:1033px;display:flex;justify-content:space-between}
-        .p02-opt{width:323px;padding:0;border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:28px}
-        .p02-opt-img{width:323px;height:430px;box-sizing:border-box;border:solid 6px #eae0fd;border-radius:28px;background: center / cover no-repeat}
-        .p02-opt .card-btn{display:flex;align-items:center;justify-content:center;min-width:0;width:300px;height:100px;padding:10px 10px 6px;font-size:52px;pointer-events:none}
+        .p02-opts{position:absolute;left:656px;top:247px;width:1141px;display:flex;justify-content:space-between}
+        .p02-opt{width:355px;padding:0;border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:26px}
+        .p02-opt-img{width:355px;height:450px;box-sizing:border-box;border:solid 4px var(--c-white);border-radius:8px;background: center / cover no-repeat}
+        .p02-opt .card-btn{display:flex;align-items:center;justify-content:center;min-width:0;width:358px;height:118px;padding:10px 10px 6px;font-size:56px;pointer-events:none}
         .p02-opt:hover .p02-opt-img{border-color:var(--c-violet)}
         .p02-opt:hover .card-btn{color:var(--c-violet)}
         .p02-opt.is-selected .p02-opt-img{border-color:#ff4ff9}
@@ -35,9 +38,14 @@
 
         /* .avatar-card.p02-pc{width:1580px;padding:50px 90px 60px}
         .p02-pc .avatar-card-text{padding-left:225px;margin-bottom:40px;text-align:left} */
-        .p02-pc-opts{display:grid;grid-template-columns:1fr 1fr;gap:34px 40px}
-        .p02-pc-opt{width:100%;height:116px;padding:4px 24px 0;font-size:36px;line-height:1.2;letter-spacing:-0.05em;word-break:keep-all}
-        .p02-pc-opt.is-right{background:linear-gradient(180deg,#4d8bff,var(--c-blue));color:var(--c-white);border-color:#9fc0ff}
+        .avatar-card.p02-pc{padding:90px 50px 46px}
+        .p02-pc .avatar-card-title{margin-bottom:40px}
+        .p02-pc-ask{position:relative;z-index:1;width:max-content;max-width:100%;margin:0 auto -50px;padding:6px 50px 0;box-sizing:border-box;background:var(--c-white);border:solid 5px #7d42f5;border-radius:50px;box-shadow:0 8px 0 0 rgba(92,61,240,.25);font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.3;color:#5c24ce;letter-spacing:-0.06em;text-align:center}
+        .p02-pc-ask.is-small{font-size:50px}
+        .p02-pc-opts{display:grid;grid-template-columns:1fr 1fr;gap:30px 40px;padding:70px 36px 36px;background:#a589ff;border:solid 5px #7d42f5;border-radius:50px}
+        .p02-pc-opt{min-width:0;width:100%;height:100px;font-size:36px;padding:10px 20px 8px;line-height:1.1em;text-align:left;box-shadow:0 10px 0 0 #a9a2ff, 0 10px 0 10px #6009c3;color:#48159c}
+        .p02-pc-opt.is-selected{translate:0 8px;box-shadow:0 2px 0 0 #a9a2ff, 0 2px 0 10px #6009c3}
+        .p02-pc-opt:not(.is-selected):not(:disabled):not(.is-disabled):active{translate:0 8px;box-shadow:0 2px 0 0 #a9a2ff, 0 2px 0 10px #6009c3}
         .p02-pc-opt.is-wrong{animation:fix-word-shake .3s ease}
 
         #p02Wrong, #p02Good{z-index:120}
@@ -54,6 +62,7 @@
 
           <div class="p02-board"></div>
           <div class="p02-memo">
+            <img class="p02-memo-pin" src="img/p02_pin.png" alt="">
             <p class="p02-memo-ask" id="p02Ask"></p>
             <div class="p02-memo-text" id="p02Memo"></div>
           </div>
@@ -63,7 +72,7 @@
             <div class="avatar-card is-small p02-pc">
               <img class="avatar-card-avatar" src="../../img/common/avatar_correct.png" alt="">
               <p class="avatar-card-title">정답이에요!</p>
-              <p class="avatar-card-text" id="p02PcText"></p>
+              <p class="p02-pc-ask" id="p02PcText"></p>
               <div class="p02-pc-opts" id="p02PcOpts"></div>
             </div>
           </div>
@@ -126,7 +135,7 @@
           { text: '내가 메뉴를 선택할 수 없다.' }
         ],
         pcWrong: '도시락, 학교 급식, 박물관 식당 중<br>어떤 것의 장단점인지 다시 한 번 생각해봐요.' },
-      { title: 'STAGE3 어떻게 활동할까?', ask: '박물관에서<br>어떻게 관람해야 할까요?',
+      { title: 'STAGE3 어떻게 활동할까?', ask: '박물관에서 어떻게 관람해야 할까요?',
         memo: ['전교생이 함께 박물관에 왔어요.', '안전상의 이유로 선생님께서 개별 활동을 허락하지 않았어요.', '학교에서 모둠별 활동지를 받아서 챙겨왔어요.'],
         options: ['단체 활동', '모둠 활동', '개별 활동'], answer: 1,
         pcText: '다음 중, 모둠 활동의 장점과 단점을 선택해봐요.',
@@ -160,7 +169,7 @@
     function fitMemo() {
       const box = document.querySelector('.p02-memo');
       const text = $('p02Memo');
-      let size = 38;
+      let size = 32;
       text.style.fontSize = size + 'px';
       while (size > 24 && box.scrollHeight > box.clientHeight) {
         size -= 1;
@@ -190,11 +199,12 @@
     function openPc() {
       const s = STAGES[index];
       $('p02PcText').textContent = s.pcText;
+      $('p02PcText').classList.toggle('is-small', index === 1);
       pcOpts.innerHTML = '';
       s.pcOpts.forEach((o) => {
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'emotion-option p02-pc-opt';
+        btn.className = 'card-btn p02-pc-opt';
         btn.textContent = o.text;
         btn.addEventListener('click', () => {
           if (btn.classList.contains('is-right')) return;
@@ -206,7 +216,7 @@
             return;
           }
           playClick();
-          btn.classList.add('is-right');
+          btn.classList.add('is-right', 'is-selected');
           if (pcOpts.querySelectorAll('.is-right').length === s.pcOpts.filter((x) => x.right).length) finishStage();
         });
         pcOpts.appendChild(btn);

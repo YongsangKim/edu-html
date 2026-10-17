@@ -6,50 +6,64 @@
     <title>물어보고, 살펴보고, 결정하기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 23~30p. STEP1 프롬프트 빈칸 끌어 넣기(initMatchDrag) → STEP2·3 말풍선이 차례로 올라오고
+        /* 디자인 반영(STEP1 화면) - 기획서 23~30p. STEP1 프롬프트 빈칸 끌어 넣기(initMatchDrag) → STEP2·3 말풍선이 차례로 올라오고
            Gemini 답변은 로딩 2초 뒤 타이핑 → STEP4 최종 결정(정답 없음) → 마무리 안내 */
 
-        .p08-step{position:absolute;left:259px;top:40px;width:834px;height:91px;box-sizing:border-box;padding:6px 30px 0;display:flex;align-items:center;justify-content:center;z-index:2;
-          background:var(--c-purple);border-radius:46px;font-family:'Cafe24 Ssurround';font-size:48px;color:var(--c-white);letter-spacing:-0.04em}
-        .p08-box{position:absolute;left:109px;top:88px;width:1134px;height:281px;box-sizing:border-box;padding:50px 40px 20px;display:flex;align-items:center;justify-content:center;
-          background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
-          font-family:'Cafe24 Ssurround';font-size:50px;line-height:1.3;color:var(--c-purple);text-align:center;letter-spacing:-0.04em;word-break:keep-all}
-        .p08-character{left:1361px;top:146px;width:431px;height:630px}
+        .p08-step{left:100px;top:40px;transform:none;width:1200px;z-index:2}
+        .p08-step{font-size:62px}
+        .p08-step>span{justify-content:center;padding:8px 20px 0;white-space:nowrap}
+        .p08-box{position:absolute;left:77px;top:90px;width:1248px;height:310px;box-sizing:border-box;padding:70px 40px 10px;display:flex;align-items:center;justify-content:center;
+          background:#dff3fd;border:solid 5px var(--c-navy);border-radius:16px;
+          font-family:'Cafe24 Ssurround';font-size:66px;line-height:1.3;color:var(--c-ink);text-align:center;letter-spacing:-0.04em;word-break:keep-all}
+        .p08-character{left:1340px;top:165px;width:auto;height:auto}
 
-        .p08-prompt{position:absolute;left:109px;top:400px;width:1134px;box-sizing:border-box;padding:30px 40px;background:var(--c-white);border:solid 4px #b9b3dd;border-radius:28px;
-          font-family:'Cafe24 Ssurround';font-size:52px;line-height:2;color:var(--c-ink);letter-spacing:-0.04em}
-        .p08-blank{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;width:300px;height:92px;box-sizing:border-box;margin:0 6px;border:dashed 4px var(--c-violet);border-radius:16px;
-          font-size:34px;color:var(--c-violet)}
-        .p08-blank[data-filled]{border:0}
-        .p08-cards{position:absolute;left:109px;top:710px;width:1134px;display:flex;justify-content:space-around}
-        .p08-hold{width:300px;height:92px}
-        .p08-card{width:300px;height:92px;padding:6px 20px 0;box-sizing:border-box;font-size:48px;cursor:grab;user-select:none;position:relative;z-index:5;display:flex;align-items:center;justify-content:center}
+        .p08-panel{position:absolute;left:75px;top:410px;width:1253px;height:498px;border-radius:12px;background:#2a6bd0}
+        .p08-prompt{position:absolute;left:95px;top:427px;width:1215px;height:295px;box-sizing:border-box;padding:0 30px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+          background:var(--c-white);border:solid 5px var(--c-navy);border-radius:12px;
+          font-family:'Cafe24 Ssurround';font-size:64px;line-height:1;color:var(--c-ink);letter-spacing:-0.04em}
+        .p08-line{display:flex;align-items:center;gap:10px}
+        .p08-blank{display:inline-flex;align-items:center;justify-content:center;width:345px;height:115px;box-sizing:border-box;background:#d6d6d6;border:solid 6px #bdbdbd;border-radius:24px;
+          padding-top:8px;font-size:56px;color:#c4c4c4;-webkit-text-stroke:8px #fff;paint-order:stroke fill}
+        .p08-blank[data-filled]{background:none;border:0;padding:0}
+        .p08-cards{position:absolute;left:130px;top:758px;width:1145px;display:flex;justify-content:space-between}
+        .p08-hold{width:345px;height:115px}
+        .p08-card{width:345px;height:115px;box-sizing:border-box;padding:8px 10px 0;border:solid 8px var(--c-ink);border-radius:24px;cursor:grab;user-select:none;position:relative;z-index:5;
+          display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:56px;letter-spacing:-0.04em;color:var(--c-ink);white-space:nowrap;
+          -webkit-text-stroke:10px #fff;paint-order:stroke fill;box-shadow:inset 6px 8px 8px rgba(255,255,255,.3),inset -6px -10px 10px rgba(0,0,0,.18)}
+        .p08-card[data-key="place"]{background:linear-gradient(180deg,#ffc80d,#ffb70e)}
+        .p08-card[data-key="goal"]{background:linear-gradient(180deg,#4e97ff,#7272fe)}
+        .p08-card[data-key="ask"]{background:linear-gradient(180deg,#b463ca,#a043ed)}
         .p08-card.is-dragging{cursor:grabbing;z-index:50}
         .p08-blank .p08-card{cursor:default}
 
-        .p08-chat{position:absolute;left:0;top:0;width:1300px;height:960px;pointer-events:none}
-        .p08-msg{position:absolute;box-sizing:border-box;padding:30px 40px;border:solid 4px var(--c-ink);border-radius:32px;font-family:'Pretendard';font-size:40px;line-height:1.45;font-weight:600;color:var(--c-ink);
-          letter-spacing:-0.02em;word-break:keep-all;transition:top .5s ease,opacity .4s ease;opacity:0}
+        .p08-chat{position:absolute;left:75px;top:410px;width:1300px;height:498px;overflow:hidden;pointer-events:none}
+        .p08-chat-in{position:absolute;left:0;top:0;width:100%;height:100%;transition:transform .6s ease}
+        .p08-msg{position:absolute;box-sizing:border-box;border:solid 8px var(--c-navy);border-radius:16px;font-family:'Cafe24 Ssurround';color:var(--c-ink);
+          letter-spacing:-0.04em;word-break:keep-all;transition:top .5s ease,opacity .4s ease;opacity:0}
         .p08-msg.is-show{opacity:1}
-        .p08-msg.is-me{left:145px;width:807px;background:#fff3c9}
-        .p08-msg.is-ai{background:var(--c-pale)}
-        .p08-dots span{display:inline-block;animation:p08-dot 1s infinite}
-        .p08-dots span:nth-child(2){animation-delay:.2s}
-        .p08-dots span:nth-child(3){animation-delay:.4s}
-        @keyframes p08-dot{0%,100%{opacity:.2}50%{opacity:1}}
+        .p08-msg.is-me{right:107px;width:fit-content;max-width:948px;box-sizing:border-box;white-space:pre-line;padding:26px 40px 26px 40px;background:#fff3bf;font-size:56px;line-height:1.25}
+        .p08-msg.is-me:before,.p08-msg.is-me:after{content:'';position:absolute;width:0;height:0;border-style:solid;border-color:transparent;top:74%;transform:translateY(-50%)}
+        .p08-msg.is-me:before{right:-52px;border-width:30px 0 30px 52px;border-left-color:var(--c-navy)}
+        .p08-msg.is-me:after{right:-30px;border-width:19px 0 19px 34px;border-left-color:#fff3bf}
+        .p08-msg.is-ai{left:103px;width:1192px;white-space:pre-line;padding:24px 34px 18px;background:var(--c-white);font-size:50px;line-height:1.2}
+        .p08-dots{display:inline-flex;gap:12px;padding:14px 0}
+        .p08-dots span{display:block;width:28px;height:28px;border-radius:50%;background:#2a6bd0;animation:p08-dot 1.2s infinite}
+        .p08-dots span:nth-child(2){animation-delay:.4s}
+        .p08-dots span:nth-child(3){animation-delay:.8s}
+        @keyframes p08-dot{0%,33%{background:#052a6e}34%,100%{background:#2a6bd0}}
 
-        .p08-yes{position:absolute;left:536px;top:748px;width:280px}
-        .p08-picks{position:absolute;left:145px;top:610px;width:1044px;display:grid;grid-template-columns:1fr 1fr;gap:40px 36px}
-        .p08-picks .card-btn{min-width:0;height:115px;padding:8px 20px 4px;font-size:40px;line-height:1.2;letter-spacing:-0.05em}
+        .p08-yes{position:absolute;left:495px;top:765px;width:395px;z-index:3}
+        .p08-picks{position:absolute;left:105px;top:618px;width:1190px;display:grid;grid-template-columns:1fr 1fr;gap:23px 24px;z-index:3}
+        .p08-picks .card-btn{min-width:0;height:118px;padding:8px 20px 4px;font-size:46px;line-height:1.1;letter-spacing:-0.05em}
+        .p08-box.is-small{font-size:56px;letter-spacing:-0.06em}
 
-        .p08-end{position:absolute;left:746px;top:178px;width:942px;height:594px;box-sizing:border-box;padding:60px 70px 160px;display:flex;align-items:center;justify-content:center;
-          background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:60px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
-          font-family:'Cafe24 Ssurround';font-size:54px;line-height:1.35;color:var(--c-purple);text-align:center;letter-spacing:-0.04em;word-break:keep-all}
-        .p08-end{flex-direction:column;padding-top:30px;color:var(--c-ink)}
-        .p08-end b{display:block;margin-bottom:16px;font-weight:normal;font-size:110px;line-height:1.1;color:var(--c-purple)}
-        .p08-end-character{position:absolute;left:200px;top:180px;width:440px;height:576px;display:flex;align-items:flex-end;justify-content:center}
+        .p08-end{position:absolute;left:545px;top:105px;width:1267px;height:743px;box-sizing:border-box;padding:70px 20px 0 0;display:flex;flex-direction:column;align-items:center;
+          background:var(--c-white);border:solid 5px var(--c-purple);border-radius:110px;box-shadow:0 12px 0 0 rgba(86,148,231,.2);
+          font-family:'Cafe24 Ssurround';font-size:70px;line-height:1.15;color:var(--c-purple);text-align:center;letter-spacing:-0.04em;word-break:keep-all}
+        .p08-end b{display:block;margin-bottom:50px;font-weight:normal;font-size:116px;line-height:1.1}
+        .p08-end-character{position:absolute;left:0;top:80px;z-index:2;display:flex;align-items:flex-end;justify-content:center}
         .p08-end-character img{max-width:100%;max-height:100%;object-fit:contain}
-        .p08-end-next{position:absolute;left:1014px;top:600px}
+        .p08-end-next{position:absolute;left:965px;top:650px}
 
         .p08 .is-off{display:none}
     </style>
@@ -61,25 +75,28 @@
       <div id="stage" class="stage">
         <main class="bg-default p08">
           <div id="p08Play">
-            <div class="p08-step" id="p08Step"></div>
+            <p class="ask-pill has-stage p08-step" id="p08Step"></p>
             <div class="p08-box" id="p08Box"></div>
-            <div class="char-box p08-character"><img src="img/p8_character_intro.png" alt="메인 캐릭터"></div>
+            <div class="char-box p08-character"><img src="img/p08_character01.png" id="p08Char" alt="메인 캐릭터"></div>
 
+            <div class="p08-panel"></div>
             <div id="p08Step1">
               <div class="p08-prompt">
-                <span class="p08-blank" data-key="place">장소</span>에 <span class="p08-blank" data-key="goal">목적</span>고 해요.<br>
-                어떤 <span class="p08-blank" data-key="ask">질문</span>이 필요할까요?
+                <div class="p08-line"><span class="p08-blank" data-key="place">장소</span>에 <span class="p08-blank" data-key="goal">목적</span>고 해요.</div>
+                <div class="p08-line">어떤 <span class="p08-blank" data-key="ask">질문</span>이 필요할까요?</div>
               </div>
               <div class="p08-cards" id="p08Cards">
-                <div class="p08-hold"><div class="emotion-option p08-card" data-key="place">공원</div></div>
-                <div class="p08-hold"><div class="emotion-option p08-card" data-key="ask">준비물</div></div>
-                <div class="p08-hold"><div class="emotion-option p08-card" data-key="goal" data-fill="놀러 가려">놀러 가기</div></div>
+                <div class="p08-hold"><div class="p08-card" data-key="place">공원</div></div>
+                <div class="p08-hold"><div class="p08-card" data-key="ask">준비물</div></div>
+                <div class="p08-hold"><div class="p08-card" data-key="goal" data-fill="놀러 가려">놀러 가기</div></div>
               </div>
             </div>
 
             <div class="p08-chat">
-              <div class="p08-msg is-me" id="p08Me"></div>
-              <div class="p08-msg is-ai" id="p08Ai"></div>
+              <div class="p08-chat-in" id="p08ChatIn">
+                <div class="p08-msg is-me" id="p08Me"></div>
+                <div class="p08-msg is-ai" id="p08Ai"></div>
+              </div>
             </div>
 
             <button type="button" class="card-btn is-popup p08-yes is-off" id="p08Yes">네</button>
@@ -92,7 +109,7 @@
           </div>
 
           <div class="is-off" id="p08EndView">
-            <div class="p08-end-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+            <div class="p08-end-character"><img src="img/p08_character05.png" alt="메인 캐릭터"></div>
             <div class="p08-end"><b>좋아요!</b>Gemini Live는 나의 질문을 듣고<br>조언을 줄 수 있지만,<br>마지막 결정은 내가 하는 거예요.</div>
             <a href="page09.html" class="js-nav-effect p08-end-next">
               <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
@@ -113,9 +130,10 @@
     const box = $('p08Box');
     const me = $('p08Me');
     const ai = $('p08Ai');
+    const chatIn = $('p08ChatIn');
     const yesBtn = $('p08Yes');
     const picks = $('p08Picks');
-    const LOADING = '<span class="p08-dots"><span>●</span> <span>●</span> <span>●</span></span>';
+    const LOADING = '<span class="p08-dots"><span></span><span></span><span></span></span>';
 
     function place(el, left, top, width) {
       el.style.left = left + 'px';
@@ -136,28 +154,37 @@
       }, 60);
     }
 
-    function ask(meText, aiLeft, aiText, done) {
+    function ask(meText, aiText, done) {
       me.textContent = meText;
-      place(me, 145, 401);
+      me.style.top = '13px';
       me.classList.add('is-show');
       setTimeout(() => {
         ai.innerHTML = LOADING;
-        place(ai, aiLeft, 401 + me.offsetHeight + 19, aiLeft === 289 ? 955 : 807);
+        place(ai, 28, 13 + me.offsetHeight + 15);
         ai.classList.add('is-show');
         setTimeout(() => type(ai, aiText, done), 2000);
       }, 700);
     }
 
+    // 스테이지마다 캐릭터가 바뀜(p08_character01~04). 아직 없는 이미지는 1단계 캐릭터로 대신 보여줌
+    const charImg = $('p08Char');
+    charImg.addEventListener('error', () => { if (!charImg.src.endsWith('p08_character01.png')) charImg.src = 'img/p08_character01.png'; });
+
+    function setStep(n, title) {
+      charImg.src = 'img/p08_character0' + n + '.png';
+      stepEl.innerHTML = '<i>STAGE ' + n + '</i><span>' + title + '</span>';
+    }
+
     function step2() {
       $('p08Step1').classList.add('is-off');
-      stepEl.textContent = 'STEP2 Gemini Live의 조언 듣기';
+      setStep(2, 'Gemini Live의 조언 듣기');
       box.textContent = 'Gemini Live가 답변하는 중이에요.';
-      ask('공원에 놀러 가려고 해요. 어떤 준비물이 필요할까요?', 289,
-        '날씨를 확인하고, 물과 모자를 준비하면 좋아요. 함께 갈 사람과 약속 시간도 정해 보세요. 날씨 정보를 알려 드릴까요?', () => {
-          me.classList.remove('is-show');
-          ai.style.top = '408px';
+      ask('공원에 놀러 가려고 해요.\n어떤 준비물이 필요할까요?',
+        '날씨를 확인하고, 물과 모자를 준비하면 좋아요.\n함께 갈 사람과 약속 시간도 정해 보세요.\n날씨 정보를 알려 드릴까요?', () => {
           box.textContent = '‘네’를 클릭해 나에게 필요한 정보를 얻어봐요.';
-          yesBtn.classList.remove('is-off');
+          // 대화가 위로 밀려 올라가며 아래에 '네' 버튼 자리가 생김
+          chatIn.style.transform = 'translateY(-' + Math.max(0, ai.offsetTop + ai.offsetHeight - 335) + 'px)';
+          setTimeout(() => yesBtn.classList.remove('is-off'), 600);
         });
     }
 
@@ -165,20 +192,23 @@
       clearFingers();
       yesBtn.classList.add('is-off');
       ai.classList.remove('is-show');
-      stepEl.textContent = 'STEP3 나에게 필요한 정보 선택하기';
+      me.classList.remove('is-show');
+      setTimeout(() => { chatIn.style.transition = 'none'; chatIn.style.transform = ''; void chatIn.offsetWidth; chatIn.style.transition = ''; }, 380);
+      setStep(3, '나에게 필요한 정보 선택하기');
       box.textContent = 'Gemini Live가 답변하는 중이에요.';
-      setTimeout(() => ask('네. 주말 날씨 정보를 알려주세요.', 436, '주말에 비 예보가 있습니다. 우산을 챙겨가는 것을 권장합니다.', step4), 400);
+      setTimeout(() => ask('네. 주말 날씨 정보를 알려주세요.', '주말에 비 예보가 있습니다.\n우산을 챙겨가는 것을 권장합니다.', step4), 400);
     }
 
     function step4() {
       me.classList.remove('is-show');
-      ai.style.top = '410px';
-      stepEl.textContent = 'STEP4 최종 결정하기';
+      ai.style.top = '13px';
+      setStep(4, '최종 결정하기');
+      box.classList.add('is-small');
       box.innerHTML = 'Gemini Live의 답변을 확인하고 최종 결정을 해요.<br>정답은 없어요. 나의 생각과 가까운 것을 선택해봐요.';
       picks.classList.remove('is-off');
     }
 
-    stepEl.textContent = 'STEP1 궁금한 점 물어보기';
+    setStep(1, '궁금한 점 물어보기');
     box.innerHTML = '주말에 공원에 가고 싶어요.<br>AI에게 보낼 프롬프트 문장을 완성해봐요.';
 
     initMatchDrag({

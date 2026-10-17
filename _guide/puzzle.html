@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI 가이드 - 퍼즐·빙고</title>
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="guide.css">
+</head>
+<body>
+  <div class="g-wrap">
+    <h1>퍼즐 · 빙고</h1>
+    <p class="g-note">
+      퍼즐·카드 뒤집기·빙고 활동 화면. 아래 미리보기는 실제 페이지(1920×1080)를 줄여 보여주는 것이라 직접 눌러서 해볼 수 있습니다.
+      조각 퍼즐은 공용 <code>initJigsawPuzzle</code> + <code>.jig-*</code>, 빙고는 사회 3차시 전용 스타일(<code>.p02-*</code>)입니다.
+    </p>
+    <ul class="g-toc"></ul>
+
+    <h2>조건 퍼즐 <code>.jig-*</code> — 공용</h2>
+    <p class="g-note">판(<code>.jig-board</code>) 안에 칸(<code>.jig-slot</code>), 아래 트레이(<code>.jig-tray</code>)에 조각(<code>.jig-piece</code>)을 늘어놓고 눌러서 맞추는 퍼즐. <code>initJigsawPuzzle({next, puzzles})</code>로 호출하며 판마다 정답 조각 4개 + 오답 2개. 조각을 누르면 맞는 칸이면 들어가고, 아니면 <code>.is-wrong</code>으로 흔들립니다.</p>
+    <div class="g-list">
+      <div class="g-item">
+        <p class="g-meta"><b>sa/05:05 조건 퍼즐</b><br>판 3개, 조각 6개(정답 4 + 오답 2)</p>
+        <div class="g-view" style="aspect-ratio:16/9;overflow:hidden"><iframe src="../sa/05/page05.html" style="width:1920px;height:1080px;border:0;transform-origin:0 0;pointer-events:auto" loading="lazy"></iframe></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta"><b>sa/08:06 조건 퍼즐</b><br>같은 공용 퍼즐, 내용만 다름</p>
+        <div class="g-view" style="aspect-ratio:16/9;overflow:hidden"><iframe src="../sa/08/page06.html" style="width:1920px;height:1080px;border:0;transform-origin:0 0;pointer-events:auto" loading="lazy"></iframe></div>
+      </div>
+    </div>
+
+    <h2>사진 퍼즐 · 몸속 퍼즐 — 페이지 전용</h2>
+    <p class="g-note">조각을 끌어 맞추는 퍼즐. 공용 끌어 놓기 <code>initMatchDrag</code>(<code>_guide/drag.html</code> 참고)와 <code>.drop-zone</code>을 씁니다.</p>
+    <div class="g-list">
+      <div class="g-item">
+        <p class="g-meta"><b>sa/10:02 퍼즐로 완성하는 우리 동네</b><br>사진이 조각으로 나뉘면 제자리에 맞춤</p>
+        <div class="g-view" style="aspect-ratio:16/9;overflow:hidden"><iframe src="../sa/10/page02.html" style="width:1920px;height:1080px;border:0;transform-origin:0 0;pointer-events:auto" loading="lazy"></iframe></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta"><b>gwa/08:02 차례대로 맞추는 몸속 퍼즐</b><br>순서에 맞는 칸에 놓기</p>
+        <div class="g-view" style="aspect-ratio:16/9;overflow:hidden"><iframe src="../gwa/08/page02.html" style="width:1920px;height:1080px;border:0;transform-origin:0 0;pointer-events:auto" loading="lazy"></iframe></div>
+      </div>
+    </div>
+
+    <h2>카드 뒤집어서 짝 맞추기 — 사회 8차시 전용</h2>
+    <p class="g-note">카드를 눌러 앞면으로 뒤집고(<code>transform: rotateY(180deg)</code>, <code>.p02-card.is-back</code> = 뒷면이 보이는 상태) 같은 그림 두 장을 찾으면 짝이 맞아 <code>.is-done</code>(노란 테두리)으로 고정됩니다. 시작할 때 앞면을 잠깐 보여준 뒤 모두 뒷면으로 뒤집습니다. 공용 함수 없이 페이지 안에서 처리합니다.</p>
+    <div class="g-list">
+      <div class="g-item">
+        <p class="g-meta"><b>sa/08:02 인기 여행지 카드 짝 맞추기</b><br>카드를 눌러 뒤집어 보세요</p>
+        <div class="g-view" style="aspect-ratio:16/9;overflow:hidden"><iframe src="../sa/08/page02.html" style="width:1920px;height:1080px;border:0;transform-origin:0 0;pointer-events:auto" loading="lazy"></iframe></div>
+      </div>
+    </div>
+
+    <h2>빙고 — 사회 3차시 전용</h2>
+    <p class="g-note">3×3 빙고판(<code>.p02-board</code> · <code>.p02-cell</code>)에서 칸을 고르면 상황 화면(<code>.p02-sit-*</code>)으로 바뀌고, 알맞은 말을 고르면 그 칸이 완료(<code>.is-done</code>, 분홍 테두리)됩니다. 가로·세로·대각선 한 줄이 되면 <code>BINGO!</code> + 완료 팝업(<code>.avatar-modal</code>).</p>
+    <div class="g-list">
+      <div class="g-item">
+        <p class="g-meta"><b>sa/03:02 마음 표현 빙고</b><br>칸을 눌러 시작</p>
+        <div class="g-view" style="aspect-ratio:16/9;overflow:hidden"><iframe src="../sa/03/page02.html" style="width:1920px;height:1080px;border:0;transform-origin:0 0;pointer-events:auto" loading="lazy"></iframe></div>
+      </div>
+    </div>
+  </div>
+  <script src="guide.js"></script>
+  <script>initGuideTabs(wrapH2Sections(document.querySelector('.g-wrap')));if (window.scaleGuideViews) window.scaleGuideViews();</script>
+</body>
+</html>

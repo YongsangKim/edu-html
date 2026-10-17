@@ -6,32 +6,37 @@
     <title>물어보고, 살펴보고, 결정하기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 21~22p. 대화 순서 카드 4장을 순서도 칸에 끌어 넣기(공용 initMatchDrag) */
+        /* 디자인 반영(퍼즐 모양 대신 둥근 네모). 대화 순서 카드 4장을 순서도 칸에 끌어 넣기(공용 initMatchDrag) */
 
-        .p07-bubble{left:109px;bottom:620px;width:552px;font-size:46px}
-        .p07-character{left:200px;top:300px;width:300px;height:330px}
+        .p07-bubble{left:92px;bottom:691px;width:480px;padding:26px 10px;font-size:40px;margin:0}
+        .p07-character{left:53px;top:281px;width:359px;height:390px}
 
-        .p07-flow{position:absolute;left:740px;top:50px;width:1098px;height:494px;box-sizing:border-box;background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
-        .p07-slot{position:absolute;width:489px;height:180px;box-sizing:border-box;border:dashed 5px #b9b3dd;border-radius:28px;display:flex;align-items:center;justify-content:center}
-        .p07-slot1{left:766px;top:109px}
-        .p07-slot2{left:1313px;top:109px}
-        .p07-slot3{left:1313px;top:345px}
-        .p07-slot4{left:766px;top:345px}
-        .p07-num{position:absolute;left:-26px;top:-30px;width:70px;height:70px;border-radius:50%;background:var(--c-purple);display:flex;align-items:center;justify-content:center;
-          font-family:'Cafe24 Ssurround';font-size:40px;color:var(--c-white);z-index:10}
+        .p07-flow{position:absolute;left:688px;top:25px;width:1170px;height:590px;border-radius:20px;background:var(--c-white);box-shadow:0 10px 0 0 rgba(86,148,231,.2)}
+        .p07-slot{position:absolute;width:437px;height:200px;box-sizing:border-box;background:#d6d6d6;border:solid 10px #bdbdbd;border-radius:30px;display:flex;align-items:center;justify-content:center}
+        .p07-slot1{left:775px;top:85px}
+        .p07-slot2{left:1352px;top:85px}
+        .p07-slot3{left:1352px;top:395px}
+        .p07-slot4{left:775px;top:395px}
+        .p07-slot[data-filled]{background:none;border-color:transparent}
+        .p07-num{position:absolute;left:-50px;top:-50px;width:110px;height:110px;box-sizing:border-box;border-radius:50%;border:solid 9px var(--c-ink);background:#2d5ed9;
+          display:flex;align-items:center;justify-content:center;padding-top:6px;font-family:'Cafe24 Ssurround';font-size:70px;color:var(--c-white);z-index:10}
         .p07-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;opacity:0;transition:opacity .5s ease;
           font-family:'Cafe24 Ssurround';font-size:44px;line-height:1.15;color:var(--c-violet);letter-spacing:-0.04em}
         .p07-hint.is-on{opacity:.5}
-        .p07-arrow{position:absolute;width:70px;height:70px;display:flex;align-items:center;justify-content:center;font-size:64px;line-height:1;color:var(--c-purple);z-index:3}
+        .p07-arrow{position:absolute;width:60px;height:70px;z-index:3}
+        .p07-arrow svg{display:block;width:100%;height:100%}
 
-        .p07-tray{position:absolute;left:79px;top:632px;width:1759px;height:267px;box-sizing:border-box;padding:0 48px;display:flex;align-items:center;justify-content:space-between;
-          background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:40px}
-        .p07-hold{width:359px;height:132px}
-        .p07-card{width:359px;height:132px;padding:8px 12px 4px;cursor:grab;user-select:none;position:relative;z-index:5}
-        .p07-card.emotion-option{font-size:42px;line-height:1.15;display:flex;align-items:center;justify-content:center;text-align:center;box-sizing:border-box}
+        .jig-tray.p07-tray{padding:0 34px}
+        .p07-hold{width:405px;height:180px}
+        .p07-card{width:405px;height:180px;box-sizing:border-box;padding:8px 16px 0;border:solid 8px var(--c-ink);border-radius:30px;cursor:grab;user-select:none;position:relative;z-index:5;
+          display:flex;align-items:center;justify-content:center;text-align:center;font-family:'Cafe24 Ssurround';font-size:52px;line-height:1.15;letter-spacing:-0.04em;color:var(--c-ink);
+          -webkit-text-stroke:10px #fff;paint-order:stroke fill;box-shadow:inset 6px 8px 8px rgba(255,255,255,.3),inset -6px -10px 10px rgba(0,0,0,.18)}
+        .p07-card[data-key="1"]{background:linear-gradient(180deg,#ffc80d,#ffb70e)}
+        .p07-card[data-key="2"]{background:linear-gradient(180deg,#4e97ff,#7272fe)}
+        .p07-card[data-key="3"]{background:linear-gradient(180deg,#fb8b16,#ef6a59)}
+        .p07-card[data-key="4"]{background:linear-gradient(180deg,#b463ca,#a043ed)}
         .p07-card.is-dragging{cursor:grabbing;z-index:50}
-        .p07-slot .p07-card{cursor:default;border:0}
-        .p07-slot[data-filled]{border-style:solid;border-color:var(--c-blue)}
+        .p07-slot .p07-card{cursor:default}
 
         #p07Done{z-index:120}
     </style>
@@ -43,22 +48,23 @@
       <div id="stage" class="stage">
         <main class="bg-default">
           <p class="guide-bubble is-center p07-bubble">먼저, Gemini Live와 어떤 순서로 대화해야 하는지 카드를 배열해서 알아봐요!</p>
-          <div class="char-box p07-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+          <div class="char-box p07-character"><img src="img/p07_character.png" alt="메인 캐릭터"></div>
 
           <div class="p07-flow"></div>
-          <span class="p07-arrow" style="left:1249px;top:164px">&#10140;</span>
-          <span class="p07-arrow" style="left:1522px;top:282px;transform:rotate(90deg)">&#10140;</span>
-          <span class="p07-arrow" style="left:1249px;top:400px;transform:rotate(180deg)">&#10140;</span>
+          <span class="p07-arrow" style="left:1257px;top:152px"><svg viewBox="0 0 60 70"><path d="M4 2H26L56 35L26 68H4L34 35Z" fill="#2160d8"/></svg></span>
+          <span class="p07-arrow" style="left:1541px;top:306px;transform:rotate(90deg)"><svg viewBox="0 0 60 70"><path d="M4 2H26L56 35L26 68H4L34 35Z" fill="#2160d8"/></svg></span>
+          <span class="p07-arrow" style="left:1250px;top:462px;transform:rotate(180deg)"><svg viewBox="0 0 60 70"><path d="M4 2H26L56 35L26 68H4L34 35Z" fill="#2160d8"/></svg></span>
           <div class="p07-slot p07-slot1" data-key="1"><span class="p07-num">1</span><span class="p07-hint">궁금한 점<br>질문하기</span></div>
           <div class="p07-slot p07-slot2" data-key="2"><span class="p07-num">2</span><span class="p07-hint">Gemini Live의<br>조언 듣기</span></div>
           <div class="p07-slot p07-slot3" data-key="3"><span class="p07-num">3</span><span class="p07-hint">나에게 필요한<br>정보 선택하기</span></div>
           <div class="p07-slot p07-slot4" data-key="4"><span class="p07-num">4</span><span class="p07-hint">최종 결정하기</span></div>
 
-          <div class="p07-tray" id="p07Tray">
-            <div class="p07-hold"><div class="emotion-option p07-card" data-key="1">궁금한 점<br>질문하기</div></div>
-            <div class="p07-hold"><div class="emotion-option p07-card" data-key="2">Gemini Live의<br>조언 듣기</div></div>
-            <div class="p07-hold"><div class="emotion-option p07-card" data-key="3">나에게 필요한<br>정보 선택하기</div></div>
-            <div class="p07-hold"><div class="emotion-option p07-card" data-key="4">최종 결정하기</div></div>
+          <div class="jig-tray-label p07-tab">순서 카드</div>
+          <div class="jig-tray p07-tray" id="p07Tray">
+            <div class="p07-hold"><div class="p07-card" data-key="1">궁금한 점<br>질문하기</div></div>
+            <div class="p07-hold"><div class="p07-card" data-key="2">Gemini Live의<br>조언 듣기</div></div>
+            <div class="p07-hold"><div class="p07-card" data-key="3">나에게 필요한<br>정보 선택하기</div></div>
+            <div class="p07-hold"><div class="p07-card" data-key="4">최종 결정하기</div></div>
           </div>
 
           <div class="ox-result-correct is-avatar is-off" id="p07Done">
