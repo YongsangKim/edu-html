@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="../../css/common.css">
     <style>
         /* 디자인 반영 - 디자인/사회4차시 02p-1·02p-2. 기획서 3~10p를 한 페이지로 합침: 채팅 목록 <-> 4개 문제 <-> 온도계 모달.
-           채팅방은 순서 상관없이 다시 들어올 수 있고 온도계 진행도가 유지돼야 해서 DOM 전환으로 처리. 얼굴 사진은 샘플 조각(img/new/face_*.png·emo_*.png) */
+           채팅방은 순서 상관없이 다시 들어올 수 있고 온도계 진행도가 유지돼야 해서 DOM 전환으로 처리. 얼굴 사진은 샘플 조각(img/face_*.png·emo_*.png) */
         .p02-screen{position:absolute;left:0;top:0;width:1920px;height:960px}
         .p02-screen.is-off{display:none}
         #p02Quiz .chat-panel-bar:after{top:120px;height:140px}
@@ -102,9 +102,9 @@
         preview: '친구가 약속을 바꾸자고 했어. "괜찮아"라고 말했지만...',
         msg: '친구가 약속을 바꾸자고 했어.<br>"괜찮아"라고 말했지만, 사실은 오늘을 많이 기다렸어.',
         options: [
-          { label: '아쉬움', face: '\u{1F61E}', correct: true },
-          { label: '화남', face: '\u{1F620}' },
-          { label: '걱정', face: '\u{1F61F}' }
+          { label: '아쉬움', face: '\u{1F61E}', img: 'emo_regret', correct: true },
+          { label: '화남', face: '\u{1F620}', img: 'emo_angry' },
+          { label: '걱정', face: '\u{1F61F}', img: 'emo_worry' }
         ]
       },
       {
@@ -113,9 +113,9 @@
         preview: '발표 연습을 많이 했어. 그런데 내 차례가 가까워지니까...',
         msg: '발표 연습을 많이 했어.<br>그런데 내 차례가 가까워지니까 손에 땀이 났어.',
         options: [
-          { label: '속상함', face: '\u{1F614}' },
-          { label: '슬픔', face: '\u{1F622}' },
-          { label: '긴장', face: '\u{1F630}', correct: true }
+          { label: '속상함', face: '\u{1F614}', img: 'emo_minjun_upset' },
+          { label: '슬픔', face: '\u{1F622}', img: 'emo_minjun_sad' },
+          { label: '긴장', face: '\u{1F630}', img: 'emo_minjun_nervous', correct: true }
         ]
       },
       {
@@ -124,9 +124,9 @@
         preview: '내가 실수로 친구의 그림을 구겼어. 친구가 괜찮다고 했지만...',
         msg: '내가 실수로 친구의 그림을 구겼어.<br>친구가 괜찮다고 했지만, 미안해서 계속 친구의 표정을 살피게 돼.',
         options: [
-          { label: '미안함', face: '\u{1F623}', correct: true },
-          { label: '부끄러움', face: '\u{1F633}' },
-          { label: '슬픔', face: '\u{1F622}' }
+          { label: '미안함', face: '\u{1F623}', img: 'emo_subin_sorry', correct: true },
+          { label: '부끄러움', face: '\u{1F633}', img: 'emo_subin_shy' },
+          { label: '슬픔', face: '\u{1F622}', img: 'emo_subin_sad' }
         ]
       },
       {
@@ -135,9 +135,9 @@
         preview: '친구들이 내 생일을 축하해 줬어. 고맙긴 한데...',
         msg: '친구들이 내 생일을 축하해 줬어.<br>고맙긴 한데, 갑자기 많은 친구들이 나를 쳐다봐서 얼굴이 빨개졌어.',
         options: [
-          { label: '걱정', face: '\u{1F61F}' },
-          { label: '부끄러움', face: '\u{1F633}', correct: true },
-          { label: '화남', face: '\u{1F620}' }
+          { label: '걱정', face: '\u{1F61F}', img: 'emo_taewoo_worry' },
+          { label: '부끄러움', face: '\u{1F633}', img: 'emo_taewoo_shy', correct: true },
+          { label: '화남', face: '\u{1F620}', img: 'emo_taewoo_angry' }
         ]
       }
     ];
@@ -163,8 +163,6 @@
     const wrongLayer = document.querySelector('.ox-result-wrong');
 
 
-    // 감정 이름에 맞는 표정 사진(샘플 조각)이 있으면 어느 대화에서든 그 사진을 씀, 없으면 이모지
-    const EMO_IMG = { '아쉬움': 'emo_regret', '화남': 'emo_angry', '걱정': 'emo_worry' };
     const solved = CHATS.map(() => false);
 
     // 누르면 card-btn 눌림(is-selected) 모양이 잠깐 보인 뒤 문제 화면으로 넘어감
@@ -183,7 +181,7 @@
         const row = document.createElement('div');
         row.className = 'chat-row';
         row.innerHTML =
-          '<img class="face" src="img/new/face_' + chat.id + '.png" alt="' + chat.name + '">' +
+          '<img class="face" src="img/face_' + chat.id + '.png" alt="' + chat.name + '">' +
           '<span class="txt">' + chat.preview + '</span>' +
           (solved[i]
             ? '<span class="chk"><i class="icon-check"></i></span>'
@@ -195,8 +193,8 @@
 
     function openQuiz(index) {
       const chat = CHATS[index];
-      qFace.src = 'img/new/face_' + chat.id + '_big.png';
-      qFace.onerror = function () { this.onerror = null; this.src = 'img/new/face_' + chat.id + '.png'; };
+      qFace.src = 'img/face_' + chat.id + '_big.png';
+      qFace.onerror = function () { this.onerror = null; this.src = 'img/face_' + chat.id + '.png'; };
       qMsg.innerHTML = chat.msg;
 
       optionsBox.innerHTML = '';
@@ -204,7 +202,7 @@
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'card-btn p02-opt';
-        btn.innerHTML = '<span class="face">' + (EMO_IMG[opt.label] ? '<img src="img/new/' + EMO_IMG[opt.label] + '.png" alt="" style="width:100%;height:100%;object-fit:cover">' : opt.face) + '</span>' +
+        btn.innerHTML = '<span class="face">' + (opt.img ? '<img src="img/' + opt.img + '.png" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.replaceWith(document.createTextNode(' + JSON.stringify(opt.face).replace(/"/g, "&quot;") + '))">' : opt.face) + '</span>' +
                         '<span class="lab">' + opt.label + '</span>';
         btn.addEventListener('click', () => {
           if (opt.correct) {

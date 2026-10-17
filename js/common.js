@@ -2491,12 +2491,12 @@ function initEmotionPickFlow(config) {
   const showCorrectPopup = (html) => show(popupCorrect, textOf(popupCorrect), html);
   const showWarnPopup = (html) => show(popupWarn, popupWarnText, html);
 
-  // 얼굴 사진은 img/new/face_<id>.png 샘플 조각(config.faces: 이름 -> 파일 id), 없으면 이름 첫 글자
+  // 얼굴 사진은 img/face_<id>.png 샘플 조각(config.faces: 이름 -> 파일 id), 없으면 이름 첫 글자
   const FACES = config.faces || {};
   const body = chatBox.querySelector('.chat-panel-body') || chatBox;
   body.innerHTML = CHAT.map((line) =>
     '<div class="talk-line' + (line.me ? ' is-me' : '') + '">' +
-      '<span class="talk-avatar"' + (FACES[line.who] ? ' style="background-image:url(img/new/face_' + FACES[line.who] + '.png)"' : '') + '>' + (FACES[line.who] ? '' : line.who.charAt(0)) + '</span>' +
+      '<span class="talk-avatar"' + (FACES[line.who] ? ' style="background-image:url(img/face_' + FACES[line.who] + '.png)"' : '') + '>' + (FACES[line.who] ? '' : line.who.charAt(0)) + '</span>' +
       '<span class="talk-msgwrap"><span class="talk-who">' + line.who + '</span><span class="talk-bubble">' + line.text + '</span></span>' +
     '</div>').join('');
 
@@ -2576,7 +2576,7 @@ function initEmotionPickFlow(config) {
        nextHref: 'page15.html'
      });
 ========================================================== */
-/* 사회 4차시 폰 채팅 화면 부품(그림 대신 HTML로 그림). 키보드만 샘플 그림(img/new/ph_kb.png)을 씀.
+/* 사회 4차시 폰 채팅 화면 부품(그림 대신 HTML로 그림). 키보드만 샘플 그림(img/ph_kb.png)을 씀.
    페이지의 폰 화면 안 .cf-input / .cf-panel / .cf-find 에 넣어 씀: cfUI.bar(false|true), cfUI.searchSheet(), cfUI.resultSheet(), cfUI.emojiSheet(), cfUI.findScreen() */
 window.cfUI = (function () {
   const SMILE = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#b9bec7"/><circle cx="8.6" cy="10" r="1.3" fill="#111"/><circle cx="15.4" cy="10" r="1.3" fill="#111"/><path d="M7.5 14c1.2 2.600 7.800 2.600 9 0" fill="none" stroke="#111" stroke-width="1.8" stroke-linecap="round"/></svg>';
@@ -2592,14 +2592,14 @@ window.cfUI = (function () {
       '<span class="cf-lab" style="top:146px">추천 키워드</span>' +
       '<div class="cf-chips" style="top:172px">' + ['ㅠㅠ', '감사합니다', '화이팅', 'ㅋㅋㅋㅋㅋ', '네', 'ㅎㅎ'].map((c) => '<span>' + c + '</span>').join('') + '</div>' +
       '<span class="cf-lab" style="top:236px">많이 검색하는 이모티콘</span>' +
-      '<div class="cf-rank"><p style="left:16px;top:0"><em style="background-image:url(img/new/rank_1.png)"></em><b>1</b>안원잘부 ›</p><p style="left:220px;top:0"><em style="background-image:url(img/new/rank_2.png)"></em><b>2</b>우땅이 ›</p>' +
-      '<p style="left:16px;top:40px"><em style="background-image:url(img/new/rank_3.png)"></em><b>3</b>44교시 생존수업 ›</p><p style="left:220px;top:40px"><em style="background-image:url(img/new/rank_4.png)"></em><b>4</b>면작귀 ›</p></div></div>',
+      '<div class="cf-rank"><p style="left:16px;top:0"><em style="background-image:url(img/rank_1.png)"></em><b>1</b>안원잘부 ›</p><p style="left:220px;top:0"><em style="background-image:url(img/rank_2.png)"></em><b>2</b>우땅이 ›</p>' +
+      '<p style="left:16px;top:40px"><em style="background-image:url(img/rank_3.png)"></em><b>3</b>44교시 생존수업 ›</p><p style="left:220px;top:40px"><em style="background-image:url(img/rank_4.png)"></em><b>4</b>면작귀 ›</p></div></div>',
     resultSheet: () => '<div class="cf-sheet"><i class="cf-handle"></i>' + tabs(0) +
       '<div class="cf-chips" style="top:90px"><span class="back">‹</span><span class="dark">잠금 해제</span><span class="light">감사</span><span class="light">감사합니다</span></div></div>',
     emojiSheet: () => '<div class="cf-sheet"><i class="cf-handle"></i>' + tabs(1) +
-      '<div class="cf-cats"><i class="on" style="background-image:url(img/new/cat_recent.png)"></i><i class="all">ALL</i><i style="background-image:url(img/new/cat_1.png)"></i><i style="background-image:url(img/new/cat_2.png)"></i><i style="background-image:url(img/new/cat_3.png)"></i><i style="background-image:url(img/new/cat_4.png)"></i><i style="background-image:url(img/new/cat_5.png)"></i><i style="background-image:url(img/new/cat_6.png)"></i></div>' +
+      '<div class="cf-cats"><i class="on" style="background-image:url(img/cat_recent.png)"></i><i class="all">ALL</i><i style="background-image:url(img/cat_1.png)"></i><i style="background-image:url(img/cat_2.png)"></i><i style="background-image:url(img/cat_3.png)"></i><i style="background-image:url(img/cat_4.png)"></i><i style="background-image:url(img/cat_5.png)"></i><i style="background-image:url(img/cat_6.png)"></i></div>' +
       '<span class="cf-lab" style="top:132px">최근사용</span></div>',
-    findScreen: () => '<i class="cf-handle"></i><div class="cf-ffield"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>찾고싶은 이모티콘을 검색해보세요.</div><div class="cf-fkb" style="background-image:url(img/new/ph_kb.png)"></div>'
+    findScreen: () => '<i class="cf-handle"></i><div class="cf-ffield"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>찾고싶은 이모티콘을 검색해보세요.</div><div class="cf-fkb" style="background-image:url(img/ph_kb.png)"></div>'
   };
 })();
 
@@ -2607,7 +2607,7 @@ function initEmotionChatFlow(config) {
   const DATA = config.data;
   const NEXT_HREF = config.nextHref;
   const FINISH_MODAL = config.finishModal || null;
-  const IMG = 'img/new/';
+  const IMG = 'img/';
 
   const screen = document.getElementById('cfScreen');
   const guideEl = document.getElementById('chatappGuide');

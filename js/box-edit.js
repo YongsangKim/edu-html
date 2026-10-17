@@ -8,6 +8,7 @@
      1) 박스를 만들 때 BoxEdit.tag(el, box) — box 는 좌표 배열 그 자체(복사본 말고 코드에 있는 배열), el 에 data-box 가 붙어 편집 대상이 됨
      2) BoxEdit.init({
           apply: (el) => { el.style.cssText = ... },   // el._ref(=고친 좌표)로 el 의 위치·크기 스타일을 다시 입힘 (필수). 좌표가 2개뿐인 배열(위치 보정값 등)은 Alt+방향키가 무시됨
+          unit: 0.1,                                    // 방향키 한 번에 움직이는 값(기본 1 — 좌표가 %면 0.1 처럼 작게). Shift 는 10배
           name: (el) => '문구',                         // 표시줄에서 좌표 앞에 붙일 이름 (선택)
           setup: () => { ... },                         // 수정 모드일 때만 한 번 — 뒤 단계를 바로 볼 수 있게 상태를 미리 채움 (선택)
           step: { count, get: () => 현재번호, set: (n) => 번호만 바꿈, go: (n) => 그 단계로 다시 그림, label: (n) => '문구' }  // 단계가 있는 페이지만 (선택)
@@ -26,6 +27,7 @@
 
   BoxEdit.init = function (o) {
     if (!ON) return;
+    const UNIT = o.unit || 1;
     if (o.setup) o.setup();
     const style = document.createElement('style');
     style.textContent = '.is-box-edit [data-box]{outline:2px dashed #e5342f;animation:none !important}.is-box-edit [data-box].is-box-sel{outline:3px solid #2fbf71}';
@@ -89,12 +91,12 @@
       }
       if (!sel || !sel.isConnected || e.key.indexOf('Arrow') !== 0) return;
       e.preventDefault();
-      const d = e.shiftKey ? 10 : 1;
+      const d = e.shiftKey ? 10 * UNIT : UNIT;
       const k = e.altKey
         ? { ArrowLeft: [2, -d], ArrowRight: [2, d], ArrowUp: [3, -d], ArrowDown: [3, d] }
         : { ArrowLeft: [0, -d], ArrowRight: [0, d], ArrowUp: [1, -d], ArrowDown: [1, d] };
       if (k[e.key][0] >= sel._ref.length) return;
-      sel._ref[k[e.key][0]] += k[e.key][1];
+      sel._ref[k[e.key][0]] = Math.round((sel._ref[k[e.key][0]] + k[e.key][1]) * 1000) / 1000;
       refresh();
     });
   };
