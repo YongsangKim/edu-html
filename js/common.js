@@ -3017,9 +3017,19 @@ function initJigsawPuzzle(cfg) {
 
   // 지그소 조각 변: 위·오른쪽·아래·왼쪽 순, 0 평평 / 1 튀어나옴 / -1 들어감. 조각은 판의 4가지 칸 모양만 씀(오답은 그중 무작위)
   const CELL_EDGES = [[0, 1, -1, 0], [0, 0, 1, -1], [1, -1, 0, 0], [-1, 0, 0, 1]];
-  const COLORS = ['#fff3b8', '#cfe6ff', '#d6f5c8', '#ffd6e2', '#eee8ff', '#ffe3c7'];
-  const S = 260;
+  // const COLORS = ['#ffc70d', '#5b88ff', '#b05cd1', '#f4793b', '#41c535', '#d5579f'];
+  const COLORS = [
+    ['#ffcf0e', '#ffb70e'],
+    ['#4e97ff', '#7272fe'],
+    ['#b463ca', '#a043ed'],
+    ['#fb8b16', '#ef6a59'],
+    ['#4bcc24', '#19aa73'],
+    ['#da5ba6', '#bf4573']
+  ];
+  const S = 280;
   const M = 74;
+  const TS = 224;
+  const TM = 40;
 
   let index = 0;
   let filled = 0;
@@ -3028,30 +3038,48 @@ function initJigsawPuzzle(cfg) {
   function jigPath(s, m, edges) {
     const corners = [[m, m], [m + s, m], [m + s, m + s], [m, m + s]];
     const dirs = [[1, 0], [0, 1], [-1, 0], [0, -1]];
-    const knob = [[0.42, 0, 0.41, 0.07, 0.39, 0.11], [0.35, 0.18, 0.4, 0.27, 0.5, 0.27], [0.6, 0.27, 0.65, 0.18, 0.61, 0.11], [0.59, 0.07, 0.58, 0, 0.62, 0]];
-    let d = 'M' + m + ' ' + m;
+    const knob = [[0.36, 0, 0.38, 0, 0.38, 0.02], [0.38, 0.0863, 0.4337, 0.14, 0.5, 0.14], [0.5663, 0.14, 0.62, 0.0863, 0.62, 0.02], [0.62, 0, 0.64, 0, 0.67, 0]];
+    const r = 0.075;
+    let d = 'M' + (m + r * s) + ' ' + m;
     edges.forEach((e, k) => {
       const [x0, y0] = corners[k];
       const [dx, dy] = dirs[k];
       const pt = (u, v) => (x0 + (u * dx + v * e * dy) * s).toFixed(1) + ' ' + (y0 + (u * dy - v * e * dx) * s).toFixed(1);
       if (e) {
-        d += ' L' + pt(0.38, 0);
+        d += ' L' + pt(0.33, 0);
         knob.forEach((c) => { d += ' C' + pt(c[0], c[1]) + ' ' + pt(c[2], c[3]) + ' ' + pt(c[4], c[5]); });
       }
-      d += ' L' + pt(1, 0);
+      const [nx, ny] = corners[(k + 1) % 4];
+      const [ndx, ndy] = dirs[(k + 1) % 4];
+      d += ' L' + pt(1 - r, 0) + ' Q' + nx + ' ' + ny + ' ' + (nx + ndx * r * s).toFixed(1) + ' ' + (ny + ndy * r * s).toFixed(1);
     });
     return d + ' Z';
   }
 
-  function jigSvg(s, m, edges, fill) {
+  // function jigSvg(s, m, edges, fill) {
+  //   const w = s + m * 2;
+  //   return '<svg class="jig" width="' + w + '" height="' + w + '" viewBox="0 0 ' + w + ' ' + w + '"><path d="' + jigPath(s, m, edges) + '"' + (fill ? ' style="fill:' + fill + '"' : '') + '/></svg>';
+  // }
+
+  function jigSvg(s, m, edges, colors, id) {
     const w = s + m * 2;
-    return '<svg class="jig" width="' + w + '" height="' + w + '" viewBox="0 0 ' + w + ' ' + w + '"><path d="' + jigPath(s, m, edges) + '"' + (fill ? ' style="fill:' + fill + '"' : '') + '/></svg>';
+    const d = jigPath(s, m, edges);
+    const o = (s * 0.015).toFixed(1);
+    const shine = colors
+      ? '<g clip-path="url(#clip-' + id + ')"><g filter="url(#blur-' + id + ')">' +
+        '<path d="' + d + '" transform="translate(' + o + ' ' + o + ')" style="fill:none;stroke:rgba(255,255,255,.15);stroke-width:' + (s * 0.08).toFixed(1) + '"/>' +
+        '<path d="' + d + '" transform="translate(-' + o + ' -' + o + ')" style="fill:none;stroke:' + colors[1] + ';stroke-width:' + (s * 0.08).toFixed(1) + ';mix-blend-mode:multiply;opacity:0.6"/>' +
+        '<path d="' + d + '" transform="translate(-' + o + ' -' + o + ')" style="fill:none;stroke:' + colors[1] + ';stroke-width:' + (s * 0.08).toFixed(1) + ';mix-blend-mode:multiply;opacity:0.6"/>' +
+        '</g></g><path d="' + d + '" style="fill:none"/>'
+      : '';
+    if (!colors) {colors = ['transparent', 'transparent'];}
+    return '<svg class="jig" width="' + w + '" height="' + w + '" viewBox="0 0 ' + w + ' ' + w + '">' + '<defs>' + '<linearGradient id="grad-' + id + '" x1="0%" y1="0%" x2="0%" y2="100%">' + '<stop offset="0%" stop-color="' + colors[0] + '"/>' + '<stop offset="100%" stop-color="' + colors[1] + '"/>' + '</linearGradient>' + '<clipPath id="clip-' + id + '"><path d="' + d + '"/></clipPath>' + '<filter id="blur-' + id + '" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="' + (s * 0.01).toFixed(1) + '"/></filter>' + '</defs>' + '<path d="' + d + '" style="fill:url(#grad-' + id + ')" />' + shine + '</svg>';
   }
 
   // 들어간 변 쪽은 홈 깊이만큼 비워서 글자·아이콘이 조각 밖으로 안 나가게 함
   function labelBox(s, m, edges, x, y) {
     const pad = Math.round(s * 0.06);
-    const [t, r, b, l] = edges.map((e) => (e < 0 ? Math.round(s * 0.3) : pad));
+    const [t, r, b, l] = edges.map((e) => (e < 0 ? Math.round(s * 0.18) : pad));
     return 'left:' + (x + m + l) + 'px;top:' + (y + m + t) + 'px;width:' + (s - l - r) + 'px;height:' + (s - t - b) + 'px';
   }
 
@@ -3060,7 +3088,8 @@ function initJigsawPuzzle(cfg) {
     const y = Math.floor(i / 2) * S;
     const slot = grid.children[i * 2];
     const label = grid.children[i * 2 + 1];
-    slot.innerHTML = jigSvg(S, M, CELL_EDGES[i], fill);
+    slot.innerHTML = jigSvg(S, M, CELL_EDGES[i], fill, 'cell-' + i);
+    // slot.innerHTML = fill ? jigSvg(S, M, CELL_EDGES[i], fill, 'cell-' + i) : '';
     slot.classList.toggle('is-filled', !!fill);
     slot.style.cssText = 'left:' + x + 'px;top:' + y + 'px';
     label.className = 'jig-label' + (fill ? '' : ' is-hint');
@@ -3078,11 +3107,16 @@ function initJigsawPuzzle(cfg) {
     for (let i = 0; i < 4; i++) drawCell(i, p.pieces.find((x) => x.cell === i).text);
     tray.innerHTML = '';
     const shaped = p.pieces.map((piece, i) => ({ piece, color: COLORS[i], edges: CELL_EDGES[piece.cell === undefined ? Math.floor(Math.random() * 4) : piece.cell] }));
-    shuffleArray(shaped).forEach(({ piece, color, edges }) => {
+    // 오른쪽 꼭지 조각 바로 뒤에 왼쪽 꼭지 조각이 오면 꼭지끼리 겹치므로 그런 순서는 다시 섞음
+    const clash = (list) => list.some((x, i) => i > 0 && list[i - 1].edges[1] > 0 && x.edges[3] > 0);
+    let order = shuffleArray(shaped);
+    for (let tries = 0; tries < 100 && clash(order); tries++) order = shuffleArray(shaped);
+    order.forEach(({ piece, color, edges }, i) => {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'jig-piece';
-      btn.innerHTML = jigSvg(180, 52, edges, color) + '<span class="jig-label" style="' + labelBox(180, 52, edges, 0, 0) + '">' + piece.text + '</span>';
+      btn.innerHTML = jigSvg(TS, TM, edges, color, 'tray-' + i) + '<span class="jig-label" style="' + labelBox(TS, TM, edges, 0, 0) + '">' + piece.text + '</span>';
+      btn.style.top = (((edges[0] > 0) - (edges[2] > 0)) * TS * 0.07).toFixed(1) + 'px';
       btn.addEventListener('click', () => pick(btn, piece, color));
       tray.appendChild(btn);
     });

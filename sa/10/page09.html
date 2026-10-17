@@ -6,7 +6,7 @@
     <title>뚝딱! 우리 동네 브이로그 제작소</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 기획서 47~81p. VLLO로 우리 동네 브이로그 만들기 실습. 휴대폰 화면은 기획서에 들어 있는 실제 VLLO 앱 캡처(img/ui/u{기획서 그림 번호}.jpg)를 그대로 쓰고,
+        /* 기획서 47~81p. VLLO로 우리 동네 브이로그 만들기 실습. 휴대폰 화면은 기획서의 VLLO 앱 캡처(u{그림 번호}.jpg)를 보고 SVG로 다시 그린 것(vllo-ui.js, 사진 부분만 img/ui/vllo_photo.jpg)을 쓰고,
            학생이 고른 장소 장면(미리보기)·자막·모자이크는 기획서 슬라이드처럼 캡처 위에 얹음(좌표는 모두 캡처 픽셀 540x1170 기준). 캡처는 폭에 맞춰 줄이고 하단 시스템 버튼 자리를 위해 빈 띠를 잘라 붙임(CUT_AT). 누를 곳(.p09-hot)은 분홍 깜빡임, 손가락이 가리킴.
            흐름: 홈에서 VLLO → 장소 고르기(마트·우체국·도서관·공원) → 음성 녹음(준비된 목소리 TTS) → 자동 자막 생성 → 음성과 자막 비교해 틀린 단어 찾기 → 자막 수정 → 효과·왜곡(모자이크)·블러 → 얼굴 트래킹 → 추출하기 → 완성 영상 보기.
            장소 장면은 임시 이모지 그림(img/p09_place_*.jpg), 완성 영상은 영상 파일이 없어 이모지 이웃이 걸어가는 짧은 애니메이션으로 대신함. TTS는 브라우저 음성(speechSynthesis) — 음성 파일(m4a)이 오면 교체 */
@@ -18,7 +18,7 @@
 
         .p09-phone{left:735px;top:21px;width:450px;height:895px}
         .p09-base{position:absolute;left:0;top:0;width:100%;height:833px;overflow:hidden}
-        .p09-base i{position:absolute;left:0;width:100%;background-repeat:no-repeat;background-size:100% auto}
+        .p09-base svg{position:absolute;left:0;width:100%;display:block}
         .p09-ov{position:absolute;box-sizing:border-box;overflow:hidden}
         .p09-hot{position:absolute;box-sizing:border-box;padding:0;border:solid 3px transparent;border-radius:24px;background:transparent;cursor:pointer;transition:box-shadow .15s,border-color .15s;z-index:6}
         .p09-hot{animation:cv-target 1.2s ease-in-out infinite}
@@ -69,7 +69,7 @@
         .p09-nav{position:absolute;z-index:5;pointer-events:none}
         .p09-nav-del{position:absolute;left:0;top:0;height:100%}
         .p09-nav-clip{position:absolute;top:0;height:100%;overflow:hidden}
-        .p09-nav-clip img{display:block;max-width:none;height:100%}
+        .p09-nav-clip svg{display:block;max-width:none;height:100%}
         .p09-swhand.is-left{animation-name:p09-swl}
         @keyframes p09-swl{0%{opacity:0;transform:translateX(0)}15%{opacity:1}70%{opacity:1;transform:translateX(-150px)}100%{opacity:0;transform:translateX(-150px)}}
         @keyframes p09-sw{0%{opacity:0;transform:translateX(0)}15%{opacity:1}70%{opacity:1;transform:translateX(150px)}100%{opacity:0;transform:translateX(150px)}}
@@ -123,6 +123,7 @@
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
   <script src="../../js/box-edit.js"></script>
+  <script src="vllo-ui.js"></script>
   <script>
   (function () {
     const PLACES = {
@@ -235,11 +236,12 @@
         add('<div class="app-home is-purple"><div class="phone-status is-dark"></div><div class="app-icon is-static"><i><img src="img/ui/vllo_icon.png" alt=""></i>VLLO</div><div class="phone-nav"></div></div>');
         initPhoneBars();
       } else {
-        const f = cutFrom(), bg = 'background-image:url(img/ui/u' + (s.base || s.img) + '.jpg)';
+        VLLO_UI.place = st.pl ? 'img/' + st.pl.img + '.jpg' : '';
+        const f = cutFrom(), n = s.base || s.img, lo = f + cutLen();
         const base = document.createElement('div');
         base.className = 'p09-base';
         base.style.height = (NONAV[s.img] ? SH : SH - NAVH) + 'px';
-        base.innerHTML = '<i style="' + bg + ';top:0;height:' + f * SC + 'px"></i><i style="' + bg + ';top:' + f * SC + 'px;height:' + (1170 - f - cutLen()) * SC + 'px;background-position:0 -' + (f + cutLen()) * SC + 'px"></i>';
+        base.innerHTML = VLLO_UI.svg(n, 0, f, ' style="top:0;height:' + f * SC + 'px"') + VLLO_UI.svg(n, lo, 1170 - lo, ' style="top:' + f * SC + 'px;height:' + (1170 - lo) * SC + 'px"');
         screen.appendChild(base);
         add('<div class="phone-status" style="background:' + (s.img === 7 ? '#111' : s.img === 25 ? '#000' : '#17181c') + '"></div>');
         if (!NONAV[s.img]) add('<div class="phone-nav is-dark"></div>');
@@ -331,13 +333,14 @@
 
     // 하단 메뉴 밀기용 그림: 고정 칸(del) + 옆으로 밀리는 줄(slide). 캡처 픽셀(540x1170) 기준 — 고정 칸은 (0,y), 줄은 (x,y)에서 시작해 end 만큼 왼쪽으로 밀리면 다음 캡처와 같아짐(캡처와 겹쳐 맞춘 값)
     const NAVS = {
-      a: { del: 'nav_del.png', slide: 'nav_slide.png', x: 89, y: 1025, w: 823, h: 91, dw: 89, end: 372 },
-      b: { del: 'nav2_del.png', slide: 'nav2_slide.png', x: 88, y: 1025, w: 760, h: 89, dw: 88, end: 308 }
+      a: { x: 89, y: 1025, w: 823, h: 91, dw: 89, end: 372 },
+      b: { x: 88, y: 1025, w: 760, h: 89, dw: 88, end: 308 }
     };
     function navSlide(key) {
       const c = NAVS[key];
-      const n = add('<div class="p09-nav" style="' + pct([0, c.y, 540, c.h]) + '"><img class="p09-nav-del" src="img/ui/' + c.del + '" alt="" style="width:' + c.dw / 5.4 + '%"><div class="p09-nav-clip" style="left:' + c.x / 5.4 + '%;width:' + (540 - c.x) / 5.4 + '%"><img src="img/ui/' + c.slide + '" alt="" style="width:' + c.w / (540 - c.x) * 100 + '%"></div></div>');
-      const s = n.querySelector('.p09-nav-clip img');
+      const v = VLLO_UI.nav(key);
+      const n = add('<div class="p09-nav" style="' + pct([0, c.y, 540, c.h]) + '">' + v.del.replace('<svg', '<svg class="p09-nav-del" style="width:' + c.dw / 5.4 + '%"') + '<div class="p09-nav-clip" style="left:' + c.x / 5.4 + '%;width:' + (540 - c.x) / 5.4 + '%">' + v.slide.replace('<svg', '<svg style="width:' + c.w / (540 - c.x) * 100 + '%"') + '</div></div>');
+      const s = n.querySelector('.p09-nav-clip svg');
       return { end: c.end, set(off, anim) { s.style.transition = anim ? 'transform .25s ease' : 'none'; s.style.transform = 'translateX(' + (-off / c.w * 100) + '%)'; } };
     }
 
@@ -471,9 +474,7 @@
     $('p09InfoOk').addEventListener('click', () => { $('p09Info').classList.add('is-off'); advance(); });
     // 화면 전환 때 끊기지 않게 쓰는 그림을 미리 불러와 디코딩해 둠(단계 순서대로, 지금 단계부터)
     const PRELOAD = [];
-    STEPS.forEach((s) => { if (s.img) PRELOAD.push('img/ui/u' + s.img + '.jpg'); if (s.base) PRELOAD.push('img/ui/u' + s.base + '.jpg'); });
-    PRELOAD.push('img/ui/vllo_icon.png', '../../img/common/img_finger01.png', '../../img/common/img_finger02.png', '../../img/common/btn_play.png');
-    Object.keys(NAVS).forEach((k) => PRELOAD.push('img/ui/' + NAVS[k].del, 'img/ui/' + NAVS[k].slide));
+    PRELOAD.push('img/ui/vllo_photo.jpg', 'img/ui/vllo_icon.png', '../../img/common/img_finger01.png', '../../img/common/img_finger02.png', '../../img/common/btn_play.png');
     Object.keys(PLACES).forEach((k) => PRELOAD.push('img/' + PLACES[k].img + '.jpg'));
     window.p09Cache = Array.from(new Set(PRELOAD)).map((src) => { const im = new Image(); im.src = src; if (im.decode) im.decode().catch(() => {}); return im; });
 
@@ -486,7 +487,7 @@
       step: { count: STEPS.length, get: () => st.i, set: (n) => { st.i = n; }, go,
         label: (n) => '단계 ' + n + ' / ' + (STEPS.length - 1) + ' (캡처 ' + (STEPS[n].img || (STEPS[n].home ? 'home' : '—')) + ')' }
     });
-    render();
+    Promise.all(['500', '600', '700'].map((w) => document.fonts.load(w + ' 16px Pretendard', '가A1'))).then(render, render);
   })();
   </script>
 </body>
