@@ -280,8 +280,15 @@
       show(['p10Overview']);
       document.querySelector('.p10').classList.add('is-overview');
       Object.keys(ITEMS).forEach((k) => $('p10OverviewGrid').appendChild(itemBtn(k)));
-      nextThen(() => clickGuide('Gemini 앱을 클릭해요.', 'home', [905, 416, 110, 110, '28px'],
-        () => clickGuide('Gemini Live 모드<br>버튼을 클릭해요.', 'chat', [1072, 778, 82, 82, '50%'], () => match(0))));
+      nextThen(step2);
+    }
+
+    function step2() {
+      clickGuide('Gemini 앱을 클릭해요.', 'home', [905, 416, 110, 110, '28px'], step3);
+    }
+
+    function step3() {
+      clickGuide('Gemini Live 모드<br>버튼을 클릭해요.', 'chat', [1072, 778, 82, 82, '50%'], () => match(0));
     }
 
     function match(m, asked) {
@@ -319,12 +326,16 @@
       answer.innerHTML = '<span></span>';
       typeText(answer.firstChild, ITEMS[key].answer, () => { answer.insertAdjacentHTML('beforeend', ACTS); nextThen(() => {
         if (asked.length < 2) match(m, asked);
-        else choose('<i>ROUND 1</i><span>' + (m + 1) + '/4</span>', '어떤 준비물을<br>가져가는 게 좋을까?', ROUND1[m], true, (w) => {
-          round1Winners.push(w);
-          if (m < 3) match(m + 1);
-          else round2(0);
-        });
+        else round1(m);
       }); });
+    }
+
+    function round1(m) {
+      choose('<i>ROUND 1</i><span>' + (m + 1) + '/4</span>', '어떤 준비물을<br>가져가는 게 좋을까?', ROUND1[m], true, (w) => {
+        round1Winners.push(w);
+        if (m < 3) match(m + 1);
+        else round2(0);
+      });
     }
 
     const round1Winners = [];
@@ -335,8 +346,12 @@
       choose('<i>ROUND 2</i><span>' + (i + 1) + '/2</span>', NEED_ASK, round1Winners.slice(i * 2, i * 2 + 2), true, (w) => {
         round2Winners.push(w);
         if (i === 0) round2(1);
-        else choose('<i>FINAL ROUND</i>', NEED_ASK, round2Winners, true, result);
+        else finalRound();
       });
+    }
+
+    function finalRound() {
+      choose('<i>FINAL ROUND</i>', NEED_ASK, round2Winners, true, result);
     }
 
     function choose(roundText, ask, pair, withSummary, done) {
@@ -375,11 +390,15 @@
       if (!onNext) return;
       const fn = onNext;
       onNext = null;
-      nextBtn.classList.add('is-off');
-      setTimeout(fn, 300);
+      setTimeout(() => { nextBtn.classList.add('is-off'); fn(); }, 400);
     });
 
-    overview();
+    // ?step=N 으로 단계별 보기: 1 준비물 안내 · 2 앱 클릭 · 3 Live 버튼 클릭 · 4 질문할 카드 고르기 · 5 Gemini 답변 · 6 ROUND 1 · 7 ROUND 2 · 8 FINAL · 9 결과
+    const wantStep = parseInt(new URLSearchParams(location.search).get('step'), 10);
+    if (wantStep >= 7) round1Winners.push('charger', 'carrier', 'umbrella', 'tablet');
+    if (wantStep >= 8) round2Winners.push('charger', 'umbrella');
+    const STEPS = [overview, step2, step3, () => match(0), () => askGemini(0, 'charger', ['charger']), () => round1(0), () => round2(0), finalRound, () => result('charger')];
+    (STEPS[wantStep - 1] || overview)();
   })();
   </script>
 </body>

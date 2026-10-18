@@ -220,8 +220,13 @@
       },
       onWrong: (card, blank) => { if (blank) playWrong(); },
       onDone: () => {
-        playCorrect();
-        setTimeout(step2, 1000);
+        // 정답 소리가 끝난 뒤 다음 스텝(재생 실패·지연에 대비해 3초 뒤에도 넘어감)
+        const snd = new Audio(ASSET_BASE + 'sound/correct.mp3');
+        let moved = false;
+        const next = () => { if (!moved) { moved = true; step2(); } };
+        snd.addEventListener('ended', next);
+        snd.play().catch(next);
+        setTimeout(next, 3000);
       }
     });
 
