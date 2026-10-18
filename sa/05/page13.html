@@ -38,7 +38,8 @@
           font-family:'Cafe24 Ssurround';font-size:44px;color:#4a12b0;letter-spacing:-0.06em;white-space:nowrap}
         .p13-way i{flex:none;width:100%;height:301px;border-radius:16px 16px 0 0;background:var(--c-purple) center / cover no-repeat}
         .p13-way span{flex:1 1 auto;display:flex;align-items:center;padding-top:4px}
-        .p13-way:hover{border-color:#ff4ff9}
+        /* .p13-way:hover{border-color:#ff4ff9} */
+        .p13-way:hover{border-color:var(--c-violet)}
         .p13-way.is-selected{border-color:#ff4ff9}
         .p13-way.is-checked{opacity:.4;pointer-events:none}
         .p13-pill.is-line{min-height:120px;top:60px}
@@ -160,11 +161,11 @@
   <script>
   (function () {
     const TILES = [
-      { x: 270, y: 305 },
-      { x: 878, y: 314 },
-      { x: 748, y: 609 },
-      { x: 1229, y: 714 },
-      { x: 1415, y: 305 }
+      { x: 300, y: 305 },
+      { x: 908, y: 314 },
+      { x: 778, y: 609 },
+      { x: 1259, y: 714 },
+      { x: 1445, y: 305 }
     ];
     const WAYS = [
       { key: 'sign', name: '표지판 확인하기', pro: '글과 화살표를 보고<br>방향을 알 수 있어요.', con: '표시를 이해하기<br>어려울 수 있어요.',
@@ -196,7 +197,7 @@
       const from = TILES[pos];
       pos = i;
       if (!student.style.left) { placeStudent(TILES[i].x, TILES[i].y); return; }
-      const pts = [[from.x, from.y]].concat((ROUTES[i] || []).map((p) => [p[0] - 30, p[1] - 110]), [[TILES[i].x, TILES[i].y]]);
+      const pts = [[from.x, from.y]].concat((ROUTES[i] || []).map((p) => [p[0], p[1] - 110]), [[TILES[i].x, TILES[i].y]]);
       const lens = [];
       let total = 0;
       for (let k = 1; k < pts.length; k++) { const d = Math.hypot(pts[k][0] - pts[k - 1][0], pts[k][1] - pts[k - 1][1]); lens.push(d); total += d; }
@@ -336,8 +337,12 @@
       playClick();
       close('p13Decide');
       moveTo(4, () => {
-        playCorrect();
-        setTimeout(() => navigateTo('page14.html'), 800);
+        const done = new Audio(ASSET_BASE + 'sound/correct.mp3');
+        let moved = false;
+        const next = () => { if (!moved) { moved = true; navigateTo('page14.html'); } };
+        done.onended = next;
+        done.play().catch(next);
+        setTimeout(next, 5000);
       });
     };
 
