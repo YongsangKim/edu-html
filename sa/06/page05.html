@@ -6,28 +6,23 @@
     <title>쏙쏙! 재화와 서비스 보물 상자 분류하기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 10~17p. 컨베이어 벨트 위 아이콘을 재화/서비스 보물 상자로 끌어 넣기, 3라운드.
-           맞으면 아이콘이 사라지고 정답 말풍선(2초), 틀리면 벨트로 돌아가고 오답 말풍선(5초). 라운드가 끝나면 다음 아이콘이 왼쪽에서 밀려 들어옴.
-           2라운드 서비스는 기획서 13p 정답 문구대로 '정비사의 수리'·'미용사의 이발'. 아이콘 img/p05_item_{key}.png, 상자 img/p05_box_{goods|service}.png */
-
-        .p05-belt{position:absolute;left:72px;top:355px;width:1740px;height:130px;box-sizing:border-box;border:solid 6px var(--c-ink);border-radius:65px;
-          background:repeating-linear-gradient(90deg,#5b5f73 0 60px,#6c7087 60px 120px);box-shadow:inset 0 -12px 0 rgba(0,0,0,.25)}
+        .p05-belt{position:absolute;left:0;top:370px;width:1920px;height:220px;background:url('img/p05_belt.png') no-repeat}
         .p05-items{position:absolute;left:72px;top:175px;width:1740px;height:300px;overflow:visible}
         .p05-items.is-slide{animation:p05-in .7s cubic-bezier(.2,.8,.2,1)}
         @keyframes p05-in{from{transform:translateX(-1800px)}to{transform:none}}
-        .p05-item{position:absolute;top:0;width:260px;height:270px;box-sizing:border-box;padding:0 0 14px;border:solid 5px var(--c-ink);border-radius:28px;background:var(--c-white);cursor:grab;touch-action:none;
-          display:flex;flex-direction:column;align-items:center;gap:6px;font-family:'Cafe24 Ssurround';font-size:36px;color:var(--c-indigo);letter-spacing:-0.05em;z-index:5}
-        .p05-item i{flex:1 1 auto;width:100%;border-radius:22px 22px 0 0;background:var(--c-pale) center / cover no-repeat}
+        .p05-item{position:absolute;bottom:10px;cursor:grab;touch-action:none;z-index:5}
+        .p05-item img{display:block;max-width:none;pointer-events:none}
         .p05-item.is-dragging{cursor:grabbing;z-index:60}
         .p05-item.is-back{transition:transform .3s ease}
-        .p05-item.is-gone{opacity:0;transform:scale(.3)!important;transition:opacity .3s,transform .3s;pointer-events:none}
+        .p05-item.is-gone{opacity:0;pointer-events:none;transition:transform .45s cubic-bezier(.45,0,.85,.55),opacity .2s .27s}
+        .p05-box.is-catch{animation:p05-catch .35s .4s ease-out}
+        @keyframes p05-catch{40%{transform:scale(1.06)}}
 
-        .p05-box{position:absolute;top:632px;width:570px;height:228px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:30px 30px 40px 40px;background:var(--c-pale) center / contain no-repeat;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);transition:transform .2s}
+        .p05-box{position:absolute;top:492px;width:466px;height:435px;box-sizing:border-box;background:transparent center / contain no-repeat;transition:transform .2s}
         .p05-box-goods{left:240px;background-image:url('img/p05_box_goods.png')}
-        .p05-box-service{left:1172px;background-image:url('img/p05_box_service.png')}
-        .p05-box span{position:absolute;left:50%;bottom:-40px;transform:translateX(-50%);height:84px;padding:6px 40px 0;box-sizing:border-box;display:flex;align-items:center;white-space:nowrap;
-          background:var(--c-purple);border:solid 5px var(--c-cream);border-radius:42px;font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-white)}
-        .p05-box-service span{background:var(--c-blue)}
+        .p05-box-service{left:1172px;background-image:url('img/p05_box_goods.png')}
+        .p05-box span{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);height:84px;padding:6px 20px 0;box-sizing:border-box;display:flex;align-items:center;white-space:nowrap;
+          background:var(--c-white);border:solid 5px #053c85;border-radius:20px;font-family:'Cafe24 Ssurround';font-size:60px;color:var(--c-ink);letter-spacing:-0.08em}
 
         .p05-bubble{position:absolute;left:50%;bottom:300px;transform:translateX(-50%);width:354px;min-height:153px;box-sizing:border-box;padding:24px 30px;display:flex;align-items:center;justify-content:center;text-align:center;
           background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:36px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
@@ -35,10 +30,13 @@
         .p05-bubble.is-right{width:560px;color:var(--c-blue)}
         .p05-bubble.is-wrong{width:963px;font-size:42px;color:var(--c-ink)}
         .p05-bubble:before{content:'';position:absolute;left:50%;bottom:-58px;margin-left:-50px;width:100px;height:70px;background:url('../../img/common/p_guide_tail.png') 0 0 / contain no-repeat}
-        .p05-avatar{position:absolute;left:830px;bottom:0;width:260px;height:313px;z-index:30}
+        .p05-avatar{position:absolute;left:630px;bottom:0;width:575px;height:455px;z-index:29}
         .p05-avatar img{display:block;width:100%;height:100%;object-fit:contain;object-position:bottom}
 
         #p05Done{z-index:120}
+
+        .ask-pill>span{letter-spacing:-0.1em}
+        .p05-bg{position:absolute;left:48px;top:84px;width:1826px;height:638px;background:url('img/p05_bg.png') no-repeat}
     </style>
 </head>
 <body>
@@ -47,14 +45,15 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <p class="ask-pill is-small is-fit"><span>컨베이어 벨트 위의 아이콘을 알맞은 보물 상자에 넣어 봐요!</span></p>
+          <div class="p05-bg"></div>
+          <p class="ask-pill is-fit"><span>컨베이어 벨트 위의 아이콘을 알맞은 보물 상자에 넣어 봐요!</span></p>
           <div class="p05-belt"></div>
           <div class="p05-items" id="p05Items"></div>
 
           <div class="p05-box drop-zone p05-box-goods" data-type="goods"><span>재화 보물 상자</span></div>
           <div class="p05-box drop-zone p05-box-service" data-type="service"><span>서비스 보물 상자</span></div>
           <p class="p05-bubble" id="p05Bubble"></p>
-          <div class="p05-avatar"><img src="../img/sa_main.png" alt=""></div>
+          <div class="p05-avatar"><img src="img/r5.png" alt=""></div>
 
           <div class="avatar-modal is-off" id="p05Done">
             <div class="avatar-popup-panel">
@@ -144,7 +143,7 @@
         const el = document.createElement('div');
         el.className = 'p05-item';
         el.style.left = Math.round(gap * i + (gap - 260) / 2) + 'px';
-        el.innerHTML = '<i style="background-image:url(\'img/p05_item_' + it.key + '.png\')"></i>' + it.name;
+        el.innerHTML = '<img src="img/p05_item_' + it.key + '.png" alt="' + it.name + '">';
         bindDrag(el, it);
         itemsBox.appendChild(el);
       });
@@ -161,10 +160,14 @@
         const sx = e.clientX;
         const sy = e.clientY;
         el.setPointerCapture(e.pointerId);
+        let tx = 0;
+        let ty = 0;
         el.classList.remove('is-back');
         el.classList.add('is-dragging');
         const move = (ev) => {
-          el.style.transform = 'translate(' + (ev.clientX - sx) / s + 'px,' + (ev.clientY - sy) / s + 'px)';
+          tx = (ev.clientX - sx) / s;
+          ty = (ev.clientY - sy) / s;
+          el.style.transform = 'translate(' + tx + 'px,' + ty + 'px)';
           const over = boxAt(ev.clientX, ev.clientY);
           boxes.forEach((b) => b.classList.toggle('is-over', b === over));
         };
@@ -177,7 +180,13 @@
           const box = boxAt(ev.clientX, ev.clientY);
           if (box && box.dataset.type === it.type) {
             playCorrect();
+            // 상자 입구(가운데 위쪽)로 날아 들어가며 작아지다 사라짐
+            const er = el.getBoundingClientRect();
+            const br = box.getBoundingClientRect();
             el.classList.add('is-gone');
+            el.style.transform = 'translate(' + (tx + (br.left + br.width / 2 - er.left - er.width / 2) / s) + 'px,' + (ty + (br.top + br.height * 0.35 - er.top - er.height / 2) / s) + 'px) scale(.3)';
+            box.classList.add('is-catch');
+            setTimeout(() => box.classList.remove('is-catch'), 800);
             say(it.type === 'goods' ? GOODS_RIGHT(it.subj) : it.right, 'is-right', 2000);
             left -= 1;
             if (!left) setTimeout(nextRound, 2000);

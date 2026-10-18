@@ -7,27 +7,23 @@
     <link rel="stylesheet" href="../../css/common.css">
     <style>
         /* 디자인 없음 - 기획서 3~7p. 학생 캐릭터를 알맞은 건물로 끌어다 놓기(질문 4개 차례로). 놓은 뒤 캐릭터는 제자리로 돌아오고,
-           맞힌 건물은 간판·불빛이 켜진 채 유지. 지도 img/p02_map.png, 건물 img/p02_bld_{key}.png, 학생 캐릭터 img/p02_student.png */
+           맞힌 건물은 img/p02_bld_{key}_on.png 로 바뀐 채 유지. 지도 img/p02_map.png, 건물 img/p02_bld_{key}.png, 학생 캐릭터 img/p02_student.png */
 
-        .p02-map{position:absolute;left:33px;top:34px;width:1860px;height:774px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:40px;background:var(--c-cream) url('img/p02_map.png') center / cover no-repeat}
-        .p02-place{position:absolute;width:386px;height:258px;transition:transform .2s ease}
-        .p02-sign{position:absolute;left:31px;top:0;width:325px;height:87px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:var(--c-sky);border:solid 5px var(--c-ink);border-radius:44px;
-          font-family:'Cafe24 Ssurround';font-size:48px;color:var(--c-white);transition:background-color .3s,color .3s,box-shadow .3s}
-        .p02-bld{position:absolute;left:0;top:84px;width:386px;height:171px;border-radius:24px;background:var(--c-cream) center / contain no-repeat;border:solid 5px var(--c-ink);box-sizing:border-box;transition:box-shadow .3s}
-        .p02-place.is-lit .p02-sign{background:var(--c-yellow);color:var(--c-ink);box-shadow:0 0 30px 10px rgba(255,216,61,.8)}
-        .p02-place.is-lit .p02-bld{box-shadow:0 0 40px 14px rgba(255,216,61,.75)}
+        .p02-map{position:absolute;left:60px;top:40px;width:1800px;height:650px;box-sizing:border-box;border:solid 5px #266cc8;border-radius:15px;background:var(--c-cream) url('img/p02_map.png') center / cover no-repeat}
+        .p02-place{position:absolute;display:block;max-width:none}
 
-        .p02-student{position:absolute;left:109px;top:521px;width:287px;height:396px;background:url('img/p02_student.png') center bottom / contain no-repeat;cursor:grab;touch-action:none;z-index:20}
+        .p02-student{position:absolute;left:88px;top:355px;width:473px;height:595px;background:url('img/p02_student.png') center bottom / contain no-repeat;cursor:grab;touch-action:none;z-index:20}
         .p02-student.is-dragging{cursor:grabbing;z-index:60}
         .p02-student.is-back{transition:left .3s ease,top .3s ease}
 
-        .p02-bubble{position:absolute;left:430px;top:700px;width:1371px;min-height:171px;box-sizing:border-box;padding:14px 50px;display:flex;align-items:center;
-          background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
-          font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.25;color:var(--c-purple);letter-spacing:-0.04em;word-break:keep-all;z-index:10}
-        .p02-bubble:before{content:'';position:absolute;left:-58px;top:50%;margin-top:-30px;border-style:solid;border-width:30px 58px 30px 0;border-color:transparent var(--c-purple) transparent transparent}
-        .p02-bubble:after{content:'';position:absolute;left:-47px;top:50%;margin-top:-22px;border-style:solid;border-width:22px 48px 22px 0;border-color:transparent var(--c-cream) transparent transparent}
+        .p02-bubble{position:absolute;left:480px;top:667px;width:1371px;min-height:210px;box-sizing:border-box;padding:14px 50px;display:flex;align-items:center;
+          background:transparent;border:solid 6px transparent;
+          font-family:'Cafe24 Ssurround';font-size:70px;line-height:1.25;color:var(--c-ink);letter-spacing:-0.06em;word-break:keep-all;margin:0;z-index:10}
 
         #p02Done{z-index:120}
+        .p02-bubble-shadow{position:absolute;left:460px;top:645px;}
+        .p02-bubble-shadow svg{position:relative;z-index:2}
+        .p02-bubble-shadow:after{content:'';position:absolute;left:50px;top:10px;width:1310px;height:256px;border-radius:20px;background:rgba(70,78,239,0.2);z-index:1;box-shadow:5px 5px 5px 0 rgba(70,78,239,0.2)}
     </style>
 </head>
 <body>
@@ -37,18 +33,24 @@
       <div id="stage" class="stage">
         <main class="bg-default">
           <div class="p02-map"></div>
-          <div class="p02-place drop-zone" data-key="bakery" style="left:296px;top:69px"><div class="p02-sign">빵집</div><div class="p02-bld" style="background-image:url('img/p02_bld_bakery.png')"></div></div>
-          <div class="p02-place drop-zone" data-key="stationery" style="left:1024px;top:69px"><div class="p02-sign">문구점</div><div class="p02-bld" style="background-image:url('img/p02_bld_stationery.png')"></div></div>
-          <div class="p02-place drop-zone" data-key="hospital" style="left:633px;top:411px"><div class="p02-sign">병원</div><div class="p02-bld" style="background-image:url('img/p02_bld_hospital.png')"></div></div>
-          <div class="p02-place drop-zone" data-key="salon" style="left:1362px;top:411px"><div class="p02-sign">미용실</div><div class="p02-bld" style="background-image:url('img/p02_bld_salon.png')"></div></div>
+          <img class="p02-place" data-key="bakery" style="left:396px;top:69px" src="img/p02_bld_bakery.png" data-on="img/p02_bld_bakery_on.png" alt="">
+          <img class="p02-place" data-key="stationery" style="left:1054px;top:55px" src="img/p02_bld_stationery.png" data-on="img/p02_bld_stationery_on.png" alt="">
+          <img class="p02-place" data-key="hospital" style="left:703px;top:361px" src="img/p02_bld_hospital.png" data-on="img/p02_bld_hospital_on.png" alt="">
+          <img class="p02-place" data-key="salon" style="left:1322px;top:341px" src="img/p02_bld_salon.png" data-on="img/p02_bld_salon_on.png" alt="">
 
           <div class="p02-student" id="p02Student" aria-label="학생 캐릭터"></div>
-          <p class="p02-bubble" id="p02Bubble"></p>
-
+          <p class="p02-bubble" id="p02Bubble">
+            
+          </p>
+          <div class="p02-bubble-shadow">
+          <svg width="1376px" height="281px">
+            <path fill-rule="evenodd"  fill="rgb(254, 251, 249)" stroke="#053c85" stroke-width="5" d="M1336.996,256.628 L56.918,256.628 C48.634,256.628 41.918,249.912 41.918,241.628 L41.918,97.664 L10.036,79.257 C7.216,77.629 7.216,73.559 10.036,71.931 L41.918,53.524 L41.918,22.892 C41.918,14.608 48.634,7.892 56.918,7.892 L1336.996,7.892 C1345.281,7.892 1351.996,14.608 1351.996,22.892 L1351.996,241.628 C1351.996,249.912 1345.281,256.628 1336.996,256.628 Z"/>
+            </svg>
+          </div>
           <div class="avatar-modal is-off" id="p02Done">
             <div class="avatar-popup-panel">
               <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
-              <div class="avatar-popup-body is-finish">
+              <div class="avatar-popup-body is-side">
                 <p class="avatar-popup-text">좋아요!</p>
                 <p class="avatar-popup-sub">모든 미션을 성공했어요.</p>
                 <a href="page03.html" class="js-nav-effect avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
@@ -85,7 +87,8 @@
     let wrongTimer = null;
 
     function ask() {
-      bubble.textContent = MISSIONS[index].ask + ' 알맞은 장소로 학생을 드래그해보세요.';
+      bubble.textContent = MISSIONS[index].ask;
+      // bubble.textContent = MISSIONS[index].ask + ' 알맞은 장소로 학생을 드래그해보세요.';
       locked = false;
     }
 
@@ -103,11 +106,14 @@
       const sx = e.clientX;
       const sy = e.clientY;
       student.setPointerCapture(e.pointerId);
+      const sr = student.getBoundingClientRect();
+      student.style.transformOrigin = (sx - sr.left) / s + 'px ' + (sy - sr.top) / s + 'px';
       student.classList.remove('is-back');
       student.classList.add('is-dragging');
+      student.style.transform = 'scale(.5)';
 
       const move = (ev) => {
-        student.style.transform = 'translate(' + (ev.clientX - sx) / s + 'px,' + (ev.clientY - sy) / s + 'px)';
+        student.style.transform = 'translate(' + (ev.clientX - sx) / s + 'px,' + (ev.clientY - sy) / s + 'px) scale(.5)';
         const over = placeAt(ev.clientX, ev.clientY);
         places.forEach((p) => p.classList.toggle('is-over', p === over));
       };
@@ -118,6 +124,7 @@
         student.classList.remove('is-dragging');
         student.classList.add('is-back');
         student.style.transform = '';
+        student.style.transformOrigin = '';
         places.forEach((p) => p.classList.remove('is-over'));
         const place = placeAt(ev.clientX, ev.clientY);
         if (place) drop(place);
@@ -139,7 +146,7 @@
       clearTimeout(wrongTimer);
       locked = true;
       playCorrect();
-      place.classList.add('is-lit');
+      place.src = place.dataset.on;
       bubble.textContent = m.done;
       // 기획서: 맞힌 문구 2초 뒤 다음 질문(마지막이면 완료 팝업)
       setTimeout(() => {
