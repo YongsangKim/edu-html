@@ -3203,14 +3203,18 @@ function initPhoneBars() {
 initPhoneBars();
 
 /* 글꼴 미리 불러오기: @font-face 글꼴은 그 글꼴로 글자가 처음 그려질 때에야 내려받아서, 그 순간 대체 글꼴로 보였다가 바뀐다.
-   나중에 쓰는 글꼴이 있는 페이지는 <main data-preload-fonts="KCC-DodamDodam,KCC-MurukMuruk">처럼 써 두면 페이지를 열 때 미리 받음.
+   폰 화면 등에 쓰는 Pretendard는 굵기마다 파일이 달라 모든 페이지에서 미리 받고, 그 밖의 글꼴은
+   <main data-preload-fonts="KCC-DodamDodam,600 KCC-MurukMuruk">처럼 써 두면(굵기는 앞에 선택) 페이지를 열 때 미리 받음.
    글꼴 선언(@font-face)은 css/common.css에 있음 */
 function initFontPreload() {
+  if (!document.fonts) return;
+  [300, 400, 500, 600, 700].forEach((w) => document.fonts.load(w + ' 40px "Pretendard"'));
   const holder = document.querySelector('[data-preload-fonts]');
-  if (!holder || !document.fonts) return;
+  if (!holder) return;
   holder.dataset.preloadFonts.split(',').forEach((name) => {
-    name = name.trim();
-    if (name) document.fonts.load('40px "' + name + '"');
+    const m = name.trim().match(/^(\d{3})\s+(.+)$/);
+    if (m) document.fonts.load(m[1] + ' 40px "' + m[2] + '"');
+    else if (name.trim()) document.fonts.load('40px "' + name.trim() + '"');
   });
 }
 initFontPreload();

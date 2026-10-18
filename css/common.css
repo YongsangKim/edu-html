@@ -556,6 +556,11 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
   color: #d168fb;
 }
 
+/* 모달 안 버튼은 보라색(.is-purple, 크기는 .is-popup 과 함께). 확인·다음 같은 두 글자 버튼은 .is-short 로 글자 간격 */
+.card-btn.is-purple{box-shadow:0 10px 0 0 #a9a2ff,0 10px 0 10px #6b03d6;color:#48159c}
+.card-btn.is-purple.is-short{letter-spacing:0.2em;padding-left:60px}
+.card-btn.is-purple:not(:disabled):not(.is-disabled):active{translate:0 8px;box-shadow:0 2px 0 0 #a9a2ff,0 2px 0 10px #6b03d6}
+
 /* ---------------- 끌어 놓기 상태 ---------------- */
 .drop-zone.is-over{outline:8px solid var(--c-yellow);outline-offset:-8px}
 
@@ -1021,12 +1026,14 @@ header:has(.page-title.is-long) .header-left, header:has(.page-title.is-long) .h
 .gauge.is-robot:after{content:'';position:absolute;right:var(--ge-r,-132px);top:var(--ge-t,-43px);width:180px;height:137px;background:url('../img/common/gauge_mail.png') 0 0 / contain no-repeat;z-index:1}
 
 .ribbon-wrap{isolation:isolate}
-.ribbon{--rb-w:752px;--rb-h:105px;--rb-fs:70px;--rb-ls:-0.05em;--rb-color:var(--c-ink);--rb-bg:#dff6ff;--rb-bd:#fff;--rb-shadow:rgba(54,98,170,.2);--rb-tail:#719fdc;--rb-fold:#5b84d6;--rb-tw:150px;--rb-th:102px;--rb-ext:100px;--rb-drop:44px;
-  position:relative;width:var(--rb-w);height:var(--rb-h);margin:0;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;background:var(--rb-bg);border:solid 5px var(--rb-bd);box-shadow:0 32px 0 -16px var(--rb-shadow);
+.ribbon{--rb-w:752px;--rb-h:105px;--rb-fs:70px;--rb-ls:-0.05em;--rb-color:var(--c-ink);--rb-bg:#dff6ff;--rb-bd:#fff;--rb-bdw:5px;--rb-tail:#719fdc;--rb-fold:#5b84d6;--rb-tw:150px;--rb-th:102px;--rb-ext:100px;--rb-drop:44px;--rb-notch:52px;--rb-sd-y:10px;--rb-shadow:rgba(0,0,0,.15);
+  position:relative;width:var(--rb-w);height:var(--rb-h);margin:0;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;background:var(--rb-bg);border:solid var(--rb-bdw) var(--rb-bd);filter:drop-shadow(0 var(--rb-sd-y) 0 var(--rb-shadow));
   font-family:'Cafe24 Ssurround';font-size:var(--rb-fs);color:var(--rb-color);letter-spacing:var(--rb-ls);white-space:nowrap}
-.ribbon:before,.ribbon:after{content:'';position:absolute;top:calc(var(--rb-h) + var(--rb-drop) - var(--rb-th));width:var(--rb-tw);height:var(--rb-th);z-index:-1;background-repeat:no-repeat}
-.ribbon:before{left:calc(var(--rb-ext) * -1);clip-path:polygon(0 0,100% 0,100% 100%,0 100%,36% 50%);background:linear-gradient(to bottom left,var(--rb-fold) 50%,transparent 50%) 100% calc(var(--rb-th) * .54) / calc(var(--rb-th) * .54) calc(var(--rb-th) * .46) no-repeat,var(--rb-tail)}
-.ribbon:after{right:calc(var(--rb-ext) * -1);clip-path:polygon(0 0,100% 0,64% 50%,100% 100%,0 100%);background:linear-gradient(to bottom right,var(--rb-fold) 50%,transparent 50%) 0 calc(var(--rb-th) * .54) / calc(var(--rb-th) * .54) calc(var(--rb-th) * .46) no-repeat,var(--rb-tail)}
+.ribbon:before,.ribbon:after{content:'';position:absolute;top:calc(var(--rb-h) + var(--rb-drop) - var(--rb-th) - var(--rb-bdw));width:var(--rb-tw);height:var(--rb-th)}
+.ribbon:before{left:calc(var(--rb-ext) * -1 - var(--rb-bdw));clip-path:polygon(0 0,var(--rb-ext) 0,var(--rb-ext) calc(var(--rb-th) - var(--rb-drop)),100% calc(var(--rb-th) - var(--rb-drop)),100% 100%,0 100%,var(--rb-notch) 50%);
+  background:linear-gradient(to bottom left,var(--rb-fold) 50%,transparent 50%) 100% 100% / calc(var(--rb-tw) - var(--rb-ext)) var(--rb-drop) no-repeat,var(--rb-tail)}
+.ribbon:after{right:calc(var(--rb-ext) * -1 - var(--rb-bdw));clip-path:polygon(calc(100% - var(--rb-ext)) 0,100% 0,calc(100% - var(--rb-notch)) 50%,100% 100%,0 100%,0 calc(var(--rb-th) - var(--rb-drop)),calc(100% - var(--rb-ext)) calc(var(--rb-th) - var(--rb-drop)));
+  background:linear-gradient(to bottom right,var(--rb-fold) 50%,transparent 50%) 0 100% / calc(var(--rb-tw) - var(--rb-ext)) var(--rb-drop) no-repeat,var(--rb-tail)}
 .end-title{position:absolute;left:750px;top:65px;width:930px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:100px;background:linear-gradient(180deg,#02185c,#0362d7);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-0.06em}
 .end-panel{position:absolute;left:750px;top:185px;width:930px;min-height:540px;background:var(--c-cream);border:solid 15px var(--c-navy);border-radius:30px;box-shadow:0 0 0 5px var(--c-white);box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;padding:30px}
 .end-desc{margin:0;font-family:'Cafe24 Ssurround';font-size:70px;line-height:1.4;color:#3b1e87;text-align:center;letter-spacing:-0.04em;word-break:keep-all}
@@ -1087,8 +1094,9 @@ div:where(.phone-frame.is-thick){padding:18px;border:0;border-radius:70px;box-sh
 .app-home.is-blue{background:linear-gradient(160deg,#3a6ea5,#7fb3e8 45%,#c9e2f7)}
 .app-home.is-sky{background:linear-gradient(180deg,#dcecff,#f3f8ff)}
 .app-home:after{content:'';position:absolute;left:50%;top:9px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#3a3b45;z-index:8}
+.phone-frame.has-cam .app-home:after{display:none}
 .cam-hole:after{content:'';position:absolute;left:50%;top:9px;width:22px;height:22px;margin-left:-11px;border-radius:50%;background:#3a3b45;z-index:50;pointer-events:none}
-.app-home .app-icon{position:absolute;left:50%;top:44%;width:110px;margin-left:-55px;padding:0;border:0;background:none;cursor:pointer;display:block;text-align:center;font-family:'Pretendard';font-size:20px;font-weight:600;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.3);z-index:3}
+.app-home .app-icon{position:absolute;left:50%;top:44%;width:110px;margin-left:-55px;padding:0;border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;white-space:nowrap;text-align:center;font-family:'Pretendard';font-size:20px;font-weight:600;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.3);z-index:3}
 .app-home .app-icon.is-dark{color:#111;text-shadow:none}
 .app-home .app-icon i{display:flex;align-items:center;justify-content:center;width:110px;height:110px;margin-bottom:8px;border-radius:28px;box-shadow:0 6px 14px rgba(0,0,0,.2);overflow:hidden;transition:transform .15s}
 .app-home .app-icon i img{display:block;width:100%;height:100%;object-fit:cover}
@@ -1131,7 +1139,7 @@ div:where(.phone-frame.is-thick){padding:18px;border:0;border-radius:70px;box-sh
 .jig-label.is-hint{color:var(--c-violet);opacity:0;transition:opacity .5s ease}
 .jig-label.is-hint.is-on{opacity:.55}
 .jig-tray-label{position:absolute;left:52px;top:565px;min-width:400px;height:100px;padding:8px 46px 10px;box-sizing:border-box;display:flex;align-items:center;background:var(--c-navy);border-radius:28px 28px 0 0;
-  font-family:'Cafe24 Ssurround';font-size:54px;color:var(--c-white);border:solid 6px var(--c-sky);border-bottom:0;z-index:2}
+  font-family:'Cafe24 Ssurround';font-size:60px;color:var(--c-white);border:solid 6px var(--c-sky);border-bottom:0;z-index:2}
 .jig-tray-label:after{content:"";position:absolute;left:calc(100% - 2px);bottom:0;width:32px;height:40px;background:radial-gradient(circle 30px at 100% 0,transparent 23.5px,var(--c-sky) 24px 29.5px,var(--c-navy) 30px)}
 .jig-tray{position:absolute;left:52px;top:649px;width:1818px;height:300px;box-sizing:border-box;padding:0 40px;display:flex;align-items:center;justify-content:space-between;
   background:var(--c-navy);border:solid 6px var(--c-sky);border-radius:24px;border-top-left-radius:0}
@@ -1467,10 +1475,11 @@ a.gn-hl, button.gn-hl{cursor:pointer}
 @keyframes blk-glow{0%,100%{filter:drop-shadow(0 2px 0 rgba(0,0,0,.2))}50%{filter:drop-shadow(0 0 0 rgba(255,216,61,0)) drop-shadow(0 0 10px rgba(255,200,0,1)) drop-shadow(0 0 4px rgba(255,200,0,1))}}
 
 /* ---------------- 페이지 제목 알약(.ask-pill): 화면 맨 위 가운데의 흰 알약 한 줄 안내/질문 ---------------- */
-.ask-pill{position:absolute;left:50%;top:40px;transform:translateX(-50%);width:1000px;min-height:100px;margin:0;box-sizing:border-box;padding:6px 60px 0;display:flex;align-items:center;justify-content:center;text-align:center;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:50px;box-shadow:0 15px 0 0 rgba(86,148,231,0.2);font-family:'Cafe24 Ssurround';font-size:70px;color:var(--c-ink);letter-spacing:-0.05em}
+.ask-pill{position:absolute;left:50%;top:40px;transform:translateX(-50%);width:1000px;min-height:100px;margin:0;box-sizing:border-box;padding:6px 60px 0;display:flex;align-items:center;justify-content:center;text-align:center;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:80px;box-shadow:0 15px 0 0 rgba(86,148,231,0.2);font-family:'Cafe24 Ssurround';font-size:70px;color:var(--c-ink);letter-spacing:-0.05em}
 .ask-pill.is-fit{width:max-content;max-width:1700px}
 .ask-pill.is-wide{width:1700px;font-size:70px}
 .ask-pill.is-small{font-size:50px}
+.ask-pill.is-medium{font-size:60px;line-height:1.2}
 .ask-pill.has-stage{padding:0;overflow:hidden;align-items:stretch;justify-content:flex-start;text-align:left;background:var(--c-cream)}
 .ask-pill.has-stage>i{flex:none;width:380px;display:flex;align-items:center;justify-content:center;padding-top:8px;background:var(--c-sky);font-style:normal;color:var(--c-white)}
 .ask-pill.has-stage>span{flex:1 1 auto;display:flex;align-items:center;padding:8px 40px 0}
