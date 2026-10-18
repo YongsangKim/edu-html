@@ -6,9 +6,13 @@
     <title>나의 미래 모습 만들기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        main{background:url('img/p11_bg_guide2.png') no-repeat}
-        /* 좌표는 목업 비율 추정치, 실제 이미지 나오면 조정 필요 */
-        .p11-input-field{position:absolute;left:745px;top:840px;width:400px;height:70px}
+        /* 폰 틀은 공용 .phone-frame(has-cam), ChatGPT 대화 화면은 CSS. 안내 캐릭터는 공용 ../img/sa_wink_point5.png, 손가락은 공용 pointFingerAt */
+        .p11-sugg{position:absolute;left:30px;top:686px;display:flex;flex-direction:column;gap:22px;font-size:14px;color:#222}
+        .p11-sugg span{display:flex;align-items:center;gap:12px}
+        .p11-sugg i{flex:none;width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#5bc0f8,#f7b84b)}
+        .p11-sugg span+span i{border-radius:50%;background:linear-gradient(135deg,#8ea2ff,#6a5df5)}
+        .p11-input{position:absolute;left:15px;top:784px;width:399px;height:48px;box-sizing:border-box;padding-left:50px;border-radius:24px;background:#fff;display:flex;align-items:center;font-size:14px;color:#8a8c99;cursor:pointer;text-decoration:none}
+        .p11-input svg{position:absolute;left:12px;top:12px;width:24px;height:24px;fill:none;stroke:#111;stroke-width:1.9;stroke-linecap:round}
     </style>
 </head>
 <body>
@@ -16,9 +20,28 @@
   <div id="viewport" class="viewport">
     <div id="stage-spacer">
       <div id="stage" class="stage">
-        <main>
+        <main class="bg-default">
+          <div class="guide-set is-wink-point5">
+            <p class="guide-bubble is-center">입력창을<br>클릭해보세요.</p>
+            <div class="guide-character"><img src="../img/sa_wink_point5.png" alt=""></div>
+          </div>
 
-          <a href="page12.html" class="js-nav-effect js-sfx hit-area p11-input-field" data-sound="sound/click.mp3" aria-label="입력창 클릭"></a>
+          <div class="phone-frame has-cam">
+            <div class="phone-screen is-chat">
+              <div class="phone-status is-dark" data-time="6:31"></div>
+              <div class="phone-head">
+                <span class="phone-round is-l"><svg viewBox="0 0 24 24"><path d="M4 8h14M4 15h9"/></svg></span>
+                <span class="phone-seg"><b>Chat</b><b>Work</b></span>
+                <span class="phone-round is-r"><svg viewBox="0 0 24 24"><path d="M5 18l1.2-3.6A7.5 7.5 0 1112 19.5a7.6 7.6 0 01-3.3-.8z"/></svg></span>
+              </div>
+              <div class="p11-sugg">
+                <span><i></i>새 이미지 모델을 사용해 보세요</span>
+                <span><i></i>Figma production week</span>
+              </div>
+              <a href="page12.html" class="p11-input js-nav-effect js-sfx" id="p11Input" data-sound="sound/click.mp3" aria-label="입력창 클릭"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>ChatGPT에게 물어보세요</a>
+              <div class="phone-nav"></div>
+            </div>
+          </div>
         </main>
       </div>
     </div>
@@ -28,5 +51,8 @@
   <script src="../../js/header.js" data-title="나의 미래 모습 만들기" data-next="page12.html"></script>
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
+  <script>
+  pointFingerAt($('p11Input'), { onMain: true, dy: -30 });
+  </script>
 </body>
 </html>

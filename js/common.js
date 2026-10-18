@@ -138,9 +138,9 @@ if (sessionStorage.getItem('skipFadeIn') === '1') {
     pageFade.style.opacity = '0';
   }
 } else {
-  requestAnimationFrame(() => {
-    if (pageFade) pageFade.style.opacity = '0';
-  });
+  // 글꼴이 준비된 뒤에 걷음(대체 글꼴이 보였다가 바뀌며 글자가 움직이는 것을 막음). 오래 걸려도 1.2초 뒤엔 걷음
+  const fadeIn = () => requestAnimationFrame(() => { if (pageFade) pageFade.style.opacity = '0'; });
+  Promise.race([initFontPreload(), new Promise((res) => setTimeout(res, 1200))]).then(fadeIn, fadeIn);
 }
 
 /* ==========================================================
@@ -392,8 +392,10 @@ function initImageSwap() {
      같은 폴더의 pageNN-1 / pageNN+1로 이동(이전은 page01이면 그 차시의 단원 선택 화면 gateNN으로)
 ========================================================== */
 // prev()/next(): sa|gwa/<차시>/pageNN.html 안에서 같은 폴더의 pageNN∓1로 이동.
-// 이전은 page01이면 단원 선택 화면(gateNN.html)으로. 차시 폴더 밖이면 null(호출부가 fallback 처리)
+// 이전은 page01이면 단원 선택 화면(gateNN.html)으로, gateNN이면 sa.html/gwa.html 로. 그 밖이면 null(호출부가 fallback 처리)
 function stepPageHref(delta) {
+  const g = window.location.pathname.match(/\/(sa|gwa)\/gate\d+\.html$/);
+  if (g) return delta < 0 ? g[1] + '.html' : null; // 단원 선택 화면의 이전은 사회/과학 단원 목록(sa.html·gwa.html)
   const m = window.location.pathname.match(/\/(sa|gwa)\/\d+\/page(\d+)\.html$/);
   if (!m) return null;
   const n = parseInt(m[2], 10) + delta;
@@ -3207,14 +3209,16 @@ initPhoneBars();
    <main data-preload-fonts="KCC-DodamDodam,600 KCC-MurukMuruk">처럼 써 두면(굵기는 앞에 선택) 페이지를 열 때 미리 받음.
    글꼴 선언(@font-face)은 css/common.css에 있음 */
 function initFontPreload() {
-  if (!document.fonts) return;
-  [300, 400, 500, 600, 700].forEach((w) => document.fonts.load(w + ' 40px "Pretendard"'));
+  if (!document.fonts) return Promise.resolve();
+  const loads = [300, 400, 500, 600, 700].map((w) => document.fonts.load(w + ' 40px "Pretendard"'));
   const holder = document.querySelector('[data-preload-fonts]');
-  if (!holder) return;
-  holder.dataset.preloadFonts.split(',').forEach((name) => {
-    const m = name.trim().match(/^(\d{3})\s+(.+)$/);
-    if (m) document.fonts.load(m[1] + ' 40px "' + m[2] + '"');
-    else if (name.trim()) document.fonts.load('40px "' + name.trim() + '"');
-  });
+  if (holder) {
+    holder.dataset.preloadFonts.split(',').forEach((name) => {
+      const m = name.trim().match(/^(\d{3})\s+(.+)$/);
+      if (m) loads.push(document.fonts.load(m[1] + ' 40px "' + m[2] + '"'));
+      else if (name.trim()) loads.push(document.fonts.load('40px "' + name.trim() + '"'));
+    });
+  }
+  return Promise.all(loads);
 }
 initFontPreload();

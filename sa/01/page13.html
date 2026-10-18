@@ -6,13 +6,21 @@
     <title>나의 미래 모습 만들기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        main{background:url('img/result_confirm_bg.png') no-repeat}
-        /* TODO: 실제 이미지 위 버튼 위치에 맞춰 좌표 조정 필요 */
+        /* 폰 틀은 공용 .phone-frame, 검은 사진 보기 화면은 CSS. 안내 로봇 공용 sa/img/sa_wink_present.png(.guide-set). 폰 속 사진은 page12에서 고른 결과 */
+        .p13-bw{--gb-left:108px;--gb-w:630px;--tail-x:290px}
+        .p13-screen{background:#000}
+        .p13-top{position:absolute;left:0;top:46px;width:100%;height:46px}
+        .p13-round{position:absolute;top:0;width:46px;height:46px;border-radius:50%;background:#2a2a2e;display:flex;align-items:center;justify-content:center}
+        .p13-round svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+        .p13-tool i svg{width:26px;height:26px;fill:none;stroke:#fff;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+        .p13-share{position:absolute;right:15px;top:0;width:86px;height:46px;border-radius:23px;background:#fff;color:#111;font-size:17px;font-weight:700;display:flex;align-items:center;justify-content:center}
+        .p13-tools{position:absolute;left:0;bottom:22px;width:100%;display:flex;justify-content:space-around;padding:0 14px;box-sizing:border-box}
+        .p13-tool{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;font-weight:600;color:#fff}
+        .p13-tool i{width:50px;height:50px;box-sizing:border-box;border:solid 1px #3a3a3e;border-radius:50%;background:#232325;display:flex;align-items:center;justify-content:center}
+        .p13-photo{position:absolute;left:0;top:106px;bottom:100px;margin:auto 0;width:100%;height:auto;aspect-ratio:1/1;object-fit:cover}
+        .p13-photo.is-off{display:none}
         .p13-retry{position:absolute;left:1450px;top:640px}
         .p13-decide{position:absolute;left:1450px;top:800px}
-        /* 폰 화면 속 사진 칸(724,309 · 426×392) 위에 page12에서 고른 결과 이미지를 덮음(없으면 배경 그대로) */
-        .p13-photo{position:absolute;left:724px;top:309px;width:426px;height:392px;object-fit:cover}
-        .p13-photo.is-off{display:none}
     </style>
 </head>
 <body>
@@ -20,8 +28,29 @@
   <div id="viewport" class="viewport">
     <div id="stage-spacer">
       <div id="stage" class="stage">
-        <main>
-          <img class="p13-photo is-off" id="p13Photo" alt="나의 미래 모습">
+        <main class="bg-default">
+          <div class="guide-set is-wink-present p13-bw">
+            <p class="guide-bubble is-center">이 이미지로 결정할까요?<br>아니면 다시 시도해볼까요?</p>
+            <div class="guide-character"><img src="../img/sa_wink_present.png" alt=""></div>
+          </div>
+          <div class="phone-frame has-cam">
+            <div class="phone-screen p13-screen">
+              <div class="phone-status" data-time="6:31"></div>
+              <div class="p13-top">
+                <span class="p13-round" style="left:15px"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+                <span class="p13-round" style="right:164px"><svg viewBox="0 0 24 24"><path d="M12 6h.01M12 12h.01M12 18h.01" stroke-width="3"/></svg></span>
+                <span class="p13-round" style="right:110px"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></span>
+                <span class="p13-share">공유</span>
+              </div>
+              <img class="p13-photo is-off" id="p13Photo" alt="나의 미래 모습">
+              <div class="p13-tools">
+                <span class="p13-tool"><i><svg viewBox="0 0 24 24"><path d="M5 19l.9-3.6L15.6 5.7a2 2 0 012.8 0l-.1.1 0 0 .9.9a2 2 0 010 2.8L9.5 19.1z"/><path d="M13.8 7.6l3.6 3.6"/></svg></i>편집</span>
+                <span class="p13-tool"><i><svg viewBox="0 0 24 24"><path d="M12 4a8 8 0 100 16 8 8 0 003.6-.9l3.6.9-1.1-3.4A8 8 0 0012 4z"/><path d="M12 8.6v6M9 11.6h6"/></svg></i>댓글</span>
+                <span class="p13-tool"><i><svg viewBox="0 0 24 24"><rect x="3.8" y="5.5" width="16.4" height="13" rx="2.4"/><path d="M10.5 18.5v-3.6a1.6 1.6 0 011.6-1.6h8.1"/></svg></i>크기 조정</span>
+                <span class="p13-tool"><i><svg viewBox="0 0 24 24"><g transform="rotate(-45 12 12)"><rect x="4.2" y="7.6" width="15.6" height="8.8" rx="2.8"/><path d="M9.4 7.6v8.8"/></g></svg></i>제거</span>
+              </div>
+            </div>
+          </div>
           <!-- 화면(기획서 28p): 생성된 이미지 확인.
                다시하기 = 공통 버튼(img/common/btn_retry) 재사용, page12(빌더 처음)로
                결정하기 = 이 페이지 전용 3단 이미지(기본/on/오버), 다음 화면으로
@@ -48,7 +77,7 @@
     try { job = sessionStorage.getItem('sa01_job') || job; gender = sessionStorage.getItem('sa01_gender') || gender; } catch (e) {}
     const photo = document.getElementById('p13Photo');
     photo.onload = function () { photo.classList.remove('is-off'); };
-    photo.src = 'img/p12_result_' + job + '_' + gender + '.png';
+    photo.src = 'img/p15_result_' + job + '_' + gender + '.png';
   })();
   </script>
 </body>

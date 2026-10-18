@@ -6,26 +6,41 @@
     <title>나의 미래 모습 프롬프트</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 좌표는 기획서 목업 비율 기준 추정치 — 실제 이미지 크기 나오면 조정 필요 */
-        .p08-step{background-repeat:no-repeat}
-        .p08-step1{background-image:url('img/p08_bg_step1.png')}
-        .p08-step2{background-image:url('img/p08_bg_step2.png')}
-        .p08-step3{background-image:url('img/p08_bg_step3.png')}
-        .p08-step4{background-image:url('img/p08_bg_step4.png')}
+        /* 단계 표시 · 질문 알약 · 선택지 판 · 프롬프트 미리보기 판을 CSS로 그림(통 배경 이미지 없음). 사진은 img/p08_gender_{f|m}.png · p05_card_r1_* · p08_job_*, 완성 화면 로봇 img/p08_character.png */
+        .p08-steps{position:absolute;left:95px;top:48px;gap:256px}
+        .prompt-builder[data-current-step="4"] .p08-steps{left:360px}
+        .p08-q{left:695px;top:200px;width:1126px;padding:6px 20px 0;font-size:72px;letter-spacing:-0.07em;white-space:nowrap}
+        .p08-board{position:absolute;left:47px;top:338px;width:1295px;height:435px;border-radius:14px;background:var(--c-navy)}
+        .p08-side{position:absolute;left:1377px;top:29px;width:517px;height:903px;box-sizing:border-box;border-radius:14px;background:var(--c-ink)}
+        .p08-side b,.p08-final b{display:block;text-align:center;font-weight:normal;font-family:'Cafe24 Ssurround';color:#dff6ff;letter-spacing:-0.04em}
+        .p08-side b{padding-top:18px;font-size:59px;line-height:76px}
+        .p08-side i{position:absolute;left:22px;top:110px;width:472px;height:772px;border-radius:10px;background:var(--c-white)}
+        .p08-final{position:absolute;left:754px;top:231px;width:1040px;height:682px;box-sizing:border-box;border-radius:22px;background:var(--c-ink)}
+        .p08-final b{padding-top:24px;font-size:59px;line-height:80px}
+        .p08-final i{position:absolute;left:44px;top:118px;width:951px;height:342px;border-radius:10px;background:var(--c-white)}
+        .p08-robot{position:absolute;left:130px;top:260px;width:590px;height:640px}
+        .prompt-builder[data-current-step="4"] .p08-side{display:none}
 
-        .prompt-steps{position:absolute;left:80px;top:60px}
+        .p08-opt{position:absolute;top:361px;box-sizing:border-box;border:solid 4px #fff;border-radius:12px;background:var(--c-white);overflow:visible}
+        .p08-opt:hover{box-shadow:0 0 0 6px #b18cff}
+        .p08-opt.is-selected{box-shadow:0 0 0 6px #ff2fc2}
+        .p08-opt i{position:absolute;left:0;top:0;right:0;border-radius:8px 8px 0 0;background:var(--c-mist) center / cover no-repeat}
+        .p08-opt span{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;padding-top:4px;font-family:'Cafe24 Ssurround';color:var(--c-ink);text-align:center;letter-spacing:-0.06em;white-space:nowrap}
+        .p08-opt:hover span{color:var(--c-purple)}
+        .p08-opt2{width:576px;height:389px}
+        .p08-opt2 i{height:272px}
+        .p08-opt2 span{top:276px;font-size:66px}
+        .p08-opt2-1{left:101px}
+        .p08-opt2-2{left:712px}
+        .p08-opt4{top:365px;width:300px;height:378px}
+        .p08-opt4 i{height:236px}
+        .p08-opt4 span{top:240px;font-size:47px;line-height:1.1}
+        .p08-opt4-1{left:71px}
+        .p08-opt4-2{left:389px}
+        .p08-opt4-3{left:708px}
+        .p08-opt4-4{left:1027px}
+
         .prompt-preview{position:absolute;left:1410px;top:180px;width:450px;word-break:keep-all}
-
-        .p08-opt2{position:absolute;top:355px;width:588px;height:400px}
-        .p08-opt2-1{left:95px}
-        .p08-opt2-2{left:706px}
-
-        .p08-opt4{position:absolute;top:359px;width:312px;height:394px}
-        .p08-opt4-1{left:64px}
-        .p08-opt4-2{left:381px}
-        .p08-opt4-3{left:703px}
-        .p08-opt4-4{left:1021px}
-
         .p08-actions{position:absolute;left:80px;top:810px;width:1260px}
 
         /* 완성 화면(Step4)은 미리보기가 가운데 큰 박스라 위치/크기가 다르고,
@@ -44,17 +59,21 @@
   <div id="viewport" class="viewport">
     <div id="stage-spacer">
       <div id="stage" class="stage">
-        <main>
+        <main class="bg-default">
           <div class="prompt-builder">
 
+            <div class="prompt-steps p08-steps"><span class="step-dot">1</span><span class="step-dot">2</span><span class="step-dot">3</span><span class="step-dot">4</span></div>
+            <div class="p08-side"><b>프롬프트 미리보기</b><i></i></div>
             <div class="prompt-preview"></div>
 
             <div class="step-flow">
 
-              <div class="step-panel p08-step p08-step1" data-step="1">
+              <div class="step-panel" data-step="1">
+                <p class="ask-pill p08-q">나의 성별은 무엇인가요?</p>
+                <div class="p08-board"></div>
                 <div class="multi-select" data-single="true">
-                  <button class="multi-option pick-card p08-opt2 p08-opt2-1" data-clause="나는 {{여자}}이고," aria-label="여자"></button>
-                  <button class="multi-option pick-card p08-opt2 p08-opt2-2" data-clause="나는 {{남자}}이고," aria-label="남자"></button>
+                  <button class="multi-option pick-card p08-opt p08-opt2 p08-opt2-1" data-clause="나는 {{여자}}이고," aria-label="여자"><i style="background-image:url('img/p08_gender_f.png')"></i><span>여자</span></button>
+                  <button class="multi-option pick-card p08-opt p08-opt2 p08-opt2-2" data-clause="나는 {{남자}}이고," aria-label="남자"><i style="background-image:url('img/p08_gender_m.png')"></i><span>남자</span></button>
                 </div>
                 <div class="step-actions p08-actions">
                   <a href="javascript:;" class="js-nav-effect js-sfx multi-next is-disabled">
@@ -63,12 +82,14 @@
                 </div>
               </div>
 
-              <div class="step-panel p08-step p08-step2" data-step="2">
+              <div class="step-panel" data-step="2">
+                <p class="ask-pill p08-q">나는 무엇을 좋아하나요?</p>
+                <div class="p08-board"></div>
                 <div class="multi-select" data-single="true">
-                  <button class="multi-option pick-card p08-opt4 p08-opt4-1" data-clause="{{그림 그리는 걸}} 좋아해." aria-label="그림 그리기"></button>
-                  <button class="multi-option pick-card p08-opt4 p08-opt4-2" data-clause="{{동물 돌보는 걸}} 좋아해." aria-label="동물 돌보기"></button>
-                  <button class="multi-option pick-card p08-opt4 p08-opt4-3" data-clause="{{음식이나 음료 만드는 걸}} 좋아해." aria-label="음식이나 음료 만들기"></button>
-                  <button class="multi-option pick-card p08-opt4 p08-opt4-4" data-clause="{{노래하거나 춤추는 걸}} 좋아해." aria-label="노래하거나 춤추기"></button>
+                  <button class="multi-option pick-card p08-opt p08-opt4 p08-opt4-1" data-clause="{{그림 그리는 걸}} 좋아해." aria-label="그림 그리기"><i style="background-image:url('img/p05_card_r1_1.png')"></i><span>그림<br>그리기</span></button>
+                  <button class="multi-option pick-card p08-opt p08-opt4 p08-opt4-2" data-clause="{{동물 돌보는 걸}} 좋아해." aria-label="동물 돌보기"><i style="background-image:url('img/p05_card_r1_2.png')"></i><span>동물<br>돌보기</span></button>
+                  <button class="multi-option pick-card p08-opt p08-opt4 p08-opt4-3" data-clause="{{음식이나 음료 만드는 걸}} 좋아해." aria-label="음식이나 음료 만들기"><i style="background-image:url('img/p05_card_r1_3.png')"></i><span>음식이나<br>음료 만들기</span></button>
+                  <button class="multi-option pick-card p08-opt p08-opt4 p08-opt4-4" data-clause="{{노래하거나 춤추는 걸}} 좋아해." aria-label="노래하거나 춤추기"><i style="background-image:url('img/p05_card_r1_4.png')"></i><span>노래하거나<br>춤추기</span></button>
                 </div>
                 <div class="step-actions p08-actions has-both">
                   <a href="javascript:;" class="prompt-back">
@@ -80,12 +101,14 @@
                 </div>
               </div>
 
-              <div class="step-panel p08-step p08-step3" data-step="3">
+              <div class="step-panel" data-step="3">
+                <p class="ask-pill p08-q">미래의 나는 어떤 일을 하고 있을까요?</p>
+                <div class="p08-board"></div>
                 <div class="multi-select" data-single="true">
-                  <button class="multi-option pick-card p08-opt4 p08-opt4-1" data-clause="미래의 나는 {{공연 예술가}}가 되어 있을 거야." aria-label="공연 예술가"></button>
-                  <button class="multi-option pick-card p08-opt4 p08-opt4-2" data-clause="미래의 나는 {{카페 바리스타}}가 되어 있을 거야." aria-label="카페 바리스타"></button>
-                  <button class="multi-option pick-card p08-opt4 p08-opt4-3" data-clause="미래의 나는 {{일러스트 작가}}가 되어 있을 거야." aria-label="일러스트 작가"></button>
-                  <button class="multi-option pick-card p08-opt4 p08-opt4-4" data-clause="미래의 나는 {{교육 돌봄 보조교사}}가 되어 있을 거야." aria-label="교육 돌봄 보조교사"></button>
+                  <button class="multi-option pick-card p08-opt p08-opt4 p08-opt4-1" data-clause="미래의 나는 {{공연 예술가}}가 되어 있을 거야." aria-label="공연 예술가"><i style="background-image:url('img/p08_job_stage.png')"></i><span>공연 예술가<br>(가수,댄서)</span></button>
+                  <button class="multi-option pick-card p08-opt p08-opt4 p08-opt4-2" data-clause="미래의 나는 {{카페 바리스타}}가 되어 있을 거야." aria-label="카페 바리스타"><i style="background-image:url('img/p08_job_barista.png')"></i><span>카페 바리스타</span></button>
+                  <button class="multi-option pick-card p08-opt p08-opt4 p08-opt4-3" data-clause="미래의 나는 {{일러스트 작가}}가 되어 있을 거야." aria-label="일러스트 작가"><i style="background-image:url('img/p08_job_illust.png')"></i><span>일러스트 작가</span></button>
+                  <button class="multi-option pick-card p08-opt p08-opt4 p08-opt4-4" data-clause="미래의 나는 {{교육 돌봄 보조교사}}가 되어 있을 거야." aria-label="교육 돌봄 보조교사"><i style="background-image:url('img/p08_job_care.png')"></i><span>교육 돌봄<br>보조교사</span></button>
                 </div>
                 <div class="step-actions p08-actions has-both">
                   <a href="javascript:;" class="prompt-back">
@@ -97,7 +120,9 @@
                 </div>
               </div>
 
-              <div class="step-panel p08-step p08-step4" data-step="4">
+              <div class="step-panel" data-step="4">
+                <div class="p08-final"><b>프롬프트가 완성되었어요!</b><i></i></div>
+                <img class="p08-robot" src="img/p08_character.png" alt="">
                 <div class="step-actions p08-actions-final">
                   <a href="page09.html" class="js-nav-effect js-sfx">
                     <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
