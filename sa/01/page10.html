@@ -6,9 +6,8 @@
     <title>나의 미래 모습 만들기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        main{background:url('img/p10_bg_guide1.png') no-repeat}
-        /* 좌표는 목업 비율 추정치, 실제 이미지 나오면 조정 필요 */
-        .p10-app-icon{position:absolute;left:830px;top:360px;width:220px;height:220px}
+        /* 폰 틀은 공용 .phone-frame(has-cam)로 CSS로 그림. 안내 캐릭터는 공용 sa/img/sa_wink_point.png, 손가락은 공용 pointFingerAt */
+        .p10-home{background:linear-gradient(180deg,#a8c2f8 0%,#e3e6f8 30%,#f2c1f6 66%,#f98ff4 88%,#b7a3f9 100%)}
     </style>
 </head>
 <body>
@@ -16,9 +15,21 @@
   <div id="viewport" class="viewport">
     <div id="stage-spacer">
       <div id="stage" class="stage">
-        <main>
+        <main class="bg-default">
+          <div class="guide-set is-wink-point">
+            <p class="guide-bubble is-center">ChatGPT를 클릭해요.</p>
+            <div class="guide-character"><img src="../img/sa_wink_point.png" alt=""></div>
+          </div>
 
-          <a href="page11.html" class="js-nav-effect js-sfx hit-area p10-app-icon" data-sound="sound/click.mp3" aria-label="ChatGPT 앱 클릭"></a>
+          <div class="phone-frame has-cam">
+            <div class="phone-screen">
+              <div class="app-home p10-home">
+                <div class="phone-status is-dark" data-time="6:31"></div>
+                <a href="page11.html" class="app-icon is-dark js-nav-effect js-sfx" id="p10App" data-sound="sound/click.mp3" aria-label="ChatGPT 앱 클릭"><i style="background:#fff"><img src="../../img/common/icon_chatgpt.png" alt="" style="width:72px;height:72px;object-fit:contain"></i>ChatGPT</a>
+                <div class="phone-nav"></div>
+              </div>
+            </div>
+          </div>
         </main>
       </div>
     </div>
@@ -28,5 +39,8 @@
   <script src="../../js/header.js" data-title="나의 미래 모습 만들기" data-next="page11.html"></script>
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
+  <script>
+  pointFingerAt($('p10App'), { onMain: true, dx: 15, dy: -37 });
+  </script>
 </body>
 </html>

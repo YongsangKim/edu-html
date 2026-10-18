@@ -6,11 +6,28 @@
     <title>나의 미래 모습 만들기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        .p14-bg{display:block;width:1920px;height:960px}
-        /* 대화창 속 사진 칸(805,115 · 324×298) 위에 page12에서 고른 결과 이미지를 덮음(없으면 배경 그대로) */
-        .p14-photo{position:absolute;left:805px;top:115px;width:324px;height:298px;border-radius:24px;object-fit:cover}
-        .p14-photo.is-off,.p14-share.is-off{display:none}
-        .p14-share{position:absolute;left:1060px;top:345px;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center}
+        /* 폰 틀은 공용 .phone-frame, 단체 대화창은 CSS(1초마다 말풍선이 하나씩 나타남). 안내 로봇 공용 sa/img/sa_main_wave.png(.guide-set) */
+        .p14-bw{--gb-left:88px;--gb-w:640px;--tail-x:310px}
+        .p14-screen{background:#ffeeb8;font-family:'Pretendard';color:#111}
+        .p14-title{position:absolute;left:0;top:40px;width:100%;height:48px;box-sizing:border-box;display:flex;align-items:center;padding-left:14px;font-size:22px;font-weight:700;letter-spacing:-0.03em}
+        .p14-title svg{width:22px;height:22px;margin-right:6px;fill:none;stroke:#111;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+        .p14-in{position:absolute;left:12px;bottom:12px;width:414px;height:62px;border-radius:31px;background:#fff}
+        .p14-in i{position:absolute;left:5px;top:5px;width:52px;height:52px;border-radius:50%;background:#dcdcde;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:38px;font-weight:700;line-height:1}
+        .p14-msg{position:absolute;box-sizing:border-box;padding:10px 32px;display:flex;align-items:center;border-radius:30px;font-size:20px;font-weight:600;line-height:1.3;letter-spacing:-0.04em;opacity:0;transform:translateY(12px);transition:opacity .4s,transform .4s}
+        .p14-msg.is-on{opacity:1;transform:none}
+        .p14-msg:before{content:'';position:absolute;top:50%;margin-top:-10px;width:20px;height:20px;background:inherit}
+        .p14-me{left:101px;top:415px;width:310px;background:#a9cdff}
+        .p14-me:before{right:-10px;clip-path:polygon(0 0,100% 50%,0 100%)}
+        .p14-fr{left:28px;background:#fff}
+        .p14-fr:before{left:-12px;clip-path:polygon(100% 0,0 50%,100% 100%)}
+        .p14-f1{top:504px;width:218px}
+        .p14-f2{top:568px;width:337px}
+        .p14-f3{top:657px;width:337px}
+        .p14-photo{position:absolute;left:114px;top:101px;width:298px;height:298px;border-radius:24px;object-fit:cover;opacity:0;transition:opacity .4s}
+        .p14-photo.is-on{opacity:1}
+        .p14-share{position:absolute;left:343px;top:332px;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .4s}
+        .p14-share.is-on{opacity:1}
+        .next-btn.hidden{display:none}
     </style>
 </head>
 <body>
@@ -18,12 +35,24 @@
   <div id="viewport" class="viewport">
     <div id="stage-spacer">
       <div id="stage" class="stage">
-        <main>
-          <img class="loading-sequence p14-bg" src="img/p14_bg_ani1.png"
-               data-frames="img/p14_bg_ani1.png,img/p14_bg_ani2.png,img/p14_bg_ani3.png,img/p14_bg_ani4.png,img/p14_bg_ani5.png"
-               data-interval="1000" data-reveal=".next-btn" alt="">
-          <img class="p14-photo is-off" id="p14Photo" alt="나의 미래 모습">
-          <span class="p14-share is-off" id="p14Share"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></span>
+        <main class="bg-default">
+          <div class="guide-set is-main-wave p14-bw">
+            <p class="guide-bubble is-center">대화 내용을 읽고,<br>AI를 사용할 때 주의해야 할<br>점을 알아봐요.</p>
+            <div class="guide-character"><img src="../img/sa_main_wave.png" alt=""></div>
+          </div>
+          <div class="phone-frame has-cam">
+            <div class="phone-screen p14-screen">
+              <div class="phone-status is-dark" data-time="6:31"></div>
+              <div class="p14-title"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>친구들 단체 대화창</div>
+              <img class="p14-photo" id="p14Photo" alt="나의 미래 모습">
+              <span class="p14-share" id="p14Share"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.6l6.8-4M8.6 13.4l6.8 4"/></svg></span>
+              <div class="p14-msg p14-me" data-seq="1">안녕! 내 모습 어때?<br>멋있지 않아?</div>
+              <div class="p14-msg p14-fr p14-f1" data-seq="2">우와~ 멋지다!</div>
+              <div class="p14-msg p14-fr p14-f2" data-seq="3">이게 정말 네 모습이라고?<br>우리는 학생이잖아!</div>
+              <div class="p14-msg p14-fr p14-f3" data-seq="4">그래? 이게 어떻게 된<br>일이지?</div>
+              <div class="p14-in"><i>+</i></div>
+            </div>
+          </div>
           <a href="javascript:;" class="next-btn hidden confirm-quiz-trigger" data-confirm-quiz=".p14-confirm-quiz">
             <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
           </a>
@@ -109,11 +138,12 @@
     let gender = 'm';
     try { job = sessionStorage.getItem('sa01_job') || job; gender = sessionStorage.getItem('sa01_gender') || gender; } catch (e) {}
     const photo = document.getElementById('p14Photo');
-    photo.onload = function () {
-      photo.classList.remove('is-off');
-      document.getElementById('p14Share').classList.remove('is-off');
-    };
-    photo.src = 'img/p12_result_' + job + '_' + gender + '.png';
+    photo.src = 'img/p15_result_' + job + '_' + gender + '.png';
+    const share = document.getElementById('p14Share');
+    const steps = Array.from(document.querySelectorAll('.p14-msg'));
+    setTimeout(() => { photo.classList.add('is-on'); share.classList.add('is-on'); }, 1000);
+    steps.forEach((el, i) => setTimeout(() => el.classList.add('is-on'), 1000 * (i + 2)));
+    setTimeout(() => document.querySelector('.next-btn').classList.remove('hidden'), 1000 * (steps.length + 2));
   })();
   </script>
 </body>
