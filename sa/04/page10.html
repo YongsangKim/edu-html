@@ -6,29 +6,12 @@
     <title>AI 이모티콘 문장 만들기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 반영 - 디자인/사회4차시 10p-1. 감정 -> 표정 -> 문구 카드를 순서대로 고르면 오른쪽 '이모티콘 만들기' 슬롯에 하나씩 채워지고,
-           고른 뒤 '다음'(마지막 단계는 '만들기')이 나타남 */
-        .p10-chat{left:52px;top:18px;width:1170px;height:546px;border-radius:100px}
-        .p10-chat .chat-panel-body{padding:14px 40px 0}
-        .p10-line{display:flex;align-items:flex-start;gap:14px;margin-bottom:12px}
-        .p10-avatar{width:118px;height:118px;flex:0 0 auto;border-radius:28px;background:var(--c-sky) center / cover no-repeat}
-        .p10-who{display:block;font-family:'Pretendard';font-weight:600;font-size:36px;line-height:1.1;margin:0 0 6px;color:var(--c-ink)}
-        .p10-bubble{display:block;background:#fff3b8;border-radius:30px;padding:16px 28px;font-family:'Pretendard';font-size:40px;line-height:1.2;font-weight:600;color:var(--c-ink);letter-spacing:-0.04em}
-
-        /* 질문 알약 + 선택지 판을 한 묶음으로: 알약은 판 위 가장자리에 반쯤 걸치게 왼쪽에서 137px */
-        .p10-bottom{position:absolute;left:50px;top:570px;width:1175px;display:flex;flex-direction:column}
-        .p10-ask{position:relative;left:auto;top:auto;transform:none;align-self:flex-start;margin:0 0 -50px 137px;z-index:3;box-shadow:0 12px 0 0 #2264c5}
-        .p10-cardbox{position:relative;width:100%;height:320px;padding:90px 22px 0;display:flex;gap:28px;border-radius:110px 110px 80px 80px}
-        .p10-cardbox .card-btn{flex:1 1 0;min-width:0;height:160px;padding:10px 10px 0;font-size:56px;letter-spacing:-0.04em;line-height:1.1em}
-
-        .p10-maker{position:absolute;left:1250px;top:60px;width:635px;height:880px;box-sizing:border-box;background:#dff3fd;border:solid 6px #1b4fae;border-radius:80px;box-shadow:0 14px 0 0 rgba(63,111,181,.25);padding-top:120px;z-index:1}
-        .p10-maker .ribbon{--rb-w:430px;--rb-h:82px;--rb-fs:50px;--rb-ext:68px;--rb-tw:100px;--rb-th:71px;--rb-drop:30px;--rb-tail:#91b9e7;--rb-fold: #799ce0;position:absolute;left:100px;top:-49px}
-        .p10-slot{display:flex;width:575px;height:170px;margin:0 auto 26px;box-sizing:border-box;border:solid 6px #1b4fae;border-radius:28px;overflow:hidden;background:var(--c-white)}
-        .p10-slot-key{flex:0 0 212px;display:flex;align-items:center;justify-content:center;padding-top:6px;background:#2a6bd0;font-family:'Cafe24 Ssurround';font-size:54px;color:var(--c-white);letter-spacing:-0.05em}
-        .p10-slot-value{flex:1 1 auto;display:flex;align-items:center;justify-content:center;padding-top:6px;font-family:'Cafe24 Ssurround';font-size:56px;line-height:1.2;color:var(--c-ink);text-align:center;letter-spacing:-0.05em}
-        .p10-slot.is-filled{background:var(--c-white)}
-        .p10-go{position:absolute;left:50%;bottom:48px;margin-left:-190px;width:380px;min-width:0;height:120px;padding:8px 0 0;font-size:64px}
-        .p10-go.is-off{display:none}
+        /* 디자인 반영 - 디자인/사회4차시 12p. 네모 박스 하나 안에 왼쪽 생성된 이모티콘(샘플 조각 img/mod_boy.png) + 오른쪽 문구 + 다음 버튼 */
+        .p12-box{position:absolute;left:155px;top:95px;width:1610px;height:762px;box-sizing:border-box;background:var(--c-white);border:solid 15px var(--c-ink);border-radius:25px;box-shadow:0 0 0 5px var(--c-white)}
+        .p12-emoji{position:absolute;left:100px;top:55px;width:580px;height:610px;object-fit:contain}
+        .p12-text{position:absolute;left:750px;top:70px;width:740px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:70px;line-height:1.35;letter-spacing:-0.06em;color:var(--c-ink);word-break:keep-all}
+        .p12-text b{display:block;margin-bottom:60px;font-weight:normal;font-size:90px;line-height:1.2;color:var(--c-purple)}
+        .p12-next{position:absolute;left:1090px;top:653px;width:360px;min-width:0}
     </style>
 </head>
 <body>
@@ -37,42 +20,12 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-
-          <div class="chat-panel p10-chat">
-            <p class="chat-panel-bar">채팅</p>
-            <div class="chat-panel-body">
-              <div class="p10-line">
-                <span class="p10-avatar" style="background-image:url(img/face_jiwoo.png)"></span>
-                <span><span class="p10-who">지우</span><span class="p10-bubble">오늘 발표하는 날이지?</span></span>
-              </div>
-              <div class="p10-line">
-                <span class="p10-avatar" style="background-image:url(img/face_jiwoo.png)"></span>
-                <span><span class="p10-who">지우</span><span class="p10-bubble">많이 떨리겠다.<br>힘내! 넌 잘할 수 있을 거야.</span></span>
-              </div>
-            </div>
+          <div class="p12-box">
+            <img class="p12-emoji" src="img/mod_boy.png" alt="">
+            <p class="p12-text"><b>좋아요!</b>AI가 감정과 상황을<br>이해하기 쉽게 설명했어요.</p>
           </div>
 
-          <div class="p10-bottom">
-            <p class="ask-pill is-fit p10-ask" id="p10Ask"></p>
-            <div class="opt-panel p10-cardbox" id="p10Cards"></div>
-          </div>
-
-          <div class="p10-maker">
-            <b class="ribbon">이모티콘 만들기</b>
-            <div class="p10-slot" data-slot="emotion"><span class="p10-slot-key">감정</span><span class="p10-slot-value"></span></div>
-            <div class="p10-slot" data-slot="face"><span class="p10-slot-key">표정</span><span class="p10-slot-value"></span></div>
-            <div class="p10-slot" data-slot="phrase"><span class="p10-slot-key">문구</span><span class="p10-slot-value"></span></div>
-            <a href="javascript:;" class="card-btn is-popup next-btn p10-go is-off js-sfx" id="p10Go" data-sound="sound/click.mp3">다음</a>
-          </div>
-
-          <div class="avatar-modal is-wrong is-off" id="p10Popup">
-            <div class="avatar-popup-panel">
-              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
-              <div class="avatar-popup-body">
-                <p class="avatar-popup-text is-small" id="p10PopupPanel"></p>
-              </div>
-            </div>
-          </div>
+          <a href="page11.html" class="js-nav-effect card-btn is-start p12-next next-btn js-sfx" data-sound="sound/click.mp3">다음</a>
         </main>
       </div>
     </div>
@@ -82,111 +35,5 @@
   <script src="../../js/header.js" data-title="AI 이모티콘 문장 만들기" data-next="page11.html"></script>
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
-  <script>
-  /* 기획서 25~28p. 정답을 고르면 슬롯에 입력되고 '다음' 버튼이 나타남.
-     마지막(문구) 단계에서는 '다음'이 아니라 '만들기'로 page11(프롬프트 화면)로 이동 */
-  (function () {
-    const STEPS = [
-      {
-        slot: 'emotion',
-        ask: '어떤 감정을 담아야 할까요?',
-        wrong: '친구의 메시지를 잘 읽고<br>어떤 감정을 담아야 하는지 다시 생각해봐요.',
-        options: [
-          { text: '고마움', correct: true },
-          { text: '속상함' },
-          { text: '미안함' },
-          { text: '화남' }
-        ]
-      },
-      {
-        slot: 'face',
-        ask: '어떤 표정을 담아야 할까요?',
-        wrong: '친구의 메시지를 잘 읽고<br>어떤 표정을 담아야 하는지 다시 생각해봐요.',
-        options: [
-          { text: '웃는 얼굴', correct: true },
-          { text: '화난 얼굴' },
-          { text: '슬픈 얼굴' },
-          { text: '무표정' }
-        ]
-      },
-      {
-        slot: 'phrase',
-        ask: '어떤 문구를 담아야 할까요?',
-        wrong: '친구의 메시지를 잘 읽고<br>어떤 문구를 담아야 하는지 다시 생각해봐요.',
-        last: true,
-        options: [
-          { text: '고마워', correct: true },
-          { text: '미안해' },
-          { text: '왜 그랬어?' },
-          { text: '축하해' }
-        ]
-      }
-    ];
-
-    const askEl = document.getElementById('p10Ask');
-    const cardsBox = document.getElementById('p10Cards');
-    const goBtn = document.getElementById('p10Go');
-    const popup = document.getElementById('p10Popup');
-    const popupPanel = document.getElementById('p10PopupPanel');
-
-
-    function showPopup(html) {
-      popupPanel.innerHTML = html;
-      flashLayer(popup);
-    }
-
-    let stepIndex = 0;
-
-    function renderStep() {
-      const step = STEPS[stepIndex];
-      askEl.textContent = step.ask;
-      cardsBox.innerHTML = '';
-      goBtn.classList.add('is-off');
-      goBtn.textContent = step.last ? '만들기' : '다음';
-      goBtn.classList.toggle('next-btn', !step.last);
-      goBtn.classList.remove('is-selected');
-
-      shuffleArray(step.options).forEach((opt) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'p10-card card-btn';
-        btn.textContent = opt.text;
-        btn.addEventListener('click', () => {
-          if (!opt.correct) {
-            playWrong();
-            btn.classList.remove('is-wrong');
-            void btn.offsetWidth;
-            btn.classList.add('is-wrong');
-            showPopup(step.wrong);
-            return;
-          }
-
-          playCorrect();
-          btn.classList.add('is-selected');
-          cardsBox.querySelectorAll('.p10-card').forEach((b) => { b.disabled = true; });
-
-          const slot = document.querySelector('.p10-slot[data-slot="' + step.slot + '"]');
-          slot.classList.add('is-filled');
-          slot.querySelector('.p10-slot-value').innerHTML = opt.text;
-
-          // 마지막 단계에서는 '다음' 대신 '만들기' 버튼이 나타남(기획서 28p)
-          goBtn.classList.remove('is-off');
-        });
-        cardsBox.appendChild(btn);
-      });
-    }
-
-    goBtn.addEventListener('click', () => {
-      goBtn.classList.add('is-selected');
-      if (STEPS[stepIndex].last) { setTimeout(() => navigateTo('page11.html'), 300); return; }
-      setTimeout(() => {
-        stepIndex += 1;
-        renderStep();
-      }, 300);
-    });
-
-    renderStep();
-  })();
-  </script>
 </body>
 </html>

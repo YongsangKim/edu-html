@@ -2478,10 +2478,10 @@ function initStepOrder(o) {
 }
 
 /* ==========================================================
-   sa/04 감정 -> 표현 고르기 채팅(page06~08이 상황(DATA)만 다른 같은 구조라 공용화)
+   sa/04 감정 -> 표현 고르기 채팅(상황(DATA)만 다른 같은 구조라 공용화, page06 한 페이지에서 rounds 로 상황 3개를 차례로 진행)
    - initEmotionChatFlow처럼 자동 실행되지 않고 페이지 <script>에서 명시적으로 호출
    - 마크업 id(talkChat, talkAsk, talkOptions, talkPopup, talkPopupCorrect, talkPopupWarn,
-     talkPopupWarnText)는 page06~08에서 전부 동일(talkPopupCorrect는 step.correct가 있는 페이지만)
+     talkPopupWarnText)는 page06에서 씀(talkPopupCorrect는 step.correct가 있는 단계에서만 뜸)
    - 감정 단계 오답은 딤 모달(talkPopupWarn), 표현 단계 오답은 딤 없는 팝업(talkPopup) — 둘 다 오답 아바타
    - step.correct 문구가 있으면 정답 뒤 정답 아바타 팝업(talkPopupCorrect)을 2.2초 보여주고 넘어감(없으면 0.7초)
    - 마지막 단계 뒤에는 finishModal(선택자)이 있으면 그 모달을 띄우고, 없으면 nextHref로 이동
@@ -2492,10 +2492,13 @@ function initStepOrder(o) {
                { kind: 'message', ask: '...', wrong: '...', correct: '...', options: [...] }],
        nextHref: 'page07.html'
      });
+   상황이 여러 개면 faces/chat/steps 대신 rounds: [{ faces, chat, steps }, ...] 를 넘김(마지막 상황의 마지막 단계 뒤에 finishModal 또는 nextHref). ?step=N 은 상황마다 단계를 이어 센 번호
 ========================================================== */
 function initEmotionPickFlow(config) {
-  const CHAT = config.chat;
-  const STEPS = config.steps;
+  const ROUNDS = config.rounds || [{ faces: config.faces, chat: config.chat, steps: config.steps }];
+  let round = 0;
+  let CHAT = ROUNDS[0].chat;
+  let STEPS = ROUNDS[0].steps;
   const NEXT_HREF = config.nextHref;
   const FINISH_MODAL = config.finishModal || null;
 
@@ -2524,13 +2527,15 @@ function initEmotionPickFlow(config) {
   const showWarnPopup = (html) => show(popupWarn, popupWarnText, html);
 
   // 얼굴 사진은 img/face_<id>.png 샘플 조각(config.faces: 이름 -> 파일 id), 없으면 이름 첫 글자
-  const FACES = config.faces || {};
   const body = chatBox.querySelector('.chat-panel-body') || chatBox;
+  function renderChat() {
+  const FACES = ROUNDS[round].faces || {};
   body.innerHTML = CHAT.map((line) =>
     '<div class="talk-line' + (line.me ? ' is-me' : '') + '">' +
       '<span class="talk-avatar"' + (FACES[line.who] ? ' style="background-image:url(img/face_' + FACES[line.who] + '.png)"' : '') + '>' + (FACES[line.who] ? '' : line.who.charAt(0)) + '</span>' +
       '<span class="talk-msgwrap"><span class="talk-who">' + line.who + '</span><span class="talk-bubble">' + line.text + '</span></span>' +
     '</div>').join('');
+  }
 
   let stepIndex = 0;
 
@@ -2571,6 +2576,8 @@ function initEmotionPickFlow(config) {
           stepIndex += 1;
           if (stepIndex < STEPS.length) {
             renderStep();
+          } else if (round + 1 < ROUNDS.length) {
+            startRound(round + 1);
           } else if (FINISH_MODAL) {
             document.querySelector(FINISH_MODAL).classList.remove('is-off');
           } else {
@@ -2582,16 +2589,35 @@ function initEmotionPickFlow(config) {
     });
   }
 
-  renderStep();
+  // 상황(round)이 바뀌면 채팅과 단계를 처음부터 다시 그림
+  function startRound(n, at) {
+    round = n;
+    CHAT = ROUNDS[n].chat;
+    STEPS = ROUNDS[n].steps;
+    stepIndex = at || 0;
+    [popup, popupCorrect, popupWarn].forEach((p) => p.classList.add('is-off'));
+    renderChat();
+    renderStep();
+  }
+
+  // ?step=N : 상황마다 STEPS 를 이어 센 N번째 단계부터 보기
+  let want = parseInt(new URLSearchParams(location.search).get('step'), 10) - 1;
+  let start = 0;
+  if (want > 0) {
+    while (start < ROUNDS.length - 1 && want >= ROUNDS[start].steps.length) { want -= ROUNDS[start].steps.length; start += 1; }
+  } else {
+    want = 0;
+  }
+  startRound(start, Math.min(want, ROUNDS[start].steps.length - 1));
 }
 
 /* ==========================================================
-   sa/04 감정 이모티콘 채팅 흐름(page14~17이 상황(DATA)만 다른 같은 구조라 공용화) —
+   sa/04 감정 이모티콘 채팅 흐름(page12: 상황(DATA)만 다른 같은 흐름을 rounds 배열로 한 페이지에서 차례로 진행) —
    다른 기능들과 달리 DOM을 스캔해 자동 실행되지 않고, 페이지별 <script>에서
    DATA/NEXT_HREF만 넘겨 명시적으로 호출해야 함(그래서 아래 자동 초기화 목록에는
    없음). 마크업 id(chatappChat, chatappGuide, chatappEmotions, chatappPicker, chatappPickerInput,
    chatappSearchBtn, .chatapp-keyword-btn, chatappCandidates, chatappEmojiBtn, chatappSendBtn,
-   chatappNext, chatappPopup, chatappPopupText)는 page14~17에서 전부 동일하게 씀
+   chatappNext, chatappPopup, chatappPopupText)는 page14에서 씀(상황 4개를 rounds 로 한 페이지에서 차례로 진행)
    예시 호출(페이지 쪽 <script>에 남기는 부분):
      initEmotionChatFlow({
        data: {
@@ -2607,6 +2633,7 @@ function initEmotionPickFlow(config) {
        },
        nextHref: 'page15.html'
      });
+   상황이 여러 개면 data/faces 대신 rounds: [{ faces, data }, ...] 를 넘김(마지막 상황이 끝나야 nextHref 로 이동)
 ========================================================== */
 /* 사회 4차시 폰 채팅 화면 부품(그림 대신 HTML로 그림). 키보드만 샘플 그림(img/ph_kb.png)을 씀.
    페이지의 폰 화면 안 .cf-input / .cf-panel / .cf-find 에 넣어 씀: cfUI.bar(false|true), cfUI.searchSheet(), cfUI.resultSheet(), cfUI.emojiSheet(), cfUI.findScreen() */
@@ -2636,7 +2663,9 @@ window.cfUI = (function () {
 })();
 
 function initEmotionChatFlow(config) {
-  const DATA = config.data;
+  const ROUNDS = config.rounds || [{ data: config.data, faces: config.faces }];
+  let round = 0;
+  let DATA = ROUNDS[0].data;
   const NEXT_HREF = config.nextHref;
   const FINISH_MODAL = config.finishModal || null;
   const IMG = 'img/';
@@ -2654,7 +2683,13 @@ function initEmotionChatFlow(config) {
   const clickSound = new Audio(ASSET_BASE + 'sound/click.mp3');
   const play = (audio) => audio.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
 
-  // 폰 화면(샘플 조각): 머리글(이름) / 채팅 / 입력줄 / 아래 패널(키보드·이모티콘 검색) / 검색 화면 덮개
+  let chatBox, input, panel, find, prev;
+  let FACES = {};
+  let pickedImg = null;
+  let hot = null;
+
+  // 폰 화면(샘플 조각): 머리글(이름) / 채팅 / 입력줄 / 아래 패널(키보드·이모티콘 검색) / 검색 화면 덮개. 상황(round)이 바뀔 때마다 새로 그림
+  function buildPhone() {
   screen.innerHTML =
     '<div class="phone-status is-dark"></div>' +
     '<div class="cf-head"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><span class="nm">' + DATA.friend + '</span>' +
@@ -2665,16 +2700,27 @@ function initEmotionChatFlow(config) {
     '<div class="cf-panel" id="cfPanel" style="background-image:url(' + IMG + 'ph_kb.png)"></div>' +
     '<div class="cf-find is-off" id="cfFind">' + cfUI.findScreen() + '</div>' +
     '<div class="phone-nav is-dark"></div>';
-  const chatBox = document.getElementById('cfChat');
-  const input = document.getElementById('cfInput');
-  const panel = document.getElementById('cfPanel');
-  const find = document.getElementById('cfFind');
-  const prev = document.getElementById('cfPrev');
+  chatBox = document.getElementById('cfChat');
+  input = document.getElementById('cfInput');
+  panel = document.getElementById('cfPanel');
+  find = document.getElementById('cfFind');
+  prev = document.getElementById('cfPrev');
   if (typeof initPhoneBars === 'function') initPhoneBars();
+  }
 
-  const FACES = config.faces || {};
-  let pickedImg = null;
-  let hot = null;
+  function startRound() {
+    DATA = ROUNDS[round].data;
+    FACES = ROUNDS[round].faces || {};
+    pickedImg = null;
+    clearHot();
+    popup.classList.add('is-off');
+    keywordBtn.classList.add('is-off');
+    keywordBtn.classList.remove('is-selected');
+    nextBtn.classList.add('is-off');
+    emotionsBox.classList.remove('is-off');
+    buildPhone();
+    addLine(DATA.friend, DATA.friendMsg, false, false);
+  }
 
   function showPopup(html) {
     popupText.innerHTML = html;
@@ -2832,7 +2878,11 @@ function initEmotionChatFlow(config) {
   function stageDone() {
     guideEl.innerHTML = '내 마음을 이모티콘으로<br>표현했어요!';
     showNext(() => {
-      if (FINISH_MODAL) {
+      if (round + 1 < ROUNDS.length) {
+        round += 1;
+        startRound();
+        stageEmotion();
+      } else if (FINISH_MODAL) {
         document.querySelector(FINISH_MODAL).classList.remove('is-off');
       } else {
         window.location.href = NEXT_HREF;
@@ -2855,7 +2905,7 @@ function initEmotionChatFlow(config) {
     }, 300);
   });
 
-  addLine(DATA.friend, DATA.friendMsg, false, false);
+  startRound();
   if (window.BoxEdit && BoxEdit.on) {
     // 좌표 수정 모드: 이모티콘 검색 패널을 띄우고 세 눌림 영역을 한꺼번에 보여줌
     panel.style.backgroundImage = 'none';

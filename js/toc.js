@@ -69,10 +69,10 @@
                 <a href="${BASE}sa/04/page01.html" class="toc-sub-item">1) 마음 톡톡! 감정 찾기 게임</a>
                 <a href="${BASE}sa/04/page04.html" class="toc-sub-item">2) 개념 이해 영상</a>
                 <a href="${BASE}sa/04/page05.html" class="toc-sub-item">3) 감정과 표현 선택하기</a>
-                <a href="${BASE}sa/04/page09.html" class="toc-sub-item">4) AI 이모티콘 문장 만들기</a>
-                <a href="${BASE}sa/04/page13.html" class="toc-sub-item">5) 나의 마음 이모티콘 제작소</a>
-                <a href="${BASE}sa/04/page20.html" class="toc-sub-item">6) 퀴즈 풀기</a>
-                <a href="${BASE}sa/04/page21.html" class="toc-sub-item">7) 마음 배달 이모티콘 게임</a>
+                <a href="${BASE}sa/04/page07.html" class="toc-sub-item">4) AI 이모티콘 문장 만들기</a>
+                <a href="${BASE}sa/04/page11.html" class="toc-sub-item">5) 나의 마음 이모티콘 제작소</a>
+                <a href="${BASE}sa/04/page14.html" class="toc-sub-item">6) 퀴즈 풀기</a>
+                <a href="${BASE}sa/04/page15.html" class="toc-sub-item">7) 마음 배달 이모티콘 게임</a>
               </div>
             </div>
 

@@ -3,15 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 이모티콘 문장 만들기</title>
+    <title>나의 마음 이모티콘 제작소</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 반영 - 디자인/사회4차시 12p. 네모 박스 하나 안에 왼쪽 생성된 이모티콘(샘플 조각 img/mod_boy.png) + 오른쪽 문구 + 다음 버튼 */
-        .p12-box{position:absolute;left:155px;top:95px;width:1610px;height:762px;box-sizing:border-box;background:var(--c-white);border:solid 15px var(--c-ink);border-radius:25px;box-shadow:0 0 0 5px var(--c-white)}
-        .p12-emoji{position:absolute;left:100px;top:55px;width:580px;height:610px;object-fit:contain}
-        .p12-text{position:absolute;left:750px;top:70px;width:740px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:70px;line-height:1.35;letter-spacing:-0.06em;color:var(--c-ink);word-break:keep-all}
-        .p12-text b{display:block;margin-bottom:60px;font-weight:normal;font-size:90px;line-height:1.2;color:var(--c-purple)}
-        .p12-next{position:absolute;left:1090px;top:653px;width:360px;min-width:0}
+      .cf-panel{z-index:10}
     </style>
 </head>
 <body>
@@ -20,20 +15,102 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <div class="p12-box">
-            <img class="p12-emoji" src="img/mod_boy.png" alt="">
-            <p class="p12-text"><b>좋아요!</b>AI가 감정과 상황을<br>이해하기 쉽게 설명했어요.</p>
-          </div>
 
-          <a href="page13.html" class="js-nav-effect card-btn is-start p12-next next-btn js-sfx" data-sound="sound/click.mp3">다음</a>
+          <p class="guide-bubble" id="chatappGuide"></p>
+          <div class="guide-character"><img src="../img/sa_wink_point.png" alt="메인 캐릭터"></div>
+
+          <div class="phone-frame is-thin has-cam cf-phone"><div class="phone-screen" id="cfScreen"></div></div>
+
+          <div class="cf-opts" id="chatappEmotions"></div>
+          <button type="button" class="card-btn cf-keyword is-off js-sfx" data-sound="sound/click.mp3"></button>
+
+          <a href="javascript:;" class="card-btn is-start next-btn is-off js-sfx" id="chatappNext" data-sound="sound/click.mp3">다음</a>
+
+          <div class="avatar-modal is-off" id="chatappPopup">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small" id="chatappPopupText"></p>
+              </div>
+            </div>
+          </div>
         </main>
       </div>
     </div>
   </div>
   <div class="zoom-info" id="zoomInfo"></div>
 
-  <script src="../../js/header.js" data-title="AI 이모티콘 문장 만들기" data-next="page13.html"></script>
+  <script src="../../js/header.js" data-title="나의 마음 이모티콘 제작소" data-next="page13.html"></script>
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
+  <script src="../../js/box-edit.js"></script>
+  <script>
+  /* 기획서 34~42p — 디자인/사회4차시 14p-1~7. 상황 4개를 한 페이지에서 차례로 진행(마지막 상황이 끝나면 page18) */
+  initEmotionChatFlow({
+    rounds: [
+    // 상황 1: 지우 / 감사
+    {
+      faces: { '지우': 'jiwoo' },
+      data: {
+        friend: '지우',
+        friendMsg: '오늘 발표 진짜 잘했어!<br>열심히 준비한 게 느껴졌어&#128077;',
+        emotions: ['감사', '미안', '축하', '슬픔'],
+        correctEmotion: '감사',
+        wrongEmotion: '친구의 메시지를 다시 한 번 읽어봐요.',
+        myMsg: '고마워!<br>떨렸지만 열심히 노력했어.',
+        keyword: '감사',
+        pickGuide: '고마운 마음을 담은 이모티콘을 찾았어요!<br>나의 마음에 드는 이모티콘을 선택해요.',
+        stickers: ['stk_dog_thanks', 'stk_boy_thanks']
+      }
+    },
+    // 상황 2: 민준 / 미안
+    {
+      faces: { '민준': 'minjun' },
+      data: {
+        friend: '민준',
+        friendMsg: '아까 내가 말하고 있는데<br>계속 장난쳐서 조금 속상했어.',
+        emotions: ['감사', '미안', '축하', '슬픔'],
+        correctEmotion: '미안',
+        wrongEmotion: '친구의 메시지를 다시 한 번 읽어봐요.',
+        myMsg: '미안해. 재밌는 줄 알았는데<br>너는 기분이 안 좋았구나.<br>다음부터 조심할게.',
+        keyword: '미안해',
+        pickGuide: '미안한 마음을 담은 이모티콘을 찾았어요!<br>나의 마음에 드는 이모티콘을 선택해요.',
+        stickers: ['stk_sad', 'stk_cry']
+      }
+    },
+    // 상황 3: 수빈 / 축하
+    {
+      faces: { '수빈': 'subin' },
+      data: {
+        friend: '수빈',
+        friendMsg: '오늘 무슨 날인지 알아?<br>내 생일이야!',
+        emotions: ['감사', '미안', '축하', '슬픔'],
+        correctEmotion: '축하',
+        wrongEmotion: '친구의 메시지를 다시 한 번 읽어봐요.',
+        myMsg: '생일 축하해 수빈아!<br>행복한 하루 보내!',
+        keyword: '축하해',
+        pickGuide: '축하하는 마음을 담은 이모티콘을 찾았어요!<br>나의 마음에 드는 이모티콘을 선택해요.',
+        stickers: ['stk_party', 'stk_cheer']
+      }
+    },
+    // 상황 4: 태우 / 슬픔
+    {
+      faces: { '태우': 'taewoo' },
+      data: {
+        friend: '태우',
+        friendMsg: '다음 달에 다른 학교로 전학 가게 됐어.<br>이제 자주 못 볼 것 같아…',
+        emotions: ['감사', '미안', '축하', '슬픔'],
+        correctEmotion: '슬픔',
+        wrongEmotion: '친구의 메시지를 다시 한 번 읽어봐요.',
+        myMsg: '너와 친구가 되어서 즐거웠는데<br>정말 슬프고 아쉽다…<br>전학 가서도 잘 지내야 해!',
+        keyword: '슬퍼',
+        pickGuide: '슬픈 마음을 담은 이모티콘을 찾았어요!<br>나의 마음에 드는 이모티콘을 선택해요.',
+        stickers: ['stk_cry', 'stk_sad']
+      }
+    }
+    ],
+    nextHref: 'page13.html'
+  });
+  </script>
 </body>
 </html>
