@@ -154,7 +154,11 @@
 
     function renderRound() {
       const r = ROUNDS[round];
-      $('p06Ask').textContent = r.ask;
+      const askEl = $('p06Ask');
+      askEl.classList.remove('is-medium');
+      askEl.textContent = r.ask;
+      // 문구가 두 줄로 넘어가면 글자를 줄임
+      if (askEl.offsetHeight > 130) askEl.classList.add('is-medium');
       $('p06BoxLabel').textContent = r.label;
       box.querySelectorAll('.p06-chip').forEach((c) => c.remove());
       cardsBox.innerHTML = '';
