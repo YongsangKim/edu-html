@@ -129,6 +129,11 @@ applyStageTransform();
      자체는 몰라도 됨 (독립적인 공통 유틸)
 ========================================================== */
 const pageFade = document.getElementById('page-fade');
+// 화면이 실제로 보이기 시작하는 때(페이드 인 시작)에 풀리는 약속. 페이지 시작 애니메이션이 검은 막 뒤에서 끝나 버리지 않게 `pageShown.then(...)`으로 시작함
+let pageShownResolve;
+const pageShown = new Promise((res) => { pageShownResolve = res; });
+// CSS 애니메이션은 화면이 보이기 시작할 때부터 재생(common.css의 html:not(.is-shown) 규칙이 그때까지 멈춰 둠)
+pageShown.then(() => document.documentElement.classList.add('is-shown'));
 
 // 페이지 로드 시 페이드 인 (단, 뒤로가기로 인한 새로고침이면 건너뜀)
 if (sessionStorage.getItem('skipFadeIn') === '1') {
@@ -137,9 +142,10 @@ if (sessionStorage.getItem('skipFadeIn') === '1') {
     pageFade.style.transition = 'none'; // 애니메이션 없이 즉시
     pageFade.style.opacity = '0';
   }
+  pageShownResolve();
 } else {
   // 글꼴이 준비된 뒤에 걷음(대체 글꼴이 보였다가 바뀌며 글자가 움직이는 것을 막음). 오래 걸려도 1.2초 뒤엔 걷음
-  const fadeIn = () => requestAnimationFrame(() => { if (pageFade) pageFade.style.opacity = '0'; });
+  const fadeIn = () => requestAnimationFrame(() => { if (pageFade) pageFade.style.opacity = '0'; pageShownResolve(); });
   Promise.race([initFontPreload(), new Promise((res) => setTimeout(res, 1200))]).then(fadeIn, fadeIn);
 }
 
@@ -2208,7 +2214,31 @@ const playWrong = sfx.wrong;
 const playDrag = (() => {
   const audio = new Audio(ASSET_BASE + 'sound/drag.mp3');
   audio.preload = 'auto';
-  return () => { const a = audio.cloneNode(); a.volume = 0.5; a.play().catch(() => {}); };
+  audio.volume = 0.5;
+  // 새로고침 직후에도 바로 나도록 미리 내려받아 해독해 둔 소리를 WebAudio로 재생(해독이 안 끝났거나 file:// 처럼 못 받으면 audio 요소로 재생)
+  let ctx = null;
+  let buf = null;
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    ctx = new AC();
+    fetch(ASSET_BASE + 'sound/drag.mp3').then((r) => r.arrayBuffer()).then((b) => ctx.decodeAudioData(b)).then((d) => { buf = d; }).catch(() => {});
+  } catch (e) { ctx = null; }
+  return () => {
+    if (ctx && buf) {
+      try {
+        ctx.resume();
+        const src = ctx.createBufferSource();
+        const g = ctx.createGain();
+        src.buffer = buf;
+        g.gain.value = 0.5;
+        src.connect(g).connect(ctx.destination);
+        src.start();
+        return;
+      } catch (e) { /* 아래 audio 요소로 */ }
+    }
+    if (audio.paused) { audio.currentTime = 0; audio.play().catch(() => {}); return; }
+    const a = audio.cloneNode(); a.volume = 0.5; a.play().catch(() => {});
+  };
 })();
 
 const $ = (id) => document.getElementById(id);
@@ -3002,6 +3032,52 @@ function initIdlePreload() {
   else window.addEventListener('load', schedule, { once: true });
 }
 
+/* 지그소 조각 그리기(initJigsawPuzzle과 직접 만든 퍼즐 화면이 같이 씀).
+   jigPath(크기, 여백, [위,오른,아래,왼]) 변 모양 0 평평/1 튀어나옴/-1 들어감, jigSvg(...)는 색 칠한 조각 svg 문자열(colors 없으면 빈 칸 모양), labelBox는 글자 상자 위치 */
+function jigPath(s, m, edges) {
+  const corners = [[m, m], [m + s, m], [m + s, m + s], [m, m + s]];
+  const dirs = [[1, 0], [0, 1], [-1, 0], [0, -1]];
+  const knob = [[0.36, 0, 0.38, 0, 0.38, 0.02], [0.38, 0.0863, 0.4337, 0.14, 0.5, 0.14], [0.5663, 0.14, 0.62, 0.0863, 0.62, 0.02], [0.62, 0, 0.64, 0, 0.67, 0]];
+  const r = 0.075;
+  let d = 'M' + (m + r * s) + ' ' + m;
+  edges.forEach((e, k) => {
+    const [x0, y0] = corners[k];
+    const [dx, dy] = dirs[k];
+    const pt = (u, v) => (x0 + (u * dx + v * e * dy) * s).toFixed(1) + ' ' + (y0 + (u * dy - v * e * dx) * s).toFixed(1);
+    if (e) {
+      d += ' L' + pt(0.33, 0);
+      knob.forEach((c) => { d += ' C' + pt(c[0], c[1]) + ' ' + pt(c[2], c[3]) + ' ' + pt(c[4], c[5]); });
+    }
+    const [nx, ny] = corners[(k + 1) % 4];
+    const [ndx, ndy] = dirs[(k + 1) % 4];
+    d += ' L' + pt(1 - r, 0) + ' Q' + nx + ' ' + ny + ' ' + (nx + ndx * r * s).toFixed(1) + ' ' + (ny + ndy * r * s).toFixed(1);
+  });
+  return d + ' Z';
+}
+
+function jigSvg(s, m, edges, colors, id) {
+  const w = s + m * 2;
+  const d = jigPath(s, m, edges);
+  const o = (s * 0.015).toFixed(1);
+  const shine = colors
+    ? '<g clip-path="url(#clip-' + id + ')"><g filter="url(#blur-' + id + ')">' +
+      '<path d="' + d + '" transform="translate(' + o + ' ' + o + ')" style="fill:none;stroke:rgba(255,255,255,.15);stroke-width:' + (s * 0.08).toFixed(1) + '"/>' +
+      '<path d="' + d + '" transform="translate(-' + o + ' -' + o + ')" style="fill:none;stroke:' + colors[1] + ';stroke-width:' + (s * 0.08).toFixed(1) + ';mix-blend-mode:multiply;opacity:0.6"/>' +
+      '<path d="' + d + '" transform="translate(-' + o + ' -' + o + ')" style="fill:none;stroke:' + colors[1] + ';stroke-width:' + (s * 0.08).toFixed(1) + ';mix-blend-mode:multiply;opacity:0.6"/>' +
+      '</g></g><path d="' + d + '" style="fill:none"/>'
+    : '';
+  if (!colors) {colors = ['transparent', 'transparent'];}
+  return '<svg class="jig" width="' + w + '" height="' + w + '" viewBox="0 0 ' + w + ' ' + w + '">' + '<defs>' + '<linearGradient id="grad-' + id + '" x1="0%" y1="0%" x2="0%" y2="100%">' + '<stop offset="0%" stop-color="' + colors[0] + '"/>' + '<stop offset="100%" stop-color="' + colors[1] + '"/>' + '</linearGradient>' + '<clipPath id="clip-' + id + '"><path d="' + d + '"/></clipPath>' + '<filter id="blur-' + id + '" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="' + (s * 0.01).toFixed(1) + '"/></filter>' + '</defs>' + '<path d="' + d + '" style="fill:url(#grad-' + id + ')" />' + shine + '</svg>';
+}
+
+// 들어간 변 쪽은 홈 깊이만큼 비워서 글자·아이콘이 조각 밖으로 안 나가게 함
+function labelBox(s, m, edges, x, y) {
+  const pad = Math.round(s * 0.06);
+  const [t, r, b, l] = edges.map((e) => (e < 0 ? Math.round(s * 0.18) : pad));
+  return 'left:' + (x + m + l) + 'px;top:' + (y + m + t) + 'px;width:' + (s - l - r) + 'px;height:' + (s - t - b) + 'px';
+}
+
+
 /* 지그소 조건 퍼즐: 판(2x2 칸) 4개를 정답 조각으로 채우는 게임. 판마다 정답 4 + 오답 2개 조각, 다 맞추면 다음 판/다음 페이지.
    마크업(.jig-* 클래스는 css/common.css, 위치는 페이지 CSS에서):
      <p class="guide-bubble is-center p05-bubble"></p>
@@ -3036,54 +3112,6 @@ function initJigsawPuzzle(cfg) {
   let index = 0;
   let filled = 0;
   let bubbleTimer = null;
-
-  function jigPath(s, m, edges) {
-    const corners = [[m, m], [m + s, m], [m + s, m + s], [m, m + s]];
-    const dirs = [[1, 0], [0, 1], [-1, 0], [0, -1]];
-    const knob = [[0.36, 0, 0.38, 0, 0.38, 0.02], [0.38, 0.0863, 0.4337, 0.14, 0.5, 0.14], [0.5663, 0.14, 0.62, 0.0863, 0.62, 0.02], [0.62, 0, 0.64, 0, 0.67, 0]];
-    const r = 0.075;
-    let d = 'M' + (m + r * s) + ' ' + m;
-    edges.forEach((e, k) => {
-      const [x0, y0] = corners[k];
-      const [dx, dy] = dirs[k];
-      const pt = (u, v) => (x0 + (u * dx + v * e * dy) * s).toFixed(1) + ' ' + (y0 + (u * dy - v * e * dx) * s).toFixed(1);
-      if (e) {
-        d += ' L' + pt(0.33, 0);
-        knob.forEach((c) => { d += ' C' + pt(c[0], c[1]) + ' ' + pt(c[2], c[3]) + ' ' + pt(c[4], c[5]); });
-      }
-      const [nx, ny] = corners[(k + 1) % 4];
-      const [ndx, ndy] = dirs[(k + 1) % 4];
-      d += ' L' + pt(1 - r, 0) + ' Q' + nx + ' ' + ny + ' ' + (nx + ndx * r * s).toFixed(1) + ' ' + (ny + ndy * r * s).toFixed(1);
-    });
-    return d + ' Z';
-  }
-
-  // function jigSvg(s, m, edges, fill) {
-  //   const w = s + m * 2;
-  //   return '<svg class="jig" width="' + w + '" height="' + w + '" viewBox="0 0 ' + w + ' ' + w + '"><path d="' + jigPath(s, m, edges) + '"' + (fill ? ' style="fill:' + fill + '"' : '') + '/></svg>';
-  // }
-
-  function jigSvg(s, m, edges, colors, id) {
-    const w = s + m * 2;
-    const d = jigPath(s, m, edges);
-    const o = (s * 0.015).toFixed(1);
-    const shine = colors
-      ? '<g clip-path="url(#clip-' + id + ')"><g filter="url(#blur-' + id + ')">' +
-        '<path d="' + d + '" transform="translate(' + o + ' ' + o + ')" style="fill:none;stroke:rgba(255,255,255,.15);stroke-width:' + (s * 0.08).toFixed(1) + '"/>' +
-        '<path d="' + d + '" transform="translate(-' + o + ' -' + o + ')" style="fill:none;stroke:' + colors[1] + ';stroke-width:' + (s * 0.08).toFixed(1) + ';mix-blend-mode:multiply;opacity:0.6"/>' +
-        '<path d="' + d + '" transform="translate(-' + o + ' -' + o + ')" style="fill:none;stroke:' + colors[1] + ';stroke-width:' + (s * 0.08).toFixed(1) + ';mix-blend-mode:multiply;opacity:0.6"/>' +
-        '</g></g><path d="' + d + '" style="fill:none"/>'
-      : '';
-    if (!colors) {colors = ['transparent', 'transparent'];}
-    return '<svg class="jig" width="' + w + '" height="' + w + '" viewBox="0 0 ' + w + ' ' + w + '">' + '<defs>' + '<linearGradient id="grad-' + id + '" x1="0%" y1="0%" x2="0%" y2="100%">' + '<stop offset="0%" stop-color="' + colors[0] + '"/>' + '<stop offset="100%" stop-color="' + colors[1] + '"/>' + '</linearGradient>' + '<clipPath id="clip-' + id + '"><path d="' + d + '"/></clipPath>' + '<filter id="blur-' + id + '" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="' + (s * 0.01).toFixed(1) + '"/></filter>' + '</defs>' + '<path d="' + d + '" style="fill:url(#grad-' + id + ')" />' + shine + '</svg>';
-  }
-
-  // 들어간 변 쪽은 홈 깊이만큼 비워서 글자·아이콘이 조각 밖으로 안 나가게 함
-  function labelBox(s, m, edges, x, y) {
-    const pad = Math.round(s * 0.06);
-    const [t, r, b, l] = edges.map((e) => (e < 0 ? Math.round(s * 0.18) : pad));
-    return 'left:' + (x + m + l) + 'px;top:' + (y + m + t) + 'px;width:' + (s - l - r) + 'px;height:' + (s - t - b) + 'px';
-  }
 
   function drawCell(i, text, fill) {
     const x = (i % 2) * S;

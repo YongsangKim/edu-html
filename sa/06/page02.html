@@ -10,7 +10,11 @@
            맞힌 건물은 img/p02_bld_{key}_on.png 로 바뀐 채 유지. 지도 img/p02_map.png, 건물 img/p02_bld_{key}.png, 학생 캐릭터 img/p02_student.png */
 
         .p02-map{position:absolute;left:60px;top:40px;width:1800px;height:650px;box-sizing:border-box;border:solid 5px #266cc8;border-radius:15px;background:var(--c-cream) url('img/p02_map.png') center / cover no-repeat}
-        .p02-place{position:absolute;display:block;max-width:none}
+        .p02-place{position:absolute;display:block;max-width:none;transition:filter .2s}
+        /* 학생을 끄는 동안 놓을 수 있는 건물이 은은하게 깜빡이고, 위에 올리면 노랗게 빛남 */
+        .p02-dragging .p02-place{animation:p02-hint 1s ease-in-out infinite}
+        @keyframes p02-hint{50%{filter:drop-shadow(0 0 12px rgba(255,216,61,.85))}}
+        .p02-dragging .p02-place.is-over{animation:none;filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 10px #ffd83d) drop-shadow(0 0 22px #ffd83d)}
 
         .p02-student{position:absolute;left:88px;top:355px;width:473px;height:595px;background:url('img/p02_student.png') center bottom / contain no-repeat;cursor:grab;touch-action:none;z-index:20}
         .p02-student.is-dragging{cursor:grabbing;z-index:60}
@@ -76,6 +80,7 @@
     ];
     const WRONG = '다시 한 번 잘 생각해봐요.';
 
+    const main = document.querySelector('main');
     const student = $('p02Student');
     const bubble = $('p02Bubble');
     const places = Array.from(document.querySelectorAll('.p02-place'));
@@ -110,6 +115,7 @@
       student.style.transformOrigin = (sx - sr.left) / s + 'px ' + (sy - sr.top) / s + 'px';
       student.classList.remove('is-back');
       student.classList.add('is-dragging');
+      main.classList.add('p02-dragging');
       student.style.transform = 'scale(.5)';
 
       const move = (ev) => {
@@ -122,6 +128,7 @@
         student.removeEventListener('pointerup', up);
         student.removeEventListener('pointercancel', up);
         student.classList.remove('is-dragging');
+        main.classList.remove('p02-dragging');
         student.classList.add('is-back');
         student.style.transform = '';
         student.style.transformOrigin = '';
