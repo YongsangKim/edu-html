@@ -33,12 +33,14 @@
         @keyframes p07-shine{0%{opacity:0;transform:scale(.9);filter:brightness(2)}60%{opacity:1;transform:scale(1.05)}100%{transform:none;filter:none}}
         .p07-next{position:absolute;z-index:6;left:1450px;top:805px}
 
-        .p07-summary-title{position:absolute;left:0;top:51px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:70px;letter-spacing:-0.06em;
-          background:linear-gradient(180deg,#02185c,#0362d7);-webkit-background-clip:text;background-clip:text;color:transparent}
-        .p07-summary-sub{position:absolute;left:0;top:160px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:48px;color:var(--c-purple);letter-spacing:-0.04em}
-        .p07-summary{position:absolute;left:408px;top:268px;width:1105px;height:455px;box-sizing:border-box;padding:40px;display:flex;flex-direction:column;justify-content:center;gap:34px;
-          background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:48px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);font-family:'Cafe24 Ssurround';font-size:50px;color:var(--c-ink);text-align:center;letter-spacing:-0.04em}
-        .p07-summary-next{position:absolute;left:756px;top:770px}
+        /* 마지막 스텝(디자인 7p-4): 큰 패널 + 리본 제목 + 알약 안내 + 하늘색 가사 상자 + 다음 */
+        .p07-sum-panel{position:absolute;left:57px;top:105px;width:1806px;height:803px;box-sizing:border-box;background:#f8f6f6;border:solid 5px var(--c-ink);border-radius:14px}
+        .p07-sum-ribbon{--rb-w:1514px;--rb-h:122px;--rb-fs:76px;--rb-th:133px;--rb-drop:68px;position:absolute;left:203px;top:45px;z-index:2}
+        .p07-sum-pill{position:absolute;left:320px;top:208px;width:1282px;height:104px;margin:0;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;background:#fdf9f6;border:solid 5px var(--c-ink);border-radius:52px;box-shadow:0 10px 0 0 rgba(86,148,231,.2);
+          font-family:'Cafe24 Ssurround';font-size:62px;color:var(--c-ink);letter-spacing:-0.05em;white-space:nowrap;z-index:2}
+        .p07-summary{position:absolute;left:193px;top:343px;width:1534px;height:387px;box-sizing:border-box;padding:0 30px;display:flex;flex-direction:column;justify-content:center;background:#dff6ff;border:solid 5px var(--c-navy);border-radius:14px;
+          font-family:'Cafe24 Ssurround';font-size:82px;line-height:117px;color:var(--c-ink);text-align:center;letter-spacing:-0.05em;white-space:nowrap;z-index:2}
+        .p07-summary-next{position:absolute;left:758px;top:758px;z-index:3}
 
         .p07 .is-off{display:none}
     </style>
@@ -64,8 +66,9 @@
           </div>
 
           <div class="is-off" id="p07Summary">
-            <p class="p07-summary-title">재화와 서비스에 대한 노래 가사를 만들었어요!</p>
-            <p class="p07-summary-sub">조립한 가사들을 활용해서 노래를 만들어볼까요?</p>
+            <div class="p07-sum-panel"></div>
+            <p class="ribbon p07-sum-ribbon">재화와 서비스에 대한 노래 가사를 만들었어요!</p>
+            <p class="p07-sum-pill">조립한 가사들을 활용해서 노래를 만들어볼까요?</p>
             <div class="p07-summary" id="p07SummaryList"></div>
             <a href="page08.html" class="js-nav-effect p07-summary-next">
               <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
@@ -112,6 +115,7 @@
     const lines = [];
 
     let index = 0;
+    let quiet = false;
     let filled = 0;
     let bubbleTimer = null;
 
@@ -162,7 +166,7 @@
         setTimeout(() => hints.forEach((h) => h.classList.remove('is-on')), 1000);
         return;
       }
-      playClick();
+      if (!quiet) playClick();
       el.classList.add('is-used');
       const slot = slotsBox.children[b.i];
       slot.classList.add('is-filled');
@@ -176,7 +180,7 @@
       const text = p.answer.join(' ');
       lines.push(text);
       clearTimeout(bubbleTimer);
-      playCorrect();
+      if (!quiet) playCorrect();
       setTimeout(() => {
         slotsBox.classList.add('is-off');
         sentence.textContent = text;
@@ -193,14 +197,36 @@
           render();
           return;
         }
-        try { sessionStorage.setItem('sa06_lyrics', lines.join('\n')); } catch (e) {}
-        $('p07SummaryList').innerHTML = lines.map((l) => '<p style="margin:0">' + l + '</p>').join('');
-        $('p07Play').classList.add('is-off');
-        $('p07Summary').classList.remove('is-off');
+        showSummary();
       }, 300);
     });
 
-    render();
+    function showSummary() {
+      try { sessionStorage.setItem('sa06_lyrics', lines.join('\n')); } catch (e) {}
+      $('p07SummaryList').innerHTML = lines.map((l) => '<p style="margin:0">' + l + '</p>').join('');
+      $('p07Play').classList.add('is-off');
+      $('p07Summary').classList.remove('is-off');
+    }
+
+    // ?step=N 으로 단계별 보기: 1·3·5 재화/서비스/개념 퍼즐 맞추는 중 · 2·4·6 그 판을 완성한 화면 · 7 마지막 요약. 그 단계에서 시작해도 다음으로 이어짐
+    const wantStep = parseInt(new URLSearchParams(location.search).get('step'), 10);
+    if (wantStep >= 1 && wantStep <= 7) {
+      quiet = true;
+      const done = wantStep === 7 ? PUZZLES.length : Math.floor((wantStep - 1) / 2);
+      for (let k = 0; k < done; k++) lines.push(PUZZLES[k].answer.join(' '));
+      if (wantStep === 7) {
+        showSummary();
+      } else {
+        index = done;
+        render();
+        if (wantStep % 2 === 0) {
+          Array.from(board.children).forEach((el) => { if (PUZZLES[index].answer.includes(el.textContent.trim())) el.click(); });
+        }
+      }
+      setTimeout(() => { quiet = false; }, 1200);
+    } else {
+      render();
+    }
   })();
   </script>
 </body>
