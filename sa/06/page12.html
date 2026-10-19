@@ -8,41 +8,35 @@
     <style>
         /* 디자인 없음 - 기획서 46~61p. 손님 5명의 주문을 보고 재화/서비스 선반에서 알맞은 것 고르기.
            맞으면 웃는 손님 + 감사 말풍선 2초 뒤 다음 손님(게이지 20%씩), 틀리면 힌트 팝업 3초(기획서 5초는 너무 길어 줄임).
-           가게 배경 img/p12_bg.png, 점원 뒷모습 img/p12_clerk.png, 손님 img/p12_guest{번호}(_happy).png, 물건 img/p12_item_{key}.png */
+           가게 배경 img/p12_bg.png, 물건 img/p12_item_{key}.png */
         main{background:url('img/p12_bg.png') center / cover no-repeat, linear-gradient(180deg,#d9ddeb 0%,#cddcea 50%,#c2d9e9 100%)}
 
-        .p12-gauge{left:156px;top:30px;width:1614px}
+        /* 디자인 12p: 가게 배경(img/p12_bg.png, 손님·선반 포함) 위에 게이지 · 주문 말풍선 · 질문 알약 · 재화/서비스 이름표 · 동그란 물건 4개 */
+        .p12-gauge{left:333px;top:36px;width:1292px}
 
-        .p12-guest{position:absolute;left:697px;top:146px;width:357px;height:626px;background:center bottom / contain no-repeat}
-        .p12-guest:after{content:'손님';position:absolute;left:59px;top:90px;width:240px;height:300px;border-radius:140px 140px 40px 40px;background:rgba(72,21,156,.2);
-          display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:48px;color:var(--c-purple)}
-        .p12-guest.has-img:after{display:none}
-        .p12-clerk{position:absolute;left:109px;top:212px;width:418px;height:733px;z-index:10;pointer-events:none}
-        .p12-clerk img{display:block;width:100%;height:100%;object-fit:contain;object-position:bottom}
+        .p12-order{position:absolute;left:1103px;top:170px;margin:0;width:547px;min-height:218px;box-sizing:border-box;padding:24px 30px 18px;display:flex;align-items:center;justify-content:center;text-align:center;
+          background:var(--c-white);border:solid 5px #2b6bd6;border-radius:24px;
+          font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.25;color:#2b6bd6;letter-spacing:-0.05em;word-break:keep-all;box-shadow:10px 10px 4px 0 rgba(55,45,86,0.4)}
+        .p12-order.is-small{font-size:50px;padding-left:14px;padding-right:14px}
+        .p12-order:before{content:'';position:absolute;left:-55px;top:17px;width:60px;height:70px;background:url('img/p14_arrow.png') 0 0 / 60px 70px no-repeat}
 
-        .p12-order{position:absolute;left:1070px;top:212px;width:495px;min-height:188px;box-sizing:border-box;padding:28px 34px;display:flex;align-items:center;justify-content:center;text-align:center;
-          background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
-          font-family:'Cafe24 Ssurround';font-size:42px;line-height:1.3;color:var(--c-purple);letter-spacing:-0.04em;word-break:keep-all}
-        .p12-order:before{content:'';position:absolute;left:-52px;top:50%;margin-top:-28px;border-style:solid;border-width:28px 52px 28px 0;border-color:transparent var(--c-purple) transparent transparent}
-        .p12-order:after{content:'';position:absolute;left:-42px;top:50%;margin-top:-21px;border-style:solid;border-width:21px 43px 21px 0;border-color:transparent var(--c-cream) transparent transparent}
-
-        .p12-counter{position:absolute;left:61px;top:495px;width:1799px;height:457px;box-sizing:border-box;background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
-        .p12-ask{position:absolute;left:577px;top:522px;width:1261px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:48px;color:var(--c-purple);letter-spacing:-0.04em}
-        .p12-shelf{position:absolute;top:605px;width:593px;height:320px;box-sizing:border-box;padding:40px 30px 0;display:flex;justify-content:space-around;
-          background:var(--c-pale);border:solid 5px var(--c-ink);border-radius:26px}
-        .p12-shelf-goods{left:598px}
-        .p12-shelf-service{left:1222px}
-        .p12-shelf b{position:absolute;top:-36px;height:70px;padding:6px 36px 0;box-sizing:border-box;display:flex;align-items:center;border-radius:35px;font-weight:normal;
-          font-family:'Cafe24 Ssurround';font-size:40px;color:var(--c-white)}
-        .p12-shelf-goods b{left:20px;background:var(--c-purple)}
-        .p12-shelf-service b{right:20px;background:var(--c-blue)}
-        .p12-item{width:228px;height:260px;box-sizing:border-box;padding:0 0 10px;border:solid 5px #eae0fd;border-radius:24px;background:var(--c-white);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;
-          font-family:'Cafe24 Ssurround';font-size:32px;line-height:1.1;color:var(--c-indigo);letter-spacing:-0.05em;word-break:keep-all}
-        .p12-item i{flex:1 1 auto;width:100%;border-radius:18px 18px 0 0;background:var(--c-pale) center / cover no-repeat}
-        .p12-item:hover{border-color:var(--c-violet)}
-        .p12-item.is-selected{border-color:#ff4ff9}
+        .p12-ask,.p12-thanks{position:absolute;left:757px;top:502px;width:1073px;height:100px;margin:0;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;
+          background:#fdf9f6;border:solid 5px var(--c-ink);border-radius:50px;font-family:'Cafe24 Ssurround';font-size:70px;color:var(--c-ink);letter-spacing:-0.05em;white-space:nowrap;box-shadow:0 16px 0 0 rgba(86,148,231,0.2)}
+        .p12-thanks{color:#2b6bd6}
+        .p12-shelf{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none}
+        .p12-shelf b{position:absolute;top:610px;width:212px;height:65px;padding-top:4px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border-radius:33px;font-weight:normal;
+          background:#789ce0;font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-white);letter-spacing:-0.03em;border:solid 4px #91b9e7}
+        .p12-shelf-goods b{left:910px}
+        .p12-shelf-service b{left:1487px}
+        .p12-item{position:absolute;bottom:25px;width:270px;height:290px;padding:0;border:0;background:none;display:flex;align-items:flex-end;justify-content:center;cursor:pointer;pointer-events:auto;transition:transform .15s ease}
+        .p12-item img{display:block;max-width:100%;max-height:100%}
+        .p12-shelf-goods .p12-item:nth-of-type(1){left:705px}
+        .p12-shelf-goods .p12-item:nth-of-type(2){left:1025px}
+        .p12-shelf-service .p12-item:nth-of-type(1){left:1315px}
+        .p12-shelf-service .p12-item:nth-of-type(2){left:1635px}
+        .p12-item:hover{transform:scale(1.05)}
+        .p12-item.is-selected{filter:drop-shadow(0 0 0 #ff4ff9) drop-shadow(0 0 10px #ff4ff9) drop-shadow(0 0 4px #ff4ff9)}
         .p12-item.is-wrong{animation:fix-word-shake .3s ease}
-        .p12-thanks{position:absolute;left:577px;top:676px;width:1261px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:60px;color:var(--c-blue);letter-spacing:-0.04em}
 
         .p12 .is-off{display:none}
         #p12Hint{z-index:120}
@@ -55,15 +49,12 @@
       <div id="stage" class="stage">
         <main class="p12">
           <div class="gauge is-thin p12-gauge"><div class="gauge-fill" id="p12GaugeFill"></div></div>
-          <div class="p12-guest" id="p12Guest"></div>
           <p class="p12-order" id="p12Order"></p>
 
-          <div class="p12-counter"></div>
           <p class="p12-ask" id="p12Ask">손님이 원하는 것은 무엇인가요?</p>
           <div class="p12-shelf p12-shelf-goods" id="p12Goods"><b>재화</b></div>
           <div class="p12-shelf p12-shelf-service" id="p12Service"><b>서비스</b></div>
           <p class="p12-thanks is-off" id="p12Thanks"></p>
-          <div class="p12-clerk"><img src="img/p12_clerk.png" alt="점원"></div>
 
           <div class="avatar-modal is-off" id="p12Hint">
             <div class="avatar-popup-panel">
@@ -102,7 +93,6 @@
         hint: '집에 가는 길이 먼 손님에게 필요한 것은 손으로 잡을 수 있는 물건일까요, 택시 기사님의 기술과 도움일까요?' }
     ];
 
-    const guest = $('p12Guest');
     const order = $('p12Order');
     const shelves = { goods: $('p12Goods'), service: $('p12Service') };
     const thanks = $('p12Thanks');
@@ -111,19 +101,24 @@
     let index = 0;
     let busy = false;
 
-    function setGuest(n, happy) {
-      if (!happy) { guest.style.backgroundImage = ''; guest.classList.remove('has-img'); }
-      const src = 'img/p12_guest' + n + (happy ? '_happy' : '') + '.png';
-      const probe = new Image();
-      probe.onload = () => { guest.style.backgroundImage = "url('" + src + "')"; guest.classList.add('has-img'); };
-      probe.src = src;
+    // 물건 그림은 5차시 p05_item_*(파란 원이 든 그림)을 그대로 씀. 색연필은 연필 그림, 없는 것(색종이)은 p12 전용 그림
+    const P05 = ['bag', 'bread', 'clothes', 'delivery', 'doctor', 'haircut', 'mechanic', 'pencil', 'shoes', 'snack', 'taxi', 'umbrella'];
+    function itemImg(key) {
+      if (key === 'crayon') key = 'pencil';
+      return P05.includes(key) ? 'p05_item_' + key : 'p12_item_' + key;
+    }
+
+    // 말풍선 문구를 바꿀 때마다 확인: 기본 크기로 두 줄을 넘어 세 줄 이상이 되면 is-small(50px)로 줄임
+    function setOrder(html) {
+      order.classList.remove('is-small');
+      order.innerHTML = html;
+      order.classList.toggle('is-small', order.offsetHeight > 230);
     }
 
     function render() {
       const g = GUESTS[index];
       busy = false;
-      setGuest(index + 1, false);
-      order.innerHTML = g.order;
+      setOrder(g.order);
       thanks.classList.add('is-off');
       $('p12Ask').classList.remove('is-off');
       ['goods', 'service'].forEach((type) => {
@@ -134,7 +129,8 @@
           const btn = document.createElement('button');
           btn.type = 'button';
           btn.className = 'p12-item';
-          btn.innerHTML = '<i style="background-image:url(\'img/p12_item_' + key + '.png\')"></i>' + name;
+          btn.setAttribute('aria-label', name);
+          btn.innerHTML = '<img src="img/' + itemImg(key) + '.png" alt="">';
           btn.addEventListener('click', () => pick(btn, key));
           shelf.appendChild(btn);
         });
@@ -157,8 +153,7 @@
       playCorrect();
       btn.classList.add('is-selected');
       setTimeout(() => {
-        setGuest(index + 1, true);
-        order.innerHTML = '감사합니다!';
+        setOrder('감사합니다!');
         shelves.goods.classList.add('is-off');
         shelves.service.classList.add('is-off');
         $('p12Ask').classList.add('is-off');

@@ -8,9 +8,8 @@
     <style>
         .p05-belt{position:absolute;left:0;top:370px;width:1920px;height:220px;background:url('img/p05_belt.png') no-repeat}
         .p05-items{position:absolute;left:72px;top:175px;width:1740px;height:300px;overflow:visible}
-        .p05-items.is-slide{animation:p05-in .7s cubic-bezier(.2,.8,.2,1)}
         @keyframes p05-in{from{transform:translateX(-1800px)}to{transform:none}}
-        .p05-item{position:absolute;bottom:10px;cursor:grab;touch-action:none;z-index:5}
+        .p05-item{position:absolute;bottom:10px;cursor:grab;touch-action:none;z-index:5;animation:p05-in .7s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--i) * .2s)}
         .p05-item img{display:block;max-width:none;pointer-events:none}
         .p05-item.is-dragging{cursor:grabbing;z-index:60}
         .p05-item.is-back{transition:transform .3s ease}
@@ -142,14 +141,12 @@
       items.forEach((it, i) => {
         const el = document.createElement('div');
         el.className = 'p05-item';
+        el.style.setProperty('--i', items.length - 1 - i);
         el.style.left = Math.round(gap * i + (gap - 260) / 2) + 'px';
         el.innerHTML = '<img src="img/p05_item_' + it.key + '.png" alt="' + it.name + '">';
         bindDrag(el, it);
         itemsBox.appendChild(el);
       });
-      itemsBox.classList.remove('is-slide');
-      void itemsBox.offsetWidth;
-      itemsBox.classList.add('is-slide');
       say(DEFAULT_BUBBLE);
     }
 

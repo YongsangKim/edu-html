@@ -6,32 +6,32 @@
     <title>경제Song! 가사 블록 조립하기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 19~25p. 가사 퍼즐 3판(정답 5 + 오답 2, 자리 무작위). 정답 블록을 누르면 아래 빈칸에 차례로 붙고,
+        /* 디자인 7p(조각 판·조립대) + 기획서 19~25p. 가사 퍼즐 3판(정답 5 + 오답 2, 자리 무작위). 정답 블록을 누르면 아래 빈칸에 차례로 붙고,
            오답이면 말풍선 2초 + 빈칸에 정답이 1초 흐릿하게 보임. 다 맞히면 반짝 효과와 함께 한 문장으로 바뀜.
            2·3판 완성 말풍선은 기획서에 1판(재화)만 있어 같은 형식으로 맞춤. 완성 가사는 sessionStorage 'sa06_lyrics'(Suno 활동에서 씀) */
 
-        .p07-bubble{left:80px;bottom:622px;width:490px;padding:30px 10px;font-size:44px;z-index:5}
-        .p07-character{left:90px;top:212px;width:360px;height:560px;z-index:3}
+        .p07-bubble{left:47px;bottom:720px;width:620px;padding:18px 10px;font-size:46px;z-index:5}
+        .p07-bubble:before{--tail-x:300px}
+        .p07-character{left:57px;top:164px;width:485px;height:516px;z-index:3}
 
-        .p07-board{position:absolute;left:527px;top:28px;width:1329px;height:556px}
-        .p07-piece{position:absolute;box-sizing:border-box;padding:6px 16px 0;display:flex;align-items:center;justify-content:center;text-align:center;
-          font-size:44px;line-height:1.15;cursor:pointer;transition:transform .15s ease,opacity .3s ease}
-        .p07-piece:hover{transform:scale(1.06)}
-        .p07-piece.is-used{opacity:0;pointer-events:none}
+        .p07-boardbg{position:absolute;left:660px;top:15px;width:1210px;height:515px;box-sizing:border-box;background:var(--c-navy);border:solid 10px var(--c-sky);border-radius:40px}
+        .p07-board{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none;z-index:2}
+        .p07-piece{position:absolute;padding:0;border:0;background:none;cursor:pointer;pointer-events:auto;transition:transform .15s ease}
+        .p07-piece path{stroke:var(--c-ink);stroke-width:8}
+        .p07-piece:hover{transform:scale(1.08)}
+        .p07-piece.is-used{visibility:hidden}
         .p07-piece.is-wrong{animation:fix-word-shake .3s ease}
-
-        .p07-tray{position:absolute;left:87px;top:600px;width:1377px;height:317px;box-sizing:border-box;background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
-        .p07-slots{position:absolute;left:400px;top:632px;display:flex;gap:3px}
-        .p07-slot{position:relative;width:209px;height:253px;box-sizing:border-box;margin-right:0;border:dashed 4px #b9b3dd;border-radius:20px;display:flex;align-items:center;justify-content:center}
-        .p07-slot + .p07-slot{margin-left:-4px}
-        .p07-slot .emotion-option{width:189px;height:150px;padding:6px 8px 0;box-sizing:border-box;font-size:38px;line-height:1.15;display:flex;align-items:center;justify-content:center;text-align:center;cursor:default}
-        .p07-slot-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;opacity:0;transition:opacity .5s ease;
-          font-family:'Cafe24 Ssurround';font-size:38px;line-height:1.15;color:var(--c-violet);letter-spacing:-0.04em}
-        .p07-slot-hint.is-on{opacity:.5}
-        .p07-sentence{position:absolute;left:380px;top:710px;width:1045px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:70px;color:var(--c-purple);letter-spacing:-0.04em;
+        
+        .p07-tab{left:52px;top:444px;width:580px;min-width:0;height:107px;padding:8px 0 10px 66px;white-space:nowrap;z-index:6;background:var(--c-white);border-color:var(--c-blue);color:var(--c-blue);font-size:62px;border-width:10px}
+        .p07-tab:after{background:radial-gradient(circle 30px at 100% 0,transparent 20px,var(--c-blue) 20px 30px,var(--c-white) 30px);bottom:-3px}
+        .p07-tray{position:absolute;left:52px;top:535px;width:1818px;height:415px;box-sizing:border-box;background:var(--c-white);border:solid 10px var(--c-blue);border-radius:30px;border-top-left-radius:0;z-index:4}
+        .p07-slots{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none;z-index:5}
+        .p07-slot{position:absolute}
+        .p07-slot .jig-label{font-size:78px}
+        .p07-sentence{position:absolute;z-index:5;left:92px;top:700px;width:1340px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:70px;color:var(--c-purple);letter-spacing:-0.04em;
           animation:p07-shine 1s ease}
         @keyframes p07-shine{0%{opacity:0;transform:scale(.9);filter:brightness(2)}60%{opacity:1;transform:scale(1.05)}100%{transform:none;filter:none}}
-        .p07-next{position:absolute;left:1485px;top:790px}
+        .p07-next{position:absolute;z-index:6;left:1450px;top:805px}
 
         .p07-summary-title{position:absolute;left:0;top:51px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:70px;letter-spacing:-0.06em;
           background:linear-gradient(180deg,#02185c,#0362d7);-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -51,9 +51,11 @@
         <main class="bg-default p07">
           <div id="p07Play">
             <p class="guide-bubble is-center p07-bubble" id="p07Bubble"></p>
-            <div class="p07-tray"></div>
-            <div class="char-box p07-character"><img src="../img/sa_main.png" alt="메인 캐릭터"></div>
+            <div class="char-box p07-character"><img src="img/r7.png" alt="메인 캐릭터"></div>
+            <div class="p07-boardbg"></div>
             <div class="p07-board" id="p07Board"></div>
+            <div class="jig-tray-label p07-tab">퍼즐 조각 조립대</div>
+            <div class="p07-tray"></div>
             <div class="p07-slots" id="p07Slots"></div>
             <p class="p07-sentence is-off" id="p07Sentence"></p>
             <a href="javascript:;" class="js-sfx p07-next is-off" id="p07Next" data-sound="sound/click.mp3">
@@ -88,11 +90,19 @@
       { ask: '재화와 서비스에 대한<br>개념 설명 블록을 찾아<br>연결해서 가사를 만들어봐요!', wrong: '재화와 서비스의 개념에 대한<br>설명을 찾아봐요.', done: '좋아요!<br>재화와 서비스에 대한 가사를<br>완성했어요!',
         answer: ['재화는', '눈에', '보이는 것,', '서비스는', '편리함'], extra: ['택배는', '들리는 것,'] }
     ];
-    // 기획서 19p 퍼즐 조각 자리(보드 기준 좌표·크기), 조각마다 무작위로 배정
-    const SPOTS = [
-      [23, 281, 286, 262], [359, 307, 286, 228], [167, 4, 270, 274], [486, 51, 334, 215],
-      [890, 0, 249, 280], [1022, 305, 286, 228], [683, 280, 286, 262]
-    ];
+    // 디자인 7p: 조각 크기(BS 판 위·TS 조립대)와 자리(판 위 7곳, 조각마다 무작위 배정). 정답 조각은 앞뒤가 맞물리는 모양(EDGES: 위·오른쪽·아래·왼쪽, 1 튀어나옴/-1 들어감)
+    const BS = 200;
+    const BM = 44;
+    const TS = 270;
+    const TM = 62;
+    const STEP = 268;
+    const TRAY_X = 92;
+    const TRAY_Y = 615;
+    const EDGES = [[1, 1, -1, 0], [-1, 1, 0, -1], [1, -1, 0, -1], [0, 1, -1, 1], [1, 0, 0, -1]];
+    const EXTRA_EDGES = [[1, 0, -1, -1], [-1, -1, 0, 1]];
+    const COLORS = [['#b463ca', '#a043ed'], ['#4bcc24', '#19aa73'], ['#ffcf0e', '#ffb70e'], ['#4e97ff', '#7272fe'], ['#fb8b16', '#ef6a59']];
+    const EXTRA_COLORS = [['#da5ba6', '#bf4573'], ['#3fe3e0', '#1fb6e8']];
+    const SPOTS = [[840, 75], [1160, 70], [1480, 66], [695, 305], [995, 305], [1325, 305], [1625, 305]];
 
     const bubble = $('p07Bubble');
     const board = $('p07Board');
@@ -113,16 +123,25 @@
       nextBtn.classList.add('is-off');
       resetImageSwap(nextBtn);
       slotsBox.classList.remove('is-off');
-      slotsBox.innerHTML = p.answer.map((a) => '<div class="p07-slot"><span class="p07-slot-hint">' + a + '</span></div>').join('');
+      slotsBox.innerHTML = '';
+      p.answer.forEach((t, k) => {
+        const slot = document.createElement('div');
+        slot.className = 'jig-slot p07-slot';
+        slot.style.cssText = 'left:' + (TRAY_X + k * STEP - TM) + 'px;top:' + (TRAY_Y - TM) + 'px';
+        slot.innerHTML = jigSvg(TS, TM, EDGES[k], null, 'p07-s' + k) + '<span class="jig-label is-hint" style="' + labelBox(TS, TM, EDGES[k], 0, 0) + '">' + t + '</span>';
+        slotsBox.appendChild(slot);
+      });
       board.innerHTML = '';
       const spots = shuffleArray(SPOTS);
-      shuffleArray(p.answer.map((t, i) => ({ t, i })).concat(p.extra.map((t) => ({ t, i: -1 })))).forEach((b, k) => {
-        const [x, y, w, h] = spots[k];
+      const pieces = p.answer.map((t, i) => ({ t, i, edges: EDGES[i], color: COLORS[i] }))
+        .concat(p.extra.map((t, j) => ({ t, i: -1, edges: EXTRA_EDGES[j], color: EXTRA_COLORS[j] })));
+      shuffleArray(pieces).forEach((b, k) => {
+        const [x, y] = spots[k];
         const el = document.createElement('button');
         el.type = 'button';
-        el.className = 'emotion-option p07-piece';
-        el.style.cssText = 'left:' + x + 'px;top:' + y + 'px;width:' + w + 'px;height:' + h + 'px';
-        el.textContent = b.t;
+        el.className = 'p07-piece';
+        el.style.cssText = 'left:' + (x - BM) + 'px;top:' + (y - BM) + 'px;width:' + (BS + BM * 2) + 'px;height:' + (BS + BM * 2) + 'px';
+        el.innerHTML = jigSvg(BS, BM, b.edges, b.color, 'p07-b' + k) + '<span class="jig-label" style="' + labelBox(BS, BM, b.edges, 0, 0) + '">' + b.t + '</span>';
         el.addEventListener('click', () => pick(el, b));
         board.appendChild(el);
       });
@@ -138,7 +157,7 @@
         bubble.innerHTML = p.wrong;
         clearTimeout(bubbleTimer);
         bubbleTimer = setTimeout(() => { bubble.innerHTML = p.ask; }, 2000);
-        const hints = Array.from(slotsBox.children).filter((s) => !s.querySelector('.emotion-option')).map((s) => s.querySelector('.p07-slot-hint'));
+        const hints = Array.from(slotsBox.children).filter((s) => !s.classList.contains('is-filled')).map((s) => s.querySelector('.jig-label'));
         hints.forEach((h) => h.classList.add('is-on'));
         setTimeout(() => hints.forEach((h) => h.classList.remove('is-on')), 1000);
         return;
@@ -146,10 +165,8 @@
       playClick();
       el.classList.add('is-used');
       const slot = slotsBox.children[b.i];
-      const placed = document.createElement('div');
-      placed.className = 'emotion-option';
-      placed.textContent = b.t;
-      slot.appendChild(placed);
+      slot.classList.add('is-filled');
+      slot.innerHTML = jigSvg(TS, TM, b.edges, b.color, 'p07-f' + b.i) + '<span class="jig-label" style="' + labelBox(TS, TM, b.edges, 0, 0) + '">' + b.t + '</span>';
       filled += 1;
       if (filled === p.answer.length) complete();
     }
