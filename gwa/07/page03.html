@@ -10,11 +10,11 @@
            기기를 누르면 말풍선에 기기 설명, 맞으면 기기가 칸에 고정되고 정답 팝업(확인), 틀리면 트레이로 돌아가고 오답 팝업(확인).
            배경 img/p03_bg_round{1|2}.png(.p03-scene 1460×499에 꽉 채움, 칸 좌표 zone [left, top, width, height]는 이 장면 상자 기준 px — 개발자도구에 보이는 left/top/width/height 값 그대로), 기기 img/p03_dev_{key}.png. 캐릭터는 임시로 sa/06 캐릭터 복사본 */
 
-        .p03-title{position:absolute;margin:0;left:420px;top:20px;width:1180px;height:90px;box-sizing:border-box;padding:6px 30px 0;display:flex;align-items:center;justify-content:center;gap:24px;
-          background:var(--c-white);border:solid 5px var(--c-ink);border-radius:45px;box-shadow:0 10px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:60px;color:var(--c-ink);letter-spacing:-0.06em}
-        .p03-round{position:absolute;margin:0;left:140px;top:20px;height:90px;box-sizing:border-box;padding:6px 36px 0;display:flex;align-items:center;border-radius:45px;background:var(--c-navy);box-shadow:0 10px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:50px;color:var(--c-white);letter-spacing:-0.04em}
-        .p03-count{position:absolute;margin:0;left:1630px;top:20px;width:250px;height:90px;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;
-          background:var(--c-ink);border-radius:45px;font-family:'Cafe24 Ssurround';font-size:50px;color:var(--c-white)}
+        .p03-step{left:80px;top:20px;transform:none;width:1460px;font-size:56px}
+        .p03-step>i{width:300px}
+        .p03-step>span{justify-content:center;padding:8px 20px 0;white-space:nowrap}
+        .p03-count{position:absolute;margin:0;left:1590px;top:20px;width:250px;height:100px;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;
+          background:var(--c-ink);border-radius:50px;font-family:'Cafe24 Ssurround';font-size:56px;color:var(--c-white)}
 
         .p03-scene{position:absolute;left:420px;top:145px;width:1460px;height:499px;background: 0 0 / 100% 100% no-repeat}
         .p03-scene.is-round1{background-image:url('img/p03_bg_round1.png')}
@@ -23,7 +23,7 @@
         .p03-zone[data-filled]{border-color:transparent;background:none}
 
         .p03-character{left:10px;top:330px;width:400px;height:330px}
-        .p03-bubble{position:absolute;margin:0;left:20px;top:20px;width:385px;min-height:260px;box-sizing:border-box;padding:26px 28px;display:flex;align-items:center;justify-content:center;text-align:center;
+        .p03-bubble{position:absolute;margin:0;left:20px;bottom:650px;width:385px;min-height:200px;box-sizing:border-box;padding:26px 28px;display:flex;align-items:center;justify-content:center;text-align:center;
           background:var(--c-cream);border:solid 5px var(--c-purple);border-radius:30px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
           font-family:'Cafe24 Ssurround';font-size:36px;line-height:1.3;color:var(--c-purple);letter-spacing:-0.05em;word-break:keep-all}
         .p03-bubble:before{content:'';position:absolute;left:150px;bottom:-58px;width:100px;height:70px;background:url('../../img/common/p_guide_tail.png') 0 0 / contain no-repeat}
@@ -53,8 +53,7 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <p class="p03-round" id="p03Round">1라운드</p>
-          <p class="p03-title">스마트 기기를 알맞은 위치로 옮겨 주세요</p>
+          <p class="ask-pill has-stage p03-step"><i id="p03Round">1라운드</i><span>스마트 기기를 알맞은 위치로 옮겨 주세요</span></p>
           <p class="p03-count" id="p03Count">0/6</p>
           <div class="p03-scene is-round1" id="p03Scene"></div>
 
@@ -243,7 +242,20 @@
       renderRound();
     });
 
+    // ?step=N 으로 단계별 보기: 1 1라운드 · 2 정답 팝업 · 3 오답 팝업 · 4 1라운드 완료 · 5 2라운드 · 6 2라운드 완료 · 7 영상
+    const wantStep = parseInt(new URLSearchParams(location.search).get('step'), 10);
+    if (wantStep >= 5 && wantStep <= 6) round = 1;
     renderRound();
+    if (wantStep === 2) {
+      $('p03RightText').innerHTML = ROUNDS[0].devices[0].right;
+      open('p03Right');
+    } else if (wantStep === 3) {
+      open('p03Wrong');
+    } else if (wantStep === 4 || wantStep === 6) {
+      showClear();
+    } else if (wantStep === 7) {
+      open('p03Video');
+    }
   })();
   </script>
 </body>
