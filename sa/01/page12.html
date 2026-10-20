@@ -6,75 +6,27 @@
     <title>나의 미래 모습 만들기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 폰 틀은 공용 .phone-frame, 폰 속 ChatGPT 화면·키보드는 CSS. 안내 로봇은 공용 sa/img/sa_wink_point3.png(.guide-set), 손가락은 공용 pointFingerAt */
-        .p12-bw-wide{--gb-left:115px;--gb-w:642px;--tail-x:297px}
-        .p12-bw-gen{--gb-left:155px;--gb-w:560px;--tail-x:257px}
-        .p12-pill svg{width:22px;height:22px;fill:none;stroke:#111;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-        .p12-pill{position:absolute;right:11px;top:0;width:95px;height:46px;border-radius:23px;background:var(--c-white);box-shadow:0 2px 10px rgba(0,0,0,.08);display:none;align-items:center;justify-content:space-evenly}
-        .prompt-builder[data-current-step="6"] .phone-seg,.prompt-builder[data-current-step="7"] .phone-seg,
-        .prompt-builder[data-current-step="6"] .p12-r1.is-r,.prompt-builder[data-current-step="7"] .p12-r1.is-r{display:none}
-        .prompt-builder[data-current-step="6"] .p12-pill,.prompt-builder[data-current-step="7"] .p12-pill{display:flex}
-
-        .p12-bar{position:absolute;left:19px;bottom:378px;width:404px;min-height:50px;box-sizing:border-box;border-radius:25px;background:var(--c-white);box-shadow:0 2px 14px rgba(0,0,0,.08);display:flex;flex-direction:column;justify-content:flex-end}
-        .p12-bar .prompt-preview{padding:14px 18px 0;font-family:'Pretendard';font-size:20px;line-height:1.3;font-weight:500;letter-spacing:0;color:#000;white-space:pre-line;word-break:keep-all}
-        .p12-bar .prompt-preview:empty{display:none}
-        .p12-bar .prompt-value{color:inherit;font-weight:inherit}
-        .p12-bar-row{position:relative;height:50px;flex:none}
-        .p12-bar-row svg{position:absolute;fill:none;stroke:#111;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-        .p12-plus{left:12px;top:13px;width:24px;height:24px}
-        .p12-mic{right:62px;top:13px;width:22px;height:24px}
-        .p12-voice{position:absolute;right:14px;top:9px;width:32px;height:32px;border-radius:50%;background:#3b82f6;display:flex;align-items:center;justify-content:center;gap:2px}
-        .p12-voice i{width:2px;border-radius:1px;background:#fff}
-        .p12-answer{display:none;position:absolute;left:19px;bottom:18px;width:404px;height:50px;box-sizing:border-box;border-radius:25px;background:var(--c-white);box-shadow:0 2px 14px rgba(0,0,0,.08);font-size:14px;color:#555;align-items:center;padding-left:52px}
-        .p12-answer svg{position:absolute;left:12px;top:13px;width:24px;height:24px;fill:none;stroke:#111;stroke-width:1.9;stroke-linecap:round}
-        .p12-answer .p12-voice b{width:12px;height:12px;border-radius:2px;background:#fff}
-        .prompt-builder[data-current-step="6"] .p12-answer,.prompt-builder[data-current-step="7"] .p12-answer{display:flex}
-        .prompt-builder[data-current-step="6"] .p12-bar,.prompt-builder[data-current-step="7"] .p12-bar,
-        .prompt-builder[data-current-step="6"] .p12-kb,.prompt-builder[data-current-step="7"] .p12-kb{display:none}
-
-        .prompt-builder[data-current-step="6"] .phone-screen.has-kb,.prompt-builder[data-current-step="7"] .phone-screen.has-kb{background:linear-gradient(180deg,#f0f0f0 0,#fff 50%,#f0f0f0 100%)}
-        .p12-kb{position:absolute;left:0;top:528px;width:100%;bottom:0;box-sizing:border-box;background:linear-gradient(180deg,#1b1b1e,#121214);padding:0 18px 0 22px;color:#fff;font-family:'Pretendard'}
-        .p12-kb-tools{height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 14px 0 9px}
-        .p12-kb-tools svg{width:22px;height:22px;fill:none;stroke:#d8d8dc;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-        .p12-kb-rows{display:flex;flex-direction:column;gap:9px;padding-top:12px}
-        .p12-kb-row{display:flex;gap:10px;height:60px}
-        .p12-key{position:relative;flex:1 1 0;min-width:0;border-radius:12px;background:#3a3a3f;display:flex;align-items:center;justify-content:center;font-size:22px;letter-spacing:.2em;padding-left:.2em;box-sizing:border-box}
-        .p12-key small{position:absolute;right:8px;top:4px;font-size:12px;color:#a2a2a8;letter-spacing:0;padding:0}
-        .p12-key.is-s{flex:0 0 40px;background:none;font-size:20px;letter-spacing:0;padding:0}
-        .p12-key.is-s2{flex:0 0 42px;background:#2c2c31;font-size:12px;letter-spacing:0;padding:0;line-height:1.15;text-align:center}
-
-        .p12-card{left:1257px;width:581px;height:148px;padding:0 24px;border:solid 5px #1d1850;border-radius:42px;background:#f4f6fb;overflow:visible;display:flex;align-items:center;justify-content:center;
-          font-family:'Cafe24 Ssurround';font-size:66px;letter-spacing:-0.07em;color:#1f64d0;white-space:nowrap}
-        .p12-card:hover{border-color:#b18cff}
-        .p12-card.is-selected{border-color:#ff2fc2;box-shadow:inset 0 0 0 5px #ff2fc2}
-        .p12-g2 .p12-card:nth-child(1){top:252px}
-        .p12-g2 .p12-card:nth-child(2){top:456px}
-        .p12-g4 .p12-card:nth-child(1){top:72px}
-        .p12-g4 .p12-card:nth-child(2){top:241px}
-        .p12-g4 .p12-card:nth-child(3){top:410px}
-        .p12-g4 .p12-card:nth-child(4){top:579px}
-        .p12-g3 .p12-card{display:none}
-        .p12-g3 .p12-card.is-show{display:flex}
-        .p12-actions{position:absolute;left:1370px;top:800px;width:530px}
-
-        .p12-prompt-bubble{position:absolute;right:782px;top:172px;max-width:300px;box-sizing:border-box;padding:16px 18px;border-radius:26px;background:#e6effa;font-family:'Pretendard';font-size:17px;line-height:1.4;font-weight:500;color:#1a2a4a;text-align:left;z-index:3}
-        .p12-prompt-bubble .prompt-value{color:inherit}
-        .p12-gen{position:absolute;left:745px;top:370px;width:290px;height:290px;box-sizing:border-box;border-radius:34px;background:#f2f2f2;z-index:3;overflow:hidden;font-family:'Pretendard';font-size:16px;font-weight:600;color:#444}
-        .p12-gen b{position:absolute;left:26px;top:26px;font-weight:600;letter-spacing:-0.02em}
-        .p12-gen i{position:absolute;left:0;top:0;width:100%;height:100%;
-          background:radial-gradient(circle,#b9b9b9 2.4px,transparent 2.8px) 3px 3px/15px 15px;
-          -webkit-mask:radial-gradient(ellipse 46% 36% at 50% 55%,#000 15%,transparent 100%);mask:radial-gradient(ellipse 46% 36% at 50% 55%,#000 15%,transparent 100%)}
-        .p12-gen i+i{background:radial-gradient(circle,#555 3px,transparent 3.4px) 3px 3px/15px 15px;
-          -webkit-mask:radial-gradient(circle at 50% 55%,transparent 0 var(--w0),#000 calc(var(--w0) + 14px),transparent calc(var(--w0) + 44px));mask:radial-gradient(circle at 50% 55%,transparent 0 var(--w0),#000 calc(var(--w0) + 14px),transparent calc(var(--w0) + 44px));
-          animation:p12-wave 1.6s ease-out infinite}
-        @property --w0{syntax:'<length>';inherits:false;initial-value:0px}
-        @keyframes p12-wave{from{--w0:0px;opacity:1}to{--w0:120px;opacity:0}}
-        .p12-result{position:absolute;left:745px;top:370px;display:block;width:330px;z-index:3}
-        .p12-result img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:24px}
-        .prompt-builder[data-current-step="5"] .p12-voice i{display:none}
-        .prompt-builder[data-current-step="5"] .p12-voice{background:#3b82f6 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 19V5M6 11l6-6 6 6'/%3E%3C/svg%3E") center / 20px no-repeat}
-        .p12-send{position:absolute;left:1094px;top:519px;width:32px;height:32px;border-radius:50%;z-index:4}
-        .p12-send:after{content:"";position:absolute;left:-26px;top:-26px;right:-26px;bottom:-26px}
+        /* 폰 틀은 공용 .phone-frame, 단체 대화창은 CSS(1초마다 말풍선이 하나씩 나타남). 안내 로봇 공용 sa/img/sa_main_wave.png(.guide-set) */
+        .p14-screen{background:#ffeeb8;font-family:'Pretendard';color:#111}
+        .p14-title{position:absolute;left:0;top:40px;width:100%;height:48px;box-sizing:border-box;display:flex;align-items:center;padding-left:14px;font-size:22px;font-weight:700;letter-spacing:-0.03em}
+        .p14-title svg{width:22px;height:22px;margin-right:6px;fill:none;stroke:#111;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+        .p14-in{position:absolute;left:12px;bottom:12px;width:414px;height:62px;border-radius:31px;background:#fff}
+        .p14-in i{position:absolute;left:5px;top:5px;width:52px;height:52px;border-radius:50%;background:#dcdcde;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:38px;font-weight:700;line-height:1}
+        .p14-msg{position:absolute;box-sizing:border-box;padding:10px 32px;display:flex;align-items:center;border-radius:30px;font-size:20px;font-weight:600;line-height:1.3;letter-spacing:-0.04em;opacity:0;transform:translateY(12px);transition:opacity .4s,transform .4s}
+        .p14-msg.is-on{opacity:1;transform:none}
+        .p14-msg:before{content:'';position:absolute;top:50%;margin-top:-10px;width:20px;height:20px;background:inherit}
+        .p14-me{left:101px;top:415px;width:310px;background:#a9cdff}
+        .p14-me:before{right:-10px;clip-path:polygon(0 0,100% 50%,0 100%)}
+        .p14-fr{left:28px;background:#fff}
+        .p14-fr:before{left:-12px;clip-path:polygon(100% 0,0 50%,100% 100%)}
+        .p14-f1{top:504px;width:218px}
+        .p14-f2{top:568px;width:337px}
+        .p14-f3{top:657px;width:337px}
+        .p14-photo{position:absolute;left:114px;top:101px;width:298px;height:298px;border-radius:24px;object-fit:cover;opacity:0;transition:opacity .4s}
+        .p14-photo.is-on{opacity:1}
+        .p14-share{position:absolute;left:343px;top:332px;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .4s}
+        .p14-share.is-on{opacity:1}
+        .next-btn.hidden{display:none}
     </style>
 </head>
 <body>
@@ -83,185 +35,91 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <div class="prompt-builder">
-            <div class="phone-frame has-cam">
-              <div class="phone-screen is-chat has-kb">
-                <div class="phone-status is-dark" data-time="6:31"></div>
-                <div class="phone-head">
-                  <span class="phone-round is-l p12-r1"><svg viewBox="0 0 24 24"><path d="M4 8h14M4 15h9"/></svg></span>
-                  <span class="phone-seg"><b>Chat</b><b>Work</b></span>
-                  <span class="phone-round is-r p12-r1"><svg viewBox="0 0 24 24"><path d="M5 18l1.2-3.6A7.5 7.5 0 1112 19.5a7.6 7.6 0 01-3.3-.8z"/></svg></span>
-                  <span class="p12-pill"><svg viewBox="0 0 24 24"><path d="M12 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-6"/><path d="M17.5 3.5l3 3-8 8-4 1 1-4z"/></svg><svg viewBox="0 0 24 24"><path d="M12 6h.01M12 12h.01M12 18h.01" stroke-width="3"/></svg></span>
-                </div>
-                <div class="p12-bar">
-                  <div class="prompt-preview"></div>
-                  <div class="p12-bar-row">
-                    <svg class="p12-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-                    <svg class="p12-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg>
-                    <span class="p12-voice"><i style="height:6px"></i><i style="height:12px"></i><i style="height:16px"></i><i style="height:10px"></i><i style="height:5px"></i></span>
-                  </div>
-                </div>
-                <div class="p12-answer"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>ChatGPT에게 답장하기<span class="p12-voice"><b></b></span></div>
-                <div class="p12-kb">
-                  <div class="p12-kb-tools"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 14a4 4 0 007 0M9 9.5h.01M15 9.5h.01"/></svg><svg viewBox="0 0 24 24"><rect x="4" y="4" width="11" height="11" rx="2"/><path d="M9 20h11V9"/></svg><svg viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="16" rx="2"/><path d="M9 4h6v3H9z"/></svg><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h.01M12 12h.01M19 12h.01" stroke-width="3"/></svg></div>
-                  <div class="p12-kb-rows">
-                <div class="p12-kb-row"><div class="p12-key"><small>1</small>ㅣ</div><div class="p12-key"><small>2</small>·</div><div class="p12-key"><small>3</small>ㅡ</div><div class="p12-key"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11a1 1 0 011 1v10a1 1 0 01-1 1H9l-6-6z"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"/></svg></div></div>
-                <div class="p12-kb-row"><div class="p12-key"><small>4</small>ㄱㅋ</div><div class="p12-key"><small>5</small>ㄴㄹ</div><div class="p12-key"><small>6</small>ㄷㅌ</div><div class="p12-key"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 5v8a2 2 0 01-2 2H5M9 11l-4 4 4 4"/></svg></div></div>
-                <div class="p12-kb-row"><div class="p12-key"><small>7</small>ㅂㅍ</div><div class="p12-key"><small>8</small>ㅅㅎ</div><div class="p12-key"><small>9</small>ㅈㅊ</div><div class="p12-key" style="letter-spacing:0;font-size:26px">.,?!</div></div>
-                <div class="p12-kb-row"><div class="p12-key is-s">!#1</div><div class="p12-key is-s2">한<br>/영</div><div class="p12-key"><small>0</small>ㅇㅁ</div><div class="p12-key"><svg viewBox="0 0 24 24" width="30" height="20" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h16V9"/></svg></div><div class="p12-key" style="letter-spacing:0;font-size:18px">한자</div></div>
-                  </div>
-                </div>
+          <div class="guide-set is-main-wave">
+            <p class="guide-bubble is-center is-medium">대화 내용을 읽고,<br>AI를 사용할 때 주의해야 할<br>점을 알아봐요.</p>
+            <div class="guide-character"><img src="../img/sa_main_wave.png" alt=""></div>
+          </div>
+          <div class="phone-frame has-cam">
+            <div class="phone-screen p14-screen">
+              <div class="phone-status is-dark" data-time="6:31"></div>
+              <div class="p14-title"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>친구들 단체 대화창</div>
+              <img class="p14-photo" id="p14Photo" alt="나의 미래 모습">
+              <span class="p14-share" id="p14Share"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.6l6.8-4M8.6 13.4l6.8 4"/></svg></span>
+              <div class="p14-msg p14-me" data-seq="1">안녕! 내 모습 어때?<br>멋있지 않아?</div>
+              <div class="p14-msg p14-fr p14-f1" data-seq="2">우와~ 멋지다!</div>
+              <div class="p14-msg p14-fr p14-f2" data-seq="3">이게 정말 네 모습이라고?<br>우리는 학생이잖아!</div>
+              <div class="p14-msg p14-fr p14-f3" data-seq="4">그래? 이게 어떻게 된<br>일이지?</div>
+              <div class="p14-in"><i>+</i></div>
+            </div>
+          </div>
+          <a href="javascript:;" class="next-btn hidden confirm-quiz-trigger" data-confirm-quiz=".p14-confirm-quiz">
+            <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+          </a>
+
+          <div class="confirm-quiz p14-confirm-quiz hidden">
+            <div class="confirm-quiz-panel confirm-quiz-question">
+              <p class="confirm-quiz-title"><img class="confirm-quiz-icon" src="../../img/common/icon_warning.png" alt="">주의</p>
+              <p class="confirm-quiz-text">AI로 만든 사진을 실제 나의 모습인 것처럼<br>다른 사람을 속여도 될까요?</p>
+              <div class="confirm-quiz-choices">
+                <button class="confirm-quiz-choice" data-correct="false">
+                  <img src="img/p14_btn_yes.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_yes_on.png" data-src-over="img/p14_btn_yes_over.png" data-sound="sound/click.mp3" alt="예">
+                </button>
+                <button class="confirm-quiz-choice" data-correct="true">
+                  <img src="img/p14_btn_no.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_no_on.png" data-src-over="img/p14_btn_no_over.png" data-sound="sound/click.mp3" alt="아니오">
+                </button>
               </div>
             </div>
+            <div class="confirm-quiz-panel confirm-quiz-correct hidden">
+              <p class="confirm-quiz-title">잘했어요</p>
+              <p class="confirm-quiz-text">맞아요! AI로 만들어진 모습은 실제 내 모습이 아니예요.<br>다른 사람에게 AI로 만든 모습이라고 말해야 해요.</p>
+              <button class="confirm-quiz-choice confirm-quiz-ok" data-next-quiz=".p14-confirm-quiz-2">
+                <img src="img/p14_btn_confirm.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_confirm_on.png" data-src-over="img/p14_btn_confirm_over.png" data-sound="sound/click.mp3" alt="확인">
+              </button>
+            </div>
+            <div class="confirm-quiz-panel confirm-quiz-wrong hidden">
+              <p class="confirm-quiz-title">다시 한 번 생각해요.</p>
+              <p class="confirm-quiz-text">AI 이미지를 실제인 것처럼 다른 사람을 속여서는 안 돼요.</p>
+              <button class="confirm-quiz-choice confirm-quiz-ok">
+                <img src="img/p14_btn_confirm.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_confirm_on.png" data-src-over="img/p14_btn_confirm_over.png" data-sound="sound/click.mp3" alt="확인">
+              </button>
+            </div>
+          </div>
 
-            <div class="step-flow">
-
-              <div class="step-panel" data-step="1">
-                <div class="guide-set is-wink-point3">
-                  <p class="guide-bubble is-center">나의 미래 모습을<br>묘사해요. 나와 맞는<br>선택지를 클릭해요.</p>
-                  <div class="guide-character"><img src="../img/sa_wink_point3.png" alt=""></div>
-                </div>
-                <div class="multi-select p12-g2" data-single="true">
-                  <button class="multi-option pick-card p12-card" data-gender="m" data-clause="나는 남자이고" aria-label="나는 남자이고">나는 남자이고</button>
-                  <button class="multi-option pick-card p12-card" data-gender="f" data-clause="나는 여자이고" aria-label="나는 여자이고">나는 여자이고</button>
-                </div>
-                <div class="step-actions p12-actions">
-                  <a href="javascript:;" class="js-nav-effect js-sfx multi-next" data-warn-empty="true">
-                    <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
-                  </a>
-                </div>
-                <div class="select-warning hidden" data-sound="sound/incorrect.mp3">
-                  <div class="avatar-popup-panel">
-                    <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
-                    <div class="avatar-popup-body">
-                      <p class="avatar-popup-text is-small">나와 맞는 선택지를 클릭해요.</p>
-                    </div>
-                  </div>
-                </div>
+          <div class="confirm-quiz p14-confirm-quiz-2 hidden">
+            <div class="confirm-quiz-panel confirm-quiz-question">
+              <p class="confirm-quiz-title"><img class="confirm-quiz-icon" src="../../img/common/icon_warning.png" alt="">주의</p>
+              <p class="confirm-quiz-text">다른 사람의 얼굴을 허락 없이 AI로 만들어서는 안 돼요.<br>나의 모습을 상상하며 만들었나요?</p>
+              <div class="confirm-quiz-choices">
+                <button class="confirm-quiz-choice" data-correct="true">
+                  <img src="img/p14_btn_yes.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_yes_on.png" data-src-over="img/p14_btn_yes_over.png" data-sound="sound/click.mp3" alt="예">
+                </button>
+                <button class="confirm-quiz-choice" data-correct="false">
+                  <img src="img/p14_btn_no.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_no_on.png" data-src-over="img/p14_btn_no_over.png" data-sound="sound/click.mp3" alt="아니오">
+                </button>
               </div>
+            </div>
+            <div class="confirm-quiz-panel confirm-quiz-correct hidden">
+              <p class="confirm-quiz-title">잘했어요</p>
+              <p class="confirm-quiz-text">참 잘했어요! 다른 사람의 얼굴을 지켜주는<br>멋진 디지털 시민이예요.</p>
+              <button class="confirm-quiz-choice confirm-quiz-ok" data-next-quiz=".p14-confirm-quiz-3">
+                <img src="img/p14_btn_confirm.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_confirm_on.png" data-src-over="img/p14_btn_confirm_over.png" data-sound="sound/click.mp3" alt="확인">
+              </button>
+            </div>
+            <div class="confirm-quiz-panel confirm-quiz-wrong hidden">
+              <p class="confirm-quiz-text">다른 사람의 얼굴을 허락 없이 AI로 만드는 것은<br>불법이에요!</p>
+              <button class="confirm-quiz-choice confirm-quiz-ok">
+                <img src="img/p14_btn_confirm.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_confirm_on.png" data-src-over="img/p14_btn_confirm_over.png" data-sound="sound/click.mp3" alt="확인">
+              </button>
+            </div>
+          </div>
 
-              <div class="step-panel" data-step="2">
-                <div class="guide-set is-wink-present">
-                  <p class="guide-bubble is-center">내가 좋아하는 것을<br>선택해요.</p>
-                  <div class="guide-character"><img src="../img/sa_wink_present.png" alt=""></div>
-                </div>
-                <div class="multi-select p12-g4" data-single="true">
-                  <button class="multi-option pick-card p12-card" data-pick="1"  data-clause="그림 그리는 걸 좋아해요" aria-label="그림 그리기">그림 그리기</button>
-                  <button class="multi-option pick-card p12-card" data-pick="2"  data-clause="동물 돌보는 걸 좋아해요" aria-label="동물 돌보기">동물 돌보기</button>
-                  <button class="multi-option pick-card p12-card" data-pick="3"  data-clause="음식이나 음료 만드는 걸 좋아해요" aria-label="음식이나 음료 만들기">음식이나 음료 만들기</button>
-                  <button class="multi-option pick-card p12-card" data-pick="4"  data-clause="노래하거나 춤추는 걸 좋아해요" aria-label="노래하거나 춤추기">노래하거나 춤추기</button>
-                </div>
-                <div class="step-actions p12-actions">
-                  <a href="javascript:;" class="js-nav-effect js-sfx multi-next" data-warn-empty="true">
-                    <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
-                  </a>
-                </div>
-                <div class="select-warning hidden" data-sound="sound/incorrect.mp3">
-                  <div class="avatar-popup-panel">
-                    <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
-                    <div class="avatar-popup-body">
-                      <p class="avatar-popup-text is-small">나와 맞는 선택지를 클릭해요.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="step-panel" data-step="3">
-                <div class="guide-set is-wink-open">
-                  <p class="guide-bubble is-center">내가 잘하는 것을<br>선택해요.</p>
-                  <div class="guide-character"><img src="../img/sa_wink_open.png" alt=""></div>
-                </div>
-                <div class="multi-select p12-g4" data-single="true">
-                  <button class="multi-option pick-card p12-card" data-pick="1"  data-clause="그리고 정리정돈하는 것을 잘해" aria-label="정리정돈하기">정리정돈하기</button>
-                  <button class="multi-option pick-card p12-card" data-pick="2"  data-clause="그리고 다른 사람 돕는 것을 잘해" aria-label="다른 사람 돕기">다른 사람 돕기</button>
-                  <button class="multi-option pick-card p12-card" data-pick="3"  data-clause="그리고 블록 조립하는 것을 잘해" aria-label="블록 조립하기">블록 조립하기</button>
-                  <button class="multi-option pick-card p12-card" data-pick="4"  data-clause="그리고 물건 담고 포장하는 것을 잘해" aria-label="물건 담고 포장하기">물건 담고 포장하기</button>
-                </div>
-                <div class="step-actions p12-actions">
-                  <a href="javascript:;" class="js-nav-effect js-sfx multi-next" data-warn-empty="true">
-                    <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
-                  </a>
-                </div>
-                <div class="select-warning hidden" data-sound="sound/incorrect.mp3">
-                  <div class="avatar-popup-panel">
-                    <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
-                    <div class="avatar-popup-body">
-                      <p class="avatar-popup-text is-small">나와 맞는 선택지를 클릭해요.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="step-panel" data-step="4">
-                <div class="guide-set is-wink-present">
-                  <p class="guide-bubble is-center">내가 되고 싶은<br>나의 미래 모습을<br>선택해요.</p>
-                  <div class="guide-character"><img src="../img/sa_wink_present.png" alt=""></div>
-                </div>
-                <div class="multi-select p12-g3" data-single="true">
-                  <button class="multi-option pick-card p12-card" data-job="store" data-clause="미래의 나는 매장 관리·안내원이(가) 되어 있을 거야.
-나의 미래 모습을 사진으로 만들어줘." aria-label="매장 관리·안내원">매장 관리·안내원</button>
-                  <button class="multi-option pick-card p12-card" data-job="library" data-clause="미래의 나는 도서관 사서 보조이(가) 되어 있을 거야.
-나의 미래 모습을 사진으로 만들어줘." aria-label="도서관 사서 보조">도서관 사서 보조</button>
-                  <button class="multi-option pick-card p12-card" data-job="illust" data-clause="미래의 나는 일러스트 작가이(가) 되어 있을 거야.
-나의 미래 모습을 사진으로 만들어줘." aria-label="일러스트 작가">일러스트 작가</button>
-                  <button class="multi-option pick-card p12-card" data-job="care" data-clause="미래의 나는 교육·돌봄 보조교사이(가) 되어 있을 거야.
-나의 미래 모습을 사진으로 만들어줘." aria-label="교육·돌봄 보조교사">돌봄 보조교사</button>
-                  <button class="multi-option pick-card p12-card" data-job="craft" data-clause="미래의 나는 공예품 디자이너이(가) 되어 있을 거야.
-나의 미래 모습을 사진으로 만들어줘." aria-label="공예품 디자이너">공예품 디자이너</button>
-                  <button class="multi-option pick-card p12-card" data-job="pack" data-clause="미래의 나는 포장·물류 업무 직원이(가) 되어 있을 거야.
-나의 미래 모습을 사진으로 만들어줘." aria-label="포장·물류 업무 직원">포장·물류 직원</button>
-                  <button class="multi-option pick-card p12-card" data-job="pet" data-clause="미래의 나는 반려동물 관리사이(가) 되어 있을 거야.
-나의 미래 모습을 사진으로 만들어줘." aria-label="반려동물 관리사">반려동물 관리사</button>
-                  <button class="multi-option pick-card p12-card" data-job="food" data-clause="미래의 나는 음식점·급식실 도우미이(가) 되어 있을 거야.
-나의 미래 모습을 사진으로 만들어줘." aria-label="음식점·급식실 도우미">급식실 도우미</button>
-                  <button class="multi-option pick-card p12-card" data-job="barista" data-clause="미래의 나는 카페 바리스타이(가) 되어 있을 거야.
-나의 미래 모습을 사진으로 만들어줘." aria-label="카페 바리스타">카페 바리스타</button>
-                  <button class="multi-option pick-card p12-card" data-job="stage" data-clause="미래의 나는 공연 예술가 (가수·댄서)이(가) 되어 있을 거야.
-나의 미래 모습을 사진으로 만들어줘." aria-label="공연 예술가 (가수·댄서)">공연 예술가</button>
-                </div>
-                <div class="step-actions p12-actions">
-                  <a href="javascript:;" class="js-nav-effect js-sfx multi-next" data-warn-empty="true">
-                    <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
-                  </a>
-                </div>
-                <div class="select-warning hidden" data-sound="sound/incorrect.mp3">
-                  <div class="avatar-popup-panel">
-                    <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
-                    <div class="avatar-popup-body">
-                      <p class="avatar-popup-text is-small">나와 맞는 선택지를 클릭해요.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="step-panel" data-step="5">
-                <div class="guide-set is-wink-present p12-bw-wide">
-                  <p class="guide-bubble is-center">프롬프트를 모두 입력했어요!<br>보내기 버튼을 클릭해요.</p>
-                  <div class="guide-character"><img src="../img/sa_wink_present.png" alt=""></div>
-                </div>
-                <a href="javascript:;" class="js-nav-effect js-sfx p12-send" data-sound="sound/click.mp3" aria-label="보내기"></a>
-              </div>
-
-              <div class="step-panel" data-step="6">
-                <div class="guide-set is-main">
-                  <p class="guide-bubble is-center">AI가 나의 문장을 읽고<br>그림을 그리는 중이에요.</p>
-                  <div class="guide-character"><img src="../img/sa_main.png" alt=""></div>
-                </div>
-                <div class="p12-prompt-bubble"></div>
-                <div class="p12-gen" id="p12Gen"><b>이미지 생성 중</b><i></i><i></i></div>
-              </div>
-
-              <div class="step-panel" data-step="7">
-                <div class="guide-set is-happy-jump">
-                  <p class="guide-bubble is-center">완성됐어요!<br>클릭해서 자세히 살펴봐요.</p>
-                  <div class="guide-character"><img src="../img/sa_happy_jump.png" alt=""></div>
-                </div>
-                <div class="p12-prompt-bubble"></div>
-                <a href="page13.html" class="js-nav-effect js-sfx p12-result" data-sound="sound/click.mp3" aria-label="다음">
-                  <img id="p12Result" src="img/p15_result_store_m.png" alt="">
-                </a>
-              </div>
-
+          <div class="confirm-quiz p14-confirm-quiz-3 hidden">
+            <div class="confirm-quiz-panel confirm-quiz-correct">
+              <p class="confirm-quiz-title"><img class="confirm-quiz-icon" src="../../img/common/icon_warning.png" alt="">주의</p>
+              <p class="confirm-quiz-text">실제 나의 모습이 아닌 AI로 만든 이미지임을<br>반드시 표기해야 해요!</p>
+              <button class="confirm-quiz-choice confirm-quiz-ok" data-next-href="page13.html">
+                <img src="img/p14_btn_confirm.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_confirm_on.png" data-src-over="img/p14_btn_confirm_over.png" data-sound="sound/click.mp3" alt="확인">
+              </button>
             </div>
           </div>
         </main>
@@ -274,61 +132,18 @@
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
   <script>
-  // 고른 성별·직업을 page15 결과 이미지(img/p15_result_{직업}_{m|f}.png)에 넘김
-  // TODO: 직업 10개 디자인이 나오면 조합(좋아하는 것×잘하는 것)별 3개로 — 작업본은 _backup_page12_combo/page12.html
-  // 결과 이미지는 p15와 같은 img/p15_result_{직업}_{m|f}.png(가로로 긴 그림을 가운데 정사각형으로 잘라 보여줌), 폰 속 문구는 고른 프롬프트를 복사해 보여줌
-  var pick = {};
-  var result = document.getElementById('p12Result');
-  var builder = document.querySelector('.prompt-builder');
-  var preview = builder.querySelector('.prompt-preview');
-  var sendBtn = document.querySelector('.p12-send');
-  var gen = document.getElementById('p12Gen');
-  var wantStep = parseInt(new URLSearchParams(location.search).get('step'), 10);
-  // 좋아하는 것(2단계)×잘하는 것(3단계) 조합으로 4단계 직업 3개를 고름 — 조합표는 page06과 같음(조합 번호 = (좋아하는 것-1)*4 + 잘하는 것)
-  var JOB_MATRIX = [
-    ['store', 'library', 'illust'], ['illust', 'care', 'library'], ['craft', 'illust', 'pack'], ['pack', 'store', 'craft'],
-    ['pet', 'store', 'library'], ['pet', 'care', 'food'], ['craft', 'pet', 'pack'], ['pack', 'pet', 'store'],
-    ['barista', 'food', 'store'], ['food', 'care', 'barista'], ['food', 'pack', 'barista'], ['pack', 'barista', 'food'],
-    ['store', 'library', 'stage'], ['stage', 'care', 'food'], ['craft', 'stage', 'pack'], ['pack', 'store', 'stage']
-  ];
-  var TOPS = [136, 327, 518];
-  var like = 1, good = 1;
-  document.querySelectorAll('.step-panel[data-step="2"] .p12-card').forEach(function (c) { c.addEventListener('click', function () { like = Number(c.dataset.pick); }); });
-  document.querySelectorAll('.step-panel[data-step="3"] .p12-card').forEach(function (c) { c.addEventListener('click', function () { good = Number(c.dataset.pick); }); });
-  document.querySelector('.step-panel[data-step="4"]').addEventListener('step:visible', function () {
-    var keys = JOB_MATRIX[(like - 1) * 4 + good - 1];
-    document.querySelectorAll('.p12-g3 .p12-card').forEach(function (c) {
-      var i = keys.indexOf(c.dataset.job);
-      c.classList.toggle('is-show', i >= 0);
-      c.style.top = i >= 0 ? TOPS[i] + 'px' : '';
-    });
-  });
-  whenVisible(gen, function () { if (wantStep) return; setTimeout(function () { advancePanelOrNavigate(gen, 'page13.html'); }, 3000); });
-  new MutationObserver(function () {
-    var step = Number(builder.dataset.currentStep);
-    clearFingers();
-    if (step === 5) pointFingerAt(sendBtn, { onMain: true });
-    if (step < 6) return;
-    document.querySelectorAll('.p12-prompt-bubble').forEach(function (el) { el.innerHTML = preview.innerHTML; });
-  }).observe(builder, { attributes: true, attributeFilter: ['data-current-step'] });
-  // 주소 끝에 ?step=N 을 붙이면 앞 단계는 첫 번째 선택지를 고른 것으로 채우고 N단계부터 보여줌(확인·좌표 수정용)
-  if (wantStep > 1) {
-    var panels = [].slice.call(document.querySelectorAll('.step-panel'));
-    panels.slice(0, wantStep - 1).forEach(function (p) { var o = p.querySelector('.multi-option'); if (o) o.click(); });
-    panels.forEach(function (p, k) { p.classList.toggle('is-hidden', k !== wantStep - 1); });
-    panels[wantStep - 1].dispatchEvent(new CustomEvent('step:visible'));
-  }
-  document.querySelectorAll('.p12-card[data-gender], .p12-card[data-job]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      if (btn.dataset.gender) pick.gender = btn.dataset.gender;
-      if (btn.dataset.job) pick.job = btn.dataset.job;
-      if (pick.gender && pick.job) result.src = 'img/p15_result_' + pick.job + '_' + pick.gender + '.png';
-      try {
-        if (btn.dataset.gender) sessionStorage.setItem('sa01_gender', btn.dataset.gender);
-        if (btn.dataset.job) sessionStorage.setItem('sa01_job', btn.dataset.job);
-      } catch (e) {}
-    });
-  });
+  (function () {
+    let job = 'store';
+    let gender = 'm';
+    try { job = sessionStorage.getItem('sa01_job') || job; gender = sessionStorage.getItem('sa01_gender') || gender; } catch (e) {}
+    const photo = document.getElementById('p14Photo');
+    photo.src = 'img/p15_result_' + job + '_' + gender + '.png';
+    const share = document.getElementById('p14Share');
+    const steps = Array.from(document.querySelectorAll('.p14-msg'));
+    setTimeout(() => { photo.classList.add('is-on'); share.classList.add('is-on'); }, 1000);
+    steps.forEach((el, i) => setTimeout(() => el.classList.add('is-on'), 1000 * (i + 2)));
+    setTimeout(() => document.querySelector('.next-btn').classList.remove('hidden'), 1000 * (steps.length + 2));
+  })();
   </script>
 </body>
 </html>

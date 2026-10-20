@@ -6,8 +6,54 @@
     <title>나의 미래 모습 만들기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 폰 틀은 공용 .phone-frame(has-cam)로 CSS로 그림. 안내 캐릭터는 공용 sa/img/sa_wink_point.png, 손가락은 공용 pointFingerAt */
-        .p10-home{background:linear-gradient(180deg,#a8c2f8 0%,#e3e6f8 30%,#f2c1f6 66%,#f98ff4 88%,#b7a3f9 100%)}
+        /* 폰 틀은 공용 .phone-frame, 폰 속 ChatGPT 화면·키보드는 CSS. 안내 로봇은 공용 sa/img/sa_wink_point3.png(.guide-set), 손가락은 공용 pointFingerAt */
+        /* .phone-screen{z-index:10} */
+        .p10-hide{display:none}
+        /* .p10-phone{left:735px;top:21px;width:450px;height:895px} */
+        /* .p12-bw-wide{--gb-left:115px;--gb-w:642px;--tail-x:297px} */
+        .p12-bw-gen{--gb-left:155px;--gb-w:560px;--tail-x:257px}
+        .prompt-builder[data-current-step="6"] .gpt-seg,.prompt-builder[data-current-step="7"] .gpt-seg,
+        .prompt-builder[data-current-step="6"] .p12-r1.is-r,.prompt-builder[data-current-step="7"] .p12-r1.is-r{display:none}
+        .prompt-builder[data-current-step="6"] .gpt-pill,.prompt-builder[data-current-step="7"] .gpt-pill{display:flex}
+
+        .prompt-builder[data-current-step="6"] .gpt-reply,.prompt-builder[data-current-step="7"] .gpt-reply{display:flex}
+        .prompt-builder[data-current-step="6"] .gpt-bar,.prompt-builder[data-current-step="7"] .gpt-bar,
+        .prompt-builder[data-current-step="6"] .phone-kb,.prompt-builder[data-current-step="7"] .phone-kb{display:none}
+
+        .prompt-builder[data-current-step="6"] .phone-screen.has-kb,.prompt-builder[data-current-step="7"] .phone-screen.has-kb{background:linear-gradient(180deg,#f0f0f0 0,#fff 50%,#f0f0f0 100%)}
+
+        .p12-card{left:1257px;width:581px;height:148px;padding:0 24px;border:solid 5px #1d1850;border-radius:42px;background:#f4f6fb;overflow:visible;display:flex;align-items:center;justify-content:center;
+          font-family:'Cafe24 Ssurround';font-size:66px;letter-spacing:-0.07em;color:#1f64d0;white-space:nowrap}
+        .p12-card:hover{border-color:#b18cff}
+        .p12-card.is-selected{border-color:#ff2fc2;box-shadow:inset 0 0 0 5px #ff2fc2}
+        .p12-g2 .p12-card:nth-child(1){top:252px}
+        .p12-g2 .p12-card:nth-child(2){top:456px}
+        .p12-g4 .p12-card:nth-child(1){top:72px}
+        .p12-g4 .p12-card:nth-child(2){top:241px}
+        .p12-g4 .p12-card:nth-child(3){top:410px}
+        .p12-g4 .p12-card:nth-child(4){top:579px}
+        .p12-g3 .p12-card{display:none}
+        .p12-g3 .p12-card.is-show{display:flex}
+        .p12-actions{position:absolute;left:1370px;top:800px;width:530px}
+
+        .p12-prompt-bubble{position:absolute;right:785px;top:157px;max-width:300px;box-sizing:border-box;padding:16px 18px;border-radius:26px;background:#e6effa;font-family:'Pretendard';font-size:17px;line-height:1.4;font-weight:500;color:#1a2a4a;text-align:left;z-index:3}
+        .p12-prompt-bubble .prompt-value{color:inherit}
+        .p12-gen{position:absolute;left:740px;top:355px;width:290px;height:290px;box-sizing:border-box;border-radius:34px;background:#f2f2f2;z-index:3;overflow:hidden;font-family:'Pretendard';font-size:16px;font-weight:600;color:#444}
+        .p12-gen b{position:absolute;left:26px;top:26px;font-weight:600;letter-spacing:-0.02em}
+        .p12-gen i{position:absolute;left:0;top:0;width:100%;height:100%;
+          background:radial-gradient(circle,#b9b9b9 2.4px,transparent 2.8px) 3px 3px/15px 15px;
+          -webkit-mask:radial-gradient(ellipse 46% 36% at 50% 55%,#000 15%,transparent 100%);mask:radial-gradient(ellipse 46% 36% at 50% 55%,#000 15%,transparent 100%)}
+        .p12-gen i+i{background:radial-gradient(circle,#555 3px,transparent 3.4px) 3px 3px/15px 15px;
+          -webkit-mask:radial-gradient(circle at 50% 55%,transparent 0 var(--w0),#000 calc(var(--w0) + 14px),transparent calc(var(--w0) + 44px));mask:radial-gradient(circle at 50% 55%,transparent 0 var(--w0),#000 calc(var(--w0) + 14px),transparent calc(var(--w0) + 44px));
+          animation:p12-wave 1.6s ease-out infinite}
+        @property --w0{syntax:'<length>';inherits:false;initial-value:0px}
+        @keyframes p12-wave{from{--w0:0px;opacity:1}to{--w0:120px;opacity:0}}
+        .p12-result{position:absolute;left:740px;top:355px;display:block;width:330px;z-index:3}
+        .p12-result img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:24px}
+        .prompt-builder[data-current-step="5"] .gpt-voice i{display:none}
+        .prompt-builder[data-current-step="5"] .gpt-voice{background:#3b82f6 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 19V5M6 11l6-6 6 6'/%3E%3C/svg%3E") center / 20px no-repeat}
+        .p12-send{position:absolute;left:1120px;top:507px;width:32px;height:32px;border-radius:50%;z-index:4}
+        .p12-send:after{content:"";position:absolute;left:-26px;top:-26px;right:-26px;bottom:-26px}
     </style>
 </head>
 <body>
@@ -16,18 +62,225 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <div class="guide-set is-wink-point">
-            <p class="guide-bubble is-center">ChatGPT를 클릭해요.</p>
-            <div class="guide-character"><img src="../img/sa_wink_point.png" alt=""></div>
-          </div>
+          <div id="p10Home">
+            <div class="guide-set is-wink-point">
+              <p class="guide-bubble is-center">ChatGPT를 클릭해요.</p>
+              <div class="guide-character"><img src="../img/sa_wink_point.png" alt=""></div>
+            </div>
 
-          <div class="phone-frame has-cam">
-            <div class="phone-screen">
-              <div class="app-home p10-home">
+            <div class="phone-frame has-cam">
+              <div class="phone-screen">
+                <div class="app-home is-pink">
+                  <div class="phone-status is-dark" data-time="6:31"></div>
+                  <a href="javascript:;" class="app-icon is-dark js-sfx" id="p10App" data-sound="sound/click.mp3" aria-label="ChatGPT 앱 클릭"><i style="background:#fff"><img src="../../img/common/icon_chatgpt.png" alt="" style="width:72px;height:72px;object-fit:contain"></i>ChatGPT</a>
+                  <div class="phone-nav"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="p11Chat" class="p10-hide">
+            <div class="guide-set is-wink-point4">
+              <p class="guide-bubble is-center">입력창을<br>클릭해보세요.</p>
+              <div class="guide-character"><img src="../img/sa_wink_point4.png" alt=""></div>
+            </div>
+
+            <div class="phone-frame has-cam">
+              <div class="phone-screen is-gpt">
                 <div class="phone-status is-dark" data-time="6:31"></div>
-                <a href="page11.html" class="app-icon is-dark js-nav-effect js-sfx" id="p10App" data-sound="sound/click.mp3" aria-label="ChatGPT 앱 클릭"><i style="background:#fff"><img src="../../img/common/icon_chatgpt.png" alt="" style="width:72px;height:72px;object-fit:contain"></i>ChatGPT</a>
+                <div class="gpt-head">
+                  <span class="gpt-round is-l"><svg viewBox="0 0 24 24"><path d="M4 8h14M4 15h9"/></svg></span>
+                  <span class="gpt-seg"><b>Chat</b><b>Work</b></span>
+                  <span class="gpt-round is-r"><svg viewBox="0 0 24 24"><path d="M5 18l1.2-3.6A7.5 7.5 0 1112 19.5a7.6 7.6 0 01-3.3-.8z"/></svg></span>
+                </div>
+                <div class="gpt-sugg">
+                  <span><svg viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="3"/><circle cx="15.5" cy="9" r="1.6"/><path d="M3.5 17l5-5 4 4 2.5-2.5 5.5 5"/></svg>이미지나 스티커 만들어줘</span>
+                  <span><svg viewBox="0 0 24 24"><path d="M4.5 19.5l.9-4L16.2 4.7a2 2 0 012.8 0l.3.3a2 2 0 010 2.8L8.5 18.6z"/><path d="M14.5 6.5l3 3"/></svg>글쓰기</span>
+                </div>
+                <div class="gpt-bar is-start js-sfx" id="p11Input" data-sound="sound/click.mp3" aria-label="입력창 클릭"><div class="gpt-bar-row"><svg class="gpt-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span class="gpt-ph">ChatGPT에게 물어보세요</span><svg class="gpt-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg><span class="gpt-voice"><i style="height:6px"></i><i style="height:12px"></i><i style="height:16px"></i><i style="height:10px"></i><i style="height:5px"></i></span></div></div>
                 <div class="phone-nav"></div>
               </div>
+            </div>
+          </div>
+
+          <div class="prompt-builder p10-hide" id="p12Builder">
+            <div class="phone-frame has-cam">
+              <div class="phone-screen is-gpt has-kb">
+                <div class="phone-status is-dark" data-time="6:31"></div>
+                <div class="gpt-head">
+                  <span class="gpt-round is-l p12-r1"><svg viewBox="0 0 24 24"><path d="M4 8h14M4 15h9"/></svg></span>
+                  <span class="gpt-seg"><b>Chat</b><b>Work</b></span>
+                  <span class="gpt-round is-r p12-r1"><svg viewBox="0 0 24 24"><path d="M5 18l1.2-3.6A7.5 7.5 0 1112 19.5a7.6 7.6 0 01-3.3-.8z"/></svg></span>
+                  <span class="gpt-pill"><svg viewBox="0 0 24 24"><path d="M12 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-6"/><path d="M17.5 3.5l3 3-8 8-4 1 1-4z"/></svg><svg viewBox="0 0 24 24"><path d="M12 6h.01M12 12h.01M12 18h.01" stroke-width="3"/></svg></span>
+                </div>
+                <div class="gpt-bar">
+                  <div class="prompt-preview"></div>
+                  <div class="gpt-bar-row">
+                    <svg class="gpt-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                    <svg class="gpt-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg>
+                    <span class="gpt-voice"><i style="height:6px"></i><i style="height:12px"></i><i style="height:16px"></i><i style="height:10px"></i><i style="height:5px"></i></span>
+                  </div>
+                </div>
+                <div class="gpt-reply"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>ChatGPT에게 답장하기<span class="gpt-voice"><b></b></span></div>
+                <div class="phone-kb">
+                  <div class="phone-kb-tools"><i><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M8.6 14.2c1.8 2 5 2 6.8 0"/><path d="M9 9.6h.01M15 9.6h.01" stroke-width="2.2"/></svg></i><i><svg viewBox="0 0 24 24"><path d="M9.5 8.5V6.2a2 2 0 012-2h6.3a2 2 0 012 2v6.3a2 2 0 01-2 2h-2.3"/><rect x="3.7" y="9.5" width="10.8" height="10.3" rx="2.2"/><path d="M6.9 17.2l2.2-5.4 2.2 5.4M7.7 15.4h2.8"/></svg></i><i><svg viewBox="0 0 24 24"><rect x="5.3" y="4.6" width="13.4" height="16" rx="3.6"/><path d="M9.6 8.6h4.8"/></svg></i><i><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" transform="translate(1.5 1.5) scale(.875)"/></svg></i><i class="is-bare"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.7" fill="currentColor" stroke="none"/></svg></i></div>
+                  <div class="phone-kb-rows">
+                <div class="phone-kb-row"><div class="phone-key"><small>1</small>ㅣ</div><div class="phone-key"><small>2</small>·</div><div class="phone-key"><small>3</small>ㅡ</div><div class="phone-key is-dk"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.8 5.6h9.8a2.4 2.4 0 012.4 2.4v8a2.4 2.4 0 01-2.4 2.4H8.8a2 2 0 01-1.5-.7l-4.6-4.9a1.2 1.2 0 010-1.7l4.6-4.9a2 2 0 011.5-.7z"/><path d="M12 9.5l5 5M17 9.5l-5 5"/></svg></div></div>
+                <div class="phone-kb-row"><div class="phone-key"><small>4</small>ㄱㅋ</div><div class="phone-key"><small>5</small>ㄴㄹ</div><div class="phone-key"><small>6</small>ㄷㅌ</div><div class="phone-key is-dk"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 5v8a2 2 0 01-2 2H5M9 11l-4 4 4 4"/></svg></div></div>
+                <div class="phone-kb-row"><div class="phone-key"><small>7</small>ㅂㅍ</div><div class="phone-key"><small>8</small>ㅅㅎ</div><div class="phone-key"><small>9</small>ㅈㅊ</div><div class="phone-key is-dk" style="letter-spacing:0;font-size:26px">.,?!</div></div>
+                <div class="phone-kb-row"><div class="phone-key is-s">!#1</div><div class="phone-key is-s2">한 &nbsp; &nbsp; &nbsp;<br>&nbsp; &nbsp; &nbsp; 영</div><div class="phone-key"><small>0</small>ㅇㅁ</div><div class="phone-key  is-dk"><svg viewBox="0 0 44 20" width="46" height="20" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5v9h38V5"/></svg></div><div class="phone-key is-dk" style="letter-spacing:0;font-size:18px">한자</div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-flow">
+
+              <div class="step-panel" data-step="1">
+                <div class="guide-set is-wink-point3">
+                  <p class="guide-bubble is-center">나의 미래 모습을<br>묘사해요. 나와 맞는<br>선택지를 클릭해요.</p>
+                  <div class="guide-character"><img src="../img/sa_wink_point3.png" alt=""></div>
+                </div>
+                <div class="multi-select p12-g2" data-single="true">
+                  <button class="multi-option pick-card p12-card" data-gender="m" data-clause="나는 남자이고" aria-label="나는 남자이고">나는 남자이고</button>
+                  <button class="multi-option pick-card p12-card" data-gender="f" data-clause="나는 여자이고" aria-label="나는 여자이고">나는 여자이고</button>
+                </div>
+                <div class="step-actions p12-actions">
+                  <a href="javascript:;" class="js-nav-effect js-sfx multi-next" data-warn-empty="true">
+                    <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+                <div class="select-warning hidden" data-sound="sound/incorrect.mp3">
+                  <div class="avatar-popup-panel">
+                    <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+                    <div class="avatar-popup-body">
+                      <p class="avatar-popup-text is-small">나와 맞는 선택지를 클릭해요.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="step-panel" data-step="2">
+                <div class="guide-set is-wink-present">
+                  <p class="guide-bubble is-center">내가 좋아하는 것을<br>선택해요.</p>
+                  <div class="guide-character"><img src="../img/sa_wink_present.png" alt=""></div>
+                </div>
+                <div class="multi-select p12-g4" data-single="true">
+                  <button class="multi-option pick-card p12-card" data-pick="1"  data-clause="그림 그리는 걸 좋아해요" aria-label="그림 그리기">그림 그리기</button>
+                  <button class="multi-option pick-card p12-card" data-pick="2"  data-clause="동물 돌보는 걸 좋아해요" aria-label="동물 돌보기">동물 돌보기</button>
+                  <button class="multi-option pick-card p12-card" data-pick="3"  data-clause="음식이나 음료 만드는 걸 좋아해요" aria-label="음식이나 음료 만들기">음식이나 음료 만들기</button>
+                  <button class="multi-option pick-card p12-card" data-pick="4"  data-clause="노래하거나 춤추는 걸 좋아해요" aria-label="노래하거나 춤추기">노래하거나 춤추기</button>
+                </div>
+                <div class="step-actions p12-actions">
+                  <a href="javascript:;" class="js-nav-effect js-sfx multi-next" data-warn-empty="true">
+                    <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+                <div class="select-warning hidden" data-sound="sound/incorrect.mp3">
+                  <div class="avatar-popup-panel">
+                    <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+                    <div class="avatar-popup-body">
+                      <p class="avatar-popup-text is-small">나와 맞는 선택지를 클릭해요.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="step-panel" data-step="3">
+                <div class="guide-set is-wink-open">
+                  <p class="guide-bubble is-center">내가 잘하는 것을<br>선택해요.</p>
+                  <div class="guide-character"><img src="../img/sa_wink_open.png" alt=""></div>
+                </div>
+                <div class="multi-select p12-g4" data-single="true">
+                  <button class="multi-option pick-card p12-card" data-pick="1"  data-clause="그리고 정리정돈하는 것을 잘해" aria-label="정리정돈하기">정리정돈하기</button>
+                  <button class="multi-option pick-card p12-card" data-pick="2"  data-clause="그리고 다른 사람 돕는 것을 잘해" aria-label="다른 사람 돕기">다른 사람 돕기</button>
+                  <button class="multi-option pick-card p12-card" data-pick="3"  data-clause="그리고 블록 조립하는 것을 잘해" aria-label="블록 조립하기">블록 조립하기</button>
+                  <button class="multi-option pick-card p12-card" data-pick="4"  data-clause="그리고 물건 담고 포장하는 것을 잘해" aria-label="물건 담고 포장하기">물건 담고 포장하기</button>
+                </div>
+                <div class="step-actions p12-actions">
+                  <a href="javascript:;" class="js-nav-effect js-sfx multi-next" data-warn-empty="true">
+                    <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+                <div class="select-warning hidden" data-sound="sound/incorrect.mp3">
+                  <div class="avatar-popup-panel">
+                    <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+                    <div class="avatar-popup-body">
+                      <p class="avatar-popup-text is-small">나와 맞는 선택지를 클릭해요.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="step-panel" data-step="4">
+                <div class="guide-set is-wink-present">
+                  <p class="guide-bubble is-center">내가 되고 싶은<br>나의 미래 모습을<br>선택해요.</p>
+                  <div class="guide-character"><img src="../img/sa_wink_present.png" alt=""></div>
+                </div>
+                <div class="multi-select p12-g3" data-single="true">
+                  <button class="multi-option pick-card p12-card" data-job="store" data-clause="미래의 나는 매장 관리·안내원이(가) 되어 있을 거야.
+나의 미래 모습을 사진으로 만들어줘." aria-label="매장 관리·안내원">매장 관리·안내원</button>
+                  <button class="multi-option pick-card p12-card" data-job="library" data-clause="미래의 나는 도서관 사서 보조이(가) 되어 있을 거야.
+나의 미래 모습을 사진으로 만들어줘." aria-label="도서관 사서 보조">도서관 사서 보조</button>
+                  <button class="multi-option pick-card p12-card" data-job="illust" data-clause="미래의 나는 일러스트 작가이(가) 되어 있을 거야.
+나의 미래 모습을 사진으로 만들어줘." aria-label="일러스트 작가">일러스트 작가</button>
+                  <button class="multi-option pick-card p12-card" data-job="care" data-clause="미래의 나는 교육·돌봄 보조교사이(가) 되어 있을 거야.
+나의 미래 모습을 사진으로 만들어줘." aria-label="교육·돌봄 보조교사">돌봄 보조교사</button>
+                  <button class="multi-option pick-card p12-card" data-job="craft" data-clause="미래의 나는 공예품 디자이너이(가) 되어 있을 거야.
+나의 미래 모습을 사진으로 만들어줘." aria-label="공예품 디자이너">공예품 디자이너</button>
+                  <button class="multi-option pick-card p12-card" data-job="pack" data-clause="미래의 나는 포장·물류 업무 직원이(가) 되어 있을 거야.
+나의 미래 모습을 사진으로 만들어줘." aria-label="포장·물류 업무 직원">포장·물류 직원</button>
+                  <button class="multi-option pick-card p12-card" data-job="pet" data-clause="미래의 나는 반려동물 관리사이(가) 되어 있을 거야.
+나의 미래 모습을 사진으로 만들어줘." aria-label="반려동물 관리사">반려동물 관리사</button>
+                  <button class="multi-option pick-card p12-card" data-job="food" data-clause="미래의 나는 음식점·급식실 도우미이(가) 되어 있을 거야.
+나의 미래 모습을 사진으로 만들어줘." aria-label="음식점·급식실 도우미">급식실 도우미</button>
+                  <button class="multi-option pick-card p12-card" data-job="barista" data-clause="미래의 나는 카페 바리스타이(가) 되어 있을 거야.
+나의 미래 모습을 사진으로 만들어줘." aria-label="카페 바리스타">카페 바리스타</button>
+                  <button class="multi-option pick-card p12-card" data-job="stage" data-clause="미래의 나는 공연 예술가 (가수·댄서)이(가) 되어 있을 거야.
+나의 미래 모습을 사진으로 만들어줘." aria-label="공연 예술가 (가수·댄서)">공연 예술가</button>
+                </div>
+                <div class="step-actions p12-actions">
+                  <a href="javascript:;" class="js-nav-effect js-sfx multi-next" data-warn-empty="true">
+                    <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+                  </a>
+                </div>
+                <div class="select-warning hidden" data-sound="sound/incorrect.mp3">
+                  <div class="avatar-popup-panel">
+                    <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+                    <div class="avatar-popup-body">
+                      <p class="avatar-popup-text is-small">나와 맞는 선택지를 클릭해요.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="step-panel" data-step="5">
+                <div class="guide-set is-wink-point2">
+                  <p class="guide-bubble is-center is-medium">프롬프트를 모두 입력했어요!<br>보내기 버튼을 클릭해요.</p>
+                  <div class="guide-character"><img src="../img/sa_wink_point2.png" alt=""></div>
+                </div>
+                <a href="javascript:;" class="js-nav-effect js-sfx p12-send" data-sound="sound/click.mp3" aria-label="보내기"></a>
+              </div>
+
+              <div class="step-panel" data-step="6">
+                <div class="guide-set is-main">
+                  <p class="guide-bubble is-center">AI가 나의 문장을 읽고<br>그림을 그리는 중이에요.</p>
+                  <div class="guide-character"><img src="../img/sa_main.png" alt=""></div>
+                </div>
+                <div class="p12-prompt-bubble"></div>
+                <div class="p12-gen" id="p12Gen"><b>이미지 생성 중</b><i></i><i></i></div>
+              </div>
+
+              <div class="step-panel" data-step="7">
+                <div class="guide-set is-happy-jump">
+                  <p class="guide-bubble is-center">완성됐어요!<br>클릭해서 자세히 살펴봐요.</p>
+                  <div class="guide-character"><img src="../img/sa_happy_jump.png" alt=""></div>
+                </div>
+                <div class="p12-prompt-bubble"></div>
+                <a href="page11.html" class="js-nav-effect js-sfx p12-result" data-sound="sound/click.mp3" aria-label="다음">
+                  <img id="p12Result" src="img/p15_result_store_m.png" alt="">
+                </a>
+              </div>
+
             </div>
           </div>
         </main>
@@ -39,8 +292,109 @@
   <script src="../../js/header.js" data-title="나의 미래 모습 만들기" data-next="page11.html"></script>
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
+  <script src="../../js/box-edit.js"></script>
   <script>
-  pointFingerAt($('p10App'), { onMain: true, dx: 15, dy: -37 });
+  // 고른 성별·직업을 page15 결과 이미지(img/p15_result_{직업}_{m|f}.png)에 넘김
+  // TODO: 직업 10개 디자인이 나오면 조합(좋아하는 것×잘하는 것)별 3개로 — 작업본은 _backup_page12_combo/page12.html
+  // 결과 이미지는 p15와 같은 img/p15_result_{직업}_{m|f}.png(가로로 긴 그림을 가운데 정사각형으로 잘라 보여줌), 폰 속 문구는 고른 프롬프트를 복사해 보여줌
+  var pick = {};
+  var result = document.getElementById('p12Result');
+  var builder = document.querySelector('.prompt-builder');
+  var preview = builder.querySelector('.prompt-preview');
+  var sendBtn = document.querySelector('.p12-send');
+  var gen = document.getElementById('p12Gen');
+  // ?step=N : 1 홈 화면(ChatGPT 클릭) · 2 채팅 화면(입력창 클릭) · 3~9 프롬프트 만들기 1~7단계
+  var wantStep = parseInt(new URLSearchParams(location.search).get('step'), 10);
+  var bStep = wantStep - 2;
+  // 좋아하는 것(2단계)×잘하는 것(3단계) 조합으로 4단계 직업 3개를 고름 — 조합표는 page06과 같음(조합 번호 = (좋아하는 것-1)*4 + 잘하는 것)
+  var JOB_MATRIX = [
+    ['store', 'library', 'illust'], ['illust', 'care', 'library'], ['craft', 'illust', 'pack'], ['pack', 'store', 'craft'],
+    ['pet', 'store', 'library'], ['pet', 'care', 'food'], ['craft', 'pet', 'pack'], ['pack', 'pet', 'store'],
+    ['barista', 'food', 'store'], ['food', 'care', 'barista'], ['food', 'pack', 'barista'], ['pack', 'barista', 'food'],
+    ['store', 'library', 'stage'], ['stage', 'care', 'food'], ['craft', 'stage', 'pack'], ['pack', 'store', 'stage']
+  ];
+  var TOPS = [136, 327, 518];
+  var like = 1, good = 1;
+  document.querySelectorAll('.step-panel[data-step="2"] .p12-card').forEach(function (c) { c.addEventListener('click', function () { like = Number(c.dataset.pick); }); });
+  document.querySelectorAll('.step-panel[data-step="3"] .p12-card').forEach(function (c) { c.addEventListener('click', function () { good = Number(c.dataset.pick); }); });
+  document.querySelector('.step-panel[data-step="4"]').addEventListener('step:visible', function () {
+    var keys = JOB_MATRIX[(like - 1) * 4 + good - 1];
+    document.querySelectorAll('.p12-g3 .p12-card').forEach(function (c) {
+      var i = keys.indexOf(c.dataset.job);
+      c.classList.toggle('is-show', i >= 0);
+      c.style.top = i >= 0 ? TOPS[i] + 'px' : '';
+    });
+  });
+  whenVisible(gen, function () { if (wantStep) return; setTimeout(function () { advancePanelOrNavigate(gen, 'page11.html'); }, 3000); });
+  new MutationObserver(function () {
+    var step = Number(builder.dataset.currentStep);
+    clearFingers();
+    if (step === 5) pointFingerAt(sendBtn, { onMain: true, dx: -11, dy: 23 });
+    if (step < 6) return;
+    document.querySelectorAll('.p12-prompt-bubble').forEach(function (el) { el.innerHTML = preview.innerHTML; });
+  }).observe(builder, { attributes: true, attributeFilter: ['data-current-step'] });
+  // 주소 끝에 ?step=N 을 붙이면 앞 단계는 첫 번째 선택지를 고른 것으로 채우고 N단계부터 보여줌(확인·좌표 수정용)
+  if (bStep > 1) {
+    var panels = [].slice.call(document.querySelectorAll('.step-panel'));
+    panels.slice(0, bStep - 1).forEach(function (p) { var o = p.querySelector('.multi-option'); if (o) o.click(); });
+    panels.forEach(function (p, k) { p.classList.toggle('is-hidden', k !== bStep - 1); });
+    panels[bStep - 1].dispatchEvent(new CustomEvent('step:visible'));
+  }
+  document.querySelectorAll('.p12-card[data-gender], .p12-card[data-job]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (btn.dataset.gender) pick.gender = btn.dataset.gender;
+      if (btn.dataset.job) pick.job = btn.dataset.job;
+      if (pick.gender && pick.job) result.src = 'img/p15_result_' + pick.job + '_' + pick.gender + '.png';
+      try {
+        if (btn.dataset.gender) sessionStorage.setItem('sa01_gender', btn.dataset.gender);
+        if (btn.dataset.job) sessionStorage.setItem('sa01_job', btn.dataset.job);
+      } catch (e) {}
+    });
+  });
+  var cur = wantStep >= 1 && wantStep <= 9 ? wantStep : 1;
+  // ?edit : CSS 로 못 맞추는 손가락(dx,dy)과 클릭영역만 클릭해 방향키로 좌표를 맞춤. 표시줄 값 [left, top, 폭, 높이] 를 CSS 에 옮겨 적을 것(단계를 옮기면 다시 그려져 원래 값으로 돌아감)
+  if (BoxEdit.on) {
+    var origFinger = window.pointFingerAt;
+    window.pointFingerAt = function (el, opts) {
+      origFinger(el, opts);
+      var fs = document.querySelectorAll('.js-point-finger');
+      var fg = fs[fs.length - 1];
+      if (!fg) return;
+      var dx = (opts && opts.dx) || 0, dy = (opts && opts.dy) || 0;
+      fg._base = [parseFloat(fg.style.left) - dx, parseFloat(fg.style.top) - dy];
+      fg._name = '손가락 dx,dy';
+      fg.style.pointerEvents = 'auto';
+      BoxEdit.tag(fg, [dx, dy]);
+    };
+    var hitEl = document.querySelector('.p12-send');
+    hitEl._name = '전송 클릭영역';
+    var hs = getComputedStyle(hitEl);
+    BoxEdit.tag(hitEl, [parseFloat(hs.left), parseFloat(hs.top), parseFloat(hs.width), parseFloat(hs.height)]);
+    BoxEdit.init({
+      apply: function (el) {
+        var r = el._ref, st = el.style;
+        if (el._base) { st.left = (el._base[0] + r[0]) + 'px'; st.top = (el._base[1] + r[1]) + 'px'; return; }
+        st.left = r[0] + 'px'; st.top = r[1] + 'px'; st.right = 'auto'; st.bottom = 'auto'; st.marginLeft = '0';
+        st.width = r[2] + 'px'; st.height = r[3] + 'px';
+      },
+      name: function (el) { return '[' + el._name + '] '; },
+      step: { count: 10, get: function () { return cur; }, set: function (n) { cur = n; }, go: function (n) { if (n >= 1) location.search = '?edit&step=' + n; }, label: function (n) { return '단계 ' + n + ' / 9'; } }
+    });
+  }
+  // 홈 화면 → 채팅 화면 → 프롬프트 만들기(같은 폰 틀에서 이어서 진행)
+  var homeEl = document.getElementById('p10Home');
+  var chatEl = document.getElementById('p11Chat');
+  function showStage(n) {
+    clearFingers();
+    homeEl.classList.toggle('p10-hide', n !== 1);
+    chatEl.classList.toggle('p10-hide', n !== 2);
+    builder.classList.toggle('p10-hide', n < 3);
+    if (n === 1) pointFingerAt($('p10App'), { onMain: true, dx: 15, dy: -37 });
+    if (n === 2) pointFingerAt($('p11Input'), { onMain: true, dx: -160, dy: -30 });
+  }
+  $('p10App').addEventListener('click', function () { showStage(2); });
+  $('p11Input').addEventListener('click', function () { showStage(3); });
+  showStage(wantStep >= 3 ? 3 : wantStep === 2 ? 2 : 1);
   </script>
 </body>
 </html>

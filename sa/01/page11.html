@@ -6,13 +6,9 @@
     <title>나의 미래 모습 만들기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 폰 틀은 공용 .phone-frame(has-cam), ChatGPT 대화 화면은 CSS. 안내 캐릭터는 공용 ../img/sa_wink_point4.png, 손가락은 공용 pointFingerAt */
-        .p11-sugg{position:absolute;left:30px;top:686px;display:flex;flex-direction:column;gap:22px;font-size:14px;color:#222}
-        .p11-sugg span{display:flex;align-items:center;gap:12px}
-        .p11-sugg i{flex:none;width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#5bc0f8,#f7b84b)}
-        .p11-sugg span+span i{border-radius:50%;background:linear-gradient(135deg,#8ea2ff,#6a5df5)}
-        .p11-input{position:absolute;left:15px;top:784px;width:399px;height:48px;box-sizing:border-box;padding-left:50px;border-radius:24px;background:#fff;display:flex;align-items:center;font-size:14px;color:#8a8c99;cursor:pointer;text-decoration:none}
-        .p11-input svg{position:absolute;left:12px;top:12px;width:24px;height:24px;fill:none;stroke:#111;stroke-width:1.9;stroke-linecap:round}
+        /* 폰 틀은 공용 .phone-frame, 검은 사진 보기 화면은 CSS. 안내 로봇 공용 sa/img/sa_wink_present.png(.guide-set). 폰 속 사진은 page12에서 고른 결과 */
+        .p13-retry{position:absolute;left:1450px;top:640px}
+        .p13-decide{position:absolute;left:1450px;top:800px}
     </style>
 </head>
 <body>
@@ -21,27 +17,38 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <div class="guide-set is-wink-point4">
-            <p class="guide-bubble is-center">입력창을<br>클릭해보세요.</p>
-            <div class="guide-character"><img src="../img/sa_wink_point4.png" alt=""></div>
+          <div class="guide-set is-wink-present">
+            <p class="guide-bubble is-center is-medium">이 이미지로 결정할까요?<br>아니면 다시 시도해볼까요?</p>
+            <div class="guide-character"><img src="../img/sa_wink_present.png" alt=""></div>
           </div>
-
           <div class="phone-frame has-cam">
-            <div class="phone-screen is-chat">
-              <div class="phone-status is-dark" data-time="6:31"></div>
-              <div class="phone-head">
-                <span class="phone-round is-l"><svg viewBox="0 0 24 24"><path d="M4 8h14M4 15h9"/></svg></span>
-                <span class="phone-seg"><b>Chat</b><b>Work</b></span>
-                <span class="phone-round is-r"><svg viewBox="0 0 24 24"><path d="M5 18l1.2-3.6A7.5 7.5 0 1112 19.5a7.6 7.6 0 01-3.3-.8z"/></svg></span>
+            <div class="phone-screen is-dark">
+              <div class="phone-status" data-time="6:31"></div>
+              <div class="phone-view-top">
+                <span class="phone-view-round is-close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+                <span class="phone-view-round is-more"><svg viewBox="0 0 24 24"><path d="M12 6h.01M12 12h.01M12 18h.01" stroke-width="3"/></svg></span>
+                <span class="phone-view-round is-save"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></span>
+                <span class="phone-view-share">공유</span>
               </div>
-              <div class="p11-sugg">
-                <span><i></i>새 이미지 모델을 사용해 보세요</span>
-                <span><i></i>Figma production week</span>
+              <img class="phone-view-photo is-off" id="p13Photo" alt="나의 미래 모습">
+              <div class="phone-view-tools">
+                <span class="phone-view-tool"><i><svg viewBox="0 0 24 24"><path d="M5 19l.9-3.6L15.6 5.7a2 2 0 012.8 0l-.1.1 0 0 .9.9a2 2 0 010 2.8L9.5 19.1z"/><path d="M13.8 7.6l3.6 3.6"/></svg></i>편집</span>
+                <span class="phone-view-tool"><i><svg viewBox="0 0 24 24"><path d="M12 4a8 8 0 100 16 8 8 0 003.6-.9l3.6.9-1.1-3.4A8 8 0 0012 4z"/><path d="M12 8.6v6M9 11.6h6"/></svg></i>댓글</span>
+                <span class="phone-view-tool"><i><svg viewBox="0 0 24 24"><rect x="3.8" y="5.5" width="16.4" height="13" rx="2.4"/><path d="M10.5 18.5v-3.6a1.6 1.6 0 011.6-1.6h8.1"/></svg></i>크기 조정</span>
+                <span class="phone-view-tool"><i><svg viewBox="0 0 24 24"><g transform="rotate(-45 12 12)"><rect x="4.2" y="7.6" width="15.6" height="8.8" rx="2.8"/><path d="M9.4 7.6v8.8"/></g></svg></i>제거</span>
               </div>
-              <a href="page12.html" class="p11-input js-nav-effect js-sfx" id="p11Input" data-sound="sound/click.mp3" aria-label="입력창 클릭"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>ChatGPT에게 물어보세요</a>
-              <div class="phone-nav"></div>
             </div>
           </div>
+          <!-- 화면(기획서 28p): 생성된 이미지 확인.
+               다시하기 = 공통 버튼(img/common/btn_retry) 재사용, page12(빌더 처음)로
+               결정하기 = 이 페이지 전용 3단 이미지(기본/on/오버), 다음 화면으로
+               TODO: 실제로 어디로 가야 할지 확인 필요(현재는 임시 추정값) -->
+          <a href="page10.html?step=3" class="js-nav-effect p13-retry">
+            <img src="../../img/common/btn_retry.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_retry_on.png" data-src-over="../../img/common/btn_retry_over.png" data-sound="sound/click.mp3" alt="다시하기">
+          </a>
+          <a href="page12.html" class="js-nav-effect p13-decide">
+            <img src="img/p13_btn_decide.png" class="js-img-swap js-sfx" data-src-alt="img/p13_btn_decide_on.png" data-src-over="img/p13_btn_decide_over.png" data-sound="sound/click.mp3" alt="결정하기">
+          </a>
         </main>
       </div>
     </div>
@@ -52,7 +59,14 @@
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
   <script>
-  pointFingerAt($('p11Input'), { onMain: true, dy: -30 });
+  (function () {
+    let job = 'store';
+    let gender = 'm';
+    try { job = sessionStorage.getItem('sa01_job') || job; gender = sessionStorage.getItem('sa01_gender') || gender; } catch (e) {}
+    const photo = document.getElementById('p13Photo');
+    photo.onload = function () { photo.classList.remove('is-off'); };
+    photo.src = 'img/p15_result_' + job + '_' + gender + '.png';
+  })();
   </script>
 </body>
 </html>
