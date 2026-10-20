@@ -32,8 +32,8 @@
                 <a href="${BASE}sa/01/page04.html" class="toc-sub-item">3) 미래 진로 선택을 위한 가치 보물찾기</a>
                 <a href="${BASE}sa/01/page07.html" class="toc-sub-item">4) 나의 미래 모습 프롬프트</a>
                 <a href="${BASE}sa/01/page09.html" class="toc-sub-item">5) 나의 미래 모습 만들기</a>
-                <a href="${BASE}sa/01/page16.html" class="toc-sub-item">6) 퀴즈 풀기</a>
-                <a href="${BASE}sa/01/page17.html" class="toc-sub-item">7) 프롬프트를 고쳐라</a>
+                <a href="${BASE}sa/01/page14.html" class="toc-sub-item">6) 퀴즈 풀기</a>
+                <a href="${BASE}sa/01/page15.html" class="toc-sub-item">7) 프롬프트를 고쳐라</a>
               </div>
             </div>
 

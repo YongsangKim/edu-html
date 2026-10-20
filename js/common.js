@@ -2635,14 +2635,16 @@ function initEmotionPickFlow(config) {
      });
    상황이 여러 개면 data/faces 대신 rounds: [{ faces, data }, ...] 를 넘김(마지막 상황이 끝나야 nextHref 로 이동)
 ========================================================== */
-/* 사회 4차시 폰 채팅 화면 부품(그림 대신 HTML로 그림). 키보드만 샘플 그림(img/ph_kb.png)을 씀.
+/* 사회 4차시 폰 채팅 화면 부품(그림 대신 HTML로 그림). 키보드는 공용 .phone-kb(cfUI.kb()).
    페이지의 폰 화면 안 .cf-input / .cf-panel / .cf-find 에 넣어 씀: cfUI.bar(false|true), cfUI.searchSheet(), cfUI.resultSheet(), cfUI.emojiSheet(), cfUI.findScreen() */
 window.cfUI = (function () {
+  const KB = '<div class="phone-kb"><div class="phone-kb-tools"><i><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M8.6 14.2c1.8 2 5 2 6.8 0"/><path d="M9 9.6h.01M15 9.6h.01" stroke-width="2.2"/></svg></i><i><svg viewBox="0 0 24 24"><path d="M9.5 8.5V6.2a2 2 0 012-2h6.3a2 2 0 012 2v6.3a2 2 0 01-2 2h-2.3"/><rect x="3.7" y="9.5" width="10.8" height="10.3" rx="2.2"/><path d="M6.9 17.2l2.2-5.4 2.2 5.4M7.7 15.4h2.8"/></svg></i><i><svg viewBox="0 0 24 24"><rect x="5.3" y="4.6" width="13.4" height="16" rx="3.6"/><path d="M9.6 8.6h4.8"/></svg></i><i><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" transform="translate(1.5 1.5) scale(.875)"/></svg></i><i class="is-bare"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.7" fill="currentColor" stroke="none"/></svg></i></div><div class="phone-kb-rows"><div class="phone-kb-row"><div class="phone-key"><small>1</small>ㅣ</div><div class="phone-key"><small>2</small>·</div><div class="phone-key"><small>3</small>ㅡ</div><div class="phone-key is-dk"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.8 5.6h9.8a2.4 2.4 0 012.4 2.4v8a2.4 2.4 0 01-2.4 2.4H8.8a2 2 0 01-1.5-.7l-4.6-4.9a1.2 1.2 0 010-1.7l4.6-4.9a2 2 0 011.5-.7z"/><path d="M12 9.5l5 5M17 9.5l-5 5"/></svg></div></div><div class="phone-kb-row"><div class="phone-key"><small>4</small>ㄱㅋ</div><div class="phone-key"><small>5</small>ㄴㄹ</div><div class="phone-key"><small>6</small>ㄷㅌ</div><div class="phone-key is-dk"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 5v8a2 2 0 01-2 2H5M9 11l-4 4 4 4"/></svg></div></div><div class="phone-kb-row"><div class="phone-key"><small>7</small>ㅂㅍ</div><div class="phone-key"><small>8</small>ㅅㅎ</div><div class="phone-key"><small>9</small>ㅈㅊ</div><div class="phone-key is-dk" style="letter-spacing:0;font-size:26px">.,?!</div></div><div class="phone-kb-row"><div class="phone-key is-s">!#1</div><div class="phone-key is-s2">한 &nbsp; &nbsp; &nbsp;<br>&nbsp; &nbsp; &nbsp; 영</div><div class="phone-key"><small>0</small>ㅇㅁ</div><div class="phone-key  is-dk"><svg viewBox="0 0 44 20" width="46" height="20" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5v9h38V5"/></svg></div><div class="phone-key is-dk" style="letter-spacing:0;font-size:18px">한자</div></div></div></div>';
   const SMILE = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#b9bec7"/><circle cx="8.6" cy="10" r="1.3" fill="#111"/><circle cx="15.4" cy="10" r="1.3" fill="#111"/><path d="M7.5 14c1.2 2.600 7.800 2.600 9 0" fill="none" stroke="#111" stroke-width="1.8" stroke-linecap="round"/></svg>';
   const LOCK = '<svg class="lk" viewBox="0 0 16 16"><path d="M4 7V5a4 4 0 0 1 8 0v2h1v8H3V7zm2 0h4V5a2 2 0 0 0-4 0z"/></svg>';
   const MAG = '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.500"/><path d="M20 20l-4.500-4.500"/></svg>';
   const tabs = (on) => '<div class="cf-tabs">' + ['검색', '이모티콘', '미니', '발견'].map((t, i) => '<span' + (i === on ? ' class="on"' : '') + '>' + t + '</span>').join('') + '</div>';
   return {
+    kb: () => KB,
     bar: (send) => '<div class="cf-bar"><i class="cf-plus">+</i><span class="cf-ph">메시지 입력</span>' +
       (send ? '<i class="cf-kbd"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2.500"/><path d="M7 10h.01M11 10h.01M15 10h.01M18 10h.01M7 14h.01M11 14h2M18 14h.01"/></svg></i><i class="cf-go"><svg viewBox="0 0 24 24"><path d="M3 20.500L22 12 3 3.500v6.700l12 1.800-12 1.800z"/></svg></i>'
             : '<i class="cf-smile">' + SMILE + '</i><i class="cf-hash">#</i>') + '</div>',
@@ -2658,7 +2660,7 @@ window.cfUI = (function () {
     emojiSheet: () => '<div class="cf-sheet"><i class="cf-handle"></i>' + tabs(1) +
       '<div class="cf-cats"><i class="on" style="background-image:url(img/cat_recent.png)"></i><i class="all">ALL</i><i style="background-image:url(img/cat_1.png)"></i><i style="background-image:url(img/cat_2.png)"></i><i style="background-image:url(img/cat_3.png)"></i><i style="background-image:url(img/cat_4.png)"></i><i style="background-image:url(img/cat_5.png)"></i><i style="background-image:url(img/cat_6.png)"></i></div>' +
       '<span class="cf-lab" style="top:132px">최근사용</span></div>',
-    findScreen: () => '<i class="cf-handle"></i><div class="cf-ffield"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>찾고싶은 이모티콘을 검색해보세요.</div><div class="cf-fkb" style="background-image:url(img/ph_kb.png)"></div>'
+    findScreen: () => '<i class="cf-handle"></i><div class="cf-ffield"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>찾고싶은 이모티콘을 검색해보세요.</div>' + KB
   };
 })();
 
@@ -2697,7 +2699,7 @@ function initEmotionChatFlow(config) {
     '<div class="cf-chat" id="cfChat"></div>' +
     '<div class="cf-prev is-off" id="cfPrev"><svg class="st" viewBox="0 0 24 24"><path d="M12 2l3 6.500 7 .8-5.200 4.800 1.400 7-6.200-3.600-6.200 3.600 1.400-7L2 9.300l7-.8z"/></svg><svg class="cl" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg><img alt=""></div>' +
     '<div class="cf-input" id="cfInput">' + cfUI.bar(false) + '</div>' +
-    '<div class="cf-panel" id="cfPanel" style="background-image:url(' + IMG + 'ph_kb.png)"></div>' +
+    '<div class="cf-panel" id="cfPanel">' + cfUI.kb() + '</div>' +
     '<div class="cf-find is-off" id="cfFind">' + cfUI.findScreen() + '</div>' +
     '<div class="phone-nav is-dark"></div>';
   chatBox = document.getElementById('cfChat');

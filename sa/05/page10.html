@@ -262,8 +262,15 @@
     // 01 앱 첫 화면 · 02 Live 모드 버튼 · 03 준비물 카드 고르기 · 04 Gemini 답변 · 05 ROUND 1 · 06 ROUND 2 · 07 FINAL · 08 결과
     const charImg = $('p10Char');
     charImg.addEventListener('error', () => { if (!charImg.src.endsWith('p_character_main.png')) charImg.src = '../img/sa_main.png'; });
+    const charOk = {};
+    for (let n = 1; n <= 8; n++) {
+      const pre = new Image();
+      pre.onload = () => { charOk[n] = true; };
+      pre.onerror = () => { charOk[n] = false; };
+      pre.src = 'img/p10_character0' + n + '.png';
+    }
     function setChar(n) {
-      charImg.src = 'img/p10_character0' + n + '.png';
+      charImg.src = charOk[n] === false ? '../img/sa_main.png' : 'img/p10_character0' + n + '.png';
     }
 
     function clickGuide(bubbleHtml, screen, rect, then) {

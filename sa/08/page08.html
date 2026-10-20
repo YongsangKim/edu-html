@@ -92,6 +92,14 @@
       });
     }
 
+    function finish() {
+      $('p08Screen').style.backgroundImage = "url('img/p08_map_7.png')";
+      $('p08Ask').innerHTML = '좋아요! 네이버 지도의 저장하기 기능을 사용해서<br>여행 계획을 마무리해요!<br>AI 추천 장소는 참고하고, 실제 여행 정보는 다시 확인해야 해요!';
+      box.classList.add('is-off');
+      $('p08Summary').classList.remove('is-off');
+      $('p08Next').classList.remove('is-off');
+    }
+
     function pick(btn, right) {
       if (!right) {
         playWrong();
@@ -109,15 +117,14 @@
       setTimeout(() => {
         step += 1;
         if (step < STEPS.length) { show(); return; }
-        $('p08Screen').style.backgroundImage = "url('img/p08_map_7.png')";
-        $('p08Ask').innerHTML = '좋아요! 네이버 지도의 저장하기 기능을 사용해서<br>여행 계획을 마무리해요!<br>AI 추천 장소는 참고하고, 실제 여행 정보는 다시 확인해야 해요!';
-        box.classList.add('is-off');
-        $('p08Summary').classList.remove('is-off');
-        $('p08Next').classList.remove('is-off');
+        finish();
       }, 1000);
     }
 
-    show();
+    // ?step=N : 1~6 질문 단계 · 7 마무리 화면
+    const wantStep = parseInt(new URLSearchParams(location.search).get('step'), 10);
+    if (wantStep >= 7) finish();
+    else { step = wantStep >= 1 ? wantStep - 1 : 0; show(); }
   })();
   </script>
 </body>

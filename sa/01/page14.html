@@ -3,31 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>나의 미래 모습 만들기</title>
+    <title>퀴즈 풀기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 폰 틀은 공용 .phone-frame, 단체 대화창은 CSS(1초마다 말풍선이 하나씩 나타남). 안내 로봇 공용 sa/img/sa_main_wave.png(.guide-set) */
-        .p14-bw{--gb-left:88px;--gb-w:640px;--tail-x:310px}
-        .p14-screen{background:#ffeeb8;font-family:'Pretendard';color:#111}
-        .p14-title{position:absolute;left:0;top:40px;width:100%;height:48px;box-sizing:border-box;display:flex;align-items:center;padding-left:14px;font-size:22px;font-weight:700;letter-spacing:-0.03em}
-        .p14-title svg{width:22px;height:22px;margin-right:6px;fill:none;stroke:#111;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-        .p14-in{position:absolute;left:12px;bottom:12px;width:414px;height:62px;border-radius:31px;background:#fff}
-        .p14-in i{position:absolute;left:5px;top:5px;width:52px;height:52px;border-radius:50%;background:#dcdcde;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:38px;font-weight:700;line-height:1}
-        .p14-msg{position:absolute;box-sizing:border-box;padding:10px 32px;display:flex;align-items:center;border-radius:30px;font-size:20px;font-weight:600;line-height:1.3;letter-spacing:-0.04em;opacity:0;transform:translateY(12px);transition:opacity .4s,transform .4s}
-        .p14-msg.is-on{opacity:1;transform:none}
-        .p14-msg:before{content:'';position:absolute;top:50%;margin-top:-10px;width:20px;height:20px;background:inherit}
-        .p14-me{left:101px;top:415px;width:310px;background:#a9cdff}
-        .p14-me:before{right:-10px;clip-path:polygon(0 0,100% 50%,0 100%)}
-        .p14-fr{left:28px;background:#fff}
-        .p14-fr:before{left:-12px;clip-path:polygon(100% 0,0 50%,100% 100%)}
-        .p14-f1{top:504px;width:218px}
-        .p14-f2{top:568px;width:337px}
-        .p14-f3{top:657px;width:337px}
-        .p14-photo{position:absolute;left:114px;top:101px;width:298px;height:298px;border-radius:24px;object-fit:cover;opacity:0;transition:opacity .4s}
-        .p14-photo.is-on{opacity:1}
-        .p14-share{position:absolute;left:343px;top:332px;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .4s}
-        .p14-share.is-on{opacity:1}
-        .next-btn.hidden{display:none}
+        /* 질문 박스·선택지는 공용 .quiz-ask-box / .quiz-opts + .card-btn.is-quiz */
+
     </style>
 </head>
 <body>
@@ -35,92 +15,93 @@
   <div id="viewport" class="viewport">
     <div id="stage-spacer">
       <div id="stage" class="stage">
-        <main class="bg-default">
-          <div class="guide-set is-main-wave p14-bw">
-            <p class="guide-bubble is-center">대화 내용을 읽고,<br>AI를 사용할 때 주의해야 할<br>점을 알아봐요.</p>
-            <div class="guide-character"><img src="../img/sa_main_wave.png" alt=""></div>
-          </div>
-          <div class="phone-frame has-cam">
-            <div class="phone-screen p14-screen">
-              <div class="phone-status is-dark" data-time="6:31"></div>
-              <div class="p14-title"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>친구들 단체 대화창</div>
-              <img class="p14-photo" id="p14Photo" alt="나의 미래 모습">
-              <span class="p14-share" id="p14Share"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.6l6.8-4M8.6 13.4l6.8 4"/></svg></span>
-              <div class="p14-msg p14-me" data-seq="1">안녕! 내 모습 어때?<br>멋있지 않아?</div>
-              <div class="p14-msg p14-fr p14-f1" data-seq="2">우와~ 멋지다!</div>
-              <div class="p14-msg p14-fr p14-f2" data-seq="3">이게 정말 네 모습이라고?<br>우리는 학생이잖아!</div>
-              <div class="p14-msg p14-fr p14-f3" data-seq="4">그래? 이게 어떻게 된<br>일이지?</div>
-              <div class="p14-in"><i>+</i></div>
-            </div>
-          </div>
-          <a href="javascript:;" class="next-btn hidden confirm-quiz-trigger" data-confirm-quiz=".p14-confirm-quiz">
-            <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
-          </a>
+        <main class="quiz-stage">
+          <div class="step-flow">
 
-          <div class="confirm-quiz p14-confirm-quiz hidden">
-            <div class="confirm-quiz-panel confirm-quiz-question">
-              <p class="confirm-quiz-title"><img class="confirm-quiz-icon" src="../../img/common/icon_warning.png" alt="">주의</p>
-              <p class="confirm-quiz-text">AI로 만든 사진을 실제 나의 모습인 것처럼<br>다른 사람을 속여도 될까요?</p>
-              <div class="confirm-quiz-choices">
-                <button class="confirm-quiz-choice" data-correct="false">
-                  <img src="img/p14_btn_yes.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_yes_on.png" data-src-over="img/p14_btn_yes_over.png" data-sound="sound/click.mp3" alt="예">
-                </button>
-                <button class="confirm-quiz-choice" data-correct="true">
-                  <img src="img/p14_btn_no.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_no_on.png" data-src-over="img/p14_btn_no_over.png" data-sound="sound/click.mp3" alt="아니오">
-                </button>
+            <div class="step-panel p14-panel p14-q1">
+
+              <div class="quiz-ask-box">
+
+                <div class="quiz-ask-row">
+
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+
+                  <span class="quiz-qnum">Q1.</span>
+
+                  <p class="quiz-ask">어른이 되어 하고 싶은 일을 결정할 때, 중요하게 생각해야 할 것은 무엇일까요? 모두 골라보세요.</p>
+
+                </div>
+
+              </div>
+              <div class="answer-pick-quiz quiz-opts is-row">
+                <button class="answer-pick card-btn is-quiz" data-correct="true" aria-label="적성">적성</button>
+                <button class="answer-pick card-btn is-quiz is-long" data-correct="false" aria-label="친구가 좋아하는 것">친구가<br>좋아하는 것</button>
+                <button class="answer-pick card-btn is-quiz" data-correct="false" aria-label="멋있는 일">멋있는 일</button>
+                <button class="answer-pick card-btn is-quiz is-long" data-correct="true" aria-label="내가 좋아하는 것">내가<br>좋아하는 것</button>
+                <button class="answer-pick card-btn is-quiz" data-correct="true" aria-label="잘하는 일">잘하는 일</button>
               </div>
             </div>
-            <div class="confirm-quiz-panel confirm-quiz-correct hidden">
-              <p class="confirm-quiz-title">잘했어요</p>
-              <p class="confirm-quiz-text">맞아요! AI로 만들어진 모습은 실제 내 모습이 아니예요.<br>다른 사람에게 AI로 만든 모습이라고 말해야 해요.</p>
-              <button class="confirm-quiz-choice confirm-quiz-ok" data-next-quiz=".p14-confirm-quiz-2">
-                <img src="img/p14_btn_confirm.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_confirm_on.png" data-src-over="img/p14_btn_confirm_over.png" data-sound="sound/click.mp3" alt="확인">
-              </button>
-            </div>
-            <div class="confirm-quiz-panel confirm-quiz-wrong hidden">
-              <p class="confirm-quiz-title">다시 한 번 생각해요.</p>
-              <p class="confirm-quiz-text">AI 이미지를 실제인 것처럼 다른 사람을 속여서는 안 돼요.</p>
-              <button class="confirm-quiz-choice confirm-quiz-ok">
-                <img src="img/p14_btn_confirm.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_confirm_on.png" data-src-over="img/p14_btn_confirm_over.png" data-sound="sound/click.mp3" alt="확인">
-              </button>
-            </div>
-          </div>
 
-          <div class="confirm-quiz p14-confirm-quiz-2 hidden">
-            <div class="confirm-quiz-panel confirm-quiz-question">
-              <p class="confirm-quiz-title"><img class="confirm-quiz-icon" src="../../img/common/icon_warning.png" alt="">주의</p>
-              <p class="confirm-quiz-text">다른 사람의 얼굴을 허락 없이 AI로 만들어서는 안 돼요.<br>나의 모습을 상상하며 만들었나요?</p>
-              <div class="confirm-quiz-choices">
-                <button class="confirm-quiz-choice" data-correct="true">
-                  <img src="img/p14_btn_yes.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_yes_on.png" data-src-over="img/p14_btn_yes_over.png" data-sound="sound/click.mp3" alt="예">
-                </button>
-                <button class="confirm-quiz-choice" data-correct="false">
-                  <img src="img/p14_btn_no.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_no_on.png" data-src-over="img/p14_btn_no_over.png" data-sound="sound/click.mp3" alt="아니오">
-                </button>
+            <div class="step-panel p14-panel p14-q2">
+
+              <div class="quiz-ask-box">
+
+                <div class="quiz-ask-row">
+
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+
+                  <span class="quiz-qnum">Q2.</span>
+
+                  <p class="quiz-ask">생성형 AI에게 내가 원하는 이미지를 만들기 위해 입력해야 하는 설명 글을 무엇이라고 할까요?</p>
+
+                </div>
+
+              </div>
+              <div class="answer-pick-quiz quiz-opts is-row">
+                <button class="answer-pick card-btn is-quiz" data-correct="true" aria-label="프롬프트">프롬프트</button>
+                <button class="answer-pick card-btn is-quiz" data-correct="false" aria-label="알고리즘">알고리즘</button>
+                <button class="answer-pick card-btn is-quiz" data-correct="false" aria-label="인공지능">인공지능</button>
               </div>
             </div>
-            <div class="confirm-quiz-panel confirm-quiz-correct hidden">
-              <p class="confirm-quiz-title">잘했어요</p>
-              <p class="confirm-quiz-text">참 잘했어요! 다른 사람의 얼굴을 지켜주는<br>멋진 디지털 시민이예요.</p>
-              <button class="confirm-quiz-choice confirm-quiz-ok" data-next-quiz=".p14-confirm-quiz-3">
-                <img src="img/p14_btn_confirm.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_confirm_on.png" data-src-over="img/p14_btn_confirm_over.png" data-sound="sound/click.mp3" alt="확인">
-              </button>
+
+            <div class="step-panel p14-panel p14-q3">
+
+              <div class="quiz-ask-box">
+
+                <div class="quiz-ask-row">
+
+                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+
+                  <span class="quiz-qnum">Q3.</span>
+
+                  <p class="quiz-ask">AI가 만든 이미지를 실제 내 얼굴인 것처럼 다른 사람에게 속여서 소개해도 될까요?</p>
+
+                </div>
+
+              </div>
+              <div class="ox-quiz" data-answer="x" data-next="page15.html">
+                <img class="ox-btn js-img-swap ox-pick is-o" data-value="o" src="../../img/common/icon_o.png" data-src-alt="../../img/common/icon_o_on.png" alt="O 선택">
+                <img class="ox-btn js-img-swap ox-pick is-x" data-value="x" src="../../img/common/icon_x.png" data-src-alt="../../img/common/icon_x_on.png" alt="X 선택">
+              </div>
             </div>
-            <div class="confirm-quiz-panel confirm-quiz-wrong hidden">
-              <p class="confirm-quiz-text">다른 사람의 얼굴을 허락 없이 AI로 만드는 것은<br>불법이에요!</p>
-              <button class="confirm-quiz-choice confirm-quiz-ok">
-                <img src="img/p14_btn_confirm.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_confirm_on.png" data-src-over="img/p14_btn_confirm_over.png" data-sound="sound/click.mp3" alt="확인">
-              </button>
-            </div>
+
           </div>
 
-          <div class="confirm-quiz p14-confirm-quiz-3 hidden">
-            <div class="confirm-quiz-panel confirm-quiz-correct">
-              <p class="confirm-quiz-title"><img class="confirm-quiz-icon" src="../../img/common/icon_warning.png" alt="">주의</p>
-              <p class="confirm-quiz-text">실제 나의 모습이 아닌 AI로 만든 이미지임을<br>반드시 표기해야 해요!</p>
-              <button class="confirm-quiz-choice confirm-quiz-ok" data-next-href="page15.html">
-                <img src="img/p14_btn_confirm.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_confirm_on.png" data-src-over="img/p14_btn_confirm_over.png" data-sound="sound/click.mp3" alt="확인">
-              </button>
+          <div class="ox-result-correct is-avatar is-off" data-sound="sound/correct.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">정답이에요!</p>
+              </div>
+              <div class="avatar-popup-extra"><img src="../../img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div>
+          <div class="ox-result-wrong is-avatar is-off" data-sound="sound/incorrect.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">문장을 다시 한 번 잘 읽어봐요.</p>
+              </div>
             </div>
           </div>
         </main>
@@ -129,22 +110,8 @@
   </div>
   <div class="zoom-info" id="zoomInfo"></div>
 
-  <script src="../../js/header.js" data-title="나의 미래 모습 만들기" data-next="page15.html"></script>
+  <script src="../../js/header.js" data-title="퀴즈 풀기" data-next="page15.html"></script>
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
-  <script>
-  (function () {
-    let job = 'store';
-    let gender = 'm';
-    try { job = sessionStorage.getItem('sa01_job') || job; gender = sessionStorage.getItem('sa01_gender') || gender; } catch (e) {}
-    const photo = document.getElementById('p14Photo');
-    photo.src = 'img/p15_result_' + job + '_' + gender + '.png';
-    const share = document.getElementById('p14Share');
-    const steps = Array.from(document.querySelectorAll('.p14-msg'));
-    setTimeout(() => { photo.classList.add('is-on'); share.classList.add('is-on'); }, 1000);
-    steps.forEach((el, i) => setTimeout(() => el.classList.add('is-on'), 1000 * (i + 2)));
-    setTimeout(() => document.querySelector('.next-btn').classList.remove('hidden'), 1000 * (steps.length + 2));
-  })();
-  </script>
 </body>
 </html>
