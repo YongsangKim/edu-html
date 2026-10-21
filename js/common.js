@@ -2342,6 +2342,55 @@ function resetImageSwap(root) {
    opts.x: 가로 어디를 가리킬지(0=왼쪽 끝 ~ 1=오른쪽 끝, 기본 1). 긴 입력창처럼 오른쪽 끝에 다른 버튼이 있을 때
    opts.dx / opts.dy: 손가락 위치를 px로 더 옮김(예: dy:-50이면 위로)
    opts.w: 손가락 너비(px, 기본 110). 버튼이 화면 맨 아래라 손가락이 잘릴 때 줄여서 씀 */
+/* 말풍선 + 캐릭터 포즈 한 세트 바꾸기(사회 폰 실습 페이지 공용). 페이지에서 한 번 만들고 단계마다 say 를 부름.
+   const say = initGuideSay({ bubble: $('bub'), img: $('char'), set: $('set') });   // set 은 .guide-set 요소(선택): 포즈에 맞는 좌표 클래스(.is-wink-point2 …)를 같이 바꿈
+   say('문구<br>문구', 'wink_point2');            // 문구 + 포즈(sa/img/sa_*.png 의 * 부분)
+   say('문구', 'wink_point4', true);              // 세 번째 true 는 말풍선에 .is-medium(넓은 말풍선), 안 주면 뗌
+   줄이 길어지면 .is-long(44px)을 자동으로 붙이고 .is-medium(넓은 말풍선)도 같이 붙임: 기본 모양으로 그려 본 줄 수가 opts.longLines(기본 5)줄 이상일 때. say('문구', 포즈, medium, true|false) 네 번째 값으로 강제로 켜고 끌 수 있음(직접 주면 .is-medium 은 따라붙지 않고 세 번째 값만 따름)
+   처음에는 캐릭터를 숨겨 두었다가 첫 포즈가 로드되면 보여 주고(기본 그림이 잠깐 비치지 않게), 포즈를 바꿀 때도 새 그림이 로드된 뒤에 그림·좌표를 함께 바꿈.
+   opts.dir: 그림 폴더(기본: img 의 현재 src 에서 sa_ 앞부분), opts.poses: 미리 불러올 포즈 목록(기본: 사회 공용 포즈 전부) */
+function initGuideSay(opts) {
+  const bubble = opts.bubble, img = opts.img, set = opts.set || null;
+  const longLines = opts.longLines || 5;
+  const countLines = () => {
+    const r = document.createRange();
+    r.selectNodeContents(bubble);
+    const tops = new Set();
+    Array.from(r.getClientRects()).forEach((q) => { if (q.width > 1 && q.height > 1) tops.add(Math.round(q.top / 4)); });
+    return tops.size;
+  };
+  const dir = opts.dir || (img.getAttribute('src') || '').replace(/sa_[^/]*$/, '');
+  const poses = opts.poses || ['main', 'main_wave', 'wink_open', 'wink_point', 'wink_point2', 'wink_point3', 'wink_point4', 'wink_point5', 'wink_present', 'smile_present', 'point_front', 'wink_jump', 'happy_jump'];
+  poses.forEach((p) => { new Image().src = dir + 'sa_' + p + '.png'; });
+  img.style.visibility = 'hidden';
+  setTimeout(() => { img.style.visibility = ''; }, 1500);
+  let seq = 0;
+  return function say(html, pose, medium, long) {
+    bubble.innerHTML = html;
+    bubble.classList.toggle('is-medium', !!medium);
+    bubble.classList.remove('is-long');
+    const isLong = long === undefined ? countLines() >= longLines : !!long;
+    bubble.classList.toggle('is-medium', !!medium || (long === undefined && isLong));
+    bubble.classList.toggle('is-long', isLong);
+    if (!pose) return;
+    const src = dir + 'sa_' + pose + '.png';
+    const my = ++seq;
+    const apply = () => {
+      if (my !== seq) return;
+      img.src = src;
+      if (set) {
+        Array.from(set.classList).forEach((c) => { if (/^is-/.test(c)) set.classList.remove(c); });
+        set.classList.add('is-' + pose.replace(/_/g, '-'));
+      }
+      img.style.visibility = '';
+    };
+    const im = new Image();
+    im.onload = apply;
+    im.onerror = apply;
+    im.src = src;
+  };
+}
+
 /* 버튼 옆에 손가락 안내. opts: dx/dy 보정, w 손가락 폭, onMain(el이 main 안 스케일된 요소일 때 화면 좌표로 환산), x(onMain에서 폭 비율), beside(대상을 가리지 않게 옆에 둠) */
 function pointFingerAt(el, opts) {
   if (opts && opts.onMain) {
@@ -2743,7 +2792,7 @@ function initEmotionChatFlow(config) {
   // 눌러야 할 곳(분홍 깜빡임) — 폰 화면 좌표(434x879)
   // 눌러야 할 곳 좌표 [x, y, 폭, 높이, 모서리(선택: 숫자px 또는 '50%'; 안 적으면 원)](폰 화면 기준). 페이지에서 initEmotionChatFlow({ hot: { open: [...] } })로 덮어씀
   // ?edit 으로 열면 세 곳이 한꺼번에 보이고 box-edit.js(클릭 → 방향키)로 맞춘 뒤 표시줄 값을 hot 에 붙여 넣음
-  const HOT = Object.assign({ open: [314, 463, 48, 48], search: [372, 614, 50, 50], send: [369, 462, 50, 50] }, config.hot || {});
+  const HOT = Object.assign({ open: [328, 468, 48, 48], search: [389, 619, 50, 50], send: [383, 466, 50, 50] }, config.hot || {});
   const HOT_NAME = { open: '이모티콘 버튼', search: '검색 버튼', send: '보내기 버튼' };
   const radiusOf = (b) => (b[4] === undefined ? '50%' : typeof b[4] === 'number' ? b[4] + 'px' : b[4]);
   const placeHot = (el) => {

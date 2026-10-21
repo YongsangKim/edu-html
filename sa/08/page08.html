@@ -6,29 +6,36 @@
     <title>여행 계획 순서 맞추기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 23~30p. 여행 계획 카드 6장(순서 무작위) 중 지금 할 일을 차례로 고르기(6단계).
+        /* 디자인 8차시 08p(휴대폰 화면 제외) · 기획서 23~30p. 여행 계획 카드 6장(순서 무작위) 중 지금 할 일을 차례로 고르기(6단계).
            맞으면 다음 단계, 틀리면 흔들림 + 정답 카드 2초 반짝임. 오른쪽 휴대폰은 1단계엔 빈 화면에 네이버 지도 아이콘(../../img/common/logo_navermap.png), 2단계부터 그 단계의 네이버 지도 화면(img/p08_map_{2~6}.png).
-           다 끝나면 단계 순서 정리 + 'AI 추천 장소는 참고하고...' 안내(30p) */
+           다 끝나면 마무리 안내(캐릭터 + 다음) → 단계 순서 정리 + 'AI 추천 장소는 참고하고...' 안내(30p). ?step=7 마무리 안내, ?step=8 단계 순서 정리 */
 
-        .p08-phone{left:1400px;top:21px;width:450px;height:895px}
+        .p08-phone{left:1400px}
         .p08-screen{width:100%;height:100%;background:var(--c-white) url('../../img/common/logo_navermap.png') center / 220px 220px no-repeat}
         .p08-screen[style*=p08_map]{background-color:var(--c-pale);background-size:100% 100%}
 
-        .p08-ask{position:absolute;left:60px;top:40px;width:1260px;min-height:230px;margin:0;box-sizing:border-box;padding:30px 40px;display:flex;align-items:center;justify-content:center;
-          background:var(--c-white);border:solid 5px var(--c-ink);border-radius:40px;box-shadow:0 10px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:42px;line-height:1.35;color:var(--c-ink);text-align:center;letter-spacing:-0.05em;word-break:keep-all;text-wrap:balance}
-        .p08-ask.is-ok{color:#1f9d4c}
-        .p08-cards{position:absolute;left:60px;top:420px;width:1260px;display:grid;grid-template-columns:repeat(3,1fr);gap:40px 34px}
-        .p08-card.card-btn{min-width:0;width:100%;height:180px;padding:10px 16px 0;display:flex;align-items:center;justify-content:center;font-size:48px;line-height:1.15;word-break:keep-all}
+        .p08-ask{position:absolute;left:75px;top:50px;width:1252px;height:360px;margin:0;box-sizing:border-box;padding:20px 40px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+          background:#dff4ff;border:solid 5px #0b3a8f;border-radius:14px;font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.25;color:var(--c-ink);text-align:center;letter-spacing:-0.05em;word-break:keep-all}
+        .p08-ok{display:block;margin-bottom:6px;font-size:72px;line-height:1.1;font-weight:normal;color:#2a6bd0}
+        .p08-cards{position:absolute;left:75px;top:437px;width:1252px;height:475px;box-sizing:border-box;padding:60px 48px 0;display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:175px;gap:23px 15px;align-content:start;background:#2a6bd0;border-radius:14px}
+        .p08-card.card-btn{min-width:0;width:100%;height:175px;padding:10px 12px 0;display:flex;align-items:center;justify-content:center;font-size:50px;line-height:1.15;word-break:keep-all}
         .p08-card.is-wrong{animation:fix-word-shake .3s ease}
         .p08-card.is-hint{box-shadow:0 0 0 8px var(--c-yellow),0 0 40px 14px rgba(255,216,61,.8),0 13px 0 0 #a9a2ff;transform:scale(1.05)}
         .p08-cards.is-locked{pointer-events:none}
 
-        .p08-summary{position:absolute;left:60px;top:420px;width:1260px;margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(3,1fr);gap:24px;counter-reset:s}
-        .p08-summary li{height:150px;box-sizing:border-box;padding:12px 16px 4px;display:flex;align-items:center;justify-content:center;gap:12px;background:var(--c-white);border:solid 5px var(--c-purple);border-radius:24px;
-          font-family:'Cafe24 Ssurround';font-size:38px;line-height:1.15;color:var(--c-indigo);letter-spacing:-0.05em;word-break:keep-all;counter-increment:s}
-        .p08-summary li:before{content:counter(s);flex:0 0 56px;height:56px;display:flex;align-items:center;justify-content:center;padding-top:4px;box-sizing:border-box;border-radius:50%;background:var(--c-purple);color:var(--c-white);font-size:34px}
-        .p08-summary.is-off, .p08-next.card-btn.is-off, .p08-cards.is-off{display:none}
-        .p08-next.card-btn{right:600px;display:flex;align-items:center;justify-content:center;text-decoration:none;min-width:0;width:300px;height:110px;margin-bottom:20px;padding:8px 10px 0;font-size:56px}
+        .p08-done{position:absolute;left:75px;top:437px;width:1252px;height:475px;box-sizing:border-box;overflow:hidden;background:var(--c-white);border:solid 4px #2a6bd0;border-radius:10px}
+        .p08-done-char{position:absolute;left:30px;top:-12px;width:640px;height:490px}
+        .p08-done-char img{position:absolute;left:0;bottom:-30px;width:100%;height:auto;max-height:540px;object-fit:contain;object-position:left bottom}
+        .p08-done .card-btn{position:absolute;left:748px;top:308px;display:flex;align-items:center;justify-content:center;text-decoration:none;min-width:0;width:404px;height:127px;padding:8px 10px 0 calc(10px + .2em);font-size:66px;letter-spacing:.2em}
+
+        .p08-final{position:absolute;left:57px;top:105px;width:1806px;height:802px;box-sizing:border-box;background:#f8f7fb;border:solid 6px var(--c-ink);border-radius:14px}
+        .p08-final-title{position:absolute;left:286px;top:-60px;--rb-w:1235px;--rb-h:165px;--rb-fs:66px;--rb-ls:-0.04em;--rb-bdw:5px;--rb-tw:110px;--rb-th:150px;--rb-ext:100px;--rb-drop:70px;--rb-bg:#ddf3fd;--rb-tail:#8cb6ea;--rb-fold:#5f8fdc;z-index:2;line-height:1.2;text-align:center}
+        .p08-summary{position:absolute;left:42px;top:138px;width:1709px;height:473px;box-sizing:border-box;margin:0;padding:68px 63px 0;list-style:none;display:grid;grid-template-columns:repeat(3,493px);grid-auto-rows:140px;gap:51px 58px;align-content:start;background:#dff4fe;border:solid 3px #2a6bd0;border-radius:12px;counter-reset:s}
+        .p08-summary li{position:relative;box-sizing:border-box;padding:10px 16px 0 64px;display:flex;align-items:center;justify-content:center;background:#1a3a99;border-radius:12px;box-shadow:0 8px 0 0 rgba(26,58,153,.28);
+          font-family:'Cafe24 Ssurround';font-size:50px;line-height:1.1;color:var(--c-white);letter-spacing:-0.05em;word-break:keep-all;counter-increment:s}
+        .p08-summary li:before{content:counter(s);position:absolute;left:-41px;top:27px;width:86px;height:86px;display:flex;align-items:center;justify-content:center;padding-top:6px;box-sizing:border-box;border-radius:50%;background:#8b78f0;color:var(--c-white);font-size:62px}
+        .p08-final .p08-next.card-btn{position:absolute;left:700px;top:650px;display:flex;align-items:center;justify-content:center;text-decoration:none;min-width:0;width:405px;height:127px;padding:8px 10px 0 calc(10px + .2em);font-size:66px;letter-spacing:.2em}
+        .p08-cards.is-off, .p08-done.is-off, .p08-final.is-off, .p08-phone.is-off, .p08-ask.is-off{display:none}
     </style>
 </head>
 <body>
@@ -37,14 +44,21 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <div class="phone-frame is-thin has-cam p08-phone"><div class="p08-screen" id="p08Screen"></div></div>
+          <div class="phone-frame has-cam p08-phone"><div class="phone-screen p08-screen" id="p08Screen"></div></div>
           <p class="p08-ask" id="p08Ask"></p>
           <div class="p08-cards" id="p08Cards"></div>
-          <ol class="p08-summary is-off" id="p08Summary">
-            <li>여행 지역 검색</li><li>인기 장소 확인</li><li>장소 정보 살펴보기</li>
-            <li>예약 가능 여부 확인</li><li>이동 코스 확인</li><li>장소 저장하기</li>
-          </ol>
-          <a href="page09.html" class="js-nav-effect js-sfx card-btn next-btn p08-next is-off" id="p08Next" data-sound="sound/click.mp3">다음</a>
+          <div class="p08-done is-off" id="p08Done">
+            <div class="p08-done-char"><img src="img/p08_character.png" onerror="this.onerror=null;this.src='../img/sa_main.png'" alt="메인 캐릭터"></div>
+            <a href="javascript:;" class="js-sfx card-btn" id="p08Next1" data-sound="sound/click.mp3">다음</a>
+          </div>
+          <div class="p08-final is-off" id="p08Final">
+            <p class="ribbon p08-final-title">AI 추천 장소는 참고하고,<br>실제 여행 정보는 다시 확인해야 해요!</p>
+            <ol class="p08-summary" id="p08Summary">
+              <li>여행 지역 검색</li><li>인기 장소 확인</li><li>장소 정보 살펴보기</li>
+              <li>예약 가능 여부 확인</li><li>이동 코스 확인</li><li>장소 저장하기</li>
+            </ol>
+            <a href="page09.html" class="js-nav-effect js-sfx card-btn next-btn p08-next" id="p08Next" data-sound="sound/click.mp3">다음</a>
+          </div>
         </main>
       </div>
     </div>
@@ -74,11 +88,12 @@
     ];
 
     const box = $('p08Cards');
+    const headed = (t) => t.replace(/^(맞아요!|좋아요!)s*/, '<b class="p08-ok">$1</b>');
     let step = 0;
 
     function show() {
       const s = STEPS[step];
-      $('p08Ask').innerHTML = s.ask;
+      $('p08Ask').innerHTML = headed(s.ask);
       $('p08Screen').style.backgroundImage = step ? "url('img/p08_map_" + (step + 1) + ".png')" : '';
       box.innerHTML = '';
       box.classList.remove('is-locked');
@@ -94,11 +109,18 @@
 
     function finish() {
       $('p08Screen').style.backgroundImage = "url('img/p08_map_7.png')";
-      $('p08Ask').innerHTML = '좋아요! 네이버 지도의 저장하기 기능을 사용해서<br>여행 계획을 마무리해요!<br>AI 추천 장소는 참고하고, 실제 여행 정보는 다시 확인해야 해요!';
+      $('p08Ask').innerHTML = headed('좋아요! 네이버 지도의 저장하기 기능을 사용해서<br>여행 계획을 마무리해요!');
       box.classList.add('is-off');
-      $('p08Summary').classList.remove('is-off');
-      $('p08Next').classList.remove('is-off');
+      $('p08Done').classList.remove('is-off');
     }
+
+    function summary() {
+      document.querySelector('.p08-phone').classList.add('is-off');
+      $('p08Ask').classList.add('is-off');
+      $('p08Done').classList.add('is-off');
+      $('p08Final').classList.remove('is-off');
+    }
+    $('p08Next1').addEventListener('click', () => setTimeout(summary, 300));
 
     function pick(btn, right) {
       if (!right) {
@@ -121,9 +143,9 @@
       }, 1000);
     }
 
-    // ?step=N : 1~6 질문 단계 · 7 마무리 화면
+    // ?step=N : 1~6 질문 단계 · 7 마무리 안내 · 8 단계 순서 정리
     const wantStep = parseInt(new URLSearchParams(location.search).get('step'), 10);
-    if (wantStep >= 7) finish();
+    if (wantStep >= 7) { finish(); if (wantStep >= 8) summary(); }
     else { step = wantStep >= 1 ? wantStep - 1 : 0; show(); }
   })();
   </script>

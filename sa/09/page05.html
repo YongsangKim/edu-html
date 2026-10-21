@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>지켜라! 우리 동네 안전망</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서 10~12p. 왼쪽 '인물 카드' 3줄(사진+직업명 + 끌어 놓을 칸), 오른쪽 '역할 카드' 6장(무작위 배치) → 알맞은 칸에 끌어 넣으면 부착, 틀리면 제자리로.
+           2판(구급대원·환경미화원·버스 기사 → 경찰관·택배 기사·급식 조리사), 끝나면 활동 종료 팝업 */
+        .p05-tag{position:absolute;margin:0;top:148px;width:253px;height:80px;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;background:var(--c-navy);border:solid 5px var(--c-ink);border-radius:39px;z-index:2;
+          font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-white);letter-spacing:-0.04em}
+        .p05-tag.is-person{left:312px}
+        .p05-tag.is-role{left:1247px}
+
+        .p05-person{position:absolute;left:107px;width:250px;height:230px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:20px 0 0 20px;overflow:hidden;background:var(--c-white);display:flex;flex-direction:column}
+        .p05-person i{flex:1 1 auto;background:var(--c-mist) center / cover no-repeat}
+        .p05-person span{flex:0 0 40px;display:flex;align-items:center;justify-content:center;padding-top:5px;background:var(--c-white);font-family:'Cafe24 Ssurround';font-size:36px;color:var(--c-ink);letter-spacing:-0.05em;line-height:1;white-space:nowrap}
+        .p05-slot{position:absolute;left:357px;width:400px;height:230px;box-sizing:border-box;background:#d6d6d6;border:solid 8px #bdbdbd;border-radius:0 20px 20px 0;border-left:0;display:flex;align-items:center;justify-content:center;text-align:center;
+          font-family:'Cafe24 Ssurround';font-size:34px;line-height:1.15;letter-spacing:-0.04em;color:#8c8c93;white-space:nowrap}
+        .p05-slot[data-filled]{background:none;border:0}
+        .p05-slot[data-filled] .p05-hint{display:none}
+
+        .p05-panel{position:absolute;left:864px;top:190px;width:1016px;height:745px;box-sizing:border-box;background:var(--c-white);border:solid 5px var(--c-navy);border-radius:20px;box-shadow:0 10px 0 0 rgba(86,148,231,.2)}
+        .p05-hold{position:absolute;width:413px;height:185px}
+        .p05-card{width:413px;height:185px;box-sizing:border-box;padding:10px 20px 0;border:solid 7px var(--c-ink);border-radius:26px;cursor:grab;user-select:none;position:relative;z-index:5;
+          display:flex;align-items:center;justify-content:center;text-align:center;font-family:'Cafe24 Ssurround';font-size:36px;line-height:1.3;letter-spacing:-0.05em;color:var(--c-ink);word-break:keep-all;
+          color:var(--c-ink);-webkit-text-stroke:8px #fff;paint-order:stroke fill;box-shadow:inset 6px 8px 8px rgba(255,255,255,.3),inset -6px -10px 10px rgba(0,0,0,.18)}
+        .p05-card[data-key="police"]{background:linear-gradient(180deg,#ffcf0e,#ffb70e)}
+        .p05-card[data-key="cleaner"]{background:linear-gradient(180deg,#4bcc24,#19aa73)}
+        .p05-card[data-key="bus"]{background:linear-gradient(180deg,#4e97ff,#7272fe)}
+        .p05-card[data-key="paramedic"]{background:linear-gradient(180deg,#da5ba6,#bf4573)}
+        .p05-card[data-key="cook"]{background:linear-gradient(180deg,#fb8b16,#ef6a59)}
+        .p05-card[data-key="courier"]{background:linear-gradient(180deg,#b463ca,#a043ed)}
+        .p05-card:hover{filter:brightness(1.06)}
+        .p05-card.is-dragging{cursor:grabbing;z-index:50}
+        .p05-slot .p05-card{cursor:default;width:100%;height:100%;white-space:normal;font-size:38px;border-radius:0 20px 20px 0;border-left:0}
+
+        #p05Done{z-index:120}
+
+        .ask05{top:30px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="ask-pill is-fit ask05"><span>역할 카드를 드래그해 인물 카드와 알맞게 연결해보세요</span></p>
+
+          <p class="p05-tag is-person">인물 카드</p>
+          <p class="p05-tag is-role">역할 카드</p>
+          <div class="p05-panel"></div>
+
+          <div id="p05Persons"></div>
+          <div id="p05Slots"></div>
+          <div id="p05Tray"></div>
+
+          <div class="avatar-modal is-off" id="p05Done">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">좋아요!</p>
+                <p class="avatar-popup-sub">이분들의 노력 덕분에 우리가<br>안전하게 생활할 수 있어요.</p>
+                <a href="page06.html" class="js-nav-effect avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="지켜라! 우리 동네 안전망" data-next="page06.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  /* 인물 사진 img/p05_{id}.png (없으면 회색 칸) */
+  (function () {
+    const ROLES = [
+      { id: 'police', label: '경찰관', role: '동네를 살피고<br>안전을 지켜요' },
+      { id: 'cleaner', label: '환경미화원', role: '쓰레기를 치워<br>거리를 깨끗하게 해요' },
+      { id: 'bus', label: '버스 기사', role: '버스를 운전해<br>사람들을 안전하게 태워줘요' },
+      { id: 'paramedic', label: '구급대원', role: '다친 사람이 있을 때<br>응급처치를 하고 병원으로 옮겨요' },
+      { id: 'cook', label: '급식 조리사', role: '학생들이 먹을<br>급식을 만들어요' },
+      { id: 'courier', label: '택배 기사', role: '주문한 물건을<br>집까지 배달해요' },
+    ];
+    const byId = (id) => ROLES.find((r) => r.id === id);
+    const ROUNDS = [['paramedic', 'cleaner', 'bus'], ['police', 'courier', 'cook']];
+    const ROW_TOP = [239, 478, 717];
+    const CARD_POS = [[947, 259], [1387, 259], [947, 481], [1387, 481], [947, 703], [1387, 703]];
+    let round = 0;
+
+    const persons = $('p05Persons');
+    const slotsBox = $('p05Slots');
+    const tray = $('p05Tray');
+
+    function setup() {
+      const jobs = ROUNDS[round].map(byId);
+      persons.innerHTML = '';
+      slotsBox.innerHTML = '';
+      tray.innerHTML = '';
+      jobs.forEach((j, i) => {
+        persons.insertAdjacentHTML('beforeend', '<div class="p05-person" style="top:' + ROW_TOP[i] + 'px"><i style="background-image:url(\x27img/p05_' + j.id + '.png\x27)"></i><span>' + j.label + '</span></div>');
+        slotsBox.insertAdjacentHTML('beforeend', '<div class="p05-slot" style="top:' + ROW_TOP[i] + 'px" data-key="' + j.id + '"><span class="p05-hint">이곳에 드래그해 보세요</span></div>');
+      });
+      shuffleArray(ROLES).forEach((r, i) => {
+        tray.insertAdjacentHTML('beforeend', '<div class="p05-hold" style="left:' + CARD_POS[i][0] + 'px;top:' + CARD_POS[i][1] + 'px"><div class="p05-card" data-key="' + r.id + '">' + r.role + '</div></div>');
+      });
+      initMatchDrag({
+        cards: Array.from(tray.querySelectorAll('.p05-card')),
+        zones: Array.from(slotsBox.querySelectorAll('.p05-slot')),
+        onWrong: (card, slot) => {
+          if (slot) playWrong();
+        },
+        onDone: () => {
+          playCorrect();
+          setTimeout(() => {
+            round += 1;
+            if (round < ROUNDS.length) setup();
+            else flashLayer($('p05Done'), 'is-off', 600000);
+          }, 900);
+        }
+      });
+    }
+
+    setup();
+  })();
+  </script>
+</body>
+</html>

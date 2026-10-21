@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>안전 지킴이 변신 프롬프트</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서 14~19p. STEP1 만나고 싶은 안전 지킴이 고르기 → STEP2 프롬프트 블록을 입력창 빈칸 6곳에 끌어 넣기(마지막 칸만 '쉽게/예시' 둘 다 정답)
+           → 완성되면 직업·말투를 sessionStorage(sa09_job, sa09_style)에 저장하고 안내 팝업 2개 → page08 */
+
+        .p07-person{position:absolute;top:210px;width:480px;height:560px;box-sizing:border-box;padding:0;border:solid 5px var(--c-ink);border-radius:24px;overflow:hidden;background:var(--c-white);cursor:pointer;display:flex;flex-direction:column}
+        .p07-person:hover{border-color:var(--c-sky)}
+        .p07-person i{flex:1 1 auto;background:var(--c-white) center / cover no-repeat}
+        .p07-person span{flex:0 0 80px;display:flex;align-items:center;justify-content:center;padding-top:6px;background:var(--c-white);font-family:'Cafe24 Ssurround';font-size:64px;color:var(--c-ink);letter-spacing:-0.05em;line-height:1}
+
+        .p07-me{left:60px;top:190px;width:410px;height:410px;cursor:default}
+        .p07-me:hover{border-color:var(--c-ink)}
+        .p07-me i{background-size:contain;background-position:center bottom;background-repeat:no-repeat}
+        .p07-me span{background:var(--c-sky);color:var(--c-ink)}
+        .p07-me.is-hot{animation:p07-hot .5s ease 3}
+        .p07-me.is-hot i{background-size:cover;background-position: 0 0;}
+        .p07-me.is-hot span{background:#f4b400}
+        @keyframes p07-hot{50%{transform:scale(1.04)}}
+
+        .p07-input{position:absolute;left:530px;top:230px;width:1340px;height:385px;box-sizing:border-box;background:var(--c-white);border:solid 5px var(--c-navy);border-radius:20px;box-shadow:0 10px 0 0 rgba(86,148,231,.2)}
+        .p07-input-tab{position:absolute;left:30px;top:-62px;height:62px;padding:8px 40px 0;box-sizing:border-box;display:flex;align-items:center;background:var(--c-navy);border-radius:20px 20px 0 0;font-family:'Cafe24 Ssurround';font-size:38px;color:var(--c-white);letter-spacing:-0.04em}
+        .p07-blank{position:absolute;width:360px;height:110px;box-sizing:border-box;background:#d6d6d6;border:solid 8px #bdbdbd;border-radius:26px;display:flex;align-items:center;justify-content:center;text-align:center;
+          font-family:'Cafe24 Ssurround';font-size:30px;line-height:1.15;letter-spacing:-0.04em;color:#8c8c93}
+        .p07-blank[data-filled]{background:none;border-color:transparent}
+        .p07-blank[data-filled] .p07-hint{display:none}
+        .p07-blank.b1{left:60px;top:55px}
+        .p07-blank.b2{left:490px;top:55px}
+        .p07-blank.b3{left:920px;top:55px}
+        .p07-blank.b4{left:60px;top:215px}
+        .p07-blank.b5{left:490px;top:215px}
+        .p07-blank.b6{left:920px;top:215px}
+
+        .p07-tab{left:52px;top:615px}
+        .jig-tray.p07-tray{top:699px;height:250px;padding:0 40px;flex-wrap:wrap;justify-content:center;align-content:center;gap:5px 24px}
+        .p07-hold{width:360px;height:110px}
+        .p07-card{width:360px;height:110px;box-sizing:border-box;padding:6px 10px 0;border:solid 7px var(--c-ink);border-radius:26px;cursor:grab;user-select:none;position:relative;z-index:5;
+          display:flex;align-items:center;justify-content:center;text-align:center;font-family:'Cafe24 Ssurround';font-size:34px;line-height:1.05;letter-spacing:-0.06em;color:var(--c-ink);white-space:nowrap;
+          background:linear-gradient(180deg,#ffc80d,#ffb70e);box-shadow:inset 6px 8px 8px rgba(255,255,255,.3),inset -6px -10px 10px rgba(0,0,0,.18)}
+        .p07-card.is-job{background:linear-gradient(180deg,#4e97ff,#7272fe)}
+        .p07-card.is-tail{background:linear-gradient(180deg,#b463ca,#a043ed)}
+        .p07-card.is-dragging{cursor:grabbing;z-index:50}
+        .p07-blank .p07-card{cursor:default;width:100%;height:100%;border-radius:18px}
+
+        .p07-popup{z-index:130}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+
+          <div id="p07Pick">
+            <p class="ask-pill"><span>누구와 이야기하고 싶나요?</span></p>
+          </div>
+
+          <div id="p07Build" style="display:none">
+            <p class="ask-pill is-small is-fit"><span>프롬프트 블록을 알맞은 자리에 조립해 가상의 안전 지킴이를 만나보세요!</span></p>
+            <div class="p07-person p07-me" id="p07Me"><i id="p07Char" style="background-image:url('../img/sa_main.png')"></i><span id="p07MeName">아로</span></div>
+
+            <div class="p07-input">
+              <span class="p07-input-tab">프롬프트 입력창</span>
+              <div class="p07-blank b1" data-keys="intro"><span class="p07-hint">이곳에<br>드래그해 보세요.</span></div>
+              <div class="p07-blank b2" data-keys="job"><span class="p07-hint">이곳에<br>드래그해 보세요.</span></div>
+              <div class="p07-blank b3" data-keys="role"><span class="p07-hint">이곳에<br>드래그해 보세요.</span></div>
+              <div class="p07-blank b4" data-keys="ask"><span class="p07-hint">이곳에<br>드래그해 보세요.</span></div>
+              <div class="p07-blank b5" data-keys="view"><span class="p07-hint">이곳에<br>드래그해 보세요.</span></div>
+              <div class="p07-blank b6" data-keys="easy example"><span class="p07-hint">이곳에<br>드래그해 보세요.</span></div>
+            </div>
+
+            <div class="jig-tray-label p07-tab">프롬프트 블록</div>
+            <div class="jig-tray p07-tray" id="p07Tray"></div>
+          </div>
+
+          <div class="avatar-modal is-wrong is-off" id="p07Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-sub">AI에게 어떤 역할을 맡길지 먼저 입력하고,<br>원하는 답변의 형식을 선택해봐요.</p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p07WrongOk" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal p07-popup is-off" id="p07Done1">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish is-side">
+                <p class="avatar-popup-text">멋진 프롬프트가 완성되었어요!</p>
+                <p class="avatar-popup-sub">이제 AI가 여러분이 지정한 <b class="p07-job-eu"></b>으로<br>변신할 준비를 마쳤어요.</p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p07Next1" data-sound="sound/click.mp3">다음</button>
+              </div>
+            </div>
+          </div>
+          <div class="avatar-modal p07-popup is-off" id="p07Done2">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
+              <div class="avatar-popup-body is-finish is-side">
+                <p class="avatar-popup-text">잠깐!</p>
+                <p class="avatar-popup-sub">AI는 실제 <b class="p07-job-i"></b> 아니며,<br>사실과 다른 답을 할 수 있어요.</p>
+                <a href="page08.html" class="js-nav-effect avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="안전 지킴이 변신 프롬프트" data-next="page08.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  /* 안전 지킴이 사진 img/p07_{id}.png(정면, 없으면 메인 캐릭터 그대로), 고르기 카드 사진 img/p07_pick_{id}.png */
+  (function () {
+    const JOBS = [
+      { id: 'police', label: '경찰관' },
+      { id: 'paramedic', label: '구급대원' },
+      { id: 'cleaner', label: '환경미화원' },
+    ];
+    const LEFT = [150, 720, 1290];
+    const STYLES = { easy: '쉽게 설명해줘.', example: '예시를 들어 설명해줘.' };
+
+    const pick = $('p07Pick');
+    const build = $('p07Build');
+    const tray = $('p07Tray');
+    const me = $('p07Me');
+    const charImg = $('p07Char');
+    const meName = $('p07MeName');
+    let job = null;
+
+    JOBS.forEach((j, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'p07-person js-sfx';
+      b.dataset.sound = 'sound/click.mp3';
+      b.style.left = LEFT[i] + 'px';
+      b.innerHTML = '<i style="background-image:url(\x27img/p07_pick_' + j.id + '.png\x27)"></i><span>' + j.label + '</span>';
+      b.addEventListener('click', () => startBuild(j));
+      pick.appendChild(b);
+    });
+
+    function card(key, text, cls) {
+      return '<div class="p07-hold"><div class="p07-card ' + (cls || '') + '" data-key="' + key + '">' + text + '</div></div>';
+    }
+
+    function startBuild(j) {
+      job = j;
+      pick.style.display = 'none';
+      build.style.display = '';
+      new Image().src = 'img/p07_' + j.id + '.png';
+      tray.innerHTML = shuffleArray([
+        card('intro', '너는 지금부터'),
+        card('job', j.label, 'is-job'),
+        card('role', '역할을 해줘.'),
+        card('ask', '내가 묻는 말에'),
+        card('view', j.label + '의 입장에서', 'is-job'),
+        card('easy', STYLES.easy, 'is-tail'),
+        card('example', STYLES.example, 'is-tail'),
+      ]).join('');
+      let style = null;
+      initMatchDrag({
+        cards: Array.from(tray.querySelectorAll('.p07-card')),
+        zones: Array.from(build.querySelectorAll('.p07-blank')),
+        match: (c, z) => z.dataset.keys.split(' ').includes(c.dataset.key),
+        onRight: (c) => {
+          if (c.dataset.key === 'easy' || c.dataset.key === 'example') style = c.dataset.key;
+        },
+        onWrong: (c, z) => {
+          if (!z) return;
+          playWrong();
+          flashLayer($('p07Wrong'), 'is-off', 600000);
+        },
+        onDone: () => {
+          playCorrect();
+          try { sessionStorage.setItem('sa09_job', j.id); sessionStorage.setItem('sa09_style', style); } catch (e) {}
+          const pic = new Image();
+          pic.onload = () => { charImg.style.backgroundImage = 'url(img/p07_pick_' + j.id + '.png)'; };
+          pic.src = 'img/p07_pick_' + j.id + '.png';
+          meName.textContent = j.label;
+          me.classList.add('is-hot');
+          setTimeout(() => {
+            document.querySelector('.p07-job-eu').textContent = j.label;
+            document.querySelector('.p07-job-i').textContent = j.label + '이';
+            $('p07Done1').classList.remove('is-off');
+          }, 2000);
+        }
+      });
+    }
+
+    $('p07WrongOk').addEventListener('click', () => $('p07Wrong').classList.add('is-off'));
+    $('p07Next1').addEventListener('click', () => {
+      $('p07Done1').classList.add('is-off');
+      $('p07Done2').classList.remove('is-off');
+    });
+  })();
+  </script>
+</body>
+</html>
