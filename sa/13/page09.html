@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 지우개로 개인정보 지우기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서 19~30p. 가운데 공용 폰 틀 안에 갤러리 앱 캡처 이미지(img/p09_screen_*.png)를 그대로 깔고, 그 위에 누를 곳(투명 버튼)·손가락·강조 효과만 얹음(캡처를 부품으로 나누지 않는 예외).
+           흐름: 갤러리 → 사진 고르기 → 편집 → 포토 어시스트 → AI 지우개 → 개인정보 클릭(엉뚱한 곳을 누르면 손가락 힌트) → 하이라이트 → 지우기 → 로딩 → 완료 → 다른 파일로 저장 → 결과 화면(다음)
+           누를 곳은 화면에 대한 [왼쪽%, 위%, 폭%, 높이%] (?edit&step=N 으로 보며 맞춤) */
+        .p09-img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:fill;display:block;user-select:none;-webkit-user-drag:none}
+        .p09-home{position:absolute;inset:0;background:linear-gradient(180deg,#f2f2f6,#e6e8f2)}
+        .p09-home img{position:absolute;left:50%;top:44%;width:120px;margin:-60px 0 0 -60px;border-radius:48px;box-shadow:0 6px 16px rgba(0,0,0,.2)}
+        .p09-home>span{position:absolute;left:0;right:0;top:44%;margin-top:78px;text-align:center;font-size:22px;color:#222}
+        .p09-hot{position:absolute;border:0;padding:0;background:transparent;cursor:pointer;z-index:5}
+        .p09-hot,
+        .p09-hot.is-flash{outline:5px solid val(--c-pink);border-radius:8px;animation:p09-pulse .4s ease-in-out infinite alternate}
+        .p09-hot.is-plain{outline:none;animation:none}
+        /* div:not(#p09Hots) .p09-hot:hover{background:none;outline:none;animation:none} */
+        @keyframes p09-pulse{to{box-shadow:0 0 0 10px rgba(255,79,249,1)}}
+        body.is-edit .p09-hot{outline:3px dashed #e60000;background:rgba(255,79,249,.5);z-index:20}
+        .p09-bubble-ico{display:block;width:62px;height:62px;margin:0 auto 10px;border-radius:50%;background:linear-gradient(135deg,#7a7ee8,#c6a6e8);color:#fff;font-size:34px;line-height:62px;text-align:center;border:4px solid #111;box-sizing:border-box}
+        .p09-end{position:absolute;inset:0;z-index:8}
+        .p09-end.is-off{display:none}
+        /* .p09-end p{position:absolute;left:0;top:50px;width:1920px;margin:0;text-align:center;font-size:56px;font-weight:500;line-height:1.35;color:var(--c-ink);letter-spacing:-0.04em} */
+        .p09-end img.p09-result{position:absolute;left:50%;top:230px;width:1000px;height:558px;margin-left:-500px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);object-fit:cover}
+        .p09-end .next-btn-center{top:auto;bottom:10px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="guide-set is-main" id="p09Set">
+            <p class="guide-bubble is-center" id="p09Bubble"></p>
+            <div class="guide-character"><img id="p09Char" src="../img/sa_main.png" alt="메인 캐릭터"></div>
+          </div>
+          <div class="phone-frame has-cam p09-phone" id="p09Phone"><div class="phone-screen is-dark" id="p09Screen">
+            <img class="p09-img" id="p09Img" alt="" draggable="false">
+            <div class="p09-home" id="p09Home"><div class="phone-status is-dark" data-time="21:56"></div><img src="img/p09_gallery_icon.png" alt=""><span>갤러리</span></div>
+            <div id="p09Hots"></div>
+          </div></div>
+
+          <div class="p09-end is-off" id="p09End">
+            <p class="ask-pill is-fit is-medium">AI 지우개로 사진 속 개인정보를 지웠어요!<br>사진을 공유하기 전에 개인정보를 모두 지웠는지 꼭 확인해요.</p>
+            <img class="p09-result" src="img/p09_screen_38.png" alt="">
+            <a href="page10.html" class="js-nav-effect next-btn-center">
+              <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+            </a>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="AI 지우개로 개인정보 지우기" data-next="page10.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script src="../../js/box-edit.js"></script>
+  <script>
+  (function () {
+    const ICO = '<span class="p09-bubble-ico">✦</span>';
+    const FG = { hot: [-10, -20] };
+    const STEPS = [
+      { home: true, say: '갤러리를 클릭해요.', pose: 'wink_point2', hot: [37, 37.6, 26, 13], finger: true },
+      { img: 28, say: '어떤 사진을 SNS에 공유할까요?<br>원하는 사진을 클릭해봐요.', pose: 'wink_point4', hot: [2.7, 59.8, 94.6, 24.5], finger: false },
+      { img: 29, say: '앗, 사진에 개인정보가 포함되어 있어요!<br>아래의 편집하기 버튼을 눌러<br>개인정보를 지워봐요.', pose: 'wink_point2', hot: [28.5, 88, 15, 5] },
+      { img: 30, say: ICO + '포토 어시스트 버튼을 클릭해요.', pose: 'wink_point2', hot: [17.5, 89.5, 9, 4.5] },
+      { img: 32, say: 'AI 지우개를 클릭해요.', pose: 'wink_point2', hot: [14, 89, 16, 5] },
+      { img: 32, say: '개인정보가 찍힌 부분을 찾아<br>클릭해봐요.', pose: 'wink_point4', hot: [59.4, 40.5, 17, 7], hint: true },
+      { img: 33, say: '개인정보가 찍힌 부분을 찾아<br>클릭해봐요.', pose: 'wink_point4', auto: 1500 },
+      { img: 34, say: '지우기 버튼을 클릭해<br>개인정보를 지워봐요.', pose: 'wink_point2', hot: [30, 88, 40, 5] },
+      { img: 35, say: 'AI 지우개가 개인정보를<br>지우는 중이에요.', pose: 'main', auto: 1500 },
+      { img: 36, say: '개인정보가 지워졌어요!<br>완료를 눌러 편집을 마무리해요.', pose: 'wink_point2', hot: [12, 88.6, 36.4, 4.9] },
+      { img: 37, say: '다른 파일로 저장을 눌러<br>개인정보를 지운 사진을 저장해요.', pose: 'wink_point2', hot: [58, 5.8, 28, 3], long: true },
+      { end: true }
+    ];
+
+    const phone = $('p09Phone');
+    const screen = $('p09Screen');
+    const hots = $('p09Hots');
+    const say = initGuideSay({ bubble: $('p09Bubble'), img: $('p09Char'), set: $('p09Set') });
+    let si = 0, timer = 0;
+    if (BoxEdit.on) document.body.classList.add('is-edit');
+
+    const place = (el, b) => { el.style.cssText = 'left:' + b[0] + '%;top:' + b[1] + '%;width:' + b[2] + '%;height:' + b[3] + '%'; };
+    const guide = (el) => pointFingerAt(el, { onMain: true, dx: FG.hot[0], dy: FG.hot[1] });
+
+    function go(n) {
+      clearTimeout(timer);
+      clearFingers();
+      si = n;
+      const s = STEPS[si];
+      hots.innerHTML = '';
+      if (s.end) {
+        phone.style.display = 'none';
+        $('p09Set').style.display = 'none';
+        $('p09End').classList.remove('is-off');
+        return;
+      }
+      $('p09Home').style.display = s.home ? '' : 'none';
+      $('p09Img').style.display = s.home ? 'none' : '';
+      if (!s.home) $('p09Img').src = 'img/p09_screen_' + s.img + '.png';
+      say(s.say, s.pose, false, s.long);
+      if (s.auto) {
+        timer = setTimeout(() => go(si + 1), s.auto);
+        return;
+      }
+      const b = document.createElement('button');
+      if (!s.hot) s.hot = [40, 45, 20, 8];
+      b.type = 'button';
+      b.className = 'p09-hot' + (s.home ? ' is-plain' : '');
+      place(b, s.hot);
+      BoxEdit.tag(b, s.hot);
+      hots.appendChild(b);
+      b.addEventListener('click', () => {
+        if (BoxEdit.on) return;
+        playClick();
+        if (si === 5) {
+          b.classList.add('is-flash');
+          timer = setTimeout(() => go(si + 1), 300);
+          return;
+        }
+        go(si + 1);
+      });
+      if (BoxEdit.on) return;
+      if (s.hint) {
+        screen.onclick = (e) => { if (!hots.contains(e.target)) { playWrong(); guide(b); } };
+      } else {
+        screen.onclick = null;
+        if (s.finger !== false) setTimeout(() => guide(b), 400);
+      }
+    }
+
+    if (BoxEdit.on) {
+      const m = location.search.match(/[?&]step=([0-9]+)/);
+      si = m ? Math.max(0, Math.min(STEPS.length - 1, parseInt(m[1], 10))) : 0;
+      BoxEdit.init({
+        unit: 0.1,
+        name: () => '단계' + (si + 1),
+        apply: (el) => place(el, el._ref),
+        step: { count: STEPS.length, get: () => si, set: (n) => { si = n; }, go: (n) => { location.search = '?edit&step=' + n; }, label: (n) => '단계 ' + (n + 1) + ' / ' + STEPS.length }
+      });
+      STEPS.forEach((s) => { if (s.auto) s.auto = 0; });
+    }
+    go(si);
+  })();
+  </script>
+</body>
+</html>

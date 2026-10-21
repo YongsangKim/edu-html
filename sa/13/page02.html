@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>숨은 개인정보 찾기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서 3~7p. 사진 3장(방·현관·교실 책상) 차례로, 한 장마다 개인정보 3곳 찾기. 마우스 커서가 돋보기(렌즈 투명), 돋보기가 정답에 가까이 가면 '개인정보 탐지기' 경광등이 켜짐.
+           알맞은 곳 클릭 → 빨간 동그라미 채점, 3곳 모두 찾으면 해당 영역 강조 + [설명보기] → 정답 팝업 → 다음 사진. 개인정보가 아닌 글자 클릭(방: 수학 연습장·오늘도 즐겁게!, 현관: 취급 주의·운동화 상자 정보)은 오답 피드백 팝업
+           좌표는 사진 크기에 대한 [왼쪽%, 위%, 폭%, 높이%] (?edit 로 맞춤) */
+        main{cursor:none}
+        .p02-tip{position:absolute;left:0;top:28px;width:1920px;margin:0;text-align:center;font-size:52px;font-weight:500;color:#1b78d0;letter-spacing:-0.04em;word-break:keep-all}
+        .p02-photo{position:absolute;left:285px;top:135px;width:1350px;height:760px;border:solid 5px var(--c-ink);border-radius:14px;box-sizing:content-box;margin:-5px 0 0 -5px;overflow:hidden;background:#fff;box-shadow:0 10px 0 0 rgba(86,148,231,.2)}
+        .p02-photo>img{display:block;width:100%;height:100%;object-fit:fill;user-select:none;-webkit-user-drag:none}
+        .p02-box{position:absolute;box-sizing:border-box}
+        .p02-box.is-circle:after{content:'';position:absolute;left:-10%;top:-18%;width:120%;height:136%;background:url(img/p02_circle.jpeg) center / 100% 100% no-repeat;mix-blend-mode:multiply;pointer-events:none}
+        .p02-box.is-glow{background:rgba(255,216,61,.35);outline:6px solid #ffb400;outline-offset:-3px;border-radius:12px;pointer-events:none}
+        body.is-edit .p02-box{outline:3px dashed #e60000;background:rgba(255,0,0,.12);cursor:pointer;pointer-events:auto;z-index:20}
+        body.is-edit .p02-box.is-decoy{outline-color:#1b78d0;background:rgba(27,120,208,.15)}
+        body.is-edit main{cursor:default}
+
+        .p02-siren{position:absolute;left:300px;top:150px;width:200px;white-space:nowrap;text-align:center;z-index:6;font-size:26px;font-weight:700;color:var(--c-ink);text-shadow:0 0 6px #fff,0 0 6px #fff,0 0 6px #fff}
+        .p02-siren i{display:block;position:relative;width:96px;height:96px;margin:0 auto 6px}
+        .p02-siren i:before{content:'';position:absolute;left:14px;top:0;width:68px;height:60px;border-radius:34px 34px 0 0;background:#9aa0a6;border:solid 4px var(--c-ink);box-sizing:border-box;transition:background .15s,box-shadow .15s}
+        .p02-siren i:after{content:'';position:absolute;left:4px;top:56px;width:88px;height:24px;border-radius:6px;background:#555;border:solid 4px var(--c-ink);box-sizing:border-box}
+        .p02-siren.is-on i:before{background:#ff2b2b;box-shadow:0 0 0 10px rgba(255,43,43,.35),0 0 40px 18px rgba(255,43,43,.75);animation:p02-blink .35s infinite alternate}
+        @keyframes p02-blink{to{background:#ff8a8a}}
+
+        .p02-lens{position:absolute;left:0;top:0;width:130px;z-index:60;pointer-events:none;display:none;
+          -webkit-mask-image:radial-gradient(circle at 51px 51px,transparent 43px,#000 44px);mask-image:radial-gradient(circle at 51px 51px,transparent 43px,#000 44px)}
+        .p02-explain{position:absolute;left:1410px;top:825px;z-index:30;min-width:0;padding:8px 46px 4px;font-size:46px}
+        .p02-explain.is-off{display:none}
+        #p02Wrong,#p02Done{z-index:120;cursor:default}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="p02-tip" id="p02Tip"></p>
+          <div class="p02-photo" id="p02Photo"><img id="p02Img" alt="" draggable="false"></div>
+          <div class="p02-siren" id="p02Siren"><i></i><span>개인정보 탐지기</span></div>
+          <img class="p02-lens" id="p02Lens" src="img/p02_magnifier.png" alt="">
+          <button type="button" class="card-btn is-start p02-explain is-off js-sfx" id="p02Explain" data-sound="sound/click.mp3">설명보기</button>
+
+          <div class="avatar-modal is-wrong is-off" id="p02Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body is-finish is-side">
+                <p class="avatar-popup-sub" id="p02WrongText" style="font-size:44px"></p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p02WrongOk" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div>
+          <div class="avatar-modal is-off" id="p02Done">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">좋아요!</p>
+                <p class="avatar-popup-sub" id="p02DoneText"></p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p02DoneOk" data-sound="sound/click.mp3">다음</button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="숨은 개인정보 찾기" data-next="page03.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script src="../../js/box-edit.js"></script>
+  <script>
+  (function () {
+    const NEAR = 5;
+    const ROUNDS = [
+      { img: 'img/p02_photo_1.png', tip: '사진에서 내 이름이나 나를 알아볼 수 있는 정보가 있는 곳을 찾아 보세요.',
+        ok: '명찰과 학생증에는 나를 알아볼 수 있는 정보가 있어요. 공유하기 전에 가려야 해요.',
+        targets: [[11.1, 72.8, 32.3, 24.4], [58.3, 68.5, 25.1, 17], [46.4, 44.1, 8.7, 9]],
+        decoys: [
+          { box: [56.2, 85, 30.8, 9], text: '‘수학 연습장’은 공책의 제목이에요.<br>누구의 공책인지 알려주는 이름도 있는지 살펴볼까요?' },
+          { box: [64, 1.1, 28.1, 13.8], text: '이 문구는 내 이름을 알려주지 않아요.<br>글자가 있다고 모두 개인정보는 아니에요.' }
+        ] },
+      { img: 'img/p02_photo_2.png', tip: '상자와 우편물에서 이름, 집, 주소, 연락처가 보이는 곳을 찾아보세요.',
+        ok: '받는 사람의 이름과 집 주소는 가려야 해요.',
+        targets: [[4.7, 45.7, 24.5, 39.3], [49.9, 9, 30.2, 25], [85.2, 34, 8.4, 19.1]],
+        decoys: [
+          { box: [29.6, 47.8, 9.3, 22.8], text: '‘취급 주의’는 물건을 다루는 방법을 알려주는 문구예요.<br>누가 받는지 알려주는 이름도 있는지 살펴볼까요?' },
+          { box: [71.5, 72.8, 20.9, 23.9], text: '제품명과 크기, 색상은 운동화에 대한 정보예요.<br>누구의 물건인지 알려주는 이름도 있는지 살펴볼까요?' }
+        ] },
+      { img: 'img/p02_photo_3.png', tip: '개인정보가 노출된 부분을 찾아 클릭해 보세요.',
+        ok: '사진 속 개인정보를 모두 찾았어요!<br>사진을 공유하기 전에는 개인정보가 보이는지 꼭 확인해요.',
+        targets: [[11.4, 40.9, 26.6, 25], [39.8, 26, 21.8, 21.8], [67.3, 55.3, 20.9, 20.2]],
+        decoys: [] }
+    ];
+
+    const photo = $('p02Photo');
+    const lens = $('p02Lens');
+    const siren = $('p02Siren');
+    const stage = $('stage');
+    let ri = 0, found = [], locked = false, els = [];
+    if (BoxEdit.on) document.body.classList.add('is-edit');
+
+    const place = (el, b) => { el.style.cssText = 'left:' + b[0] + '%;top:' + b[1] + '%;width:' + b[2] + '%;height:' + b[3] + '%'; };
+
+    function render() {
+      const r = ROUNDS[ri];
+      $('p02Tip').textContent = r.tip;
+      $('p02Img').src = r.img;
+      photo.querySelectorAll('.p02-box').forEach((e) => e.remove());
+      $('p02Explain').classList.add('is-off');
+      siren.classList.remove('is-on');
+      found = [];
+      locked = false;
+      els = [];
+      r.targets.forEach((b, i) => {
+        const el = document.createElement('div');
+        el.className = 'p02-box';
+        el.dataset.k = 't' + i;
+        photo.appendChild(el);
+        place(el, b);
+        BoxEdit.tag(el, b);
+        els.push(el);
+      });
+      r.decoys.forEach((d, i) => {
+        const el = document.createElement('div');
+        el.className = 'p02-box is-decoy';
+        el.dataset.k = 'd' + i;
+        photo.appendChild(el);
+        place(el, d.box);
+        BoxEdit.tag(el, d.box);
+        els.push(el);
+      });
+    }
+
+    const hotspot = (e) => {
+      const r = photo.getBoundingClientRect();
+      const s = r.width / 1350;
+      return { s: s, x: (e.clientX - r.left) / s, y: (e.clientY - r.top) / s };
+    };
+    const inBox = (b, x, y, pad) => {
+      const l = b[0] * 13.5 - pad, t = b[1] * 7.6 - pad, w = b[2] * 13.5 + pad * 2, h = b[3] * 7.6 + pad * 2;
+      return x >= l && x <= l + w && y >= t && y <= t + h;
+    };
+
+    document.addEventListener('pointermove', (e) => {
+      if (BoxEdit.on) return;
+      const s = stage.getBoundingClientRect().width / 1920;
+      const mr = document.querySelector('main').getBoundingClientRect();
+      lens.style.display = 'block';
+      lens.style.transformOrigin = '0 0';
+      lens.style.transform = 'translate(' + ((e.clientX - mr.left) / s - 51) + 'px,' + ((e.clientY - mr.top) / s - 51) + 'px)';
+      if (locked) return;
+      const h = hotspot(e);
+      const r = ROUNDS[ri];
+      let near = false;
+      r.targets.forEach((b, i) => { if (!found.includes(i) && inBox(b, h.x, h.y, 70)) near = true; });
+      siren.classList.toggle('is-on', near);
+    });
+    document.addEventListener('pointerleave', () => { lens.style.display = 'none'; });
+
+    photo.addEventListener('click', (e) => {
+      if (BoxEdit.on || locked) return;
+      const h = hotspot(e);
+      const r = ROUNDS[ri];
+      const ti = r.targets.findIndex((b, i) => !found.includes(i) && inBox(b, h.x, h.y, NEAR));
+      if (ti >= 0) {
+        found.push(ti);
+        playCorrect();
+        els[ti].classList.add('is-circle');
+        if (found.length === r.targets.length) {
+          locked = true;
+          siren.classList.remove('is-on');
+          setTimeout(() => {
+            els.slice(0, r.targets.length).forEach((el) => el.classList.add('is-glow'));
+            $('p02Explain').classList.remove('is-off');
+          }, 700);
+        }
+        return;
+      }
+      const di = r.decoys.findIndex((d) => inBox(d.box, h.x, h.y, NEAR));
+      if (di >= 0) {
+        playWrong();
+        $('p02WrongText').innerHTML = r.decoys[di].text;
+        $('p02Wrong').classList.remove('is-off');
+      }
+    });
+
+    $('p02WrongOk').addEventListener('click', () => $('p02Wrong').classList.add('is-off'));
+    $('p02Explain').addEventListener('click', () => {
+      $('p02DoneText').innerHTML = ROUNDS[ri].ok;
+      $('p02Done').classList.remove('is-off');
+    });
+    $('p02DoneOk').addEventListener('click', () => {
+      if (ri === ROUNDS.length - 1) { location.href = 'page03.html'; return; }
+      $('p02Done').classList.add('is-off');
+      ri += 1;
+      render();
+    });
+
+    if (BoxEdit.on) {
+      const m = location.search.match(/[?&]step=([0-9]+)/);
+      ri = m ? Math.max(0, Math.min(ROUNDS.length - 1, parseInt(m[1], 10))) : 0;
+      BoxEdit.init({
+        unit: 0.1,
+        name: (el) => '사진' + (ri + 1) + ' ' + (el.dataset.k[0] === 't' ? '개인정보 ' : '오답 ') + (parseInt(el.dataset.k.slice(1), 10) + 1),
+        apply: (el) => place(el, el._ref),
+        step: { count: ROUNDS.length, get: () => ri, set: (n) => { ri = n; }, go: (n) => { location.search = '?edit&step=' + n; }, label: (n) => '사진 ' + (n + 1) + ' / ' + ROUNDS.length }
+      });
+    }
+    render();
+  })();
+  </script>
+</body>
+</html>

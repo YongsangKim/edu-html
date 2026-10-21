@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>안전한 SNS 업로드 챌린지</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서 38~40p. 조작 없는 SNS 확인 애니메이션: 가운데 폰 상단바는 고정, 게시물이 1.2초 간격으로 아래에서 위로 떠오르고(방 → 현관 → 교실, 공간이 모자라면 화면이 스크롤) 게시물마다 빈 하트가 빨갛게 채워짐.
+           끝나면 전체 화면 팡파레(색종이) 후 오른쪽 아래에 [다음] → 배지 획득 팝업 [확인] → 마무리(page14). 사진은 page12에서 고른 3장(sessionStorage sa13_picks, 없으면 기본 3장) */
+        .p13-phone .phone-screen{background:#fff}
+        .p13-bar{position:absolute;left:0;top:40px;width:100%;height:64px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;background:#fff;border-bottom:1px solid #e3e3e8;z-index:5}
+        .p13-feed{position:absolute;left:0;top:104px;width:100%;bottom:46px;overflow:hidden}
+        .p13-list{position:absolute;left:0;top:0;width:100%;transition:transform .9s ease}
+        .p13-post{padding:14px 20px 8px;opacity:0;transform:translateY(60px);transition:opacity .7s ease,transform .7s ease}
+        .p13-post.is-in{opacity:1;transform:none}
+        .p13-post>img{display:block;width:100%;height:250px;object-fit:cover;border:1px solid #ccd;border-radius:6px}
+        .p13-like{display:flex;align-items:center;gap:14px;height:62px;font-size:28px;color:#222}
+        .p13-like svg{width:44px;height:44px;fill:none;stroke:#333;stroke-width:1.8;stroke-linejoin:round;transition:fill .2s,stroke .2s}
+        .p13-post.is-liked .p13-like svg{fill:#ff3b5c;stroke:#ff3b5c;animation:p13-pop .5s ease}
+        .p13-like{position:relative}
+        .p13-like .p13-burst{position:absolute;left:4px;top:8px;width:44px;height:44px;pointer-events:none}
+        .p13-post.is-liked .p13-burst{animation:p13-ring .7s ease-out}
+        .p13-burst:before,.p13-burst:after{content:'';position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px;border-radius:50%;background:transparent}
+        .p13-post.is-liked .p13-burst:before{box-shadow:0 -34px #ffb400,24px -24px #ff6b9a,34px 0 #4cc3ff,24px 24px #7ee05a,0 34px #ffb400,-24px 24px #ff6b9a,-34px 0 #4cc3ff,-24px -24px #7ee05a;animation:p13-fly .7s ease-out forwards}
+        @keyframes p13-pop{40%{transform:scale(1.5)}100%{transform:scale(1)}}
+        @keyframes p13-fly{from{transform:scale(.3);opacity:1}to{transform:scale(1.4);opacity:0}}
+        @keyframes p13-ring{from{opacity:1}to{opacity:1}}
+        .p13-fan{position:absolute;left:0;top:0;width:1920px;height:960px;object-fit:cover;pointer-events:none;z-index:40;opacity:0;transition:opacity .4s}
+        .p13-fan.is-on{opacity:1}
+        .p13-next{position:absolute;right:60px;bottom:40px;z-index:45}
+        .p13-next.is-off{display:none}
+        #p13Badge{z-index:120}
+        #p13Badge .avatar-popup-avatar img{background:#ffd84a}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="phone-frame has-cam p13-phone"><div class="phone-screen">
+            <div class="phone-status is-dark" data-time="21:57"></div>
+            <div class="p13-bar">나의 SNS 둘러보기</div>
+            <div class="p13-feed"><div class="p13-list" id="p13List"></div></div>
+            <div class="phone-nav"></div>
+          </div></div>
+          <img class="p13-fan" id="p13Fan" src="img/p13_confetti.png" alt="">
+          <a href="javascript:;" class="js-sfx p13-next is-off" id="p13Next" data-sound="sound/click.mp3">
+            <img src="../../img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" alt="다음">
+          </a>
+
+          <div class="avatar-modal is-off" id="p13Badge">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="img/p13_badge.png" alt="배지"></div>
+              <div class="avatar-popup-body is-finish is-side">
+                <p class="avatar-popup-sub" style="font-size:52px">디지털 안전 지킴이 배지를<br>획득했어요!</p>
+                <a href="page14.html" class="js-nav-effect avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">확인</a>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="안전한 SNS 업로드 챌린지" data-next="page14.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    let imgs = ['img/p02_photo_1_clean.png', 'img/p02_photo_2.png', 'img/p02_photo_3.png'];
+    try { const v = JSON.parse(sessionStorage.getItem('sa13_picks') || 'null'); if (v && v.length === 3) imgs = v; } catch (e) {}
+    const HEART = '<svg viewBox="0 0 24 24"><path d="M12 21C5 16 2 12.5 2 9a5 5 0 0 1 10-1 5 5 0 0 1 10 1c0 3.5-3 7-10 12z"/></svg>';
+    const list = $('p13List');
+    imgs.forEach((src) => {
+      const p = document.createElement('div');
+      p.className = 'p13-post';
+      p.innerHTML = '<img src="' + src + '" alt=""><div class="p13-like">' + HEART + '<i class="p13-burst"></i>좋아요</div>';
+      list.appendChild(p);
+    });
+    const posts = list.querySelectorAll('.p13-post');
+    const at = (ms, fn) => setTimeout(fn, ms);
+    const STEP = 1300;
+    at(800, () => posts[0].classList.add('is-in'));
+    at(800 + STEP, () => { posts[0].classList.add('is-liked'); playCorrect(); });
+    at(800 + STEP * 2, () => posts[1].classList.add('is-in'));
+    at(800 + STEP * 3, () => { posts[1].classList.add('is-liked'); playCorrect(); });
+    at(800 + STEP * 4, () => { list.style.transform = 'translateY(-' + (posts[0].offsetHeight + 40) + 'px)'; });
+    at(800 + STEP * 5, () => posts[2].classList.add('is-in'));
+    at(800 + STEP * 6, () => { posts[2].classList.add('is-liked'); playCorrect(); });
+    at(800 + STEP * 7, () => { $('p13Fan').classList.add('is-on'); playCorrect(); $('p13Next').classList.remove('is-off'); });
+    $('p13Next').addEventListener('click', () => $('p13Badge').classList.remove('is-off'));
+  })();
+  </script>
+</body>
+</html>
