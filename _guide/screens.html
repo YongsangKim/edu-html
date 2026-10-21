@@ -10,6 +10,11 @@
         .g-cmp .g-view{width:640px;height:320px}
         .g-cmp .g-stage{transform:scale(.3333)}
         .g-cmp .g-item{width:672px}
+        .g-colors{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 26px}
+        .g-color{width:132px;padding:8px;box-sizing:border-box;background:#fff;border-radius:10px;box-shadow:0 1px 5px rgba(0,0,0,.12);font-size:13px;line-height:1.35}
+        .g-color i{display:block;height:44px;margin-bottom:6px;border-radius:6px;border:1px solid rgba(0,0,0,.12)}
+        .g-color b{display:block;font-size:13px}
+        .g-color code{font-size:13px}
         .g-diff{width:100%;border-collapse:collapse;font-size:15px;background:#fff}
         .g-diff th, .g-diff td{padding:8px 12px;border:1px solid #cfd6e2;text-align:left;vertical-align:top;line-height:1.5}
         .g-diff th{background:#eef1f6}
@@ -19,6 +24,18 @@
   <div class="g-wrap">
     <h1>레이아웃</h1>
     <p class="g-note">실제 화면(1920×960)을 절반 크기로 보여줌. 공용 <code>css/common.css</code>를 고치면 실제 페이지에도 그대로 반영됨. <span class="g-local">페이지 전용 스타일</span> 표시가 있는 항목은 그 페이지 &lt;style&gt;의 복사본이라 여기서 고친 뒤 원래 페이지에도 옮겨야 함.</p>
+    <p class="g-note"><b>공용 색 변수</b> — <code>css/common.css</code>의 <code>:root</code>에 정의한 색. 쓸 때는 <code>var(--c-이름)</code>으로 가져다 씀(색 코드는 <code>common.css</code>에서 읽어 보여주고, 변수를 새로 만들면 아래 스크립트의 이름 목록에도 추가)</p>
+    <div class="g-colors" id="gColors"></div>
+    <script>
+      (function () {
+        var names = ['ink', 'white', 'purple', 'cream', 'yellow', 'sky-pale', 'sky', 'blue', 'violet', 'indigo', 'pale', 'mist', 'navy', 'pink', 'hotpink'];
+        var cs = getComputedStyle(document.documentElement);
+        document.getElementById('gColors').innerHTML = names.map(function (n) {
+          var v = cs.getPropertyValue('--c-' + n).trim();
+          return '<div class="g-color"><i style="background:var(--c-' + n + ')"></i><b>--c-' + n + '</b><code>' + v + '</code></div>';
+        }).join('');
+      })();
+    </script>
     <ul class="g-toc"></ul>
 
         <h2>1. 영상 화면 <code>.video-box</code> + <code>.next-btn-center</code> — 공용화 완료</h2>
@@ -132,7 +149,7 @@
       <div class="g-item">
         <p class="g-meta"><b>기본 틀 + 카메라 홀</b> <code>.phone-frame.has-cam</code> (450×895)</p>
         <div class="g-view"><div class="g-stage bg-default">
-          <div class="phone-frame is-thin has-cam" style="left:735px;top:21px;width:450px;height:895px"><div class="phone-screen"><div class="phone-status is-dark"><span>13:13</span></div><div class="phone-nav"><i></i><b></b><u></u></div></div></div>
+          <div class="phone-frame has-cam"><div class="phone-screen"><div class="phone-status is-dark"><span>13:13</span></div><div class="phone-nav"><i></i><b></b><u></u></div></div></div>
         </div></div>
       </div>
       <div class="g-item">

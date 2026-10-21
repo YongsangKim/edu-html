@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>제미나이 Notebook으로 PPT 만들기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* STB 실습만 기획서 1~15p. 왼쪽 캐릭터 말풍선 세트, 가운데 공용 폰 틀(Gemini Notebook 앱 화면: 공용 .gn-*), 오른쪽 안내·선택 영역.
+           흐름: 앱 → 새로 만들기 → 파일 → 믿을 수 있는 PDF 2개 고르기 → 업로드 → 노트북 제목 고르기 → 스튜디오 → 슬라이드 자료 → 맞춤설정(질문 5개) → 생성 → 7초 → 슬라이드 확인(검수 3칸) → 저장하기 → 마무리 팝업.
+           생성 완료 화면(슬라이드 그림)은 아직 없어 자리만 잡음 */
+        .p07-side{position:absolute;left:1225px;top:150px;width:640px;display:flex;flex-direction:column;gap:18px}
+        .p07-side:empty{display:none}
+        .p07-side .card-btn{width:100%;min-width:0;height:130px;padding:8px 18px 4px;font-size:40px;line-height:1.2;letter-spacing:-0.05em}
+        .p07-tip{box-sizing:border-box;padding:22px 26px;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:22px;box-shadow:0 8px 0 0 rgba(86,148,231,.2)}
+        .p07-tip h4{margin:0 0 10px;font-family:'Cafe24 Ssurround';font-size:38px;color:var(--c-navy);letter-spacing:-0.05em}
+        .p07-tip p{margin:0 0 10px;font-family:'Pretendard';font-weight:600;font-size:27px;line-height:1.4;color:#222;letter-spacing:-0.03em;word-break:keep-all}
+        .p07-tip p b{display:block;font-size:29px;color:#1f5fd0}
+        .p07-tip.is-msg{font-family:'Cafe24 Ssurround';font-size:38px;text-align:center;letter-spacing:-0.05em;word-break:keep-all}
+        .p07-tip.is-msg.is-right{border-color:#1a7f37;color:#1a7f37}
+        .p07-tip.is-msg.is-wrong{border-color:#c0392b;color:#c0392b}
+        .p07-q{box-sizing:border-box;padding:30px 30px 34px;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:30px}
+        .p07-q h5{margin:0 0 22px;font-family:'Cafe24 Ssurround';font-size:42px;white-space:nowrap;color:var(--c-navy);letter-spacing:-0.05em}
+        .p07-q div{display:flex;gap:16px}
+        .p07-q button{flex:1 1 0;min-height:150px;padding:10px 12px 4px;border:solid 5px var(--c-ink);border-radius:22px;background:#f4f6ff;cursor:pointer;font-family:'Cafe24 Ssurround';font-size:38px;line-height:1.2;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all}
+        .p07-q button:hover{background:#e4ebff}
+        .p07-q button.is-on{background:#ffe58a}
+        .p07-q button.is-wrong{animation:p07-shake .4s}
+        .p07-q.is-done{opacity:.55}
+        @keyframes p07-shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+        .p07-pick{position:absolute;left:0;right:0;top:122px;display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 18px}
+        .p07-pick button{position:relative;height:250px;box-sizing:border-box;border:solid 2px #d6d6dd;border-radius:10px;background:#fff;padding:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;font-family:inherit;font-size:19px;font-weight:600;color:#222;text-align:center}
+        .p07-pick button .gn-pdf{width:68px;height:68px;font-size:18px}
+        .p07-pick button.is-on{border-color:#4655e8;background:#eceefb}
+        .p07-pick button.is-on:after{content:'✓';position:absolute;right:8px;top:6px;width:32px;height:32px;border-radius:50%;background:#4655e8;color:#fff;font-size:20px;line-height:32px}
+        .p07-pick button.is-wrong{animation:p07-shake .4s}
+        .p07-title-opts{position:absolute;left:18px;right:18px;top:228px;display:flex;flex-direction:column;gap:10px;z-index:4}
+        .p07-title-opts button{height:56px;border:solid 2px #cfd0e0;border-radius:14px;background:#fff;font-family:inherit;font-size:19px;font-weight:600;cursor:pointer}
+        .p07-title-opts button:hover{background:#eceefb}
+        .p07-chk{display:flex;align-items:center;gap:12px;margin:0 0 12px;padding:14px 16px;border:solid 4px var(--c-ink);border-radius:18px;background:#fff;cursor:pointer;font-family:'Cafe24 Ssurround';font-size:32px;line-height:1.2;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all}
+        .p07-chk i{flex:0 0 auto;width:44px;height:44px;box-sizing:border-box;border:solid 4px var(--c-ink);border-radius:10px;background:#fff;font-style:normal;font-size:34px;line-height:34px;text-align:center;color:#1a7f37}
+        .p07-chk.is-on i:before{content:'✓'}
+        .p07-slide-ph{height:150px;border-radius:10px;background:#e9ecf5;display:flex;align-items:center;justify-content:center;font-size:19px;color:#667;font-weight:700}
+        .gn-load{position:absolute;left:0;right:0;top:300px;display:flex;flex-direction:column;align-items:center;gap:16px;font-size:20px;font-weight:600;text-align:center}
+        .gn-load .gn-spin{width:56px;height:56px;border-width:7px}
+        .gn-prompt{position:absolute;left:18px;right:18px;top:350px;padding:18px;border:solid 2px #cfd0e0;border-radius:16px;font-size:17px;line-height:1.55;color:#333;background:#fff}
+        .gn-go.is-wait{opacity:.35;pointer-events:none}
+        #p07Done{z-index:120}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="guide-set is-main" id="p07Set">
+            <p class="guide-bubble is-center" id="p07Bubble"></p>
+            <div class="guide-character"><img id="p07Char" src="../img/sa_main.png" alt="메인 캐릭터"></div>
+          </div>
+
+          <div class="phone-frame has-cam" id="p07Phone"><div class="gn-screen" id="p07Scr"></div></div>
+          <div class="p07-side" id="p07Side"></div>
+
+          <div class="avatar-modal is-off" id="p07Done">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish is-side">
+                <p class="avatar-popup-text is-small">훌륭한 발표자료가 완성되었어요.</p>
+                <p class="avatar-popup-sub" style="font-size:42px">믿을 수 있는 정보로 생성해서, 설득력이 높은 발표자료가 만들어졌어요. 검수까지 완료했어요.<br>이제 퀴즈를 풀며 배운 내용을 확인해볼까요?</p>
+                <a href="page08.html" class="js-nav-effect avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="제미나이 Notebook으로 PPT 만들기" data-next="page08.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script src="../../js/box-edit.js"></script>
+  <script>
+  (function () {
+    const I = '../../img/common/';
+    const scr = $('p07Scr');
+    const side = $('p07Side');
+    const bubble = $('p07Bubble');
+    const charImg = $('p07Char');
+    const charSet = $('p07Set');
+    const phone = $('p07Phone');
+
+    const ST = (t) => '<div class="phone-status is-dark" data-time="' + t + '"></div>';
+    const NAV = '<div class="phone-nav"></div>';
+    const ICON = {
+      back: '<svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
+      share: '<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.4"/><circle cx="6" cy="12" r="2.4"/><circle cx="18" cy="19" r="2.4"/><path d="M8.2 10.8l7.6-4.5M8.2 13.2l7.6 4.5"/></svg>',
+      more: '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg>',
+    };
+    const PDF = '<span class="gn-pdf">PDF</span>';
+    const topbar = (t) => '<div class="gn-bar">' + ICON.back + '<em class="is-title">' + t + '</em>' + ICON.share + ICON.more + '</div>';
+    const tabs = (on) => '<div class="gn-tabs">' + [['source', '소스'], ['chat', '채팅'], ['studio', '스튜디오']].map(([k, l]) => '<div' + (on === k ? ' class="is-on"' : '') + ' data-tab="' + k + '"><img class="gn-tab-ico' + (on === k ? '' : ' is-src') + '" src="' + I + 'gn_tab_' + k + '.png" alt="">' + l + '</div>').join('') + '</div>';
+    const fab = (txt, id) => '<div class="gn-fab" style="bottom:150px"><span class="gn-cam"><img src="' + I + 'gn_photo.png" alt=""></span><span class="gn-btn" id="' + (id || '') + '">＋ ' + txt + '</span></div>';
+    const TILES = [
+      ['audio', '<path d="M4 9v6M8 6v12M12 10v4M16 7v10M20 10v4"/>', 'AI 오디오 오버뷰'],
+      ['video', '<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M10 10v5l4-2.5z"/>', 'AI 동영상 오버뷰'],
+      ['slide', '<rect x="3" y="5" width="18" height="14" rx="2"/>', '슬라이드 자료'],
+      ['card', '<rect x="4" y="7" width="15" height="12" rx="2"/><path d="M8 4h12v12"/>', '플래시카드'],
+      ['quiz', '<rect x="4" y="5" width="14" height="14" rx="2"/><path d="M9.5 10a2.5 2.5 0 115 0c0 1.5-2.5 2-2.5 3.5M12 16.5h.01"/>', '퀴즈'],
+      ['info', '<path d="M5 19V9M10 19V5M15 19v-7M20 19V8"/>', '인포그래픽'],
+      ['report', '<path d="M6 4h9l4 4v12H6z"/><path d="M9 13h7M9 17h5"/>', '보고서'],
+    ].map(([c, s, l]) => '<button type="button" class="gn-tile is-' + c + '" data-tile="' + c + '"><svg viewBox="0 0 24 24">' + s + '</svg>' + l + '</button>').join('');
+
+    const say = initGuideSay({ bubble: bubble, img: charImg, set: charSet });
+    const FG = { app: [15, -37], nb: [0, 0], file: [0, 0], studio: [0, 0], slide: [0, 0], go: [0, -50], open: [0, 0], save: [0, -50] };
+    const finger = (sel, key) => {
+      const el = typeof sel === 'string' ? scr.querySelector(sel) : sel;
+      if (el) pointFingerAt(el, { onMain: true, dx: FG[key][0], dy: FG[key][1], beside: true });
+    };
+    const go = (fn) => { clearFingers(); fn(); };
+    const setSide = (html) => { side.innerHTML = html || ''; };
+    const msgTip = (html, cls) => '<div class="p07-tip is-msg ' + (cls || '') + '">' + html + '</div>';
+    const next = (label, fn) => {
+      setSide('<button type="button" class="card-btn js-sfx" data-sound="sound/click.mp3" id="p07NextBtn">' + label + '</button>');
+      $('p07NextBtn').addEventListener('click', () => go(fn));
+    };
+
+    /* 1 앱 */
+    function s1() {
+      scr.innerHTML = '<div class="app-home is-purple">' + ST('9:39') + '<button type="button" class="app-icon is-dark" id="p07App" aria-label="Gemini Notebook"><i><img src="' + I + 'gn_app_icon.png" alt=""></i>Notebook</button>' + NAV + '</div>';
+      setSide('');
+      say('신뢰할 수 있는 문서를 올려<br>PPT를 만들어 볼까요?<br>Gemini Notebook을 클릭!', 'wink_point3');
+      $('p07App').onclick = () => { playClick(); go(s2); };
+    }
+    /* 2 새로 만들기 */
+    function s2() {
+      scr.innerHTML = ST('9:39') + '<div class="gn-bar" style="border:0;font-size:29px;font-weight:500"><em>Gemini Notebook</em><span><img src="' + I + 'gn_search.png" alt=""></span><span style="display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;background:#5a9a2f;color:#fff;font-size:20px">Y</span></div><div style="position:absolute;left:0;right:0;top:355px;text-align:center"><div style="font-size:60px"><img src="' + I + 'gn_start.png" alt=""></div><div style="font-size:26px">시작하기</div><div style="margin-top:8px;font-size:16px;color:#555">아래에서 첫 번째 노트북을 만들어 보세요</div></div>' + fab('새로 만들기', 'p07New').replace('bottom:150px', 'bottom:140px') + NAV;
+      say('‘+ 새로 만들기’를 클릭하세요.', 'wink_point2');
+      $('p07New').onclick = () => { playClick(); go(s3); };
+      finger('#p07New', 'nb');
+    }
+    /* 3 소스 추가 시트 */
+    function s3() {
+      scr.innerHTML = ST('9:39') + '<div class="gn-dim"></div><div class="gn-sheet"><span class="gn-sheet-x">✕</span><p class="gn-sheet-title">다음에서 AI 오디오 오버뷰를 만드세요</p><p class="gn-sheet-sub">내 문서</p><div class="gn-search">웹에서 소스를 찾으세요.<i>➤</i></div><p class="gn-note">또는 파일 업로드하기</p><div class="gn-list"><div id="p07File"><img src="' + I + 'gn_src_file.png" alt="">PDF 파일</div><div><img src="' + I + 'gn_src_photo.png" alt="">사진</div><div><img src="' + I + 'gn_src_web.png" alt="">웹사이트</div><div><img src="' + I + 'gn_src_text.png" alt="">복사된 텍스트</div><div><img src="' + I + 'gn_src_play.png" alt="">Google Play 북</div><div><img src="' + I + 'gn_src_drive.png" alt="">Drive</div></div><p class="gn-foot">가져온 후 Drive 파일이 자동으로 동기화됩니다.</p></div>' + NAV;
+      say('‘PDF’를 클릭해<br>소스로 추가해요.', 'wink_point3');
+      $('p07File').style.cursor = 'pointer';
+      $('p07File').onclick = () => { playClick(); go(s4); };
+      finger('#p07File', 'file');
+    }
+    /* 4 파일 고르기 */
+    const FILES = [
+      { k: 'police', name: '경찰서 공식 · 개인정보보호수칙', ok: true },
+      { k: 'edu', name: '시 교육청 공식 · 올바른 인터넷 사용법', ok: true },
+      { k: 'tv', name: '꿀잼TV · 무료다운로드', ok: false },
+      { k: 'com', name: '커뮤니티 · 알수없음', ok: false },
+    ];
+    function s4() {
+      scr.innerHTML = ST('9:41') + '<div class="gn-bar" style="border:0"><em class="is-title">최근 파일</em></div><div class="p07-pick" id="p07Pick">' + shuffleArray(FILES).map((f) => '<button type="button" data-k="' + f.k + '">' + PDF + f.name + '</button>').join('') + '</div>' + NAV;
+      say('믿을 수 있는 자료 2개를<br>골라 주세요.', 'wink_point4');
+      setSide('<div class="p07-tip"><h4>자료를 고를 때 확인해요!</h4><p><b>누가 만들었나요?</b>만든 기관, 출처를 확인해요.</p><p><b>올바른 행동을 알려 주나요?</b>개인정보를 지키고, 다른 사람을 존중하는 내용인지 살펴봐요.</p><p><b>겁을 주거나 공유를 강요 하나요?</b>확인되지 않은 소문이나 공유를 강요하는 내용은 의심해요.</p><p><b>개인정보 입력이나 모르는 파일 다운로드를 요구하나요?</b>모르는 링크를 누르라는 내용은 주의해요.</p></div><div id="p07PickMsg"></div>');
+      let okCount = 0;
+      Array.from($('p07Pick').children).forEach((b) => b.addEventListener('click', () => {
+        if (b.classList.contains('is-on')) return;
+        const f = FILES.find((x) => x.k === b.dataset.k);
+        if (!f.ok) {
+          playWrong();
+          b.classList.remove('is-wrong'); void b.offsetWidth; b.classList.add('is-wrong');
+          $('p07PickMsg').innerHTML = msgTip('믿을 수 없는 정보가 섞여 있어요. 다시 한 번 살펴볼까요?<br><small style="font-size:28px">제작자, 출처, 내용을 꼼꼼하게 살펴보세요.</small>', 'is-wrong');
+          return;
+        }
+        playCorrect();
+        b.classList.add('is-on');
+        okCount += 1;
+        $('p07PickMsg').innerHTML = msgTip('믿을 수 있는 정보를 잘 골랐어요!', 'is-right');
+        if (okCount === 2) setTimeout(() => go(s5), 1200);
+      }));
+    }
+    /* 5 업로드 */
+    function s5() {
+      setSide('');
+      say('PDF 자료가<br>업로드 중이에요..', 'main');
+      scr.innerHTML = ST('9:42') + topbar('제목 없는 노트북') + '<div class="gn-sec"><b>소스</b>' + ICON.more + '</div><div class="gn-srcs"><div class="gn-src"><i class="gn-spin"></i>' + FILES[0].name.split(' · ')[0] + '</div><div class="gn-src"><i class="gn-spin"></i>교육청</div></div>' + fab('소스 추가') + tabs('source') + NAV;
+      setTimeout(() => {
+        scr.querySelector('.gn-srcs').innerHTML = '<div class="gn-src">' + PDF + '경찰서 · 우리 동네 안전 시설 안내</div><div class="gn-src">' + PDF + '교육청 · 인터넷 언어 예절 안내</div>';
+        say('PDF 자료가<br>업로드 되었어요!', 'main_wave');
+        setTimeout(() => go(s6), 1800);
+      }, 3000);
+    }
+    /* 6 제목 고르기 */
+    function s6() {
+      scr.innerHTML = ST('9:42') + topbar('<span id="p07Ttl">제목 없는 노트북</span>') + '<div class="gn-sec"><b>소스</b>' + ICON.more + '</div><div class="gn-srcs"><div class="gn-src">' + PDF + '경찰서 · 우리 동네 안전 시설 안내</div><div class="gn-src">' + PDF + '교육청 · 인터넷 언어 예절 안내</div></div>' + fab('소스 추가') + tabs('source') + NAV;
+      say('슬라이드 주제에 맞게<br>이름을 수정해볼까요?', 'wink_point2');
+      setSide('<div class="p07-q"><h5>노트북 제목을 골라 주세요</h5><div style="flex-direction:column"><button type="button" data-ok="1">우리 동네 안전 PPT 슬라이드</button><button type="button">우리 동네 경찰서 소개 자료</button><button type="button">올바른 인터넷 언어 예절</button></div></div><div id="p07TtlMsg"></div>');
+      Array.from(side.querySelectorAll('.p07-q button')).forEach((b) => b.addEventListener('click', () => {
+        if (!b.dataset.ok) {
+          playWrong();
+          b.classList.remove('is-wrong'); void b.offsetWidth; b.classList.add('is-wrong');
+          $('p07TtlMsg').innerHTML = msgTip('선택한 자료의 제목을 자세히 살펴보고, 모든 자료와 어울리는 제목을 골라보세요.', 'is-wrong');
+          return;
+        }
+        playCorrect();
+        $('p07Ttl').textContent = b.textContent;
+        $('p07TtlMsg').innerHTML = msgTip('잘했어요! 선택한 자료의 내용과 어울리는 제목이예요.', 'is-right');
+        setTimeout(() => go(s7), 2000);
+      }));
+    }
+    /* 7 스튜디오 탭 */
+    function s7() {
+      setSide('');
+      scr.innerHTML = ST('9:44') + topbar('우리 동네 안전 PPT 슬라이드') + '<div class="gn-sec"><b>소스</b>' + ICON.more + '</div><div class="gn-srcs"><div class="gn-src">' + PDF + '경찰서 · 우리 동네 안전 시설 안내</div><div class="gn-src">' + PDF + '교육청 · 인터넷 언어 예절 안내</div></div>' + fab('소스 추가') + tabs('source') + NAV;
+      say('이제 슬라이드를 만들어볼까요? ‘스튜디오’를 클릭하세요.', 'wink_point3');
+      const t = scr.querySelector('[data-tab="studio"]');
+      t.style.cursor = 'pointer';
+      t.onclick = () => { playClick(); go(s8); };
+      finger(t, 'studio');
+    }
+    /* 8 슬라이드 자료 */
+    function s8() {
+      scr.innerHTML = ST('9:44') + topbar('우리 동네 안전 PPT 슬라이드') + '<div class="gn-grid-title">새로 생성</div><div class="gn-grid">' + TILES + '</div><div class="gn-empty"><svg viewBox="0 0 24 24"><path d="M5 19l9-9M14 6l4 4M17 3v3M19 5h-3M7 5v2M8 6H6"/></svg>스튜디오 출력이 여기에 저장됩니다</div>' + tabs('studio') + NAV;
+      say('‘슬라이드 자료’를 클릭하세요.', 'wink_point2');
+      const t = scr.querySelector('[data-tile="slide"]');
+      t.onclick = () => { playClick(); go(s9); };
+      finger(t, 'slide');
+    }
+    /* 9 맞춤설정: 질문 5개 */
+    const QS = [
+      { q: '무엇을 위한 자료인가요?', ok: '우리 동네 안전과 디지털 예절 알리기', no: '광고 메시지 스타일로' },
+      { q: '발표를 듣는 사람은 누구인가요?', ok: '우리 동네 중고등학생', no: '할아버지, 할머니' },
+      { q: '어떤 말투로 만들까요?', ok: '쉽고 친절한 말투', no: '전문적인 말투' },
+      { q: '글과 그림은 어떻게 넣을까요?', ok: '그림을 많이, 글은 짧게', no: '이해하기 쉬운 웹툰 스타일' },
+      { q: '슬라이드 방향은 어떻게 할까요?', ok: '가로형', no: '세로형' },
+    ];
+    function s9() {
+      scr.innerHTML = ST('9:45') + '<div class="gn-set"><svg class="gn-set-x" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg><div class="gn-set-ico"><svg viewBox="0 0 24 24"><path d="M8 4v2M7 5h2M18.5 9.5l-9 9L6 19l.5-3.5 9-9z"/></svg></div><p class="gn-set-title">슬라이드 맞춤설정</p><p class="gn-set-lab">언어</p><div class="gn-chips"><span class="gn-chip is-fill">한국어(기본)</span></div><p class="gn-set-lab">소스</p><div class="gn-chips"><span class="gn-chip is-fill">2</span></div><p class="gn-set-lab">프롬프트</p><div class="gn-text" id="p07Prompt" style="min-height:230px">질문에 답하면 프롬프트가 여기에 만들어져요.</div></div>';
+      say('질문에 답하며,<br>프롬프트를 입력해볼까요?', 'wink_point4');
+      setSide(QS.map((x, i) => '<div class="p07-q" data-i="' + i + '"' + (i ? ' style="display:none"' : '') + '><h5>' + x.q + '</h5><div>' + shuffleArray([['1', x.ok], ['', x.no]]).map(([o, t]) => '<button type="button" data-ok="' + o + '">' + t + '</button>').join('') + '</div></div>').join(''));
+      const parts = [];
+      const TEXT = ['우리 동네의 안전한 디지털 환경을 만들기 위해', '우리 동네 중고등학생을 위한 발표 자료야.', '중학생도 이해하기 쉬운 친절한 말투로 작성해주고,', '그림이 많아서 쉽게 이해할 수 있게 만들어 줘.', ''];
+      Array.from(side.querySelectorAll('.p07-q')).forEach((box, i) => {
+        Array.from(box.querySelectorAll('button')).forEach((b) => b.addEventListener('click', () => {
+          if (!b.dataset.ok) {
+            playWrong();
+            b.classList.remove('is-wrong'); void b.offsetWidth; b.classList.add('is-wrong');
+            return;
+          }
+          playCorrect();
+          b.classList.add('is-on');
+          box.classList.add('is-done');
+          Array.from(box.querySelectorAll('button')).forEach((x) => { x.disabled = true; });
+          parts[i] = TEXT[i];
+          $('p07Prompt').textContent = parts.filter(Boolean).join(' ');
+          const n = side.querySelector('.p07-q[data-i="' + (i + 1) + '"]');
+          if (n) setTimeout(() => { box.style.display = 'none'; n.style.display = ''; }, 700);
+          else setTimeout(() => go(s10), 1200);
+        }));
+      });
+    }
+    /* 10 생성 클릭 */
+    function s10() {
+      setSide('');
+      scr.querySelector('.gn-set').insertAdjacentHTML('beforeend', '<span class="gn-go" id="p07Go">생성</span>');
+      say('프롬프트가 완성되었어요. ‘생성’을 클릭하세요.', 'wink_point2');
+      $('p07Go').onclick = () => { playClick(); go(s11); };
+      finger('#p07Go', 'go');
+    }
+    /* 11 생성 중 7초 */
+    function s11() {
+      say('생성 중이에요..', 'main');
+      scr.innerHTML = ST('9:45') + topbar('우리 동네 안전 PPT 슬라이드') + '<div class="gn-grid-title">새로 생성</div><div class="gn-grid">' + TILES + '</div><div class="gn-gen"><div class="gn-gen-card"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/></svg><div><b>생성 중…</b><small>잠시 후 다시 시도해 주세요</small></div></div><span class="gn-ghost">닫기</span></div>' + tabs('studio') + NAV;
+      setTimeout(() => go(s12), 7000);
+    }
+    /* 12 생성 완료 → 열기 */
+    function s12() {
+      scr.innerHTML = ST('9:57') + topbar('우리 동네 안전 PPT 슬라이드') + '<div class="gn-grid-title">새로 생성</div><div class="gn-grid">' + TILES + '</div><div class="gn-out" id="p07Out"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/></svg><div><b>에듀테크 AI 학습 경험 설계 블루프린트</b><small>소스 2개 • 방금</small></div></div>' + tabs('studio') + NAV;
+      say('슬라이드가 생성 되었어요!<br>확인해볼까요?', 'wink_point2');
+      $('p07Out').onclick = () => { playClick(); go(s13); };
+      finger('#p07Out', 'open');
+    }
+    /* 13 검수 */
+    function s13() {
+      scr.innerHTML = '<div class="gn-view">' + ST('9:57') + '<div class="gn-view-bar">' + ICON.back + '<i></i>' + ICON.share + ICON.more + '</div><div class="gn-view-body"><div class="gn-view-slide" style="display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#556">표지 – 디지털 안전 수칙</div><div class="gn-view-slide" style="display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#556">페이지 – 우리의 약속</div></div><div class="gn-view-meta"><b>우리 동네 안전 PPT 슬라이드</b><small>소스 2개 • 방금</small></div></div>' + NAV;
+      say('발표자료가 완성되었어요.<br>AI가 잘 만들었는지<br>검수해봐야 해요.', 'wink_point3');
+      const CH = ['내가 제공한 자료와 내용이 일치하나요?', '듣는 사람을 고려하여 작성되었나요?', '잘못된 정보는 없나요?'];
+      setSide('<div>' + CH.map((c) => '<div class="p07-chk">' + '<i></i>' + c + '</div>').join('') + '</div>');
+      let n = 0;
+      Array.from(side.querySelectorAll('.p07-chk')).forEach((c) => c.addEventListener('click', () => {
+        if (c.classList.contains('is-on')) return;
+        playClick();
+        c.classList.add('is-on');
+        n += 1;
+        if (n === CH.length) setTimeout(() => go(s14), 1000);
+      }));
+    }
+    /* 14 저장하기 */
+    function s14() {
+      setSide('');
+      say('검수를 모두 완료했어요.<br>[저장하기]를 클릭하면 끝!', 'wink_point2');
+      scr.querySelector('.gn-view').insertAdjacentHTML('beforeend', '<span class="gn-go" id="p07Save" style="bottom:130px">저장하기</span>');
+      $('p07Save').onclick = () => { playClick(); go(s15); };
+      finger('#p07Save', 'save');
+    }
+    /* 15 종료 */
+    function s15() {
+      say('훌륭한 발표자료가 완성되었어요.', 'happy_jump');
+      playCorrect();
+      setTimeout(() => $('p07Done').classList.remove('is-off'), 700);
+    }
+
+    /* ?edit : 손가락 dx,dy(FG)만 클릭해 방향키로 맞춤. ?edit&step=1~14 (표시줄 값을 코드의 FG 에 옮겨 적음) */
+    const STEPS = [s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15];
+    const FGKEY = { 1: 'app', 2: 'nb', 3: 'file', 7: 'studio', 8: 'slide', 10: 'go', 12: 'open', 14: 'save' };
+    if (BoxEdit.on) {
+      const origFinger = window.pointFingerAt;
+      window.pointFingerAt = function (el, opts) {
+        origFinger(el, opts);
+        const fs = document.querySelectorAll('.js-point-finger');
+        const fg = fs[fs.length - 1];
+        if (!fg) return;
+        const dx = (opts && opts.dx) || 0, dy = (opts && opts.dy) || 0;
+        fg._base = [parseFloat(fg.style.left) - dx, parseFloat(fg.style.top) - dy];
+        fg.style.pointerEvents = 'auto';
+        fg._fg = 'FG.' + (FGKEY[cur] || '?');
+        BoxEdit.tag(fg, [dx, dy]);
+      };
+      const m = location.search.match(/[?&]step=([0-9]+)/);
+      let cur = m ? Math.min(+m[1], 14) : 1;
+      BoxEdit.init({
+        apply: (el) => { const r = el._ref; if (el._base) { el.style.left = (el._base[0] + r[0]) + 'px'; el.style.top = (el._base[1] + r[1]) + 'px'; } },
+        name: () => '[손가락 dx,dy → FG.' + (FGKEY[cur] || '?') + '] ',
+        step: { count: 15, get: () => cur, set: (n) => { cur = n; }, go: (n) => { if (n >= 1) location.search = '?edit&step=' + n; }, label: (n) => '단계 ' + n + ' / 14' },
+      });
+      if (cur === 4 || cur === 5 || cur === 6) { s1(); STEPS[cur - 1](); } else STEPS[cur - 1]();
+      return;
+    }
+    s1();
+  })();
+  </script>
+</body>
+</html>

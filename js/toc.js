@@ -131,12 +131,13 @@
             <div class="toc-accordion">
               <button class="toc-accordion-toggle js-sfx" data-sound="sound/click.mp3">9차시</button>
               <div class="toc-accordion-panel">
-                <a href="javascript:;" class="toc-sub-item">01</a>
-                <a href="javascript:;" class="toc-sub-item">02</a>
-                <a href="javascript:;" class="toc-sub-item">03</a>
-                <a href="javascript:;" class="toc-sub-item">04</a>
-                <a href="javascript:;" class="toc-sub-item">05</a>
-                <a href="javascript:;" class="toc-sub-item">06</a>
+                <a href="${BASE}sa/09/page01.html" class="toc-sub-item">1) 우리 동네 숨은 영웅을 찾아라!</a>
+                <a href="${BASE}sa/09/page03.html" class="toc-sub-item">2) 개념 이해 영상</a>
+                <a href="${BASE}sa/09/page04.html" class="toc-sub-item">3) 지켜라! 우리 동네 안전망</a>
+                <a href="${BASE}sa/09/page06.html" class="toc-sub-item">4) 안전 지킴이 변신 프롬프트</a>
+                <a href="${BASE}sa/09/page08.html" class="toc-sub-item">5) 우리 동네 안전 지킴이 인터뷰</a>
+                <a href="${BASE}sa/09/page11.html" class="toc-sub-item">6) 퀴즈 풀기</a>
+                <a href="${BASE}sa/09/page12.html" class="toc-sub-item">7) 팩트체크! AI의 거짓말을 잡아라</a>
               </div>
             </div>
 
@@ -205,12 +206,12 @@
             <div class="toc-accordion">
               <button class="toc-accordion-toggle js-sfx" data-sound="sound/click.mp3">15차시</button>
               <div class="toc-accordion-panel">
-                <a href="javascript:;" class="toc-sub-item">01</a>
-                <a href="javascript:;" class="toc-sub-item">02</a>
-                <a href="javascript:;" class="toc-sub-item">03</a>
-                <a href="javascript:;" class="toc-sub-item">04</a>
-                <a href="javascript:;" class="toc-sub-item">05</a>
-                <a href="javascript:;" class="toc-sub-item">06</a>
+                <a href="${BASE}sa/15/page01.html" class="toc-sub-item">1) 진짜? 가짜? 뉴스 판별기!</a>
+                <a href="${BASE}sa/15/page03.html" class="toc-sub-item">2) 디지털 윤리 수칙 분류하기</a>
+                <a href="${BASE}sa/15/page05.html" class="toc-sub-item">3) 믿을 수 있는 정보로 만드는 노트북</a>
+                <a href="${BASE}sa/15/page07.html" class="toc-sub-item">4) 제미나이 Notebook으로 PPT 만들기</a>
+                <a href="${BASE}sa/15/page08.html" class="toc-sub-item">5) 퀴즈 풀기</a>
+                <a href="${BASE}sa/15/page09.html" class="toc-sub-item">6) 완벽한 슬라이드 퍼즐 맞추기</a>
               </div>
             </div>
 

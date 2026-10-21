@@ -13,11 +13,10 @@
         
 
         .p09-character{left:170px;top:360px;width:480px;height:580px}
-        .p09-phone{width:450px;height:895px}
 
-        /* Suno 앱 화면을 CSS로 다시 그림(기획서 캡처 기준 497x1075 좌표, 폰 화면 폭 434px·높이 879px에 맞춰 가로 .873배·세로 .817배) */
+        /* Suno 앱 화면을 CSS로 다시 그림(기획서 캡처 기준 497x1075 좌표, 공용 폰 화면 폭 450px·높이 890px에 맞춰 가로 .905배·세로 .828배) */
         .s6{position:absolute;inset:0;overflow:hidden;font-family:'Pretendard';color:#111;background:#f7f3ee}
-        .s6-ui{position:absolute;left:0;top:0;width:497px;height:1075px;transform:scale(.8733,.8169);transform-origin:0 0;letter-spacing:-0.01em}
+        .s6-ui{position:absolute;left:0;top:0;width:497px;height:1075px;transform:scale(.9054,.8279);transform-origin:0 0;letter-spacing:-0.01em}
         .s6-ui .a{position:absolute;box-sizing:border-box}
         .s6 svg{display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
         .s6-bg{background:linear-gradient(180deg,#dac9c7 0%,#d6cad2 45%,#e3dde7 78%,#f2eef0 100%)}
@@ -128,7 +127,7 @@
             <p class="guide-bubble is-center p09-bubble" id="p09Bubble"></p>
             <div class="char-box p09-character"><img src="../img/sa_main.png" alt="메인 캐릭터"></div>
 
-            <div class="phone-frame has-cam p09-phone"><div class="phone-screen">
+            <div class="phone-frame has-cam"><div class="phone-screen">
               <div class="s6" id="p09Screen"></div>
               <div class="app-home is-sky is-off" id="p09Home">
                 <div class="phone-status is-dark"></div>
@@ -185,7 +184,6 @@
     // 화면 요소 좌표 [x, y, 폭, 높이] (?edit 으로 열어 고친 값을 여기에 붙여 넣음). 말풍선 y 는 아래 가장자리, 폭·높이가 빠진 건 CSS 크기를 씀
     const BOX = {
       bubble: [132, 340, 553],
-      phone: [735, 21],
       load: [1280, 430, 480],
       genres: [1280, 220, 480],
       final: [57, 105, 1806, 803],
@@ -197,8 +195,8 @@
       finalNext: [758, 758]
     };
     const BOX_EL = { bubble: 'p09Bubble', load: 'p09Load', genres: 'p09Genres' };
-    const BOX_SEL = { phone: '.p09-phone', final: '.p09-final', ribbon: '.p09-final-ribbon', sub: '.p09-final-sub', finalBox: '.p09-final-box', cover: '.p09-final-cover', player: '.p09-player', finalNext: '.p09-final-next' };
-    const BOX_NAME = { bubble: '말풍선(y=아래선)', phone: '폰', load: '가사 불러오기', genres: '장르 버튼', final: '마무리 패널', ribbon: '리본', sub: '부제', finalBox: '하늘색 상자', cover: '표지', player: '재생 칸', finalNext: '다음' };
+    const BOX_SEL = { final: '.p09-final', ribbon: '.p09-final-ribbon', sub: '.p09-final-sub', finalBox: '.p09-final-box', cover: '.p09-final-cover', player: '.p09-player', finalNext: '.p09-final-next' };
+    const BOX_NAME = { bubble: '말풍선(y=아래선)', load: '가사 불러오기', genres: '장르 버튼', final: '마무리 패널', ribbon: '리본', sub: '부제', finalBox: '하늘색 상자', cover: '표지', player: '재생 칸', finalNext: '다음' };
     function placeBox(el) {
       const r = el._ref;
       const st = el.style;
@@ -212,21 +210,22 @@
     Object.keys(BOX).forEach((k) => {
       const el = BOX_EL[k] ? $(BOX_EL[k]) : document.querySelector(BOX_SEL[k]);
       el._key = k;
-      BoxEdit.tag(el, BOX[k]);
+      el._ref = BOX[k];
       placeBox(el);
     });
 
-    // ?edit 일 때만: 폰 안(497x1075 기준) 요소를 클릭해 좌표를 볼 수 있게 함. 다시 그리면 원래 값으로 돌아가므로 표시줄 값을 아래 createUI 등 코드에 옮겨 적을 것
+    // ?edit 일 때만: 폰 안(497x1075 기준) 클릭 영역(.s6-hot)과 클릭하라고 강조하는 것(.p09-pulse)만 클릭해 좌표를 볼 수 있게 함(나머지는 CSS·BOX 에서 직접 고침). 다시 그리면 원래 값으로 돌아가므로 표시줄 값을 아래 createUI 등 코드에 옮겨 적을 것
+    function tagEl(el) {
+      if (!BoxEdit.on || el._ref || el.closest('svg')) return;
+      const st = el.style;
+      const box = [el.offsetLeft, el.offsetTop];
+      if (st.width || st.height) box.push(el.offsetWidth, el.offsetHeight);
+      const txt = (el.textContent || '').trim().replace(/s+/g, ' ').slice(0, 10);
+      el._name = (el.id || (el.className && String(el.className).replace(/a/, '').trim().split(' ')[0]) || el.tagName.toLowerCase()) + (txt ? ' ' + txt : '');
+      BoxEdit.tag(el, box);
+    }
     function tagPhone() {
-      screen.querySelectorAll('.s6-ui .a, .s6-ui [style*="left:"], .s6-ui button, .s6-ui .s6-hot').forEach((el) => {
-        if (el.closest('svg')) return;
-        const st = el.style;
-        const box = [el.offsetLeft, el.offsetTop];
-        if (st.width || st.height) box.push(el.offsetWidth, el.offsetHeight);
-        const txt = (el.textContent || '').trim().replace(/s+/g, ' ').slice(0, 10);
-        el._name = (el.id || (el.className && String(el.className).replace(/a/, '').trim().split(' ')[0]) || el.tagName.toLowerCase()) + (txt ? ' ' + txt : '');
-        BoxEdit.tag(el, box);
-      });
+      screen.querySelectorAll('.s6-ui .s6-hot, .s6-ui .p09-pulse').forEach(tagEl);
     }
 
     // ?edit 일 때만: 손가락은 [dx, dy] (pointFingerAt 의 dx·dy 보정값) 를 고쳐서 각 단계 코드의 on(...)·pointFingerAt(...) 옵션에 옮겨 적음
@@ -426,6 +425,7 @@
     }
     function on(el, fn, fo) {
       el.classList.add('s6-hot');
+      tagEl(el);
       el.onclick = (e) => { e.stopPropagation(); playClick(); fn(); };
       if (fo !== false) pointFingerAt(el, Object.assign({ onMain: true }, fo));
     }
@@ -433,6 +433,7 @@
       el.classList.remove('p09-pulse');
       void el.offsetWidth;
       el.classList.add('p09-pulse');
+      tagEl(el);
     }
 
     function stepHome() {
@@ -541,6 +542,7 @@
         row.classList.remove('s6-hot');
         more.classList.remove('is-off');
         more.classList.add('s6-hot');
+        tagEl(more);
         more.onclick = (e) => { e.stopPropagation(); playClick(); stepDownload(); };
       });
       pointFingerAt(rows[0].querySelector('.more'), { onMain: true, x: 0.5, dx: 49, dy: 15 });

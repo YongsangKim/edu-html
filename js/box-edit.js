@@ -14,6 +14,9 @@
           step: { count, get: () => 현재번호, set: (n) => 번호만 바꿈, go: (n) => 그 단계로 다시 그림, label: (n) => '문구' }  // 단계가 있는 페이지만 (선택)
         });
       init 은 단계 데이터가 준비된 뒤, 처음 그리기(render) 전에 부를 것
+   표시줄: 고른 박스의 값을 코드에 그대로 붙여 넣을 모양으로 보여 줌 — 손가락(el._base 가 있는 것)은 'FG.이름 = [dx, dy];'(이름은 el._fg), 그 밖의 [left, top, 폭, 높이] 박스는
+   '#id { left:..px; top:..px; width:..px; height:..px; }'(선택자는 id → 첫 클래스 순, el._sel 로 직접 지정). 맞춘 값은 단계를 옮겨도(sessionStorage) 모여 있고,
+   [복사] 현재 값 · [전체 복사] 모은 값 전부 · [지우기]. 값을 코드에 자동으로 쓰지는 못하므로 복사해서 붙여 넣을 것(o.format(el) 로 출력 모양을 바꿀 수 있음)
    ========================================================== */
 (function () {
   const ON = /[?&]edit(=|&|$)/.test(location.search);
@@ -25,8 +28,39 @@
     return el;
   };
 
+  const selOf = (el) => {
+    if (el._sel) return el._sel;
+    if (el.id) return '#' + el.id;
+    const c = Array.from(el.classList).find((x) => !/^(is-|js-)/.test(x));
+    return (el.tagName.toLowerCase()) + (c ? '.' + c : '');
+  };
+  const num = (v) => Math.round(v * 1000) / 1000;
+  BoxEdit.line = function (el) {
+    const r = el._ref;
+    if (el._base) return (el._fg || 'FG.' + selOf(el)) + ' = [' + r.map(num).join(', ') + '];';
+    if (r.length === 4) return selOf(el) + ' { left:' + num(r[0]) + 'px; top:' + num(r[1]) + 'px; width:' + num(r[2]) + 'px; height:' + num(r[3]) + 'px; }';
+    return selOf(el) + ' = [' + r.map(num).join(', ') + '];';
+  };
+  BoxEdit.keyOf = function (el) { return el._base ? (el._fg || el._name || selOf(el)) : selOf(el); };
+
   BoxEdit.init = function (o) {
     if (!ON) return;
+    const STORE_KEY = 'boxedit:' + location.pathname;
+    let saved = {};
+    try { saved = JSON.parse(sessionStorage.getItem(STORE_KEY) || '{}'); } catch (e) { saved = {}; }
+    const persist = () => { try { sessionStorage.setItem(STORE_KEY, JSON.stringify(saved)); } catch (e) {} };
+    const fmt = (el) => (o.format ? o.format(el) : BoxEdit.line(el));
+    const copyText = (s, done) => {
+      const fallback = () => {
+        const ta = document.createElement('textarea');
+        ta.value = s; ta.style.cssText = 'position:fixed;left:-999px;top:0';
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); } catch (e) {}
+        ta.remove(); done();
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(s).then(done, fallback);
+      else fallback();
+    };
     const UNIT = o.unit || 1;
     if (o.setup) o.setup();
     const style = document.createElement('style');
@@ -35,20 +69,34 @@
     document.body.classList.add('is-box-edit');
 
     const bar = document.createElement('div');
-    bar.style.cssText = 'position:fixed;left:10px;bottom:10px;z-index:9999;display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:8px;background:#111;color:#ff0;font:600 18px Pretendard,sans-serif';
+    bar.style.cssText = 'position:fixed;left:10px;top:10px;z-index:9999;display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:8px;background:#111;color:#ff0;font:600 18px Pretendard,sans-serif';
     const txt = document.createElement('span');
-    const btn = (label, d) => {
+    const mkBtn = (label, fn) => {
       const b = document.createElement('button');
       b.type = 'button';
       b.textContent = label;
       b.style.cssText = 'padding:4px 12px;border:0;border-radius:6px;background:#ff0;color:#111;font:700 18px Pretendard,sans-serif;cursor:pointer';
-      b.addEventListener('click', () => move(d));
+      b.addEventListener('click', fn);
       return b;
     };
+    const btn = (label, d) => mkBtn(label, () => move(d));
     if (o.step) bar.appendChild(btn('◀ 이전', -1));
     bar.appendChild(txt);
     if (o.step) bar.appendChild(btn('다음 ▶', 1));
+    const cnt = document.createElement('span');
+    cnt.style.cssText = 'color:#9f9;font-size:15px';
+    const flash = (b, t) => { const o0 = b.textContent; b.textContent = t; setTimeout(() => { b.textContent = o0; }, 1200); };
+    const copyOne = mkBtn('복사', () => { if (sel) copyText(fmt(sel), () => flash(copyOne, '복사됨')); });
+    const copyAll = mkBtn('전체 복사', () => {
+      const keys = Object.keys(saved);
+      if (!keys.length) { flash(copyAll, '모은 값 없음'); return; }
+      copyText('/* ' + location.pathname.split('/').slice(-2).join('/') + ' */' + String.fromCharCode(10) + keys.map((k) => saved[k]).join(String.fromCharCode(10)), () => flash(copyAll, '복사됨'));
+    });
+    const clearAll = mkBtn('지우기', () => { saved = {}; persist(); showCount(); });
+    [cnt, copyOne, copyAll, clearAll].forEach((x) => bar.appendChild(x));
     document.body.appendChild(bar);
+    const showCount = () => { cnt.textContent = '모은 값 ' + Object.keys(saved).length + '개'; };
+    showCount();
 
     const stepText = (n) => (o.step.label ? o.step.label(n) : '단계 ' + n + ' / ' + (o.step.count - 1));
     if (o.step) {
@@ -61,7 +109,10 @@
     const refresh = () => {
       o.apply(sel);
       sel.dataset.box = sel._ref.join(',');
-      say((o.name ? o.name(sel) : '') + '[' + sel._ref.join(', ') + ']');
+      saved[BoxEdit.keyOf(sel)] = fmt(sel);
+      persist();
+      showCount();
+      say(fmt(sel));
     };
     function move(d) {
       const n = o.step.get() + d;

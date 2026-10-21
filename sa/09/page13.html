@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>팩트체크! AI의 거짓말을 잡아라</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서 54~64p. AI 인물 5명의 말(사실 O / 거짓 X)을 하나씩 판별. 맞으면 정답 팝업, 틀리면 고른 카드가 흔들리고 오답 팝업(확인 → 같은 문제로 돌아감).
+           마지막 문제를 맞히면 배지 팝업 → page14. 인물 사진 img/p13_{id}.png (없으면 회색 칸) */
+        /* 기획서 54p 구조: 위쪽 AI 인물 카드(사진+AI 직업명) + 말풍선, 가운데 가로선 위에 질문 상자, 아래 O/X 카드 2장 */
+        .p13-person{position:absolute;left:354px;top:190px;width:327px;height:350px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:24px;overflow:hidden;background:var(--c-white);display:flex;flex-direction:column}
+        .p13-person i{flex:1 1 auto;background:var(--c-mist) center / cover no-repeat}
+        .p13-person span{flex:0 0 76px;display:flex;align-items:center;justify-content:center;padding-top:6px;background:var(--c-sky);font-family:'Cafe24 Ssurround';font-size:46px;color:var(--c-white);letter-spacing:-0.05em;line-height:1}
+
+        .p13-say{position:absolute;left:789px;top:225px;width:816px;height:279px;box-sizing:border-box;padding:30px 40px 24px;display:flex;align-items:center;justify-content:center;text-align:center;
+          background:var(--c-cream);border:solid 5px var(--c-purple);border-radius:30px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';font-size:54px;line-height:1.35;color:var(--c-purple);letter-spacing:-0.05em;word-break:keep-all}
+        .p13-say:before{content:'';position:absolute;left:-52px;top:50%;margin-top:-30px;width:0;height:0;border-style:solid;border-width:30px 52px 30px 0;border-color:transparent var(--c-purple) transparent transparent}
+        .p13-say:after{content:'';position:absolute;left:-36px;top:50%;margin-top:-22px;width:0;height:0;border-style:solid;border-width:22px 38px 22px 0;border-color:transparent var(--c-cream) transparent transparent}
+
+
+        .p13-opt{position:absolute;top:585px;width:540px;height:350px;box-sizing:border-box;padding:10px 20px 10px;border:0;border-radius:30px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:space-between;background:none;
+          font-family:'Cafe24 Ssurround';font-size:64px;line-height:1.1;color:var(--c-ink);letter-spacing:-0.05em;white-space:nowrap}
+        .p13-opt img{width:250px;height:auto;display:block}
+        .p13-opt:hover img{transform:scale(1.08)}
+        .p13-opt img{transition:transform .15s}
+        .p13-opt.is-o{left:370px}
+        .p13-opt.is-x{left:1010px}
+        .p13-opt.is-wrong{animation:p13-shake .4s}
+        @keyframes p13-shake{20%{transform:translateX(-14px)}40%{transform:translateX(14px)}60%{transform:translateX(-10px)}80%{transform:translateX(10px)}}
+        .p13-opt:disabled{cursor:default;pointer-events:none}
+
+        .p13-pop{z-index:120}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p13-person"><i id="p13Photo"></i><span id="p13Name"></span></div>
+          <div class="p13-say" id="p13Say"></div>
+          <p class="ask-pill is-fit"><span>AI의 답변은 사실일까요 거짓일까요?</span></p>
+
+          <button type="button" class="p13-opt is-o js-sfx" id="p13O" data-sound="sound/click.mp3"><img src="../../img/common/icon_o.png" alt=""><span style="color:var(--c-blue)">사실이에요.</span></button>
+          <button type="button" class="p13-opt is-x js-sfx" id="p13X" data-sound="sound/click.mp3"><img src="../../img/common/icon_x.png" alt=""><span style="color:var(--c-hotpink)">거짓 정보 주의!</span></button>
+
+          <div class="avatar-modal p13-pop is-off" id="p13Right">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">맞아요!</p>
+                <p class="avatar-popup-sub" id="p13RightText"></p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p13RightOk" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div>
+          <div class="avatar-modal p13-pop is-wrong is-off" id="p13Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-sub" id="p13WrongText"></p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p13WrongOk" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div>
+          <div class="avatar-modal p13-pop is-off" id="p13Badge">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish is-side">
+                <p class="avatar-popup-text is-small">우리 동네 팩트체크 마스터<br>배지를 획득했어요!</p>
+                <a href="page14.html" class="js-nav-effect avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">확인</a>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="팩트체크! AI의 거짓말을 잡아라" data-next="page14.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const ITEMS = [
+      { id: 'police', name: '경찰관', say: '저는 화재 현장에서 소방 호스로<br>불을 끄는 일을 합니다.', ok: false, truth: '경찰관은 위험에 처한 사람을 도와주고 사건사고가 발생한 현장을 정리해요.' },
+      { id: 'paramedic', name: '구급대원', say: '저는 응급환자가 발생하면<br>환자를 구급차에 실어 병원으로 옮겨요.', ok: true },
+      { id: 'cleaner', name: '환경미화원', say: '저는 길거리의 쓰레기를 치우고<br>모인 쓰레기를 수거해요.', ok: true },
+      { id: 'cook', name: '급식조리사', say: '저는 학생들이 먹을 급식을<br>맛있고 위생적으로 만들어요.', ok: true },
+      { id: 'courier', name: '택배기사', say: '저는 배송한 물건이 고장나면<br>직접 수리해줘요.', ok: false, truth: '택배기사는 고객이 주문한 물건을 안전하게 집까지 배송해줘요.' },
+    ];
+    let idx = 0;
+    let busy = false;
+
+    const optO = $('p13O');
+    const optX = $('p13X');
+    const right = $('p13Right');
+    const wrong = $('p13Wrong');
+    const badge = $('p13Badge');
+
+    function show() {
+      const it = ITEMS[idx];
+      busy = false;
+      $('p13Photo').style.backgroundImage = 'url(\x27img/p13_' + it.id + '.png\x27)';
+      $('p13Name').textContent = 'AI ' + it.name;
+      $('p13Say').innerHTML = it.say;
+      [optO, optX].forEach((b) => { b.classList.remove('is-wrong'); setOn(b, false); });
+    }
+    function setOn(b, on) {
+      const im = b.querySelector('img');
+      im.src = '../../img/common/icon_' + (b === optO ? 'o' : 'x') + (on ? '_on' : '') + '.png';
+    }
+
+    function pick(btn, v) {
+      if (busy) return;
+      const it = ITEMS[idx];
+      busy = true;
+      setOn(btn, true);
+      if (v === it.ok) {
+        playCorrect();
+        $('p13RightText').innerHTML = it.ok ? 'AI의 답변이 사실과 일치해요.' : 'AI의 거짓말을 찾아냈어요.<br>' + it.truth;
+        right.classList.remove('is-off');
+      } else {
+        playWrong();
+        btn.classList.add('is-wrong');
+        $('p13WrongText').innerHTML = it.ok ? 'AI의 답변이 사실과 일치하는지<br>다시 한번 확인해보세요.' : '앗! AI가 꾸며낸 정보에 속았어요.<br>다시 한번 팩트체크해 볼까요?';
+        setTimeout(() => wrong.classList.remove('is-off'), 400);
+      }
+    }
+
+    optO.addEventListener('click', () => pick(optO, true));
+    optX.addEventListener('click', () => pick(optX, false));
+    $('p13WrongOk').addEventListener('click', () => { wrong.classList.add('is-off'); show(); });
+    $('p13RightOk').addEventListener('click', () => {
+      right.classList.add('is-off');
+      idx += 1;
+      if (idx >= ITEMS.length) { badge.classList.remove('is-off'); return; }
+      show();
+    });
+
+    show();
+  })();
+  </script>
+</body>
+</html>
