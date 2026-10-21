@@ -182,12 +182,13 @@
             <div class="toc-accordion">
               <button class="toc-accordion-toggle js-sfx" data-sound="sound/click.mp3">13차시</button>
               <div class="toc-accordion-panel">
-                <a href="javascript:;" class="toc-sub-item">01</a>
-                <a href="javascript:;" class="toc-sub-item">02</a>
-                <a href="javascript:;" class="toc-sub-item">03</a>
-                <a href="javascript:;" class="toc-sub-item">04</a>
-                <a href="javascript:;" class="toc-sub-item">05</a>
-                <a href="javascript:;" class="toc-sub-item">06</a>
+                <a href="${BASE}sa/13/page01.html" class="toc-sub-item">1) 숨은 개인정보 찾기</a>
+                <a href="${BASE}sa/13/page03.html" class="toc-sub-item">2) 개념 이해 영상</a>
+                <a href="${BASE}sa/13/page04.html" class="toc-sub-item">3) 이 사진, 올려도 될까?</a>
+                <a href="${BASE}sa/13/page06.html" class="toc-sub-item">4) 쓱싹! 개인정보 지키기</a>
+                <a href="${BASE}sa/13/page08.html" class="toc-sub-item">5) AI 지우개로 개인정보 지우기</a>
+                <a href="${BASE}sa/13/page10.html" class="toc-sub-item">6) 퀴즈 풀기</a>
+                <a href="${BASE}sa/13/page11.html" class="toc-sub-item">7) 안전한 SNS 업로드 챌린지</a>
               </div>
             </div>
 

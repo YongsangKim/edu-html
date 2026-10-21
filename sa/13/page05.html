@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>이 사진, 올려도 될까?</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서 10~13p. 사진 6장을 1→4→5→2→6→3 순서로 한 장씩 보여 주고 '공유 가능한 사진' / '확인, 수정이 필요한 사진' 폴더로 끌어 넣기.
+           빈 폴더 아이콘으로 시작해 사진이 들어가면 문서가 든 폴더로 바뀜(안전·위험 폴더 색 다름). 정답이면 효과음 + 다음 사진, 오답이면 팝업. 다 하면 활동 종료 팝업 */
+        /* .p05-tip{position:absolute;left:0;top:50px;width:1920px;margin:0;text-align:center;font-size:56px;font-weight:500;color:var(--c-ink);letter-spacing:-0.04em} */
+        .p05-stage{position:absolute;left:152px;top:213px;width:1105px;height:660px;box-sizing:border-box;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:20px;box-shadow:0 10px 0 0 rgba(86,148,231,.2)}
+        .p05-photo{position:absolute;left:50%;top:50%;width:1000px;height:563px;margin:-282px 0 0 -500px;cursor:grab;touch-action:none;user-select:none;z-index:30}
+        .p05-photo img{display:block;width:100%;height:100%;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.25);pointer-events:none;-webkit-user-drag:none}
+        .p05-photo.is-dragging{cursor:grabbing;z-index:90}
+        .p05-photo.is-back{transition:transform .25s ease}
+        .p05-photo.is-off{display:none}
+        .p05-photo small{position:absolute;left:0;right:0;bottom:0;padding:12px 18px;border-radius:0 0 12px 12px;background:rgba(0,0,0,.65);color:#fff;font-size:32px;text-align:center;letter-spacing:-0.03em}
+
+        .p05-zones{position:absolute;left:1315px;top:213px;width:501px;height:660px;box-sizing:border-box;padding:26px 28px;display:flex;flex-direction:column;justify-content:space-between;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:20px;box-shadow:0 10px 0 0 rgba(86,148,231,.2)}
+        .p05-folder{position:relative;height:287px;box-sizing:border-box;border-radius:16px;border:dashed 5px #b9b3dd;background:#f6f5fb;text-align:center}
+        .p05-folder.is-over{border-style:solid;border-color:#f4b400;background:rgba(255,230,120,.35)}
+        .p05-folder i{display:block;width:170px;height:170px;margin:14px auto 0;background:url(img/p05_folders.jpeg) 0 0 / 340px 340px no-repeat;mix-blend-mode:multiply}
+        .p05-folder.is-safe i{filter:hue-rotate(85deg) saturate(1.1)}
+        .p05-folder.is-danger i{filter:hue-rotate(-38deg) saturate(1.3)}
+        .p05-folder.is-full i{background-position:0 -170px}
+        .p05-folder span{display:block;margin-top:6px;font-size:36px;font-weight:700;line-height:1.15;color:#1b78d0;letter-spacing:-0.04em;word-break:keep-all}
+        #p05Wrong,#p05Done{z-index:120}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="ask-pill is-fit">사진을 보고 알맞은 폴더로 드래그해 옮겨보세요.</p>
+
+          <!-- <p class="p05-tip">사진을 보고 알맞은 폴더로 드래그해 옮겨보세요.</p> -->
+          <div class="p05-stage" id="p05Stage"></div>
+          <div class="p05-zones">
+            <div class="p05-folder is-safe" data-key="safe"><i></i><span>공유 가능한 사진</span></div>
+            <div class="p05-folder is-danger" data-key="danger"><i></i><span>확인, 수정이 필요한<br>사진</span></div>
+          </div>
+
+          <div class="avatar-modal is-wrong is-off" id="p05Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body is-finish is-side">
+                <p class="avatar-popup-sub" style="font-size:44px">개인정보나 친구의 얼굴이 포함되어 있는지<br>다시 한번 확인해봐요.</p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p05WrongOk" data-sound="sound/click.mp3">다음</button>
+              </div>
+            </div>
+          </div>
+          <div class="avatar-modal is-off" id="p05Done">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">좋아요!</p>
+                <p class="avatar-popup-sub">사진을 공유하기 전에, 개인정보가 찍혀 있지 않은 지 확인하고 친구의 얼굴이 찍혀 있다면 공유해도 되는지 허락을 받아야 해요.</p>
+                <a href="page06.html" class="js-nav-effect avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="이 사진, 올려도 될까?" data-next="page06.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const ORDER = [
+      { n: 1, key: 'safe' }, { n: 4, key: 'danger', note: '아직 친구에게 사진을 올려도 되는지 물어보지 않았어요.' },
+      { n: 5, key: 'danger' }, { n: 2, key: 'safe' }, { n: 6, key: 'danger' }, { n: 3, key: 'safe' }
+    ];
+    const box = $('p05Stage');
+    const stage = $('stage');
+    const folders = Array.from(document.querySelectorAll('.p05-folder'));
+    let idx = 0;
+
+    const folderAt = (x, y) => folders.find((f) => { const r = f.getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; }) || null;
+
+    function show() {
+      box.innerHTML = '';
+      const q = ORDER[idx];
+      const el = document.createElement('div');
+      el.className = 'p05-photo';
+      el.innerHTML = '<img src="img/p05_photo_' + q.n + '.png" alt="">' + (q.note ? '<small>' + q.note + '</small>' : '');
+      box.appendChild(el);
+
+      el.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        const s = stage.getBoundingClientRect().width / 1920;
+        const sx = e.clientX, sy = e.clientY;
+        el.setPointerCapture(e.pointerId);
+        el.classList.remove('is-back');
+        el.classList.add('is-dragging');
+        const move = (ev) => {
+          el.style.transform = 'translate(' + (ev.clientX - sx) / s + 'px,' + (ev.clientY - sy) / s + 'px) scale(.4)';
+          const over = folderAt(ev.clientX, ev.clientY);
+          folders.forEach((f) => f.classList.toggle('is-over', f === over));
+        };
+        const up = (ev) => {
+          el.removeEventListener('pointermove', move);
+          el.removeEventListener('pointerup', up);
+          el.removeEventListener('pointercancel', up);
+          el.classList.remove('is-dragging');
+          folders.forEach((f) => f.classList.remove('is-over'));
+          const f = folderAt(ev.clientX, ev.clientY);
+          if (f && f.dataset.key === q.key) {
+            f.classList.add('is-full');
+            el.classList.add('is-off');
+            playCorrect();
+            idx += 1;
+            if (idx === ORDER.length) setTimeout(() => $('p05Done').classList.remove('is-off'), 700);
+            else setTimeout(show, 700);
+            return;
+          }
+          el.classList.add('is-back');
+          el.style.transform = '';
+          if (f) {
+            playWrong();
+            setTimeout(() => $('p05Wrong').classList.remove('is-off'), 300);
+          }
+        };
+        el.addEventListener('pointermove', move);
+        el.addEventListener('pointerup', up);
+        el.addEventListener('pointercancel', up);
+      });
+    }
+    $('p05WrongOk').addEventListener('click', () => $('p05Wrong').classList.add('is-off'));
+    show();
+  })();
+  </script>
+</body>
+</html>
