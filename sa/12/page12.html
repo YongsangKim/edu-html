@@ -8,6 +8,16 @@
     <style>
         /* 기획서(실습만) 16~21p. 한옥마을: 이야기 → 이미지 기능 → 촬영 버튼(번역 로딩 1초) → 안내판 번역 결과 + 다음 → 이야기.
            이야기 삽화는 img/p12_story_{1,2}.png (없으면 설명 글자). 카메라 사진은 img/photo_hanok.png, 번역 문구는 사진 속 안내판 위치(box, 폰 화면 %)에 얹음 */
+        .pp-ov.is-hanok-ov{
+            left: 20.5%;
+            top: 18%;
+            width: 55%;
+            height: 50%;
+            background: rgba(219, 186, 159, 1);
+            color: #2a2a2a;
+            font-size: 34px;
+            transform: perspective(500px) rotateY(-25deg) skew(0deg, -4deg);
+        }
         .p12-next{position:absolute;left:1440px;top:810px;width:330px;min-width:0;z-index:30}
         .p12-next.is-off{display:none}
     </style>
@@ -45,7 +55,7 @@
     const PHOTO = { src: 'img/photo_hanok.png', pos: '80% 50%', box: [24.5, 13, 52, 52] };
     const camLive = () => PP.cam({ to: '영어', photo: PHOTO.src, pos: PHOTO.pos, hot: ['shoot'] });
     const camLoad = () => PP.cam({ to: '영어', photo: PHOTO.src, pos: PHOTO.pos, load: true });
-    const camDone = () => PP.cam({ to: '영어', photo: PHOTO.src, pos: PHOTO.pos, mode: 'result', overlays: [{ box: PHOTO.box, html: 'Take off your shoes before entering.<br>Please put the shoes in the shoe rack.', fs: 19, bg: 'rgba(255,255,255,.9)' }] });
+    const camDone = () => PP.cam({ to: '영어', photo: PHOTO.src, pos: PHOTO.pos, mode: 'result', overlays: [{ cls: 'is-hanok-ov', html: 'Please take off your shoes before entering.<br>Please put the shoes in the shoe rack.' }] });
     const STEPS = [
       { story: '한옥마을에서 미국인 친구가 신발을 신고 대청마루에 들어가려는 장면 삽화(안내문 포함)', cap: '한옥마을에 도착했어요. 미국인 친구가 신발을 신고 대청마루에 들어가려고 해요. 안내문을 번역해서 한옥의 규칙을 알려줘요.' },
       { say: '이미지 기능을 사용해서<br>미국인 친구에게 한옥의<br>규칙을 설명해봐요.', pose: 'wink_point2', screen: () => PP.home({ to: '영어', hot: ['image'] }), hot: 'image' },
@@ -74,6 +84,8 @@
       if (s.story) {
         imgN += 1;
         story.classList.remove('is-off');
+        $('p12Set').style.display = 'none';
+        $('p12Phone').style.display = 'none';
         $('p12Ph').textContent = s.story;
         const p = $('p12Pic');
         p.style.display = '';
@@ -82,6 +94,8 @@
         return;
       }
       story.classList.add('is-off');
+      $('p12Set').style.display = '';
+      $('p12Phone').style.display = '';
       say(s.say, s.pose, true);
       PP.mount(screen, s.screen());
       if (s.hot) { handler = () => go(si + 1); finger(s.hot); }

@@ -24,8 +24,8 @@
         .p12-lock{flex-direction:column;gap:2px}
         .p12-lock.is-open{background:#9be6a6}
         .p12-lock.is-open:before{content:'🔓'}
-        .p12-man{position:absolute;left:550px;top:200px;width:1300px;height:200px;box-sizing:border-box;border:solid 4px var(--c-ink);border-radius:16px;background:#fff}
-        .p12-man h3{position:absolute;left:50%;top:-34px;margin:0 0 0 -150px;width:300px;height:56px;display:flex;align-items:center;justify-content:center;border:solid 4px var(--c-ink);border-radius:14px;background:#fff;font-family:'Cafe24 Ssurround';font-size:34px;color:var(--c-ink)}
+        .p12-man{position:absolute;left:550px;top:200px;width:1300px;height:200px;box-sizing:border-box;border:solid 4px var(--c-navy);border-radius:16px;background:#fff}
+        .p12-man h3{position:absolute;left:50%;top:-34px;margin:0 0 0 -150px;width:300px;height:56px;display:flex;align-items:center;justify-content:center;border:solid 4px var(--c-ink);border-radius:14px;background:var(--c-navy);font-family:'Cafe24 Ssurround';font-size:34px;color:var(--c-white)}
         .p12-slots{position:absolute;left:36px;right:36px;top:52px;display:flex;align-items:center;justify-content:space-between}
         .p12-slot{width:350px;height:104px;box-sizing:border-box;border:dashed 4px #9aa8c4;border-radius:12px;background:#f6f8fc;display:flex;align-items:center;justify-content:center}
         .p12-slot.is-over{border-style:solid;border-color:#f4b400;background:rgba(255,230,120,.35)}
@@ -34,7 +34,7 @@
         .p12-pool p{margin:0;padding-top:22px;text-align:center;font-size:40px;color:var(--c-ink);letter-spacing:-0.04em}
         .p12-cards{position:absolute;left:100px;top:100px;width:1100px;display:grid;grid-template-columns:repeat(3,1fr);gap:20px 30px}
         .p12-card{height:170px;box-sizing:border-box;border:solid 4px var(--c-ink);border-radius:14px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:34px;color:var(--c-ink);letter-spacing:-0.04em;cursor:grab;touch-action:none;user-select:none;position:relative;z-index:5}
-        .p12-card i{display:block;width:104px;height:104px}
+        .p12-card i{display:block;width:104px;height:104px;background:#eef2f8;border-radius:50%}
         .p12-card i img{display:block;width:100%;height:100%;object-fit:contain}
         .p12-card i.is-none{background:#eef2f8;border-radius:50%}
         .p12-card.is-dragging{cursor:grabbing;z-index:90;box-shadow:0 10px 22px rgba(0,0,0,.3)}
@@ -49,7 +49,7 @@
 
         .p12-modal{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:100;background:rgba(27,23,56,.55)}
         .p12-modal.is-off{display:none}
-        .p12-modal-panel{position:absolute;left:560px;top:150px;width:800px;height:660px;background:var(--c-cream);border:solid 6px var(--c-ink);border-radius:48px;box-sizing:border-box;padding:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px}
+        .p12-modal-panel{position:absolute;left:560px;top:150px;width:800px;height:660px;background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:48px;box-sizing:border-box;padding:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px;box-shadow:0 12px 0 0 rgba(60, 20, 120, .35)}
 
         .p12-scr{position:relative;width:400px;height:440px;overflow:hidden;border-radius:26px 26px 0 0;background:#1a1a2e;box-shadow:0 0 0 4px var(--c-ink)}
         .p12-scr.is-sms{background:#fbfbfd}
@@ -172,7 +172,7 @@
       $('p12Cards').innerHTML = '';
       slots.forEach((s) => { s.innerHTML = ''; delete s.dataset.full; });
       $('p12Ok').disabled = true;
-      playLock(); setTimeout(playLock, 500);
+      if (ri === 0) { const a = new Audio(ASSET_BASE + 'sound/sa14_lock.mp3'); let n = 0; a.onended = () => { if (++n < 2) a.play().catch(() => {}); }; a.play().catch(() => {}); }
       const cards = shuffleArray(r.cards.map((c) => ({ t: c[0], ico: c[1], ord: c[2] }))).map((c) => {
         const el = document.createElement('div');
         el.className = 'p12-card';
@@ -226,7 +226,7 @@
       const allOk = placed.every((c) => c.ord > 0);
       const inOrder = allOk && placed.every((c, i) => c.ord === i + 1);
       if (inOrder) {
-        playCorrect(); playUnlock();
+        playUnlock();
         $('p12Siren').classList.add('is-ok');
         $('p12Top').textContent = '좋아요! 안전하게 대처했어요.';
         const lk = $(ROUNDS[ri].lock);

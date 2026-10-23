@@ -2,7 +2,7 @@
    PP.mount(화면요소, PP.home({...})) 처럼 씀. 눌러야 할 곳은 o.hot 에 이름을 넘기면 data-hot="이름" 이 붙고, 마우스를 올리면 분홍 테두리가 생김.
    PP.home({from,to,hot:['voice','talk','image','doc','learn','input','from','to'],time})
    PP.voice({from,to,state:'listen'|'result',src,out,pron,hot:['mic','back'],time})
-   PP.cam({from,to,photo,pos,mode:'live'|'result',overlays:[{box:[left%,top%,폭%,높이%],html,bg,color,fs,rot,hot}],load,hot:['shoot'],time})
+   PP.cam({from,to,photo,pos,mode:'live'|'result',overlays:[{box:[left%,top%,폭%,높이%],html,bg,color,fs,rot,hot} | {cls:"페이지 CSS 클래스",html}],load,hot:['shoot'],time})
    PP.launcher({hot:['app']}), PP.speak(글,언어,소리파일,끝나면)
    PP.text({from,to,input,kb,sug,result:{big,pron},hot:['input','sug','enter'],time})
    PP.lang({sel,hot:['한국어','영어',…],time}) */
@@ -82,6 +82,7 @@
       const live = o.mode !== 'result';
       let ov = '';
       (o.overlays || []).forEach((v) => {
+        if (v.cls) { ov += '<div class="pp-ov ' + v.cls + '"' + (v.hot ? ' data-hot="' + v.hot + '"' : '') + '>' + v.html + '</div>'; return; }
         ov += '<div class="pp-ov"' + (v.hot ? ' data-hot="' + v.hot + '"' : '') + ' style="left:' + v.box[0] + '%;top:' + v.box[1] + '%;width:' + v.box[2] + '%;height:' + v.box[3] + '%;background:' + (v.bg || 'rgba(255,255,255,.88)') + ';color:' + (v.color || '#2a2a2a') + ';font-size:' + (v.fs || 18) + 'px' + (v.rot ? ';transform:rotate(' + v.rot + 'deg)' : '') + '">' + v.html + '</div>';
       });
       const bottom = live
