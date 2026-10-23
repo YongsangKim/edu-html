@@ -142,7 +142,8 @@
       }
       if (!sel || !sel.isConnected || e.key.indexOf('Arrow') !== 0) return;
       e.preventDefault();
-      const d = e.shiftKey ? 10 * UNIT : UNIT;
+      const U = sel._base ? 1 : UNIT;
+      const d = e.shiftKey ? 10 * U : U;
       const k = e.altKey
         ? { ArrowLeft: [2, -d], ArrowRight: [2, d], ArrowUp: [3, -d], ArrowDown: [3, d] }
         : { ArrowLeft: [0, -d], ArrowRight: [0, d], ArrowUp: [1, -d], ArrowDown: [1, d] };

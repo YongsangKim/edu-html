@@ -9,19 +9,18 @@
         /* 기획서 3~7p. 사진 3장(방·현관·교실 책상) 차례로, 한 장마다 개인정보 3곳 찾기. 마우스 커서가 돋보기(렌즈 투명), 돋보기가 정답에 가까이 가면 '개인정보 탐지기' 경광등이 켜짐.
            알맞은 곳 클릭 → 빨간 동그라미 채점, 3곳 모두 찾으면 해당 영역 강조 + [설명보기] → 정답 팝업 → 다음 사진. 개인정보가 아닌 글자 클릭(방: 수학 연습장·오늘도 즐겁게!, 현관: 취급 주의·운동화 상자 정보)은 오답 피드백 팝업
            좌표는 사진 크기에 대한 [왼쪽%, 위%, 폭%, 높이%] (?edit 로 맞춤) */
-        main{cursor:none}
-        .p02-tip{position:absolute;left:0;top:28px;width:1920px;margin:0;text-align:center;font-size:52px;font-weight:500;color:#1b78d0;letter-spacing:-0.04em;word-break:keep-all}
-        .p02-photo{position:absolute;left:285px;top:135px;width:1350px;height:760px;border:solid 5px var(--c-ink);border-radius:14px;box-sizing:content-box;margin:-5px 0 0 -5px;overflow:hidden;background:#fff;box-shadow:0 10px 0 0 rgba(86,148,231,.2)}
+        .ask-pill.is-fit.p02-tip{word-break:keep-all;max-width:none;padding:6px 30px 0}
+        .p02-photo{cursor:none;position:absolute;left:285px;top:170px;width:1350px;height:760px;border:solid 5px var(--c-ink);border-radius:14px;box-sizing:content-box;margin:-5px 0 0 -5px;overflow:hidden;background:#fff;box-shadow:0 10px 0 0 rgba(86,148,231,.2)}
         .p02-photo>img{display:block;width:100%;height:100%;object-fit:fill;user-select:none;-webkit-user-drag:none}
         .p02-box{position:absolute;box-sizing:border-box}
         .p02-box.is-circle:after{content:'';position:absolute;left:-10%;top:-18%;width:120%;height:136%;background:url(img/p02_circle.jpeg) center / 100% 100% no-repeat;mix-blend-mode:multiply;pointer-events:none}
         .p02-box.is-glow{background:rgba(255,216,61,.35);outline:6px solid #ffb400;outline-offset:-3px;border-radius:12px;pointer-events:none}
+        body.is-edit .p02-photo{cursor:default}
         body.is-edit .p02-box{outline:3px dashed #e60000;background:rgba(255,0,0,.12);cursor:pointer;pointer-events:auto;z-index:20}
         body.is-edit .p02-box.is-decoy{outline-color:#1b78d0;background:rgba(27,120,208,.15)}
-        body.is-edit main{cursor:default}
 
-        .p02-siren{position:absolute;left:300px;top:150px;width:200px;white-space:nowrap;text-align:center;z-index:6;font-size:26px;font-weight:700;color:var(--c-ink);text-shadow:0 0 6px #fff,0 0 6px #fff,0 0 6px #fff}
-        .p02-siren i{display:block;position:relative;width:96px;height:96px;margin:0 auto 6px}
+        .p02-siren{position:absolute;left:300px;top:185px;width:200px;white-space:nowrap;text-align:center;z-index:6;font-size:26px;font-weight:700;color:var(--c-ink);text-shadow:0 0 6px #fff,0 0 6px #fff,0 0 6px #fff;letter-spacing:-0.06em}
+        .p02-siren i{display:block;position:relative;width:96px;height:80px;margin:0 auto 6px}
         .p02-siren i:before{content:'';position:absolute;left:14px;top:0;width:68px;height:60px;border-radius:34px 34px 0 0;background:#9aa0a6;border:solid 4px var(--c-ink);box-sizing:border-box;transition:background .15s,box-shadow .15s}
         .p02-siren i:after{content:'';position:absolute;left:4px;top:56px;width:88px;height:24px;border-radius:6px;background:#555;border:solid 4px var(--c-ink);box-sizing:border-box}
         .p02-siren.is-on i:before{background:#ff2b2b;box-shadow:0 0 0 10px rgba(255,43,43,.35),0 0 40px 18px rgba(255,43,43,.75);animation:p02-blink .35s infinite alternate}
@@ -29,7 +28,7 @@
 
         .p02-lens{position:absolute;left:0;top:0;width:130px;z-index:60;pointer-events:none;display:none;
           -webkit-mask-image:radial-gradient(circle at 51px 51px,transparent 43px,#000 44px);mask-image:radial-gradient(circle at 51px 51px,transparent 43px,#000 44px)}
-        .p02-explain{position:absolute;left:1410px;top:825px;z-index:30;min-width:0;padding:8px 46px 4px;font-size:46px}
+        .card-btn.is-start.p02-explain {position:absolute;left:1652px;width:auto;height:80px;top:834px;z-index:30;min-width:0;padding:8px 25px 4px;font-size:46px}
         .p02-explain.is-off{display:none}
         #p02Wrong,#p02Done{z-index:120;cursor:default}
     </style>
@@ -40,7 +39,7 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <p class="p02-tip" id="p02Tip"></p>
+          <p class="p02-tip ask-pill is-fit is-medium" id="p02Tip"></p>
           <div class="p02-photo" id="p02Photo"><img id="p02Img" alt="" draggable="false"></div>
           <div class="p02-siren" id="p02Siren"><i></i><span>개인정보 탐지기</span></div>
           <img class="p02-lens" id="p02Lens" src="img/p02_magnifier.png" alt="">
@@ -152,7 +151,10 @@
       if (BoxEdit.on) return;
       const s = stage.getBoundingClientRect().width / 1920;
       const mr = document.querySelector('main').getBoundingClientRect();
-      lens.style.display = 'block';
+      const pr = photo.getBoundingClientRect();
+      const inside = e.clientX >= pr.left && e.clientX <= pr.right && e.clientY >= pr.top && e.clientY <= pr.bottom;
+      lens.style.display = inside ? 'block' : 'none';
+      if (!inside) { siren.classList.remove('is-on'); return; }
       lens.style.transformOrigin = '0 0';
       lens.style.transform = 'translate(' + ((e.clientX - mr.left) / s - 51) + 'px,' + ((e.clientY - mr.top) / s - 51) + 'px)';
       if (locked) return;

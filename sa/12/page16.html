@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관광객 안내 표지판 완성 게임</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서 59~86p. 장소 3곳(공원 잔디밭·지하철·정자)이 같은 흐름: ① 알맞은 표지판을 사진 속 빈칸으로 끌어 넣기 → ② Papago 이미지 번역으로 영어 안내문 채우기(번역 결과를 눌러 입력)
+           → ③ 안내 방송용 안내문 고르기 → ④ 음성 번역 + 확성기로 한국어·영어 안내 방송(1회 이상 누르면 다음). 마지막 장소 뒤 완성 팝업 → 다음 페이지.
+           표지판 그림: img/p16_sign_{lawn,shoes,seat}.png (없으면 글자). 사진: img/photo_*.png, 빈칸·표지판 위치는 사진 크기에 대한 %. TTS: sound/sa12_tts_*.mp3 가 있으면 그것, 없으면 브라우저 음성 */
+        .p16-q{font-size:46px}
+        .p16-photo{position:absolute;left:80px;top:175px;width:1110px;height:740px;box-sizing:border-box;overflow:hidden;background:#ccd;border:solid 6px var(--c-ink);border-radius:30px;box-shadow:0 14px 0 0 rgba(86,148,231,.2)}
+        .p16-pic{position:absolute;display:block}
+        .p16-pic img.bg{display:block;width:100%;height:auto}
+        .p16-zone{position:absolute;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-align:center;border:.35em dashed #ff2f92;border-radius:.6em;background:rgba(255,255,255,0);color:#c4166a;font-weight:700;line-height:1.3;font-family:'Pretendard'}
+        .p16-zone.is-over{background:rgba(255,230,120,.8)}
+        .p16-sign{position:absolute;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border-radius:.6em;color:#222;font-weight:800;line-height:1.2;font-family:'Pretendard'}
+        .p16-sign img{width:70%;max-height:60%;object-fit:contain}
+        .p16-eng{position:absolute;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-align:center;border-radius:.4em;color:#222;font-weight:700;line-height:1.2;font-family:'Pretendard'}
+        .p16-eng.is-blank{border-style:dashed;border-color:#888;background:rgba(255,255,255,0);color:#777;font-weight:500}
+        .p16-spk{position:absolute;right:26px;bottom:26px;width:110px;height:110px;border-radius:50%;border:solid 6px var(--c-ink);background:var(--c-white);color:var(--c-ink);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:6;padding:0;box-shadow:0 8px 0 0 rgba(86,148,231,.3)}
+        .p16-spk svg{width:60px;height:60px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+        .p16-spk:hover{border-color:var(--c-pink)}
+        .p16-spk.is-off{display:none}
+        .p16-side{position:absolute;left:1250px;top:175px;width:600px}
+        .p16-side h4{margin:0 0 18px;text-align:center;font-family:'Cafe24 Ssurround';font-size:52px;font-weight:normal;color:var(--c-ink);letter-spacing:-0.04em}
+        .p16-card{position:relative;box-sizing:border-box;min-height:170px;margin-bottom:26px;padding:12px 22px 6px;display:flex;align-items:center;justify-content:center;gap:20px;text-align:center;background:var(--c-white);border:solid 6px var(--c-ink);border-radius:26px;box-shadow:0 8px 0 0 rgba(86,148,231,.25);cursor:pointer;font-family:'Cafe24 Ssurround';font-size:44px;line-height:1.2;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all;user-select:none}
+        .p16-card img{width:120px;height:120px;object-fit:contain;flex:0 0 auto}
+        .p16-card.is-drag{cursor:grab;touch-action:none}
+        .p16-card.is-dragging{z-index:50;cursor:grabbing;box-shadow:0 14px 20px rgba(0,0,0,.25)}
+        .p16-card:not(.is-drag):hover{border-color:var(--c-pink);transform:translateY(-3px)}
+        .p16-card.is-lock{pointer-events:none}
+        .p16-card.is-right{border-color:var(--c-pink);box-shadow:0 0 0 8px rgba(255,14,128,.28);background:#fff3fb}
+        .p16-phone{left:1290px;top:190px;transform:scale(.78);transform-origin:0 0}
+        .p16-next{position:absolute;left:1440px;top:830px;width:330px;min-width:0;z-index:30}
+        .p16-next.is-off,.p16-side.is-off,.p16-phone.is-off{display:none}
+        #p16Wrong,#p16Done{z-index:120}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="p16-q ask-pill is-small is-fit" id="p16Q"><span></span></p>
+          <div class="p16-photo" id="p16Photo"></div>
+          <button type="button" class="p16-spk is-off" id="p16Spk" aria-label="확성기"><svg viewBox="0 0 24 24"><path d="M3 10v4h4l6 5V5L7 10zM16.500 8.500a5 5 0 010 7M19 6a8.500 8.500 0 010 12"/></svg></button>
+          <div class="p16-side is-off" id="p16Side"></div>
+          <div class="phone-frame has-cam p16-phone is-off" id="p16Phone"><div class="phone-screen" id="p16Screen"></div></div>
+          <button type="button" class="card-btn is-start p16-next is-off js-sfx" id="p16Next" data-sound="sound/click.mp3">다음</button>
+
+          <div class="avatar-modal is-wrong is-off" id="p16Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body is-finish is-side">
+                <p class="avatar-popup-sub" id="p16WrongP" style="font-size:48px"></p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p16WrongOk" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div>
+          <div class="avatar-modal is-off" id="p16Done">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish is-side">
+                <p class="avatar-popup-sub" style="font-size:48px">Papago를 이용하여<br>관광객 안내 표지판을<br>완성했어요!</p>
+                <a href="page17.html" class="js-nav-effect avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="관광객 안내 표지판 완성 게임" data-next="page17.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script src="../../js/papago.js"></script>
+  <script>
+  (function () {
+    const SIGNS = [
+      { key: 'lawn', label: '잔디밭 출입 금지', img: 'img/p16_sign_lawn.png' },
+      { key: 'shoes', label: '신발을 벗어 주세요.', img: 'img/p16_sign_shoes.png' },
+      { key: 'seat', label: '임산부 배려석', img: 'img/p16_sign_seat.png' }
+    ];
+    const ROUNDS = [
+      { photo: 'img/photo_park_blank.png', ratio: 768 / 1367, where: '공원의 잔디밭에서', right: 'lawn',
+        zone: [12.6, 15.5, 22.4, 55], eng: [12.6, 73.5, 22.4, 18], fs: 2.1,
+        cam: { pos: '11% 50%', box: [17, 16, 66, 54] }, en: 'Keep off the grass.',
+        texts: ['잔디밭에서 신발을 벗으세요.', '잔디밭에 들어가지 마세요.', '잔디밭에 가방을 놓으세요.'], ans: 1, tts: 'lawn',
+        enSpeak: 'Don’t go onto the lawn.' },
+      { photo: 'img/photo_subway_blank.png', filled: 'img/photo_subway.png', ratio: 843 / 1264, where: '지하철에서', right: 'seat',
+        zone: [43.2, 6, 23, 46], eng: [43.2, 53, 23, 8], fs: 1.8,
+        cam: { pos: '56% 50%', box: [21.7, 7, 58, 45] }, en: 'Seat for pregnant women',
+        texts: ['임산부가 앉을 수 있도록 자리를 비워주세요.', '다음 역에서 내릴 사람을 위해 자리를 비워주세요.', '무거운 가방을 놓을 수 있도록 자리를 비워주세요.'], ans: 0, tts: 'subway',
+        enSpeak: 'Please keep this seat available for pregnant women.' },
+      { photo: 'img/photo_pavilion.png', ratio: 1024 / 1536, where: '정자에서', right: 'shoes', cover: true,
+        zone: [64.2, 20, 19.2, 48.5], eng: [64.2, 70.5, 19.2, 8.5], fs: 1.6,
+        cam: { pos: '88% 50%', box: [26, 20, 49, 48] }, en: 'Please take off your shoes.',
+        texts: ['정자에 올라가지 마세요.', '신발 바닥을 닦고 정자에 올라가세요.', '신발을 벗고 정자에 올라가세요.'], ans: 2, tts: 'pavilion',
+        enSpeak: 'Please take off your shoes before entering the pavilion.' }
+    ];
+    const SPK_ICON = '<svg viewBox="0 0 24 24"><path d="M3 10v4h4l6 5V5L7 10zM16.500 8.500a5 5 0 010 7M19 6a8.500 8.500 0 010 12"/></svg>';
+    let ri = 0, handler = null, spokeNow = false;
+    const photo = $('p16Photo'), side = $('p16Side'), phone = $('p16Phone'), screen = $('p16Screen'), next = $('p16Next'), spk = $('p16Spk');
+    const setQ = (t) => { $('p16Q').firstElementChild.textContent = t; };
+    const R = () => ROUNDS[ri];
+
+    /* 사진: 상자를 꽉 채우게(cover) 깔고, 빈칸·표지판·영어 안내문은 사진 크기에 대한 %로 얹음. st = {zone, sign, filled, eng: null|'blank'|글} */
+    function drawPhoto(st) {
+      const r = R();
+      const bw = photo.clientWidth, bh = photo.clientHeight;
+      const w = Math.max(bw, bh / r.ratio), h = w * r.ratio;
+      const pic = document.createElement('div');
+      pic.className = 'p16-pic';
+      pic.style.cssText = 'width:' + w + 'px;height:' + h + 'px;left:' + ((bw - w) / 2) + 'px;top:' + ((bh - h) / 2) + 'px;font-size:' + (w / 100) + 'px';
+      let html = '<img class="bg" src="' + (st.filled && r.filled ? r.filled : r.photo) + '" alt="">';
+      const z = r.zone, e = r.eng;
+      const box = (b) => 'left:' + b[0] + '%;top:' + b[1] + '%;width:' + b[2] + '%;height:' + b[3] + '%';
+      if (r.cover && !st.filled) {
+        html += '<div class="p16-sign" style="' + box(z) + ';background:#ead9b2;border-color:#caa86b"></div>';
+      }
+      if (st.zone) html += '<div class="p16-zone" id="p16Zone" data-key="' + r.right + '" style="' + box(z) + ';font-size:1.7em">이곳에 표지판을<br>드래그해 보세요.</div>';
+      if (st.sign && !r.filled && !r.cover) {
+        const s = SIGNS.find((x) => x.key === r.right);
+        html += '<div class="p16-sign" style="' + box(z) + ';font-size:2.5em"><img src="' + s.img + '" alt="" onerror="this.remove()"><span>' + s.label + '</span></div>';
+      }
+      if (st.eng !== null && st.eng !== undefined) {
+        const blank = st.eng === 'blank';
+        html += '<div class="p16-eng' + (blank ? ' is-blank' : '') + '" style="' + box(e) + ';font-size:' + r.fs + 'em">' + (blank ? '영어 안내문 빈칸' : st.eng) + '</div>';
+      }
+      pic.innerHTML = html;
+      photo.innerHTML = '';
+      photo.appendChild(pic);
+    }
+
+    function show(html) { PP.mount(screen, html); }
+    function finger(el) {
+      clearFingers();
+      if (el) setTimeout(() => { if (el.isConnected) pointFingerAt(el, { onMain: true, dx: -10, dy: -20 }); }, 300);
+    }
+    function showSide(title, html) {
+      side.innerHTML = '<h4>' + title + '</h4>' + html;
+      side.classList.remove('is-off');
+      phone.classList.add('is-off');
+    }
+    function showPhone() {
+      side.classList.add('is-off');
+      phone.classList.remove('is-off');
+    }
+    function wrong(msg) {
+      playWrong();
+      $('p16WrongP').innerHTML = msg;
+      $('p16Wrong').classList.remove('is-off');
+    }
+
+    /* ① 표지판 끌어 넣기 */
+    function stepSign() {
+      setQ('다음 장소에 알맞은 표지판을 골라 빈칸에 드래그해 넣어요.');
+      drawPhoto({ zone: true, eng: 'blank' });
+      spk.classList.add('is-off');
+      next.classList.add('is-off');
+      showSide('표지판', '');
+      const order = shuffleArray(SIGNS);
+      const cards = order.map((s) => {
+        const d = document.createElement('div');
+        d.className = 'p16-card is-drag';
+        d.dataset.key = s.key;
+        d.innerHTML = '<img src="' + s.img + '" alt="" onerror="this.remove()"><span>' + s.label + '</span>';
+        side.appendChild(d);
+        return d;
+      });
+      initMatchDrag({
+        cards, zones: [$('p16Zone')], slop: 40,
+        onRight: (card) => {
+          playCorrect();
+          card.style.display = 'none';
+          drawPhoto({ sign: true, filled: true, eng: 'blank' });
+          setTimeout(stepImage, 900);
+        },
+        onWrong: (card, zone) => { if (zone) wrong('다시 한번 생각해보세요.<br>' + R().where + ' 지켜야 할 규칙은<br>무엇일까요?'); }
+      });
+    }
+
+    /* ② 이미지 번역 */
+    function stepImage() {
+      const r = R();
+      setQ('Papago의 이미지 번역 기능을 사용하여 영어 안내문을 추가해요.');
+      showPhone();
+      const signOv = () => ({ box: r.cam.box, html: r.right === 'seat' ? '임산부<br>배려석' : (r.right === 'lawn' ? '잔디밭<br>출입 금지' : '신발을<br>벗어 주세요'), fs: 24, bg: r.right === 'shoes' ? 'rgba(234,217,178,.95)' : (r.right === 'seat' ? 'rgba(230,60,120,.92)' : 'rgba(255,255,255,.95)'), color: r.right === 'seat' ? '#fff' : '#222' });
+      const home = () => PP.home({ to: '영어', hot: ['image'] });
+      show(home());
+      handler = () => {
+        show(PP.cam({ to: '영어', photo: r.photo, pos: r.cam.pos, overlays: [signOv()], hot: ['shoot'] }));
+        finger(screen.querySelector('[data-hot="shoot"]'));
+        handler = () => {
+          show(PP.cam({ to: '영어', photo: r.photo, pos: r.cam.pos, overlays: [signOv()], load: true }));
+          handler = null;
+          setTimeout(() => {
+            show(PP.cam({ to: '영어', photo: r.photo, pos: r.cam.pos, mode: 'result', overlays: [{ box: r.cam.box, html: r.en, fs: 24, bg: 'rgba(255,255,255,.93)', hot: 'result' }] }));
+            finger(screen.querySelector('[data-hot="result"]'));
+            handler = () => {
+              handler = null;
+              playCorrect();
+              drawPhoto({ sign: true, filled: true, eng: r.en });
+              setTimeout(stepText, 900);
+            };
+          }, 1000);
+        };
+      };
+      finger(screen.querySelector('[data-hot="image"]'));
+    }
+
+    /* ③ 안내문 고르기 */
+    function stepText() {
+      const r = R();
+      setQ('안내 방송을 위한 알맞은 안내문 골라 클릭해요.');
+      showSide('안내문', '');
+      r.texts.forEach((t, i) => {
+        const d = document.createElement('div');
+        d.className = 'p16-card';
+        d.style.fontSize = '40px';
+        d.textContent = t;
+        d.addEventListener('click', () => {
+          if (i !== r.ans) { wrong('다시 한번 생각해보세요.<br>표지판이 안내하고 있는 규칙은<br>무엇일까요?'); return; }
+          playCorrect();
+          d.classList.add('is-right', 'is-lock');
+          side.querySelectorAll('.p16-card').forEach((x) => x.classList.add('is-lock'));
+          setTimeout(stepVoice, 900);
+        });
+        side.appendChild(d);
+      });
+    }
+
+    /* ④ 음성 번역 + 확성기 */
+    function stepVoice() {
+      const r = R();
+      const ko = r.texts[r.ans];
+      setQ('Papago의 음성 번역 기능을 사용하여 안내 방송을 해요.');
+      showPhone();
+      show(PP.home({ to: '영어', hot: ['voice'] }));
+      finger(screen.querySelector('[data-hot="voice"]'));
+      handler = () => {
+        handler = null;
+        show(PP.voice({ to: '영어', state: 'listen' }));
+        PP.speak(ko, 'ko-KR', 'sa12_tts_' + r.tts + '_ko.mp3');
+        setTimeout(() => show(PP.voice({ to: '영어', state: 'result', src: ko, out: '' })), 400);
+        setTimeout(() => {
+          show(PP.voice({ to: '영어', state: 'result', src: ko, out: r.enSpeak }));
+          spk.classList.remove('is-off');
+          finger(spk);
+        }, 1800);
+      };
+    }
+
+    spk.addEventListener('click', () => {
+      if (spokeNow) return;
+      spokeNow = true;
+      clearFingers();
+      const r = R();
+      PP.speak(r.texts[r.ans], 'ko-KR', 'sa12_tts_' + r.tts + '_ko.mp3', () => {
+        PP.speak(r.enSpeak, 'en-US', 'sa12_tts_' + r.tts + '_en.mp3', () => {
+          spokeNow = false;
+          next.classList.remove('is-off');
+        });
+      });
+    });
+
+    screen.addEventListener('click', (e) => {
+      const t = e.target.closest('[data-hot]');
+      if (t && handler) { playClick(); const h = handler; handler = null; clearFingers(); h(t.dataset.hot); }
+    });
+    next.addEventListener('click', () => {
+      next.classList.add('is-off');
+      spk.classList.add('is-off');
+      ri += 1;
+      if (ri >= ROUNDS.length) { $('p16Done').classList.remove('is-off'); return; }
+      stepSign();
+    });
+    $('p16WrongOk').addEventListener('click', () => $('p16Wrong').classList.add('is-off'));
+    stepSign();
+  })();
+  </script>
+</body>
+</html>

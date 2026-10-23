@@ -68,15 +68,15 @@
     const STEPS = [
       { home: true, say: '갤러리를 클릭해요.', pose: 'wink_point2', hot: [37, 37.6, 26, 13], finger: true },
       { img: 28, say: '어떤 사진을 SNS에 공유할까요?<br>원하는 사진을 클릭해봐요.', pose: 'wink_point4', hot: [2.7, 59.8, 94.6, 24.5], finger: false },
-      { img: 29, say: '앗, 사진에 개인정보가 포함되어 있어요!<br>아래의 편집하기 버튼을 눌러<br>개인정보를 지워봐요.', pose: 'wink_point2', hot: [28.5, 88, 15, 5] },
-      { img: 30, say: ICO + '포토 어시스트 버튼을 클릭해요.', pose: 'wink_point2', hot: [17.5, 89.5, 9, 4.5] },
-      { img: 32, say: 'AI 지우개를 클릭해요.', pose: 'wink_point2', hot: [14, 89, 16, 5] },
-      { img: 32, say: '개인정보가 찍힌 부분을 찾아<br>클릭해봐요.', pose: 'wink_point4', hot: [59.4, 40.5, 17, 7], hint: true },
-      { img: 33, say: '개인정보가 찍힌 부분을 찾아<br>클릭해봐요.', pose: 'wink_point4', auto: 1500 },
+      { img: 29, say: '앗, 사진에 개인정보가 포함되어 있어요!<br>아래의 편집하기 버튼을 눌러<br>개인정보를 지워봐요.', pose: 'wink_point2', hot: [28.5, 88, 15, 5], fg: [0, -10] },
+      { img: 30, say: ICO + '포토 어시스트 버튼을 클릭해요.', pose: 'wink_point2', hot: [17.5, 89.5, 9, 4.5], fg:  [10, -20] },
+      { img: 32, say: 'AI 지우개를 클릭해요.', pose: 'wink_point2', hot: [14, 89, 16, 5], fg: [10, -20] },
+      { img: 32, say: '개인정보가 찍힌 부분을 찾아<br>클릭해봐요.', pose: 'wink_point4', hot: [59.4, 40.5, 17, 7], hint: true, fg: [0, -20] },
+      { img: 33, say: '개인정보가 찍힌 부분을 찾아<br>클릭해봐요.', pose: 'wink_point4', auto: 1500, fg: [10, -20] },
       { img: 34, say: '지우기 버튼을 클릭해<br>개인정보를 지워봐요.', pose: 'wink_point2', hot: [30, 88, 40, 5] },
       { img: 35, say: 'AI 지우개가 개인정보를<br>지우는 중이에요.', pose: 'main', auto: 1500 },
       { img: 36, say: '개인정보가 지워졌어요!<br>완료를 눌러 편집을 마무리해요.', pose: 'wink_point2', hot: [12, 88.6, 36.4, 4.9] },
-      { img: 37, say: '다른 파일로 저장을 눌러<br>개인정보를 지운 사진을 저장해요.', pose: 'wink_point2', hot: [58, 5.8, 28, 3], long: true },
+      { img: 37, say: '다른 파일로 저장을 눌러<br>개인정보를 지운 사진을 저장해요.', pose: 'wink_point2', hot: [58, 5.8, 28, 3], long: true, fg: [10, -10] },
       { end: true }
     ];
 
@@ -88,7 +88,7 @@
     if (BoxEdit.on) document.body.classList.add('is-edit');
 
     const place = (el, b) => { el.style.cssText = 'left:' + b[0] + '%;top:' + b[1] + '%;width:' + b[2] + '%;height:' + b[3] + '%'; };
-    const guide = (el) => pointFingerAt(el, { onMain: true, dx: FG.hot[0], dy: FG.hot[1] });
+    const guide = (el) => { const f = STEPS[si].fg || FG.hot; pointFingerAt(el, { onMain: true, dx: f[0], dy: f[1] }); };
 
     function go(n) {
       clearTimeout(timer);
@@ -127,7 +127,10 @@
         }
         go(si + 1);
       });
-      if (BoxEdit.on) return;
+      if (BoxEdit.on) {
+        if (s.finger !== false) setTimeout(() => guide(b), 100);
+        return;
+      }
       if (s.hint) {
         screen.onclick = (e) => { if (!hots.contains(e.target)) { playWrong(); guide(b); } };
       } else {
@@ -139,10 +142,22 @@
     if (BoxEdit.on) {
       const m = location.search.match(/[?&]step=([0-9]+)/);
       si = m ? Math.max(0, Math.min(STEPS.length - 1, parseInt(m[1], 10))) : 0;
+      const origFinger = window.pointFingerAt;
+      window.pointFingerAt = function (el, opts) {
+        origFinger(el, opts);
+        const fs = document.querySelectorAll('.js-point-finger');
+        const fg = fs[fs.length - 1];
+        if (!fg) return;
+        const dx = (opts && opts.dx) || 0, dy = (opts && opts.dy) || 0;
+        fg._base = [parseFloat(fg.style.left) - dx, parseFloat(fg.style.top) - dy];
+        fg.style.pointerEvents = 'auto';
+        fg._fg = 'STEPS[' + si + '].fg';
+        BoxEdit.tag(fg, [dx, dy]);
+      };
       BoxEdit.init({
         unit: 0.1,
         name: () => '단계' + (si + 1),
-        apply: (el) => place(el, el._ref),
+        apply: (el) => { const r = el._ref; if (el._base) { el.style.left = (el._base[0] + r[0]) + 'px'; el.style.top = (el._base[1] + r[1]) + 'px'; } else place(el, r); },
         step: { count: STEPS.length, get: () => si, set: (n) => { si = n; }, go: (n) => { location.search = '?edit&step=' + n; }, label: (n) => '단계 ' + (n + 1) + ' / ' + STEPS.length }
       });
       STEPS.forEach((s) => { if (s.auto) s.auto = 0; });

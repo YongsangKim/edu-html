@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>위기 탈출! 보이스피싱 탈출 게임</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서 52~58p. 두 라운드(① 스팸 문자 ② 보이스피싱 전화). 라운드 시작 때 상황 안내 팝업(폰 틀 없이 화면 내용만) → 닫으면 본 게임, 자물쇠 잠기는 소리 2번.
+           카드 6장(순서 무작위) 중 정답 3장을 순서대로 '안전 대처 매뉴얼' 칸 3개에 끌어 넣음(매뉴얼 밖에 놓으면 제자리). 3칸이 차면 [확인] 활성 → 정답이면 경광등 초록 + 자물쇠 열림 + '좋아요! 안전하게 대처했어요.' + [다음],
+           정답이 아닌 카드가 하나라도 있으면 오답 팝업 A, 카드는 맞지만 순서가 틀리면 오답 팝업 B(둘 다 확인 → 카드가 제자리로 돌아감). [상황 다시 보기]는 상황 안내 팝업을 다시 엶. 두 라운드 모두 끝나면 page13. 2라운드(전화)는 시작할 때 안내 팝업 없이 바로 본 게임(상황 다시 보기 버튼으로만 열림) */
+        .p12-top{position:absolute;left:260px;width:1300px;padding:0 30px 0 130px;transform:none}
+        .p12-siren{position:absolute;left:286px;top:49px;width:100px;height:100px;z-index:5}
+        .p12-siren i{position:absolute;left:18px;top:4px;width:64px;height:56px;border-radius:32px 32px 0 0;background:#e23a3a;border:solid 4px var(--c-ink);box-sizing:border-box;box-shadow:0 0 0 8px rgba(226,58,58,.3),0 0 30px 10px rgba(226,58,58,.7);animation:p12-blink .45s infinite alternate}
+        .p12-siren:after{content:'';position:absolute;left:8px;top:56px;width:84px;height:24px;border-radius:6px;background:#555;border:solid 4px var(--c-ink);box-sizing:border-box}
+        .p12-siren.is-ok i{background:#27c24c;border-color:var(--c-ink);box-shadow:0 0 0 8px rgba(39,194,76,.3),0 0 30px 10px rgba(39,194,76,.7);animation:none}
+        @keyframes p12-blink{to{background:#ff8a8a;box-shadow:0 0 0 8px rgba(226,58,58,.15),0 0 14px 4px rgba(226,58,58,.4)}}
+        .p12-again{position:absolute;left:1580px;top:44px;width:265px;height:78px;min-width:0;padding:4px 10px 0;font-size:40px;white-space:nowrap}
+        .p12-door{position:absolute;left:70px;top:200px;width:380px;height:740px;box-sizing:border-box;border:solid 8px var(--c-ink);border-bottom:0;border-radius:6px 6px 0 0;background:linear-gradient(180deg,#8d98a8,#6b7686);box-shadow:inset 0 0 0 10px #59636f}
+        .p12-door .plate{position:absolute;left:50%;top:60px;width:200px;height:72px;margin-left:-100px;display:flex;align-items:center;justify-content:center;border:solid 4px var(--c-ink);border-radius:8px;background:#f3e6b8;font-family:'Cafe24 Ssurround';font-size:40px;color:var(--c-ink)}
+        .p12-locks{position:absolute;right:-65px;top:295px;width:122px;display:flex;flex-direction:column;gap:34px;z-index:3}
+        .p12-lock{height:104px;display:flex;align-items:center;justify-content:center;border:solid 4px var(--c-ink);border-radius:12px;background:#ffd84a;font-family:'Cafe24 Ssurround';font-size:30px;line-height:1.1;text-align:center;color:var(--c-ink)}
+        .p12-lock:before{content:'🔒';display:block;margin-right:4px;font-size:34px}
+        .p12-lock{flex-direction:column;gap:2px}
+        .p12-lock.is-open{background:#9be6a6}
+        .p12-lock.is-open:before{content:'🔓'}
+        .p12-man{position:absolute;left:550px;top:200px;width:1300px;height:200px;box-sizing:border-box;border:solid 4px var(--c-ink);border-radius:16px;background:#fff}
+        .p12-man h3{position:absolute;left:50%;top:-34px;margin:0 0 0 -150px;width:300px;height:56px;display:flex;align-items:center;justify-content:center;border:solid 4px var(--c-ink);border-radius:14px;background:#fff;font-family:'Cafe24 Ssurround';font-size:34px;color:var(--c-ink)}
+        .p12-slots{position:absolute;left:36px;right:36px;top:52px;display:flex;align-items:center;justify-content:space-between}
+        .p12-slot{width:350px;height:104px;box-sizing:border-box;border:dashed 4px #9aa8c4;border-radius:12px;background:#f6f8fc;display:flex;align-items:center;justify-content:center}
+        .p12-slot.is-over{border-style:solid;border-color:#f4b400;background:rgba(255,230,120,.35)}
+        .p12-arrow{font-size:46px;color:var(--c-ink)}
+        .p12-pool{position:absolute;left:550px;top:430px;width:1300px;height:510px;box-sizing:border-box;border:solid 4px var(--c-ink);border-radius:16px;background:#fff}
+        .p12-pool p{margin:0;padding-top:22px;text-align:center;font-size:40px;color:var(--c-ink);letter-spacing:-0.04em}
+        .p12-cards{position:absolute;left:100px;top:100px;width:1100px;display:grid;grid-template-columns:repeat(3,1fr);gap:20px 30px}
+        .p12-card{height:170px;box-sizing:border-box;border:solid 4px var(--c-ink);border-radius:14px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:34px;color:var(--c-ink);letter-spacing:-0.04em;cursor:grab;touch-action:none;user-select:none;position:relative;z-index:5}
+        .p12-card i{display:block;width:104px;height:104px}
+        .p12-card i img{display:block;width:100%;height:100%;object-fit:contain}
+        .p12-card i.is-none{background:#eef2f8;border-radius:50%}
+        .p12-card.is-dragging{cursor:grabbing;z-index:90;box-shadow:0 10px 22px rgba(0,0,0,.3)}
+        .p12-card.is-back{transition:transform .25s ease}
+        .p12-slot .p12-card{width:100%;height:100%;flex-direction:row;font-size:40px;font-weight:600;cursor:default;pointer-events:none;border-color:#1b78d0;background:#eaf3ff}
+        .p12-slot .p12-card i{display:none}
+        .p12-ok{position:absolute;left:840px;bottom:60px;width:240px;height:100px;min-width:0;padding:6px 20px 2px;font-size:50px}
+        .p12-ok:disabled{opacity:0;pointer-events:none}
+        .p12-next{position:absolute;left:1374px;bottom:84px;z-index:30}
+        .p12-next.is-off{display:none}
+        #p12Info,#p12WrongA,#p12WrongB{z-index:120}
+
+        .p12-modal{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:100;background:rgba(27,23,56,.55)}
+        .p12-modal.is-off{display:none}
+        .p12-modal-panel{position:absolute;left:560px;top:150px;width:800px;height:660px;background:var(--c-cream);border:solid 6px var(--c-ink);border-radius:48px;box-sizing:border-box;padding:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px}
+
+        .p12-scr{position:relative;width:400px;height:440px;overflow:hidden;border-radius:26px 26px 0 0;background:#1a1a2e;box-shadow:0 0 0 4px var(--c-ink)}
+        .p12-scr.is-sms{background:#fbfbfd}
+        .p12-sms-head{position:absolute;left:0;top:0;width:100%;height:70px;box-sizing:border-box;padding:0 22px;display:flex;align-items:center;gap:14px;font-size:24px;font-weight:700;color:#1b3a6b;background:#fbfbfd}
+        .p12-sms-head i{flex:0 0 auto;width:36px;height:36px;border-radius:50%;background:#e2e3e7}
+        .p12-sms-bubble{position:absolute;left:26px;top:70px;width:320px;box-sizing:border-box;padding:16px 18px;border-radius:22px;background:#d9e1f3;font-size:26px;line-height:1.4;color:var(--c-navy);word-break:keep-all}
+        .p12-sms-bubble u{color:#1a55cc}
+        .p12-sms-head u{margin-left:10px;width: 10px;height: 10px;border: solid #666;border-width: 0 0 2px 2px;transform: rotate(45deg);}
+        
+        .p12-bg{position:absolute;left:0;top:0;width:400px;height:auto;display:block}
+        .p12-num{position:absolute;left:0;top:112px;width:100%;text-align:center;font-size:40px;color:#fff}
+        .p12-card2{position:absolute;left:14px;right:14px;top:190px;box-sizing:border-box;padding:18px 20px 14px;border-radius:16px;background:#d33b3b;color:#fff;box-shadow:0 10px 24px rgba(0,0,0,.35);opacity:0;transform:translateY(-16px);transition:opacity .4s,transform .4s;font-family:'Pretendard'}
+        .p12-card2.is-on{opacity:1;transform:none}
+        .p12-card2 .t{display:flex;align-items:center;gap:16px}
+        .p12-card2 .ic{flex:0 0 auto;width:60px;height:60px;border-radius:50%;background:#fde0e0;display:flex;align-items:center;justify-content:center}
+        .p12-card2 .ic svg{width:34px;height:34px;fill:none;stroke:#e23a3a;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+        
+        .p12-card2 b{display:block;font-size:27px;line-height:1.15;letter-spacing:-0.02em}
+        .p12-card2 small{display:block;margin-top:3px;font-size:21px;font-weight:700;color:rgba(255,255,255,.72);letter-spacing:.01em}
+        .p12-card2 .x{position:absolute;right:14px;top:14px;width:22px;height:22px}
+        .p12-card2 .x svg,.p12-card2 .chev svg{width:100%;height:100%;fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+        .p12-card2 .chev{position:absolute;right:22px;top:62px;width:20px;height:20px}
+        .p12-card2 .tag{margin-top:14px;padding:11px 14px;border-radius:10px;background:#f2cccc;color:#222;font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px}
+        .p12-card2 .tag em{font-style:normal;font-size:9px;line-height:.9;font-weight:800;color:#555;text-align:center}
+        .p12-card2 .row{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.28);font-size:18px;font-weight:700}
+        .p12-card2 .row span{display:flex;align-items:center;gap:7px}
+        .p12-card2 .row svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p12-siren" id="p12Siren"><i></i></div>
+          <p class="p12-top ask-pill" id="p12Top"></p>
+          <button type="button" class="card-btn p12-again js-sfx" id="p12Again" data-sound="sound/click.mp3">상황 다시 보기</button>
+          <div class="p12-door"><div class="plate">탈출문</div><div class="p12-locks"><div class="p12-lock" id="p12L1">자물쇠1</div><div class="p12-lock" id="p12L2">자물쇠2</div></div></div>
+          <div class="p12-man"><h3>안전 대처 매뉴얼</h3><div class="p12-slots" id="p12Slots"><div class="p12-slot"></div><span class="p12-arrow">→</span><div class="p12-slot"></div><span class="p12-arrow">→</span><div class="p12-slot"></div></div></div>
+          <div class="p12-pool"><p>알맞은 카드를 빈칸에 순서대로 드래그해 넣어보세요.</p><div class="p12-cards" id="p12Cards"></div>
+            <button type="button" class="card-btn is-start next-btn p12-ok js-sfx" id="p12Ok" data-sound="sound/click.mp3" disabled>확인</button>
+          </div>
+          <button type="button" class="card-btn is-start next-btn p12-next is-off js-sfx" id="p12Next" data-sound="sound/click.mp3">다음</button>
+
+          <div class="p12-modal" id="p12Info">
+            <div class="p12-modal-panel">
+              <div id="p12InfoShot"></div>
+              <button type="button" class="card-btn is-popup js-sfx" id="p12InfoOk" data-sound="sound/click.mp3">닫기</button>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-wrong is-off" id="p12WrongA">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body is-finish is-side">
+                <p class="avatar-popup-sub" style="font-size:44px">수상한 연락을 받으면 어떻게 해야 할까요?<br>안전한 행동과 순서를 다시 생각해 보세요.</p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p12WrongAOk" data-sound="sound/click.mp3">다음</button>
+              </div>
+            </div>
+          </div>
+          <div class="avatar-modal is-wrong is-off" id="p12WrongB">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body is-finish is-side">
+                <p class="avatar-popup-text is-small">알맞은 행동을 골랐어요!</p>
+                <p class="avatar-popup-sub" style="font-size:44px">어떤 행동을 먼저 해야 할지 다시 생각해 보세요.</p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p12WrongBOk" data-sound="sound/click.mp3">다음</button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="위기 탈출! 보이스피싱 탈출 게임" data-next="page13.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const playLock = makeSfx('sound/sa14_lock.mp3');
+    const playUnlock = makeSfx('sound/sa14_unlock.mp3');
+    const ROUNDS = [
+      { top: '경고! 문자로 수상한 링크가 날아왔어요.',
+        shot: '<div class="p12-scr is-sms"><div class="p12-sms-head"><u></u>국제 발신</div><div class="p12-sms-bubble" style="width:340px">다른 사람이 회원님의 계정에 접속했습니다. 아래 링크에서 아이디와 비밀번호를 입력하여 로그인한 뒤 계정을 보호하세요.<br><u>account.help</u></div></div>',
+        lock: 'p12L1',
+        cards: [['링크 누르기', 'link', 0], ['앱 설치하기', 'app', 0], ['신고하기', 'report', 3], ['문자 의심하기', 'sms', 1], ['멈추기', 'stop', 2], ['답장하기', 'reply', 0]] },
+      { top: '경고! 모르는 번호로 전화가 걸려왔어요.',
+        shot: '<div class="p12-scr"><img class="p12-bg" src="img/m_image6.png" alt=""><div class="p12-num">010-0000-0000</div><div class="p12-card2 is-on" id="p02Card"><i class="x"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"></path></svg></i><span class="chev"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"></path></svg></span><div class="t"><div class="ic"><svg viewBox="0 0 24 24"><path d="M7 17v-4a5 5 0 0 1 10 0v4M5 17h14v3H5zM12 3v2M4.500 6l1.500 1.500M19.500 6L18 7.500"></path></svg></div><div><b>보이스피싱 주의</b><small>010-0000-0000</small></div></div><div class="tag"><em>who<br>who</em>보이스피싱 의심 번호</div><div class="row"><span><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.500 1.500a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"></path></svg>통화</span><span><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"></rect><path d="M8 9h8M8 12.500h8M8 16h5"></path></svg>문자</span><span><svg viewBox="0 0 24 24" style="width:30px"><rect x="2" y="7" width="20" height="10" rx="5"></rect><circle cx="8" cy="12" r="2.500"></circle></svg>스팸 해제</span></div></div></div>',
+        lock: 'p12L2',
+        cards: [['전화 의심하기', 'call', 1], ['신고하기', 'report', 3], ['정보 알려주기', 'info', 0], ['돈 보내기', 'money', 0], ['멈추기', 'stop', 2], ['전화로 대화하기', 'talk', 0]] }
+    ];
+    const stage = $('stage');
+    const slots = Array.from(document.querySelectorAll('.p12-slot'));
+    let ri = 0;
+
+    const slotAt = (x, y) => slots.find((s) => !s.dataset.full && (() => { const r = s.getBoundingClientRect(); return x >= r.left - 20 && x <= r.right + 20 && y >= r.top - 20 && y <= r.bottom + 20; })()) || null;
+    const inMan = (x, y) => { const r = document.querySelector('.p12-man').getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; };
+
+    function showInfo() {
+      const r = ROUNDS[ri];
+      $('p12InfoShot').innerHTML = r.shot;
+      $('p12Info').classList.remove('is-off');
+    }
+    function reset(cards) {
+      slots.forEach((s) => { s.innerHTML = ''; delete s.dataset.full; });
+      cards.forEach((c) => { c.el.style.transform = ''; c.el.classList.remove('is-back'); delete c.slot; $('p12Cards').appendChild(c.el); });
+      $('p12Ok').disabled = true;
+    }
+    function render() {
+      const r = ROUNDS[ri];
+      $('p12Top').textContent = r.top;
+      $('p12Siren').classList.remove('is-ok');
+      $('p12Next').classList.add('is-off');
+      $('p12Ok').style.display = '';
+      $('p12Again').style.display = '';
+      $('p12Cards').innerHTML = '';
+      slots.forEach((s) => { s.innerHTML = ''; delete s.dataset.full; });
+      $('p12Ok').disabled = true;
+      playLock(); setTimeout(playLock, 500);
+      const cards = shuffleArray(r.cards.map((c) => ({ t: c[0], ico: c[1], ord: c[2] }))).map((c) => {
+        const el = document.createElement('div');
+        el.className = 'p12-card';
+        el.innerHTML = '<i><img src="img/p12_icon_' + c.ico + '.png" alt="" onerror="this.style.display=\'none\';this.parentNode.classList.add(\'is-none\')"></i><span>' + c.t + '</span>';
+        c.el = el;
+        $('p12Cards').appendChild(el);
+        el.addEventListener('pointerdown', (e) => {
+          if (c.slot) return;
+          e.preventDefault();
+          const s = stage.getBoundingClientRect().width / 1920;
+          const sx = e.clientX, sy = e.clientY;
+          el.setPointerCapture(e.pointerId);
+          el.classList.remove('is-back');
+          el.classList.add('is-dragging');
+          const move = (ev) => {
+            el.style.transform = 'translate(' + (ev.clientX - sx) / s + 'px,' + (ev.clientY - sy) / s + 'px)';
+            const over = slotAt(ev.clientX, ev.clientY);
+            slots.forEach((z) => z.classList.toggle('is-over', z === over));
+          };
+          const up = (ev) => {
+            el.removeEventListener('pointermove', move);
+            el.removeEventListener('pointerup', up);
+            el.removeEventListener('pointercancel', up);
+            el.classList.remove('is-dragging');
+            slots.forEach((z) => z.classList.remove('is-over'));
+            const z = slotAt(ev.clientX, ev.clientY) || (inMan(ev.clientX, ev.clientY) ? slots.find((q) => !q.dataset.full) : null);
+            if (z) {
+              z.dataset.full = '1';
+              c.slot = z;
+              el.style.transform = '';
+              z.appendChild(el);
+              playDrag();
+              $('p12Ok').disabled = !slots.every((q) => q.dataset.full);
+              return;
+            }
+            el.classList.add('is-back');
+            el.style.transform = '';
+          };
+          el.addEventListener('pointermove', move);
+          el.addEventListener('pointerup', up);
+          el.addEventListener('pointercancel', up);
+        });
+        return c;
+      });
+      render.cards = cards;
+      showInfo();
+    }
+    $('p12Ok').addEventListener('click', () => {
+      const cards = render.cards;
+      const placed = slots.map((s) => cards.find((c) => c.slot === s));
+      const allOk = placed.every((c) => c.ord > 0);
+      const inOrder = allOk && placed.every((c, i) => c.ord === i + 1);
+      if (inOrder) {
+        playCorrect(); playUnlock();
+        $('p12Siren').classList.add('is-ok');
+        $('p12Top').textContent = '좋아요! 안전하게 대처했어요.';
+        const lk = $(ROUNDS[ri].lock);
+        lk.classList.add('is-open');
+        lk.lastChild.textContent = '열림';
+        $('p12Ok').style.display = 'none';
+        $('p12Again').style.display = 'none';
+        $('p12Next').classList.remove('is-off');
+        return;
+      }
+      playWrong();
+      $(allOk ? 'p12WrongB' : 'p12WrongA').classList.remove('is-off');
+    });
+    const back = () => { reset(render.cards); };
+    $('p12WrongAOk').addEventListener('click', () => { $('p12WrongA').classList.add('is-off'); back(); });
+    $('p12WrongBOk').addEventListener('click', () => { $('p12WrongB').classList.add('is-off'); back(); });
+    $('p12Again').addEventListener('click', showInfo);
+    $('p12InfoOk').addEventListener('click', () => $('p12Info').classList.add('is-off'));
+    $('p12Next').addEventListener('click', () => {
+      if (ri === ROUNDS.length - 1) { location.href = 'page13.html'; return; }
+      ri += 1;
+      render();
+    });
+    render();
+  })();
+  </script>
+</body>
+</html>

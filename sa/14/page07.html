@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>보이스피싱, 이렇게 대처해요!</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서 26~31p. 두 가지 상황(① 돈을 보내 달라는 전화 ② 계정 정보를 입력하라는 문자). 왼쪽에 받은 전화·문자 화면, 오른쪽 '대처 카드' 5장 중 알맞은 3장을 '안전 대처 매뉴얼' 빈칸 3개로 끌어 넣음(순서 상관 없음).
+           정답이면 카드가 카드 영역에서 사라지고 매뉴얼에 붙음, 오답이면 카드가 돌아가고 팝업. 3장 완성 → 완성 팝업 → (두 번째 상황은 종료 팝업까지) */
+        .p07-left{position:absolute;left:110px;top:80px;width:400px;height:700px;overflow:hidden;border-radius:26px;box-shadow:0 0 0 4px var(--c-ink);background:#fff}
+        .p07-left img{display:block;width:100%;height:100%;object-fit:cover}
+        .p07-ov{position:absolute;left:50px;top:100px;width:300px;height:112px;display:none;flex-direction:column;align-items:center;justify-content:center;background:#324f53;color:#fff;font-size:26px;line-height:1.3;text-align:center}
+        .p07-ov b{font-size:40px;letter-spacing:.02em}
+        .p07-cap{position:absolute;left:60px;top:820px;width:520px;margin:0;text-align:center;font-size:38px;line-height:1.3;color:var(--c-ink);letter-spacing:-0.04em;word-break:keep-all}
+        .p07-div{position:absolute;left:610px;top:0;width:4px;height:960px;background:var(--c-ink)}
+        .p07-tip{position:absolute;left:640px;top:30px;width:1256px;padding:6px 30px 0;letter-spacing:-0.08em;transform:none}
+        .p07-panel{position:absolute;top:150px;height:790px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:18px;background:#fff;overflow:hidden}
+        .p07-panel h3{margin:0;height:84px;display:flex;align-items:center;justify-content:center;border-bottom:solid 4px var(--c-ink);font-family:'Cafe24 Ssurround';font-size:46px;color:var(--c-ink);letter-spacing:-0.04em}
+        .p07-man{left:720px;width:540px}
+        .p07-man h3{color:#1b78d0}
+        .p07-slots{padding:32px 32px;display:flex;flex-direction:column;gap:34px}
+        .p07-slot{height:190px;box-sizing:border-box;border:dashed 4px #9aa8c4;border-radius:14px;background:#f6f8fc;display:flex;align-items:center}
+        .p07-slot.is-over{border-style:solid;border-color:#f4b400;background:rgba(255,230,120,.35)}
+        .p07-cards{left:1290px;width:570px;overflow:visible;z-index:10}
+        .p07-cards h3{border-radius:13px 13px 0 0}
+        .p07-cardbox{padding:22px 22px;display:flex;flex-direction:column;gap:16px}
+        .p07-card{height:120px;box-sizing:border-box;padding:0 20px 5px;display:flex;align-items:center;gap:20px;border:solid 4px var(--c-ink);border-radius:14px;background:#fff;font-size:32px;font-weight:500;line-height:1.25;color:var(--c-ink);letter-spacing:-0.04em;word-break:keep-all;cursor:grab;touch-action:none;user-select:none;position:relative;z-index:5}
+        .p07-card img{flex:0 0 auto;width:64px;height:64px;object-fit:contain;pointer-events:none;mix-blend-mode:multiply}
+        .p07-card.is-dragging{cursor:grabbing;z-index:90;box-shadow:0 10px 22px rgba(0,0,0,.3)}
+        .p07-card.is-back{transition:transform .25s ease}
+        .p07-card:hover{background:#eef5ff}
+        .p07-slot .p07-card{width:100%;height:100%;cursor:default;pointer-events:none;border-color:#1b78d0;background:#eaf3ff;font-size:32px}
+        #p07Wrong,#p07Done,#p07End{z-index:120}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p07-left"><img id="p07Img" alt=""><div class="p07-ov" id="p07Ov">저장되지 않은 번호<b>010-0000-0000</b></div></div>
+          <p class="p07-cap" id="p07Cap"></p>
+          <div class="p07-div"></div>
+          <p class="p07-tip ask-pill is-medium" id="p07Tip">안전한 대처 행동을 대처 카드를 보고 골라주세요.</p>
+          <div class="p07-panel p07-man"><h3>안전 대처 매뉴얼</h3><div class="p07-slots" id="p07Slots"><div class="p07-slot"></div><div class="p07-slot"></div><div class="p07-slot"></div></div></div>
+          <div class="p07-panel p07-cards"><h3>대처 카드</h3><div class="p07-cardbox" id="p07Cards"></div></div>
+
+          <div class="avatar-modal is-wrong is-off" id="p07Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body is-finish is-side">
+                <p class="avatar-popup-sub" id="p07WrongP"></p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p07WrongOk" data-sound="sound/click.mp3">다음</button>
+              </div>
+            </div>
+          </div>
+          <div class="avatar-modal is-off" id="p07Done">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish is-side">
+                <p class="avatar-popup-sub" id="p07DoneP"></p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p07DoneOk" data-sound="sound/click.mp3">다음</button>
+              </div>
+            </div>
+          </div>
+          <div class="avatar-modal is-off" id="p07End">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish is-side">
+                <p class="avatar-popup-sub">디지털 범죄가 의심될 때는 당황하지 않고<br>안전 대처 매뉴얼을 따라야 해요.</p>
+                <a href="page08.html" class="js-nav-effect avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="보이스피싱, 이렇게 대처해요!" data-next="page08.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const SETS = [
+      { img: 'img/m_image16.jpeg', cap: '모르는 사람의 전화를 받았어요.<br>지금 당장 돈을 보내 달라고 해요.',
+        wrong: '수상한 전화를 받았을 때는<br>절대 상대방의 요구를 들어주지 않고<br>대화를 이어가지 않아야 해요!',
+        done: '수상한 전화에 대처하기 위한<br>안전 행동 매뉴얼을 완성했어요!',
+        cards: [
+          { ico: 'm_image17.png', t: '당장의 위협에서 벗어나기 위해 우선 돈을 보내요.', ok: false },
+          { ico: 'm_image18.jpg', t: '수상한 전화는 바로 끊어요.', ok: true },
+          { ico: 'm_image19.jpg', t: '보호자나 선생님께 상황을 알려요.', ok: true },
+          { ico: 'm_image20.jpg', t: '계속 통화하며 대화를 끝낼 타이밍을 기다려요.', ok: false },
+          { ico: 'm_image21.png', t: '어른과 함께 수상한 번호를 차단해요.', ok: true }
+        ] },
+      { img: 'img/m_image11.png', cap: '모르는 번호로 메시지가 왔어요.<br>수상한 링크가 포함되어 있어요.',
+        wrong: '출처가 불분명한 링크가 포함된 문자를 받았을 때는<br>절대 클릭해서는 안 되며 나의 개인정보를 입력해서도 안 돼요!',
+        done: '수상한 문자에 대처하기 위한<br>안전 행동 매뉴얼을 완성했어요!',
+        cards: [
+          { ico: 'm_image22.png', t: '출처가 불분명한 링크는 절대 누르지 않아요.', ok: true },
+          { ico: 'm_image24.png', t: '계정을 보호하려고 문자 속 링크에 아이디와 비밀번호를 입력해요.', ok: false },
+          { ico: 'm_image19.jpg', t: '보호자나 선생님께 문자를 보여줘요.', ok: true },
+          { ico: 'm_image23.png', t: '어른과 함께 사기성 문자를 삭제하고 번호를 차단해요.', ok: true },
+          { ico: 'm_image12.jpeg', t: '상황을 알기 위해 링크를 눌러 내용을 확인해요.', ok: false }
+        ] }
+    ];
+    const stage = $('stage');
+    const slots = Array.from(document.querySelectorAll('.p07-slot'));
+    const cardBox = $('p07Cards');
+    let si = 0, placed = 0;
+
+    const slotAt = (x, y) => slots.find((s) => !s.dataset.full && (() => { const r = s.getBoundingClientRect(); return x >= r.left - 20 && x <= r.right + 20 && y >= r.top - 20 && y <= r.bottom + 20; })()) || null;
+    const inMan = (x, y) => { const r = document.querySelector('.p07-man').getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; };
+
+    function render() {
+      const set = SETS[si];
+      placed = 0;
+      $('p07Img').src = set.img;
+      $('p07Cap').innerHTML = set.cap;
+      $('p07Ov').style.display = si === 0 ? 'flex' : 'none';
+      slots.forEach((s) => { s.innerHTML = ''; delete s.dataset.full; });
+      cardBox.innerHTML = '';
+      set.cards.forEach((c) => {
+        const el = document.createElement('div');
+        el.className = 'p07-card';
+        el.innerHTML = '<img src="img/' + c.ico + '" alt=""><span>' + c.t + '</span>';
+        cardBox.appendChild(el);
+        el.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          const s = stage.getBoundingClientRect().width / 1920;
+          const sx = e.clientX, sy = e.clientY;
+          el.setPointerCapture(e.pointerId);
+          el.classList.remove('is-back');
+          el.classList.add('is-dragging');
+          const move = (ev) => {
+            el.style.transform = 'translate(' + (ev.clientX - sx) / s + 'px,' + (ev.clientY - sy) / s + 'px)';
+            const over = slotAt(ev.clientX, ev.clientY);
+            slots.forEach((z) => z.classList.toggle('is-over', z === over));
+          };
+          const up = (ev) => {
+            el.removeEventListener('pointermove', move);
+            el.removeEventListener('pointerup', up);
+            el.removeEventListener('pointercancel', up);
+            el.classList.remove('is-dragging');
+            slots.forEach((z) => z.classList.remove('is-over'));
+            const z = slotAt(ev.clientX, ev.clientY);
+            const dropped = z || (inMan(ev.clientX, ev.clientY) ? slots.find((q) => !q.dataset.full) : null);
+            if (dropped && c.ok) {
+              dropped.dataset.full = '1';
+              el.style.transform = '';
+              dropped.appendChild(el);
+              playDrag();
+              placed += 1;
+              if (placed === 3) { playCorrect(); setTimeout(() => { $('p07DoneP').innerHTML = set.done; $('p07Done').classList.remove('is-off'); }, 700); }
+              return;
+            }
+            el.classList.add('is-back');
+            el.style.transform = '';
+            if (dropped) {
+              playWrong();
+              $('p07WrongP').innerHTML = set.wrong;
+              setTimeout(() => $('p07Wrong').classList.remove('is-off'), 300);
+            }
+          };
+          el.addEventListener('pointermove', move);
+          el.addEventListener('pointerup', up);
+          el.addEventListener('pointercancel', up);
+        });
+      });
+    }
+    $('p07WrongOk').addEventListener('click', () => $('p07Wrong').classList.add('is-off'));
+    $('p07DoneOk').addEventListener('click', () => {
+      $('p07Done').classList.add('is-off');
+      si += 1;
+      if (si === SETS.length) $('p07End').classList.remove('is-off');
+      else render();
+    });
+    render();
+  })();
+  </script>
+</body>
+</html>

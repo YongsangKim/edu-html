@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한국에서 지켜야 할 규칙</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서 16~32p. 상황 3개(임산부 배려석·한옥 마루·잔디밭)를 차례로: 상황 확인 → 외국인이 이해한 규칙/표지판이 알려주는 규칙 칸에 카드 끌어 넣기.
+           칸마다 오답 문구가 다름(외국인 칸=상황을 다시 생각, 표지판 칸=알맞은 규칙 힌트). 둘 다 채우면 '맞아요!' 팝업 → 다음 상황. 마지막 팝업 뒤 다음 페이지.
+           상황 그림: img/p06_scene_{1,2,3}.png (없으면 설명 글자로 보임) */
+        /* .p06-q{font-size:50px;line-height:1.15;min-height:150px} */
+        /* 상황마다 main 에 is-r1·is-r2·is-r3 가 붙음 — 예) .is-r2 .p06-q{font-size:44px} */
+        .has-again{margin-left:-60px;font-size:60px;line-height:1.2}
+        .p06-scene{position:absolute;left:300px;top:180px;width:1320px;height:600px;box-sizing:border-box;overflow:hidden;background:var(--c-white);border:solid 6px var(--c-ink);border-radius:36px;box-shadow:0 14px 0 0 rgba(86,148,231,.2)}
+        .p06-scene .ph,.p06-md .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:40px;box-sizing:border-box;text-align:center;font-family:'Cafe24 Ssurround';font-size:44px;line-height:1.3;color:#9aa6c4;letter-spacing:-0.04em}
+        .p06-scene .pic,.p06-md .pic{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;display:block}
+        .p06-cap{position:absolute;left:300px;top:815px;width:1320px;margin:0;text-align:left;padding-left:30px;font-family:'Cafe24 Ssurround';font-size:50px;color:var(--c-ink);letter-spacing:-0.04em}
+        .p06-next.next-btn.card-btn.is-start{right:50px;bottom:40px}
+        .p06-next.is-off{display:none}
+        .p06-again.card-btn.is-popup{position:absolute;right:50px;top:75px;min-width:0;width:280px;height:80px;padding:6px 0 0;font-size:40px;white-space:nowrap;z-index:5}
+        .p06-slots{position:absolute;left:230px;top:240px;width:1460px;display:flex;gap:60px}
+        .p06-slot{flex:1 1 0;min-width:0;border:solid 6px var(--c-ink);border-radius:26px;padding:20px;background:#fff}
+        .p06-slot h4{margin:0 0 14px;text-align:center;font-family:'Cafe24 Ssurround';font-size:48px;font-weight:normal;color:var(--c-ink);letter-spacing:-0.04em}
+        .p06-zone{height:190px;box-sizing:border-box;background:var(--c-mist);border:dashed 6px var(--c-ink);border-radius:26px;display:flex;align-items:stretch;justify-content:stretch}
+        .p06-cards{position:absolute;left:230px;top:580px;width:1460px;display:grid;grid-template-columns:1fr 1fr;gap:10px 40px}
+        .p06-zone[data-filled]{border-style:solid}
+        .p06-cell{height:170px}
+        .p06-card{box-sizing:border-box;height:150px;padding:10px 26px 4px;display:flex;align-items:center;justify-content:center;text-align:center;background:var(--c-mist);border:solid 6px var(--c-ink);border-radius:26px;box-shadow:0 8px 0 0 rgba(86,148,231,.25);cursor:grab;font-family:'Cafe24 Ssurround';font-size:44px;line-height:1.2;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all;user-select:none;position:relative}
+        .p06-card.is-dragging{z-index:50;cursor:grabbing;box-shadow:0 14px 20px rgba(0,0,0,.25)}
+        .p06-zone .p06-card{width:100%;height:auto;border:0;border-radius:20px;box-shadow:none;cursor:default;background:var(--c-mist)}
+        .p06-md{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:100;background:rgba(27,23,56,.6);display:none}
+        .p06-md.is-on{display:block}
+        .p06-md-panel{position:absolute;left:340px;top:90px;width:1240px;height:780px;box-sizing:border-box;overflow:hidden;background:var(--c-white);border:solid 6px var(--c-purple);border-radius:36px;box-shadow:0 12px 0 0 rgba(60,20,120,.35)}
+        .p06-md-pic{position:absolute;left:0;top:0;width:100%;height:640px;overflow:hidden}
+        .p06-md-cap{position:absolute;left:0;bottom:0;width:100%;height:140px;margin:0;display:flex;align-items:center;justify-content:center;background:var(--c-cream);border-top:solid 5px var(--c-purple);font-family:'Cafe24 Ssurround';font-size:48px;color:#7d42f5;letter-spacing:-0.04em}
+        .p06-md-x{position:absolute;right:26px;top:26px;width:80px;height:80px;border:solid 5px var(--c-purple);border-radius:50%;background:var(--c-white);cursor:pointer;z-index:3;padding:0}
+        .p06-md-x:before,.p06-md-x:after{content:'';position:absolute;left:14px;top:32px;width:44px;height:6px;border-radius:3px;background:var(--c-purple);transform:rotate(45deg)}
+        .p06-md-x:after{transform:rotate(-45deg)}
+        #p06Wrong,#p06Right,#p06End{z-index:120}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="p06-q ask-pill is-fit" id="p06Q"><span></span></p>
+
+          <div id="p06Look">
+            <div class="p06-scene"><div class="ph" id="p06Ph"></div><img class="pic" id="p06Pic" alt="" onerror="this.style.display='none'"></div>
+            <p class="p06-cap" id="p06Cap"></p>
+            <button type="button" class="card-btn is-start next-btn p06-next js-sfx" id="p06Next" data-sound="sound/click.mp3">다음</button>
+          </div>
+
+          <div id="p06Play" style="display:none">
+            <button type="button" class="card-btn is-popup p06-again js-sfx" id="p06Again" data-sound="sound/click.mp3">상황 다시 보기</button>
+            <div class="p06-slots">
+              <div class="p06-slot"><h4>외국인이 이해한 규칙</h4><div class="p06-zone" data-key="f" id="p06ZoneF"></div></div>
+              <div class="p06-slot"><h4>표지판이 알려주는 규칙</h4><div class="p06-zone" data-key="s" id="p06ZoneS"></div></div>
+            </div>
+            <div class="p06-cards" id="p06Cards"></div>
+          </div>
+
+          <div class="p06-md" id="p06Md">
+            <div class="p06-md-panel">
+              <div class="p06-md-pic"><div class="ph" id="p06MdPh"></div><img class="pic" id="p06MdPic" alt="" onerror="this.style.display='none'"></div>
+              <button type="button" class="p06-md-x js-sfx" id="p06MdX" data-sound="sound/click.mp3" aria-label="닫기"></button>
+              <p class="p06-md-cap" id="p06MdCap"></p>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-wrong is-off" id="p06Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body is-finish is-side">
+                <p class="avatar-popup-sub" id="p06WrongP"></p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p06WrongOk" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div>
+          <div class="avatar-modal is-off" id="p06Right">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish is-side">
+                <p class="avatar-popup-text">맞아요!</p>
+                <p class="avatar-popup-sub">이 규칙은 우리나라를 방문한<br>관광객도 함께 지켜야 해요.</p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p06RightOk" data-sound="sound/click.mp3">다음</button>
+              </div>
+            </div>
+          </div>
+          <div class="avatar-modal is-off" id="p06End">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish is-side">
+                <p class="avatar-popup-sub">문제로 만나 본 세 가지의 상황에서<br>무엇을 알 수 있었나요?<br>알게 된 내용을 문장으로 만들어볼까요?</p>
+                <a href="page07.html" class="js-nav-effect avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="한국에서 지켜야 할 규칙" data-next="page07.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const ROUNDS = [
+      { scene: '외국인이 임산부 배려석에 자녀를 앉힌 장면', cap: '외국인이 임산부 배려석에 아이를 앉혔어요.',
+        cards: [['어린아이만 앉을 수 있어요.', 'f'], ['아이를 안고 있는 사람만 앉을 수 있어요.', ''], ['짐을 놓기 위한 자리예요.', ''], ['임산부가 이용할 수 있도록 자리를 비워두거나 양보해요.', 's']],
+        wrongF: '상황을 다시 한번 확인해봐요.<br>외국인이 분홍색 좌석을 보며<br>어떤 생각을 했나요?', wrongS: '지하철의 분홍색 좌석은<br>임산부 배려석이에요.' },
+      { scene: '외국인이 신발 바닥을 털고 한옥 마루에 들어가는 장면<br>(옆에는 신발을 벗고 올라가라는 안내판이 있음)', cap: '외국인이 신발 바닥을 털고 한옥 마루에 들어갔어요.',
+        cards: [['신발을 갈아 신고 들어가요.', ''], ['신발을 털고 들어가요.', 'f'], ['한옥 마루에 올라가서 신발을 벗어요.', ''], ['신발을 벗고 들어가요.', 's']],
+        wrongF: '상황을 다시 한번 확인해봐요.<br>외국인은 신발을 어떻게 해야<br>한다고 생각했나요?', wrongS: '한옥 마루에는 신발을 벗고<br>들어가야 해요.' },
+      { scene: '공원의 보행로를 옆에 두고 외국인이 잔디밭 위를 걸어가고 있는 장면<br>(잔디밭에 출입 금지 표지판이 붙어 있음)', cap: '외국인이 잔디밭을 가로질러 걸어가고 있어요.',
+        cards: [['잔디밭에 들어가면 안 돼요.', 's'], ['잔디밭에서 뛰지 않고 걸어 다녀요.', 'f'], ['잔디밭에 들어가기 전에 신발을 벗어요.', ''], ['잔디밭에서는 음식을 먹지 않아요.', '']],
+        wrongF: '상황을 다시 한번 확인해봐요.<br>외국인은 잔디밭에서 무엇을<br>해야 한다고 생각했나요?', wrongS: '잔디를 보호하기 위해<br>잔디밭에 들어가면 안 돼요.' }
+    ];
+    let ri = 0;
+
+    function look() {
+      const r = ROUNDS[ri];
+      const main = document.querySelector('main');
+      main.classList.remove('is-r1', 'is-r2', 'is-r3');
+      main.classList.add('is-r' + (ri + 1));
+      $('p06Q').classList.remove('has-again');
+      $('p06Q').firstElementChild.textContent = '어떤 상황인지 확인해봐요.';
+      $('p06Ph').innerHTML = r.scene;
+      const pic = $('p06Pic');
+      pic.style.display = '';
+      pic.src = 'img/p06_scene_' + (ri + 1) + '.png';
+      $('p06Cap').textContent = r.cap;
+      $('p06Look').style.display = '';
+      $('p06Play').style.display = 'none';
+    }
+
+    function play() {
+      const r = ROUNDS[ri];
+      $('p06Q').classList.add('has-again');
+      $('p06Q').firstElementChild.innerHTML = '외국인이 이해한 규칙과 표지판이 알려주는 규칙이<br>각각 무엇인지 알맞은 카드를 드래그해 보세요.';
+      $('p06Look').style.display = 'none';
+      $('p06Play').style.display = '';
+      const zF = $('p06ZoneF'), zS = $('p06ZoneS');
+      [zF, zS].forEach((z) => { z.innerHTML = ''; delete z.dataset.filled; });
+      const box = $('p06Cards');
+      box.innerHTML = '';
+      const cards = r.cards.map((c, i) => {
+        const d = document.createElement('div');
+        d.className = 'p06-card';
+        d.dataset.key = c[1] || 'x';
+        d.dataset.n = i + 1;
+        d.textContent = c[0];
+        const cell = document.createElement('div');
+        cell.className = 'p06-cell';
+        cell.appendChild(d);
+        box.appendChild(cell);
+        return d;
+      });
+      initMatchDrag({
+        cards, zones: [zF, zS], slop: 30,
+        onRight: () => playCorrect(),
+        onWrong: (card, zone) => {
+          if (!zone) return;
+          playWrong();
+          $('p06WrongP').innerHTML = zone.dataset.key === 'f' ? r.wrongF : r.wrongS;
+          $('p06Wrong').classList.remove('is-off');
+        },
+        onDone: () => setTimeout(() => $('p06Right').classList.remove('is-off'), 600)
+      });
+    }
+
+    $('p06Next').addEventListener('click', play);
+    $('p06Again').addEventListener('click', () => {
+      const r = ROUNDS[ri];
+      $('p06MdPh').innerHTML = r.scene;
+      const p = $('p06MdPic');
+      p.style.display = '';
+      p.src = 'img/p06_scene_' + (ri + 1) + '.png';
+      $('p06MdCap').textContent = r.cap;
+      $('p06Md').classList.add('is-on');
+    });
+    $('p06MdX').addEventListener('click', () => $('p06Md').classList.remove('is-on'));
+    $('p06WrongOk').addEventListener('click', () => $('p06Wrong').classList.add('is-off'));
+    $('p06RightOk').addEventListener('click', () => {
+      $('p06Right').classList.add('is-off');
+      ri += 1;
+      if (ri >= ROUNDS.length) { $('p06End').classList.remove('is-off'); return; }
+      look();
+    });
+    look();
+  })();
+  </script>
+</body>
+</html>

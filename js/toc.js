@@ -170,12 +170,13 @@
             <div class="toc-accordion">
               <button class="toc-accordion-toggle js-sfx" data-sound="sound/click.mp3">12차시</button>
               <div class="toc-accordion-panel">
-                <a href="javascript:;" class="toc-sub-item">01</a>
-                <a href="javascript:;" class="toc-sub-item">02</a>
-                <a href="javascript:;" class="toc-sub-item">03</a>
-                <a href="javascript:;" class="toc-sub-item">04</a>
-                <a href="javascript:;" class="toc-sub-item">05</a>
-                <a href="javascript:;" class="toc-sub-item">06</a>
+                <a href="${BASE}sa/12/page01.html" class="toc-sub-item">1) 도전! 표지판과 규칙 찾기</a>
+                <a href="${BASE}sa/12/page04.html" class="toc-sub-item">2) 개념 이해 영상</a>
+                <a href="${BASE}sa/12/page05.html" class="toc-sub-item">3) 한국에서 지켜야 할 규칙</a>
+                <a href="${BASE}sa/12/page08.html" class="toc-sub-item">4) 짧고 분명한 안내 문장 만들기</a>
+                <a href="${BASE}sa/12/page10.html" class="toc-sub-item">5) Papago로 한국 문화 안내하기</a>
+                <a href="${BASE}sa/12/page14.html" class="toc-sub-item">6) 퀴즈 풀기</a>
+                <a href="${BASE}sa/12/page15.html" class="toc-sub-item">7) 관광객 안내 표지판 완성 게임</a>
               </div>
             </div>
 
@@ -195,12 +196,13 @@
             <div class="toc-accordion">
               <button class="toc-accordion-toggle js-sfx" data-sound="sound/click.mp3">14차시</button>
               <div class="toc-accordion-panel">
-                <a href="javascript:;" class="toc-sub-item">01</a>
-                <a href="javascript:;" class="toc-sub-item">02</a>
-                <a href="javascript:;" class="toc-sub-item">03</a>
-                <a href="javascript:;" class="toc-sub-item">04</a>
-                <a href="javascript:;" class="toc-sub-item">05</a>
-                <a href="javascript:;" class="toc-sub-item">06</a>
+                <a href="${BASE}sa/14/page01.html" class="toc-sub-item">1) AI 방패! 수상한 연락을 막아라</a>
+                <a href="${BASE}sa/14/page03.html" class="toc-sub-item">2) 개념 이해 영상</a>
+                <a href="${BASE}sa/14/page04.html" class="toc-sub-item">3) 안전한 메시지와 수상한 메시지 나누기</a>
+                <a href="${BASE}sa/14/page06.html" class="toc-sub-item">4) 보이스피싱, 이렇게 대처해요!</a>
+                <a href="${BASE}sa/14/page08.html" class="toc-sub-item">5) 우리 가족 AI 안심 통화 설정</a>
+                <a href="${BASE}sa/14/page10.html" class="toc-sub-item">6) 퀴즈 풀기</a>
+                <a href="${BASE}sa/14/page11.html" class="toc-sub-item">7) 위기 탈출! 보이스피싱 탈출 게임</a>
               </div>
             </div>
 
