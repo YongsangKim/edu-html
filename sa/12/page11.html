@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papago로 한국 문화 안내하기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서(실습만) 2~15p. 지하철(임산부 배려석) → 올림픽 공원(잔디밭) 두 장면이 같은 형식: 이야기 → Papago 켜기 → 음성 → 안내문 문장 2개 고르면 번역(한글·영어 TTS) → 이야기.
+           이야기 삽화는 img/p11_story_{1..6}.png (없으면 설명 글자). 앱 화면은 js/papago.js(PP), 안내 소리는 sound/sa12_tts_*.mp3 가 있으면 그것, 없으면 브라우저 음성 */
+        .p11-panel{position:absolute;left:1250px;top:120px;width:610px}
+        .p11-sign{box-sizing:border-box;padding:26px 20px 22px;text-align:center;background:var(--c-white);border:solid 6px var(--c-ink);border-radius:26px;box-shadow:0 10px 0 0 rgba(86,148,231,.2)}
+        .p11-sign b{display:block;font-family:'Cafe24 Ssurround';font-weight:normal;font-size:58px;line-height:1.1;color:var(--c-ink);letter-spacing:-0.04em}
+        .p11-sign span{display:block;margin-top:12px;font-family:'Cafe24 Ssurround';font-size:36px;color:var(--c-ink);opacity:.8;letter-spacing:-0.04em}
+        .p11-opts{margin-top:44px;display:flex;flex-direction:column;gap:22px}
+        .p11-opt{box-sizing:border-box;min-height:134px;padding:14px 22px 8px;display:flex;align-items:center;justify-content:center;text-align:center;background:var(--c-white);border:solid 6px var(--c-ink);border-radius:26px;box-shadow:0 8px 0 0 rgba(86,148,231,.2);cursor:pointer;font-family:'Cafe24 Ssurround';font-size:40px;line-height:1.2;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all;transition:transform .12s}
+        .p11-opt:hover{transform:translateY(-3px);border-color:var(--c-pink)}
+        .p11-opt.is-right{border-color:var(--c-pink);box-shadow:0 0 0 8px rgba(255,14,128,.28);background:#fff3fb}
+        .p11-opt.is-lock{pointer-events:none}
+        .p11-next{position:absolute;left:1440px;top:810px;width:330px;min-width:0;z-index:30}
+        .p11-next.is-off,.p11-panel.is-off{display:none}
+        #p11Wrong{z-index:120}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="pp-story" id="p11Story">
+            <div class="ph" id="p11Ph"></div>
+            <img class="pic" id="p11Pic" alt="" onerror="this.style.display='none'">
+            <div class="pp-story-cap"><p id="p11Cap"></p><button type="button" class="card-btn is-popup js-sfx" id="p11StoryNext" data-sound="sound/click.mp3">다음</button></div>
+          </div>
+
+          <div class="guide-set is-main" id="p11Set">
+            <p class="guide-bubble is-center" id="p11Bubble"></p>
+            <div class="guide-character"><img id="p11Char" src="../img/sa_main.png" alt="메인 캐릭터"></div>
+          </div>
+          <div class="phone-frame has-cam" id="p11Phone"><div class="phone-screen" id="p11Screen"></div></div>
+          <div class="p11-panel is-off" id="p11Panel">
+            <div class="p11-sign"><b id="p11SignT"></b><span id="p11SignP"></span></div>
+            <div class="p11-opts" id="p11Opts"></div>
+          </div>
+          <button type="button" class="card-btn is-start p11-next is-off js-sfx" id="p11Next" data-sound="sound/click.mp3">다음</button>
+
+          <div class="avatar-modal is-wrong is-off" id="p11Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body is-finish is-side">
+                <p class="avatar-popup-sub">안내문을 다시 한번<br>잘 읽어봐요.</p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p11WrongOk" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="Papago로 한국 문화 안내하기" data-next="page12.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script src="../../js/papago.js"></script>
+  <script>
+  (function () {
+    const SUBWAY = {
+      sign: ['임산부 배려석', '임산부를 위해 비워주세요'], tts: 'subway',
+      opts: [['분홍색 좌석은<br>임산부 배려석이에요.', '분홍색 좌석은 임산부 배려석이에요.', 'The pink seats are priority seats for pregnant women.', true],
+             ['자리가 비어 있어도 임산부를 위해<br>비워둘 수 있어요.', '자리가 비어 있어도 임산부를 위해 비워둘 수 있어요.', 'Even if a seat is empty, it can be left open for the pregnant woman.', true],
+             ['분홍색 좌석은<br>아동 배려석이에요.', '', '', false]]
+    };
+    const LAWN = {
+      sign: ['잔디밭 출입금지', '새로 심은 잔디를 보호해주세요.'], tts: 'lawn',
+      opts: [['잔디밭에 들어가면 안 돼요.', '잔디밭에 들어가면 안 돼요.', 'Don’t go onto the lawn.', true],
+             ['잔디를 새로 심어서 보호해야 해요.', '잔디를 새로 심어서 보호해야 해요.', 'We need to protect it because they planted new grass.', true],
+             ['잔디밭에서 음식을 먹으면 안 돼요.', '', '', false]]
+    };
+    const STEPS = [
+      { story: '공항에서 인사하는 미국인 친구와 한국인 학생 장면 삽화', cap: '미국인 친구가 한국에 놀러 왔어요!<br>공항에서 만나 지하철을 타고 이동하기로 했어요.' },
+      { story: '지하철에서 미국인 친구가 임산부 배려석에 앉으려고 하는 장면 삽화', cap: '앗! 지하철에서 미국인 친구가 임산부 배려석에 앉으려고 해요.<br>친구에게 안내문에 적힌 규칙을 설명해줘요.' },
+      { say: 'Papago를 클릭해요.', pose: 'wink_point2', screen: () => PP.launcher({ hot: ['app'] }), hot: 'app' },
+      { say: '음성인식 기능을 사용해서<br>미국인 친구에게 지하철의<br>규칙을 설명해봐요.', pose: 'wink_point2', screen: () => PP.home({ to: '영어', hot: ['voice'] }), hot: 'voice' },
+      { say: '오른쪽의 지하철 안내문을 잘 읽고<br>알맞은 내용을 클릭해요.', pose: 'main', screen: () => PP.voice({ to: '영어', state: 'listen' }), quiz: SUBWAY },
+      { story: '친구에게 지하철의 규칙을 안내하는 장면 삽화', cap: '친구에게 지하철의 규칙을 안내했어요!<br>이제 서울 올림픽 공원으로 이동해봐요.' },
+      { story: '올림픽 공원에서 산책하고 휴식을 취하는 사람들 삽화', cap: '서울 올림픽 공원에 도착했어요.<br>놀러 온 사람들이 아주 많네요.' },
+      { story: '잔디밭에 출입금지 표지판이 붙어 있는 장면 삽화', cap: '새로 심은 잔디를 보호하기 위해 잔디밭의 출입을 금지하고 있어요.<br>한글을 모르는 친구를 위해 안내문을 설명해줘요.' },
+      { say: '음성인식 기능을 사용해서<br>외국인 친구에게 잔디밭의<br>안내문을 설명해봐요.', pose: 'wink_point2', screen: () => PP.home({ to: '영어', hot: ['voice'] }), hot: 'voice' },
+      { say: '오른쪽의 안내문을 잘 읽고<br>알맞은 내용을 클릭해요.', pose: 'main', screen: () => PP.voice({ to: '영어', state: 'listen' }), quiz: LAWN },
+      { story: '잔디밭 옆 보행로에서 산책하는 미국인 친구와 한국인 학생 삽화', cap: '규칙에 따라 잔디밭이 아니라 보행로에서 산책해요.<br>이제 서울 한옥마을로 이동해볼까요?', last: true }
+    ];
+    const story = $('p11Story'), set = $('p11Set'), phone = $('p11Phone'), screen = $('p11Screen'), panel = $('p11Panel'), next = $('p11Next');
+    const say = initGuideSay({ bubble: $('p11Bubble'), img: $('p11Char'), set });
+    let si = 0, found = 0, busy = false, handler = null;
+    let imgN = 0;
+
+    function show(html) { PP.mount(screen, html); }
+    function finger(name) {
+      clearFingers();
+      const el = screen.querySelector('[data-hot="' + name + '"]');
+      if (el) setTimeout(() => { if (el.isConnected) pointFingerAt(el, { onMain: true, dx: -10, dy: -20 }); }, 300);
+    }
+
+    function go(n) {
+      clearFingers();
+      si = n;
+      const s = STEPS[si];
+      next.classList.add('is-off');
+      panel.classList.add('is-off');
+      handler = null;
+      if (s.story) {
+        imgN += 1;
+        story.classList.remove('is-off');
+        $('p11Ph').textContent = s.story;
+        const p = $('p11Pic');
+        p.style.display = '';
+        p.src = 'img/p11_story_' + imgN + '.png';
+        $('p11Cap').innerHTML = s.cap;
+        return;
+      }
+      story.classList.add('is-off');
+      say(s.say, s.pose, true);
+      show(s.screen());
+      if (s.hot) {
+        handler = () => go(si + 1);
+        finger(s.hot);
+      }
+      if (s.quiz) quiz(s.quiz);
+    }
+
+    function quiz(q) {
+      found = 0;
+      busy = false;
+      $('p11SignT').textContent = q.sign[0];
+      $('p11SignP').textContent = q.sign[1];
+      const box = $('p11Opts');
+      box.innerHTML = '';
+      q.opts.forEach((o, oi) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'p11-opt';
+        b.innerHTML = o[0];
+        b.addEventListener('click', () => pick(b, o, q, oi + 1));
+        box.appendChild(b);
+      });
+      panel.classList.remove('is-off');
+    }
+
+    function pick(b, o, q, n) {
+      if (busy) return;
+      if (!o[3]) {
+        playWrong();
+        $('p11Wrong').classList.remove('is-off');
+        return;
+      }
+      busy = true;
+      playCorrect();
+      b.classList.add('is-right', 'is-lock');
+      found += 1;
+      show(PP.voice({ to: '영어', state: 'result', src: o[1], out: o[2] }));
+      PP.speak(o[1], 'ko-KR', 'sa12_tts_' + q.tts + '_' + n + '_ko.mp3', () => {
+        PP.speak(o[2], 'en-US', 'sa12_tts_' + q.tts + '_' + n + '_en.mp3', () => {
+          busy = false;
+          if (found >= 2) {
+            say('좋아요!<br>안내문의 모든 내용을 번역했어요.', 'wink_point4');
+            panel.classList.add('is-off');
+            next.classList.remove('is-off');
+          } else {
+            say('좋아요!<br>알맞은 내용을 찾아 번역했어요.', 'wink_point4');
+          }
+        });
+      });
+    }
+
+    screen.addEventListener('click', (e) => {
+      const t = e.target.closest('[data-hot]');
+      if (t && handler) { playClick(); const h = handler; handler = null; clearFingers(); h(t.dataset.hot); }
+    });
+    $('p11StoryNext').addEventListener('click', () => {
+      if (STEPS[si].last) { setTimeout(() => { location.href = 'page12.html'; }, 250); return; }
+      go(si + 1);
+    });
+    next.addEventListener('click', () => go(si + 1));
+    $('p11WrongOk').addEventListener('click', () => $('p11Wrong').classList.add('is-off'));
+    go(0);
+  })();
+  </script>
+</body>
+</html>

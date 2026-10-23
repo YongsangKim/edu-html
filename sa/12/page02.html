@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>도전! 표지판과 규칙 찾기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서 3~6p. 문제 1~2(표지판 맞히기): 왼쪽에 상황 그림+설명, 오른쪽에 표지판 3개 중 고르기. 정답이면 '규칙 발견!' 스티커 + 1초 뒤 다음 문제.
+           그림 파일: 상황 img/p02_q{1,2}_scene.png · 표지판 img/p02_q{1,2}_{a,b,c}.jpg (없으면 설명 글자·이름표로 대신 보임) */
+        /* .p02-q{font-size:46px} */
+        .p02-scene{position:absolute;left:80px;top:175px;width:1290px;height:740px;box-sizing:border-box;overflow:hidden;background:var(--c-white);border:solid 6px var(--c-ink);border-radius:36px;box-shadow:0 14px 0 0 rgba(86,148,231,.2)}
+        .p02-scene .ph{position:absolute;left:0;top:0;width:100%;height:calc(100% - 110px);display:flex;align-items:center;justify-content:center;padding:40px;box-sizing:border-box;text-align:center;font-family:'Cafe24 Ssurround';font-size:44px;color:#9aa6c4;letter-spacing:-0.04em}
+        .p02-scene .pic{position:absolute;left:0;top:0;width:100%;height:calc(100% - 110px);object-fit:cover;display:block}
+        .p02-cap{position:absolute;left:0;bottom:0;width:100%;height:110px;margin:0;box-sizing:border-box;padding:12px 30px 0;display:flex;align-items:center;justify-content:center;text-align:center;background:var(--c-cream);border-top:solid 5px var(--c-ink);font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.15;color:var(--c-ink);letter-spacing:-0.04em}
+        .p02-signs{position:absolute;left:1450px;top:175px;width:390px;display:flex;flex-direction:column;gap:26px}
+        .p02-sign{position:relative;height:229px;box-sizing:border-box;padding:0;overflow:hidden;background:var(--c-white);border:solid 6px var(--c-ink);border-radius:30px;box-shadow:0 10px 0 0 rgba(86,148,231,.2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-ink);letter-spacing:-0.04em;transition:transform .12s}
+        .p02-sign img{height:78%;width:auto;max-width:90%;object-fit:contain;display:block}
+        .p02-sign:hover{transform:translateY(-4px);border-color:var(--c-pink);box-shadow:0 10px 0 0 rgba(255,14,128,.3)}
+        .p02-sign.is-right{border-color:var(--c-pink);box-shadow:0 0 0 8px rgba(255,14,128,.28);pointer-events:none}
+        .p02-sign.is-lock{pointer-events:none}
+        .p02-found{position:absolute;right:60px;bottom:135px;z-index:5;display:none;align-items:center;gap:6px;padding:12px 30px 8px 16px;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:20px;box-shadow:0 8px 0 0 rgba(86,148,231,.3);transform:rotate(-8deg);font-family:'Cafe24 Ssurround';font-size:46px;color:var(--c-pink);letter-spacing:-0.04em}
+        .p02-found img{width:78px;height:78px;object-fit:contain}
+        .p02-found.is-on{display:flex;animation:p02-stamp .35s ease-out}
+        @keyframes p02-stamp{from{transform:rotate(-8deg) scale(2);opacity:0}to{transform:rotate(-8deg) scale(1);opacity:1}}
+        #p02Wrong{z-index:120}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="ask-pill is-small is-fit" id="p02Q"><span></span></p>
+          <div class="p02-scene" id="p02Scene">
+            <div class="ph" id="p02Ph"></div>
+            <img class="pic" id="p02Pic" alt="" onerror="this.style.display='none'">
+            <p class="p02-cap" id="p02Cap"></p>
+            <div class="p02-found" id="p02Found"><img src="img/p02_magnifier.png" alt="">규칙 발견!</div>
+          </div>
+          <div class="p02-signs" id="p02Signs"></div>
+
+          <div class="avatar-modal is-wrong is-off" id="p02Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body is-finish is-side">
+                <p class="avatar-popup-sub">이 상황에서는 어떤 표지판이 필요할까요?<br>다시 한번 생각해보세요.</p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p02WrongOk" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="도전! 표지판과 규칙 찾기" data-next="page03.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const ROUNDS = [
+      { q: '학생들이 안전하게 길을 건널 수 있도록 어떤 안내가 필요할까요?', scene: '학교 앞 어린이보호구역에서 차가 달리는 장면', cap: '학교 앞 도로에서 자동차들이 빠르게 지나가고 있어요.', signs: ['자동차전용도로', '어린이보호구역', '자전거전용도로'], right: 1 },
+      { q: '이곳은 보행자만 이용하도록 지정된 길이에요. 어떤 표지판이 필요할까요?', scene: '보행자전용도로에 차가 진입하려는 장면', cap: '사람들이 산책하는 길에 자동차가 들어오려고 해요.', signs: ['보행자전용도로', '주차', '자전거전용도로'], right: 0 }
+    ];
+    let ri = 0, busy = false;
+    const signs = $('p02Signs');
+
+    function show() {
+      const r = ROUNDS[ri], n = ri + 1;
+      $('p02Q').firstElementChild.innerHTML = r.q;
+      $('p02Ph').textContent = r.scene;
+      const pic = $('p02Pic');
+      pic.style.display = '';
+      pic.src = 'img/p02_q' + n + '_scene.png';
+      $('p02Cap').textContent = r.cap;
+      $('p02Found').classList.remove('is-on');
+      signs.innerHTML = '';
+      r.signs.forEach((name, i) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'p02-sign';
+        b.setAttribute('aria-label', name);
+        const im = document.createElement('img');
+        im.alt = '';
+        im.src = 'img/p02_q' + n + '_' + 'abc'[i] + '.jpg';
+        im.onerror = () => { im.remove(); b.textContent = name; };
+        b.appendChild(im);
+        b.addEventListener('click', () => pick(b, i));
+        signs.appendChild(b);
+      });
+      busy = false;
+    }
+
+    function pick(b, i) {
+      if (busy) return;
+      if (i !== ROUNDS[ri].right) {
+        playWrong();
+        $('p02Wrong').classList.remove('is-off');
+        return;
+      }
+      busy = true;
+      playCorrect();
+      b.classList.add('is-right');
+      signs.querySelectorAll('.p02-sign').forEach((x) => x.classList.add('is-lock'));
+      $('p02Found').classList.add('is-on');
+      setTimeout(() => {
+        ri += 1;
+        if (ri >= ROUNDS.length) { location.href = 'page03.html'; return; }
+        show();
+      }, 1000);
+    }
+    $('p02WrongOk').addEventListener('click', () => $('p02Wrong').classList.add('is-off'));
+    show();
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papago로 한국 문화 안내하기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서(실습만) 16~21p. 한옥마을: 이야기 → 이미지 기능 → 촬영 버튼(번역 로딩 1초) → 안내판 번역 결과 + 다음 → 이야기.
+           이야기 삽화는 img/p12_story_{1,2}.png (없으면 설명 글자). 카메라 사진은 img/photo_hanok.png, 번역 문구는 사진 속 안내판 위치(box, 폰 화면 %)에 얹음 */
+        .p12-next{position:absolute;left:1440px;top:810px;width:330px;min-width:0;z-index:30}
+        .p12-next.is-off{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="pp-story" id="p12Story">
+            <div class="ph" id="p12Ph"></div>
+            <img class="pic" id="p12Pic" alt="" onerror="this.style.display='none'">
+            <div class="pp-story-cap"><p id="p12Cap"></p><button type="button" class="card-btn is-popup js-sfx" id="p12StoryNext" data-sound="sound/click.mp3">다음</button></div>
+          </div>
+
+          <div class="guide-set is-main" id="p12Set">
+            <p class="guide-bubble is-center" id="p12Bubble"></p>
+            <div class="guide-character"><img id="p12Char" src="../img/sa_main.png" alt="메인 캐릭터"></div>
+          </div>
+          <div class="phone-frame has-cam" id="p12Phone"><div class="phone-screen" id="p12Screen"></div></div>
+          <button type="button" class="card-btn is-start p12-next is-off js-sfx" id="p12Next" data-sound="sound/click.mp3">다음</button>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="Papago로 한국 문화 안내하기" data-next="page13.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script src="../../js/papago.js"></script>
+  <script>
+  (function () {
+    const PHOTO = { src: 'img/photo_hanok.png', pos: '80% 50%', box: [24.5, 13, 52, 52] };
+    const camLive = () => PP.cam({ to: '영어', photo: PHOTO.src, pos: PHOTO.pos, hot: ['shoot'] });
+    const camLoad = () => PP.cam({ to: '영어', photo: PHOTO.src, pos: PHOTO.pos, load: true });
+    const camDone = () => PP.cam({ to: '영어', photo: PHOTO.src, pos: PHOTO.pos, mode: 'result', overlays: [{ box: PHOTO.box, html: 'Take off your shoes before entering.<br>Please put the shoes in the shoe rack.', fs: 19, bg: 'rgba(255,255,255,.9)' }] });
+    const STEPS = [
+      { story: '한옥마을에서 미국인 친구가 신발을 신고 대청마루에 들어가려는 장면 삽화(안내문 포함)', cap: '한옥마을에 도착했어요. 미국인 친구가 신발을 신고 대청마루에 들어가려고 해요. 안내문을 번역해서 한옥의 규칙을 알려줘요.' },
+      { say: '이미지 기능을 사용해서<br>미국인 친구에게 한옥의<br>규칙을 설명해봐요.', pose: 'wink_point2', screen: () => PP.home({ to: '영어', hot: ['image'] }), hot: 'image' },
+      { say: '촬영 버튼을 클릭해<br>한옥의 안내판을 촬영해요.', pose: 'wink_point2', screen: camLive, hot: 'shoot' },
+      { say: '촬영 버튼을 클릭해<br>한옥의 안내판을 촬영해요.', pose: 'main', screen: camLoad, auto: 1000 },
+      { say: '좋아요!<br>한옥의 규칙이 적힌<br>안내판을 번역했어요.', pose: 'wink_point4', screen: camDone, next: true },
+      { story: '미국인 친구도 함께 규칙에 따라 신발을 벗고 한옥을 체험하는 장면 삽화', cap: '미국인 친구도 함께 규칙에 따라 신발을 벗고 한옥을 체험했어요.<br>이제 카페로 이동해요.', last: true }
+    ];
+    const story = $('p12Story'), screen = $('p12Screen'), next = $('p12Next');
+    const say = initGuideSay({ bubble: $('p12Bubble'), img: $('p12Char'), set: $('p12Set') });
+    let si = 0, handler = null, timer = 0, imgN = 0;
+
+    function finger(name) {
+      clearFingers();
+      const el = screen.querySelector('[data-hot="' + name + '"]');
+      if (el) setTimeout(() => { if (el.isConnected) pointFingerAt(el, { onMain: true, dx: -10, dy: -20 }); }, 300);
+    }
+
+    function go(n) {
+      clearTimeout(timer);
+      clearFingers();
+      si = n;
+      const s = STEPS[si];
+      next.classList.add('is-off');
+      handler = null;
+      if (s.story) {
+        imgN += 1;
+        story.classList.remove('is-off');
+        $('p12Ph').textContent = s.story;
+        const p = $('p12Pic');
+        p.style.display = '';
+        p.src = 'img/p12_story_' + imgN + '.png';
+        $('p12Cap').innerHTML = s.cap;
+        return;
+      }
+      story.classList.add('is-off');
+      say(s.say, s.pose, true);
+      PP.mount(screen, s.screen());
+      if (s.hot) { handler = () => go(si + 1); finger(s.hot); }
+      if (s.auto) timer = setTimeout(() => go(si + 1), s.auto);
+      if (s.next) next.classList.remove('is-off');
+    }
+
+    screen.addEventListener('click', (e) => {
+      const t = e.target.closest('[data-hot]');
+      if (t && handler) { playClick(); const h = handler; handler = null; clearFingers(); h(t.dataset.hot); }
+    });
+    $('p12StoryNext').addEventListener('click', () => {
+      if (STEPS[si].last) { setTimeout(() => { location.href = 'page13.html'; }, 250); return; }
+      go(si + 1);
+    });
+    next.addEventListener('click', () => go(si + 1));
+    go(0);
+  })();
+  </script>
+</body>
+</html>

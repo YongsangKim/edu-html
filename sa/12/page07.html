@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>한국에서 지켜야 할 규칙</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서 33~34p. 문장 속 빈칸 2개에 단어 카드(가끔·함께·비밀·일정·규칙) 중 '함께'·'규칙'을 끌어 넣기. 틀리면 부착되지 않고 제자리로 돌아감. 다 채우면 카드가 사라지고 '다음' 버튼 */
+        .p07-sent{position:absolute;left:130px;top:260px;width:1670px;height:270px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:22px;background:var(--c-white);border:solid 6px var(--c-ink);border-radius:40px;box-shadow:0 14px 0 0 rgba(86,148,231,.2);font-family:'Cafe24 Ssurround';font-size:54px;color:var(--c-ink);letter-spacing:-0.05em;white-space:nowrap}
+        .p07-blank{width:210px;height:130px;box-sizing:border-box;display:flex;align-items:stretch;justify-content:stretch;background:#eef2fb;border:solid 5px var(--c-ink);border-radius:20px}
+        .p07-blank .p07-card{width:100%;height:100%;border:0;border-radius:14px;box-shadow:none;background:var(--c-cream);cursor:default}
+        .p07-cards{position:absolute;left:150px;top:620px;width:1620px;display:flex;justify-content:center;gap:34px}
+        .p07-cell{width:250px;height:130px}
+        .p07-card{box-sizing:border-box;width:250px;height:130px;display:flex;align-items:center;justify-content:center;background:var(--c-white);border:solid 6px var(--c-ink);border-radius:24px;box-shadow:0 8px 0 0 rgba(86,148,231,.25);cursor:grab;font-family:'Cafe24 Ssurround';font-size:54px;padding-top:6px;color:var(--c-ink);letter-spacing:-0.04em;user-select:none;position:relative}
+        .p07-card.is-dragging{z-index:50;cursor:grabbing;box-shadow:0 14px 20px rgba(0,0,0,.25)}
+        .p07-next{position:absolute;left:1440px;top:790px;width:330px;min-width:0;z-index:30}
+        .p07-next.is-off{display:none}
+        .p07-cards.is-off{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="ask-pill is-fit is-tight"><span>빈칸에 들어갈 알맞은 단어 카드를 드래그해 넣어 보세요.</span></p>
+          <div class="p07-sent">우리나라를 방문한 관광객도 <span class="p07-blank" data-key="a" id="p07A"></span> 지켜야 할 <span class="p07-blank" data-key="b" id="p07B"></span> 이 있습니다.</div>
+          <div class="p07-cards" id="p07Cards"></div>
+          <a href="page08.html" class="js-nav-effect card-btn is-start next-btn p07-next is-off js-sfx" id="p07Next" data-sound="sound/click.mp3">다음</a>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="한국에서 지켜야 할 규칙" data-next="page08.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const WORDS = [['가끔', 'x'], ['함께', 'a'], ['비밀', 'x'], ['일정', 'x'], ['규칙', 'b']];
+    const box = $('p07Cards');
+    const cards = WORDS.map((w, i) => {
+      const d = document.createElement('div');
+      d.className = 'p07-card';
+      d.dataset.key = w[1];
+      d.dataset.n = i + 1;
+      d.textContent = w[0];
+      const cell = document.createElement('div');
+      cell.className = 'p07-cell';
+      cell.appendChild(d);
+      box.appendChild(cell);
+      return d;
+    });
+    initMatchDrag({
+      cards, zones: [$('p07A'), $('p07B')], slop: 30,
+      onRight: () => playCorrect(),
+      onWrong: (card, zone) => { if (zone) playWrong(); },
+      onDone: () => setTimeout(() => { box.classList.add('is-off'); $('p07Next').classList.remove('is-off'); }, 600)
+    });
+  })();
+  </script>
+</body>
+</html>

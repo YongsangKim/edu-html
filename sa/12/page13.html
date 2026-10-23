@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papago로 한국 문화 안내하기</title>
+    <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서(실습만) 22~35p. 카페: 이야기 → 번역 언어를 일본어로 바꾸기(언어 목록) → 입력창 → 오른쪽 버튼으로 인사말 입력 → 번역 → 이야기
+           → 다시 영어로 바꾸기 → 같은 흐름으로 일본인 친구의 말 번역 → 이야기 → 마무리(휴대폰 든 캐릭터). 이야기 삽화는 img/p13_story_{1,2,3}.png (없으면 설명 글자) */
+        .p13-type{position:absolute;left:1250px;top:420px;width:560px;min-height:130px;box-sizing:border-box;padding:12px 26px 6px;display:flex;align-items:center;justify-content:center;text-align:center;background:var(--c-white);border:solid 6px var(--c-ink);border-radius:30px;box-shadow:0 10px 0 0 rgba(86,148,231,.2);cursor:pointer;font-family:'Cafe24 Ssurround';font-size:48px;line-height:1.2;color:var(--c-ink);letter-spacing:-0.05em;transition:transform .12s;z-index:10}
+        .p13-type:hover{transform:translateY(-3px);border-color:var(--c-pink)}
+        .p13-type.is-off,.p13-next.is-off{display:none}
+        .p13-next{position:absolute;left:1440px;top:810px;width:330px;min-width:0;z-index:30}
+        .p13-end-hide{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="pp-story" id="p13Story">
+            <div class="ph" id="p13Ph"></div>
+            <img class="pic" id="p13Pic" alt="" onerror="this.style.display='none'">
+            <div class="pp-story-cap"><p id="p13Cap"></p><button type="button" class="card-btn is-popup js-sfx" id="p13StoryNext" data-sound="sound/click.mp3">다음</button></div>
+          </div>
+
+          <div class="guide-set is-main" id="p13Set">
+            <p class="guide-bubble is-center" id="p13Bubble"></p>
+            <div class="guide-character"><img id="p13Char" src="../img/sa_main.png" alt="메인 캐릭터"></div>
+          </div>
+          <div class="phone-frame has-cam" id="p13Phone"><div class="phone-screen" id="p13Screen"></div></div>
+          <button type="button" class="p13-type is-off js-sfx" id="p13Type" data-sound="sound/click.mp3"></button>
+          <button type="button" class="card-btn is-start p13-next is-off js-sfx" id="p13Next" data-sound="sound/click.mp3">다음</button>
+
+          <div class="p13-end-hide" id="p13End">
+            <div class="intro-character"><img src="img/p13_character.png" alt="메인 캐릭터"></div>
+            <div class="intro-panel is-center">
+              <p class="p-how-lead">Papago로 한국의 문화와 예절을 안내하고<br>서로 다른 언어를 사용하는 외국인과도<br>문제 없이 소통했어요!</p>
+            </div>
+            <a href="page14.html" class="js-nav-effect next-btn-intro">
+              <img src="../../img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+            </a>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../js/header.js" data-title="Papago로 한국 문화 안내하기" data-next="page14.html"></script>
+  <script src="../../js/toc.js"></script>
+  <script src="../../js/common.js"></script>
+  <script src="../../js/papago.js"></script>
+  <script>
+  (function () {
+    const HELLO = { src: '안녕하세요. 만나서 반가워요.', big: '初めまして。どうぞよろしく。', pron: '하지메마시테 도오조 요로시쿠' };
+    const HE = { src: '그는 우리와 함께 여행하고 싶어해요.', big: 'He wants to travel with us', pron: '히 완츠 투 트래블 윗 어스' };
+    const STEPS = [
+      { story: '카페에서 일본인 친구를 만난 한국 학생과 외국 학생 삽화', cap: '카페에서 여행 온 일본인 친구를 만났어요!<br>서로 언어가 다르지만 Papago로 번역하며 대화할 수 있어요.' },
+      { say: '일본인 친구에게 인사를 해요.<br>먼저, 번역 언어를 일본어로<br>바꿔 봐요.', pose: 'wink_point2', screen: () => PP.home({ to: '영어', hot: ['to'] }), hot: 'to' },
+      { say: '언어 목록 중<br>일본어를 클릭해요.', pose: 'wink_point2', screen: () => PP.lang({ sel: '영어', hot: ['일본어'] }), hot: '일본어' },
+      { say: '입력창을 클릭해요.', pose: 'wink_point2', screen: () => PP.home({ to: '일본어', hot: ['input'] }), hot: 'input' },
+      { say: '오른쪽의 버튼을 클릭해<br>번역할 내용을 입력해요.', pose: 'main', screen: () => PP.text({ to: '일본어', kb: true }), type: HELLO.src },
+      { say: '좋아요!<br>일본인 친구에게 인사했어요.', pose: 'wink_point4', screen: () => PP.text({ to: '일본어', input: HELLO.src, result: HELLO }), next: true },
+      { story: '카페에서 한국 학생·미국 학생·일본 학생(남자)이 이야기하는 삽화', cap: '서로 반갑게 인사했어요. 일본인 친구가 우리와 함께 여행하고 싶다고 해요. 미국인 친구에게 일본인 친구가 한 말을 번역해서 전달해줘요.' },
+      { say: '번역 언어를 다시<br>영어로 바꿔요.', pose: 'wink_point2', screen: () => PP.home({ to: '일본어', hot: ['to'] }), hot: 'to' },
+      { say: '언어 목록 중<br>영어를 클릭해요.', pose: 'wink_point2', screen: () => PP.lang({ sel: '일본어', hot: ['영어'] }), hot: '영어' },
+      { say: '입력창을 클릭해요.', pose: 'wink_point2', screen: () => PP.home({ to: '영어', hot: ['input'] }), hot: 'input' },
+      { say: '오른쪽의 버튼을 클릭해<br>번역할 내용을 입력해요.', pose: 'main', screen: () => PP.text({ to: '영어', kb: true }), type: HE.src },
+      { say: '좋아요!<br>일본인 친구의 말을 미국인<br>친구에게 번역해서 알려줬어요.', pose: 'wink_point4', screen: () => PP.text({ to: '영어', input: HE.src, result: HE }), next: true },
+      { story: '서로 다른 언어를 사용하는 세 학생(미국·한국·일본 남자)이 이야기하는 삽화', cap: '서로 다른 언어를 사용하는 세 학생이 다 함께 여행하기로 했어요.<br>다음에는 어디로 떠나볼까요?' },
+      { end: true }
+    ];
+    const story = $('p13Story'), set = $('p13Set'), phone = $('p13Phone'), screen = $('p13Screen'), next = $('p13Next'), type = $('p13Type');
+    const say = initGuideSay({ bubble: $('p13Bubble'), img: $('p13Char'), set });
+    let si = 0, handler = null, imgN = 0;
+
+    function finger(el) {
+      clearFingers();
+      if (el) setTimeout(() => { if (el.isConnected) pointFingerAt(el, { onMain: true, dx: -10, dy: -20 }); }, 300);
+    }
+
+    function go(n) {
+      clearFingers();
+      si = n;
+      const s = STEPS[si];
+      next.classList.add('is-off');
+      type.classList.add('is-off');
+      handler = null;
+      if (s.end) {
+        story.classList.add('is-off');
+        set.style.display = 'none';
+        phone.style.display = 'none';
+        $('p13End').classList.remove('p13-end-hide');
+        return;
+      }
+      if (s.story) {
+        imgN += 1;
+        story.classList.remove('is-off');
+        $('p13Ph').textContent = s.story;
+        const p = $('p13Pic');
+        p.style.display = '';
+        p.src = 'img/p13_story_' + imgN + '.png';
+        $('p13Cap').innerHTML = s.cap;
+        return;
+      }
+      story.classList.add('is-off');
+      say(s.say, s.pose, true);
+      PP.mount(screen, s.screen());
+      if (s.hot) {
+        handler = () => go(si + 1);
+        finger(screen.querySelector('[data-hot="' + s.hot + '"]'));
+      }
+      if (s.type) {
+        type.textContent = s.type;
+        type.classList.remove('is-off');
+        finger(type);
+      }
+      if (s.next) next.classList.remove('is-off');
+    }
+
+    screen.addEventListener('click', (e) => {
+      const t = e.target.closest('[data-hot]');
+      if (t && handler) { playClick(); const h = handler; handler = null; clearFingers(); h(t.dataset.hot); }
+    });
+    type.addEventListener('click', () => go(si + 1));
+    $('p13StoryNext').addEventListener('click', () => go(si + 1));
+    next.addEventListener('click', () => go(si + 1));
+    go(0);
+  })();
+  </script>
+</body>
+</html>

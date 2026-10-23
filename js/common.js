@@ -2347,6 +2347,7 @@ function resetImageSwap(root) {
    say('문구<br>문구', 'wink_point2');            // 문구 + 포즈(sa/img/sa_*.png 의 * 부분)
    say('문구', 'wink_point4', true);              // 세 번째 true 는 말풍선에 .is-medium(넓은 말풍선), 안 주면 뗌
    줄이 길어지면 .is-long(44px)을 자동으로 붙이고 .is-medium(넓은 말풍선)도 같이 붙임: 기본 모양으로 그려 본 줄 수가 opts.longLines(기본 5)줄 이상일 때. say('문구', 포즈, medium, true|false) 네 번째 값으로 강제로 켜고 끌 수 있음(직접 주면 .is-medium 은 따라붙지 않고 세 번째 값만 따름)
+   문구가 빈 문자열('')이면 말풍선을 숨김.
    처음에는 캐릭터를 숨겨 두었다가 첫 포즈가 로드되면 보여 주고(기본 그림이 잠깐 비치지 않게), 포즈를 바꿀 때도 새 그림이 로드된 뒤에 그림·좌표를 함께 바꿈.
    opts.dir: 그림 폴더(기본: img 의 현재 src 에서 sa_ 앞부분), opts.poses: 미리 불러올 포즈 목록(기본: 사회 공용 포즈 전부) */
 function initGuideSay(opts) {
@@ -2367,6 +2368,7 @@ function initGuideSay(opts) {
   let seq = 0;
   return function say(html, pose, medium, long) {
     bubble.innerHTML = html;
+    bubble.style.display = html === '' ? 'none' : '';
     bubble.classList.toggle('is-medium', !!medium);
     bubble.classList.remove('is-long');
     const isLong = long === undefined ? countLines() >= longLines : !!long;
