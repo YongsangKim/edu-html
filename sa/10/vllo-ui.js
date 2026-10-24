@@ -1,456 +1,304 @@
+/* VLLO 앱 화면(HTML/CSS). 좌표는 모두 디자인 캡처(1080x2340)의 절반인 540x1170 기준 px, 글꼴은 전부 Pretendard.
+   VL.screen(이름, 옵션) 이 화면 한 장의 HTML 글자를 돌려줌. 영상 칸(#vlViewer)·자막·블러는 화면에 포함되지 않고 페이지가 따로 둠(영상이 끊기지 않게). 스타일은 page09.html 의 .v-* */
 (function () {
-  const U = window.VLLO_UI = {};
-  U.img = 'img/ui/';
-  const C = { bar: '#232428', view: '#16171b', ico: '#cdced1', txt: '#d3d4d7', dim: '#6f7074', left: '#24252a', trk: '#2d2e32', blue: '#4498f1', head: '#3f8fd6', panel: '#303135', pill: '#4a4b4d' };
-  const at = (k, v) => (v == null || v === '' ? '' : ' ' + k + '="' + v + '"');
-  const TX = {"tb|삭제":[-9.3,1090.8,11.8,19.8],"tb|추가":[-10.3,1090.8,11.8,19.8],"tb|음소거":[-14.3,1090.8,11.8,29.8],"tb|100%":[-17.3,1061.8,15.1,37.6],"tb|음량":[-9.3,1090.8,11.8,19.8],"tb|노이즈 제거":[-26.3,1090.8,11.8,53.8],"tb|페이드":[-14.3,1090.8,11.8,29.8],"tb|오디오 이펙트":[-32.3,1090.8,11.8,64.8],"tb|에코&amp;리버브":[-29.3,1090.8,11.8,58.8],"tb|자동 자막":[-21.4,1090.8,11.8,43.9],"tb|1.0x":[-14.3,1061.7,15.7,29.5],"tb|배속":[-9.3,1090.8,11.8,18.8],"tb|변형":[-9.3,1090.8,11.8,19.8],"tb|마스크":[-14.3,1090.8,11.8,29.8],"tb|편집":[-9.3,1090.8,11.8,19.8],"tb|모양":[-9.3,1090.8,11.8,19.8],"tb|40%":[-14.3,1061.8,15.1,29.6],"tb|강도":[-9.3,1090.8,11.8,18.8],"tb|10%":[-12.3,1061.8,15.1,27.6],"tb|페더":[-9.3,1090.8,11.8,19.8],"tb|반전":[-9.3,1090.8,11.8,19.8],"tb|얼굴 트래킹":[-26.3,1090.8,11.8,53.8],"tb|정렬":[-9.3,1090.8,11.8,18.8],"tb|여기로 이동":[-26.3,1090.8,11.8,53.8],"7|친구 초대":[383.7,85.5,15,50.7],"7|이용약관 개정":[31.7,354.7,28,146.9],"7|서비스 개선 및 운영 정책 변경에 따른 약관 개정 안내입니다.":[31.7,382.7,21.5,470.4],"7|내 프로젝트 (158)":[20.7,462.6,17.3,126.8],"7|선택":[491.7,461.6,15.3,26.9],"8|제목 없음 (16:9)":[206.7,80.6,14.9,100],"8|미디어":[18.7,820.8,14.8,41.2],"8|배경음악":[14.7,890.7,13.7,48.5],"8|효과음":[21.7,958.8,13.8,35.5],"8|음성 녹음":[13.7,1026.8,13.8,51.5],"8|AI 보이스":[13.7,1095.7,13.7,51.4],"8|오디오":[54.7,1140.7,13.3,31.1],"8|그래픽":[153.7,1140.7,13.3,32.1],"8|글자":[258.7,1140.7,12.9,20.1],"8|PIP":[359.7,1140.7,13.3,18.7],"8|효과":[457.7,1140.7,13.3,21],"9|00:00#1":[244.7,945.7,21,50.2],"9|타이머":[483.7,915.8,13.4,35],"9|취소":[255.7,1141.6,14.8,27.4],"10|00:05":[375.7,713.7,9.1,21.6],"10|00:03#1":[244.7,945.7,21,50.7],"11|파일명 :":[53.7,944.7,17.9,52.5],"11|V1#1":[123.7,945.7,18.2,18.3],"11|삭제":[141.7,1074.7,13.2,20.6],"11|듣기":[259.7,1074.8,12.4,20.2],"11|여기로 이동":[359.7,1074.8,12.4,56.3],"11|추가":[101.7,1142.7,13.8,22.6],"11|완료":[348.7,1142.7,14.8,23.4],"12|처음부터":[63.7,1007.7,10.3,34.6],"12|여기부터":[157.7,1007.7,10.3,34.6],"12|분할":[260.7,1007.7,10.3,16.5],"12|여기까지":[346.7,1007.7,10.3,34.6],"12|끝까지":[444.7,1007.7,10.3,26.6],"12|완료":[257.7,1145.7,14.8,23.4],"14|처음부터":[74.7,931.7,10.3,35.6],"14|여기부터":[193.7,931.7,10.3,34.6],"14|여기까지":[311.7,931.7,10.3,34.6],"14|끝까지":[433.7,931.7,10.3,25.6],"14|더 정확한 처리":[381.7,994.8,11.1,67.1],"14|언어 :":[287.7,1062.7,13.8,29.4],"14|한국어":[323.7,1061.8,12.2,34.1],"14|취소":[126.7,1143.6,13,23.8],"14|생성하기":[376.7,1143.6,13.8,48.6],"15|VLLO":[236.7,434.7,26.1,66.4],"15|자막 생성하는 중...":[191.7,544.7,21.4,155.3],"15|네트워크 연결을 유지하세요. 네트워크가 불안정할":[132.7,632.6,16.4,312.8],"15|경우 작업이 중단될 수 있습니다.":[132.7,663.6,15.3,198.8],"16|키프레임":[57.7,885.8,11.1,40.1],"16|처음부터":[63.7,1007.7,10.3,34.6],"16|여기부터":[157.7,1007.7,10.3,34.6],"16|분할":[260.7,1007.7,10.3,16.5],"16|여기까지":[346.7,1007.7,10.3,34.6],"16|끝까지":[444.7,1007.7,10.3,26.6],"16|전체 적용":[108.7,1090.7,9.7,32.5],"16|완료":[257.7,1145.7,14.8,23.4],"17|왼쪽":[92.7,600.8,12.4,21.4],"17|가운데":[254.7,599.8,11.3,31.4],"17|오른쪽":[419.7,600.7,13.4,31.3],"17|!#1":[26.7,1070.7,27.3,34.8],"17|-":[153.7,1068.5,20.2,8.3],"17|한국어":[272.7,1066.8,13.8,39.4],"17|.":[424.6,1074.6,26.6,6.4],"18|제목 없음 (16:9)":[206.7,80.6,14.9,100],"18|미디어":[18.7,820.8,14.8,41.2],"18|글자":[27.7,890.7,13.7,23.5],"18|라벨":[27.7,958.8,13.8,23.4],"18|자막":[26.7,1026.8,13.8,24.5],"18|자동 자막":[13.7,1095.7,13.7,51.5],"18|오디오":[54.7,1140.7,13.3,32.1],"18|그래픽":[153.7,1140.7,13.3,32.1],"18|글자#1":[258.7,1140.7,12.9,20.1],"18|PIP":[359.7,1140.7,13.3,18.7],"18|효과":[457.7,1140.7,13.3,21],"19|제목 없음 (16:9)":[206.7,80.6,14.9,100],"19|미디어":[18.7,820.8,14.8,41.2],"19|필터/보정":[11.7,889.8,12.7,54.5],"19|특수효과":[14.7,958.8,13.8,48.5],"19|왜곡":[28.7,1018.8,11.2,19.2],"19|(모자이크)":[14.7,1033.9,10.5,48.8],"19|오디오":[54.7,1140.7,13.3,32.1],"19|그래픽":[153.7,1140.7,13.3,32.1],"19|글자":[258.7,1140.7,12.9,20.1],"19|PIP":[359.7,1140.7,13.3,18.7],"19|효과":[458.7,1140.7,12.9,20.1],"20|블러":[75.7,1087.7,12.9,20],"20|픽셀":[193.7,1086.8,11.2,19.2],"20|확대":[311.7,1086.8,11.2,20.2],"20|볼록 렌즈":[418.7,1087.8,12.4,43.3],"20|취소":[126.7,1144.6,13,23.8],"20|완료":[388.7,1144.7,12.7,22.6],"21|사각형":[117.7,841.8,13.3,34.1],"21|원":[399.7,842.7,13.7,10.7],"21|강도":[24.7,908.9,12.8,22.6],"21|블러":[75.7,1087.7,12.9,20],"21|픽셀":[193.7,1086.8,11.2,19.2],"21|확대":[311.7,1086.8,11.2,20.2],"21|볼록 렌즈":[418.7,1087.8,12.4,43.3],"21|취소":[126.7,1144.6,13,23.8],"21|완료":[388.7,1145.7,14.8,23.4],"22|키프레임":[57.7,885.8,11.1,40.1],"22|처음부터":[63.7,1007.7,10.3,34.6],"22|여기부터":[157.7,1007.7,10.3,34.6],"22|분할":[260.7,1007.7,10.3,16.5],"22|여기까지":[346.7,1007.7,10.3,34.6],"22|끝까지":[444.7,1007.7,10.3,26.6],"22|완료":[257.7,1145.7,14.8,23.4],"24|트래킹 할 얼굴 영역을 설정하세요. 영역을 조금 더 넓게 설정할 때 트래킹 정확도가":[49.7,953.9,12.4,440.2],"24|올라갑니다.":[238.7,978.8,13.4,62.5],"24|트래킹하기":[239.7,1058.7,15.5,60.3],"24|취소":[257.7,1144.6,13,22.8],"25|VLLO":[240.7,669.7,23.4,59.4],"25|트래킹 중":[239.7,730.6,16.9,60.3],"26|처음부터":[63.7,1007.7,10.3,34.6],"26|여기부터":[157.7,1007.7,10.3,34.6],"26|분할":[260.7,1007.7,10.3,16.5],"26|여기까지":[346.7,1007.7,10.3,34.6],"26|끝까지":[444.7,1007.7,10.3,26.6],"26|초기화":[71.7,1089.8,12.7,36.5],"26|트래킹 추가":[236.7,1089.8,12.7,65.5],"26|트래킹 해제":[417.7,1089.8,12.7,64.5],"26|완료":[257.7,1145.7,14.8,23.4],"27|제목 없음 (16:9)":[206.7,80.6,14.9,100],"27|미디어":[18.7,820.8,14.8,41.2],"27|필터/보정":[11.7,889.8,12.7,54.5],"27|특수효과":[14.7,958.8,13.8,48.5],"27|왜곡":[28.7,1018.8,11.2,19.2],"27|(모자이크)":[14.7,1033.9,10.5,48.8],"27|오디오":[54.7,1140.7,13.3,32.1],"27|그래픽":[153.7,1140.7,13.3,32.1],"27|글자":[258.7,1140.7,12.9,20.1],"27|PIP":[359.7,1140.7,13.3,18.7],"27|효과":[458.7,1140.7,12.9,20.1],"28|추출하기":[230.7,88.7,24.2,78.5],"28|비디오":[33.7,149.8,14.8,39.3],"28|GIF":[150.7,149.7,15.8,22.5],"28|프로젝트":[242.7,149.8,14.8,54.3],"28|자막":[365.7,149.8,14.8,25.4],"28|오디오":[465.7,149.8,14.8,40.3],"28|파일명":[59.7,220.8,14.8,41.3],"28|제목 없음":[132.7,220.8,14.8,59.3],"28|추출 범위":[59.7,299.6,16.8,58.2],"28|전체":[453.7,299.8,14.8,26.3],"28|저장 위치 선택":[59.7,378.8,14.8,90.3],"28|앨범":[400.7,379.7,17.8,31.1],"28|파일":[469.7,379.7,17.8,31.1],"28|포맷":[59.7,457.8,14.8,26.3],"28|기본값 (추천)":[396.7,457.8,15.3,83.4],"28|해상도":[79.7,534.8,14.8,40.3],"28|프레임레이트":[79.7,702.8,14.8,82.3],"28|저화질":[78.7,598.8,13.4,34.1],"28|640x360":[73.7,630.7,11.3,43.4],"28|중간화질":[158.7,598.8,13.4,46.1],"28|1280x720":[157.7,630.7,11.3,49.4],"28|고화질":[251.7,598.8,13.4,34.1],"28|1920x1080":[241.7,631.7,11.6,55.7],"28|QHD":[342.7,599.7,14.1,26.8],"28|2560x1440":[327.7,630.7,11.3,56.4],"28|4K":[434.7,599.7,13.8,15.5],"28|3840x2160":[414.7,630.7,11.3,56.4],"28|18":[88.7,770.8,13.6,13.7],"28|24":[174.7,771.7,13.5,14.6],"28|영화":[172.7,790.7,11.9,18.8],"28|25":[261.7,770.8,13.7,14.6],"28|PAL":[259.7,790.7,10.8,19.2],"28|30":[348.7,770.8,12.5,14.9],"28|기본값":[342.7,790.7,11.9,27.8],"28|60":[435.7,770.8,13.4,15.4],"28|βeta":[432.7,790.6,10.8,21.5],"28|알람":[67.7,1009.8,15.9,26.4],"28|추출하기 (약 32.26 MB)":[205.7,1089.8,16.8,161.5],"29|VLLO":[236.7,446.7,27.4,66.3],"29|비디오 만드는 중...":[192.7,555.7,21.4,153.4],"29|VLLO를 끄거나 기기를 잠그지 마세요.":[169.7,643.6,15.3,239.8],"29|VLLO TIP":[229.7,953.7,19.2,79.6],"29|두 손가락으로 타임라인을 확대 및 축소할 수 있습니다.":[100.7,1047.6,16.4,338.1],"29|3/15":[255.7,1137.8,11.8,28.4],"30|저장 완료":[224.7,613.8,24.2,92.4],"30|저장 위치 : 앨범":[213.7,662.7,19,112.1],"30|공유하기":[234.7,995.7,20.9,70.8]};
-  let cur = null, seen = {};
-  const T = (x, y, s, str, o = {}) => {
-    const k = cur + '|' + str + (seen[str] ? '#' + seen[str] : '');
-    seen[str] = (seen[str] || 0) + 1;
-    const t = cur != null && !o.fix && TX[k];
-    if (t) return '<text x="' + t[0] + '" y="' + t[1] + '" font-size="' + t[2] + '" textLength="' + t[3] + '" lengthAdjust="spacingAndGlyphs" fill="' + (o.f || C.txt) + '"' + at('font-weight', o.w) + at('opacity', o.op) + '>' + str + '</text>';
-    return T0(x, y, s, str, o);
+  const VL = window.VL = {};
+  const S = (d, o = {}) => '<svg viewBox="0 0 ' + (o.w || 24) + ' ' + (o.h || 24) + '"' + (o.c ? ' class="' + o.c + '"' : '') + '>' + d + '</svg>';
+  const I = {
+    back: S('<path d="M15 4.5L7.5 12l7.5 7.5"/>'),
+    help: S('<circle cx="12" cy="12" r="10"/><path d="M8.8 9.2a3.2 3.2 0 116.2 1c0 1.6-2.2 2.2-2.2 3.8M12.8 17.4h.01" stroke-width="2.2"/>'),
+    gear: S('<circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/>'),
+    out: S('<path d="M5 15v4.5h14V15M12 4v11M7.5 8.5L12 4l4.5 4.5"/>'),
+    play: S('<path d="M8 5.5v13l11-6.5z"/>'),
+    full: S('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>'),
+    undo: S('<path d="M8.5 6.5H15a5 5 0 010 10H8.5M11.5 3.5l-3 3 3 3"/>'),
+    redo: S('<path d="M15.5 6.5H9a5 5 0 000 10h6.5M12.5 3.5l3 3-3 3"/>'),
+    first: S('<path d="M5 5v14M19 5L8.5 12 19 19z"/>'),
+    prev: S('<path d="M8.5 5v14M20 5l-10 7 10 7z"/>'),
+    next: S('<path d="M15.5 5v14M4 5l10 7L4 19z"/>'),
+    last: S('<path d="M19 5v14M5 5l10.5 7L5 19z"/>'),
+    plus: S('<circle cx="12" cy="12" r="10"/><path d="M6.5 12h11M12 6.5v11"/>'),
+    music: S('<path d="M8 18.5V5h11v12M8 9.5h11"/><circle cx="5.8" cy="18.3" r="2.4"/><circle cx="16.8" cy="16.6" r="2.4"/>'),
+    wave: S('<path d="M2 12h3.5l2-5 3 11 3-15 3 17 2-8h4"/>'),
+    mic: S('<rect x="8.5" y="2.5" width="7" height="12" rx="3.5"/><path d="M5 11.5a7 7 0 0014 0M12 18.5v3"/>'),
+    aiv: S('<path d="M5 4h8M4 8v9h6l3 3.5 3-3.5h4V8"/><path d="M9 10v5M12 9v7M15 10v5"/>'),
+    text: S('<path d="M5 8V5h14v3M12 5v14M9 19h6"/>'),
+    label: S('<path d="M4 10.5l8-7 8 7V20H4z"/><path d="M8 15h8M8 18h5"/>'),
+    sub: S('<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M3.5 14.5h17M7 17.5h7"/>'),
+    autosub: S('<path d="M13 4.5H4.5v15h15V11"/><path d="M4.5 14.5h15M8 17.5h6"/><text x="15.5" y="9.5" font-size="8" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">AI</text>'),
+    filter: S('<circle cx="9" cy="9.5" r="5.5"/><circle cx="14.5" cy="14.5" r="5.5"/>'),
+    special: S('<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M7 17l5-5M15 7v2M14 8h2"/>'),
+    distort: S('<rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M3.5 9.2h17M3.5 14.8h17M9.2 3.5v17M14.8 3.5v17"/>'),
+    trash: S('<path d="M5 6.5h14M9.5 6.5V4h5v2.5M7 6.5l1 13h8l1-13M10 10v6M14 10v6"/>'),
+    listen: S('<path d="M7 4.5v15l12-7.5z"/>'),
+    moveto: S('<path d="M12 3.5v11M7.5 10.5l4.5 4.5 4.5-4.5M5 19.5h14"/>'),
+    pencil: S('<path d="M4 20l1-4.5L16.5 4a2 2 0 012.8 0l.7.7a2 2 0 010 2.8L8.5 19zM4 21h16"/>'),
+    start: S('<path d="M4 4v16M7.5 12h10M12 7.5L17.5 12 12 16.5"/>', {}),
+    scissors: S('<circle cx="7" cy="7" r="2.8"/><circle cx="17" cy="7" r="2.8"/><path d="M9 9l9 11M15 9L6 20"/>'),
+    chevL: S('<path d="M15 4.5L7.5 12l7.5 7.5"/>'),
+    chevR: S('<path d="M9 4.5l7.5 7.5L9 19.5"/>'),
+    swap: S('<path d="M20 8H5.5l3-3M4 16h14.5l-3 3"/>'),
+    folder: S('<path d="M3.5 7.5v10h17V9.5h-8l-2-2z"/>'),
+    waveform: S('<path d="M4 9v6M8 6v12M12 3v18M16 7v10M20 10v4"/>'),
+    check: S('<path d="M4.5 12.5l5 5L19.5 7"/>'),
+    mute: S('<path d="M4 9.5v5h4l5 4v-13l-5 4zM17 9.5l4 5M21 9.5l-4 5"/>'),
+    noise: S('<path d="M3 12h2M7 7v10M11 4v16M15 8v8M19 10v4M22 12h0"/>'),
+    echo: S('<path d="M12 3.5a4 4 0 014 4V12a4 4 0 01-8 0V7.5a4 4 0 014-4zM5 11.5a7 7 0 0014 0M12 18.5v3"/>'),
+    fade: S('<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8v8M12 8v8M16 8v8"/>'),
+    speed: S('<text x="12" y="16" font-size="12" font-weight="600" fill="currentColor" stroke="none" text-anchor="middle">1.0x</text>'),
+    vol: S('<path d="M12 4l7 8-7 8-7-8z"/>'),
+    keyfr: S('<path d="M12 3.5l6 8.5-6 8.5-6-8.5z"/>'),
+    gridI: S('<rect x="3.5" y="3.5" width="17" height="17" rx="1.5"/><path d="M9.2 3.5v17M14.8 3.5v17M3.5 9.2h17M3.5 14.8h17"/>'),
+    magnet: S('<path d="M6 4v9a6 6 0 0012 0V4h-4v9a2 2 0 01-4 0V4z"/>'),
+    crown: S('<path d="M3.5 9l4 3.5L12 5l4.5 7.5 4-3.5-1.5 10h-14z"/>', {}),
+    gift: S('<rect x="4" y="9" width="16" height="11" rx="1"/><path d="M3 9h18v3.5H3zM12 9v11M12 9c-3 0-5-1.2-5-3s2.5-2 5 3c2.5-5 5-4.8 5-3s-2 3-5 3z"/>'),
+    menu: S('<path d="M3.5 7h17M3.5 12h17M3.5 17h17"/>'),
+    mark: S('<path d="M14.5 4v6l5 5-5 1v4"/>')
   };
-  const TT = (cx, x, y, s, str, o = {}) => { seen[str] = (seen[str] || 0) + 1; const t = TX['tb|' + str]; return t ? '<text x="' + +(cx + t[0]).toFixed(1) + '" y="' + t[1] + '" font-size="' + t[2] + '" textLength="' + t[3] + '" lengthAdjust="spacing" fill="' + (o.f || C.txt) + '"' + at('font-weight', o.w) + '>' + str + '</text>' : T0(x, y, s, str, o); };
-  const TF = (x0, x1, yb, sz, str, o = {}) => { seen[str] = (seen[str] || 0) + 1; return '<text x="' + +(x0 - 0.04 * sz).toFixed(1) + '" y="' + +(yb + 0.7 - (o.d || 0) * sz).toFixed(1) + '" font-size="' + sz + '" textLength="' + +(x1 - x0 + 1 + 0.08 * sz).toFixed(1) + '" lengthAdjust="spacing" fill="' + (o.f || C.txt) + '"' + at('font-weight', o.w) + '>' + str + '</text>'; };
-  const T0 = (x, y, s, str, o = {}) => '<text x="' + x + '" y="' + y + '" font-size="' + s + '" fill="' + (o.f || C.txt) + '"' + (o.a === 's' ? '' : o.a === 'e' ? ' text-anchor="end"' : ' text-anchor="middle"') + at('font-weight', o.w) + at('letter-spacing', o.ls) + at('opacity', o.op) + '>' + str + '</text>';
-  const R = (x, y, w, h, f, rx, o = '') => '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '"' + at('rx', rx) + ' fill="' + f + '"' + o + '/>';
-  const P = (d, s = C.ico, w = 2, f = 'none', o = '') => '<path d="' + d + '" fill="' + f + '"' + (s ? ' stroke="' + s + '" stroke-width="' + w + '" stroke-linecap="round" stroke-linejoin="round"' : '') + o + '/>';
-  const O = (cx, cy, r, f, s, w) => '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + (f || 'none') + '"' + (s ? ' stroke="' + s + '" stroke-width="' + (w || 2) + '"' : '') + '/>';
-  const G = (x, y, inner, sc) => '<g transform="translate(' + x + ' ' + y + ')' + (sc ? ' scale(' + sc + ')' : '') + '">' + inner + '</g>';
-  const SR = (x, y, w, h, s, sw, rx, f) => R(x, y, w, h, f || 'none', rx, ' stroke="' + s + '" stroke-width="' + (sw || 2) + '"');
+  VL.I = I;
 
-  const PH = {_w: 542, _h: 1408, u7ban: [0,2,540,217], s8: [0,223,230,78], s9: [0,305,269,78], s10: [0,387,390,78], s11: [0,469,300,78], s12: [0,551,294,78], s14: [0,633,294,78], s16: [0,715,294,78], s18: [0,797,225,78], s19: [0,879,230,78], s27: [0,961,230,78], s22: [0,1043,294,78], s24: [0,1125,294,78], s26: [0,1207,294,78], faces: [0,1289,511,115]};
-  const cwave = (x0, x1, cy, amp, c, seed) => {
-    let d = '', r = seed || 7;
-    for (let x = x0; x < x1; x += 3) { r = (r * 9301 + 49297) % 233280; const h = 1.5 + amp * (0.25 + 0.75 * Math.abs(Math.sin(x * 0.07 + seed)) * (r / 233280)); d += 'M' + x + ' ' + (cy - h).toFixed(1) + 'v' + (2 * h).toFixed(1); }
-    return P(d, c || '#fff', 1.6);
-  };
-  const frames = (x0, x1, h) => {
-    if (!U.place) return R(x0, 0, x1 - x0, h, '#55575c');
-    const fw = Math.round(h * 16 / 9);
-    let s = '';
-    for (let x = x0; x < x1; x += fw) s += '<image href="' + U.place + '" x="' + x + '" y="0" width="' + fw + '" height="' + h + '" preserveAspectRatio="xMidYMid slice"/>';
-    return '<svg x="' + x0 + '" y="0" width="' + (x1 - x0) + '" height="' + h + '" viewBox="' + x0 + ' 0 ' + (x1 - x0) + ' ' + h + '">' + s + '</svg>';
-  };
-  const band = (x0, x1, h) => R(x0, h * 0.67, x1 - x0, h * 0.33, 'rgba(0,0,0,.3)');
-  const CLIP = {
-    s8: (w, h) => frames(0, w, h),
-    s9: (w, h) => frames(0, w, h) + band(0, w, h),
-    s18: (w, h) => frames(0, w, h) + band(0, w, h),
-    s10: (w, h) => frames(0, w, h) + band(0, w, h) + R(0, 0, 270, h, 'rgba(120,165,215,.78)') + R(269, 0, 2, h, '#4a90e2'),
-    s11: (w, h) => R(0, 0, w, h, '#3a3b3f') + frames(25, 248, h) + R(25, 0, 223, h, 'rgba(140,175,215,.85)') + P('M27 45H100', '#fff', 1, 'none', ' stroke-dasharray="1 2"') + cwave(102, 247, 45, 14, '#fff', 3),
-    s12: (w, h) => R(0, 0, w, h, '#3a3b3f') + frames(25, 247, h) + band(175, 247, h) + R(25, 0, 150, h, 'rgba(140,175,215,.85)') + P('M27 45H50', '#fff', 1, 'none', ' stroke-dasharray="1 2"') + cwave(52, 150, 45, 8, '#fff', 5),
-    s14: (w, h) => R(0, 0, w, h, '#3a3b3f') + frames(25, 247, h) + band(175, 247, h) + R(25, 0, 150, h, 'rgba(70,100,70,.55)') + cwave(52, 150, 45, 12, '#fff', 5),
-    s16: (w, h) => R(0, 0, w, h, '#3a3b3f') + frames(25, 247, h) + band(175, 247, h) + R(25, 0, 150, h, 'rgba(130,180,140,.82)') + P('M27 50H120', '#fff', 1, 'none', ' stroke-dasharray="1 2"'),
-    s19: (w, h) => frames(0, w, h) + R(0, 0, w, h * 0.52, 'rgba(150,160,180,.55)') + cwave(1, w, h * 0.26, 14, '#fff', 9),
-    s27: (w, h) => frames(0, w, h) + R(0, 0, w, h * 0.52, 'rgba(150,160,180,.55)') + cwave(1, w, h * 0.26, 14, '#fff', 9)
-  };
-  const photo = (k, x, y) => {
-    const p = PH[k];
-    if (!p) return '';
-    if (CLIP[k]) return '<svg x="' + x + '" y="' + y + '" width="' + p[2] + '" height="' + p[3] + '" viewBox="0 0 ' + p[2] + ' ' + p[3] + '">' + CLIP[k](p[2], p[3]) + '</svg>';
-    return '<svg x="' + x + '" y="' + y + '" width="' + p[2] + '" height="' + p[3] + '" viewBox="' + p[0] + ' ' + p[1] + ' ' + p[2] + ' ' + p[3] + '"><image href="' + U.img + 'vllo_photo.jpg" width="' + PH._w + '" height="' + PH._h + '"/></svg>';
-  };
+  const t = (n) => (n < 10 ? '0' : '') + n;
+  const box = (cls, x, y, w, h, inner, st) => '<div class="' + cls + '" style="left:' + x + 'px;top:' + y + 'px;width:' + w + 'px;height:' + h + 'px' + (st ? ';' + st : '') + '">' + (inner || '') + '</div>';
+  const txt = (cls, x, y, s, w) => '<p class="' + cls + '" style="left:' + x + 'px;top:' + y + 'px' + (w ? ';width:' + w + 'px' : '') + '">' + s + '</p>';
 
-  const plusBadge = (x, y, bg) => O(x, y, 5, '#e4e5e7') + P('M' + (x - 2.5) + ' ' + y + 'h5M' + x + ' ' + (y - 2.5) + 'v5', bg || '#2a2b2f', 1.4);
-  const newBadge = (x, y) => R(x + 1, y + 1, 31, 14.5, '#ee4374', 2.5) + TF(x + 4.5, x + 28, y + 11.6, 12.5, 'New', { f: '#fbe9ef', w: 700 });
-  const diamond = (cx, cy, rw, rh, c, w) => P('M' + cx + ' ' + (cy - rh) + 'L' + (cx + rw) + ' ' + cy + 'L' + cx + ' ' + (cy + rh) + 'L' + (cx - rw) + ' ' + cy + 'Z', c || C.ico, w || 1.5);
-  const toggle = (x, y, w, h, on, bg) => R(x, y, w, h, on ? '#3a9afe' : (bg || '#4a4b4f'), h / 2) + O(on ? x + w - h / 2 : x + h / 2, y + h / 2, h / 2 - (on ? 2 : 0), '#fff');
-  const bigBtn = (x, y, w, h, label, f, tc, o = {}) => R(x, y, w, h, f, h / 2) + T(x + w / 2 + (o.dx || 0), y + h / 2 + 5.3, o.s || 14, label, { f: tc || '#fff', w: o.w || 600, ls: -0.2 });
-  const chevL = (x, y, h, c, w) => P('M' + (x + h / 2) + ' ' + (y - h / 2) + 'L' + x + ' ' + y + 'L' + (x + h / 2) + ' ' + (y + h / 2), c || C.ico, w || 2);
-  const chevR = (x, y, h, c, w) => P('M' + (x - h / 2) + ' ' + (y - h / 2) + 'L' + x + ' ' + y + 'L' + (x - h / 2) + ' ' + (y + h / 2), c || C.ico, w || 2);
-
-  function gear(cx, cy, c) {
-    let d = '';
-    const n = 8;
-    for (let i = 0; i < n; i++) {
-      const a = (i / n) * Math.PI * 2;
-      const pts = [[-0.17, 8.1], [0.17, 8.1], [0.3, 6], [(Math.PI * 2) / n - 0.3, 6]];
-      pts.forEach((p, k) => { const aa = a + p[0]; d += (i || k ? 'L' : 'M') + (cx + Math.sin(aa) * p[1]).toFixed(2) + ' ' + (cy - Math.cos(aa) * p[1]).toFixed(2); });
-    }
-    return P(d + 'Z', null, 0, c || '#cfd0d3') + O(cx, cy, 2.6, C.bar);
-  }
-  function helpBtn() { return O(97.5, 74.5, 13, null, C.ico, 2) + P('M92.7 70.6a4.8 4.8 0 1 1 6.9 4.3c-1.3 .7-2.1 1.6-2.1 3v1.1', C.ico, 2) + O(97.5, 82.6, 1.3, C.ico); }
-  function gridMag() {
-    return O(457.5, 75, 20, '#2a3540') + SR(448.5, 65.5, 18, 19, '#3d93e6', 2, 2.5) + P('M454.5 66v18M460.5 66v18M449 71.8h17M449 78.2h17', '#3d93e6', 1.6)
-      + O(510, 75, 20, '#2a3540') + P('M502.5 66.5v9.5a7.5 7.5 0 0 0 15 0v-9.5h-5v9.5a2.5 2.5 0 0 1-5 0v-9.5z', '#3d93e6', 2);
-  }
-  function appBar(o = {}) {
-    let s = R(0, 0, 540, 103, C.bar);
-    if (o.back) s += P('M38 62L26 74.5L38 87', C.ico, 2.4);
-    s += helpBtn();
+  /* ---------- 공통 조각 ---------- */
+  const appBar = (o = {}) => {
+    let s = '<div class="v-bar"></div>';
+    if (o.back) s += '<i class="v-ic" style="left:20px;top:58px;width:34px;height:34px">' + I.back + '</i>';
+    s += '<i class="v-ic is-help" style="left:81px;top:60px;width:32px;height:32px">' + I.help + '</i>';
     if (o.title) {
-      s += T(207, 79.8, 16, '제목 없음 (16:9)', { a: 's', ls: -0.3, f: '#d0d1d4' }) + gear(321.5, 75.5);
-      s += R(436, 60, 88, 31, '#0a9cf7', 4) + P('M444.5 74.5v6.5h15v-6.5M452 78.5V67.5M448 71.5l4-4 4 4', '#fff', 1.6) + TF(468.5, 517.5, 82.5, 14.6, '추출하기', { d: 0.09, f: '#fff' });
+      s += txt('v-title', 120, 66, '제목 없음 (2.12:1)<i class="v-ic" style="width:15px;height:15px;margin-left:6px;vertical-align:-1px">' + I.gear + '</i>', 300);
+      s += '<div class="v-out" style="left:438px;top:61px"><i class="v-ic" style="width:18px;height:18px">' + I.out + '</i>추출하기</div>';
     }
-    if (o.grid) s += gridMag();
+    if (o.grid) s += '<i class="v-ic is-blue" style="left:503px;top:56px;width:30px;height:30px;left:' + 428 + 'px">' + I.gridI + '</i><i class="v-ic is-blue" style="left:476px;top:56px;width:30px;height:30px">' + I.magnet + '</i>';
     return s;
-  }
-  function playRow(o = {}) {
+  };
+  const playRow = (o = {}) => {
     let s = '';
-    if (o.play !== false) s += O(35, 669, 20, '#242529') + P('M29 659.5v19l15.5-9.5z', C.ico, 2);
-    if (o.full) s += O(97, 669, 20, '#26272b') + P('M88 660l4.5 4.5M88 660h4M88 660v4M106 660l-4.5 4.5M106 660h-4M106 660v4M88 678l4.5-4.5M88 678h4M88 678v-4M106 678l-4.5-4.5M106 678h-4M106 678v-4', C.ico, 1.6);
-    if (o.undo !== undefined) {
-      const uc = o.undo ? C.ico : '#45464a', bg = o.undo ? '#26272b' : '#1c1d21';
-      s += O(443, 669, 20, bg) + P('M437.5 662h9a6.5 6.5 0 0 1 0 13h-9M440.5 658.5l-3.5 3.5 3.5 3.5', uc, 1.8);
-      s += O(504, 669, 20, '#1c1d21') + P('M509.5 662h-9a6.5 6.5 0 0 0 0 13h9M506.5 658.5l3.5 3.5-3.5 3.5', '#45464a', 1.8);
+    if (o.play !== false) s += '<i class="v-rb" style="left:15px;top:649px">' + I.play + '</i>';
+    if (o.full) s += '<i class="v-rb" style="left:77px;top:649px">' + I.full + '</i>';
+    if (o.undo !== undefined) s += '<i class="v-rb' + (o.undo ? '' : ' is-dim') + '" style="left:423px;top:649px">' + I.undo + '</i><i class="v-rb is-dim" style="left:484px;top:649px">' + I.redo + '</i>';
+    return s;
+  };
+  const ruler = (dots, labels) => {
+    let s = '<div class="v-ruler"></div>';
+    (dots || []).forEach((x) => { s += '<b class="v-dot" style="left:' + (x - 2) + 'px"></b>'; });
+    return s;
+  };
+  const transport = (a, b) => '<div class="v-trans"><i style="left:0">' + I.first + '</i><i style="left:90px">' + I.prev + '</i><u>' + a + '</u><u style="left:298px;color:#9a9b9f">' + b + '</u><i style="left:361px">' + I.next + '</i><i style="left:451px">' + I.last + '</i></div>';
+  const playhead = (y1) => '<div class="v-head" style="height:' + ((y1 || 1111) - 702) + 'px"></div>';
+  const sideIcon = (ic, cy, label, nw) => '<div class="v-side" style="top:' + (cy - 16) + 'px"><i class="v-ic">' + ic + '</i><span>' + label + '</span>' + (nw ? '<em>New</em>' : '') + '</div>';
+  const trackArea = (rows) => '<div class="v-trk"></div>' + rows;
+  const tabs = (active) => {
+    const L = ['오디오', '그래픽', '글자', 'PIP', '효과'], X = [70.5, 169.5, 269.5, 369, 468.5], C = ['#6d9fd8', '#c7a6d3', '#7ca593', '#9fa3b8', '#b799bb'];
+    let s = '<div class="v-tabs"></div>';
+    if (active >= 0) s += '<div class="v-tab-on" style="left:' + (X[active] - 44) + 'px;background:' + (C[active] || '#6d9fd8') + '"></div>';
+    L.forEach((n, i) => { s += '<span class="v-tab' + (i === active ? ' is-on' : '') + '" style="left:' + (X[i] - 44) + 'px">' + n + '</span>'; });
+    return s;
+  };
+  // const template = () => '<div class="v-tpl"><i class="v-ic">' + S('<rect x="4" y="5" width="12" height="14" rx="2"/><path d="M8 9v6l5-3z"/><path d="M18 6v12" /><circle cx="18" cy="14" r="2.5"/>') + '</i><span>템플릿</span></div>';
+  const template = () => '';
+  const bigBtn = (x, y, w, h, label, c, cls) => '<div class="v-btn ' + (cls || '') + '" style="left:' + x + 'px;top:' + y + 'px;width:' + w + 'px;height:' + h + 'px;background:' + c + '">' + label + '</div>';
+  const clipThumb = (x, w, cls, inner) => '<div class="v-clip ' + (cls || '') + '" style="left:' + x + 'px;width:' + w + 'px"><div class="v-frames"></div>' + (inner || '') + '</div>';
+  const badge = (x2, y, tt, o = {}) => '<em class="v-badge' + (o.c ? ' ' + o.c : '') + '" style="left:' + (x2 - (o.w || 41)) + 'px;top:' + y + 'px;width:' + (o.w || 41) + 'px">' + tt + '</em>';
+  const swapIc = () => '<i class="v-ic" style="left:508px;top:783px;width:26px;height:26px">' + I.swap + '</i>';
+  const moveBtn = (cx) => '<i class="v-move" style="left:' + (cx - 17.5) + 'px;top:777px">' + S('<path d="M12 3v18M3 12h18M8.5 6.5L12 3l3.5 3.5M8.5 17.5L12 21l3.5-3.5M6.5 8.5L3 12l3.5 3.5M17.5 8.5L21 12l-3.5 3.5"/>') + '</i>';
+  const wave = (x0, n, bot, seed, c) => {
+    let s = '', r = seed || 7;
+    for (let i = 0; i < n; i++) { r = (r * 9301 + 49297) % 233280; const h = 3 + (r / 233280) * 22 * (0.4 + 0.6 * Math.abs(Math.sin(i * 0.31 + seed))); s += '<b style="left:' + (x0 + i * 3) + 'px;height:' + h.toFixed(1) + 'px;bottom:' + bot + 'px;background:' + (c || '#b9babd') + '"></b>'; }
+    return '<div class="v-wave">' + s + '</div>';
+  };
+
+  /* 편집기 바탕(디자인 1): 앱바 + 재생줄 + 눈금 + 타임라인 + 오른쪽 클립 + 탭 */
+  const editor = (o = {}) => appBar({ back: 1, title: 1 }) + playRow({ full: 1, undo: o.undo ? 1 : 0 }) + ruler(o.dots || [360, 450, 539]) + transport('00:00<sup>00</sup>', o.t2 || '00:05') + trackArea(o.rows || '') + (o.clip === false ? '' : clipThumb(271, 229, 'is-main', '') + badge(497, 809, o.t2 || '00:05', { w: 40 })) + (o.clip === false ? '' : swapIc()) + playhead() + (o.tpl === false ? '' : template()) + tabs(o.tab === undefined ? 0 : o.tab);
+
+  const audioRows = () => sideIcon(I.plus, 779, '미디어') + sideIcon(I.music, 853, '배경음악', 1) + sideIcon(I.wave, 921, '효과음', 1) + sideIcon(I.mic, 991, '음성 녹음') + sideIcon(I.aiv, 1058, 'AI 보이스', 1);
+  const textRows = () => sideIcon(I.plus, 779, '미디어') + sideIcon(I.text, 853, '글자') + sideIcon(I.label, 921, '라벨') + sideIcon(I.sub, 991, '자막') + sideIcon(I.autosub, 1058, '자동 자막');
+  const fxRows = () => sideIcon(I.plus, 779, '미디어') + sideIcon(I.filter, 853, '필터/보정') + sideIcon(I.special, 921, '특수효과') + sideIcon(I.distort, 991, '왜곡<br>(모자이크)');
+  VL.rows = { audio: audioRows, text: textRows, fx: fxRows };
+
+  /* 클립 편집기(디자인 4~6): 위쪽 클립 줄 + 파형 + 도구 두 줄 */
+  const clipTop = (o = {}) => appBar({ grid: o.grid }) + playRow({ undo: o.undo ? 1 : 0, full: o.full }) + ruler(o.dots || [360, 450, 539]) + transport('00:00<sup>00</sup>', o.t2 || '00:05') + '<div class="v-trk is-clip"></div>';
+  const tools1 = (dis) => {
+    const L = [['처음부터', I.start], ['여기부터', I.first], ['분할', I.scissors], ['여기까지', I.last], ['끝까지', I.next]];
+    return '<i class="v-ic v-chev" style="left:6px;top:979px">' + I.chevL + '</i><i class="v-ic v-chev" style="left:520px;top:979px">' + I.chevR + '</i>' + L.map((a, i) => '<div class="v-tool' + (dis && dis.indexOf(i) >= 0 ? ' is-dim' : '') + '" style="left:' + (88 + i * 92) + 'px;top:960px"><i class="v-ic">' + a[1] + '</i><span>' + a[0] + '</span></div>').join('');
+  };
+
+  /* ---------- 화면 목록 ---------- */
+  const SC = {};
+  /* 0: 프로젝트 목록(디자인 0) */
+  SC.list = () => '<div class="v-full is-list">'
+    + '<i class="v-ic" style="left:36px;top:74px;width:34px;height:34px">' + I.menu + '</i>'
+    + '<div class="v-pill is-blue" style="left:348px;top:72px;width:97px;height:34px"><i class="v-ic" style="width:17px;height:17px">' + I.gift + '</i>친구 초대</div>'
+    + '<div class="v-crown" style="left:467px;top:70px"><i class="v-ic">' + I.crown + '</i></div>'
+    + '<div class="v-banner"><img src="img/p09_banner.png" alt=""></div>'
+    + '<p class="v-mp">내 프로젝트 (0) <i class="v-ic is-down">' + S('<circle cx="12" cy="12" r="10" fill="currentColor" stroke="none"/><path d="M7.5 10.5l4.5 4.5 4.5-4.5" stroke="#16171b" stroke-width="2.4"/>') + '</i></p>'
+    + '<i class="v-ic v-lv" style="left:372px;top:455px">' + S('<rect x="4" y="5.5" width="16" height="13" rx="2.5" fill="currentColor" stroke="none"/><rect x="6.5" y="8" width="11" height="8" rx="1" fill="#16171b" stroke="none"/>') + '</i><i class="v-ic v-lv" style="left:431px;top:455px">' + S('<rect x="5" y="3.5" width="9" height="6.5" rx="1.5"/><rect x="5" y="13.5" width="9" height="6.5" rx="1.5"/><path d="M18 5v11M15 13.5l3 3 3-3"/>') + '</i><span class="v-sel">선택</span>'
+    + '<div class="v-load"><i class="v-ic">' + S('<path d="M7 3.5h7l4 4v13H7zM13 3.5v5h5M12 11v6M9.5 14.5l2.5 2.5 2.5-2.5"/>') + '</i>프로젝트 불러오기</div>'
+    + '</div>';
+
+  /* 1: 편집기 첫 화면(디자인 1) */
+  SC.audio = () => editor({ rows: audioRows(), tab: 0 });
+  /* 2/3: 음성 녹음(디자인 2, 3) */
+  SC.record = (o = {}) => appBar({}) + playRow({ undo: 0 }) + ruler(o.rec ? [60, 130, 200, 245, 270, 330, 400, 460] : [360, 450, 539]) + transport(o.rec ? '00:01<sup>02</sup>' : '00:00<sup>00</sup>', '00:05') + '<div class="v-trk is-rec"></div>'
+    + (o.rec ? '<div class="v-recclip" style="left:79px;width:190px"></div>' : '') + clipThumb(271, 270, 'is-main is-dimclip', '') + playhead(878)
+    + '<div class="v-recpanel"></div>'
+    + (o.rec ? '' : '<div class="v-timer"><i class="v-ic">' + S('<circle cx="12" cy="12" r="9.5"/><text x="12" y="16" font-size="9" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">3</text>') + '</i>타이머</div>')
+    + '<p class="v-rtime">' + (o.rec ? '00:01' : '00:00') + '</p>'
+    + '<div class="v-rbtn"><b class="' + (o.rec ? 'is-stop' : '') + '"></b></div>'
+    + '<div class="v-cancel">취소</div>';
+  /* 4: 녹음 파일(디자인 4) */
+  SC.recdone = () => clipTop({ undo: 1, full: 0 }) + moveBtn(193) + '<div class="v-aclip"><i class="v-lh">' + I.chevL + '</i><div class="v-ab"><span class="v-an"><i class="v-ic">' + S('<rect x="9.5" y="3" width="5" height="10" rx="2.5"/><path d="M6.5 11a5.5 5.5 0 0011 0M12 17v3"/>', { c: '' }) + '</i>V1</span>' + wave(8, 82, 8, 5, '#fff') + '<em class="v-badge is-a" style="right:4px;bottom:3px">00:04</em></div></div>'
+    + playhead(876) + '<div class="v-name"><span>파일명 :</span><b>V1</b><i class="v-ic">' + I.pencil + '</i></div>'
+    + '<div class="v-act" style="left:152px"><i class="v-ic">' + I.trash + '</i><span>삭제</span></div><div class="v-act" style="left:270px"><i class="v-ic">' + I.listen + '</i><span>듣기</span></div><div class="v-act" style="left:388px"><i class="v-ic">' + I.moveto + '</i><span>여기로 이동</span></div>'
+    + '<div class="v-add"><b class="v-rdot"></b>추가</div>' + bigBtn(200, 1112, 324, 55, '완료', '#0a9cf7', 'is-done');
+  /* 5/6: 클립 도구(디자인 5, 6): second 이면 오른쪽으로 밀려 자동 자막이 보이는 줄. slide=0~1 */
+  VL.NAVW = 358;
+  const row2items = [['추가', I.plus, 164], ['음소거', I.mute, 251], ['음량', I.vol, 339], ['노이즈 제거', I.noise, 434], ['페이드', I.fade, 512], ['오디오 이펙트', I.waveform, 605], ['에코&amp;리버브', I.echo, 698], ['자동 자막', I.autosub, 786], ['배속', I.speed, 866]];
+  SC.clip = (o = {}) => {
+    const off = (o.slide || 0) * VL.NAVW;
+    let s = clipTop({ undo: 1, grid: 0 }) + moveBtn(193) + '<div class="v-aclip"><i class="v-lh">' + I.chevL + '</i><div class="v-ab"><span class="v-an"><i class="v-ic">' + S('<rect x="9.5" y="3" width="5" height="10" rx="2.5"/><path d="M6.5 11a5.5 5.5 0 0011 0M12 17v3"/>') + '</i>V1</span>' + wave(8, 82, 8, 5, '#fff') + '<em class="v-badge is-a" style="right:4px;bottom:3px">00:04</em></div></div>'
+      + '<div class="v-sidetabs"><i class="v-ic">' + I.folder + '</i><i class="v-ic">' + I.waveform + '</i></div>' + wave(274, 60, 12, 3, '#b9babd').replace('class="v-wave"', 'class="v-wave is-low"') + playhead(951) + tools1([2, 3]);
+    s += '<div class="v-row2"><div class="v-row2-fix"><i class="v-ic">' + I.trash + '</i><span>삭제</span></div><div class="v-row2-clip"><div class="v-row2-in" id="vlRow2" style="transform:translateX(' + (-off) + 'px)">';
+    row2items.forEach((a) => { s += '<div class="v-r2" style="left:' + (a[2] - 45 - 100) + 'px"><i class="v-ic">' + a[1] + '</i><span>' + a[0] + '</span></div>'; });
+    s += '</div></div></div>' + bigBtn(10, 1112, 521, 55, '완료', '#0a9cf7', 'is-done');
+    return s;
+  };
+  /* 7: 자막 생성 범위(디자인 7) */
+  SC.subrange = () => clipTop({ undo: 1 }) + moveBtn(193) + '<div class="v-aclip is-ai"><i class="v-lh">' + I.chevL + '</i><div class="v-ab"><span class="v-an is-sm">자막 생성 범위</span>' + wave(8, 82, 14, 11, '#cfd8e6') + '<em class="v-badge is-a" style="right:4px;bottom:3px">00:04</em></div></div>'
+    + '<div class="v-tools4"><div class="v-tool is-dim" style="left:46px;top:886px"><i class="v-ic">' + I.start + '</i><span>처음부터</span></div><div class="v-tool is-dim" style="left:163px;top:886px"><i class="v-ic">' + I.first + '</i><span>여기부터</span></div><div class="v-tool is-dim" style="left:277px;top:886px"><i class="v-ic">' + I.last + '</i><span>여기까지</span></div><div class="v-tool" style="left:400px;top:886px"><i class="v-ic">' + I.next + '</i><span>끝까지</span></div></div>'
+    + '<div class="v-aiopt"><i>AI</i>더 정확한 처리<u class="v-tog"><b></b></u></div>'
+    + '<div class="v-sel2" style="left:17px"><span>오디오 : <b>음성 녹음</b></span><i class="v-ic">' + S('<path d="M5 12a7 7 0 0112-5l2 2M19 12a7 7 0 01-12 5l-2-2M17 4v5h-5M7 20v-5h5"/>') + '</i></div><div class="v-sel2" style="left:278px"><span>언어 : <b>한국어</b></span><i class="v-ic">' + S('<path d="M5 12a7 7 0 0112-5l2 2M19 12a7 7 0 01-12 5l-2-2M17 4v5h-5M7 20v-5h5"/>') + '</i></div>'
+    + bigBtn(17, 1112, 238, 55, '취소', '#4c4d50') + bigBtn(272, 1112, 252, 55, '생성하기', '#0a9cf7', 'is-done');
+  /* 로딩 화면(자막 생성 중 / 트래킹 중 / 비디오 만드는 중): msg, warn, pct(0~1), cls */
+  SC.loading = (o = {}) => '<div class="v-full is-load' + (o.cls ? ' ' + o.cls : '') + '">'
+    + (o.back ? '<i class="v-ic" style="left:20px;top:58px;width:34px;height:34px">' + I.back + '</i>' : '')
+    + '<div class="v-logo" id="vlLogo">' + VL.logoSvg + '</div>'
+    + '<p class="v-lmsg">' + o.msg + '</p>'
+    + '<div class="v-lbar"><i id="vlLoadBar"></i></div><u class="v-lpct" id="vlLoadPct">0%</u>'
+    + (o.warn ? '<p class="v-lwarn"><i class="v-ic is-warn">' + S('<path d="M12 3.5l10 17H2z" fill="#f5c518" stroke="none"/><path d="M12 10v5M12 17.5h.01" stroke="#232428" stroke-width="2"/>') + '</i>' + o.warn + '</p>' : '')
+    + (o.tip ? '<div class="v-tip"><b>VLLO TIP</b><div class="v-tipc"><span>' + o.tip + '</span></div></div>' : '') + '</div>';
+  /* 8: 자막 만들어진 뒤 글자 탭(디자인 8) */
+  SC.subdone = (o = {}) => clipTop({ undo: 1, grid: 1 }) + moveBtn(193) + '<div class="v-aclip is-sub"><i class="v-lh">' + I.chevL + '</i><div class="v-ab"><span class="v-an"><i class="v-ic">' + I.sub + '</i>' + (o.text || '') + '</span><em class="v-badge is-a" style="right:4px;bottom:3px">00:03</em></div></div>'
+    + '<div class="v-kf"><i class="v-ic">' + I.keyfr + '</i><span>변형<br>키프레임</span><u class="v-tog"><b></b></u></div><div class="v-sidetabs"><i class="v-ic">' + I.folder + '</i><i class="v-ic">' + I.waveform + '</i></div>' + playhead(951) + tools1([2, 3])
+    + '<div class="v-row2"><div class="v-row2-fix"><i class="v-ic">' + I.trash + '</i><span>삭제</span></div><div class="v-all"><u class="v-tog is-on"><b></b></u><span>전체 적용</span></div><div class="v-row2-in2"><div class="v-r2" style="left:0"><i class="v-ic">' + I.plus + '</i><span>추가</span></div><div class="v-r2" style="left:67px"><i class="v-ic">' + S('<path d="M5 5v14h14M5 15l4-4 4 4 5-8"/>') + '</i><span>변형</span></div><div class="v-r2" style="left:132px"><i class="v-ic">' + S('<rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/>') + '</i><span>마스크</span><em class="v-new2">New</em></div><div class="v-r2" style="left:198px"><i class="v-ic">' + I.pencil + '</i><span>편집</span></div></div></div>'
+    + bigBtn(10, 1112, 521, 55, '완료', '#0a9cf7', 'is-done');
+
+  SC.todo = () => editor({ rows: textRows(), tab: 2 }) + '<p class="v-todo">이후 화면은 준비 중이에요</p>';
+
+
+  /* ---------- 자막 수정·효과·블러·트래킹·추출 (디자인 8~23) ---------- */
+  const faces = (sel) => ['블러', '픽셀', '확대', '볼록 렌즈'].map((t, i) => '<div class="v-fc' + (sel && i === 0 ? ' is-sel' : '') + '" style="left:' + (30 + i * 118.5) + 'px"><img src="img/p09_face_' + (i + 1) + '.png" alt=""></div><span class="v-fl" style="left:' + (30 + i * 118.5) + 'px">' + t + '</span>').join('');
+  const dimBtns = (ok) => bigBtn(17, 1112, 245, 55, '취소', '#4c4d50') + bigBtn(279, 1112, 245, 55, '완료', ok ? '#0a9cf7' : '#2c4a6c', ok ? 'is-done' : 'is-dimbtn');
+  const crownI = S('<path d="M3.5 9l4 3.5L12 5l4.5 7.5 4-3.5-1.5 10h-14z" fill="currentColor"/>');
+
+  /* 글자 탭 편집기(디자인 12, 20, 23) */
+  SC.subed = () => editor({ undo: 1, rows: sideIcon(I.plus, 779, '미디어') + sideIcon(I.text, 853, '글자') + sideIcon(I.label, 921, '라벨') + sideIcon(I.sub, 991, '자막') + sideIcon(I.autosub, 1058, '자동 자막'), tab: 2, dots: [360, 450, 539], t2: '00:05' })
+    + '<div class="v-subbar"></div><span class="v-subtag" style="left:272px;top:1082px">여기</span><div class="v-edbox"><i class="v-ic">' + I.pencil + '</i></div>';
+  /* 키보드(디자인 9, 10) */
+  const kb = (rows) => '<div class="v-kr is-n">' + '1234567890'.split('').map((c) => '<b>' + c + '</b>').join('') + '</div>' + rows;
+  SC.keyboard = (o = {}) => appBar({ grid: 1 }) + playRow({ play: 0 }) + '<div class="v-kpanel"></div>'
+    + '<div class="v-align"><span><i class="v-ic">' + S('<path d="M4 7h16M4 12h10M4 17h16"/>') + '</i>왼쪽</span><span class="is-on"><i class="v-ic">' + S('<path d="M4 7h16M7 12h10M4 17h16"/>') + '</i>가운데</span><span><i class="v-ic">' + S('<path d="M4 7h16M10 12h10M4 17h16"/>') + '</i>오른쪽</span></div>'
+    + '<div class="v-input"><span>' + (o.text || '') + '</span><i class="v-x"><b></b></i></div><div class="v-ok"><i class="v-ic">' + I.check + '</i></div>'
+    + '<div class="v-kb"><div class="v-kt">' + ['<i class="v-ic">' + S('<path d="M12 3l1.5 5 5 1.5-5 1.5L12 16l-1.5-5-5-1.5 5-1.5z"/>') + '</i>', '<i class="v-ic">' + S('<circle cx="12" cy="12" r="9"/><path d="M8.5 14.5c1.8 2 5.2 2 7 0M9 9.5h.01M15 9.5h.01"/>') + '</i>', '<i class="v-ic">' + S('<rect x="4" y="4" width="11" height="11" rx="2"/><rect x="9" y="9" width="11" height="11" rx="2"/>') + '</i>', '<i class="v-ic">' + S('<rect x="6" y="3.5" width="12" height="17" rx="2"/>') + '</i>', '<i class="v-ic">' + I.gear + '</i>', '<i class="v-ic">' + I.dots + '</i>'].join('') + '</div>'
+    + kb('<div class="v-kr">' + 'ㅂㅈㄷㄱㅅㅛㅕㅑㅐㅔ'.split('').map((c) => '<b>' + c + '</b>').join('') + '</div><div class="v-kr is-in">' + 'ㅁㄴㅇㄹㅎㅗㅓㅏㅣ'.split('').map((c) => '<b>' + c + '</b>').join('') + '</div>'
+      + '<div class="v-kr"><b class="is-w">' + S('<path d="M12 4l8 9h-5v6H9v-6H4z"/>') + '</b>' + 'ㅋㅌㅊㅍㅠㅜㅡ'.split('').map((c) => '<b>' + c + '</b>').join('') + '<b class="is-w">' + S('<path d="M9 5h10a2 2 0 012 2v10a2 2 0 01-2 2H9l-6-7z"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"/>') + '</b></div>'
+      + '<div class="v-kr"><b class="is-w">!#1</b><b class="is-w">한/영</b><b class="is-w">한자</b><b class="is-sp"></b><b class="is-w">.</b><b class="is-w is-ent">' + S('<path d="M19 6v6a2 2 0 01-2 2H6M9.5 10.5L6 14l3.5 3.5"/>') + '</b></div>')
+    + '<div class="v-knav"><i class="v-ic">' + I.mic + '</i><u>|||</u><u>□</u><u>◁</u><u>⌄</u></div></div>';
+  /* 효과 탭(디자인 13) */
+  SC.fx = () => editor({ undo: 1, rows: fxRows() + '<i class="v-crown2">' + crownI + '</i>', tab: 4, dots: [360, 450, 539] });
+  /* 왜곡 고르기(디자인 14) */
+  SC.faces = () => appBar({}) + playRow({ full: 0, play: 1 }) + '<div class="v-panel2"></div>' + faces(false) + dimBtns(false);
+  /* 블러 상자 설정(디자인 15) */
+  SC.blursel = () => appBar({ grid: 1 }) + playRow({}) + '<div class="v-panel2"></div>'
+    + '<div class="v-shape is-on" style="left:121px"><i></i><span>사각형</span></div><div class="v-shape" style="left:392px"><i class="is-r"></i><span>원</span></div>'
+    + '<p class="v-str">강도</p><div class="v-scale">' + Array.from({ length: 37 }, (_, i) => '<b' + (i % 5 === 0 ? ' class="is-b"' : '') + ' style="left:' + (85.5 + i * 13) + 'px"></b>').join('') + [10, 20, 30, 40, 50, 60, 70].map((v, i) => '<span class="v-pct' + (v === 40 ? ' is-on' : '') + '" style="left:' + (111 + i * 65) + 'px">' + v + '%</span>').join('') + '<u class="v-needle"></u></div>'
+    + faces(true) + dimBtns(true);
+  /* 블러 클립 편집(디자인 16, 17) */
+  VL.TRKW = 366;
+  const r2a = [['추가', I.plus, 160], ['변형', S('<path d="M5 5v14h14M5 15l4-4 4 4 5-8"/>'), 248], ['모양', S('<rect x="4.5" y="4.5" width="15" height="15" rx="2"/>'), 335], ['40%<br>강도', S('<text x="12" y="16" font-size="11" fill="currentColor" stroke="none" text-anchor="middle">40%</text>'), 419]];
+  const r2b = [['반전', S('<path d="M12 3v18M4 6.5l5 2.5v6l-5 2.5zM20 6.5L15 9v6l5 2.5z"/>'), 142 + VL.TRKW], ['얼굴 트래킹', S('<circle cx="12" cy="12" r="6.5"/><path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4M12 10v4M10 12h4"/>'), 227 + VL.TRKW], ['정렬', S('<path d="M12 4l8 4-8 4-8-4zM4 12l8 4 8-4M4 16l8 4 8-4"/>'), 316 + VL.TRKW], ['여기로 이동', I.moveto, 402 + VL.TRKW]];
+  SC.blurclip = (o = {}) => {
+    const off = (o.slide || 0) * VL.TRKW;
+    let s = appBar({ grid: 1 }) + playRow({ undo: 1 }) + ruler([360, 450, 539]) + transport('00:00<sup>18</sup>', '00:05') + '<div class="v-trk is-clip"></div>' + moveBtn(193)
+      + '<div class="v-aclip is-blur"><i class="v-lh">' + I.chevL + '</i><div class="v-ab"><span class="v-an"><i class="v-ic">' + I.distort + '</i>블러</span><em class="v-badge is-a" style="right:4px;bottom:3px">00:04</em></div></div>'
+      + '<span class="v-subtag" style="left:226px;top:850px;border-color:#5aa0e0;color:#8fc2f5">V1</span><span class="v-subtag" style="left:272px;top:850px">여기</span>'
+      + '<div class="v-kf"><i class="v-ic">' + I.keyfr + '</i><span>변형<br>키프레임</span><u class="v-tog"><b></b></u></div><div class="v-sidetabs"><i class="v-ic">' + I.folder + '</i><i class="v-ic">' + I.waveform + '</i></div>' + wave(274, 60, 12, 3, '#b9babd').replace('class="v-wave"', 'class="v-wave is-low"') + playhead(951) + tools1([2, 3]);
+    s += '<div class="v-row2"><div class="v-row2-fix"><i class="v-ic">' + I.trash + '</i><span>삭제</span></div><div class="v-row2-clip is-w2"><div class="v-row2-in" id="vlRow2" style="transform:translateX(' + (-off) + 'px)">';
+    r2a.concat(r2b).forEach((a) => { s += '<div class="v-r2" style="left:' + (a[2] - 45 - 100) + 'px"><i class="v-ic">' + a[1] + '</i><span>' + a[0] + '</span></div>'; });
+    s += '</div></div><div class="v-prem"><i class="v-ic">' + crownI + '</i><span>VLLO 프리미엄 플러스</span></div></div>' + bigBtn(10, 1112, 521, 55, '완료', '#0a9cf7', 'is-done');
+    return s;
+  };
+  /* 트래킹 영역 설정(디자인 18) */
+  SC.trackset = () => appBar({}) + playRow({ undo: 0, play: 1 }) + ruler([360, 450, 539]) + transport('00:00<sup>18</sup>', '00:05') + '<div class="v-trk is-clip"></div>' + moveBtn(193)
+    + '<div class="v-aclip is-blur"><i class="v-lh">' + I.chevL + '</i><div class="v-ab"><span class="v-an"><i class="v-ic">' + I.distort + '</i>블러</span><em class="v-badge is-a" style="right:4px;bottom:3px">00:04</em><span class="v-trg">트래킹 범위</span></div></div>'
+    + '<span class="v-subtag" style="left:226px;top:850px;border-color:#5aa0e0;color:#8fc2f5">V1</span><span class="v-subtag" style="left:272px;top:850px">여기</span><div class="v-sidetabs is-s"><i class="v-ic">' + I.folder + '</i></div><div class="v-ti"></div>' + playhead(896)
+    + '<p class="v-tinfo">트래킹 할 얼굴 영역을 설정하세요. 영역을 조금 더 넓게 설정할 때 트래킹 정확도가<br>올라갑니다.</p>' + bigBtn(172, 1026, 196, 54, '트래킹하기', '#0a9cf7', 'is-done')
+    + '<div class="v-cancel2">취소</div>';
+  /* 추출하기(디자인 21) */
+  SC.export = () => '<div class="v-full is-exp"><i class="v-ic" style="left:22px;top:60px;width:34px;height:34px">' + I.back + '</i><p class="v-et">추출하기</p>'
+    + '<div class="v-etabs"><span class="is-on">비디오</span><span>GIF</span><span>프로젝트</span><span>자막</span><span>오디오</span><u></u></div>'
+    + '<p class="v-es" style="top:238px">파일</p><div class="v-ebox" style="top:262px;height:118px"><div class="v-er"><span>파일명</span><em>제목 없음</em></div><div class="v-er is-2"><span>저장 위치</span><em><b>앨범</b> | 파일</em></div></div>'
+    + '<p class="v-es" style="top:400px">추출 옵션</p><div class="v-ebox" style="top:424px;height:54px"><div class="v-er"><span>추출 범위</span><em><b>전체</b> &gt;</em></div></div>'
+    + '<p class="v-es" style="top:500px">포맷</p><div class="v-ebox" style="top:524px;height:324px"><div class="v-er is-fmt"><b>기본값 (추천)</b><u>▲</u></div><div class="v-er is-sl"><span>해상도</span><em>1920 x 906 / 기본값</em></div><div class="v-sl"><i style="width:55%"></i><b style="left:55%"></b></div><div class="v-ticks"><span>SD</span><span>HD</span><span>Full HD</span><span>QHD</span><span>4K UHD</span></div><div class="v-er is-sl" style="margin-top:12px"><span>프레임레이트</span><em>기본값</em></div><div class="v-sl"><i style="width:84%"></i><b style="left:84%"></b></div><div class="v-ticks"><span>18</span><span>24</span><span>25</span><span>30</span><span>60</span></div></div>'
+    + '<div class="v-eb"><span>완료 알람</span><u class="v-tog is-on"><b></b></u></div>'
+    + '<div class="v-bigb">추출하기 (약 5.56 MB)</div></div>';
+  /* 저장 완료(디자인 22) */
+  SC.saved = () => '<div class="v-full is-saved"><i class="v-ic" style="left:22px;top:60px;width:34px;height:34px">' + I.back + '</i><i class="v-ic" style="left:489px;top:60px;width:34px;height:34px">' + S('<path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/>') + '</i>'
+    + '<div class="v-chk"><svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="95" fill="none" stroke="#e9416a" stroke-width="5"/><path d="M62 98l30 40 60-84" fill="none" stroke="#e9416a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
+    + '<p class="v-sv1">저장 완료</p><p class="v-sv2">저장 위치 : 앨범</p><div class="v-sv3">추출한 파일 확인하기 &gt;</div><p class="v-sv4"><i></i>공유하기<i></i></p>'
+    + '<div class="v-soc"><img src="img/p09_share_1.png" alt=""><img src="img/p09_share_2.png" alt=""><img src="img/p09_share_3.png" alt=""><img src="img/p09_share_4.png" alt=""></div></div>';
+
+
+  /* 로딩 로고 모션: VLLO 글자 → 점 4개 → 물고기 → 점 → VLLO 반복 (캡처 영상 기준) */
+  VL.LOGO = [220, 385, 100, 66];
+  VL.logoSvg = '<svg viewBox="76 6 148 98" width="100" height="66" fill="none" stroke="#fe2c5e" style="stroke:#fe2c5e" stroke-linecap="round" stroke-linejoin="round">'
+    + '<g id="vlLg"><path d="M86 40L97 79L108 40"/><path d="M126 40V79H144"/><path d="M154 40V79H172"/><ellipse cx="197" cy="59" rx="19" ry="20"/></g>'
+    + '<g id="vlDt" fill="#fe2c5e" stroke="none"><circle r="3.5"/><circle r="3.5"/><circle r="3.5"/><circle r="3.5"/></g>'
+    + '<g id="vlFs"><path pathLength="1" d="M85 60C85 30 100 13 127 13C152 13 172 30 188 56" stroke-width="9"/><path pathLength="1" d="M85 56C85 82 100 99 127 99C152 99 172 82 188 56" stroke-width="9"/>'
+    + '<path d="M192 56L215 40V72Z" fill="#fe2c5e" stroke-width="4"/></g></svg>';
+  VL.logo = (box) => {
+    const svg = box.querySelector('svg'), lg = svg.querySelector('#vlLg').children, dt = svg.querySelector('#vlDt').children, fs = svg.querySelector('#vlFs').children;
+    const DOT = [[97, 57], [133, 57], [169, 57], [203, 57]], ANC = [[97, 59], [135, 59], [163, 59], [197, 59]];
+    const T = 6.2, t0 = performance.now();
+    const cl = (x) => Math.max(0, Math.min(1, x)), ez = (x) => (x = cl(x), x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2), mix = (a, b, k) => a + (b - a) * k;
+    const K = () => (svg.clientWidth || 100) / 148;
+    function draw(c) {
+      const lp = c < .6 ? ez(c / .6) : c < 1.6 ? 1 : c < 2.3 ? 1 - ez((c - 1.6) / .7) : 0;
+      const f = c < 3.1 ? 0 : c < 4.1 ? ez(c - 3.1) : c < 5.4 ? 1 : c < 5.9 ? 1 - ez((c - 5.4) / .5) : 0;
+      const sw = 6.5 * K();
+      for (let i = 0; i < 4; i++) {
+        const s = Math.max(lp, .0001), x = mix(DOT[i][0], ANC[i][0], lp), y = mix(DOT[i][1], ANC[i][1], lp);
+        lg[i].setAttribute('transform', 'translate(' + x + ' ' + y + ') scale(' + s + ') translate(' + -ANC[i][0] + ' ' + -ANC[i][1] + ')');
+        lg[i].setAttribute('stroke-width', sw);
+        lg[i].setAttribute('vector-effect', 'non-scaling-stroke');
+        lg[i].style.display = lp > .002 ? '' : 'none';
+      }
+      const showDots = lp <= .002;
+      const top = ez(f / .7), bot = ez((f - .2) / .8);
+      const d = [DOT[0].slice(), DOT[1].slice(), DOT[2].slice(), DOT[3].slice()], r = [3.5, 3.5, 3.5, 3.5], o = [1, 1, 1, 1];
+      d[0][0] = mix(97, 86, cl(f / .15));
+      o[0] = top > .02 ? 0 : 1;
+      const e = ez(f / .8);
+      d[1] = [mix(133, 118, e), mix(57, 50, e)]; r[1] = mix(3.5, 7, e);
+      d[2] = [mix(169, 188, ez(f / .5)), 57]; o[2] = 1 - cl((f - .35) / .3);
+      const tail = cl((f - .6) / .4);
+      d[3] = [mix(203, 205, ez(f / .6)), mix(57, 56, ez(f / .6))]; r[3] = mix(3.5, 9, ez(f / .6)); o[3] = 1 - tail;
+      for (let i = 0; i < 4; i++) {
+        dt[i].setAttribute('cx', d[i][0]); dt[i].setAttribute('cy', d[i][1]); dt[i].setAttribute('r', r[i]);
+        dt[i].style.opacity = showDots ? o[i] : 0;
+      }
+      [top, bot].forEach((q, i) => { fs[i].style.display = q > .02 ? '' : 'none'; fs[i].setAttribute('stroke-dasharray', q + ' 2'); });
+      fs[2].style.opacity = tail;
+      fs[2].setAttribute('transform', 'translate(205 56) scale(' + (.4 + .6 * tail) + ') translate(-205 -56)');
     }
-    return s;
-  }
-  function ruler(dots, labels) {
-    let s = R(0, 703, 540, 15, '#242328') + R(0, 718, 540, 2, '#141519');
-    (dots || []).forEach((x) => { s += O(x, 710, 1.9, '#8e8f92'); });
-    (labels || []).forEach((l) => { s += T(l[0], 714, 9, l[1], { f: '#6c6d71' }); });
-    return s;
-  }
-  function transport(t1, t2, o = {}) {
-    let s = R(0, 720, 540, 34, '#222327');
-    if (o.cells !== false) {
-      [89, 179, 359, 450].forEach((x) => { s += R(x, 720, 1.6, 34, '#16171b'); });
-      s += P('M35 727.5v19.5M55 727.5L39.5 737.2 55 747z', C.ico, 2) + P('M143.5 727.5v19.5M123.5 737.2L139 727.5v19.5z', C.ico, 2)
-        + P('M395.5 727.5v19.5M400.5 727.5v19.5l15.5-9.8z', C.ico, 2) + P('M504.5 727.5v19.5M484.5 727.5v19.5l15.5-9.8z', C.ico, 2);
-    } else {
-      [179, 359].forEach((x) => { s += R(x, 720, 1.6, 34, '#16171b'); });
+    function tick() {
+      if (!box.isConnected) return;
+      draw(((performance.now() - t0) / 1000) % T);
+      requestAnimationFrame(tick);
     }
-    s += TF(200, 233, 742, 15.3, t1 || '00:00', { f: '#c9cacd', w: 300 }) + TF(237, 247, 738, 10.8, o.sup || '00', { f: '#b9babd', w: 300 });
-    s += TF(298, 330, 742, 15.3, t2 || '00:05', { f: '#9a9b9f', w: 300 });
-    s += R(0, 754, 540, 2, '#14151a');
-    return s;
-  }
-  const playhead = (y1) => R(268.6, 702, 2.2, (y1 || 1111) - 702, C.head) + O(269.7, 708, 2.6, C.head);
-  const badge = (x2, y, t, o = {}) => { const w = o.w || 40; return R(x2 - w, y, w, 20, o.bg || 'rgba(178,178,180,.82)', 4) + TF(x2 - w + 4, x2 - 4.5, y + 15, 12.8, t, { f: o.f || '#16171a', w: 700 }); };
-
-  const ICO = {
-    media: (cx, cy) => O(cx, cy, 14, null, C.ico, 1.8) + P('M' + (cx - 7.5) + ' ' + cy + 'h15M' + cx + ' ' + (cy - 7.5) + 'v15', C.ico, 1.8),
-    music: (cx, cy) => P('M' + (cx - 5) + ' ' + (cy + 7) + 'V' + (cy - 9.5) + 'H' + (cx + 9.5) + 'V' + (cy + 5) + 'M' + (cx - 5) + ' ' + (cy - 4) + 'H' + (cx + 9.5), C.ico, 1.6) + O(cx - 7.7, cy + 7.5, 2.7, null, C.ico, 1.6) + O(cx + 6.8, cy + 5.5, 2.7, null, C.ico, 1.6) + plusBadge(cx + 11, cy + 9),
-    sfx: (cx, cy) => P('M' + (cx - 14) + ' ' + (cy + 1) + 'h5l2-5 3 11 3-15 3 17 2-8h3', C.ico, 1.6) + plusBadge(cx + 9, cy + 9),
-    mic: (cx, cy) => R(cx - 4.5, cy - 12, 9, 15, 'none', 4.5, ' stroke="' + C.ico + '" stroke-width="1.6"') + P('M' + (cx - 8) + ' ' + (cy - 1) + 'a8 8 0 0 0 16 0M' + cx + ' ' + (cy + 7) + 'v5', C.ico, 1.6) + plusBadge(cx + 9, cy + 9),
-    aiv: (cx, cy) => P('M' + (cx - 6) + ' ' + (cy - 8) + 'h6M' + (cx - 9) + ' ' + (cy - 5) + 'v10.5h7l3 4 3-4h4', C.ico, 1.6) + T(cx + 7, cy - 4, 9, 'AI', { f: C.ico, w: 700 }) + P('M' + (cx - 6) + ' ' + (cy + 1) + 'v5M' + (cx - 3) + ' ' + (cy - 1) + 'v9M' + cx + ' ' + (cy + 1) + 'v5', C.ico, 1.4) + plusBadge(cx + 9, cy + 9),
-    text: (cx, cy) => P('M' + (cx - 10) + ' ' + (cy - 9) + 'v-2.5h20v2.5M' + cx + ' ' + (cy - 11.5) + 'v22M' + (cx - 3.5) + ' ' + (cy + 10.5) + 'h7', C.ico, 1.6) + plusBadge(cx + 9, cy + 9),
-    label: (cx, cy) => P('M' + (cx - 10) + ' ' + (cy - 3) + 'l10-8 10 8v12h-20z', C.ico, 1.6) + O(cx, cy - 4, 2, null, C.ico, 1.4) + P('M' + (cx - 6) + ' ' + (cy + 2) + 'h12M' + (cx - 6) + ' ' + (cy + 5.5) + 'h8', C.ico, 1.4) + plusBadge(cx + 9, cy + 9),
-    sub: (cx, cy) => SR(cx - 11, cy - 11, 21, 21, C.ico, 1.6, 3) + P('M' + (cx - 11) + ' ' + (cy + 3) + 'h21M' + (cx - 7) + ' ' + (cy + 6.5) + 'h11', C.ico, 1.4) + plusBadge(cx + 9, cy + 9),
-    autosub: (cx, cy) => P('M' + (cx + 1) + ' ' + (cy - 11) + 'h-12v21h21v-9', C.ico, 1.6) + T(cx + 8, cy - 4, 9, 'AI', { f: C.ico, w: 700 }) + P('M' + (cx - 11) + ' ' + (cy + 3) + 'h21M' + (cx - 7) + ' ' + (cy + 6.5) + 'h11', C.ico, 1.4) + plusBadge(cx + 9, cy + 9),
-    filter: (cx, cy) => O(cx - 3, cy - 4, 8.5, null, C.ico, 1.6) + O(cx + 3, cy + 3, 8.5, null, C.ico, 1.6) + P('M' + (cx - 6) + ' ' + (cy + 4) + 'l9-9M' + (cx - 3) + ' ' + (cy + 6) + 'l8-8', C.ico, 1.3) + plusBadge(cx + 9, cy + 9),
-    special: (cx, cy) => SR(cx - 11, cy - 11, 22, 22, C.ico, 1.6, 2) + P('M' + (cx - 8) + ' ' + (cy + 8) + 'l10-10M' + (cx + 4) + ' ' + (cy - 8) + 'v4M' + (cx + 2) + ' ' + (cy - 6) + 'h4M' + (cx + 6) + ' ' + (cy - 2) + 'l2 2M' + (cx - 2) + ' ' + (cy - 7) + 'l1.5 2', C.ico, 1.4) + plusBadge(cx + 9, cy + 9),
-    distort: (cx, cy) => { let s = SR(cx - 11, cy - 11, 22, 22, C.ico, 1.6, 2); for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) { const x = cx - 10 + j * 7, y = cy - 10 + i * 7; s += (i + j) % 2 ? R(x + .8, y + .8, 5.4, 5.4, C.ico) : P('M' + (x + 1.5) + ' ' + (y + 5) + 'l3.5-3.5', C.ico, 1.1); } return s + plusBadge(cx + 9, cy + 9); }
-  };
-  function sideIcon(key, cx, cy, label, ly, o = {}) {
-    let s = ICO[key](cx, cy);
-    const L = Array.isArray(label) ? label : [label];
-    L.forEach((l, i) => { s += T(o.lx || 38.5, ly + i * 16, o.s || 15, l, { ls: -0.4 }); });
-    if (o.isNew) s += newBadge(6, cy - 15);
-    return s;
-  }
-  function trackArea(rows) {
-    let s = R(0, 756, 80, 349, C.left) + R(80, 756, 1, 349, '#1a1b1f') + R(81, 756, 459, 349, C.trk);
-    [834, 901, 969, 1037, 1105].forEach((y) => { s += R(0, y, 540, 2, '#16171b'); });
-    return s + rows.join('');
-  }
-  function tabs(active, col) {
-    const L = ['오디오', '그래픽', '글자', 'PIP', '효과'], X = [70.5, 169.5, 269.5, 369, 468.5];
-    let s = R(0, 1107, 540, 63, C.bar) + R(21, 1112, 498, 48, C.pill, 24);
-    s += R(X[active] - 44, 1118, 88, 36, col, 18);
-    L.forEach((t, i) => { s += T(X[i], 1140.5, 13.5, t, { f: i === active ? '#1b1d22' : '#c4c5c7', ls: -0.3 }); });
-    return s;
-  }
-  function template() {
-    return '<defs><linearGradient id="vlTplG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0628a"/><stop offset="1" stop-color="#ef3468"/></linearGradient></defs>'
-      + O(483.8, 1055, 35.8, 'url(#vlTplG)') + SR(471, 1035, 18, 22, '#fbe0e8', 2, 2.5) + P('M476.5 1041v13l8.5-6.5z', null, 0, '#fbe0e8') + P('M493.2 1038v14M496.8 1039.5v12', '#fbe0e8', 1.6) + O(494, 1054.6, 5, '#fbe0e8') + P('M491.5 1054.6h5M494 1052.1v5', '#ec3f6f', 1.4) + TF(470, 498, 1079, 11.3, '템플릿', { d: 0.09, f: '#fbe0e8', w: 500 });
-  }
-  const swapIcon = () => P('M532 790.5h-24l6-5.5M508 799.5h24l-5.5 5', '#c9cacd', 1.7);
-  function mainEditor(o) {
-    return appBar({ back: 1, title: 1 }) + R(0, 103, 540, 600, C.view) + playRow({ full: 1, undo: o.undo }) + ruler(o.dots) + transport('00:00', o.t2)
-      + trackArea(o.rows) + photo(o.clip, 271, 756) + badge(497, 809, o.t2) + swapIcon() + (o.extra || '') + playhead() + template() + tabs(o.tab, o.tabCol);
-  }
-  const mediaRow = () => sideIcon('media', 39, 779, '미디어', 820.5, { s: 16 });
-
-  const wave = (x0, bot, hs, c, w) => { let d = ''; hs.forEach((h, i) => { d += 'M' + (x0 + i * 2.5) + ' ' + bot + 'v-' + h; }); return '<path d="' + d + '" stroke="' + c + '" stroke-width="' + (w || 1.4) + '"/>'; };
-  const WAVE = {
-    a: [1, 1, 1, 1, 1, 1, 1, 1, 1, 13, 14, 23, 24, 21, 21, 20, 20, 20, 21, 21, 21, 20, 18, 18, 15, 15, 13, 12, 13, 15, 15, 15, 15, 17, 17, 17, 15, 15, 14, 13, 17, 16, 15, 11, 12, 12, 12, 13, 13, 8, 9, 2, 3, 2, 3, 3, 1, 1, 1, 1, 1],
-    b: [41, 44, 44, 46, 41, 29, 21, 17, 18, 18, 19, 20, 18, 13, 21, 29, 26, 22, 19, 18, 10, 13, 21, 17, 14, 13, 15, 19, 19, 12, 5, 4, 10, 19, 25, 27, 29, 41, 53, 40, 15, 8, 5, 3, 4, 3, 5, 16, 25, 27, 25, 21, 20, 12, 12, 6, 5, 4, 4, 18, 35, 37, 34, 30, 23, 21, 18, 25, 42, 44, 36, 28, 24, 17, 20, 25, 24, 29, 24, 15, 15, 20, 29, 35, 35, 34, 33, 25, 34, 39, 22, 9],
-    c: [37, 37, 39, 41, 41, 37, 37, 31, 31, 38, 38, 46, 46, 43, 43, 36, 36, 34, 29, 29, 22, 22, 18, 18, 15, 15, 12, 12, 15, 15, 15, 15, 16, 16, 18, 17, 17, 17, 17, 19, 19, 19, 19, 19, 19, 18, 18, 14, 14, 12, 12, 10, 9, 9, 20, 20, 29, 29, 24, 24, 19, 19, 21, 21, 22, 22, 17, 19, 19, 18, 18, 14, 14, 10, 10, 7, 7, 7, 7, 5, 5, 11, 11, 15, 17, 17, 17, 17, 10, 10, 12]
+    tick();
   };
 
-  function clipTop(o = {}) {
-    let s = appBar({ grid: o.grid }) + R(0, 103, 540, 600, C.view) + playRow({ play: o.play, undo: o.undo }) + ruler(o.dots, o.labels) + transport(o.t1, o.t2, { sup: o.sup, cells: o.cells });
-    s += R(0, 756, 540, 78, C.panel);
-    return s;
-  }
-  const moveBtn = (cx) => O(cx, 795, 17.5, '#fff') + P('M' + (cx - 11) + ' 795h22M' + cx + ' 784v22M' + (cx - 7.5) + ' 791.5L' + (cx - 11) + ' 795l3.5 3.5M' + (cx + 7.5) + ' 791.5L' + (cx + 11) + ' 795l-3.5 3.5M' + (cx - 3.5) + ' 787.5L' + cx + ' 784l3.5 3.5M' + (cx - 3.5) + ' 802.5L' + cx + ' 806l3.5-3.5', '#1b1c20', 1.8);
-  function clipFrame(x0, x1, ix0, ix1, o = {}) {
-    let s = '<path fill-rule="evenodd" fill="#fff" d="M' + (x0 + 6) + ' 762H' + (x1 - 6) + 'a6 6 0 0 1 6 6v53a6 6 0 0 1-6 6H' + (x0 + 6) + 'a6 6 0 0 1-6-6v-53a6 6 0 0 1 6-6zM' + ix0 + ' 763.5V825.5H' + ix1 + 'V763.5z"/>';
-    s += chevL(x0 + 7, 795, 14, '#1b1c20', 1.8);
-    if (o.right !== false) s += chevR(x1 - 7, 795, 14, '#1b1c20', 1.8);
-    return s;
-  }
-  const sideTabs = (o = {}) => R(500, 834, 40, o.h || 118, '#303135', 0) + R(500, 834, 6, o.h || 118, '#2a2b2f') + P('M509.5 856v14.5h21v-12.5h-11.5l-2.5-2z', C.ico, 1.5) + (o.h && o.h < 100 ? '' : P('M511 917v6M514 914v12M517 911v18M520 913v14M523 915v10M526 917v6M529 918v4', C.ico, 1.5));
-  function toolRow(o = {}) {
-    const on = '#d2d3d6', off = '#6b6c70', y = o.y || 977, ly = o.ly || 1007.5;
-    const c = o.c || [on, on, off, off, on];
-    let s = (o.bg !== false ? R(0, 952, 540, 74, C.bar) : '');
-    if (o.arrows !== false) s += chevL(12.5, 988.5, 17, C.ico, 1.6) + chevR(527, 988.5, 17, C.ico, 1.6);
-    const X = o.x || [80.5, 175, 269, 363.5, 458.5];
-    const kk = o.k || 1, g = (x, inner) => '<g transform="translate(' + x + ' ' + y + ')' + (kk !== 1 ? ' scale(' + kk + ')' : '') + '">' + inner + '</g>';
-    const ic = [
-      (x) => g(x, P('M-11 -11v22M-2.5 -11h-5v22h5M11.5 -0.5h-10M5 -4l-3.5 3.5 3.5 3.5', c[0], 1.6)),
-      (x) => g(x, P('M-10.5 -0.5h9.5M-4.5 -4l3.5 3.5-3.5 3.5M10.5 -11h-5v22h5', c[1], 1.6)),
-      (x) => g(x, O(-4.5, -7.5, 3.5, null, c[2], 1.6) + O(4.5, -7.5, 3.5, null, c[2], 1.6) + P('M-2.5 -4.5L10 11M2.5 -4.5L-10 11', c[2], 1.6)),
-      (x) => g(x, P('M-9.5 -11h5v22h-5M10.5 -0.5h-9.5M4.5 -4l-3.5 3.5 3.5 3.5', c[3], 1.6)),
-      (x) => g(x, P('M-11.5 -0.5h10M-5 -4l3.5 3.5-3.5 3.5M2.5 -11h5v22h-5M11 -11v22', c[4], 1.6))
-    ];
-    const L = ['처음부터', '여기부터', '분할', '여기까지', '끝까지'];
-    (o.items || [0, 1, 2, 3, 4]).forEach((k, i) => { s += ic[k](X[i]) + T(X[i], ly, o.ls || 10.5, L[k], { f: c[k], ls: -0.3, w: o.bold && o.bold[k] ? 600 : null }); });
-    return s;
-  }
-
-  const TB = {
-    del: (x) => P('M' + (x - 10.5) + ' 1047.5h21M' + (x - 5) + ' 1047.5v-3.5h10v3.5M' + (x - 8.5) + ' 1047.5l1 19.5a2.5 2.5 0 0 0 2.5 2.4h10a2.5 2.5 0 0 0 2.5-2.4l1-19.5M' + (x - 3.5) + ' 1054v10M' + x + ' 1054v10M' + (x + 3.5) + ' 1054v10', C.ico, 1.7),
-    add: (x) => O(x, 1056, 13.5, null, C.ico, 1.7) + P('M' + (x - 7) + ' 1056h14M' + x + ' 1049v14', C.ico, 1.7),
-    mute: (x) => P('M' + (x - 11) + ' 1051.5h5l7-6v21l-7-6h-5z', C.ico, 1.6) + P('M' + (x + 5) + ' 1052a5 5 0 0 1 0 8M' + (x + 8) + ' 1049a9 9 0 0 1 0 14M' + (x - 12) + ' 1045l23 22', C.ico, 1.6),
-    pct: (x, t) => diamond(x - 25, 1047, 4.5, 5.5, C.ico, 1.3) + TT(x, x + 7, 1062, 17, t, { f: C.ico, ls: -0.2 }),
-    noise: (x) => P('M' + (x - 14) + ' 1056h5l2-6 3 12 3-17 3 21 3-14 2 4h5', C.ico, 1.5) + P('M' + (x - 10) + ' 1045l20 22', C.ico, 1.6),
-    fade: (x) => SR(x - 11.5, 1044.5, 23, 23, C.ico, 1.7, 2.5) + P('M' + (x - 5) + ' 1052v8M' + (x - 1.5) + ' 1050v12M' + (x + 1.5) + ' 1054v4M' + (x + 5) + ' 1050v12', C.ico, 1.5),
-    afx: (x) => P('M' + (x - 12) + ' 1054v4M' + (x - 8) + ' 1051v10M' + (x - 4) + ' 1047v18M' + x + ' 1050v12M' + (x + 4) + ' 1047v18M' + (x + 8) + ' 1051v10M' + (x + 12) + ' 1054v4', C.ico, 1.6),
-    echo: (x) => R(x - 4.5, 1044, 9, 15, 'none', 4.5, ' stroke="' + C.ico + '" stroke-width="1.6"') + P('M' + (x - 8) + ' 1053a8 8 0 0 0 16 0M' + x + ' 1061v5M' + (x - 12) + ' 1049a14 14 0 0 0 0 10M' + (x + 12) + ' 1049a14 14 0 0 1 0 10', C.ico, 1.6),
-    asub: (x) => P('M' + (x + 1) + ' 1045h-12v22h23v-11', C.ico, 1.6) + R(x - 7, 1058, 16, 4.5, 'none', 1, ' stroke="' + C.ico + '" stroke-width="1.4"') + T(x + 8, 1051, 10, 'AI', { f: C.ico, w: 700 }),
-    speed: (x) => TT(x, x, 1062, 16.5, '1.0x', { f: C.ico }),
-    crop: (x) => diamond(x - 25, 1047, 4.5, 5.5, C.ico, 1.3) + P('M' + (x - 8) + ' 1044v17.5h17.5M' + (x - 12) + ' 1048h16v16M' + (x + 4) + ' 1044.5l4 3.5-4 3.5M' + (x - 9) + ' 1065l3 3.5 3-3.5', C.ico, 1.8),
-    shape: (x) => SR(x - 13, 1048, 26, 16, C.ico, 1.7, 8),
-    flip: (x) => P('M' + (x - 1) + ' 1045v22M' + (x - 1) + ' 1047h-9.5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9.5', C.ico, 1.7) + P('M' + (x + 3) + ' 1047h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-8', C.ico, 1.7, 'none', ' stroke-dasharray="2.4 2.4"'),
-    face: (x) => O(x, 1056, 10.5, null, C.ico, 1.7) + P('M' + x + ' 1042v6M' + x + ' 1064v6M' + (x - 14) + ' 1056h6M' + (x + 8) + ' 1056h6M' + (x - 4.5) + ' 1059a5 5 0 0 0 9 0', C.ico, 1.6) + O(x - 3.5, 1053, 1.2, C.ico) + O(x + 3.5, 1053, 1.2, C.ico),
-    layer: (x) => P('M' + x + ' 1044l12 6.5-12 6.5-12-6.5zM' + (x - 12) + ' 1055.5l12 6.5 12-6.5M' + (x - 12) + ' 1061l12 6.5 12-6.5', C.ico, 1.6),
-    movehere: (x) => P('M' + (x - 4) + ' 1043.5h8v9h5.5l-9.5 10-9.5-10h5.5zM' + (x - 12) + ' 1068h24', C.ico, 1.6),
-    mask: (x) => SR(x - 12.5, 1043.5, 25, 25, C.ico, 1.7, 3) + O(x + 0, 1056, 6.5, '#9b9c9f'),
-    edit: (x) => P('M' + (x - 9) + ' 1063.5l1.5-6.5 13-13a2.5 2.5 0 0 1 3.5 0l1.5 1.5a2.5 2.5 0 0 1 0 3.5l-13 13zM' + (x + 2) + ' 1047.5l5 5M' + (x - 12) + ' 1068h24', C.ico, 1.6)
-  };
-  const TBL = { del: '삭제', add: '추가', mute: '음소거', vol: '음량', noise: '노이즈 제거', fade: '페이드', afx: '오디오 이펙트', echo: '에코&amp;리버브', asub: '자동 자막', speed: '배속', crop: '변형', shape: '모양', str: '강도', feather: '페더', flip: '반전', face: '얼굴 트래킹', layer: '정렬', movehere: '여기로 이동', mask: '마스크', edit: '편집' };
-  function tbItem(k, x) {
-    let s = k === 'vol' ? TB.pct(x, '100%') : k === 'str' ? TB.pct(x, '40%') : k === 'feather' ? TB.pct(x, '10%') : TB[k](x);
-    if (k === 'mask') s += newBadge(x - 16.5, 1038);
-    return s + TT(x, x, 1090, 12.5, TBL[k], { f: C.ico, ls: -0.3 });
-  }
-  const NAV = { a: ['add', 'mute', 'vol', 'noise', 'fade', 'afx', 'echo', 'asub', 'speed'], b: ['crop', 'shape', 'str', 'feather', 'flip', 'face', 'layer', 'movehere'] };
-  const navItems = (k) => NAV[k].map((it, i) => tbItem(it, 164 + 87 * i)).join('');
-  const toolbarBg = () => R(0, 1026, 540, 144, '#2f3034');
-  const delFixed = () => tbItem('del', 45) + R(86.5, 1034, 2, 73, '#45464a');
-
-  function editPanel(o) {
-    let s = R(0, 834, 540, 118, C.view);
-    if (o.kf) s += R(13, 840, 104, 92, '#2c2d31', 7) + diamond(32.5, 886, 9.5, 12, C.ico, 1.6) + TF(69, 87, 863.3, 11.4, '변형', { d: 0.09 }) + T(78, 889, 13.5, '키프레임', { ls: -0.3 }) + toggle(56, 902, 46, 23, false, '#4a4b4f');
-    s += sideTabs() + (o.wave || '') + playhead(951) + toolRow() + toolbarBg() + (o.tb || '') + bigBtn(16, 1116, 508, 48, '완료', C.blue);
-    return s;
-  }
-  const wvBlue = () => wave(272.5, 952, WAVE.a, '#58789e', 1.5);
-
-  U.nav = function (k) {
-    const w = k === 'a' ? 823 : 760, x0 = k === 'a' ? 89 : 88;
-    return {
-      del: '<svg viewBox="0 1025 ' + x0 + ' 91" preserveAspectRatio="none" style="font-family:Pretendard;font-variant-ligatures:no-contextual">' + R(0, 1025, x0, 91, '#2f3034') + delFixed() + '</svg>',
-      slide: '<svg viewBox="' + x0 + ' 1025 ' + w + ' ' + (k === 'a' ? 91 : 89) + '" preserveAspectRatio="none" style="font-family:Pretendard;font-variant-ligatures:no-contextual">' + R(x0, 1025, w, 91, '#2f3034') + navItems(k) + '</svg>'
-    };
-  };
-
-  U[7] = () => {
-    let s = R(0, 0, 540, 1170, '#18191d') + R(0, 0, 540, 113, '#141518');
-    s += P('M39 68.5h28M39 79.5h28M39 90.5h28', '#d6d7da', 2.2);
-    s += R(347, 62, 99, 36, '#3d8fea', 18) + P('M361.5 76h13v4h-13zM363 80v8h10v-8M368 76v12M368 75.5c-2-4-6-4-5.5-1.5s5.5 1.5 5.5 1.5c2-4 6-4 5.5-1.5s-5.5 1.5-5.5 1.5', '#fff', 1.6) + T(383, 85, 13.5, '친구 초대', { a: 's', f: '#fff', w: 500, ls: -0.3 });
-    s += O(486, 80, 20, '#ea3d5e') + P('M476.5 74l4.5 4.5 5-6.5 5 6.5 4.5-4.5-1.5 11h-16z', null, 0, '#fff') + R(477.5, 87, 17, 2.5, '#ea3d5e');
-    s += '<defs><linearGradient id="vlBnA" x1="0" y1="330" x2="0" y2="416" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#da7187"/><stop offset="1" stop-color="#d0637a"/></linearGradient><linearGradient id="vlBnB" x1="540" y1="320" x2="220" y2="416" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#e4a0b5"/><stop offset="1" stop-color="#d0718a"/></linearGradient><linearGradient id="vlBnN" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#e94d68"/><stop offset="1" stop-color="#ee5f78"/></linearGradient></defs>';
-    s += R(0, 329, 540, 87, 'url(#vlBnA)') + '<path d="M218 329A461 461 0 0 0 159 416H540V329z" fill="url(#vlBnB)"/>';
-    s += photo('u7ban', 0, 113);
-    s += R(32, 138, 89, 26, 'url(#vlBnN)', 3) + P('M40 148.5h3.5l7-4.5v14l-7-4.5H40zM43.5 153.5l1.5 4.5', '#fff', 1.4, '#fff') + R(52, 147, 2.5, 8, '#fff', 1) + T(61, 157.5, 15.5, 'NOTICE', { a: 's', f: '#fff', w: 500, ls: -0.2 });
-    s += T(32, 353.5, 25, '이용약관 개정', { a: 's', f: '#fff', w: 600, ls: -0.5 }) + T(32, 381.5, 18.5, '서비스 개선 및 운영 정책 변경에 따른 약관 개정 안내입니다.', { a: 's', f: '#fff', ls: -0.4 });
-    for (let i = 0; i < 7; i++) s += O(207 + i * 21, 397, 5.5, i === 1 ? '#50474b' : '#d9d2d5');
-    s += R(0, 416, 540, 754, '#18191d');
-    s += T(21, 463, 16.5, '내 프로젝트 (158)', { a: 's', f: '#d8d9dc', ls: -0.3 }) + O(167, 457, 11, '#d8d9dc') + P('M161.5 454.5h11l-5.5 6.5z', null, 0, '#18191d');
-    s += SR(378, 448, 24, 18, '#c9cacd', 1.6, 2) + P('M380 444.5h20', '#c9cacd', 1.6) + R(382, 452, 16, 10, '#c9cacd', 1);
-    s += SR(436.5, 446, 13, 7.5, '#c9cacd', 1.6, 2) + SR(436.5, 455.5, 13, 7.5, '#c9cacd', 1.6, 2) + P('M459 448v15M455.5 459.5l3.5 3.5 3.5-3.5', '#c9cacd', 1.6);
-    s += T(505, 462, 14.5, '선택', { f: '#d8d9dc', ls: -0.3 });
-    return s;
-  };
-
-  U[8] = () => mainEditor({ undo: 0, dots: [389, 510], t2: '00:03', clip: 's8', tab: 0, tabCol: '#6eaadc',
-    rows: [mediaRow(), sideIcon('music', 39, 853, '배경음악', 891, { isNew: 1 }), sideIcon('sfx', 39, 921, '효과음', 959, { isNew: 1 }), sideIcon('mic', 39, 991, '음성 녹음', 1027), sideIcon('aiv', 39, 1058, 'AI 보이스', 1095, { isNew: 1 })] });
-
-  function recPanel(o) {
-    let s = R(0, 834, 540, 2, '#0b0c0e') + R(0, 836, 540, 42, '#161719') + R(0, 878, 540, 227, '#242527') + R(0, 1105, 540, 65, C.panel);
-    s += T(270, 946, 20, o.t, { f: '#cfd0d3' });
-    s += O(270, 1018, 38, null, '#fff', 5.5);
-    s += o.stop ? R(248, 996, 44, 44, '#cc433d', 6) : O(270, 1018, 23, '#cc433d');
-    if (o.timer) s += P('M461 900.5a11 11 0 1 1-9.5 5.5M451.5 906l-1.8-3.6M451.5 906l3.8-1', '#c9cacd', 1.5) + T(463, 917, 12, '3', { f: '#c9cacd' }) + T(483, 917, 13.5, '타이머', { a: 's', f: '#d3d4d7', ls: -0.3 });
-    if (o.cancel) s += bigBtn(16, 1110, 508, 54, '취소', '#3b3c40', '#d3d4d7');
-    return s;
-  }
-  U[9] = () => clipTop({ dots: [347, 426, 504] }) + photo('s9', 271, 756) + badge(497, 809, '00:05') + recPanel({ t: '00:00', timer: 1, cancel: 1 }) + playhead(878);
-  U[10] = () => clipTop({ play: false, cells: false, t1: '00:03', sup: '14', dots: [75, 152, 230, 308, 465], labels: [[386, '00:05']] }) + R(390, 756, 150, 78, '#3a3b3f') + photo('s10', 0, 756) + badge(385, 809, '00:05') + recPanel({ t: '00:03', stop: 1 }) + playhead(878);
-  U[11] = () => {
-    let s = clipTop({ undo: 1, sup: '04', labels: [[263, '0']], dots: [353, 443, 531] });
-    s += photo('s11', 240, 756) + clipFrame(240, 513, 265, 488) + R(265, 764, 223, 18, 'rgba(40,52,64,.88)') + micTag(276, 773, 'V1') + badge(485, 805, '00:05', { bg: 'rgba(205,215,225,.85)', f: '#15171b' }) + moveBtn(187);
-    s += R(0, 834, 540, 2, '#0b0c0e') + R(0, 836, 540, 42, '#161719') + R(0, 878, 540, 122, '#242527') + R(0, 1000, 540, 170, C.panel);
-    s += R(27, 913, 486, 52, '#3f4043', 8) + T(53, 945, 16, '파일명 :', { a: 's', f: '#c9cacd', ls: -0.3 }) + T(124, 945, 17, 'V1', { a: 's', f: '#e4e5e8' }) + P('M465 946l1-5 11-11a2 2 0 0 1 3 0l1 1a2 2 0 0 1 0 3l-11 11zM464 951h21', '#d3d4d7', 1.6);
-    s += G(0, -20, TB.del(151)) + T(151, 1074, 12.5, '삭제', { f: C.ico }) + P('M260.5 1023.5v26l20-13z', C.ico, 1.8) + T(270, 1074, 12.5, '듣기', { f: C.ico }) + G(0, -20, TB.movehere(387)) + T(387, 1074, 12.5, '여기로 이동', { f: C.ico, ls: -0.3 });
-    s += R(16, 1110, 167, 54, 'none', 27, ' stroke="#55565a" stroke-width="1.6"') + O(82, 1137, 8.5, '#fff') + O(82, 1137, 6.3, '#d63c3c') + T(101, 1142, 14, '추가', { a: 's', f: '#d3d4d7' }) + bigBtn(199, 1110, 325, 54, '완료', C.blue);
-    return s + playhead(878);
-  };
-  const micTag = (x, y, t) => R(x - 3.5, y - 7, 7, 11, 'none', 3.5, ' stroke="#d3d4d7" stroke-width="1.3"') + P('M' + (x - 6) + ' ' + (y + 1) + 'a6 6 0 0 0 12 0M' + x + ' ' + (y + 7) + 'v3', '#d3d4d7', 1.3) + T(x + 13, y + 5.5, 14, t, { a: 's', f: '#d3d4d7' });
-  function audioClip(o = {}) {
-    let s = photo(o.ph || 's12', 246, 756) + clipFrame(246, 447, 271, 422) + moveBtn(193);
-    s += badge(495, 809, '00:05');
-    return s;
-  }
-  U[12] = () => clipTop({ undo: 1, dots: [360, 450, 539] }) + audioClip({ ph: 's12' }) + R(271, 764, 151, 18, 'rgba(40,52,64,.88)') + micTag(285, 773, 'V1') + badge(420, 805, '00:03', { bg: 'rgba(205,215,225,.85)', f: '#15171b' })
-    + editPanel({ wave: wvBlue(), tb: delFixed() + navItems('a') });
-  U[13] = () => clipTop({ undo: 1, dots: [360, 450, 539] }) + audioClip({ ph: 's12' }) + editPanel({ wave: wvBlue(), tb: delFixed() + '<svg x="89" y="1025" width="451" height="91" viewBox="' + (89 + 372) + ' 1025 451 91">' + navItems('a') + '</svg>' });
-  U[14] = () => {
-    let s = clipTop({ dots: [360, 450, 539] }) + audioClip({ ph: 's14' }) + R(271, 764, 151, 18, 'rgba(40,52,64,.7)') + T(276, 777.5, 14, '자막 생성 범위', { a: 's', f: '#e4e5e8' }) + badge(420, 805, '00:03', { bg: 'rgba(205,215,225,.85)', f: '#15171b' });
-    s += R(0, 834, 540, 119, C.bar) + toolRow({ bg: false, arrows: false, k: 0.85, y: 905, ly: 932, x: [89, 210, 328, 446], items: [0, 1, 3, 4], c: ['#6b6c70', '#6b6c70', '#6b6c70', '#6b6c70', '#e8e9ec'], bold: { 4: 1 } });
-    s += R(0, 953, 540, 2, '#3a3b3f') + R(0, 955, 540, 154, '#25262a');
-    s += O(366, 990, 9.5, '#8e5bd8') + T(366, 994.5, 11, 'AI', { f: '#fff', w: 700 }) + T(382, 995.5, 13.5, '더 정확한 처리', { a: 's', f: '#d3d4d7', ls: -0.3 }) + toggle(462, 977, 57, 28, false, '#3a3a3a');
-    s += R(21, 1026, 242, 62, '#3c3d40', 6) + T(32, 1062, 14, '오디오 :', { a: 's', f: '#9fa0a3', ls: -0.3 }) + T(80, 1062, 14.5, '음성 녹음', { a: 's', f: '#fff', w: 600, ls: -0.3 }) + swapSq(239, 1057);
-    s += R(276, 1026, 243, 62, '#3c3d40', 6) + T(287, 1062, 14, '언어 :', { a: 's', f: '#9fa0a3', ls: -0.3 }) + T(323, 1062, 14.5, '한국어', { a: 's', f: '#fff', w: 600, ls: -0.3 }) + swapSq(494, 1057);
-    s += R(0, 1109, 540, 61, C.panel) + bigBtn(16, 1114, 246, 50, '취소', '#4a4b4f', '#e4e5e8') + bigBtn(278, 1114, 246, 50, '생성하기', C.blue);
-    return s + playhead(834);
-  };
-  const swapSq = (cx, cy) => P('M' + (cx - 9) + ' ' + (cy + 1) + 'v-7h16M' + (cx + 4) + ' ' + (cy - 9) + 'l3 3-3 3M' + (cx + 9) + ' ' + (cy - 1) + 'v7h-16M' + (cx - 4) + ' ' + (cy + 9) + 'l-3-3 3-3', '#d3d4d7', 1.6);
-  function loading(o) {
-    let s = R(0, 0, 540, 1170, o.bg || '#17181c');
-    if (o.back) s += P('M52 68L41 80.5L52 93', C.ico, 2);
-    s += T(270, o.ly + 10, 29, 'VLLO', { f: '#e9455f', w: 300, ls: 0.5 });
-    return s;
-  }
-  const warn = (x, y) => P('M' + x + ' ' + (y - 11) + 'l12.5 21.5h-25z', '#f5c242', 2, '#f5c242') + R(x - 1.2, y - 4.5, 2.4, 8, '#17181c', 1) + O(x, y + 6.5, 1.4, '#17181c');
-  U[15] = () => loading({ back: 1, ly: 426 }) + T(270, 544, 19.5, '자막 생성하는 중...', { f: '#d8d9dc', ls: -0.3 }) + warn(105, 631) + T(131, 634, 14.5, '네트워크 연결을 유지하세요. 네트워크가 불안정할', { a: 's', f: '#d8d9dc', ls: -0.3 }) + T(131, 665, 14.5, '경우 작업이 중단될 수 있습니다.', { a: 's', f: '#d8d9dc', ls: -0.3 });
-  const subClip = () => photo('s16', 246, 756) + clipFrame(246, 429, 271, 404) + moveBtn(193) + badge(495, 809, '00:05') + R(271, 764, 133, 18, 'rgba(60,82,64,.9)') + subTag(285, 773) + T(297, 779, 14, '여기는 우리 동네', { a: 's', f: '#eef0ef', ls: -0.3 }) + badge(401, 805, '00:03', { bg: 'rgba(205,215,225,.85)', f: '#15171b' });
-  const subTag = (x, y) => P('M' + (x + 3) + ' ' + (y - 7) + 'h-9v13h12v-5', '#e4e5e8', 1.3) + P('M' + (x - 4) + ' ' + (y + 1.5) + 'h8', '#e4e5e8', 1.2) + O(x + 4.5, y - 4, 2.2, null, '#e4e5e8', 1.1);
-  U[16] = () => clipTop({ undo: 1, grid: 1, dots: [360, 450, 539] }) + subClip() + editPanel({ kf: 1, wave: wvBlue() + R(271, 836, 152, 3, '#3b4a5c') + SR(271.5, 846.5, 24, 21, '#5d84ad', 1.2, 3, '#22344a') + T(283.5, 862, 11.5, 'V1', { f: '#8fb0d8' }), tb: delFixed() + toggle(96, 1042, 57, 28, true) + T(125, 1090, 10, '전체 적용', { f: C.ico, ls: -0.3 }) + R(164.5, 1034, 2, 73, '#45464a') + tbItem('add', 243) + tbItem('crop', 330) + tbItem('mask', 417) + tbItem('edit', 504) });
-  U[17] = () => {
-    let s = appBar({ grid: 1 }) + R(0, 103, 540, 434, C.view) + R(0, 537, 540, 138, '#2b2c30');
-    const al = (x, k, c) => P('M' + (x - 11) + ' 559h22M' + (x - 11 + (k === 0 ? 0 : k === 1 ? 4 : 8)) + ' 565.5h' + (k === 1 ? 14 : 14) + 'M' + (x - 11) + ' 572h22M' + (x - 11 + (k === 0 ? 0 : k === 1 ? 4 : 8)) + ' 578.5h14', c, 1.5);
-    s += al(104, 0, '#cfd0d3') + T(104, 600, 11.5, '왼쪽', { f: '#cfd0d3' }) + al(270, 1, '#3d93e6') + T(270, 600, 11.5, '가운데', { f: '#3d93e6' }) + al(436, 2, '#cfd0d3') + T(436, 600, 11.5, '오른쪽', { f: '#cfd0d3' });
-    s += R(7, 616, 457, 51, '#fff', 6) + R(477, 616, 52, 51, '#454649', 6) + P('M490 641l8.5 9.5 17-21', '#cfd0d3', 1.8);
-    s += keyboard();
-    return s;
-  };
-  function keyboard() {
-    let s = R(0, 675, 540, 495, '#e2e5ea');
-    const tb = [[38, 'emoji'], [118, 'ai'], [197, 'set'], [276, 'trans'], [355, 'clip'], [434, 'hand'], [507, 'more']];
-    tb.forEach((b) => { if (b[1] !== 'more') s += O(b[0], 703, 21, '#d2d6dd'); });
-    const k = '#4c4f54';
-    s += O(38, 703, 9.5, null, k, 1.6) + O(34.5, 700.5, 1.2, k) + O(41.5, 700.5, 1.2, k) + P('M33.5 705.5a5 5 0 0 0 9 0', k, 1.5) + O(56, 686, 3.5, '#e56a2b');
-    s += P('M116 694l2.5 7 7 2.5-7 2.5-2.5 7-2.5-7-7-2.5 7-2.5zM124.5 692l1 2.5 2.5 1-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1z', null, 0, k);
-    s += O(197, 703, 4, null, k, 1.6) + P(gearPath(197, 703, 10, 7.3), k, 1.6);
-    s += SR(266, 693, 13, 13, k, 1.6, 2) + SR(274, 700, 13, 13, k, 1.6, 2, '#d2d6dd') + T(272.5, 703.5, 9, 'A', { f: k, w: 700 });
-    s += SR(347, 693, 16, 20, k, 1.6, 2.5) + P('M351 708h1M355 708h1M359 708h1M351 704h1M355 704h1M359 704h1', k, 1.5);
-    s += O(434, 703, 21, '#d7dbe1') + P('M427 712h14M429 708l7-15 3 2.5-6.5 14z', '#aeb2b8', 1.5) + T(429.5, 708, 13, 'T', { f: '#aeb2b8' });
-    s += O(498, 703, 2, k) + O(507, 703, 2, k) + O(516, 703, 2, k);
-    const row = (y, keys, x0, w, pitch, h, o = {}) => keys.forEach((c, i) => { const x = x0 + i * pitch; s += R(x, y, w, h, '#fff', 7) + T(x + w / 2, y + h / 2 + (o.dy || 9), o.s || 25, c, { f: '#1a1a1a', w: o.w || 500, fix: 1 }); });
-    row(743, ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'], 11.5, 43.5, 52.6, 47, { s: 25, w: 400, dy: 9 });
-    row(808, ['ㅂ', 'ㅈ', 'ㄷ', 'ㄱ', 'ㅅ', 'ㅛ', 'ㅕ', 'ㅑ', 'ㅐ', 'ㅔ'], 11.5, 43.5, 52.6, 57);
-    row(883, ['ㅁ', 'ㄴ', 'ㅇ', 'ㄹ', 'ㅎ', 'ㅗ', 'ㅓ', 'ㅏ', 'ㅣ'], 38, 44, 52.7, 57);
-    row(958, ['ㅋ', 'ㅌ', 'ㅊ', 'ㅍ', 'ㅠ', 'ㅜ', 'ㅡ'], 90, 44, 52.7, 57);
-    s += R(11.5, 958, 62, 57, '#c4c9d1', 7) + P('M43 976l-10 10.5h5.5v9h9v-9h5.5z', '#1a1a1a', 1.6);
-    s += R(466, 958, 62, 57, '#c4c9d1', 7) + P('M481 986.5l8-9h24v18h-24zM495 982l9 9M504 982l-9 9', '#1a1a1a', 1.6);
-    s += R(11.5, 1033, 63.5, 57, '#c4c9d1', 7) + T(43, 1069, 21, '!#1', { f: '#1a1a1a', ls: -0.5 });
-    s += R(83.5, 1033, 44.5, 57, '#c4c9d1', 7) + O(105, 1061.5, 11.5, null, '#1a1a1a', 1.6) + P('M93.5 1061.5h23M105 1050c-6 6-6 17 0 23M105 1050c6 6 6 17 0 23', '#1a1a1a', 1.4);
-    s += R(136, 1033, 44, 57, '#fff', 7) + T(159.5, 1069, 21, '-', { f: '#1a1a1a' });
-    s += R(189, 1033, 208, 57, '#fff', 7) + T(293.5, 1066, 14, '한국어', { f: '#1a1a1a' });
-    s += R(405.5, 1033, 44, 57, '#fff', 7) + T(428.5, 1074, 22, '.', { f: '#1a1a1a' });
-    s += R(458, 1033, 70, 57, '#c4c9d1', 7) + P('M504 1050v10a3 3 0 0 1-3 3h-19M488 1056l-6.5 7 6.5 7', '#1a1a1a', 1.7);
-    s += R(0, 1104, 540, 66, '#e2e5ea');
-    s += R(25.5, 1124, 9, 15, 'none', 4.5, ' stroke="#555" stroke-width="1.6"') + P('M22 1134a8 8 0 0 0 16 0M30 1142v5', '#555', 1.6) + P('M112 1129v18M121.5 1129v18M131 1129v18', '#555', 1.8) + SR(262.5, 1128, 19, 19, '#555', 1.8, 6) + P('M414 1133l9.5 9.5 9.5-9.5', '#555', 1.8);
-    return s;
-  }
-  function gearPath(cx, cy, R1, R2) {
-    let d = '';
-    for (let i = 0; i < 16; i++) { const a = (i / 16) * Math.PI * 2; const r = i % 2 ? R2 : R1; const a1 = a - 0.13, a2 = a + 0.13; d += (i ? 'L' : 'M') + (cx + Math.sin(a1) * r).toFixed(1) + ' ' + (cy - Math.cos(a1) * r).toFixed(1) + 'L' + (cx + Math.sin(a2) * r).toFixed(1) + ' ' + (cy - Math.cos(a2) * r).toFixed(1); }
-    return d + 'Z';
-  }
-  const autoSubRow = () => sideIcon('autosub', 39, 1058, '자동 자막', 1095);
-  U[18] = () => mainEditor({ undo: 1, dots: [360, 450, 539], t2: '00:05', clip: 's18', tab: 2, tabCol: '#7ca593',
-    rows: [mediaRow(), sideIcon('text', 39, 853, '글자', 891), sideIcon('label', 39, 921, '라벨', 959), sideIcon('sub', 39, 991, '자막', 1027), autoSubRow(), R(81, 1039, 45, 66, '#3a3b3f') + P('M93 1062h13M93 1068h9M93 1074h13M111 1074l8-8 2 2-8 8h-2z', C.ico, 1.4), R(271, 1045, 134, 31, '#536b60') + SR(271.5, 1082.5, 24, 21, '#8fb7a6', 1.2, 3) + T(283.5, 1097, 10, '여기', { f: '#bfdacb' })] });
-  const fxRows = () => [mediaRow(), sideIcon('filter', 39, 853, '필터/보정', 891), sideIcon('special', 39, 921, '특수효과', 959), ICO.distort(39, 991) + T(38.5, 1019, 12.5, '왜곡', { ls: -0.3 }) + T(38.5, 1035, 12.5, '(모자이크)', { ls: -0.3 })];
-  U[19] = () => mainEditor({ undo: 1, dots: [400, 530], t2: '05:00', clip: 's19', tab: 4, tabCol: '#b799bb', rows: fxRows() });
-  U[27] = () => mainEditor({ undo: 1, dots: [400, 530], t2: '00:29', clip: 's27', tab: 4, tabCol: '#b799bb', rows: fxRows().concat([R(271, 977, 269, 31, '#8a7690') + SR(271.5, 1014.5, 24, 21, '#c9a8cf', 1.2, 3) + T(283.5, 1029, 10, '블러', { f: '#d8bfdc' })]) });
-  function faces(sel) {
-    let s = photo('faces', 29, 943);
-    if (sel) s += SR(30, 945, 112, 112, '#3d93e6', 2.5, 7);
-    ['블러', '픽셀', '확대', '볼록 렌즈'].forEach((t, i) => { s += T(85.5 + i * 118.5, 1088, 12.5, t, { f: '#9fa0a3', ls: -0.3 }); });
-    return s;
-  }
-  U[20] = () => appBar() + R(0, 103, 540, 600, C.view) + playRow() + R(0, 703, 540, 408, C.bar) + faces(false) + R(0, 1111, 540, 59, C.panel) + bigBtn(16, 1116, 246, 48, '취소', '#4c4d50', '#e4e5e8') + bigBtn(278, 1116, 246, 48, '완료', '#2c4a6c', '#5b6f86');
-  U[21] = () => {
-    let s = appBar({ grid: 1 }) + R(0, 103, 540, 600, C.view) + playRow() + R(0, 703, 540, 408, C.bar);
-    s += SR(124, 796, 22, 22, '#d3d4d7', 1.8, 2) + T(135, 843, 14.5, '사각형', { f: '#d3d4d7', w: 600 }) + SR(392.5, 798.5, 24, 15, '#3d93e6', 1.8, 7.5) + T(404.5, 843, 14.5, '원', { f: '#3d93e6', w: 600 });
-    s += T(37, 911, 14, '강도', { f: '#d3d4d7' });
-    [10, 20, 30, 40, 50, 60, 70].forEach((v, i) => { const x = 111 + i * 65; const op = i === 0 || i === 6 ? '#4d4e52' : i === 1 || i === 5 ? '#9fa0a3' : '#d3d4d7'; s += T(x, 891, 11.5, v + '%', { f: op, fix: 1, w: i > 1 && i < 5 ? 500 : null }); });
-    for (let i = 0; i < 37; i++) { const x = 85.5 + i * 13; const big = (x - 111 + 0.5) % 65 === 0 || Math.abs(((x - 111) % 65 + 65) % 65) < 1; const c = x < 120 || x > 495 ? '#3d3e42' : '#8e8f93'; s += R(x, big ? 901 : 907, 1, big ? 15 : 7, c); }
-    s += R(305.5, 895, 2, 33, '#3d93e6');
-    s += faces(true) + R(0, 1111, 540, 59, C.panel) + bigBtn(16, 1116, 246, 48, '취소', '#4c4d50', '#e4e5e8') + bigBtn(278, 1116, 246, 48, '완료', C.blue);
-    return s;
-  };
-  function blurClip(o = {}) {
-    let s = photo(o.ph || 's22', 246, 756) + R(246, 762, 26, 65, '#fff', 6) + R(262, 762, 10, 65, '#fff') + chevL(253, 795, 14, '#1b1c20', 1.8) + R(271, 762, 269, 1.5, '#fff') + R(271, 826, 269, 1.5, '#fff') + moveBtn(193);
-    s += R(272, 764, 268, 17, o.lab || 'rgba(88,64,92,.92)') + distortTag(284, 772.5) + T(296, 778, 14, '블러', { a: 's', f: '#e9e0eb' });
-    if (o.track) s += T(271, 799.5, 12, '트래킹 범위', { a: 's', f: '#fff', ls: -0.3 });
-    s += badge(537, 804, o.t || '05:00', { bg: 'rgba(225,215,228,.92)', f: '#15171b', w: 44 });
-    return s;
-  }
-  const distortTag = (x, y) => { let s = SR(x - 7, y - 7, 14, 14, '#e9e0eb', 1.1, 1.5); for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) if ((i + j) % 2) s += R(x - 6 + j * 4, y - 6 + i * 4, 3, 3, '#e9e0eb'); return s; };
-  U[22] = () => clipTop({ undo: 1, grid: 1, dots: [400, 530], t2: '05:00' }) + blurClip() + editPanel({ kf: 1, wave: wave(272.5, 952, WAVE.b, '#b9babd', 1.4), tb: delFixed() + navItems('b') });
-  U[23] = () => clipTop({ undo: 1, grid: 1, dots: [400, 530], t2: '05:00' }) + blurClip() + editPanel({ kf: 1, wave: wave(272.5, 952, WAVE.b, '#b9babd', 1.4), tb: delFixed() + '<svg x="88" y="1025" width="452" height="89" viewBox="' + (88 + 308) + ' 1025 452 89">' + navItems('b') + '</svg>' });
-  U[24] = () => {
-    let s = clipTop({ dots: [400, 530], t2: '05:00' }) + blurClip({ ph: 's24', lab: 'rgba(88,64,92,.6)', track: 1 });
-    s += R(0, 834, 540, 63, C.view) + R(500, 834, 40, 62, '#303135') + P('M509.5 856v14.5h21v-12.5h-11.5l-2.5-2z', C.ico, 1.5) + R(0, 897, 540, 214, '#232428');
-    s += T(270, 955, 13.5, '트래킹 할 얼굴 영역을 설정하세요. 영역을 조금 더 넓게 설정할 때 트래킹 정확도가', { f: '#d3d4d7', ls: -0.4 }) + T(270, 979, 13.5, '올라갑니다.', { f: '#d3d4d7', ls: -0.4 });
-    s += bigBtn(172, 1026, 196, 53, '트래킹하기', C.blue) + R(0, 1111, 540, 59, C.panel) + bigBtn(16, 1116, 508, 48, '취소', '#3d3e41', '#e4e5e8');
-    return s + playhead(896);
-  };
-  U[25] = () => R(0, 0, 540, 1170, '#000') + R(0, 184, 540, 352, '#1a1b1f') + P('M496 70l23 23M519 70l-23 23', '#d3d4d7', 2) + T(270, 671, 25, 'VLLO', { f: '#e9455f', w: 300, ls: 0.5 }) + T(270, 731, 15, '트래킹 중', { f: '#fff' });
-  U[26] = () => {
-    let s = clipTop({ grid: 1, dots: [363, 457], t2: '00:29' }) + blurClip({ ph: 's26', lab: 'rgba(88,64,92,.6)', t: '00:29' });
-    s += R(0, 834, 540, 118, C.view) + sideTabs() + wave(274, 952, WAVE.c, '#b9babd', 1.4) + playhead(951) + toolRow() + toolbarBg();
-    s += P('M79.3 1052a11 11 0 0 1 19.8-4.5M99.6 1041.5v6.5h-6.5M100.7 1058a11 11 0 0 1-19.8 4.5M80.4 1068.5v-6.5h6.5', C.ico, 1.7);
-    s += T(90, 1092, 15, '초기화', { f: '#e4e5e8', w: 500 }) + O(270, 1055, 12, null, '#5a5b5f', 1.6) + P('M264 1055h12M270 1049v12', '#5a5b5f', 1.6) + T(270, 1092, 15, '트래킹 추가', { f: '#5a5b5f', w: 500 }) + O(450, 1055, 12, null, '#e4e5e8', 1.7) + P('M445.5 1050.5l9 9M454.5 1050.5l-9 9', '#e4e5e8', 1.7) + T(450, 1092, 15, '트래킹 해제', { f: '#e4e5e8', w: 500 });
-    return s + bigBtn(16, 1116, 508, 48, '완료', C.blue);
-  };
-  U[28] = () => {
-    let s = R(0, 0, 540, 1170, '#17181c') + R(0, 0, 540, 175, C.bar) + P('M44 68L33 80.5L44 93', C.ico, 2.2) + T(270, 89, 21, '추출하기', { f: '#e4e5e8' });
-    ['비디오', 'GIF', '프로젝트', '자막', '오디오'].forEach((t, i) => { s += T([54, 162, 269, 377, 486][i], 150, 16, t, { f: i ? '#d3d4d7' : '#3d93e6' }); });
-    s += R(0, 173, 108, 3, '#3d93e6');
-    const dot = (y) => O(37, y, 8, '#d3d4d7');
-    s += dot(215) + T(58, 221, 16, '파일명', { a: 's', f: '#d3d4d7' }) + R(122, 186, 391, 58, '#303135', 6) + T(133, 221, 16, '제목 없음', { a: 's', f: '#e4e5e8' }) + P('M475 224l1.5-6 13-13a2.5 2.5 0 0 1 3.5 0l1.5 1.5a2.5 2.5 0 0 1 0 3.5l-13 13zM473 229h25', '#d3d4d7', 1.7);
-    s += dot(295) + T(58, 301, 16, '추출 범위', { a: 's', f: '#d3d4d7' }) + T(481, 301, 16, '전체', { a: 'e', f: '#3d93e6' }) + chevR(506, 295, 15, '#d3d4d7', 1.8);
-    s += dot(374) + T(58, 380, 16, '저장 위치 선택', { a: 's', f: '#d3d4d7' }) + T(433, 381, 17, '앨범', { a: 'e', f: '#3d93e6' }) + R(450, 366, 1, 15, '#55565a') + T(502, 381, 17, '파일', { a: 'e', f: '#e4e5e8' });
-    s += dot(453) + T(58, 459, 16, '포맷', { a: 's', f: '#d3d4d7' }) + T(481, 459, 15.5, '기본값 (추천)', { a: 'e', f: '#3d93e6' }) + P('M494 457.5l7-7 7 7z', null, 0, '#d3d4d7');
-    s += R(41, 492, 458, 343, '#232428', 8) + O(60, 530, 5.5, '#d3d4d7') + T(80, 536, 16, '해상도', { a: 's', f: '#e4e5e8' }) + O(60, 697, 5.5, '#d3d4d7') + T(80, 703, 16, '프레임레이트', { a: 's', f: '#e4e5e8' });
-    const RS = [['저화질', '640x360'], ['중간화질', '1280x720'], ['고화질', '1920x1080'], ['QHD', '2560x1440'], ['4K', '3840x2160']];
-    RS.forEach((r, i) => { const x = 96 + i * 87, c = i === 2 ? '#3d93e6' : '#d3d4d7'; s += T(x, 600, 13.5, r[0], { f: c }) + T(x, 632, 11.5, r[1], { f: c }); if (i) s += R(x - 44, 586, 1, 50, '#3d3e42'); });
-    const FR = [['18', ''], ['24', '영화'], ['25', 'PAL'], ['30', '기본값'], ['60', 'βeta']];
-    FR.forEach((r, i) => { const x = 96 + i * 87, c = i === 3 ? '#3d93e6' : '#d3d4d7'; s += T(x, 772, 14, r[0], { f: c }) + (r[1] ? T(x, 791, 11, r[1], { f: c }) : ''); if (i) s += R(x - 44, 755, 1, 41, '#3d3e42'); });
-    s += R(0, 969, 540, 201, C.bar) + R(0, 969, 540, 1.5, '#3d3e42') + T(68, 1011, 15, '알람', { a: 's', f: '#d3d4d7' }) + toggle(429, 991, 57, 29, false, '#3d3e41');
-    s += R(53, 1039, 433, 92, C.blue, 46) + P('M175 1084v8.5h20v-8.5M185 1088.5v-13.5M180 1080l5-5 5 5', '#fff', 1.7) + T(206, 1091, 15, '추출하기 (약 32.26 MB)', { a: 's', f: '#fff', w: 600, ls: -0.3 });
-    return s;
-  };
-  U[29] = () => loading({ back: 1, ly: 437 }) + T(270, 555, 19.5, '비디오 만드는 중...', { f: '#d8d9dc', ls: -0.3 }) + warn(144, 642) + T(170, 644, 14.5, 'VLLO를 끄거나 기기를 잠그지 마세요.', { a: 's', f: '#d8d9dc', ls: -0.3 })
-    + R(0, 908, 540, 262, C.bar) + T(270, 954, 17, 'VLLO TIP', { f: '#fff', w: 700 }) + R(-60, 987, 84, 111, '#303135', 8) + T(6, 1048, 14, '.', { f: '#9fa0a3' }) + R(40, 987, 461, 111, '#303135', 8) + R(517, 987, 84, 111, '#303135', 8) + T(270, 1048, 14.5, '두 손가락으로 타임라인을 확대 및 축소할 수 있습니다.', { f: '#b5b6b9', ls: -0.4 }) + T(270, 1140, 12, '3/15', { f: '#d3d4d7' });
-  U[30] = () => {
-    let s = R(0, 0, 540, 1170, '#17181c') + P('M42 68L31 80.5L42 93', C.ico, 2) + P('M490 80l13-11.5 13 11.5M494 76v15h18v-15', C.ico, 1.8);
-    s += O(270, 424, 109, null, '#e9416a', 5) + P('M219 414L250.5 461.5a5.2 5.2 0 0 0 8.8 .2L321 378', '#e9416a', 5);
-    s += T(270, 613, 21, '저장 완료', { f: '#e9416a', w: 500 }) + T(270, 663, 16, '저장 위치 : 앨범', { f: '#d8d9dc' });
-    s += R(191.5, 733.5, 157, 37, 'none', 18.5, ' stroke="#7a7b7f" stroke-width="1.5"') + T(270, 757, 12.5, '추출한 파일 확인하기 &gt;', { f: '#a5a6a9', ls: -0.3 });
-    s += R(46, 988, 148, 1, '#4a4b4f') + R(346, 988, 148, 1, '#4a4b4f') + T(270, 995, 18, '공유하기', { f: '#d8d9dc' });
-    s += '<defs><radialGradient id="vlIg" cx=".3" cy="1.05" r="1.2"><stop offset="0" stop-color="#fdd56b"/><stop offset=".25" stop-color="#f7863b"/><stop offset=".5" stop-color="#e2306c"/><stop offset=".8" stop-color="#9c3ab7"/><stop offset="1" stop-color="#5a4fcf"/></radialGradient></defs>';
-    s += O(77, 1086, 31, 'url(#vlIg)') + SR(63, 1072, 28, 28, '#fff', 3, 8) + O(77, 1086, 6.5, null, '#fff', 3) + O(85, 1077.5, 1.8, '#fff');
-    s += O(206, 1086, 31, '#e8352a') + R(190, 1074, 32, 24, '#fff', 7) + P('M202 1079.5v13l10.5-6.5z', null, 0, '#e8352a');
-    s += O(334, 1086, 31, '#2d6be0') + P('M339 1117v-21h7l1-8h-8v-5c0-2.3.7-3.8 4-3.8h4.3v-7a55 55 0 0 0-6.3-.4c-6.3 0-10.5 3.8-10.5 10.8v5.4h-7v8h7v21.3a31 31 0 0 0 9.5-.3z', null, 0, '#fff');
-    s += O(462, 1086, 31, '#e9416a') + O(450, 1086, 3.5, '#fff') + O(462, 1086, 3.5, '#fff') + O(474, 1086, 3.5, '#fff');
-    return s;
-  };
-
-  U.draw = function (n) { cur = n; seen = {}; const r = U[n] ? U[n]() : ''; cur = null; return r; };
-  U.svg = function (n, y0, h, o) {
-    return '<svg viewBox="0 ' + y0 + ' 540 ' + h + '" preserveAspectRatio="none"' + (o || '') + ' style="font-family:Pretendard;font-variant-ligatures:no-contextual">' + U.draw(n) + '</svg>';
-  };
+  VL.screen = (name, o) => SC[name](o || {});
+  VL.names = Object.keys(SC);
 })();
