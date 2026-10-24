@@ -10,62 +10,82 @@
            → 얼굴 트래킹(처음엔 오류: 스티커가 얼굴을 놓침 → [다시 수정]으로 정상 트래킹) → [공유 준비 완료] → 모자이크된 영상 재생 확인 → 다음.
            장면은 임시 이모지 그림(img/p05_q*), 모르는 이웃은 이모지 🧑(기획서 이미지가 오면 교체), 스티커 img/stk_*.png(기획서 그림 5) */
 
-        .p07-pick{position:absolute;left:0;top:210px;width:1920px;display:flex;flex-direction:column;align-items:center;gap:34px}
-        .p07-pick-row{display:flex;gap:34px}
-        .p07-card{position:relative;display:flex;flex-direction:column;justify-content:flex-start;width:450px;height:300px;box-sizing:border-box;padding:0;overflow:hidden;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:24px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);cursor:pointer;font-family:'Cafe24 Ssurround'}
-        .p07-card img{display:block;width:100%;height:210px;object-fit:cover}
-        .p07-card span{position:absolute;left:0;right:0;bottom:0;height:80px;box-sizing:border-box;padding:6px 14px 0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:30px;line-height:1.2;letter-spacing:-0.1em;color:var(--c-ink);white-space:nowrap}
-        @media (hover:hover){.p07-card:hover{border-color:var(--c-purple);box-shadow:0 0 0 6px rgba(92,61,240,.3)}}
+        .p07-ask{width:1135px}
+        .p07-pick{position:absolute;left:72px;top:172px;width:1777px;height:732px;box-sizing:border-box;background:#266cc8;border-radius:10px}
+        .p07-card{position:absolute;width:504px;height:322px;display:flex;flex-direction:column;justify-content:flex-start;box-sizing:border-box;padding:0;overflow:hidden;background:var(--c-white);border:solid 5px var(--c-white);border-radius:10px;box-shadow:10px 10px 0 0 rgba(24,45,152,.25);cursor:pointer;font-family:'Cafe24 Ssurround'}
+        .p07-pick .p07-card:nth-child(1){left:71px;top:30px}
+        .p07-pick .p07-card:nth-child(2){left:636px;top:30px}
+        .p07-pick .p07-card:nth-child(3){left:1200px;top:30px}
+        .p07-pick .p07-card:nth-child(4){left:355px;top:380px}
+        .p07-pick .p07-card:nth-child(5){left:919px;top:380px}
+        .p07-card img{display:block;width:100%;height:232px;object-fit:cover}
+        .p07-card span{position:absolute;left:0;right:0;bottom:0;height:80px;box-sizing:border-box;padding:8px 6px 0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:38px;line-height:1.2;letter-spacing:-0.1em;color:var(--c-ink);white-space:nowrap}
+        @media (hover:hover){.p07-card:hover{border-color:#ff4ff9;box-shadow:10px 10px 0 0 rgba(24,45,152,.25),0 0 0 4px #ff4ff9}}
+        .p07-card:active{border-color:#ff4ff9;box-shadow:0 0 0 4px #ff4ff9}
 
-        .p07-scene{position:absolute;left:80px;top:24px;width:1050px;height:700px;box-sizing:border-box;border:solid 5px var(--c-ink);background:#fff center / cover no-repeat;overflow:hidden;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
-        .p07-npc{position:absolute;left:380px;top:190px;width:240px;height:340px;font-size:300px;line-height:1;text-align:center;font-family:'Segoe UI Emoji','Apple Color Emoji',sans-serif;z-index:2}
-        .p07-npc.is-bottom{display:none}
-        .p07-target{position:absolute;left:462px;top:230px;width:260px;height:260px;box-sizing:border-box;border:dashed 5px #e5342f;border-radius:16px;z-index:3;display:none}
+        /* 편집 화면(디자인 [STB사회]_10차시_07p-1-2~8): 왼쪽 네이비 판 안에 영상 + 말풍선, 오른쪽 파란 판에 도구 */
+        .p07-frame{position:absolute;left:44px;top:27px;width:1104px;height:825px;box-sizing:border-box;background:#052f6e;border-radius:30px;display:none}
+        .p07-scene{position:absolute;left:72px;top:52px;width:1048px;height:662px;box-sizing:border-box;background:#000;border-radius:18px;overflow:hidden}
+        .p07-vid{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:1;background:#000}
+        .p07-target{position:absolute;box-sizing:border-box;border:dashed 5px #e5342f;border-radius:16px;z-index:3;display:none}
         .p07-target.is-on{display:block}
         .p07-target.is-over{background:rgba(229,52,47,.18)}
-        .p07-cover{position:absolute;left:0;top:0;width:200px;height:200px;margin:-100px 0 0 -100px;z-index:4;display:none;background-size:100% 100%;background-repeat:no-repeat}
+        .p07-cover{position:absolute;left:0;top:0;width:var(--cs,150px);height:var(--cs,150px);margin:calc(var(--cs,150px) / -2) 0 0 calc(var(--cs,150px) / -2);z-index:4;display:none;background-size:100% 100%;background-repeat:no-repeat}
         .p07-cover.is-on{display:block}
-        .p07-cover.is-square{background:repeating-conic-gradient(#8c8c8c 0 25%,#dadada 0 50%) 0 0 / 30px 30px}
-        .p07-cover.is-circle{border-radius:50%;background:repeating-conic-gradient(#8c8c8c 0 25%,#dadada 0 50%) 0 0 / 30px 30px}
-        .p07-play{position:absolute;left:50%;top:50%;margin:-65px 0 0 -65px;width:130px;height:130px;padding:0;border:0;background:url('../../img/common/btn_play.png') center / contain no-repeat;cursor:pointer;z-index:6;display:none}
+        .p07-cover canvas{display:none;width:100%;height:100%;image-rendering:pixelated}
+        .p07-cover.is-square canvas,.p07-cover.is-circle canvas{display:block}
+        .p07-cover.is-circle{border-radius:50%;overflow:hidden}
+        .p07-play{position:absolute;left:50%;top:50%;margin:-115px 0 0 -115px;width:230px;height:230px;box-sizing:border-box;padding:0;border:22px solid #c26cf2;border-radius:50%;background:rgba(255,255,255,.28);cursor:pointer;z-index:6;display:none}
+        .p07-play:after{content:'';position:absolute;left:50%;top:50%;margin:-40px 0 0 -26px;border-left:70px solid #c26cf2;border-top:40px solid transparent;border-bottom:40px solid transparent}
         .p07-play.is-on{display:block}
 
-        .p07-msg{position:absolute;left:80px;top:752px;width:1050px;height:184px;box-sizing:border-box;padding:0 160px 0 180px;display:flex;align-items:center;background:var(--c-cream);border:solid 5px var(--c-purple);border-radius:30px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
-        .p07-msg-av{position:absolute;left:18px;top:50%;width:150px;height:150px;margin-top:-75px}
-        .p07-msg p{margin:0;font-family:'Cafe24 Ssurround';font-size:38px;line-height:1.3;color:var(--c-purple);letter-spacing:-0.05em;word-break:keep-all}
-        .p07-more.card-btn{position:absolute;right:30px;bottom:34px;min-width:0;width:110px;height:64px;font-size:44px;padding:0}
+        .p07-msg{position:absolute;left:45px;top:738px;width:1103px;height:182px;box-sizing:border-box;padding:0 170px 0 190px;display:flex;align-items:center;background:#fff;border:solid 5px #072a66;border-radius:91px;box-shadow:0 12px 0 0 rgba(120,100,200,.25)}
+        .p07-msg-av{position:absolute;left:6px;top:50%;width:166px;height:166px;margin-top:-83px;border-radius:50%;background:#0d49aa;object-fit:contain}
+        .p07-msg p{margin:0;font-family:'Cafe24 Ssurround';font-size:38px;line-height:1.3;color:#1c1360;letter-spacing:-0.06em;word-break:keep-all}
+        .p07-more.card-btn{position:absolute;right:30px;top:50%;margin-top:-58px;min-width:0;width:100px;height:100px;padding:0;border-radius:50%;font-size:0}
+        .p07-more.card-btn:after{content:'';position:absolute;left:50%;top:50%;margin:-26px 0 0 -16px;border-left:48px solid #1c1360;border-top:28px solid transparent;border-bottom:28px solid transparent}
 
-        .p07-panel{position:absolute;left:1170px;top:24px;width:700px;height:912px;box-sizing:border-box;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:24px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
-        .p07-back{position:absolute;left:24px;top:22px;display:none;padding:6px 26px 0 22px;height:66px;border:0;background:none;font-family:'Cafe24 Ssurround';font-size:38px;color:var(--c-ink);cursor:pointer}
-        .p07-back:before{content:'';display:inline-block;margin-right:12px;border-right:20px solid var(--c-ink);border-top:12px solid transparent;border-bottom:12px solid transparent;vertical-align:-3px}
-        .p07-head{position:absolute;left:0;top:24px;width:100%;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:46px;color:var(--c-ink);display:none}
-        .p07-list{position:absolute;left:0;top:130px;width:100%;display:flex;flex-direction:column;align-items:center;gap:34px}
-        .p07-tool{width:560px;height:200px;box-sizing:border-box;display:flex;align-items:center;gap:30px;padding:0 34px;background:var(--c-cream);border:solid 4px var(--c-ink);border-radius:24px;font-family:'Cafe24 Ssurround';font-size:52px;color:var(--c-ink);letter-spacing:-0.05em;cursor:pointer}
-        .p07-tool.is-dis{opacity:.35;pointer-events:none;filter:grayscale(1)}
-        @media (hover:hover){.p07-tool:not(.is-dis):hover{border-color:var(--c-purple);box-shadow:0 0 0 6px rgba(92,61,240,.3)}}
-        .p07-ico{flex:none;width:130px;height:130px;display:flex;align-items:center;justify-content:center;border:solid 3px var(--c-ink);border-radius:18px;background:var(--c-white);overflow:hidden}
+        .p07-panel{position:absolute;left:1170px;top:27px;width:688px;height:893px;box-sizing:border-box;background:#2a6bcb;border-radius:26px}
+        .p07-back{position:absolute;left:420px;top:788px;display:none;box-sizing:border-box;width:250px;height:80px;padding:6px 0 0;border:0;border-radius:14px;background:linear-gradient(180deg,#e6dafe,#fefbf9);box-shadow:0 8px 0 0 #a9a2ff,0 0 0 6px #035fd3,0 8px 0 6px #035fd3;font-family:'Cafe24 Ssurround';font-size:46px;color:var(--c-indigo);cursor:pointer;letter-spacing:-0.04em}
+        .p07-head{position:absolute;left:0;top:34px;width:100%;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:68px;color:#fff;letter-spacing:-0.05em;display:none}
+        .p07-list{position:absolute;left:27px;top:48px;width:633px;display:flex;flex-direction:column;gap:39px;align-items:center}
+        .p07-tool{width:633px;height:240px;flex:none;box-sizing:border-box;display:flex;align-items:center;gap:0;padding:0 16px;background:#fff;border:0;border-radius:22px;box-shadow:0 8px 0 0 rgba(10,30,100,.18);font-family:'Cafe24 Ssurround';font-size:80px;color:#2a1c8e;letter-spacing:-0.06em;cursor:pointer}
+        .p07-tool>span:last-child{flex:1 1 auto;text-align:center;padding-top:8px}
+        .p07-tool.is-dis{pointer-events:none;background:#eef0f6;color:#b9bdcc;box-shadow:0 8px 0 0 rgba(10,30,100,.10)}
+        .p07-tool.is-dis .p07-ico{filter:grayscale(1);opacity:.45}
+        @media (hover:hover){.p07-tool:not(.is-dis):hover{box-shadow:0 0 0 6px #ff4ff9,0 8px 0 0 rgba(10,30,100,.18)}}
+        .p07-ico{flex:none;width:208px;height:208px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;border:solid 4px #2a1f8a;border-radius:16px;background:#def4ff;overflow:hidden}
         .p07-ico img{max-width:86%;max-height:86%}
-        .p07-ico.is-mosaic i{display:block;width:90px;height:90px;background:repeating-conic-gradient(#8c8c8c 0 25%,#dadada 0 50%) 0 0 / 22px 22px}
-        .p07-ico.is-face{font-size:76px;font-family:'Segoe UI Emoji','Apple Color Emoji',sans-serif;line-height:1}
-        .p07-opt{width:260px;height:260px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:var(--c-cream);border:solid 4px var(--c-ink);border-radius:24px;cursor:grab;touch-action:none}
-        .p07-opt img{max-width:78%;max-height:78%;pointer-events:none}
-        .p07-opt i{display:block;width:170px;height:170px;background:repeating-conic-gradient(#8c8c8c 0 25%,#dadada 0 50%) 0 0 / 34px 34px;pointer-events:none}
+        .p07-ico.is-mosaic i{display:block;width:150px;height:150px;background:repeating-conic-gradient(#61a3bc 0 25%,#a0eaea 0 50%) 0 0 / 30px 30px}
+        .p07-ico svg{width:84%;height:84%}
+        .p07-opt{width:208px;height:208px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:#def4ff;border:solid 4px #2a1f8a;border-radius:16px;cursor:grab;touch-action:none}
+        .p07-opt img{max-width:86%;max-height:86%;pointer-events:none}
+        .p07-opt i{display:block;width:150px;height:150px;background:repeating-conic-gradient(#61a3bc 0 25%,#a0eaea 0 50%) 0 0 / 30px 30px;pointer-events:none}
         .p07-opt i.is-circle{border-radius:50%}
-        .p07-opts-wrap{display:flex;flex-direction:column;align-items:center;gap:30px}
-        .p07-opts-wrap.is-row{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:24px;padding:0 24px}
-        .p07-opts-wrap.is-row .p07-opt{width:190px;height:190px}
-        .p07-opts-wrap.is-row .p07-opt img{max-width:80%;max-height:80%}
+        .p07-opts-wrap{display:flex;flex-direction:column;align-items:center;gap:52px;width:484px;height:581px;box-sizing:border-box;margin:114px auto 0;padding:59px 0;background:#fff;border-radius:18px;box-shadow:0 8px 0 0 rgba(10,30,100,.18)}
+        .p07-opts-wrap.is-row{flex-direction:row;flex-wrap:nowrap;justify-content:flex-start;gap:23px;width:633px;height:240px;margin:279px 0 0;padding:29px 21px}
+        .p07-opts-wrap.is-row .p07-opt{width:182px;height:182px}
         .p07-ghost{position:absolute;z-index:80;pointer-events:none;opacity:.9}
         .p07-hand{position:absolute;left:0;top:0;width:110px;z-index:70;pointer-events:none;opacity:0}
         .p07-hand.is-run{animation:p07-hand 1.8s ease-in-out 2 both}
         @keyframes p07-hand{0%{opacity:0;transform:translate(0,0)}12%{opacity:1;transform:translate(0,0)}72%{opacity:1;transform:translate(var(--hx),var(--hy))}90%{opacity:1;transform:translate(var(--hx),var(--hy))}100%{opacity:0;transform:translate(var(--hx),var(--hy))}}
-        .p07-track{position:absolute;left:60px;top:300px;width:580px;text-align:center;font-family:'Cafe24 Ssurround';font-size:50px;color:var(--c-ink);display:none}
-        .p07-bar{height:30px;margin-top:26px;border:solid 3px var(--c-ink);border-radius:18px;background:var(--c-white);overflow:hidden}
-        .p07-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3cc5c9,#7b3fe4)}
-        .p07-share{position:absolute;left:0;bottom:60px;width:100%;display:none;flex-direction:column;align-items:center;gap:34px}
-        .p07-share .card-btn{min-width:0;width:520px;height:96px;padding:8px 20px 2px;font-size:46px}
-        .p07-next{position:absolute;right:90px;bottom:60px;min-width:0;width:240px;display:none;align-items:center;justify-content:center;text-decoration:none}
+        .p07-face{position:absolute;left:130px;top:163px;width:420px;height:408px;display:none}
+        .p07-panel.is-trk .p07-face{display:block}
+        .p07-track{position:absolute;left:0;top:0;width:100%;height:100%;display:none}
+        .p07-gauge{left:60px;top:592px;width:568px;height:43px}
+        .p07-gauge:before{display:none}
+        .p07-gauge .gauge-fill{border-radius:16px}
+        .p07-gauge .gauge-fill:after{top:5px;height:4px;left:16px;right:24px}
+        .p07-track span{position:absolute;left:0;top:644px;width:100%;text-align:center;font-family:'Cafe24 Ssurround';font-size:54px;color:#fff;letter-spacing:-0.05em}
+        .p07-share{position:absolute;left:105px;top:631px;width:465px;display:none;flex-direction:column;gap:30px}
+        .p07-share .card-btn{min-width:0;width:465px;height:85px;padding:6px 10px 0;font-size:46px;letter-spacing:-0.04em}
+        .card-btn.is-start.p07-next{left:1420px;top:764px;display:none;align-items:center;justify-content:center;text-decoration:none;z-index:5}
 
+        .p07.is-edit .p07-frame{display:block}
+        .p07.is-final .p07-frame{left:46px;width:1829px}
+        .p07.is-final .p07-scene{left:435px}
+        .p07.is-final .p07-msg{left:46px;width:1829px;padding-right:520px}
+        .p07.is-final .p07-msg p{font-size:50px}
         .p07 .is-off{display:none}
         #p07Pop{z-index:120}
     </style>
@@ -76,17 +96,18 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default p07">
-          <p class="ask-pill is-fit" id="p07Ask">편집할 장면을 선택하세요.</p>
+          <p class="ask-pill p07-ask" id="p07Ask">편집할 장면을 선택하세요.</p>
           <div class="p07-pick" id="p07Pick"></div>
 
+          <div class="p07-frame" id="p07Frame"></div>
           <div class="p07-scene is-off" id="p07Scene">
             <div class="p07-target" id="p07Target"></div>
-            <div class="p07-npc" id="p07Npc">🧑</div>
-            <div class="p07-cover" id="p07Cover"></div>
+            <video class="p07-vid" id="p07Vid" muted playsinline preload="auto"></video>
+            <div class="p07-cover" id="p07Cover"><canvas id="p07Mos" width="10" height="10"></canvas></div>
             <button type="button" class="p07-play" id="p07Play" aria-label="재생"></button>
           </div>
           <div class="p07-msg is-off" id="p07Msg">
-            <img class="p07-msg-av" src="../../img/common/avatar_quiz.png" alt="">
+            <img class="p07-msg-av" src="../../img/common/avatar_smile.png" alt="">
             <p id="p07Text"></p>
             <button type="button" class="p07-more card-btn is-popup is-arrow js-sfx is-off" id="p07More" data-sound="sound/click.mp3" aria-label="다음 문구">→</button>
           </div>
@@ -94,7 +115,8 @@
             <button type="button" class="p07-back js-sfx" id="p07Back" data-sound="sound/click.mp3">뒤로 가기</button>
             <p class="p07-head" id="p07Head">얼굴 트래킹</p>
             <div class="p07-list" id="p07List"></div>
-            <div class="p07-track" id="p07Track"><span id="p07TrackText">트래킹 중</span><div class="p07-bar"><i id="p07Bar"></i></div></div>
+            <img class="p07-face" id="p07Face" src="img/p07_face2.png" alt="">
+            <div class="p07-track" id="p07Track"><div class="gauge p07-gauge"><div class="gauge-fill" id="p07Bar"></div></div><span id="p07TrackText">트래킹 중</span></div>
             <div class="p07-share" id="p07Share">
               <button type="button" class="card-btn js-sfx" id="p07Ready" data-sound="sound/click.mp3">공유 준비 완료</button>
               <button type="button" class="card-btn js-sfx" id="p07Redo" data-sound="sound/click.mp3">다시 수정</button>
@@ -102,7 +124,7 @@
           </div>
           <img class="p07-hand" id="p07Hand" src="../../img/common/img_finger01.png" alt="">
 
-          <a href="page08.html" class="js-nav-effect js-sfx card-btn is-popup p07-next" id="p07Next" data-sound="sound/click.mp3">다음</a>
+          <a href="page08.html" class="js-nav-effect js-sfx card-btn is-start next-btn p07-next" id="p07Next" data-sound="sound/click.mp3">다음</a>
 
           <div class="avatar-modal is-wrong is-off" id="p07Pop">
             <div class="avatar-popup-panel">
@@ -124,20 +146,29 @@
   <script src="../../js/common.js"></script>
   <script>
   (function () {
+    // 영상 5개(sa/10/video/v1~v5.mp4, 5초)와 첫 화면 썸네일(img/p07_thumb_N.jpg). 영상마다 가려야 할 사람 얼굴 위치를 keys=[초, 좌우, 상하]로 적음(영상 폭·높이에 대한 0~1 비율, 얼굴 중심).
+    // size=가리개 지름(영상 폭에 대한 비율). 얼굴이 화면 밖으로 나가면 가리개도 같이 나감. 어긋나면 이 숫자만 고치면 됨
     const SCENES = [
-      { img: 'p05_q1_2', label: '대출대에서 책을 빌리는 장면' }, { img: 'p05_q5_3', label: '‘2관’ 표시와 출입문이 보이는 장면' },
-      { img: 'p05_q4_2', label: '길이 잘 보이는 산책길 장면' }, { img: 'p05_q2_2', label: '사과와 가격표가 함께 보이는 장면' },
-      { img: 'p05_q3_3', label: '창구에서 편지를 접수하는 장면' }
+      { thumb: 'p07_thumb_1', video: 'video/v1.mp4', label: '대출대에서 책을 빌리는 장면', size: 0.115,
+        keys: [[0, .53, .25], [.82, .51, .25], [1.6, .525, .23], [2.4, .43, .235], [3.2, .245, .205], [4, .004, .30], [4.6, -.12, .32], [5, -.2, .32]] },
+      { thumb: 'p07_thumb_2', video: 'video/v2.mp4', label: '사과와 가격표가 함께 보이는 장면', size: 0.10,
+        keys: [[0, .44, .155], [.84, .43, .165], [1.6, .40, .15], [2.4, .325, .14], [3.2, .215, .115], [4, .065, .125], [4.6, -.08, .12], [5, -.15, .12]] },
+      { thumb: 'p07_thumb_3', video: 'video/v3.mp4', label: '창구에서 편지를 접수하는 장면', size: 0.085,
+        keys: [[0, .46, .20], [.84, .48, .20], [1.6, .52, .185], [2.4, .55, .19], [3.2, .59, .19], [4, .635, .20], [5, .635, .20]] },
+      { thumb: 'p07_thumb_4', video: 'video/v4.mp4', label: '길이 잘 보이는 산책길 장면', size: 0.085,
+        keys: [[0, .635, .20], [.8, .625, .20], [1.6, .59, .20], [2.4, .575, .18], [3.2, .455, .185], [4, .347, .164], [4.6, .27, .165], [5, .20, .165]] },
+      { thumb: 'p07_thumb_5', video: 'video/v5.mp4', label: '‘2관’ 표시와 출입문이 보이는 장면', size: 0.095,
+        keys: [[0, .405, .23], [.84, .41, .23], [1.6, .46, .23], [2.4, .60, .31], [3.2, .625, .347], [4, .70, .353], [4.6, .745, .347], [5, .80, .40]] }
     ];
-    const HEAD = { x: 592, y: 360 };       // 이웃 얼굴 중심(장면 안 좌표)
-    const MOVE = 300, SEC = 4, STOP = 1.6;  // 트래킹 영상: 이웃이 오른쪽으로 걸어감, 오류 때 스티커는 STOP초에 멈춤
+    const LOST = 1.4;                      // 오류 때 스티커가 얼굴을 놓치고 그 자리에 멈추는 영상 시간(초)
+    let KEYS = [], CS = 150, HEAD = { x: 0, y: 0 };
     const TEXTS = [
-      '내가 찍은 사진이나 영상에 모르는 사람의 얼굴이 함께 찍혔다면, 인터넷에 올리기 전에 꼭 얼굴을 가려야 해요.',
+      '내가 찍은 사진이나 영상에 모르는 사람의<br>얼굴이 함께 찍혔다면,<br>인터넷에 올리기 전에 꼭 얼굴을 가려야 해요.',
       '오른쪽의 편집 도구 창에서 ‘모자이크’나 ‘스티커’ 기능을 활용해 얼굴을 가려봐요.',
       '기능을 클릭하고, 원하는 가리기 도구를 선택해 얼굴 위로 드래그해 보세요.'
     ];
     const main = document.querySelector('main');
-    const scene = $('p07Scene'), npc = $('p07Npc'), cover = $('p07Cover'), target = $('p07Target');
+    const scene = $('p07Scene'), cover = $('p07Cover'), target = $('p07Target');
     const list = $('p07List'), more = $('p07More');
     const st = { tool: '', tracking: false, mode: 'error', ti: 0, played: false, covered: false, anim: 0 };
     const hide = (...e) => e.forEach((x) => x.classList.add('is-off'));
@@ -150,24 +181,50 @@
 
     // 1) 장면 고르기
     const grid = $('p07Pick');
-    [SCENES.slice(0, 3), SCENES.slice(3)].forEach((r) => {
-      const d = document.createElement('div');
-      d.className = 'p07-pick-row';
-      r.forEach((s) => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'p07-card';
-        b.innerHTML = '<img src="img/' + s.img + '.jpg" alt=""><span>' + s.label + '</span>';
-        b.addEventListener('click', () => { playClick(); begin(s); });
-        d.appendChild(b);
-      });
-      grid.appendChild(d);
+    SCENES.forEach((s) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'p07-card';
+      b.innerHTML = '<img src="img/' + s.thumb + '.jpg" alt=""><span>' + s.label + '</span>';
+      b.addEventListener('click', () => { playClick(); begin(s); });
+      grid.appendChild(b);
     });
 
+    // 영상은 상자를 꽉 채우게(cover) 깔려 있어서, 영상 안 위치(0~1)를 상자 안 픽셀로 바꿈
+    function toBox(fx, fy) {
+      const W = scene.clientWidth, H = scene.clientHeight, dw = Math.max(W, H * 16 / 9), dh = dw * 9 / 16;
+      return { x: (W - dw) / 2 + fx * dw, y: (H - dh) / 2 + fy * dh, dw: dw };
+    }
+    function faceAt(t) {
+      for (let i = 1; i < KEYS.length; i++) {
+        if (t <= KEYS[i][0]) {
+          const a = KEYS[i - 1], b = KEYS[i], f = (t - a[0]) / ((b[0] - a[0]) || 1);
+          return [a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f];
+        }
+      }
+      const l = KEYS[KEYS.length - 1];
+      return [l[1], l[2]];
+    }
     function begin(s) {
       hide(grid, $('p07Ask'));
-      scene.style.backgroundImage = "url('img/" + s.img + ".jpg')";
+      main.classList.add('is-edit');
       show(scene, $('p07Msg'), $('p07Panel'));
+      const vid = $('p07Vid');
+      vid.src = s.video;
+      vid.poster = 'img/' + s.thumb + '.jpg';
+      vid.pause();
+      vid.currentTime = 0;
+      KEYS = s.keys;
+      thumbImg = new Image();
+      thumbImg.src = 'img/' + s.thumb + '.jpg';
+      const f0 = faceAt(0), h = toBox(f0[0], f0[1]);
+      CS = s.size * h.dw;
+      scene.style.setProperty('--cs', CS + 'px');
+      HEAD = { x: h.x, y: h.y };
+      target.style.width = target.style.height = (CS * 1.5) + 'px';
+      target.style.left = (h.x - CS * 0.75) + 'px';
+      target.style.top = (h.y - CS * 0.75) + 'px';
+      moveCover(0);
       tools(false);
       st.ti = 0;
       setText(TEXTS[0]);
@@ -187,10 +244,12 @@
       list.style.display = 'flex';
       $('p07Track').style.display = 'none';
       $('p07Share').style.display = 'none';
+      $('p07Panel').classList.remove('is-trk');
+      list.style.top = '';
       const defs = [
         { k: 'mosaic', t: '모자이크', ico: '<span class="p07-ico is-mosaic"><i></i></span>' },
         { k: 'sticker', t: '스티커', ico: '<span class="p07-ico"><img src="img/stk_star.png" alt=""></span>' },
-        { k: 'track', t: '얼굴 트래킹', ico: '<span class="p07-ico is-face">🙂</span>' }
+        { k: 'track', t: '얼굴 트래킹', ico: '<span class="p07-ico"><img src="img/p07_face.png" alt=""></span>' }
       ];
       defs.forEach((d) => {
         const b = document.createElement('button');
@@ -208,6 +267,8 @@
       if (k === 'track') { startTracking(); return; }
       list.innerHTML = '';
       $('p07Back').style.display = 'block';
+      $('p07Head').textContent = k === 'mosaic' ? '모자이크' : '스티커';
+      $('p07Head').style.display = 'block';
       const w = document.createElement('div');
       w.className = 'p07-opts-wrap' + (k === 'sticker' ? ' is-row' : '');
       const items = k === 'mosaic'
@@ -221,17 +282,20 @@
         w.appendChild(o);
       });
       list.appendChild(w);
+      list.style.top = '0';
+      list.style.left = '0';
+      list.style.width = '100%';
       target.classList.add('is-on');
       guide(w.firstChild);
     }
-    $('p07Back').addEventListener('click', () => { target.classList.remove('is-on'); stopGuide(); tools(true); });
+    $('p07Back').addEventListener('click', () => { target.classList.remove('is-on'); stopGuide(); list.style.left = ''; list.style.width = ''; tools(true); });
 
     function guide(el) {
       const hand = $('p07Hand');
       const sr = scene.getBoundingClientRect(), s = main.getBoundingClientRect().width / 1920, mr = main.getBoundingClientRect();
       const er = el.getBoundingClientRect();
       const sx = (er.left - mr.left) / s + er.width / s / 2 - 20, sy = (er.top - mr.top) / s + er.height / s / 2 - 10;
-      const tx = (sr.left - mr.left) / s + 5 + HEAD.x - 20, ty = (sr.top - mr.top) / s + 5 + HEAD.y - 10;
+      const tx = (sr.left - mr.left) / s + HEAD.x - 20, ty = (sr.top - mr.top) / s + HEAD.y - 10;
       hand.style.left = sx + 'px'; hand.style.top = sy + 'px';
       hand.style.setProperty('--hx', (tx - sx) + 'px'); hand.style.setProperty('--hy', (ty - sy) + 'px');
       hand.classList.remove('is-run'); void hand.offsetWidth; hand.classList.add('is-run');
@@ -276,7 +340,22 @@
       cover.style.backgroundPosition = it.src ? 'center' : '';
       st.item = it;
     }
-    function moveCover(dx) { cover.style.left = (HEAD.x + dx) + 'px'; cover.style.top = HEAD.y + 'px'; }
+    // 모자이크: 영상(재생 전엔 첫 장면 썸네일)에서 얼굴 칸을 CELLS×CELLS 로 줄여 그린 뒤 늘려 보여 줌
+    const CELLS = 10;
+    const mos = $('p07Mos'), mosCtx = mos.getContext('2d');
+    let thumbImg = null;
+    function drawMosaic(f, b) {
+      const v = $('p07Vid'), ready = v.readyState >= 2 && v.videoWidth;
+      const src = ready ? v : thumbImg, sw0 = ready ? v.videoWidth : (thumbImg && thumbImg.naturalWidth), sh0 = ready ? v.videoHeight : (thumbImg && thumbImg.naturalHeight);
+      if (!src || !sw0) return;
+      const sw = CS / b.dw * sw0;
+      mosCtx.drawImage(src, f[0] * sw0 - sw / 2, f[1] * sh0 - sw / 2, sw, sw, 0, 0, CELLS, CELLS);
+    }
+    function moveCover(t) {
+      const f = faceAt(t), b = toBox(f[0], f[1]);
+      cover.style.left = b.x + 'px'; cover.style.top = b.y + 'px';
+      if (st.item && st.item.cls) drawMosaic(f, b);
+    }
 
     function attach(it) {
       playCorrect();
@@ -289,25 +368,30 @@
       setMore(() => { setMore(null); setText('얼굴 트래킹 기능을 클릭해보세요.'); tools(true, 'track'); });
     }
 
-    // 3) 영상 재생(트래킹 / 확인)
+    // 3) 영상 재생(트래킹 / 확인): 영상이 5초 한 번 재생되는 동안 가리개가 얼굴 위치(KEYS)를 따라감. 오류 모드는 LOST초에 얼굴을 놓치고 그 자리에 멈춤
     function run(mode, onEnd, bar) {
       cancelAnimationFrame(st.anim);
+      const vid = $('p07Vid');
+      vid.currentTime = 0;
+      vid.play().catch(() => {});
       const t0 = performance.now();
       const step = (now) => {
-        const t = Math.min((now - t0) / 1000, SEC);
-        const dx = MOVE * t / SEC;
-        npc.style.transform = 'translateX(' + dx + 'px)';
-        moveCover(mode === 'error' ? Math.min(dx, MOVE * STOP / SEC) : dx);
-        if (bar) bar.style.width = (t / SEC * 100) + '%';
-        if (t < SEC) st.anim = requestAnimationFrame(step); else if (onEnd) onEnd();
+        const t = Math.min((now - t0) / 1000, 5);
+        const vt = vid.currentTime > 0 ? vid.currentTime : t;
+        moveCover(mode === 'error' ? Math.min(vt, LOST) : vt);
+        if (bar) bar.style.width = (t / 5 * 100) + '%';
+        if (t < 5) st.anim = requestAnimationFrame(step);
+        else { vid.pause(); if (onEnd) onEnd(); }
       };
       st.anim = requestAnimationFrame(step);
     }
-    function reset() { cancelAnimationFrame(st.anim); npc.style.transform = ''; moveCover(0); }
+    function reset() { cancelAnimationFrame(st.anim); const v = $('p07Vid'); v.pause(); v.currentTime = 0; moveCover(0); }
 
     function startTracking() {
       reset();
       list.style.display = 'none';
+      $('p07Panel').classList.add('is-trk');
+      $('p07Head').textContent = '얼굴 트래킹';
       $('p07Head').style.display = 'block';
       $('p07Track').style.display = 'block';
       $('p07TrackText').textContent = '트래킹 중';
@@ -339,14 +423,15 @@
         if (st.final) $('p07Next').style.display = 'flex';
       });
     });
-    $('p07Redo').addEventListener('click', () => { if (st.playing) return; st.mode = 'ok'; $('p07Play').classList.remove('is-on'); startTracking(); });
+    $('p07Redo').addEventListener('click', () => { if (st.playing) return; st.mode = 'ok'; $('p07Play').classList.remove('is-on'); $('p07Share').style.display = 'none'; startTracking(); });
     $('p07Ready').addEventListener('click', () => {
       if (st.playing) return;
       if (st.mode === 'error') { show($('p07Pop')); return; }
       st.final = true;
       reset();
+      main.classList.add('is-final');
       $('p07Panel').classList.add('is-off');
-      setText('영상에 찍힌 이웃의 초상권도 보호했어요! 모자이크가 잘 됐는지 재생 버튼을 눌러 확인해봐요.');
+      setText('영상에 찍힌 이웃의 초상권도 보호했어요!<br>모자이크가 잘 됐는지 재생 버튼을 눌러 확인해봐요.');
       $('p07Play').classList.add('is-on');
     });
     $('p07PopOk').addEventListener('click', () => hide($('p07Pop')));

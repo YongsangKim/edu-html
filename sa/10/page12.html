@@ -6,36 +6,47 @@
     <title>브이로그 완성 대작전</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 기획서 86~97p. 브이로그 3편(도서관·마트·공원): 장면의 자막(틀린 설명)을 눌러 알맞은 문구로 고치고, 지나가는 행인 얼굴을 눌러 가리기 도구를 끌어 얼굴(빨간 영역)에 붙이기.
-           둘 다 하면 "편집 성공!" 2초 후 다음 브이로그(자막·모자이크는 순서 상관없음). 공원은 행인 2명 모두 가려야 함. 마지막 브이로그 뒤 page13(미션 성공).
-           장면은 임시 이모지 그림(img/p12_vlog_*.jpg), 행인은 이모지 🧑(기획서 이미지가 오면 교체), 가리기 도구는 모자이크 2종(사각·원) + 스티커 2종(하트·곰, 초상권을 지켜라 소스 재사용) */
-
-        .p12-scene{position:absolute;left:60px;top:175px;width:1040px;height:585px;transform:scale(1.1);transform-origin:0 0;box-sizing:border-box;border:solid 5px var(--c-ink);background:#fff center / cover no-repeat;overflow:hidden;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
-        .p12-title{position:absolute;left:60px;top:837px;width:1144px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:46px;color:var(--c-ink);letter-spacing:-0.05em}
-        .p12-fig{position:absolute;width:192px;font-size:300px;line-height:1;text-align:center;white-space:nowrap;font-family:'Segoe UI Emoji','Apple Color Emoji',sans-serif;pointer-events:none}
-        .p12-hit{position:absolute;width:150px;height:150px;box-sizing:border-box;padding:0;border:solid 5px transparent;border-radius:16px;background:transparent;cursor:pointer;z-index:3}
+        /* 기획서 86~97p. 브이로그 3편(도서관·마트·공원): 장면의 자막(틀린 설명)을 눌러 알맞은 문구로 고치고, 사진 속 얼굴을 눌러 가리기 도구를 끌어 얼굴을 가림.
+           둘 다 하면 "편집 성공!" 2초 후 다음 브이로그(자막·모자이크는 순서 상관없음). 공원은 얼굴 2명 모두 가려야 함. 마지막 브이로그 뒤 page13(미션 성공).
+           사진 위에 따로 올리는 그림은 없고, 모자이크는 사진의 그 자리를 읽어 CELLS×CELLS 칸으로 줄였다 늘린 진짜 픽셀 모자이크. 얼굴 위치는 VLOGS 의 faces(사진 안 0~1 비율) */
+        .p12-board{position:absolute;left:67px;top:172px;width:1785px;height:732px;box-sizing:border-box;background:#2a6ccd;border-radius:22px}
+        .p12-frame{position:absolute;left:101px;top:191px;width:1083px;height:695px;box-sizing:border-box;border:solid 7px #0a2a6a;border-radius:14px;overflow:hidden;background:#fff}
+        .p12-top{position:absolute;left:0;top:0;width:100%;height:62px;display:flex;align-items:center;background:#fff}
+        .p12-top b{flex:none;width:160px;height:62px;display:flex;align-items:center;justify-content:center;background:#a9cbf0;font-family:'Pretendard';font-weight:800;font-size:44px;letter-spacing:-0.06em;color:rgba(255,255,255,.92)}
+        .p12-top span{margin-left:24px;font-family:'Pretendard';font-weight:600;font-size:44px;letter-spacing:-0.09em;color:#191919;white-space:nowrap}
+        .p12-scene{position:absolute;left:0;top:62px;width:1069px;height:616px;overflow:hidden;background:#ddd}
+        .p12-scene>img{display:block;width:100%;height:100%;object-fit:cover}
+        .p12-hit{position:absolute;box-sizing:border-box;padding:0;border:solid 5px transparent;border-radius:16px;background:transparent;cursor:pointer;z-index:3}
         @media (hover:hover){.p12-hit:not(.is-done):hover{border-color:#e5342f}}
         .p12-hit.is-target{border:dashed 5px #e5342f;background:rgba(229,52,47,.12)}
         .p12-hit.is-over{background:rgba(229,52,47,.3)}
         .p12-hit.is-done{pointer-events:none;border-color:transparent;background:none}
-        .p12-cover{position:absolute;width:100px;height:100px;z-index:4;background-repeat:no-repeat;pointer-events:none}
-        .p12-cover.is-square{background:repeating-conic-gradient(#8c8c8c 0 25%,#dadada 0 50%) 0 0 / 32px 32px}
-        .p12-cover.is-circle{border-radius:50%;background:repeating-conic-gradient(#8c8c8c 0 25%,#dadada 0 50%) 0 0 / 32px 32px}
-        .p12-sub{position:absolute;left:5%;bottom:5%;width:90%;box-sizing:border-box;padding:14px 20px 10px;margin:0;background:rgba(58,58,62,.88);border-radius:10px;font-family:'Pretendard';font-weight:600;font-size:34px;line-height:1.35;color:#fff;text-align:center;cursor:pointer;z-index:5;transition:font-size .15s}
-        .p12-sub.is-big{font-size:42px;cursor:default}
+        .p12-cover{position:absolute;z-index:4;pointer-events:none}
+        canvas.p12-cover{image-rendering:pixelated}
+        canvas.p12-cover.is-circle{border-radius:50%}
+        img.p12-cover{object-fit:contain}
+        .p12-sub{position:absolute;left:96px;top:411px;width:882px;height:184px;box-sizing:border-box;padding:0 20px;margin:0;display:flex;align-items:center;justify-content:center;text-align:center;background:rgba(48,44,92,.84);font-family:'Pretendard';font-weight:500;font-size:56px;line-height:1.4;letter-spacing:-0.09em;color:#fff;cursor:pointer;flex-direction:column}
         .p12-sub.is-done{cursor:default}
         .p12-sub b{font-weight:800;color:#ffe27a}
         @media (hover:hover){.p12-sub:not(.is-done):not(.is-big):hover{outline:4px solid #e5342f}}
 
-        .p12-panel{position:absolute;left:1230px;top:175px;width:630px;height:644px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px}
-        .p12-panel .p12-say{margin:0 0 6px;font-family:'Cafe24 Ssurround';font-size:48px;line-height:1.3;color:var(--c-ink);text-align:center;letter-spacing:-0.05em;word-break:keep-all}
-        .p12-panel .card-btn{width:100%;min-width:0;height:auto;min-height:118px;padding:14px 26px 8px;font-size:38px;line-height:1.25}
-        .p12-tools{display:grid;grid-template-columns:repeat(2,230px);gap:26px}
-        .p12-tool{width:230px;height:230px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:var(--c-cream);border:solid 4px var(--c-ink);border-radius:24px;cursor:grab;touch-action:none}
-        .p12-tool img{max-width:78%;max-height:78%;pointer-events:none}
-        .p12-tool i{display:block;width:150px;height:150px;background:repeating-conic-gradient(#8c8c8c 0 25%,#dadada 0 50%) 0 0 / 30px 30px;pointer-events:none}
+        .p12-side{position:absolute;left:1196px;top:196px;width:620px;height:689px;box-sizing:border-box}
+        .p12-side.is-white{background:#fff;border:solid 6px #8db4ee;border-radius:10px;overflow:hidden}
+        .p12-robot{position:absolute;left:55%;bottom:0;height:570px;width:auto;transform:translateX(-50%);pointer-events:none}
+        .is-white .p12-robot{height:689px;bottom:-40px}
+        .p12-side .p12-robot.is-r1{left:55%;bottom:-40px;height:689px}
+        .p12-side .p12-robot.is-r2{left:55%;bottom:-60px;height:570px}
+        .p12-bubble{position:absolute;left:48px;top:34px;width:508px;height:172px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;margin:0;background:#fff;border:solid 5px var(--c-purple);border-radius:18px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);font-family:'Cafe24 Ssurround';font-size:62px;color:var(--c-purple);letter-spacing:-0.05em;z-index:2}
+        .p12-bubble:after{content:'';position:absolute;left:310px;bottom:-60px;width:100px;height:72px;background:url('../../img/common/p_guide_tail.png') 0 0 / contain no-repeat}
+        .p12-say{position:absolute;left:0;top:0;width:100%;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.2;color:#fff;letter-spacing:-0.05em;word-break:keep-all}
+        .p12-opts{position:absolute;left:10px;top:190px;width:100%;display:flex;flex-direction:column;gap:26px}
+        .p12-opts .card-btn{width:100%;min-width:0;height:auto;min-height:118px;padding:14px 26px 8px;font-size:46px;line-height:1.25}
+        .p12-tools{position:absolute;left:0;top:188px;width:100%;height:450px}
+        .p12-tool{position:absolute;width:208px;height:208px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:#e0f5ff;border:solid 4px #2f1f8e;border-radius:16px;cursor:grab;touch-action:none}
+        .p12-tool:nth-child(1){left:87px;top:0}.p12-tool:nth-child(2){left:341px;top:0}.p12-tool:nth-child(3){left:87px;top:244px}.p12-tool:nth-child(4){left:341px;top:244px}
+        .p12-tool img{max-width:82%;max-height:82%;pointer-events:none}
+        .p12-tool i{display:block;width:150px;height:150px;background:repeating-conic-gradient(#61a3bc 0 25%,#a0eaea 0 50%) 0 0 / 30px 30px;pointer-events:none}
         .p12-tool i.is-circle{border-radius:50%}
-        .p12-ok{margin:0;font-family:'Cafe24 Ssurround';font-size:90px;color:var(--c-purple);letter-spacing:-0.05em}
         .p12-ghost{position:absolute;z-index:80;pointer-events:none;opacity:.9}
         .p12 .is-off{display:none}
     </style>
@@ -46,10 +57,13 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default p12">
-          <p class="ask-pill is-small is-fit"><span>잘못된 설명이나, 이웃의 얼굴이 가려지지 않은 부분을 찾아 클릭해요!</span></p>
-          <div class="p12-scene" id="p12Scene"></div>
-          <p class="p12-title" id="p12Title"></p>
-          <div class="p12-panel" id="p12Panel"></div>
+          <p class="ask-pill is-medium is-fit"><span>잘못된 설명이나, 이웃의 얼굴이 가려지지 않은 부분을 찾아 클릭해요!</span></p>
+          <div class="p12-board"></div>
+          <div class="p12-frame">
+            <div class="p12-top"><b>VLOG</b><span id="p12Title"></span></div>
+            <div class="p12-scene" id="p12Scene"></div>
+          </div>
+          <div class="p12-side is-white" id="p12Side"></div>
         </main>
       </div>
     </div>
@@ -61,55 +75,65 @@
   <script src="../../js/common.js"></script>
   <script>
   (function () {
+    // faces: 사진 안 얼굴 가운데 [가로, 세로] 0~1 비율, s: 모자이크 한 변(사진 가로 대비 비율)
     const VLOGS = [
-      { img: 'p12_vlog_library', title: 'VLOG | 우리 동네 도서관을 소개합니다', head: '여기는 저희 동네 도서관이고,', bad: '필요한 물건이 있으면 사러 오는 곳이에요.',
-        opts: ['책을 읽으러 오는 곳이에요.', '산책을 하러 오는 곳이에요.', '편지를 부치러 오는 곳이에요.'], ans: 0, people: [{ x: 315, y: 95 }] },
-      { img: 'p12_vlog_mart', title: 'VLOG | 오늘은 마트에 장 보러 가요!', head: '여기는 우리 동네 마트예요.', bad: '편지를 부치러 왔습니다.',
-        opts: ['머리카락을 자르러 왔습니다.', '책을 빌리러 왔습니다.', '생필품을 사러 왔습니다.'], ans: 2, people: [{ x: 315, y: 95 }] },
-      { img: 'p12_vlog_park', title: 'VLOG | 햇살 좋은 날, 공원 한 바퀴', head: '동네 공원에 왔어요.', bad: '배가 아파서 진료를 받으려고요.',
-        opts: ['친구에게 편지를 부치려고요.', '햇살이 좋아서 산책을 하려고요.', '생필품을 구매하려고요.'], ans: 1, people: [{ x: 125, y: 95 }, { x: 515, y: 95 }] }
+      { img: 'p12_vlog_library', title: '우리 동네 도서관을 소개합니다', head: '여기는 저희 동네 도서관이고,', bad: '필요한 물건이 있으면 사러 오는 곳이에요.',
+        opts: ['책을 읽으러 오는 곳이에요.', '산책을 하러 오는 곳이에요.', '편지를 부치러 오는 곳이에요.'], ans: 0, faces: [{ fx: 0.333, fy: 0.465, s: 0.085 }] },
+      { img: 'p12_vlog_mart', title: '오늘은 마트에 장 보러 가요!', head: '여기는 우리 동네 마트예요.', bad: '편지를 부치러 왔습니다.',
+        opts: ['머리카락을 자르러 왔습니다.', '책을 빌리러 왔습니다.', '생필품을 사러 왔습니다.'], ans: 2, faces: [{ fx: 0.721, fy: 0.291, s: 0.075 }] },
+      { img: 'p12_vlog_park', title: '햇살 좋은 날, 공원 한 바퀴', head: '동네 공원에 왔어요.', bad: '배가 아파서 진료를 받으려고요.',
+        opts: ['친구에게 편지를 부치려고요.', '햇살이 좋아서 산책을 하려고요.', '생필품을 구매하려고요.'], ans: 1, faces: [{ fx: 0.654, fy: 0.508, s: 0.04 }, { fx: 0.729, fy: 0.521, s: 0.04 }] }
     ];
-    const FACE = { x: 205, y: 56 };      // 전신 이모지(🧍) 얼굴 중심(글자 상자 왼쪽 위 기준)
+    const CELLS = 10;    // 모자이크 칸 수(작을수록 굵음)
+    const SW = 1069, SH = 616;
     const main = document.querySelector('main');
-    const scene = $('p12Scene'), panel = $('p12Panel');
+    const scene = $('p12Scene'), side = $('p12Side');
     const pos = (e) => { const r = main.getBoundingClientRect(), s = r.width / 1920; return { x: (e.clientX - r.left) / s, y: (e.clientY - r.top) / s }; };
-    let vi = 0, subDone = false, hits = [], busy = false;
+    const Q = new URLSearchParams(location.search), STATE = Q.get('state');   // ?state=white|sub|face|success&v=0~2 : 그 상태에서 멈춰 둠(좌표 맞추기용)
+    let vi = Math.min(Math.max(parseInt(Q.get('v'), 10) || 0, 0), 2), subDone = false, hits = [], busy = false, photo = null;
+
+    function sideWhite(robot, bubble) {
+      side.className = 'p12-side is-white';
+      side.innerHTML = (bubble ? '<p class="p12-bubble">' + bubble + '</p>' : '') + '<img class="p12-robot is-r' + robot + '" src="img/p12_robot_' + robot + '.png" alt="" onerror="this.style.display=\'none\'">';
+    }
+    function sideBlue(html) {
+      side.className = 'p12-side';
+      side.innerHTML = html;
+    }
 
     function startVlog() {
       const V = VLOGS[vi];
       subDone = false; busy = false; hits = [];
       scene.innerHTML = '';
-      scene.style.backgroundImage = "url('img/" + V.img + ".jpg')";
+      photo = new Image();
+      photo.src = 'img/' + V.img + '.jpg';
+      photo.alt = '';
+      scene.appendChild(photo);
       $('p12Title').textContent = V.title;
-      V.people.forEach((p) => {
-        const fig = document.createElement('div');
-        fig.className = 'p12-fig';
-        fig.style.cssText = 'left:' + p.x + 'px;top:' + p.y + 'px';
-        fig.textContent = '🧍';
-        scene.appendChild(fig);
+      V.faces.forEach((f) => {
+        const cs = f.s * SW, hs = Math.max(cs * 1.5, 70);
         const hit = document.createElement('button');
         hit.type = 'button';
         hit.className = 'p12-hit';
-        hit.style.cssText = 'left:' + (p.x + FACE.x - 75) + 'px;top:' + (p.y + FACE.y - 75) + 'px';
+        hit.style.cssText = 'left:' + (f.fx * SW - hs / 2) + 'px;top:' + (f.fy * SH - hs / 2) + 'px;width:' + hs + 'px;height:' + hs + 'px';
         hit.addEventListener('click', () => { if (!hit.classList.contains('is-done')) { playClick(); faceMode(); } });
         scene.appendChild(hit);
-        hits.push({ hit, cx: p.x + FACE.x, cy: p.y + FACE.y, done: false });
+        hits.push({ hit, f, cs, done: false });
       });
       const sub = document.createElement('p');
       sub.className = 'p12-sub';
       sub.id = 'p12Sub';
       sub.innerHTML = V.head + '<br>' + V.bad;
-      sub.addEventListener('click', () => { if (!subDone && !sub.classList.contains('is-big')) { playClick(); subMode(); } });
+      sub.addEventListener('click', () => { if (!subDone) { playClick(); subMode(); } });
       scene.appendChild(sub);
-      panel.innerHTML = '';
+      sideWhite(1);
     }
 
     function subMode() {
       const V = VLOGS[vi], sub = $('p12Sub');
       hits.forEach((h) => h.hit.classList.remove('is-target'));
-      sub.classList.add('is-big');
       sub.innerHTML = V.head + '<br><b>' + V.bad + '</b>';
-      panel.innerHTML = '<p class="p12-say">알맞은 내용을 선택해<br>편집해보세요.</p>';
+      sideBlue('<p class="p12-say">알맞은 내용을 선택해<br>편집해보세요.</p><div class="p12-opts" id="p12Opts"></div>');
       V.opts.forEach((t, k) => {
         const b = document.createElement('button');
         b.type = 'button';
@@ -124,31 +148,26 @@
           }
           playCorrect();
           subDone = true;
-          sub.classList.remove('is-big');
           sub.classList.add('is-done');
           sub.innerHTML = V.head + '<br>' + t;
-          panel.innerHTML = '';
-          check();
+          if (hits.every((h) => h.done)) check(); else sideWhite(1);
         });
-        panel.appendChild(b);
+        $('p12Opts').appendChild(b);
       });
     }
 
     function faceMode() {
       const sub = $('p12Sub');
-      if (!subDone) { sub.classList.remove('is-big'); sub.innerHTML = VLOGS[vi].head + '<br>' + VLOGS[vi].bad; }
+      if (!subDone) sub.innerHTML = VLOGS[vi].head + '<br>' + VLOGS[vi].bad;
       hits.forEach((h) => { if (!h.done) h.hit.classList.add('is-target'); });
-      panel.innerHTML = '<p class="p12-say">가리기 도구를 얼굴 위로<br>드래그해 보세요.</p>';
-      const g = document.createElement('div');
-      g.className = 'p12-tools';
-      [{ cls: 'is-square' }, { cls: 'is-circle' }, { src: 'img/stk_heart.png' }, { src: 'img/stk_bear.png' }].forEach((it) => {
+      sideBlue('<p class="p12-say">가리기 도구를 얼굴 위로<br>드래그해 보세요.</p><div class="p12-tools" id="p12Tools"></div>');
+      [{ cls: 'is-square' }, { cls: 'is-circle' }, { src: 'img/stk_star.png' }, { src: 'img/stk_heart.png' }].forEach((it) => {
         const o = document.createElement('div');
         o.className = 'p12-tool';
         o.innerHTML = it.src ? '<img src="' + it.src + '" alt="">' : '<i class="' + (it.cls === 'is-circle' ? 'is-circle' : '') + '"></i>';
         o.addEventListener('pointerdown', (e) => drag(e, o, it));
-        g.appendChild(o);
+        $('p12Tools').appendChild(o);
       });
-      panel.appendChild(g);
     }
 
     function drag(e, o, it) {
@@ -156,7 +175,7 @@
       playClick();
       const g = o.cloneNode(true);
       g.className = 'p12-ghost p12-tool';
-      g.style.cssText = 'width:' + o.offsetWidth + 'px;height:' + o.offsetHeight + 'px;background:transparent;border:0';
+      g.style.cssText = 'width:' + o.offsetWidth + 'px;height:' + o.offsetHeight + 'px;background:transparent;border:0;left:0;top:0';
       main.appendChild(g);
       const place = (ev) => { const q = pos(ev); g.style.left = (q.x - o.offsetWidth / 2) + 'px'; g.style.top = (q.y - o.offsetHeight / 2) + 'px'; };
       place(e);
@@ -174,30 +193,51 @@
       window.addEventListener('pointerup', up);
     }
 
+    // 사진(object-fit:cover)의 얼굴 자리를 읽어 CELLS×CELLS 로 줄여 그림
+    function mosaic(h, round) {
+      const c = document.createElement('canvas');
+      c.width = c.height = CELLS;
+      c.className = 'p12-cover' + (round ? ' is-circle' : '');
+      c.style.cssText = 'left:' + (h.f.fx * SW - h.cs / 2) + 'px;top:' + (h.f.fy * SH - h.cs / 2) + 'px;width:' + h.cs + 'px;height:' + h.cs + 'px';
+      if (photo.naturalWidth) {
+        const k = Math.max(SW / photo.naturalWidth, SH / photo.naturalHeight);
+        const ox = (SW - photo.naturalWidth * k) / 2, oy = (SH - photo.naturalHeight * k) / 2;
+        c.getContext('2d').drawImage(photo, (h.f.fx * SW - h.cs / 2 - ox) / k, (h.f.fy * SH - h.cs / 2 - oy) / k, h.cs / k, h.cs / k, 0, 0, CELLS, CELLS);
+      }
+      return c;
+    }
+
     function attach(h, it) {
       playCorrect();
       h.done = true;
       h.hit.classList.remove('is-target');
       h.hit.classList.add('is-done');
-      const c = document.createElement('div');
-      c.className = 'p12-cover' + (it.cls ? ' ' + it.cls : '');
-      if (it.src) c.style.cssText = "background-image:url('" + it.src + "');background-size:contain;background-position:center;";
-      c.style.left = (h.cx - 50) + 'px';
-      c.style.top = (h.cy - 50) + 'px';
+      let c;
+      if (it.cls) c = mosaic(h, it.cls === 'is-circle');
+      else {
+        c = document.createElement('img');
+        c.className = 'p12-cover';
+        c.src = it.src;
+        const d = h.cs * 1.4;
+        c.style.cssText = 'left:' + (h.f.fx * SW - d / 2) + 'px;top:' + (h.f.fy * SH - d / 2) + 'px;width:' + d + 'px;height:' + d + 'px';
+      }
       scene.appendChild(c);
-      if (hits.every((x) => x.done)) { hits.forEach((x) => x.hit.classList.remove('is-target')); panel.innerHTML = ''; } else faceMode();
-      check();
+      if (hits.every((x) => x.done)) { hits.forEach((x) => x.hit.classList.remove('is-target')); if (subDone) check(); else sideWhite(1); } else faceMode();
     }
 
     function check() {
       if (busy || !subDone || !hits.every((h) => h.done)) return;
       busy = true;
-      panel.innerHTML = '<p class="p12-ok">편집 성공!</p>';
+      sideWhite(2, '편집 성공!');
+      if (STATE) return;
       setTimeout(() => {
         if (vi < VLOGS.length - 1) { vi++; startVlog(); } else { location.href = 'page13.html'; }
       }, 2000);
     }
     startVlog();
+    if (STATE === 'success') sideWhite(2, '편집 성공!');
+    else if (STATE === 'sub') subMode();
+    else if (STATE === 'face') faceMode();
   })();
   </script>
 </body>
