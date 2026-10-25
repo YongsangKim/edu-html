@@ -3,11 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>완벽한 슬라이드 퍼즐 맞추기</title>
+    <title>제미나이 Notebook 정복 퍼즐</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        .p11-character{position:absolute;left:0;bottom:0;z-index:10}
-        .p11-character img{display:block}
+        /* 기획서 18~19p. 섞여 있는 퍼즐 조각 4개를 끌어 위쪽 판에 1번부터 4번까지 일자로 놓기(디자인·배치는 사회 5차시 page05, 조각 모양은 공용 jigSvg).
+           맞는 자리에 놓으면 붙고, 틀리면 조각이 제자리로 돌아오며 그 단계의 오답 문구 팝업. 다 맞추면 마무리 팝업 */
+        .p10-bubble{left:92px;bottom:691px;width:480px;padding:26px 10px;font-size:40px;margin:0;z-index:5}
+        .p10-character{left:100px;top:300px;width:380px;height:325px;z-index:3}
+        .p10-jigboard{left:640px;top:30px;width:1240px;height:500px}
+        .p10-board{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none;z-index:6}
+        .p10-piece{position:absolute;padding:0;border:0;background:none;cursor:grab;pointer-events:auto;touch-action:none}
+        .p10-piece path{stroke:var(--c-ink);stroke-width:8}
+        .p10-piece .jig-label{font-size:36px;line-height:1.2;white-space:nowrap}
+        .p10-piece.is-dragging{cursor:grabbing;z-index:60}
+        .p10-piece.is-back{transition:transform .25s ease}
+        .p10-piece.is-used{visibility:hidden}
+
+        .p10-slots{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none;z-index:5}
+        .p10-slot{position:absolute}
+        .p10-slot .jig-label{font-size:40px;line-height:1.2;white-space:nowrap}
+        .p10-slot .jig-label.is-hint{font-size:110px;opacity:.5}
+        #p10Wrong,#p10Done{z-index:120}
     </style>
 </head>
 <body>
@@ -16,27 +32,132 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <div class="p11-character"><img src="img/p11_character.png" alt="미션 성공 캐릭터"></div>
+          <p class="guide-bubble is-center p10-bubble" id="p10Bubble">퍼즐 조각을 끌어<br>1번부터 4번까지<br>알맞은 순서로 놓아요!</p>
+          <div class="char-box p10-character"><img src="img/p10_character.png" alt="메인 캐릭터"></div>
+          <div class="jig-board p10-jigboard"></div>
+          <div class="p10-board" id="p10Board"></div>
+          <div class="jig-tray-label">슬라이드 퍼즐 조각</div>
+          <div class="jig-tray"></div>
+          <div class="p10-slots" id="p10Slots"></div>
 
-          <p class="end-title">미션 성공!</p>
-          <div class="end-panel">
-            <p class="end-desc">슬라이드를 만드는 과정을 알맞은 순서로 연결해<br>우리 동네 안전 발표 자료를 완성했어요!</p>
+          <div class="avatar-modal is-wrong is-off" id="p10Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body is-finish is-side">
+                <p class="avatar-popup-text is-small">다시 한번 생각해볼까요?</p>
+                <p class="avatar-popup-sub" style="font-size:44px">슬라이드를 만들 때는 믿을 수 있는 자료를 찾고<br>AI를 이용하여 슬라이드를 만든 후에는<br>답변을 확인해야 해요.</p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p10WrongOk" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
           </div>
-
-          <a href="page09.html" class="js-nav-effect end-btn-retry">
-            <img src="../../img/common/btn_retry.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_retry_on.png" data-src-over="../../img/common/btn_retry_over.png" data-sound="sound/click.mp3" alt="다시하기">
-          </a>
-          <a href="../gate03.html" class="js-nav-effect end-btn-next-lesson">
-            <img src="../../img/common/btn_next_lesson.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_next_lesson_on.png" data-src-over="../../img/common/btn_next_lesson_over.png" data-sound="sound/click.mp3" alt="다음 차시 학습하기">
-          </a>
+          <div class="avatar-modal is-off" id="p10Done">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">정답이에요!</p>
+                <p class="avatar-popup-sub">Gemini Notebook을 이용하면<br>내 자료로 슬라이드를 만들 수 있어요.</p>
+                <a href="page12.html" class="js-nav-effect avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+              </div>
+            </div>
+          </div>
         </main>
       </div>
     </div>
   </div>
   <div class="zoom-info" id="zoomInfo"></div>
 
-  <script src="../../js/header.js" data-title="완벽한 슬라이드 퍼즐 맞추기" data-next="../gate03.html"></script>
+  <script src="../../js/header.js" data-title="제미나이 Notebook 정복 퍼즐" data-next="page12.html"></script>
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const STEPS = [
+      { t: '믿을 수 있는<br>정보<br>수집하기' },
+      { t: '제미나이<br>Notebook에<br>문서<br>업로드하기' },
+      { t: '슬라이드<br>개요<br>작성<br>프롬프트<br>입력하기' },
+      { t: 'AI 답변 확인<br>및<br>발표 자료<br>완성하기' },
+    ];
+    const BS = 240, BM = 42, TS = 280, TM = 54, STEP = 279, TRAY_X = 694, TRAY_Y = 160;
+    const EDGES = [[1, 1, -1, 0], [-1, 1, 0, -1], [1, -1, 0, -1], [0, 1, -1, 1]];
+    const COLORS = [['#b463ca', '#a043ed'], ['#4bcc24', '#19aa73'], ['#ffcf0e', '#ffb70e'], ['#4e97ff', '#7272fe']];
+    const SPOTS = [0, 1, 2, 3].map((k) => [52 + 1818 * (k + .5) / 4 - BS / 2, 799 - BS / 2]);
+
+    const board = $('p10Board');
+    const slotsBox = $('p10Slots');
+    const stage = $('stage');
+    let filled = 0;
+
+    STEPS.forEach((st, k) => {
+      const slot = document.createElement('div');
+      slot.className = 'jig-slot p10-slot';
+      slot.style.cssText = 'left:' + (TRAY_X + k * STEP - TM) + 'px;top:' + (TRAY_Y - TM) + 'px';
+      slot.innerHTML = jigSvg(TS, TM, EDGES[k], null, 'p10-s' + k) + '<span class="jig-label is-hint" style="' + labelBox(TS, TM, EDGES[k], 0, 0) + '">' + (k + 1) + '</span>';
+      slotsBox.appendChild(slot);
+    });
+
+    const spots = shuffleArray(SPOTS);
+    const pieces = shuffleArray(STEPS.map((st, i) => ({ st, i, edges: EDGES[i], color: COLORS[i] })));
+    pieces.forEach((b, k) => {
+      const [x, y] = spots[k];
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'p10-piece';
+      el.style.cssText = 'left:' + (x - BM) + 'px;top:' + (y - BM) + 'px;width:' + (BS + BM * 2) + 'px;height:' + (BS + BM * 2) + 'px';
+      el.innerHTML = jigSvg(BS, BM, b.edges, b.color, 'p10-b' + k) + '<span class="jig-label" style="' + labelBox(BS, BM, b.edges, 0, 0) + '">' + b.st.t + '</span>';
+      board.appendChild(el);
+
+      el.addEventListener('pointerdown', (e) => {
+        if (el.dataset.placed) return;
+        e.preventDefault();
+        const s = stage.getBoundingClientRect().width / 1920;
+        const sx = e.clientX, sy = e.clientY;
+        el.setPointerCapture(e.pointerId);
+        el.classList.remove('is-back');
+        el.classList.add('is-dragging');
+        const mr = document.querySelector('main').getBoundingClientRect();
+        const slotAt = (cx, cy) => {
+          const x = (cx - mr.left) / s, y = (cy - mr.top) / s;
+          for (let k = 0; k < STEPS.length; k++) {
+            const l = TRAY_X + k * STEP;
+            if (x >= l && x <= l + TS && y >= TRAY_Y && y <= TRAY_Y + TS) return slotsBox.children[k];
+          }
+          return null;
+        };
+        const move = (ev) => { el.style.transform = 'translate(' + (ev.clientX - sx) / s + 'px,' + (ev.clientY - sy) / s + 'px)'; };
+        const up = (ev) => {
+          el.removeEventListener('pointermove', move);
+          el.removeEventListener('pointerup', up);
+          el.removeEventListener('pointercancel', up);
+          el.classList.remove('is-dragging');
+          const slot = slotAt(ev.clientX, ev.clientY);
+          if (slot && !slot.classList.contains('is-filled') && slot === slotsBox.children[b.i]) {
+            el.dataset.placed = '1';
+            el.classList.add('is-used');
+            el.style.transform = '';
+            playDrag();
+            slot.classList.add('is-filled');
+            slot.innerHTML = jigSvg(TS, TM, b.edges, b.color, 'p10-f' + b.i) + '<span class="jig-label" style="' + labelBox(TS, TM, b.edges, 0, 0) + '">' + b.st.t + '</span>';
+            filled += 1;
+            if (filled === STEPS.length) {
+              playCorrect();
+              setTimeout(() => $('p10Done').classList.remove('is-off'), 900);
+            }
+            return;
+          }
+          el.classList.add('is-back');
+          el.style.transform = '';
+          if (slot) {
+            playWrong();
+            setTimeout(() => $('p10Wrong').classList.remove('is-off'), 300);
+          }
+        };
+        el.addEventListener('pointermove', move);
+        el.addEventListener('pointerup', up);
+        el.addEventListener('pointercancel', up);
+      });
+    });
+    $('p10WrongOk').addEventListener('click', () => $('p10Wrong').classList.add('is-off'));
+  })();
+  </script>
 </body>
 </html>

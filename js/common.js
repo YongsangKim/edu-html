@@ -2344,7 +2344,7 @@ function resetImageSwap(root) {
    opts.w: 손가락 너비(px, 기본 110). 버튼이 화면 맨 아래라 손가락이 잘릴 때 줄여서 씀 */
 /* 말풍선 + 캐릭터 포즈 한 세트 바꾸기(사회 폰 실습 페이지 공용). 페이지에서 한 번 만들고 단계마다 say 를 부름.
    const say = initGuideSay({ bubble: $('bub'), img: $('char'), set: $('set') });   // set 은 .guide-set 요소(선택): 포즈에 맞는 좌표 클래스(.is-wink-point2 …)를 같이 바꿈
-   say('문구<br>문구', 'wink_point2');            // 문구 + 포즈(sa/img/sa_*.png 의 * 부분)
+   say('문구<br>문구', 'wink_point2');            // 문구 + 포즈(sa/img/character/sa_*.png 의 * 부분)
    say('문구', 'wink_point4', true);              // 세 번째 true 는 말풍선에 .is-medium(넓은 말풍선), 안 주면 뗌
    줄이 길어지면 .is-long(44px)을 자동으로 붙이고 .is-medium(넓은 말풍선)도 같이 붙임: 기본 모양으로 그려 본 줄 수가 opts.longLines(기본 5)줄 이상일 때. say('문구', 포즈, medium, true|false) 네 번째 값으로 강제로 켜고 끌 수 있음(직접 주면 .is-medium 은 따라붙지 않고 세 번째 값만 따름)
    문구가 빈 문자열('')이면 말풍선을 숨김.
@@ -2361,7 +2361,7 @@ function initGuideSay(opts) {
     return tops.size;
   };
   const dir = opts.dir || (img.getAttribute('src') || '').replace(/sa_[^/]*$/, '');
-  const poses = opts.poses || ['main', 'main_wave', 'wink_open', 'wink_point', 'wink_point2', 'wink_point3', 'wink_point4', 'wink_point5', 'wink_present', 'smile_present', 'point_front', 'wink_jump', 'happy_jump'];
+  const poses = opts.poses || ['main', 'main_wave', 'wink_open', 'wink_point', 'wink_point2', 'wink_point3', 'wink_point4', 'wink_present', 'smile_present', 'point_front', 'wink_jump', 'happy_jump'];
   poses.forEach((p) => { new Image().src = dir + 'sa_' + p + '.png'; });
   img.style.visibility = 'hidden';
   setTimeout(() => { img.style.visibility = ''; }, 1500);

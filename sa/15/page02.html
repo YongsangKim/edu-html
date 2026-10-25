@@ -6,30 +6,62 @@
     <title>진짜? 가짜? 뉴스 판별기!</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 기획서 3~4p. 기사 5장을 한 장씩 가운데에 보여 주고, 오른쪽 저장(정보 수집 가방) / 왼쪽 휴지통 칸으로 끌어 놓아 분류.
+        /* 기획서 3~4p. 기사 5장(제목·출처만)을 한 장씩 가운데에 보여 주고, [원문확인]으로 원문 팝업을 본 뒤에만 분류 가능(안 보고 놓으면 안내 문구), 오른쪽 저장(정보 수집 가방) / 왼쪽 휴지통 칸으로 끌어 놓아 분류.
            구조는 사회 6차시 page05(두 상자에 끌어 넣기)와 같음. 맞으면 칸으로 들어가고 다음 기사, 틀리면 제자리로 돌아오며 말풍선 문구 */
-        .p02-paper{position:absolute;left:413px;top:250px;width:1119px;min-height:390px;box-sizing:border-box;padding:30px 60px;background:var(--c-mist);border:solid 6px var(--c-ink);border-radius:16px;
+        /* 디자인 02p: 가운데 남색 판 + 하얀 기사 카드, 아래 알림 줄(로봇+문구), 양옆 휴지통·저장 + 말풍선. 휴지통·저장 그림은 img/p02_trash.png · p02_save.png (없으면 임시 도형) */
+        .p02-board{position:absolute;left:340px;top:226px;width:1240px;height:681px;box-sizing:border-box;background:#052a5e;border-radius:0 0 94px 94px;box-shadow:0 15px 0 0 rgba(52,39,94,0.3)}
+        .p02-paper{position:absolute;left:388px;top:249px;width:1143px;height:433px;box-sizing:border-box;padding:34px 60px 110px;background:var(--c-white);border-radius:24px;
           cursor:grab;touch-action:none;user-select:none;z-index:5;display:flex;flex-direction:column;gap:16px}
         .p02-paper.is-dragging{cursor:grabbing;z-index:60}
         .p02-paper.is-back{transition:transform .25s ease}
         .p02-paper.is-gone{transition:transform .5s ease,opacity .5s ease;opacity:0}
         .p02-paper h3{margin:0;font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.2;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all}
         .p02-src{margin:0;font-family:'Cafe24 Ssurround';font-size:34px;color:#1f5fd0;letter-spacing:-0.04em}
-        .p02-body{margin:0;font-family:'Pretendard';font-weight:500;font-size:36px;line-height:1.45;color:#222;letter-spacing:-0.03em;word-break:keep-all;background:var(--c-white);border-radius:16px;padding:20px}
-        .p02-msg{position:absolute;left:413px;top:660px;width:1119px;height:200px;box-sizing:border-box;padding:20px 40px;display:flex;align-items:center;justify-content:center;text-align:center;background:var(--c-purple);border:solid 5px var(--c-purple);border-radius:26px;
-          font-family:'Cafe24 Ssurround';font-size:54px;line-height:1.3;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all}
-        .p02-msg.is-right{color:#50fe74}
-        .p02-msg.is-wrong{color:#ff4b86}
+        .p02-open.card-btn.is-popup{position:absolute;left:50%;bottom:42px;margin-left:-150px;min-width:0;width:300px;height:80px;padding:6px 0 0;font-size:52px;cursor:pointer}
+        .p02-bar{position:absolute;left:340px;top:651px;width:1240px;height:200px;box-sizing:border-box;padding:0 40px 0 196px;display:flex;align-items:center;background:var(--c-white);border:solid 8px #052a5e;border-radius:94px;z-index:4;
+          font-family:'Cafe24 Ssurround';font-size:56px;line-height:1.2;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all}
+        .p02-bar:empty{display:none}
+        .p02-bar-av{position:absolute;left:347px;top:714px;width:170px;height:170px;margin:0;border-radius:50%;border:solid 8px #fff;background:#053c85;object-fit:cover;z-index:5}
+        .p02-bar-av.is-off{display:none}
 
-        .p02-zone{position:absolute;top:574px;width:275px;height:280px;box-sizing:border-box;border:solid 8px var(--c-ink);border-radius:30px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
-          font-family:'Cafe24 Ssurround';font-size:46px;color:var(--c-ink);letter-spacing:-0.05em}
-        .p02-zone svg{width:110px;height:110px;fill:none;stroke:currentColor;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
-        .p02-zone.is-trash{left:47px;background:#fde3e1}
-        .p02-zone.is-save{left:1606px;background:#dff3e4}
-        .p02-zone small{font-family:'Pretendard';font-weight:600;font-size:24px;letter-spacing:-0.03em}
+        .p02-zone{position:absolute;top:530px;box-sizing:border-box;z-index:3}
+        .p02-zone.is-trash{left:22px;width:318px;height:385px}
+        .p02-zone.is-save{left:1570px;width:327px;height:355px;top:560px}
+        .p02-zone img{display:block;width:100%;height:100%;object-fit:contain}
+        .p02-zone .fb{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:70px;box-sizing:border-box;border-radius:26px 26px 14px 14px;font-family:'Cafe24 Ssurround';font-size:80px;color:#fff;letter-spacing:-0.05em}
+        .p02-zone.is-trash .fb{background:#9bc23a}
+        .p02-zone.is-save .fb{background:#f6b50f}
+        .p02-zone.has-img .fb{display:none}
+        .p02-zone.is-over{filter:drop-shadow(0 0 16px #ffe27a)}
         .p02-zone.is-catch{animation:p02-catch .6s ease}
         @keyframes p02-catch{40%{transform:scale(1.07)}}
+        .guide-bubble.p02-tip{bottom:auto;width:370px;min-height:0;height:120px;padding:10px 8px 4px;font-size:38px;z-index:3;filter:hue-rotate(-40deg)}
+        .p02-tip.is-trash{left:8px;top:372px}
+        .p02-tip.is-save{left:1545px;top:410px}
+        .p02-tip.is-save::before{transform:scaleX(-1)}
+        .p02-pop{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:100;background:rgba(27,23,56,.6);display:none}
+        .p02-pop.is-on{display:block}
+        .p02-pop-panel{position:absolute;left:360px;top:24px;width:1200px;box-sizing:border-box;padding:20px 40px 24px;background:var(--c-white);border:solid 6px var(--c-purple);border-radius:36px;box-shadow:0 12px 0 0 rgba(60,20,120,.35);display:flex;flex-direction:column;align-items:center;gap:14px}
+        .p02-pop-panel h3{margin:0;font-family:'Cafe24 Ssurround';font-size:50px;color:var(--c-purple);letter-spacing:-0.05em}
+        .p02-site{width:100%;box-sizing:border-box;min-height:0;max-height:620px;border:solid 4px #b9bfd6;border-radius:14px;overflow-x:hidden;overflow-y:auto;background:#fff;font-family:'Pretendard';color:#222;text-align:left}
+        .p02-site-bar{display:flex;align-items:center;gap:12px;height:46px;padding:0 20px;background:#e9ecf5;font-size:24px;color:#556}
+        .p02-site-bar i{display:block;width:14px;height:14px;border-radius:50%;background:#c4c9de}
+        .p02-site-bar span{flex:1;height:34px;margin-left:10px;padding:0 16px;display:flex;align-items:center;border-radius:17px;background:#fff;font-size:22px}
+        .p02-site-head{display:flex;align-items:center;gap:16px;height:64px;padding:0 34px;font-size:32px;font-weight:800;color:#fff;letter-spacing:-0.03em}
+        .p02-site-body{padding:20px 36px 22px;font-size:30px;line-height:1.45;font-weight:500;letter-spacing:-0.03em;word-break:keep-all}
+        .p02-site-body h4{margin:0 0 12px;font-size:36px;font-weight:800;letter-spacing:-0.04em}
+        .p02-site-body .q{margin:0 0 14px;padding:14px 22px;border-radius:14px;background:#f3f5fb}
+        .p02-site-body .src{margin:0 0 12px;font-size:26px;color:#1f5fd0;font-weight:700}
+        .p02-cm{margin:0 0 8px;padding:8px 16px;border-radius:12px;background:#f1f1f4;font-size:26px}
+        .p02-cm b{margin-right:10px;color:#667}
+        .p02-banner{margin:16px 0 0;padding:16px 24px;border-radius:14px;background:#ffe9a8;font-size:30px;font-weight:800;text-align:center;color:#7a4a00}
+        .p02-info-row{display:flex;gap:16px;margin:0 0 6px;font-size:28px}
+        .p02-info-row b{flex:0 0 160px;color:#556}
+        .p02-err{min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-size:40px;font-weight:800;color:#555}
+        .p02-err svg{width:110px;height:110px;fill:none;stroke:#999;stroke-width:3;stroke-linecap:round}
         #p02Done{z-index:120}
+
+        .ask-pill.p02-ask{width:1460px}
     </style>
 </head>
 <body>
@@ -38,15 +70,23 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <p class="ask-pill is-fit"><span>믿을 수 있는 기사는 오른쪽 저장으로!<br>가짜 뉴스는 왼쪽 휴지통으로! 밀어 주세요</span></p>
-          <div class="p02-zone is-trash drop-zone" data-type="trash">
-            <svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>휴지통<small>출처가 불분명해요</small>
-          </div>
-          <div class="p02-zone is-save drop-zone" data-type="save">
-            <svg viewBox="0 0 24 24"><path d="M5 9h14l-1 11H6zM9 9V7a3 3 0 016 0v2M12 13v4M10 15h4"/></svg>저장<small>정보 수집 가방</small>
-          </div>
+          <p class="ask-pill p02-ask"><span>믿을 수 있는 기사는 오른쪽 저장으로!<br>가짜 뉴스는 왼쪽 휴지통으로! 넣어 주세요!</span></p>
+          <div class="p02-board"></div>
+          <p class="guide-bubble is-center p02-tip is-trash">출처가 불분명해요.</p>
+          <p class="guide-bubble is-center p02-tip is-save">정보를 수집해요.</p>
+          <div class="p02-zone is-trash drop-zone" data-type="trash"><div class="fb">휴지통</div><img src="img/p02_trash.png" alt="휴지통" onload="this.parentNode.classList.add('has-img')" onerror="this.remove()"></div>
+          <div class="p02-zone is-save drop-zone" data-type="save"><div class="fb">저장</div><img src="img/p02_save.png" alt="저장" onload="this.parentNode.classList.add('has-img')" onerror="this.remove()"></div>
           <div class="p02-paper" id="p02Paper"></div>
-          <p class="p02-msg" id="p02Msg"></p>
+          <img class="p02-bar-av is-off" id="p02Av" src="../../img/common/avatar_smile.png" alt="">
+          <p class="p02-bar" id="p02Msg"></p>
+
+          <div class="p02-pop" id="p02Pop">
+            <div class="p02-pop-panel">
+              <h3>원문 내용을 확인하세요.</h3>
+              <div class="p02-site" id="p02Site"></div>
+              <button type="button" class="card-btn is-popup next-btn js-sfx" id="p02PopOk" data-sound="sound/click.mp3">확인</button>
+            </div>
+          </div>
 
           <div class="avatar-modal is-off" id="p02Done">
             <div class="avatar-popup-panel">
@@ -70,33 +110,43 @@
   <script>
   (function () {
     const ARTICLES = [
-      { title: '우리 동네 안심 귀갓길을 안내합니다', src: '출처: OO시청 안전총괄과', body: '“가로등과 CCTV가 있는 안심 귀갓길을 안내합니다. 자세한 위치와 담당 부서 연락처는 시청 안내에서 확인할 수 있습니다.”', type: 'save' },
-      { title: '오늘 밤 공원이 위험하대요! 모두에게 전달하세요!', src: '출처: 익명 게시판', body: '“친구에게 들었는데 오늘 밤 공원에 위험한 사람이 나타난대요. 확인한 곳은 모르지만 친구 10명에게 꼭 전달하세요!”', type: 'trash' },
-      { title: '내 개인정보를 지키는 생활 수칙', src: '출처: 개인정보보호위원회 청소년 안내 자료', body: '“비밀번호와 집 주소를 모르는 사람에게 알려 주지 마세요. 출처가 불분명한 링크도 누르지 마세요.”', type: 'save' },
-      { title: '친구 사진을 몰래 올리면 인기 최고!', src: '출처: 작성자를 알 수 없는 소문 모음글', body: '“친구의 실수하는 모습을 몰래 찍어 단체 채팅방에 올려 보세요. 친구가 싫다고 해도 장난이라고 하면 괜찮아요.”', type: 'trash' },
-      { title: '사진을 올리기 전, 친구에게 물어보세요', src: '출처: OO시 교육청 디지털 예절 안내', body: '“친구의 사진이나 영상을 인터넷에 올리기 전에는 허락을 받아야 합니다. 댓글에서도 서로 존중하는 말을 사용하세요.”', type: 'save' },
+      { title: '우리 동네 안심 귀갓길을 안내합니다', src: '출처: OO시청 안전총괄과', type: 'save',
+        site: { url: 'www.oo-city.go.kr', color: '#2d5fa8', head: 'OO시청', html: '<h4>안심 귀갓길 안내</h4><p class="q">“가로등과 CCTV가 있는 안심 귀갓길을 안내합니다. 자세한 위치와 담당 부서 연락처는 시청 안내에서 확인할 수 있습니다.”</p><p class="src">출처: OO시청 안전총괄과</p><p class="p02-info-row"><b>담당 부서</b>안전총괄과</p><p class="p02-info-row"><b>연락처</b>000-0000-0000</p>' } },
+      { title: '오늘 밤 공원이 위험하대요! 모두에게 전달하세요!', src: '출처: 익명 게시판', type: 'trash',
+        site: { url: 'www.anonymous-board.kr', color: '#555a66', head: '익명 게시판', html: '<h4>오늘 밤 공원이 위험하대요! 모두에게 전달하세요!</h4><p class="q">“친구에게 들었는데 오늘 밤 공원에 위험한 사람이 나타난대요. 확인한 곳은 모르지만 친구 10명에게 꼭 전달하세요!”</p><p class="src">출처: 익명 게시판</p><p class="p02-cm"><b>익명1</b>이거 거짓말입니다! 속지 마세요!</p><p class="p02-cm"><b>익명2</b>헉! 빨리 친구에게 알려야겠어요</p><p class="p02-cm"><b>익명3</b>요즘 누가 이런 걸 믿어?</p>' } },
+      { title: '내 개인정보를 지키는 생활 수칙', src: '출처: 개인정보보호위원회 청소년 안내 자료', type: 'save',
+        site: { url: 'www.privacy.go.kr', color: '#1f8a70', head: '개인정보보호위원회', html: '<h4>청소년 안내 자료</h4><p class="q">“비밀번호와 집 주소를 모르는 사람에게 알려 주지 마세요. 출처가 불분명한 링크도 누르지 마세요.”</p><p class="src">출처: 개인정보보호위원회 청소년 안내 자료</p><p class="p02-banner">내 개인정보를 지키는 생활 수칙 바로가기</p>' } },
+      { title: '친구 사진을 몰래 올리면 인기 최고!', src: '출처: 작성자를 알 수 없는 소문 모음글', type: 'trash',
+        site: { url: 'www.rumor-board.kr/view', color: '#555a66', head: '게시판', html: '<div class="p02-err"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>관리자에 의해 삭제된 게시물입니다.</div>' } },
+      { title: '사진을 올리기 전, 친구에게 물어보세요', src: '출처: OO시 교육청 디지털 예절 안내', type: 'save',
+        site: { url: 'www.oo-office-edu.go.kr', color: '#7a4ab8', head: 'OO시 교육청', html: '<h4>[공지] OO시 교육청 디지털 예절 안내 자료</h4><p class="q">“친구의 사진이나 영상을 인터넷에 올리기 전에는 허락을 받아야 합니다. 댓글에서도 서로 존중하는 말을 사용하세요.”</p><p class="src">출처: OO시 교육청 디지털 예절 안내</p><p class="p02-info-row"><b>제목</b>사진을 올리기 전, 친구에게 물어보세요</p>' } },
     ];
+
     const paper = $('p02Paper');
     const zones = Array.from(document.querySelectorAll('.p02-zone'));
     const stage = $('stage');
     let idx = 0;
     let busy = false;
+    let viewed = false;
 
     const msg = $('p02Msg');
     const MSG0 = '';
     let msgTimer = null;
+    const HOLD = /[?&]hold/.test(location.search);
     function say(html, cls) {
       msg.innerHTML = html;
-      msg.className = 'p02-msg ' + (cls || '');
+      msg.className = 'p02-bar ' + (cls || '');
+      $('p02Av').classList.toggle('is-off', !html);
       clearTimeout(msgTimer);
-      msgTimer = setTimeout(() => say(MSG0), 2500);
+      if (!HOLD) msgTimer = setTimeout(() => say(MSG0), 2500);
     }
     function show() {
       const a = ARTICLES[idx];
       busy = false;
+      viewed = false;
       paper.className = 'p02-paper';
       paper.style.cssText = '';
-      paper.innerHTML = '<h3>' + a.title + '</h3><p class="p02-src">' + a.src + '</p><p class="p02-body">' + a.body + '</p>';
+      paper.innerHTML = '<h3>' + a.title + '</h3><p class="p02-src">' + a.src + '</p><button type="button" class="card-btn is-popup p02-open js-sfx" data-sound="sound/click.mp3">원문 확인</button>';
     }
 
     /* 마우스 위치가 아니라 끄는 기사(paper)가 칸에 조금이라도 닿으면 그 칸(겹친 면적이 가장 큰 칸) */
@@ -113,7 +163,7 @@
     };
 
     paper.addEventListener('pointerdown', (e) => {
-      if (busy) return;
+      if (busy || e.target.closest('.p02-open')) return;
       e.preventDefault();
       const s = stage.getBoundingClientRect().width / 1920;
       const sx = e.clientX, sy = e.clientY;
@@ -139,6 +189,13 @@
         zones.forEach((z) => z.classList.remove('is-over'));
         const z = zoneAt();
         const a = ARTICLES[idx];
+        if (z && !viewed) {
+          paper.classList.add('is-back');
+          paper.style.transform = '';
+          playWrong();
+          say('정말 믿을 수 있는 기사인지 [원문 확인]을 눌러 원문과 비교해보세요!', 'is-wrong');
+          return;
+        }
         if (z && z.dataset.type === a.type) {
           busy = true;
           playCorrect();
@@ -150,7 +207,7 @@
           paper.style.transform = 'translate(' + gx + 'px,' + gy + 'px) scale(.25)';
           z.classList.add('is-catch');
           setTimeout(() => z.classList.remove('is-catch'), 700);
-          say('신뢰할 수 있는 정보를<br>잘 찾았어요!', 'is-right');
+          say('신뢰할 수 있는 정보를 잘 찾았어요!', 'is-right');
           idx += 1;
           setTimeout(() => {
             if (idx >= ARTICLES.length) $('p02Done').classList.remove('is-off');
@@ -162,7 +219,7 @@
         paper.style.transform = '';
         if (z) {
           playWrong();
-          say('기사의 출처를<br>다시 한번 확인해 볼까요?', 'is-wrong');
+          say('기사의 출처를 다시 한번 확인해 볼까요?', 'is-wrong');
         }
       };
       paper.addEventListener('pointermove', move);
@@ -170,7 +227,18 @@
       paper.addEventListener('pointercancel', up);
     });
 
+    paper.addEventListener('click', (e) => {
+      if (busy || !e.target.closest('.p02-open')) return;
+      playClick();
+      const s = ARTICLES[idx].site;
+      $('p02Site').innerHTML = '<div class="p02-site-bar"><i></i><i></i><i></i><span>' + s.url + '</span></div><div class="p02-site-head" style="background:' + s.color + '">' + s.head + '</div><div class="p02-site-body">' + s.html + '</div>';
+      $('p02Pop').classList.add('is-on');
+      viewed = true;
+    });
+    $('p02PopOk').addEventListener('click', () => $('p02Pop').classList.remove('is-on'));
+
     show();
+    if (HOLD) say('기사의 출처를 다시 한번 확인해 볼까요?', 'is-wrong');
   })();
   </script>
 </body>

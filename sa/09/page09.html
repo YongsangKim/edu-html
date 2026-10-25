@@ -57,6 +57,7 @@
         .p09-phone.is-wait .scr-stop{display:flex}
         .has-kb .scr-input{bottom:372px}
         .phone-screen:not(.has-kb) .kbd-cj{display:none}
+        .phone-screen.has-kb .phone-nav{display:none}
         .scr-chat .kbd-cj{z-index:6}
 
         .p09-chat{position:absolute;left:0;right:0;top:122px;bottom:176px;box-sizing:border-box;padding:0 18px 14px;display:flex;flex-direction:column;justify-content:flex-start;gap:20px;overflow:hidden}
@@ -101,7 +102,7 @@
         <main class="bg-default">
           <div class="guide-set is-main" id="p09Set">
             <p class="guide-bubble is-center" id="p09Bubble"></p>
-            <div class="guide-character"><img id="p09Char" src="../img/sa_main.png" alt="메인 캐릭터"></div>
+            <div class="guide-character"><img id="p09Char" src="../img/character/sa_main.png" alt="메인 캐릭터"></div>
           </div>
 
           <div class="phone-frame has-cam p09-phone" id="p09Phone" data-screen="home"><div class="phone-screen" id="p09Screen">
@@ -231,7 +232,7 @@
     const charImg = $('p09Char');
     const charSet = $('p09Set');
     const POSES = ['main', 'wink_point', 'wink_point2', 'wink_point3', 'wink_point4', 'wink_present', 'main_wave', 'happy_jump', 'point_front'];
-    POSES.forEach((p) => { new Image().src = '../img/sa_' + p + '.png'; });
+    POSES.forEach((p) => { new Image().src = '../img/character/sa_' + p + '.png'; });
     const say = initGuideSay({ bubble: bubble, img: charImg, set: charSet });
     /* 손가락 보정값 dx,dy (?edit 로 맞춘 값을 여기에 적음) */
     const FG = { app: [15, -37], input: [-142, -18], send: [22, -5] };
@@ -291,7 +292,7 @@
       b.className = 'card-btn js-sfx ' + (cls || '');
       b.dataset.sound = 'sound/click.mp3';
       b.textContent = label;
-      b.addEventListener('click', () => { clearFingers(); onclick(); });
+      b.addEventListener('click', () => { playClick(); clearFingers(); onclick(); });
       return b;
     }
     const nextBtn = $('p09Next');
@@ -390,7 +391,7 @@
         b.className = 'card-btn p09-ask js-sfx';
         b.dataset.sound = 'sound/click.mp3';
         b.textContent = asks[q];
-        b.addEventListener('click', () => { clearFingers(); setInput(asks[q]); stepSend(q); });
+        b.addEventListener('click', () => { playClick(); clearFingers(); setInput(asks[q]); stepSend(q); });
         setSide(b);
       };
       if (q === 0) { kb(true); go(); return; }
@@ -435,7 +436,7 @@
       const opts = $('p09FcOpts');
       opts.className = 'p09-fc-opts p09-fc-ox';
       opts.innerHTML = '';
-      [['o', true], ['x', false]].forEach(([k, v]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'ox-pick js-sfx is-' + k; b.dataset.sound = 'sound/click.mp3'; b.setAttribute('aria-label', k.toUpperCase()); b.innerHTML = '<img src="../../img/common/icon_' + k + '.png" alt="' + k.toUpperCase() + '">'; const im = b.firstChild; b.addEventListener('pointerenter', () => { im.src = '../../img/common/icon_' + k + '_on.png'; }); b.addEventListener('pointerleave', () => { im.src = '../../img/common/icon_' + k + '.png'; }); b.addEventListener('click', () => { clearFingers();
+      [['o', true], ['x', false]].forEach(([k, v]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'ox-pick js-sfx is-' + k; b.dataset.sound = 'sound/click.mp3'; b.setAttribute('aria-label', k.toUpperCase()); b.innerHTML = '<img src="../../img/common/icon_' + k + '.png" alt="' + k.toUpperCase() + '">'; const im = b.firstChild; b.addEventListener('pointerenter', () => { im.src = '../../img/common/icon_' + k + '_on.png'; }); b.addEventListener('pointerleave', () => { im.src = '../../img/common/icon_' + k + '.png'; }); b.addEventListener('click', () => { playClick(); clearFingers();
         fc.classList.add('is-off');
         const d = job.qa[q];
         if (v === d.ok) score += 1;
