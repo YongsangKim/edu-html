@@ -1,4 +1,14 @@
 <!DOCTYPE html>
+<!--
+  [편집 모드 사용법] 주소 뒤에 ?edit 을 붙여 열 때만 동작(평소 화면은 그대로)
+    page09.html?edit&step=26&place=park
+      step=N     N번째 단계(0부터)에서 바로 시작. 위쪽 노란 막대의 [◀ 이전][다음 ▶], ] [ , PageDown/PageUp 으로도 이동
+      place=이름 library 도서관(기본) · mart 마트 · post 우체국 · park 공원
+    자주 쓰는 단계: 17~21 효과·블러 고르기 · 22,23 도구 탭 밀기·얼굴 트래킹 · 24 트래킹 영역 설정 · 25 트래킹 중(자동으로 안 넘어감) · 26 영상 재생 확인 · 32 저장 완료 · 33 영상 재생
+    박스·손가락 좌표: 박스를 클릭 → 방향키 1px(Shift 10px) 이동, Alt+방향키 폭·높이. 노란 막대에 나오는 값을 STEPS 의 그 단계(hot / finger / swipe / swhand)에 붙여 넣음
+    손가락 'finger = [dx, dy]' · 밀기 손 'swhand = [dx, dy]' · 로고 모션 위치 VL.LOGO = [x, y, 폭, 높이] (vllo-ui.js, 단계 10 같은 로딩 화면에서 맞춤)
+    얼굴 따라가기(PLACES 의 size·keys)는 7페이지 ?edit&scene=1~5 에서 영상을 멈춰 가며 맞춘 뒤 [복사]한 값을 붙여 넣음 (scene 1=library · 2=mart · 3=post · 4=park)
+-->
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -113,7 +123,7 @@
         .v-rdot{display:block;width:16px;height:16px;border-radius:50%;border:2px solid #fff;background:#e0373a}
         /* 클립 도구 */
         .v-chev{width:16px;height:18px;color:#cdced1}
-        .v-tool{position:absolute;width:70px;margin-left:-35px;text-align:center;font-size:12px;color:#d3d4d7}
+        .v-tool{position:absolute;width:70px;margin-left:-35px;text-align:center;font-size:14px;color:#d3d4d7}
         .v-tool .v-ic{position:relative;display:block;width:27px;height:27px;margin:12px auto 5px}
         .v-tool.is-dim{color:#6b6c70}
         .v-tool.is-dim .v-ic{color:#6b6c70}
@@ -126,8 +136,8 @@
         .v-row2-fix .v-ic{position:relative;display:block;width:25px;height:25px;margin:2px auto 6px}
         .v-row2-clip{position:absolute;left:100px;top:0;width:440px;height:80px;overflow:hidden}
         .v-row2-in{position:absolute;left:0;top:0;width:900px;height:80px;transition:transform .25s ease}
-        .v-r2{position:absolute;top:0;width:90px;height:80px;text-align:center;font-size:16px;color:#d3d4d7;padding-top:14px}
-        .v-r2 .v-ic{position:relative;display:block;width:26px;height:26px;margin:1px auto 5px}
+        .v-r2{position:absolute;top:0;width:90px;height:80px;text-align:center;font-size:16px;color:#d3d4d7;padding-top:16px}
+        .v-r2 .v-ic{position:relative;display:block;width:26px;height:26px;margin:2px auto 5px}
         .v-r2 span{display:block;line-height:1.15}
         .v-tools4 .v-tool .v-ic{margin-top:6px}
         .v-aiopt{position:absolute;left:0;width:540px;top:974px;height:34px;display:flex;align-items:center;justify-content:flex-end;gap:7px;padding-right:20px;font-size:12px;color:#d3d4d7}
@@ -143,7 +153,7 @@
         .v-kf .v-ic{left:6px;top:20px;width:14px;height:14px}
         .v-kf .v-tog{position:absolute;left:27px;top:38px;width:22px;height:13px}
         .v-kf .v-tog b{width:10px;height:10px;left:2px;top:1.5px}
-        .v-all{position:absolute;left:100px;top:6px;width:60px;font-size:16px;text-align:center}
+        .v-all{position:absolute;left:100px;top:6px;width:88px;height:80px;font-size:16px;text-align:center;padding-top:12px}
         .v-row2-in2{position:absolute;left:230px;top:0;width:310px;height:80px}
         .v-new2{position:absolute;left:41px;top:4px;height:10px;padding:0 2px;font-size:7px;line-height:10px;border-radius:2px;background:#ee4374;color:#fff}
         /* 전체 화면(목록·로딩) */
@@ -159,7 +169,7 @@
         .v-mp .v-ic{position:relative;width:22px;height:22px;color:#dcdddf}
         .v-lv{width:30px;height:30px}
         .v-sel{position:absolute;left:489px;top:458px;font-size:14px;color:#d3d4d7}
-        .v-load{position:absolute;left:22px;top:507px;width:160px;height:43px;border-radius:21px;background:#303135;color:#bfc0c3;font-size:12.3px;display:flex;align-items:center;gap:9px;padding-left:14px}
+        .v-load{position:absolute;left:22px;top:507px;width:170px;height:43px;border-radius:21px;background:#303135;color:#bfc0c3;font-size:16px;display:flex;align-items:center;gap:9px;padding-left:14px}
         .v-load .v-ic{position:relative;width:20px;height:20px}
         .v-new{position:absolute;left:160px;top:1036px;width:220px;height:82px;border-radius:41px;background:linear-gradient(#ff5b8b,#ee2f66);color:#fff;text-align:center;padding-top:12px;z-index:3}
         .v-new b{display:flex;align-items:center;justify-content:center;gap:6px;font-size:19px;font-weight:700;line-height:1}
@@ -168,7 +178,7 @@
         .v-places{position:absolute;left:22px;top:570px;width:496px;display:flex;flex-wrap:wrap;gap:20px 14px}
         .v-places button{position:relative;width:241px;padding:0;border:0;background:none;cursor:pointer;text-align:left}
         .v-places img{display:block;width:241px;height:134px;object-fit:cover;border-radius:10px}
-        .v-places span{display:block;margin-top:8px;font-size:15px;font-weight:700;color:#fff}
+        .v-places span{display:block;margin-top:8px;font-size:20px;font-weight:700;color:#fff}
         .v-places button:hover img{box-shadow:0 0 0 4px #ff0e7f}
         /* 로딩 */
         .v-full.is-load{background:#17181c}
@@ -177,7 +187,7 @@
         .v-lmsg{position:absolute;left:0;width:540px;top:505px;text-align:center;font-size:24px;color:#e4e5e8}
         .v-lbar{position:absolute;left:29px;top:573px;width:482px;height:6px;background:#3b3c40;border-radius:3px;overflow:hidden}
         .v-lbar i{display:block;height:100%;width:0;background:#e9e9ea}
-        .v-lpct{position:absolute;left:478px;top:583px;font-size:18px;color:#aeafb2;width:34px;text-align:right}
+        .v-lpct{position:absolute;left:478px;top:583px;font-size:20px;color:#aeafb2;width:34px;text-align:right}
         .v-lwarn{position:absolute;left:0;width:540px;top:627px;text-align:center;font-size:20px;line-height:1.4em;color:#d8d9dc;display:flex;justify-content:center;gap:9px}
         .v-lwarn .v-ic{position:relative;width:32px;height:32px}
         .v-tip{position:absolute;left:0;top:895px;width:540px;height:275px;background:#232428;text-align:center;padding-top:34px;font-size:15px;color:#fff}
@@ -194,29 +204,18 @@
         .v-aclip.is-blur .v-an{color:#fff;font-size:13px;font-weight:500;top:2px}
         .v-aclip.is-blur .v-an .v-ic{color:#fff;width:14px;height:14px}
         .v-trg{position:absolute;left:4px;top:24px;right:0;height:40px;background:rgba(66,150,235,.75);color:#fff;font-size:12px;padding:8px 4px}
-        .v-kpanel{position:absolute;left:0;top:534px;width:540px;height:636px;background:#2a2b2f}
-        .v-align{position:absolute;left:0;top:545px;width:540px;height:60px;display:flex;justify-content:space-around;padding:0 20px;font-size:11px;color:#cdced1;z-index:2}
+        .v-kpanel{position:absolute;left:0;top:546px;width:540px;height:636px;background:#2a2b2f}
+        .v-align{position:absolute;left:0;top:557px;width:540px;height:60px;display:flex;justify-content:space-around;padding:0 20px;font-size:18px;color:#cdced1;z-index:2}
         .v-align span{width:100px;text-align:center;padding-top:36px;position:relative}
         .v-align span.is-on{color:#3d93e6}
         .v-align .v-ic{position:absolute;left:34px;top:6px;width:26px;height:26px;color:inherit}
-        .v-input{position:absolute;left:7px;top:615px;width:457px;height:52px;border-radius:5px;background:#fff;color:#111;font-size:24px;padding:15px 12px;z-index:2}
-        .v-input span{border-right:2px solid #111;padding-right:1px}
+        .v-input{position:absolute;left:7px;top:640px;width:457px;height:52px;border-radius:5px;background:#fff;color:#111;font-size:24px;padding:15px 12px;z-index:2}
+        .v-input span{border-right:2px solid #111;padding-right:1px;font-weight:600}
         .v-x{position:absolute;right:16px;top:16px;width:20px;height:20px;border-radius:50%;background:#111;display:block}
         .v-x:before,.v-x:after{content:'';position:absolute;left:5px;top:9px;width:10px;height:2px;background:#fff;transform:rotate(45deg)}
         .v-x:after{transform:rotate(-45deg)}
-        .v-ok{position:absolute;left:477px;top:615px;width:52px;height:52px;border-radius:5px;background:#3a3b3f;z-index:2}
+        .v-ok{position:absolute;left:477px;top:640px;width:52px;height:52px;border-radius:5px;background:#3a3b3f;z-index:2}
         .v-ok .v-ic{position:relative;width:26px;height:26px;margin:13px;color:#d3d4d7}
-        .v-kb{position:absolute;left:0;top:676px;width:540px;height:494px;background:#e9eaee;z-index:3;color:#222}
-        .v-kt{display:flex;justify-content:space-around;height:56px;padding:12px 18px;background:#ececf0}
-        .v-kt .v-ic{position:relative;width:26px;height:26px;color:#333}
-        .v-kr{display:flex;gap:10px;padding:0 9px;margin-top:10px;height:56px}
-        .v-kr.is-in{padding:0 34px}
-        .v-kr b{flex:1 1 0;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#fff;box-shadow:0 2px 0 rgba(0,0,0,.12);font-size:19px;font-weight:400;color:#222}
-        .v-kr.is-n b{background:transparent;box-shadow:none;font-size:22px}
-        .v-kr b.is-w{flex:0 0 52px;background:#d1d3da;font-size:13px}
-        .v-kr b svg{width:22px;height:22px}
-        .v-kr b.is-sp{flex:1 1 160px;background:#fff}
-        .v-kr b.is-ent{background:#d1d3da}
         .v-knav{position:absolute;left:0;bottom:0;width:540px;height:56px;display:flex;justify-content:space-around;align-items:center;color:#555;font-size:18px}
         .v-knav .v-ic{position:relative;width:22px;height:22px}
         .v-crown2{position:absolute;left:55px;top:975px;width:14px;height:14px;color:#ff3d73;display:block;z-index:3}
@@ -382,13 +381,13 @@
     /* 장소별 영상: video 는 7페이지와 같은 영상, thumb 는 영상 첫 장면 사진, size=가리개 지름(영상 폭 비율), keys=[초, 좌우, 상하] 얼굴 중심(영상 폭·높이 0~1) */
     const PLACES = {
       mart: { name: '마트', thumb: 'p07_thumb_2', video: 'video/v2.mp4', words: ['여기는', '우리', '동네', '마트'], err: '동내', bad: 2, size: 0.10,
-        keys: [[0, .44, .155], [.84, .43, .165], [1.6, .40, .15], [2.4, .325, .14], [3.2, .215, .115], [4, .065, .125], [4.6, -.08, .12], [5, -.15, .12]] },
+        keys: [[0, .44, .155], [.84, .43, .165], [1.6, .4, .15], [2.4, .325, .14], [3.2, .241, .144], [4, .122, .119], [4.6, -.005, .113], [5, -.15, .12]] },
       post: { name: '우체국', thumb: 'p07_thumb_3', video: 'video/v3.mp4', words: ['여기는', '우리', '동네', '우체국'], err: '우채국', bad: 3, size: 0.085,
-        keys: [[0, .46, .20], [.84, .48, .20], [1.6, .52, .185], [2.4, .55, .19], [3.2, .59, .19], [4, .635, .20], [5, .635, .20]] },
-      library: { name: '도서관', thumb: 'p07_thumb_1', video: 'video/v1.mp4', words: ['여기는', '우리', '동네', '도서관'], err: '도서간', bad: 3, size: 0.115,
-        keys: [[0, .53, .25], [.82, .51, .25], [1.6, .525, .23], [2.4, .43, .235], [3.2, .245, .205], [4, .004, .30], [4.6, -.12, .32], [5, -.2, .32]] },
+        keys: [[0, .475, .22], [.84, .487, .224], [1.6, .528, .193], [2.4, .553, .203], [3.2, .601, .208], [4, .635, .2], [5, .64, .208]] },
+      library: { name: '도서관', thumb: 'p07_thumb_1', video: 'video/v1.mp4', words: ['여기는', '우리', '동네', '도서관'], err: '도서간', bad: 3, size: .115,
+        keys: [[0, .534, .226], [.82, .521, .226], [1.6, .525, .23], [2.4, .457, .231], [3.2, .252, .233], [3.64, .114, .2], [4, .004, .3], [4.6, -.12, .32], [5, -.2, .32]] },
       park: { name: '공원', thumb: 'p07_thumb_4', video: 'video/v4.mp4', words: ['여기는', '우리', '동네', '공원'], err: '공언', bad: 3, size: 0.085,
-        keys: [[0, .635, .20], [.8, .625, .20], [1.6, .59, .20], [2.4, .575, .18], [3.2, .455, .185], [4, .347, .164], [4.6, .27, .165], [5, .20, .165]] }
+        keys: [[0, .635, .2], [.8, .625, .2], [1.6, .59, .2], [2.4, .533, .21], [3.2, .457, .208], [4, .347, .164], [4.6, .267, .189], [5, .215, .158]] }
     };
     const st = { pl: null, i: 0 };
     const screen = $('p09Screen'), vl = $('vl'), stack = $('vlStack'), hots = $('vlHots'), bubble = $('p09Bubble'), right = $('p09Right'), nextBtn = $('p09Next');
@@ -443,35 +442,35 @@
     const STEPS = [
       { home: true, bubble: 'VLLO를 클릭해요.', hot: [[200, 520, 140, 170]], homeHot: true },
       { scr: 'list', place: true, bubble: '우리 동네를 소개하는<br>브이로그를 만들어볼까요?<br>원하는 장소를 하나 선택해요.' },
-      { scr: 'audio', view: 1, bubble: '먼저, 우리 동네를 소개해봐요.<br>음성 녹음을 클릭해요.', hot: [[0, 969, 80, 75]], finger: [10, -40] },
-      { scr: 'record', view: 1, bubble: '녹음 버튼을 클릭해<br>우리 동네를 소개하는 말을<br>녹음해봐요.', hot: [[228, 978, 84, 84]], info: true },
-      { scr: 'record', opt: { rec: 1 }, view: 1, bubble: '녹음이 완료되면<br>정지 버튼을 클릭해요.', tts: true, hot: [[228, 978, 84, 84]] },
-      { scr: 'recdone', view: 1, bubble: '완료 버튼을 클릭해요.', hot: [[200, 1112, 324, 55]], finger: [-2, 34] },
+      { scr: 'audio', view: 1, bubble: '먼저, 우리 동네를 소개해봐요.<br>음성 녹음을 클릭해요.', hot: [[0, 969, 80, 75]], finger: [10, -40], pose: 'wink_point4' },
+      { scr: 'record', view: 1, bubble: '녹음 버튼을 클릭해<br>우리 동네를 소개하는 말을 녹음해봐요.', hot: [[228, 978, 84, 84]], info: true, pose: 'wink_point4' },
+      { scr: 'record', opt: { rec: 1 }, view: 1, bubble: '녹음이 완료되면<br>정지 버튼을 클릭해요.', tts: true, hot: [[228, 978, 84, 84]], pose: 'wink_point4' },
+      { scr: 'recdone', view: 1, bubble: '완료 버튼을 클릭해요.', hot: [[200, 1112, 324, 55]], finger: [-2, 34], pose: 'wink_point4' },
       { scr: 'clip', view: 1, bubble: '좋아요!<br>이제 녹음한 음성을<br>AI 기능을 활용해 자막으로<br>만들어봐요.', next: true },
-      { scr: 'clip', view: 1, bubble: '하단의 메뉴 바를<br>오른쪽으로 슬라이드 해요.', swipe: [0, 1026, 540, 80] },
-      { scr: 'clip', opt: { slide: 1 }, view: 1, bubble: '자동 자막을 클릭해요.', hot: [[385, 1030, 86, 76]], finger: [10, -40] },
-      { scr: 'subrange', view: 1, bubble: '생성하기 버튼을 클릭해요.', hot: [[272, 1112, 252, 55]], finger: [-30, 36] },
+      { scr: 'clip', view: 1, bubble: '하단의 메뉴 바를<br>오른쪽으로 슬라이드 해요.', swipe: [0, 1026, 540, 80], pose: 'wink_point4' },
+      { scr: 'clip', opt: { slide: 1 }, view: 1, bubble: '자동 자막을 클릭해요.', hot: [[385, 1030, 86, 76]], finger: [10, -40], pose: 'wink_point4' },
+      { scr: 'subrange', view: 1, bubble: '생성하기 버튼을 클릭해요.', hot: [[272, 1112, 252, 55]], finger: [-30, 36], pose: 'wink_point4' },
       { scr: 'loading', opt: { back: 1, msg: '자막 생성하는 중...', warn: '네트워크 연결을 유지하세요. 네트워크가<br>불안정할 경우 작업이 중단될 수 있습니다.' }, bubble: '자막을 생성하는 중이에요.', load: 6200 },
       { scr: 'subdone', view: 1, sub: 'err', bubble: 'AI 자동 자막을 생성했어요!<br>음성을 알맞게 인식했는지<br>확인해볼까요?', next: true },
       { scr: 'subdone', view: 1, sub: 'err', bubble: '음성 녹음 내용과<br>AI가 만든 자동 자막을 비교해<br>틀린 부분을 클릭해보세요.', cmp: true },
-      { scr: 'subdone', view: 1, sub: 'err', bubble: 'AI는 틀릴 수 있으니<br>꼭 다시 한번 확인해야 해요!<br>아래의 편집을 클릭해요.', hot: [[440, 1030, 70, 76]], finger: [10, -40] },
+      { scr: 'subdone', view: 1, sub: 'err', bubble: 'AI는 틀릴 수 있으니<br>꼭 다시 한번 확인해야 해요!<br>아래의 편집을 클릭해요.', hot: [[440, 1030, 70, 76]], finger: [10, -40], pose: 'wink_point4' },
       { scr: 'keyboard', opt: 'err', view: 1, sub: 'err', bubble: '오른쪽 버튼을 클릭해<br>틀린 부분을 수정해요.', fix: true },
-      { scr: 'keyboard', opt: 'fix', view: 1, sub: 'fix', bubble: '좋아요!<br>자막을 올바르게 수정했어요.<br>확인 버튼을 클릭해요.', hot: [[477, 615, 54, 54]], finger: [10, -20] },
-      { scr: 'subdone', view: 1, sub: 'fix', bubble: '아래의 완료 버튼을 눌러<br>자막 수정을 마무리해요.', hot: [[10, 1112, 521, 55]], finger: [-140, 38] },
+      { scr: 'keyboard', opt: 'fix', view: 1, sub: 'fix', bubble: '좋아요!<br>자막을 올바르게 수정했어요.<br>확인 버튼을 클릭해요.', hot: [[477, 638, 54, 54]], finger: [10, -20] },
+      { scr: 'subdone', view: 1, sub: 'fix', bubble: '아래의 완료 버튼을 눌러<br>자막 수정을 마무리해요.', hot: [[10, 1112, 521, 55]], finger: [-140, 38], pose: 'wink_point4' },
       { scr: 'subed', view: 1, sub: 'fix', bubble: '이제 영상에 찍힌<br>이웃의 얼굴을 가려볼까요?', next: true },
-      { scr: 'subed', view: 1, sub: 'fix', bubble: '하단의 효과 탭을 클릭해요.', hot: [[422, 1113, 94, 48]], finger: [0, 36] },
-      { scr: 'fx', view: 1, sub: 'fix', bubble: '왜곡(모자이크)를 클릭해요.', hot: [[2, 962, 76, 84]], finger: [9, -47] },
-      { scr: 'faces', view: 1, sub: 'fix', bubble: '얼굴을 흐릿하게 만드는 효과인<br>‘블러’를 클릭해요.', hot: [[28, 944, 114, 151]], finger: [4, -47] },
-      { scr: 'blursel', view: 1, sub: 'fix', mos: 'edit', bubble: '현재 장면의 얼굴을 가렸어요.<br>완료 버튼을 클릭해요.', hot: [[279, 1112, 245, 55]], finger: [-50, 34] },
-      { scr: 'blurclip', view: 1, sub: 'fix', mos: 'edit', bubble: '이제 모자이크를 이웃의 얼굴에<br>고정시켜 볼까요?<br>하단의 도구 탭을 오른쪽으로<br>슬라이드 해요.', swipe: [0, 1026, 455, 80], wide: VL.TRKW },
-      { scr: 'blurclip', opt: { slide: 1 }, view: 1, sub: 'fix', mos: 'edit', bubble: '얼굴 트래킹을 클릭해요.', hot: [[180, 1030, 92, 76]], finger: [8, -49] },
-      { scr: 'trackset', view: 1, sub: 'fix', mos: 'track', bubble: '모자이크 효과를 추가한 부분이<br>트래킹 영역으로 설정됐어요.<br>트래킹하기 버튼을 클릭해요.', hot: [[172, 1026, 196, 54]], finger: [0, -18] },
+      { scr: 'subed', view: 1, sub: 'fix', bubble: '하단의 효과 탭을 클릭해요.', hot: [[422, 1113, 94, 48]], finger: [0, 36], pose: 'wink_point4' },
+      { scr: 'fx', view: 1, sub: 'fix', bubble: '왜곡(모자이크)를 클릭해요.', hot: [[2, 962, 76, 84]], finger: [9, -47], pose: 'wink_point4' },
+      { scr: 'faces', view: 1, sub: 'fix', bubble: '얼굴을 흐릿하게 만드는 효과인<br>‘블러’를 클릭해요.', hot: [[28, 944, 114, 151]], finger: [4, -47], pose: 'wink_point4' },
+      { scr: 'blursel', view: 1, sub: 'fix', mos: 'edit', bubble: '현재 장면의 얼굴을 가렸어요.<br>완료 버튼을 클릭해요.', hot: [[279, 1112, 245, 55]], finger: [-50, 34], pose: 'wink_point4' },
+      { scr: 'blurclip', view: 1, sub: 'fix', mos: 'edit', bubble: '이제 모자이크를 이웃의 얼굴에 고정시켜 볼까요? 하단의 도구 탭을 오른쪽으로 슬라이드 해요.', swipe: [0, 1026, 455, 80], wide: VL.TRKW, pose: 'wink_point4' },
+      { scr: 'blurclip', opt: { slide: 1 }, view: 1, sub: 'fix', mos: 'edit', bubble: '얼굴 트래킹을 클릭해요.', hot: [[180, 1030, 92, 76]], finger: [8, -39], pose: 'wink_point4' },
+      { scr: 'trackset', view: 1, sub: 'fix', mos: 'track', bubble: '모자이크 효과를 추가한 부분이<br>트래킹 영역으로 설정됐어요.<br>트래킹하기 버튼을 클릭해요.', hot: [[172, 1026, 196, 54]], finger: [0, -18], pose: 'wink_point4' },
       { scr: 'loading', opt: { msg: '트래킹 하는 중...', cls: 'is-trkld' }, bubble: '트래킹하는 중이에요.', load: 6200 },
       { scr: 'blurclip', opt: { slide: 1 }, view: 1, sub: 'fix', mos: 'play', play: true, bubble: '영상 끝까지 얼굴이<br>잘 가려졌나요?', choices: ['잘 가려졌어요.', '다시 한번 확인해볼래요.'] },
-      { scr: 'blurclip', opt: { slide: 1 }, view: 1, sub: 'fix', mos: 'play', bubble: '아래의 완료 버튼을 클릭해<br>얼굴 트래킹을 마무리해보세요.', hot: [[10, 1112, 521, 55]], finger: [-140, 41] },
-      { scr: 'subed', view: 1, sub: 'fix', mos: 'play', bubble: '좋아요!<br>우리 동네 브이로그 편집을<br>완료했어요.', next: true },
-      { scr: 'subed', view: 1, sub: 'fix', mos: 'play', bubble: '추출하기 버튼을 클릭해<br>영상을 저장해봐요.', hot: [[436, 58, 97, 40]], finger: [13, -27] },
-      { scr: 'export', bubble: '아래의 추출하기 버튼을<br>한 번 더 클릭해요.', hot: [[53, 1050, 434, 92]], finger: [-36, -47] },
+      { scr: 'blurclip', opt: { slide: 1 }, view: 1, sub: 'fix', mos: 'play', bubble: '아래의 완료 버튼을 클릭해 얼굴 트래킹을 마무리해보세요.', hot: [[10, 1112, 521, 55]], finger: [-140, 41], pose: 'wink_point4' },
+      { scr: 'subed', view: 1, sub: 'fix', mos: 'play', bubble: '좋아요!<br>우리 동네 브이로그 편집을 완료했어요.', next: true },
+      { scr: 'subed', view: 1, sub: 'fix', mos: 'play', bubble: '추출하기 버튼을 클릭해<br>영상을 저장해봐요.', hot: [[436, 58, 97, 40]], finger: [13, -27], pose: 'wink_point' },
+      { scr: 'export', bubble: '아래의 추출하기 버튼을<br>한 번 더 클릭해요.', hot: [[53, 1050, 434, 92]], finger: [-36, -47], pose: 'wink_point4' },
       { scr: 'loading', opt: { msg: '비디오 만드는 중...', warn: 'VLLO를 끄거나 기기를 잠그지 마세요.', cls: 'is-mk' }, bubble: '비디오를 만드는 중이에요.', load: 6200 },
       { scr: 'saved', bubble: '완성했어요!<br>내가 만든 브이로그를<br>한 번 재생해볼까요?', next: true },
       { vlog: true, bubble: '', nochar: true }
@@ -480,6 +479,7 @@
     /* ---- 렌더 ---- */
     let timer = 0, tts = null, lastScr = '';
     function clearAll() {
+      document.querySelectorAll('#p09Screen > .kbd-db').forEach((k) => k.remove());
       clearTimeout(timer);
       if (tts) { tts.pause(); tts = null; }
       hots.innerHTML = '';
@@ -549,7 +549,13 @@
     }
     requestAnimationFrame(frame);
     function playClip() { vid.classList.add('is-on'); vid.currentTime = 0; vid.play().catch(() => {}); }
-    function go(n) { st.i = n; render(); }
+    function go(n) {
+      st.i = n;
+      render();
+      if (BoxEdit.on) {
+        try { const q = /[?&]step=/.test(location.search) ? location.search.replace(/([?&]step=)\d+/, '$1' + n) : location.search + '&step=' + n; history.replaceState(null, '', q); } catch (e) { /* 주소 갱신이 막힌 환경 */ }
+      }
+    }
     const advance = () => go(st.i + 1);
 
     function render() {
@@ -582,6 +588,7 @@
       setView(s);
       let inner = VL.screen(s.scr, s.scr === 'keyboard' ? { text: s.opt === 'err' ? errText() : okText() } : (s.opt || {}));
       swap(inner, lastScr === '');
+      if (s.scr === 'keyboard') $('p09Screen').insertAdjacentHTML('beforeend', kbdDbHtml());
       lastScr = s.scr;
       if (s.opt && s.opt.msg !== undefined) { /* 로딩 */ }
       if (s.place) placePick();

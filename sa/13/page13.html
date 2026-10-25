@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="../../css/common.css">
     <style>
         /* 기획서 38~40p. 조작 없는 SNS 확인 애니메이션: 가운데 폰 상단바는 고정, 게시물이 1.2초 간격으로 아래에서 위로 떠오르고(방 → 현관 → 교실, 공간이 모자라면 화면이 스크롤) 게시물마다 빈 하트가 빨갛게 채워짐.
-           끝나면 전체 화면 팡파레(색종이) 후 오른쪽 아래에 [다음] → 배지 획득 팝업 [확인] → 마무리(page14). 사진은 page12에서 고른 3장(sessionStorage sa13_picks, 없으면 기본 3장) */
+           끝나면 전체 화면 팡파레(공용 img_particle01·02 번갈아 2초) → 사라진 뒤 배지 획득 팝업 [확인] → 마무리(page14). 사진은 page12에서 고른 3장(sessionStorage sa13_picks, 없으면 기본 3장) */
         .p13-phone .phone-screen{background:#fff}
         .p13-bar{position:absolute;left:0;top:40px;width:100%;height:64px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;background:#fff;border-bottom:1px solid #e3e3e8;z-index:5}
         .p13-feed{position:absolute;left:0;top:104px;width:100%;bottom:46px;overflow:hidden}
@@ -46,7 +46,7 @@
             <div class="p13-feed"><div class="p13-list" id="p13List"></div></div>
             <div class="phone-nav"></div>
           </div></div>
-          <img class="p13-fan" id="p13Fan" src="img/p13_confetti.png" alt="">
+          <img class="p13-fan" id="p13Fan" src="../../img/common/img_particle01.png" alt="">
           <a href="javascript:;" class="js-sfx p13-next is-off" id="p13Next" data-sound="sound/click.mp3">
             <img src="../../img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" alt="다음">
           </a>
@@ -72,7 +72,7 @@
   <script>
   (function () {
     let imgs = ['img/p02_photo_1_clean.png', 'img/p02_photo_2.png', 'img/p02_photo_3.png'];
-    try { const v = JSON.parse(sessionStorage.getItem('sa13_picks') || 'null'); if (v && v.length === 3) imgs = v; } catch (e) {}
+    try { const v = JSON.parse(sessionStorage.getItem('sa13_picks') || 'null'); if (v && v.length) imgs = v; } catch (e) {}
     const HEART = '<svg viewBox="0 0 24 24"><path d="M12 21C5 16 2 12.5 2 9a5 5 0 0 1 10-1 5 5 0 0 1 10 1c0 3.5-3 7-10 12z"/></svg>';
     const list = $('p13List');
     imgs.forEach((src) => {
@@ -84,15 +84,27 @@
     const posts = list.querySelectorAll('.p13-post');
     const at = (ms, fn) => setTimeout(fn, ms);
     const STEP = 1300;
-    at(800, () => posts[0].classList.add('is-in'));
-    at(800 + STEP, () => { posts[0].classList.add('is-liked'); playCorrect(); });
-    at(800 + STEP * 2, () => posts[1].classList.add('is-in'));
-    at(800 + STEP * 3, () => { posts[1].classList.add('is-liked'); playCorrect(); });
-    at(800 + STEP * 4, () => { list.style.transform = 'translateY(-' + (posts[0].offsetHeight + 40) + 'px)'; });
-    at(800 + STEP * 5, () => posts[2].classList.add('is-in'));
-    at(800 + STEP * 6, () => { posts[2].classList.add('is-liked'); playCorrect(); });
-    at(800 + STEP * 7, () => { $('p13Fan').classList.add('is-on'); playCorrect(); $('p13Next').classList.remove('is-off'); });
-    $('p13Next').addEventListener('click', () => $('p13Badge').classList.remove('is-off'));
+    const feedH = $('p13List').parentNode.clientHeight;
+    posts.forEach((post, i) => {
+      at(800 + STEP * 2 * i, () => {
+        post.classList.add('is-in');
+        const bottom = post.offsetTop + post.offsetHeight + 20;
+        if (bottom > feedH) list.style.transform = 'translateY(-' + (bottom - feedH) + 'px)';
+      });
+      at(800 + STEP * (2 * i + 1), () => { post.classList.add('is-liked'); playCorrect(); });
+    });
+    at(800 + STEP * 2 * posts.length, () => {
+      const fan = $('p13Fan');
+      let two = false;
+      fan.classList.add('is-on');
+      playCorrect();
+      const flip = setInterval(() => { two = !two; fan.src = '../../img/common/img_particle0' + (two ? 2 : 1) + '.png'; }, 200);
+      setTimeout(() => {
+        clearInterval(flip);
+        fan.classList.remove('is-on');
+        $('p13Badge').classList.remove('is-off');
+      }, 2000);
+    });
   })();
   </script>
 </body>
