@@ -6,6 +6,7 @@
   const I = {
     back: S('<path d="M15 4.5L7.5 12l7.5 7.5"/>'),
     help: S('<circle cx="12" cy="12" r="10"/><path d="M8.8 9.2a3.2 3.2 0 116.2 1c0 1.6-2.2 2.2-2.2 3.8M12.8 17.4h.01" stroke-width="2.2"/>'),
+    dots: S('<circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/>'),
     gear: S('<circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/>'),
     out: S('<path d="M5 15v4.5h14V15M12 4v11M7.5 8.5L12 4l4.5 4.5"/>'),
     play: S('<path d="M8 5.5v13l11-6.5z"/>'),
@@ -195,14 +196,10 @@
   SC.subed = () => editor({ undo: 1, rows: sideIcon(I.plus, 779, '미디어') + sideIcon(I.text, 853, '글자') + sideIcon(I.label, 921, '라벨') + sideIcon(I.sub, 991, '자막') + sideIcon(I.autosub, 1058, '자동 자막'), tab: 2, dots: [360, 450, 539], t2: '00:05' })
     + '<div class="v-subbar"></div><span class="v-subtag" style="left:272px;top:1082px">여기</span><div class="v-edbox"><i class="v-ic">' + I.pencil + '</i></div>';
   /* 키보드(디자인 9, 10) */
-  const kb = (rows) => '<div class="v-kr is-n">' + '1234567890'.split('').map((c) => '<b>' + c + '</b>').join('') + '</div>' + rows;
   SC.keyboard = (o = {}) => appBar({ grid: 1 }) + playRow({ play: 0 }) + '<div class="v-kpanel"></div>'
     + '<div class="v-align"><span><i class="v-ic">' + S('<path d="M4 7h16M4 12h10M4 17h16"/>') + '</i>왼쪽</span><span class="is-on"><i class="v-ic">' + S('<path d="M4 7h16M7 12h10M4 17h16"/>') + '</i>가운데</span><span><i class="v-ic">' + S('<path d="M4 7h16M10 12h10M4 17h16"/>') + '</i>오른쪽</span></div>'
     + '<div class="v-input"><span>' + (o.text || '') + '</span><i class="v-x"><b></b></i></div><div class="v-ok"><i class="v-ic">' + I.check + '</i></div>'
-    + '<div class="v-kb"><div class="v-kt">' + ['<i class="v-ic">' + S('<path d="M12 3l1.5 5 5 1.5-5 1.5L12 16l-1.5-5-5-1.5 5-1.5z"/>') + '</i>', '<i class="v-ic">' + S('<circle cx="12" cy="12" r="9"/><path d="M8.5 14.5c1.8 2 5.2 2 7 0M9 9.5h.01M15 9.5h.01"/>') + '</i>', '<i class="v-ic">' + S('<rect x="4" y="4" width="11" height="11" rx="2"/><rect x="9" y="9" width="11" height="11" rx="2"/>') + '</i>', '<i class="v-ic">' + S('<rect x="6" y="3.5" width="12" height="17" rx="2"/>') + '</i>', '<i class="v-ic">' + I.gear + '</i>', '<i class="v-ic">' + I.dots + '</i>'].join('') + '</div>'
-    + kb('<div class="v-kr">' + 'ㅂㅈㄷㄱㅅㅛㅕㅑㅐㅔ'.split('').map((c) => '<b>' + c + '</b>').join('') + '</div><div class="v-kr is-in">' + 'ㅁㄴㅇㄹㅎㅗㅓㅏㅣ'.split('').map((c) => '<b>' + c + '</b>').join('') + '</div>'
-      + '<div class="v-kr"><b class="is-w">' + S('<path d="M12 4l8 9h-5v6H9v-6H4z"/>') + '</b>' + 'ㅋㅌㅊㅍㅠㅜㅡ'.split('').map((c) => '<b>' + c + '</b>').join('') + '<b class="is-w">' + S('<path d="M9 5h10a2 2 0 012 2v10a2 2 0 01-2 2H9l-6-7z"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"/>') + '</b></div>'
-      + '<div class="v-kr"><b class="is-w">!#1</b><b class="is-w">한/영</b><b class="is-w">한자</b><b class="is-sp"></b><b class="is-w">.</b><b class="is-w is-ent">' + S('<path d="M19 6v6a2 2 0 01-2 2H6M9.5 10.5L6 14l3.5 3.5"/>') + '</b></div>')
+    + ''
     + '<div class="v-knav"><i class="v-ic">' + I.mic + '</i><u>|||</u><u>□</u><u>◁</u><u>⌄</u></div></div>';
   /* 효과 탭(디자인 13) */
   SC.fx = () => editor({ undo: 1, rows: fxRows() + '<i class="v-crown2">' + crownI + '</i>', tab: 4, dots: [360, 450, 539] });

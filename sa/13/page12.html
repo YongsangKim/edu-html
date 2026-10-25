@@ -6,21 +6,21 @@
     <title>안전한 SNS 업로드 챌린지</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 기획서 35~37p. 사진 6장 중 3장이 매번 무작위로 왼쪽 폰에 나옴(img/p12_photo_1~6.png — 지금은 임시 사진, 개인정보 좌표 PHOTOS 도 임시). 사진을 고르면 오른쪽에 크게 뜨고, [AI 지우개]를 누른 뒤 개인정보를 하나씩 클릭하면 흰색으로 가려짐.
-           [안전하게 업로드]: 남았으면 '개인정보가 아직 남아 있어요!'(2초, 남은 곳 강조) / 다 지웠으면 사진이 사라지고 '안전하게 업로드 완료!'. 완료한 사진은 흑백·클릭 불가, 3장 모두 끝나면 폰이 가운데로 이동하며 SNS 화면(page13).
+        /* 기획서 35~37p. 사진 6장이 번호 순서대로 왼쪽 폰에 나오고(스크롤) 순서 상관없이 업로드, 6장 모두 끝나면 SNS(page13, 올린 순서대로 6장)(img/p12_photo_1~6.png, 개인정보가 없는 사진 1·6은 boxes 가 빈 배열). 사진을 고르면 오른쪽에 크게 뜨고, [AI 지우개]를 누른 뒤 개인정보를 하나씩 클릭하면 흰색으로 가려짐.
+           [안전하게 업로드]: 남았으면 '개인정보가 아직 남아 있어요!'(2초, 남은 곳 강조) / 다 지웠으면 사진이 사라지고 '안전하게 업로드 완료!'. 완료한 사진은 흑백·클릭 불가, 6장 모두 끝나면 폰이 가운데로 이동하며 SNS 화면(page13).
            좌표는 사진에 대한 [왼쪽%, 위%, 폭%, 높이%] (?edit) */
         .p12-tip{position:absolute;left:686px;top:24px;width:1153px;margin:0;text-align:center;font-size:50px;font-weight:500;line-height:1.3;color:var(--c-ink);letter-spacing:-0.04em}
         .p12-tip b{color:#1b78d0;font-weight:500}
         .p12-phone{left:140px;top:20px;transition:transform .8s ease}
         .p12-phone.is-center{transform:translateX(585px)}
-        .p12-slots{position:absolute;left:0;top:60px;width:100%;bottom:46px;padding:10px 20px 0;box-sizing:border-box;display:flex;flex-direction:column;gap:18px;background:#fff}
-        .p12-slot{position:relative;flex:1 1 0;min-height:0;border:solid 5px #d6d6dd;border-radius:14px;padding:0;overflow:hidden;background:#fff;cursor:pointer}
+        .p12-slots{position:absolute;left:0;top:60px;width:100%;bottom:46px;padding:10px 20px 0;box-sizing:border-box;display:flex;flex-direction:column;gap:18px;background:#fff;overflow-y:auto;scrollbar-width:thin}
+        .p12-slot{position:relative;flex:0 0 auto;height:216px;border:solid 5px #d6d6dd;border-radius:14px;padding:0;overflow:hidden;background:#fff;cursor:pointer}
         .p12-slot img{display:block;width:100%;height:100%;object-fit:cover}
         .p12-slot.is-on{border-color:#4655e8;box-shadow:0 0 0 4px rgba(70,85,232,.3)}
         .p12-slot.is-done{filter:grayscale(1);opacity:.6;cursor:default;pointer-events:none}
 
-        .p12-view{position:absolute;left:720px;top:177px;width:1089px;height:609px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:20px;background:var(--c-white);box-shadow:0 10px 0 0 rgba(86,148,231,.2);overflow:hidden}
-        .p12-view .p12-ph{position:absolute;left:50%;top:50%;width:1080px;height:600px;margin:-300px 0 0 -540px;display:none}
+        .p12-view{position:absolute;left:810px;top:177px;width:909px;height:609px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:20px;background:var(--c-white);box-shadow:0 10px 0 0 rgba(86,148,231,.2);overflow:hidden}
+        .p12-view .p12-ph{position:absolute;left:50%;top:50%;width:899px;height:599px;margin:-299.5px 0 0 -449.5px;display:none}
         .p12-view.is-photo .p12-ph{display:block}
         .p12-ph>img{display:block;width:100%;height:100%;object-fit:fill;-webkit-user-drag:none;user-select:none}
         .p12-view .p12-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
@@ -42,7 +42,7 @@
         .p12-btn:hover{background:#eef5ff}
         .p12-btn.is-on{background:#ffe58a;box-shadow:inset 0 0 0 6px #ffb400,0 8px 0 0 rgba(86,148,231,.25)}
         .p12-btn:disabled{opacity:.4;cursor:default;pointer-events:none}
-        .p12-toast{position:absolute;left:1262px;top:330px;width:900px;margin-left:-570px;box-sizing:border-box;padding:30px 20px 24px;border:solid 6px var(--c-ink);border-radius:28px;background:#fff;text-align:center;font-family:'Cafe24 Ssurround';font-size:50px;color:var(--c-ink);letter-spacing:-0.04em;box-shadow:0 10px 0 0 rgba(86,148,231,.3);z-index:100;pointer-events:none}
+        .p12-toast{position:absolute;left:1264px;top:330px;width:1000px;margin-left:-500px;box-sizing:border-box;padding:30px 20px 24px;border:solid 6px var(--c-ink);border-radius:28px;background:#fff;text-align:center;font-family:'Cafe24 Ssurround';font-size:50px;color:var(--c-ink);letter-spacing:-0.04em;box-shadow:0 10px 0 0 rgba(86,148,231,.3);z-index:100;pointer-events:none}
         .p12-toast.is-off{display:none}
     </style>
 </head>
@@ -77,12 +77,12 @@
   <script>
   (function () {
     const PHOTOS = [
-      { img: 'img/p12_photo_1.png', boxes: [[47, 49, 11, 9]] },
-      { img: 'img/p12_photo_2.png', boxes: [[4.7, 45.7, 24.5, 39.3], [49.9, 9, 30.2, 25], [85, 33, 9, 21]] },
-      { img: 'img/p12_photo_3.png', boxes: [[12, 40, 26, 26], [39.8, 26, 21.8, 21.8], [67.3, 55.3, 20.9, 20.2]] },
-      { img: 'img/p12_photo_4.png', boxes: [[58.3, 59.4, 39.3, 36.4]] },
-      { img: 'img/p12_photo_5.png', boxes: [[24, 52.9, 26.1, 28.3]] },
-      { img: 'img/p12_photo_6.png', boxes: [[77.2, 56.1, 17.7, 20.9]] }
+      { img: 'img/p12_photo_1.png', boxes: [] },
+      { img: 'img/p12_photo_2.png', boxes: [[57, 50, 28, 24]] },
+      { img: 'img/p12_photo_3.png', boxes: [[69, 44, 18, 22]] },
+      { img: 'img/p12_photo_4.png', boxes: [[44.5, 58.5, 11, 12]] },
+      { img: 'img/p12_photo_5.png', boxes: [[55, 40, 40, 48]] },
+      { img: 'img/p12_photo_6.png', boxes: [] }
     ];
     const TIP_PICK = '어떤 사진을 SNS에 공유해볼까요?<br><b>사진을 고르고, 가려야 할 개인정보가 있는지 살펴보세요.</b>';
     const TIP_ERASE = 'AI 지우개를 클릭해 개인정보를 모두 지워보세요.';
@@ -90,8 +90,10 @@
     const place = (el, b) => { el.style.cssText = 'left:' + b[0] + '%;top:' + b[1] + '%;width:' + b[2] + '%;height:' + b[3] + '%'; };
     if (BoxEdit.on) document.body.classList.add('is-edit');
 
-    const picks = BoxEdit.on ? PHOTOS.slice(0, 3) : shuffleArray(PHOTOS).slice(0, 3);
+    const sel = (location.search.match(/[?&]p=([\d,]+)/) || [])[1];   // ?edit&p=4,5,6 : 편집 때 볼 사진 번호(기본 1,2,3)
+    const picks = BoxEdit.on && sel ? sel.split(',').map((n) => PHOTOS[n - 1]).filter(Boolean) : PHOTOS;
     const slots = $('p12Slots'), view = $('p12View'), ph = $('p12Ph'), eraser = $('p12Eraser'), upload = $('p12Upload'), toast = $('p12Toast');
+    const doneOrder = [];
     let cur = null, eraserOn = false, doneN = 0, toastTimer = 0, boxEls = [];
 
     function say(t) {
@@ -148,7 +150,10 @@
       playWrong();
       say('개인정보를 지우려면 AI 지우개를 클릭하세요.');
     });
-    eraser.addEventListener('click', () => setEraser(!eraserOn));
+    eraser.addEventListener('click', () => {
+      if (cur && !cur.boxes.length) { playWrong(); say('사진에 개인정보가 있는지 다시 한번 살펴볼까요?'); return; }
+      setEraser(!eraserOn);
+    });
     upload.addEventListener('click', () => {
       if (!cur) return;
       const left = boxEls.filter((el) => !el.classList.contains('is-erased'));
@@ -164,10 +169,11 @@
       view.classList.add('is-ok');
       eraser.disabled = true;
       upload.disabled = true;
+      doneOrder.push(cur.img);
       cur = null;
       doneN += 1;
       if (doneN === picks.length) {
-        try { sessionStorage.setItem('sa13_picks', JSON.stringify(picks.map((p) => p.img))); } catch (e) {}
+        try { sessionStorage.setItem('sa13_picks', JSON.stringify(doneOrder)); } catch (e) {}
         setTimeout(() => { $('p12Phone').classList.add('is-center'); }, 1200);
         setTimeout(() => { location.href = 'page13.html'; }, 2200);
       } else {

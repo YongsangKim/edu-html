@@ -1,4 +1,11 @@
 <!DOCTYPE html>
+<!--
+  [편집 모드 사용법] 주소 뒤에 ?edit&scene=N (N=1~5) 을 붙여 열 때만 동작(평소 화면은 그대로) — 얼굴 따라가기 좌표(size·keys)를 영상을 멈춰 가며 맞춤
+    위쪽 막대 아래 편집 막대: 장면 선택 · ▶재생/❚❚멈춤(스페이스) · ◀▶ 1프레임(, .) · 시간 슬라이더 · 0초 0.82초… 링크(그 키로 이동)
+    영상 위를 클릭·드래그 = 얼굴 중심 위치 · 방향키 1px(Shift 10px) · Alt+방향키 크기(Shift 더 크게)
+    [이 시점 저장] 그 시간의 키를 바꾸거나 추가 · [이 시점 키 지우기] · [처음 값으로] · [복사] → 'size: …, keys: […]' 두 줄을 아래 SCENES 의 그 장면에 붙여 넣음(자동 저장 아님)
+    9페이지 PLACES 에도 같은 값을 붙여 넣어야 같게 보임 (scene 1=library · 2=mart · 3=post · 4=park, 5는 9페이지에서 안 씀)
+-->
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -149,19 +156,19 @@
     // 영상 5개(sa/10/video/v1~v5.mp4, 5초)와 첫 화면 썸네일(img/p07_thumb_N.jpg). 영상마다 가려야 할 사람 얼굴 위치를 keys=[초, 좌우, 상하]로 적음(영상 폭·높이에 대한 0~1 비율, 얼굴 중심).
     // size=가리개 지름(영상 폭에 대한 비율). 얼굴이 화면 밖으로 나가면 가리개도 같이 나감. 어긋나면 이 숫자만 고치면 됨
     const SCENES = [
-      { thumb: 'p07_thumb_1', video: 'video/v1.mp4', label: '대출대에서 책을 빌리는 장면', size: 0.115,
-        keys: [[0, .53, .25], [.82, .51, .25], [1.6, .525, .23], [2.4, .43, .235], [3.2, .245, .205], [4, .004, .30], [4.6, -.12, .32], [5, -.2, .32]] },
+      { thumb: 'p07_thumb_1', video: 'video/v1.mp4', label: '대출대에서 책을 빌리는 장면', size: .115,
+        keys: [[0, .534, .226], [.82, .521, .226], [1.6, .525, .23], [2.4, .457, .231], [3.2, .252, .233], [3.64, .114, .2], [4, .004, .3], [4.6, -.12, .32], [5, -.2, .32]] },
       { thumb: 'p07_thumb_2', video: 'video/v2.mp4', label: '사과와 가격표가 함께 보이는 장면', size: 0.10,
-        keys: [[0, .44, .155], [.84, .43, .165], [1.6, .40, .15], [2.4, .325, .14], [3.2, .215, .115], [4, .065, .125], [4.6, -.08, .12], [5, -.15, .12]] },
+        keys: [[0, .44, .155], [.84, .43, .165], [1.6, .4, .15], [2.4, .325, .14], [3.2, .241, .144], [4, .122, .119], [4.6, -.005, .113], [5, -.15, .12]] },
       { thumb: 'p07_thumb_3', video: 'video/v3.mp4', label: '창구에서 편지를 접수하는 장면', size: 0.085,
-        keys: [[0, .46, .20], [.84, .48, .20], [1.6, .52, .185], [2.4, .55, .19], [3.2, .59, .19], [4, .635, .20], [5, .635, .20]] },
+        keys: [[0, .475, .22], [.84, .487, .224], [1.6, .528, .193], [2.4, .553, .203], [3.2, .601, .208], [4, .635, .2], [5, .64, .208]] },
       { thumb: 'p07_thumb_4', video: 'video/v4.mp4', label: '길이 잘 보이는 산책길 장면', size: 0.085,
-        keys: [[0, .635, .20], [.8, .625, .20], [1.6, .59, .20], [2.4, .575, .18], [3.2, .455, .185], [4, .347, .164], [4.6, .27, .165], [5, .20, .165]] },
+        keys: [[0, .635, .2], [.8, .625, .2], [1.6, .59, .2], [2.4, .533, .21], [3.2, .457, .208], [4, .347, .164], [4.6, .267, .189], [5, .215, .158]] },
       { thumb: 'p07_thumb_5', video: 'video/v5.mp4', label: '‘2관’ 표시와 출입문이 보이는 장면', size: 0.095,
-        keys: [[0, .405, .23], [.84, .41, .23], [1.6, .46, .23], [2.4, .60, .31], [3.2, .625, .347], [4, .70, .353], [4.6, .745, .347], [5, .80, .40]] }
+        keys: [[0, .4, .258], [.84, .412, .246], [1.6, .463, .265], [2.4, .544, .31], [3.2, .631, .346], [4, .7, .353], [4.6, .745, .347], [5, .8, .4]] }
     ];
     const LOST = 1.4;                      // 오류 때 스티커가 얼굴을 놓치고 그 자리에 멈추는 영상 시간(초)
-    let KEYS = [], CS = 150, HEAD = { x: 0, y: 0 };
+    let KEYS = [], CS = 150, HEAD = { x: 0, y: 0 }, override = null;
     const TEXTS = [
       '내가 찍은 사진이나 영상에 모르는 사람의<br>얼굴이 함께 찍혔다면,<br>인터넷에 올리기 전에 꼭 얼굴을 가려야 해요.',
       '오른쪽의 편집 도구 창에서 ‘모자이크’나 ‘스티커’ 기능을 활용해 얼굴을 가려봐요.',
@@ -352,7 +359,7 @@
       mosCtx.drawImage(src, f[0] * sw0 - sw / 2, f[1] * sh0 - sw / 2, sw, sw, 0, 0, CELLS, CELLS);
     }
     function moveCover(t) {
-      const f = faceAt(t), b = toBox(f[0], f[1]);
+      const f = override || faceAt(t), b = toBox(f[0], f[1]);
       cover.style.left = b.x + 'px'; cover.style.top = b.y + 'px';
       if (st.item && st.item.cls) drawMosaic(f, b);
     }
@@ -435,6 +442,138 @@
       $('p07Play').classList.add('is-on');
     });
     $('p07PopOk').addEventListener('click', () => hide($('p07Pop')));
+
+    // ---- 좌표 편집 모드: 주소 뒤에 ?edit&scene=1~5 — 영상을 멈춘 채 얼굴 위치(keys)·크기(size)를 맞추고 복사 ----
+    function editMode() {
+      const mm = location.search.match(/[?&]scene=([0-9]+)/);
+      const idx = Math.min(Math.max((mm ? parseInt(mm[1], 10) : 1) - 1, 0), SCENES.length - 1);
+      const S = SCENES[idx], vid = $('p07Vid');
+      const orig = JSON.parse(JSON.stringify(S.keys)), origSize = S.size;
+      begin(S);
+      setCover({ cls: 'is-square' });
+      st.covered = true;
+      target.classList.remove('is-on');
+      setMore(null);
+      let cur = 0, size = S.size;
+      const n3 = (v) => String(Math.round(v * 1000) / 1000).replace(/^(-?)0\./, '$1.');
+      const bar = document.createElement('div');
+      bar.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:99999;background:rgba(15,15,25,.94);color:#fff;font:13px/1.5 sans-serif;padding:8px 12px;display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center';
+      bar.innerHTML = '장면 <select id="edSel">' + SCENES.map((s, i) => '<option value="' + (i + 1) + '"' + (i === idx ? ' selected' : '') + '>' + (i + 1) + ' ' + s.label + '</option>').join('') + '</select>'
+        + '<button id="edPlay">▶ 재생</button><button id="edPrev">◀ 1프레임</button><button id="edNext">1프레임 ▶</button>'
+        + '<input id="edT" type="range" min="0" max="5" step="0.01" value="0" style="width:340px"><b id="edTime">0.00</b>초'
+        + '<span id="edPos"></span><span id="edSize"></span>'
+        + '<button id="edSave">이 시점 저장</button><button id="edDel">이 시점 키 지우기</button><button id="edReset">처음 값으로</button><button id="edCopy">복사</button>'
+        + '<span id="edKeys"></span>'
+        + '<textarea id="edOut" readonly rows="3" style="width:100%;font:12px monospace"></textarea>'
+        + '<span style="opacity:.75">영상 위를 클릭·드래그 = 위치 · 방향키 1px(Shift 10px) · Alt+방향키 크기 · , . = 1프레임 · 스페이스 = 재생</span>';
+      document.body.appendChild(bar);
+      const E = (id) => bar.querySelector('#' + id);
+      const dwOf = () => toBox(0, 0).dw;
+      const cap = () => override || faceAt(cur);
+      const out = () => {
+        const f = cap();
+        E('edPos').textContent = '위치 ' + n3(f[0]) + ', ' + n3(f[1]) + (override ? ' (저장 전)' : '');
+        E('edSize').textContent = '크기 ' + n3(size);
+        E('edTime').textContent = cur.toFixed(2);
+        E('edKeys').innerHTML = KEYS.map((k) => '<a href="#" data-t="' + k[0] + '" style="color:#9cf;margin-right:6px">' + k[0] + '초</a>').join('');
+        E('edOut').value = 'size: ' + n3(size) + ',\nkeys: [' + KEYS.map((k) => '[' + n3(k[0]) + ', ' + n3(k[1]) + ', ' + n3(k[2]) + ']').join(', ') + ']';
+      };
+      const apply = () => { CS = size * dwOf(); scene.style.setProperty('--cs', CS + 'px'); moveCover(cur); out(); };
+      const seek = (t, keepOverride) => {
+        const D = vid.duration || 5;
+        cur = Math.min(Math.max(t, 0), D);
+        vid.pause();
+        if (!keepOverride) override = null;
+        E('edPlay').textContent = '▶ 재생';
+        E('edT').value = cur;
+        let done = false;
+        const fin = () => { if (done) return; done = true; vid.removeEventListener('seeked', fin); apply(); };
+        vid.addEventListener('seeked', fin);
+        vid.currentTime = cur;
+        setTimeout(fin, 250);
+        apply();
+      };
+      const toggle = () => {
+        if (vid.paused) {
+          override = null;
+          if (vid.ended || cur >= (vid.duration || 5) - 0.05) { cur = 0; vid.currentTime = 0; }
+          vid.play().catch(() => {});
+          E('edPlay').textContent = '❚❚ 멈춤';
+        } else { seek(vid.currentTime); }
+      };
+      const loop = () => {
+        if (!vid.paused) {
+          cur = vid.currentTime;
+          E('edT').value = cur;
+          moveCover(cur);
+          out();
+          if (vid.ended) seek(vid.duration || 5);
+        }
+        requestAnimationFrame(loop);
+      };
+      const nudge = (dx, dy) => {
+        const f = override ? override : faceAt(cur).slice(), dw = dwOf();
+        override = [f[0] + dx / dw, f[1] + dy / dw];
+        apply();
+      };
+      const place = (e) => {
+        const r = scene.getBoundingClientRect(), k = r.width / scene.clientWidth, W = scene.clientWidth, H = scene.clientHeight, dw = dwOf(), dh = dw * 9 / 16;
+        const x = (e.clientX - r.left) / k, y = (e.clientY - r.top) / k;
+        override = [(x - (W - dw) / 2) / dw, (y - (H - dh) / 2) / dh];
+        apply();
+      };
+      scene.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        if (!vid.paused) seek(vid.currentTime);
+        place(e);
+        const mv = (ev) => place(ev), up = () => { window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); };
+        window.addEventListener('pointermove', mv);
+        window.addEventListener('pointerup', up);
+      }, true);
+      cover.style.pointerEvents = 'none';
+      E('edSel').addEventListener('change', (e) => { location.search = '?edit&scene=' + e.target.value; });
+      E('edPlay').addEventListener('click', toggle);
+      E('edPrev').addEventListener('click', () => seek(cur - 1 / 30));
+      E('edNext').addEventListener('click', () => seek(cur + 1 / 30));
+      E('edT').addEventListener('input', (e) => seek(parseFloat(e.target.value)));
+      E('edKeys').addEventListener('click', (e) => { const a = e.target.closest('a'); if (a) { e.preventDefault(); seek(parseFloat(a.dataset.t)); } });
+      E('edSave').addEventListener('click', () => {
+        const f = cap(), t = Math.round(cur * 100) / 100, row = [t, Math.round(f[0] * 1000) / 1000, Math.round(f[1] * 1000) / 1000];
+        const i = KEYS.findIndex((k) => Math.abs(k[0] - t) < 0.02);
+        if (i >= 0) KEYS[i] = row; else { KEYS.push(row); KEYS.sort((a, b) => a[0] - b[0]); }
+        override = null;
+        apply();
+      });
+      E('edDel').addEventListener('click', () => {
+        const i = KEYS.findIndex((k) => Math.abs(k[0] - cur) < 0.02);
+        if (i >= 0 && KEYS.length > 2) { KEYS.splice(i, 1); override = null; apply(); }
+      });
+      E('edReset').addEventListener('click', () => { KEYS.length = 0; orig.forEach((k) => KEYS.push(k.slice())); size = origSize; override = null; apply(); });
+      E('edCopy').addEventListener('click', () => {
+        const t = E('edOut'); t.select();
+        try { navigator.clipboard.writeText(t.value); } catch (er) { document.execCommand('copy'); }
+        E('edCopy').textContent = '복사됨!';
+        setTimeout(() => { E('edCopy').textContent = '복사'; }, 1200);
+      });
+      window.addEventListener('keydown', (e) => {
+        if (/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName) && e.target.id !== 'edT') return;
+        const big = e.shiftKey ? 10 : 1, a = e.key;
+        if (/^Arrow/.test(a)) {
+          e.preventDefault();
+          if (!vid.paused) seek(vid.currentTime);
+          if (e.altKey) {
+            size = Math.max(0.01, size + (a === 'ArrowUp' || a === 'ArrowRight' ? 1 : -1) * (e.shiftKey ? 0.005 : 0.001));
+            apply();
+          } else nudge(a === 'ArrowLeft' ? -big : a === 'ArrowRight' ? big : 0, a === 'ArrowUp' ? -big : a === 'ArrowDown' ? big : 0);
+        } else if (a === ' ') { e.preventDefault(); toggle(); }
+        else if (a === ',') seek(cur - 1 / 30);
+        else if (a === '.') seek(cur + 1 / 30);
+      });
+      vid.addEventListener('loadeddata', () => seek(cur, true), { once: true });
+      loop();
+      seek(0);
+    }
+    if (/[?&]edit(=|&|$)/.test(location.search)) editMode();
   })();
   </script>
 </body>

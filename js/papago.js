@@ -101,11 +101,11 @@
       }
       let kb = '';
       if (o.kb) {
-        const row = (s, cls) => '<div class="pp-kb-row">' + s.split('').map((c) => '<span' + (cls ? ' class="' + cls + '"' : '') + '>' + c + '</span>').join('') + '</div>';
-        kb = '<div class="pp-kb"><div class="pp-kb-tools">' + (o.sug ? '<span class="pp-kb-sug"' + h('sug') + '>' + I.sug + o.sug + '</span>' : I.set) + I.dots + '</div><div class="pp-kb-rows">' +
+        const row = (s) => '<div class="kbd-db-row">' + s.split('').map((c) => '<span>' + c + '</span>').join('') + '</div>';
+        kb = '<div class="kbd-db is-dark"><div class="kbd-db-tools">' + (o.sug ? '<span class="kbd-db-sug"' + h('sug') + '>' + I.sug + o.sug + '</span>' : I.set) + I.dots + '</div><div class="kbd-db-rows">' +
           row('1234567890') + row('ㅂㅈㄷㄱㅅㅛㅕㅑㅐㅔ') + row('ㅁㄴㅇㄹㅎㅗㅓㅏㅣ') +
-          '<div class="pp-kb-row"><span class="is-dk">' + I.shift + '</span>' + 'ㅋㅌㅊㅍㅠㅜㅡ'.split('').map((c) => '<span>' + c + '</span>').join('') + '<span class="is-dk">' + I.bs + '</span></div>' +
-          '<div class="pp-kb-row"><span class="is-dk">!#1</span><span class="is-dk">,</span><span class="is-dk">한/영</span><span class="is-w">&nbsp;</span><span class="is-dk">.</span><span class="is-b"' + h('enter') + '>이동</span></div></div></div>';
+          '<div class="kbd-db-row"><span class="is-fn">' + I.shift + '</span>' + 'ㅋㅌㅊㅍㅠㅜㅡ'.split('').map((c) => '<span>' + c + '</span>').join('') + '<span class="is-fn">⌫</span></div>' +
+          '<div class="kbd-db-row"><span class="is-fn">!#1</span><span class="is-fn">한/영</span><span class="is-wide">한국어</span><span>.</span><span class="is-go"' + h('enter') + '>이동</span></div></div></div>';
       }
       return '<div class="pp">' + status(o, true) + '<div class="pp-bar">' + I.back + langRow(o, h) + '<svg class="is-r" viewBox="0 0 24 24">' + '<path d="M5 8h9M18 8h1M5 16h1M10 16h9"/><circle cx="16" cy="8" r="2"/><circle cx="8" cy="16" r="2"/></svg></div>' +
         '<div class="pp-x">' + I.x + '</div>' +
