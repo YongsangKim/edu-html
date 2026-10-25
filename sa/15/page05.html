@@ -3,8 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>믿을 수 있는 정보로 만드는 노트북</title>
+    <title>디지털 윤리 수칙 분류하기</title>
     <link rel="stylesheet" href="../../css/common.css">
+    <style>
+        /* 기획서 수정본 7~10p. 행동 카드를 아래 '올바른 행동' / '주의할 행동' 상자로 끌어 넣기(공용 initMatchDrag). 1라운드 4장 → 2라운드 3장(상자는 비워서 다시 시작) → 정리 화면(7장 모두 분류, 3초) → 종료 모달 [다음].
+           맞으면 카드가 상자로 들어가 위에서 사라지고, 틀리면 카드가 흔들리며 오답 팝업(카드별 문구) 후 제자리. 카드 문구·오답 설명은 CARDS */
+        .p04-cards{position:absolute;left:0;top:200px;width:1920px;height:330px}
+        .p04-hold{position:absolute;top:0;width:666px;height:137px}
+        .p04-card{width:666px;height:137px;box-sizing:border-box;padding:14px 22px 6px;border:solid 8px var(--c-ink);border-radius:30px;cursor:grab;user-select:none;position:relative;z-index:5;
+          display:flex;align-items:center;justify-content:center;text-align:center;font-family:'Cafe24 Ssurround';font-size:44px;line-height:1.2;letter-spacing:-0.05em;color:var(--c-ink);word-break:keep-all;
+          -webkit-text-stroke:8px #fff;paint-order:stroke fill;box-shadow:inset 6px 8px 8px rgba(255,255,255,.3),inset -6px -10px 10px rgba(0,0,0,.18)}
+        .p04-card[data-key="photo"]{background:linear-gradient(180deg,#b463ca,#a043ed)}
+        .p04-card[data-key="link"]{background:linear-gradient(180deg,#4e97ff,#7272fe)}
+        .p04-card[data-key="safe"]{background:linear-gradient(180deg,#da5ba6,#bf4573)}
+        .p04-card[data-key="rumor"]{background:linear-gradient(180deg,#fb8b16,#ef6a59)}
+        .p04-card[data-key="source"]{background:linear-gradient(180deg,#4bcc24,#19aa73)}
+        .p04-card[data-key="privacy"]{background:linear-gradient(180deg,#ffcf0e,#ffb70e)}
+        .p04-card[data-key="title"]{background:linear-gradient(180deg,#b463ca,#a043ed)}
+        .p04-card.is-dragging{cursor:grabbing;z-index:50}
+        .p04-card.is-wrong{animation:p04-shake .4s}
+        @keyframes p04-shake{25%{transform:translateX(-14px)}75%{transform:translateX(14px)}}
+
+        .p04-box{position:absolute;top:562px;width:729px;height:376px;box-sizing:border-box;border:solid 8px var(--c-ink);border-radius:30px;padding:58px 24px 14px;display:flex;flex-direction:column;gap:10px;align-items:center}
+        .p04-box.is-ok{left:217px;background:#dff3e4}
+        .p04-box.is-no{left:974px;background:#fde3e1}
+        .p04-tag{position:absolute;left:50%;top:-44px;transform:translateX(-50%);min-width:360px;height:80px;box-sizing:border-box;padding:6px 40px 0;display:flex;align-items:center;justify-content:center;background:var(--c-navy);border-radius:40px;
+          font-family:'Cafe24 Ssurround';font-size:48px;color:var(--c-white);letter-spacing:-0.04em;white-space:nowrap}
+        .p04-box .p04-card{cursor:default}
+        .p04-box .p04-hold{position:static;width:100%;height:137px}
+
+        .p04-end{position:absolute;left:0;right:0;top:140px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:60px;color:var(--c-navy);letter-spacing:-0.04em}
+        .p04-box.is-sum{top:300px;height:600px;gap:14px;padding-top:70px;justify-content:flex-start}
+        .p04-box.is-sum .p04-sumcard{width:640px;min-height:100px;box-sizing:border-box;padding:10px 20px 4px;border:solid 6px var(--c-ink);border-radius:24px;display:flex;align-items:center;justify-content:center;text-align:center;background:#fff;font-family:'Cafe24 Ssurround';font-size:36px;line-height:1.2;letter-spacing:-0.05em;color:var(--c-ink);word-break:keep-all}
+        .p04-box.is-sum .p04-sumcard.is-gap{visibility:hidden}
+        .p04-gone{display:none}
+        #p04Wrong,#p04Done{z-index:120}
+    </style>
 </head>
 <body>
   <div id="page-fade"></div>
@@ -12,30 +46,108 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <div class="intro-character"><img src="img/p_character_intro.png" alt="메인 캐릭터"></div>
-          <div class="intro-panel">
-            <p class="intro-tab">게임 방법</p>
-            <p class="p-how-lead">믿을 수 있는 자료로<br>나만의 Notebook을 만들어요!</p>
-            <div class="p-how">
-              <ol class="intro-list">
-                <li>1. 문서의 출처와 내용을 확인해 주세요.</li>
-                <li>2. 믿을 수 있는 문서를 [소스] 창으로 끌어다 놓아주세요.</li>
-                <li>3. 제작 기능 버튼 4가지를 모두 눌러 확인해보세요.</li>
-              </ol>
+          <p class="ask-pill is-fit"><span>행동 카드를 알맞은 상자로 옮겨 주세요.</span></p>
+
+          <div class="p04-cards" id="p04Cards"></div>
+
+          <div class="p04-box is-ok drop-zone" data-type="ok"><span class="p04-tag">올바른 행동</span></div>
+          <div class="p04-box is-no drop-zone" data-type="no"><span class="p04-tag">주의할 행동</span></div>
+
+          <div class="avatar-modal is-wrong is-off" id="p04Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body is-finish is-side">
+                <p class="avatar-popup-text">다시 한번 생각해보세요.</p>
+                <p class="avatar-popup-sub" id="p04WrongText"></p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p04WrongOk" data-sound="sound/click.mp3">확인</button>
+              </div>
             </div>
           </div>
-
-          <a href="page06.html" class="js-nav-effect next-btn-intro">
-            <img src="../../img/common/btn_start.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_start_on.png" data-src-over="../../img/common/btn_start_over.png" data-sound="sound/click.mp3" alt="시작하기">
-          </a>
+          <div class="avatar-modal is-off" id="p04Done">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish is-side">
+                <p class="avatar-popup-text is-small">믿을 수 있는 정보를 나누면서,<br>안전한 디지털 생활을 함께 실천해요!</p>
+                <a href="page06.html" class="js-nav-effect avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+              </div>
+            </div>
+          </div>
         </main>
       </div>
     </div>
   </div>
   <div class="zoom-info" id="zoomInfo"></div>
 
-  <script src="../../js/header.js" data-title="믿을 수 있는 정보로 만드는 노트북" data-next="page06.html"></script>
+  <script src="../../js/header.js" data-title="디지털 윤리 수칙 분류하기" data-next="page06.html"></script>
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
+  <script>
+  (function () {
+    const CARDS = [
+      { key: 'photo', round: 1, text: '친구 얼굴이 나온 사진은 반드시 허락을 받고 올려요', type: 'ok', why: '다른 사람의 얼굴이 나온 사진은 허락을 받고 올려야 해요.' },
+      { key: 'link', round: 1, text: '친구가 보낸 링크라도 출처를 확인한 뒤 열어봐요.', type: 'ok', why: '친구가 보낸 링크라도 출처를 먼저 확인해야 안전해요.' },
+      { key: 'safe', round: 1, text: '친구에게 도움이 될 것 같은 안전 정보는 바로 공유해요.', type: 'no', why: '도움이 될 것 같아도 출처를 확인하지 않고 바로 공유하면 안 돼요.' },
+      { key: 'rumor', round: 1, text: '친구에게 받은 소문 내용 전달하기', type: 'no', why: '확인되지 않은 소문을 퍼뜨리면 다른 사람이 피해를 볼 수 있어요.' },
+      { key: 'source', round: 2, text: '공유하기 전에 원래 출처의 내용 확인하기.', type: 'ok', why: '어디에서 나온 정보인지 확인하고 공유하면 우리 동네의 안전에 도움이 돼요.' },
+      { key: 'privacy', round: 2, text: '타인의 개인정보 보호하기', type: 'ok', why: '다른 사람의 이름, 전화번호, 주소도 소중해요.' },
+      { key: 'title', round: 2, text: '자극적인 제목의 기사 무작정 믿기', type: 'no', why: '눈길을 끄는 제목만 보고 믿어도 될까요? 출처와 내용도 확인해야 해요.' },
+    ];
+    const POS = { 1: [[282, 7], [972, 7], [282, 173], [972, 173]], 2: [[282, 7], [972, 7], [627, 173]] };
+    const by = (k) => CARDS.find((c) => c.key === k);
+    const box = document.querySelector('.p04-cards');
+    const zones = Array.from(document.querySelectorAll('.p04-box'));
+    let round = 1;
+
+    function startRound() {
+      box.innerHTML = '';
+      zones.forEach((z) => { delete z.dataset.filled; Array.from(z.querySelectorAll('.p04-hold')).forEach((x) => x.remove()); });
+      const list = shuffleArray(CARDS.filter((c) => c.round === round));
+      list.forEach((c, i) => {
+        box.insertAdjacentHTML('beforeend', '<div class="p04-hold" style="left:' + POS[round][i][0] + 'px;top:' + POS[round][i][1] + 'px"><div class="p04-card" data-key="' + c.key + '">' + c.text + '</div></div>');
+      });
+      initMatchDrag({
+        cards: Array.from(box.querySelectorAll('.p04-card')),
+        zones,
+        slop: 0,
+        match: (card, zone) => by(card.dataset.key).type === zone.dataset.type,
+        onRight: (card, zone) => {
+          delete zone.dataset.filled;
+          const wrap = document.createElement('div');
+          wrap.className = 'p04-hold';
+          wrap.appendChild(card);
+          zone.appendChild(wrap);
+          Array.from(box.querySelectorAll('.p04-hold')).forEach((x) => { if (!x.children.length) x.remove(); });
+          if (!box.querySelector('.p04-card')) {
+            playCorrect();
+            setTimeout(round === 1 ? () => { round = 2; startRound(); } : showSummary, 900);
+          }
+        },
+        onWrong: (card, zone) => {
+          if (!zone) return;
+          playWrong();
+          card.classList.remove('is-wrong');
+          void card.offsetWidth;
+          card.classList.add('is-wrong');
+          $('p04WrongText').textContent = by(card.dataset.key).why;
+          setTimeout(() => $('p04Wrong').classList.remove('is-off'), 350);
+        },
+      });
+    }
+
+    function showSummary() {
+      document.querySelector('.ask-pill span').textContent = '행동 카드를 모두 알맞게 분류했어요!';
+      box.innerHTML = '';
+      zones.forEach((z) => {
+        z.classList.add('is-sum');
+        Array.from(z.querySelectorAll('.p04-hold')).forEach((x) => x.remove());
+        CARDS.filter((c) => c.type === z.dataset.type).forEach((c) => z.insertAdjacentHTML('beforeend', '<div class="p04-sumcard">' + c.text + '</div>'));
+      });
+      setTimeout(() => $('p04Done').classList.remove('is-off'), 3000);
+    }
+
+    startRound();
+    $('p04WrongOk').addEventListener('click', () => $('p04Wrong').classList.add('is-off'));
+  })();
+  </script>
 </body>
 </html>

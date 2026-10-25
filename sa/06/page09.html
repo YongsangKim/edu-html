@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="../../css/common.css">
     <style>
         /* 디자인 없음 - 기획서 27~42p. 가운데 Suno 화면은 기획서 캡처를 보고 CSS로 직접 그림(.s6, 497x1075 좌표를 폰 화면 폭에 맞춰 축소), 노래 표지 img/p09_cover.png. 이전 캡처 이미지 방식: _backup_page09.html.
-           가사는 앞 활동(sessionStorage 'sa06_lyrics'), 없으면 기획서 30p 가사. 노래는 가사 버전(1·2) x 장르 4 = 8곡 sound/p09_song_v{1|2}_{hiphop|kpop|trot|rock}.mp3. */
+           가사는 앞 활동(sessionStorage 'sa06_lyrics'), 없으면 기획서 30p 가사. 노래는 고른 가사와 상관없이 고른 장르의 두 곡(가사 버전 1·2) — 목록의 1번째 줄 = v1, 2번째 줄 = v2. 8곡 sound/p09_song_v{1|2}_{hiphop|kpop|trot|rock}.mp3. 노래가 길어서 다른 곡을 누르거나 다운로드 단계로 넘어가면 바로 멈춤. */
 
         .p09-bubble{padding:30px 16px;font-size:42px;z-index:5}
         
@@ -125,7 +125,7 @@
         <main class="bg-default p09">
           <div id="p09Play">
             <p class="guide-bubble is-center p09-bubble" id="p09Bubble"></p>
-            <div class="char-box p09-character"><img src="../img/sa_main.png" alt="메인 캐릭터"></div>
+            <div class="char-box p09-character"><img src="../img/character/sa_main.png" alt="메인 캐릭터"></div>
 
             <div class="phone-frame has-cam"><div class="phone-screen">
               <div class="s6" id="p09Screen"></div>
@@ -513,10 +513,16 @@
       show('노래가 만들어지고 있어요.', [], songsUI({ loading: true }), 's6-cream');
       setTimeout(stepSongs, 2000);
     }
-    function songSrc() { return 'sound/p09_song_v' + (state.ver + 1) + '_' + state.genre + '.mp3'; }
-    function play() {
-      if (audio) audio.pause();
-      audio = new Audio(songSrc());
+    let songN = 1;
+    const songSrc = (n) => 'sound/p09_song_v' + n + '_' + state.genre + '.mp3';
+    function stopSong() {
+      if (audio) { audio.pause(); audio = null; }
+      screen.querySelectorAll('.p09-song.is-playing').forEach((r) => r.classList.remove('is-playing'));
+    }
+    function play(n) {
+      stopSong();
+      songN = n || songN;
+      audio = new Audio(songSrc(songN));
       audio.play().catch(() => {});
     }
     function stepSongs() {
@@ -526,8 +532,10 @@
       let played = false;
       rows.forEach((row) => row.addEventListener('click', (e) => {
         if (e.target.closest('.more')) return;
+        const n = +row.dataset.n;
+        if (row.classList.contains('is-playing')) { stopSong(); return; }
+        play(n);
         rows.forEach((r) => r.classList.toggle('is-playing', r === row));
-        play();
         if (!played) {
           played = true;
           setTimeout(() => stepChoose(rows), 1500);
@@ -543,20 +551,21 @@
         more.classList.remove('is-off');
         more.classList.add('s6-hot');
         tagEl(more);
-        more.onclick = (e) => { e.stopPropagation(); playClick(); stepDownload(); };
+        more.onclick = (e) => { e.stopPropagation(); playClick(); songN = +row.dataset.n; stopSong(); stepDownload(); };
       });
       pointFingerAt(rows[0].querySelector('.more'), { onMain: true, x: 0.5, dx: 49, dy: 15 });
     }
     function stepDownload() {
+      stopSong();
       show('다운로드 버튼을 클릭해요.', [], downloadUI(), 's6-cream');
       on($('s6Dl'), stepFinal, { x: 0.8, dy: -25 });
     }
     function stepFinal() {
-      if (audio) audio.pause();
+      stopSong();
       clearFingers();
       $('p09Play').classList.add('is-off');
       $('p09FinalView').classList.remove('is-off');
-      $('p09FinalPlay').onclick = play;
+      $('p09FinalPlay').onclick = () => { if (audio) stopSong(); else play(songN); };
     }
 
     // ?step=N 으로 단계별 보기: 1 앱 클릭 · 2 가사 입력창 · 3 가사 불러오기 · 4 마법봉 · 5 가사 완성(전체화면) · 6 가사 확인 · 7 두 번째 가사 · 8 가사 비교 · 9 스타일 입력창 · 10 스타일 키워드 · 11 만들기 · 12 만드는 중(2초 뒤 13으로) · 13 노래 고르기 · 14 다운로드 선택 · 15 다운로드 · 16 마무리

@@ -3,60 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>믿을 수 있는 정보로 만드는 노트북</title>
+    <title>Notebook으로 자료 정리하기</title>
     <link rel="stylesheet" href="../../css/common.css">
-    <style>
-        /* 기획서 10~13p(와이어프레임 구조): 왼쪽 '내 컴퓨터-문서 폴더' 파일 4개, 가운데 공용 폰 틀(Gemini Notebook 소스 화면), 오른쪽 말풍선 + 캐릭터.
-           1단계: 믿을 수 있는 문서 2개를 소스 창으로 끌어 넣기(오답 파일은 흔들리며 제자리 + 오답 화면, 정답 시 '신뢰할 수 있는 문서입니다!' 1초 후 원래 문구)
-           2단계: 제작 기능 버튼 4개를 모두 눌러 안내 확인 → 종료 팝업 */
-        .p06-files{position:absolute;left:82px;top:240px;width:561px;height:580px;box-sizing:border-box;padding:26px 32px 20px;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:20px;box-shadow:0 10px 0 0 rgba(86,148,231,.2)}
-        .p06-files.is-off,.p06-info.is-off{display:none}
-        .p06-files h3{margin:0 0 14px;text-align:center;font-family:'Cafe24 Ssurround';font-size:42px;color:var(--c-ink);letter-spacing:-0.05em}
-        .p06-file-hold{height:104px;margin-bottom:12px}
-        .p06-file{height:104px;box-sizing:border-box;padding:10px 20px 0;display:flex;align-items:center;gap:16px;border:solid 5px var(--c-ink);border-radius:18px;background:var(--c-white);cursor:grab;touch-action:none;user-select:none;position:relative;z-index:5;
-          font-family:'Pretendard';font-weight:700;font-size:30px;line-height:1.2;letter-spacing:-0.04em;color:var(--c-ink)}
-        .p06-file:hover{background:#eef5ff}
-        .p06-file.is-dragging{cursor:grabbing;z-index:60;box-shadow:0 8px 14px rgba(0,0,0,.25)}
-        .p06-file.is-wrong{animation:p06-shake .4s}
-        @keyframes p06-shake{25%{transform:translateX(-14px)}75%{transform:translateX(14px)}}
-        .p06-ext{flex:0 0 auto;width:62px;height:62px;display:flex;align-items:center;justify-content:center;border-radius:10px;color:#fff;font-weight:800;font-size:20px;letter-spacing:-.02em}
-        .p06-ext.is-pdf{background:#d93a35}
-        .p06-ext.is-img{background:#8a6bd8}
-        .p06-ext.is-zip{background:#e0a21b}
-        .p06-file small{display:block;font-weight:500;font-size:24px;color:#555}
-
-        /* #p06Ask{left:65px;transform:none;padding:20px 60px} */
-
-        .p06-phone{top:180px;height:760px;border-bottom:0;border-bottom-right-radius:0;border-bottom-left-radius:0}
-        .p06-phone .gn-screen{background:#fff;border-bottom-right-radius:0;border-bottom-left-radius:0}
-        .p06-drop{position:absolute;left:0;right:0;top:110px;bottom:230px;z-index:2}
-        .p06-drop.is-over{background:rgba(255,230,120,.35);outline:6px dashed #f4b400;outline-offset:-10px}
-        .p06-phone .gn-src{opacity:0;transition:opacity .3s}
-        .p06-phone .gn-src.is-in{opacity:1}
-        .p06-title{position:absolute;left:0;right:0;top:600px;text-align:center;font-size:22px;font-weight:700;color:#1a7f37}
-
-        /* 오른쪽 캐릭터 말풍선 세트: 공용 .guide-set 을 오른쪽으로 옮겨 씀(말풍선·캐릭터 좌표는 공용 포즈 값 그대로) */
-        .p06-set{left:1150px;top:60px}
-        .p06-set .guide-bubble small{display:block;width:100%;box-sizing:border-box;margin-top:14px;padding:12px 14px 6px;border:solid 4px var(--c-purple);border-radius:20px;background:#fff;font-size:32px}
-
-        .p06-phone[data-step="func"] :is(.gn-bar,.gn-sec,.gn-srcs,.gn-fab,.gn-tabs,.p06-title,.p06-drop){display:none}
-        .p06-guide{position:absolute;left:0;right:0;top:60px;bottom:56px;padding:0 26px;display:none;flex-direction:column;gap:18px;background:#fff;z-index:3}
-        .p06-phone[data-step="func"] .p06-guide{display:flex}
-        .p06-guide h4{margin:0;padding:34px 0 14px;text-align:center;font-size:32px;font-weight:700;border-bottom:1px solid #e8e8ec}
-        .p06-gbtn{position:relative;height:96px;display:flex;align-items:center;gap:20px;padding:0 70px 0 24px;border:0;border-radius:24px;background:var(--bg);font-family:'Pretendard';font-size:28px;font-weight:700;text-align:left;color:var(--fg);cursor:pointer}
-        .p06-gbtn svg{flex:0 0 auto;width:44px;height:44px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-        .p06-gbtn:hover{filter:brightness(.97)}
-        .p06-gbtn.is-on{box-shadow:inset 0 0 0 4px var(--fg)}
-        .p06-gbtn.is-slide,.p06-gbtn.is-report{--bg:#f1f0e6;--fg:#7a5c1e}
-        .p06-gbtn.is-info{--bg:#f0e8f0;--fg:#8a2a7a}
-        .p06-gbtn.is-audio{--bg:#eceefb;--fg:#1f3d8f}
-        .p06-gbtn .icon-check{position:absolute;right:16px;top:50%;width:56px;height:50px;margin-top:-25px;display:none}
-        .p06-gbtn.is-seen .icon-check{display:block}
-        .p06-info{position:absolute;left:1260px;top:200px;width:600px;box-sizing:border-box;padding:36px 44px 40px;background:var(--c-white);border:solid 6px var(--c-ink);border-radius:50px;box-shadow:0 10px 0 0 rgba(86,148,231,.25);text-align:center;z-index:6}
-        .p06-info h3{margin:0 0 24px;font-family:'Cafe24 Ssurround';font-size:56px;color:var(--c-purple);letter-spacing:-0.05em}
-        .p06-info p{margin:0 0 36px;font-size:44px;line-height:1.4;font-weight:600;color:var(--c-ink);letter-spacing:-0.04em;word-break:keep-all}
-        #p06Wrong,#p06Done{z-index:120}
-    </style>
 </head>
 <body>
   <div id="page-fade"></div>
@@ -64,179 +12,30 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <p class="ask-pill is-fit" id="p06Ask"><span>믿을 수 있는 자료를 소스 창으로 옮겨 추가해주세요.</span></p>
-
-          <div class="p06-files" id="p06Files">
-            <h3>내 컴퓨터-문서 폴더</h3>
-          </div>
-
-          <div class="phone-frame has-cam p06-phone" id="p06Phone"><div class="gn-screen">
-            <div class="phone-status is-dark" data-time="9:42"></div>
-            <div class="gn-bar"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg><em class="is-title" id="p06NbTitle">제목 없는 노트북</em><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.4"/><circle cx="6" cy="12" r="2.4"/><circle cx="18" cy="19" r="2.4"/><path d="M8.2 10.8l7.6-4.5M8.2 13.2l7.6 4.5"/></svg><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg></div>
-            <div class="gn-sec"><b>소스</b><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg></div>
-            <div class="gn-srcs" id="p06Srcs"></div>
-            <p class="p06-title" id="p06Msg"></p>
-            <div class="gn-fab" style="bottom:30px"><span class="gn-cam"><img src="../../img/common/gn_photo.png" alt=""></span><span class="gn-btn">＋ 소스 추가</span></div>
-            
-            <div class="p06-drop drop-zone" id="p06Drop"></div>
-            <div class="p06-guide" id="p06Guide"><h4>프롬프트 가이드</h4></div>
-          </div></div>
-
-          <div class="guide-set is-main p06-set" id="p06Set">
-            <p class="guide-bubble is-center" id="p06Bubble"></p>
-            <div class="guide-character"><img id="p06Char" src="../img/sa_main.png" alt="메인 캐릭터"></div>
-          </div>
-          <div class="p06-info is-off" id="p06Info"><h3 id="p06InfoT"></h3><p id="p06InfoP"></p><button type="button" class="card-btn is-popup next-btn js-sfx" id="p06InfoOk" data-sound="sound/click.mp3">확인</button></div>
-
-          <div class="avatar-modal is-wrong is-off" id="p06Wrong">
-            <div class="avatar-popup-panel">
-              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
-              <div class="avatar-popup-body is-finish is-side">
-                <p class="avatar-popup-sub">신뢰할 수 있는 파일인지<br>다시 한 번 확인해보세요.</p>
-                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p06WrongOk" data-sound="sound/click.mp3">확인</button>
-              </div>
+          <div class="intro-character"><img src="img/p_character_intro.png" alt="메인 캐릭터"></div>
+          <div class="intro-panel">
+            <p class="intro-tab">게임 방법</p>
+            <p class="p-how-lead">믿을 수 있는 자료로<br>나만의 Notebook을 만들어요!</p>
+            <div class="p-how">
+              <ol class="intro-list">
+                <li>1. 문서의 출처와 내용을 확인해 주세요.</li>
+                <li>2. 믿을 수 있는 문서를 [소스] 창으로 끌어다 놓아주세요.</li>
+                <li>3. 제작 기능 버튼 4가지를 모두 눌러 확인해보세요.</li>
+              </ol>
             </div>
           </div>
-          <div class="avatar-modal is-off" id="p06Done">
-            <div class="avatar-popup-panel">
-              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
-              <div class="avatar-popup-body is-finish">
-                <p class="avatar-popup-text">잘했어요!</p>
-                <p class="avatar-popup-sub">Notebook에서 믿을 수 있는 문서를 소스로 첨부하고, 프롬프트의 4가지 가이드를 확인했어요. 이제 슬라이드를 만들어 볼까요?</p>
-                <a href="page07.html" class="js-nav-effect avatar-popup-next card-btn is-popup next-btn js-sfx" data-sound="sound/click.mp3">확인</a>
-              </div>
-            </div>
-          </div>
+
+          <a href="page07.html" class="js-nav-effect next-btn-intro">
+            <img src="../../img/common/btn_start.png" class="js-img-swap js-sfx" data-src-alt="../../img/common/btn_start_on.png" data-src-over="../../img/common/btn_start_over.png" data-sound="sound/click.mp3" alt="시작하기">
+          </a>
         </main>
       </div>
     </div>
   </div>
   <div class="zoom-info" id="zoomInfo"></div>
 
-  <script src="../../js/header.js" data-title="믿을 수 있는 정보로 만드는 노트북" data-next="page07.html"></script>
+  <script src="../../js/header.js" data-title="Notebook으로 자료 정리하기" data-next="page07.html"></script>
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
-  <script>
-  (function () {
-    const FILES = [
-      { key: 'police', ext: 'pdf', label: 'PDF', name: '경찰서 개인정보보호수칙', sub: '', ok: true, short: '경찰서 · 개인정보보호수칙', says: '개인정보 보호 수칙<br><small>비밀번호와 개인정보를<br>안전하게 지키는 방법</small>' },
-      { key: 'edu', ext: 'pdf', label: 'PDF', name: '교육청 올바른 인터넷 사용법', sub: '', ok: true, short: '교육청 · 올바른 인터넷 사용법', says: '올바른 인터넷 사용법<br><small>의심스러운 링크와 파일을 주의하며 인터넷을 사용하는 방법</small>' },
-      { key: 'blog', ext: 'img', label: 'IMG', name: '블로그 인터넷 소문 모음집', sub: '', ok: false },
-      { key: 'zip', ext: 'zip', label: 'ZIP', name: '허락 없이 찍은 사진 모음집', sub: '', ok: false },
-    ];
-    const FUNCS = [
-      { k: 'slide', label: '슬라이드', icon: '<rect x="4" y="9" width="36" height="26" rx="2"/><rect x="8" y="13" width="28" height="18"/>', text: '입력한 자료를 바탕으로 4~5장 내외의 슬라이드 자료를 만들어요.' },
-      { k: 'info', label: '인포그래픽', icon: '<path d="M10 10v24M10 10h4v24M22 18v16M22 18h4v16M33 24v10M33 24h4v10"/>', text: '입력한 자료의 중요한 내용을 그림과 짧은 글로 정리해요. 원하는 그림 스타일도 고를 수 있어요.' },
-      { k: 'report', label: '보고서', icon: '<path d="M8 14v24h22M14 8h16l4 4v18H14z"/><path d="M34 4l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/>', text: '입력한 자료의 내용을 주제에 맞게 정리한 글로 만들어요.' },
-      { k: 'audio', label: '오디오 오버뷰', icon: '<path d="M8 20v4M14 14v16M20 8v28M26 16v12M32 12v20"/><path d="M38 6l1.5 3.5L43 11l-3.5 1.5L38 16l-1.5-3.5L33 11l3.5-1.5z"/>', text: '입력한 자료를 바탕으로 AI 진행자가 대화하는 팟캐스트 형태의 음성 파일을 만들 수 있어요.' },
-    ];
-    const byKey = (k) => FILES.find((f) => f.key === k);
-
-    const filesBox = $('p06Files');
-    const srcs = $('p06Srcs');
-    const msg = $('p06Msg');
-    const bubble = $('p06Bubble');
-    const charImg = $('p06Char');
-    const drop = $('p06Drop');
-    let added = 0;
-
-    const PDF = '<span class="gn-pdf">PDF</span>';
-    const say = initGuideSay({ bubble: bubble, img: charImg, set: $('p06Set') });
-
-    shuffleArray(FILES).forEach((f) => {
-      filesBox.insertAdjacentHTML('beforeend', '<div class="p06-file-hold"><div class="p06-file" data-key="' + f.key + '"><span class="p06-ext is-' + f.ext + '">' + f.label + '</span><span>' + f.name + '<small>' + f.sub + '</small></span></div></div>');
-    });
-    FILES.filter((f) => f.ok).forEach((f) => {
-      srcs.insertAdjacentHTML('beforeend', '<div class="gn-src" id="p06Src_' + f.key + '">' + PDF + f.short + '</div>');
-    });
-    say('믿을 수 있는 문서 2개를<br>[소스] 창으로 끌어다 놓아주세요.', 'main', false, true);
-
-    const stage = $('stage');
-    const files = Array.from(filesBox.querySelectorAll('.p06-file'));
-    files.forEach((el) => {
-      el.addEventListener('pointerdown', (e) => {
-        if (el.dataset.placed) return;
-        e.preventDefault();
-        const s = stage.getBoundingClientRect().width / 1920;
-        const sx = e.clientX, sy = e.clientY;
-        el.setPointerCapture(e.pointerId);
-        el.classList.add('is-dragging');
-        const inDrop = (x, y) => { const r = drop.getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; };
-        const move = (ev) => {
-          el.style.transform = 'translate(' + (ev.clientX - sx) / s + 'px,' + (ev.clientY - sy) / s + 'px)';
-          drop.classList.toggle('is-over', inDrop(ev.clientX, ev.clientY));
-        };
-        const up = (ev) => {
-          el.removeEventListener('pointermove', move);
-          el.removeEventListener('pointerup', up);
-          el.removeEventListener('pointercancel', up);
-          el.classList.remove('is-dragging');
-          drop.classList.remove('is-over');
-          const f = byKey(el.dataset.key);
-          el.style.transform = '';
-          if (!inDrop(ev.clientX, ev.clientY)) return;
-          if (!f.ok) {
-            playWrong();
-            el.classList.remove('is-wrong');
-            void el.offsetWidth;
-            el.classList.add('is-wrong');
-            setTimeout(() => $('p06Wrong').classList.remove('is-off'), 400);
-            return;
-          }
-          el.dataset.placed = '1';
-          el.closest('.p06-file-hold').style.display = 'none';
-          playDrag();
-          const src = $('p06Src_' + f.key);
-          src.innerHTML = '<i class="gn-spin"></i>' + f.short;
-          src.classList.add('is-in');
-          msg.textContent = '';
-          setTimeout(() => {
-            src.innerHTML = PDF + f.short;
-            playCorrect();
-            msg.textContent = '신뢰할 수 있는 문서입니다!';
-            say(f.says, 'main_wave');
-            setTimeout(() => { msg.textContent = ''; }, 1000);
-            added += 1;
-            if (added === 2) setTimeout(stepFunc, 1800);
-          }, 1000);
-        };
-        el.addEventListener('pointermove', move);
-        el.addEventListener('pointerup', up);
-        el.addEventListener('pointercancel', up);
-      });
-    });
-    $('p06WrongOk').addEventListener('click', () => $('p06Wrong').classList.add('is-off'));
-
-    function stepFunc() {
-      filesBox.classList.add('is-off');
-      $('p06Ask').innerHTML = '<span>가이드 버튼을 하나씩 눌러 확인해보세요.</span>';
-      document.querySelector('.p06-phone').dataset.step = 'func';
-      $('p06Set').style.display = 'none';
-      const info = $('p06Info');
-      let cur = null;
-      FUNCS.forEach((fn) => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'p06-gbtn is-' + fn.k + ' js-sfx';
-        b.dataset.sound = 'sound/click.mp3';
-        b.innerHTML = '<svg viewBox="0 0 44 44">' + fn.icon + '</svg>' + fn.label + '<i class="icon-check"></i>';
-        b.addEventListener('click', () => {
-          $('p06Guide').querySelectorAll('.p06-gbtn').forEach((x) => x.classList.remove('is-on'));
-          b.classList.add('is-on');
-          cur = b;
-          $('p06InfoT').textContent = fn.label;
-          $('p06InfoP').textContent = fn.text;
-          info.classList.remove('is-off');
-        });
-        $('p06Guide').appendChild(b);
-      });
-      $('p06InfoOk').addEventListener('click', () => {
-        info.classList.add('is-off');
-        if (cur) cur.classList.add('is-seen');
-        if ($('p06Guide').querySelectorAll('.p06-gbtn.is-seen').length === FUNCS.length) setTimeout(() => $('p06Done').classList.remove('is-off'), 600);
-      });
-    }
-  })();
-  </script>
 </body>
 </html>

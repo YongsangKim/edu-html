@@ -161,7 +161,7 @@
           <!-- 3. Canva 편집 -->
           <div id="p10EditView">
             <p class="guide-bubble is-center p10-bubble" id="p10Bubble"></p>
-            <div class="char-box p10-character"><img src="../img/sa_point_front.png" alt="메인 캐릭터"></div>
+            <div class="char-box p10-character"><img src="../img/character/sa_point_front.png" alt="메인 캐릭터"></div>
 
             <div class="phone-frame has-cam cv has-nav" id="p10Phone" data-screen="home">
               <div class="phone-screen">
@@ -535,12 +535,18 @@
     }
     function sizePanel() {
       showSub('p10-size');
-      const cur = parseInt(getComputedStyle(text).fontSize, 10);
-      sub.innerHTML = '<p>글꼴 크기</p><div><input type="range" min="20" max="64" value="' + cur + '"><span><button type="button">−</button><b>' + cur + '</b><button type="button">+</button></span></div>';
+      // 글자 상자가 카드 아래(550px)를 넘지 않는 가장 큰 크기까지만(최대 50) — 문구가 길면 더 작게 막음
+      const keep = text.style.fontSize;
+      let top = 20;
+      for (let s = 20; s <= 50; s += 2) { text.style.fontSize = s + 'px'; if (text.offsetTop + text.offsetHeight <= 546) top = s; else break; }
+      text.style.fontSize = keep;
+      const cur = Math.min(top, parseInt(getComputedStyle(text).fontSize, 10));
+      if (cur + '' !== parseInt(getComputedStyle(text).fontSize, 10) + '') text.style.fontSize = cur + 'px';
+      sub.innerHTML = '<p>글꼴 크기</p><div><input type="range" min="20" max="' + top + '" value="' + cur + '"><span><button type="button">−</button><b>' + cur + '</b><button type="button">+</button></span></div>';
       const range = sub.querySelector('input');
       const [minus, plus] = sub.querySelectorAll('button');
       const apply = (v) => {
-        v = Math.max(20, Math.min(64, v));
+        v = Math.max(20, Math.min(top, v));
         range.value = v;
         sub.querySelector('b').textContent = v;
         text.style.fontSize = v + 'px';

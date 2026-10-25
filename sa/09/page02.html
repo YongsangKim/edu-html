@@ -17,7 +17,7 @@
         .p02-hints{position:absolute;left:0;top:0}
         .p02-hint{position:absolute;top:200px;width:557px;height:314px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:14px;overflow:hidden;background:var(--c-white);display:flex;flex-direction:column}
         .p02-hint i{flex:1 1 auto;background:var(--c-mist) top center / cover no-repeat}
-        .p02-hint span{position:absolute;left:0;bottom:0;width:100%;font-family:'Cafe24 Ssurround';font-size:56px;color:var(--c-white);letter-spacing:-0.05em;text-align:center;line-height:1;-webkit-text-stroke: 10px var(--c-ink);paint-order: stroke fill}
+        .p02-hint span{flex:0 0 92px;display:flex;align-items:center;justify-content:center;padding-top:6px;background:var(--c-sky);font-family:'Cafe24 Ssurround';font-size:56px;color:var(--c-white);letter-spacing:-0.05em;line-height:1;-webkit-text-stroke:10px var(--c-ink);paint-order:stroke fill}
         .p02-hint.slot1{left:82px}
         .p02-hint.slot2{left:683px}
         .p02-hint.slot3{left:1282px}
@@ -26,11 +26,12 @@
         .p02-hint-btn.slot3{left:1282px}
 
         .p02-cards{position:absolute;left:0;top:0}
-        .p02-card{top:560px;width:280px;height:355px;background:var(--c-white);border:solid 5px var(--c-ink);display:flex;flex-direction:column}
+        .p02-cards:before{content:'';position:absolute;left:82px;top:545px;width:1756px;height:384px;border-radius:14px;background:var(--c-navy)}
+        .p02-card{top:565px;width:271px;height:343px;background:var(--c-white);border:solid 5px var(--c-white);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
         .p02-card:hover{border-color:var(--c-sky)}
-        .p02-card.is-selected{border-color:#ff2fc2}
+        .p02-card.is-selected{border-color:#ff2fc2;box-shadow:0 0 0 3px #ff2fc2}
         .p02-card i{flex:1 1 auto;background:var(--c-mist) center / cover no-repeat}
-        .p02-card span{flex:0 0 84px;display:flex;align-items:center;justify-content:center;padding-top:6px;background:var(--c-cream);font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-ink);letter-spacing:-0.05em;line-height:1}
+        .p02-card span{flex:0 0 84px;display:flex;align-items:center;justify-content:center;padding-top:6px;background:var(--c-white);font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-ink);letter-spacing:-0.05em;line-height:1}
     </style>
 </head>
 <body>
@@ -93,9 +94,9 @@
       { id: 'cook', label: '급식조리사', hints: ['조리용 모자와 앞치마', '커다란 조리용 솥', '급식실'], text: '급식 조리사는 학생들이 먹을 급식을 맛있고 위생적으로 만들어요.' },
       { id: 'cleaner', label: '환경미화원', hints: ['새벽', '빗자루', '쓰레기'], text: '환경미화원은 쓰레기를 치워 동네를 깨끗하게 해줘요.' },
       { id: 'paramedic', label: '구급대원', hints: ['응급처치 키트', '들것', '구급차'], sounds: { 3: 'sound/p02_siren.mp3' }, text: '구급대원은 아프거나 다친 사람을 응급 처치하고 병원으로 옮겨줘요.' },
-      { id: 'courier', label: '택배기사', hints: ['택배 상자', '택배 차량', '택배 배송'], text: '택배 기사는 사람들이 주문한 물건을 집까지 안전하게 배송해줘요.' },
+      { id: 'courier', label: '택배 기사', hints: ['택배 상자', '택배 차량', '택배 배송'], text: '택배 기사는 사람들이 주문한 물건을 집까지 안전하게 배송해줘요.' },
     ];
-    const CARD_LEFT = [100, 388, 676, 965, 1252, 1541];
+    const CARD_LEFT = [105, 393, 681, 969, 1257, 1545];
 
     const stageJobs = shuffleArray(JOBS).slice(0, 3);
     let stageIndex = 0;
@@ -180,7 +181,7 @@
       btn.addEventListener('click', () => {
         btn.classList.add('hidden');
         const sounds = stageJobs[stageIndex].sounds;
-        playHintSound(sounds && sounds[btn.classList.contains('slot2') ? 2 : 3]);
+        setTimeout(() => playHintSound(sounds && sounds[btn.classList.contains('slot2') ? 2 : 3]), 400);
       });
     });
 

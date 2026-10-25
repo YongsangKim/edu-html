@@ -210,11 +210,12 @@
               <button class="toc-accordion-toggle js-sfx" data-sound="sound/click.mp3">15차시</button>
               <div class="toc-accordion-panel">
                 <a href="${BASE}sa/15/page01.html" class="toc-sub-item">1) 진짜? 가짜? 뉴스 판별기!</a>
-                <a href="${BASE}sa/15/page03.html" class="toc-sub-item">2) 디지털 윤리 수칙 분류하기</a>
-                <a href="${BASE}sa/15/page05.html" class="toc-sub-item">3) 믿을 수 있는 정보로 만드는 노트북</a>
-                <a href="${BASE}sa/15/page07.html" class="toc-sub-item">4) 제미나이 Notebook으로 PPT 만들기</a>
-                <a href="${BASE}sa/15/page08.html" class="toc-sub-item">5) 퀴즈 풀기</a>
-                <a href="${BASE}sa/15/page09.html" class="toc-sub-item">6) 완벽한 슬라이드 퍼즐 맞추기</a>
+                <a href="${BASE}sa/15/page03.html" class="toc-sub-item">2) 개념 이해 영상</a>
+                <a href="${BASE}sa/15/page04.html" class="toc-sub-item">3) 디지털 윤리 수칙 분류하기</a>
+                <a href="${BASE}sa/15/page06.html" class="toc-sub-item">4) Notebook으로 자료 정리하기</a>
+                <a href="${BASE}sa/15/page08.html" class="toc-sub-item">5) 제미나이 Notebook으로 PPT 만들기</a>
+                <a href="${BASE}sa/15/page09.html" class="toc-sub-item">6) 퀴즈 풀기</a>
+                <a href="${BASE}sa/15/page10.html" class="toc-sub-item">7) 제미나이 Notebook 정복 퍼즐</a>
               </div>
             </div>
 

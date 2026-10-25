@@ -6,6 +6,7 @@
     <title>인권 존중 포스터 제작소</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
+        /* ?edit&step=N 으로 단계를 바로 열고 캐릭터 포즈를 골라 볼 수 있음. 캐릭터 포즈는 STEPS 각 줄의 pose(sa/img/character/sa_*.png 의 * 부분) */
         /* 기획서 26~68p. Canva로 인권 존중 포스터 만들기 실습. 가운데 휴대폰은 sa/02 page08·10과 같은 공용 .cv 틀 + 같은 방식(화면은 마크업에 모두 있고 단계마다 data-k로 보이기 · 누를 곳은 data-hit + .is-target 깜빡임 · 손가락은 pointFingerAt).
            앱 첫 화면·검색 화면은 공용 .cv-app 부품, 편집 화면은 기획서 캡처를 540x1170 좌표(.cu-ui, 화면에 맞춰 줄임)로 그린 것.
            아이콘·썸네일처럼 그리기 어려운 조각만 캡처에서 오려 img/ui/ 에 둠. 고른 값(프롬프트 · 초안 이미지 · 문구 · 글꼴)은 화면 안에 그대로 그려짐.
@@ -13,11 +14,9 @@
            초안 이미지 img/p09_draft_{1~4}.png(1·2번이 프롬프트에 맞는 초안, 3·4번은 맞지 않는 초안 — 3·4는 임시 그림, 실제 이미지가 오면 같은 파일명으로 덮어쓰기). 이전 버전: _backup_page09_before_cv.html */
         [hidden]{display:none!important}
 
-        .p09-bubble{position:absolute;left:30px;top:auto;bottom:560px;width:600px;margin:0;box-sizing:border-box;padding:30px;background:var(--c-cream);border:solid 5px var(--c-purple);border-radius:30px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
-          font-family:'Cafe24 Ssurround';font-size:38px;line-height:1.35;color:var(--c-purple);text-align:center;letter-spacing:-0.05em;word-break:keep-all;z-index:3}
-        .p09-bubble:before{content:'';position:absolute;left:230px;bottom:-58px;width:100px;height:70px;background:url('../../img/common/p_guide_tail.png') 0 0 / contain no-repeat}
-        .p09-bubble img{height:1em;vertical-align:-0.15em;margin:0 6px}
-        .p09-character{left:40px;top:470px;width:540px;height:470px}
+        .p09-set{--gb-left:110px;--gb-w:610px}
+        .p09-set .guide-bubble,.p09-set .guide-bubble.is-long{font-size:40px}
+        .p09-set .guide-bubble img{height:1em;vertical-align:-0.15em;margin:0 6px}
 
         /* 540x1170 좌표로 그린 편집 화면: 화면(522x1053)에 맞춰 가로 .967 · 세로 .9로 줄임 */
         .p09-ui{transform:scale(.967,.9);background:none}
@@ -100,8 +99,10 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main data-preload-fonts="Black Han Sans" class="bg-default">
-          <p class="p09-bubble" id="p09Bubble"></p>
-          <div class="char-box p09-character" id="p09Char"><img src="../img/sa_main.png" alt="메인 캐릭터"></div>
+          <div class="guide-set is-main p09-set" id="p09Set">
+            <p class="guide-bubble is-center" id="p09Bubble"></p>
+            <div class="guide-character"><img id="p09Char" src="../img/character/sa_main.png" alt="메인 캐릭터"></div>
+          </div>
 
           <div class="phone-frame has-cam cv has-nav p09-phone" id="p09Phone">
             <div class="phone-screen">
@@ -221,8 +222,8 @@
               <div data-k="done"><div class="u-page js-draft" style=""><b class="t js-phrase" style="top:52px;font-size:41px;color:#111;text-shadow:0 0 8px rgba(255,255,255,.8);"></b><b class="c" style="top:660px;font-size:24px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7);">AI로 만든 그림을 사용했어요.</b></div><div class="a" style="left:0;top:108px;width:540px;height:1062px;background:rgba(40,44,70,.55)"></div><div class="u-modal" style="top:509px;height:661px"></div><div class="l b" style="left:22px;top:524px;height:40px;font-size:19px;gap:12px"><span style="display:flex;width:30px;height:30px;border-radius:50%;background:#22a355;color:#fff;align-items:center;justify-content:center;font-size:18px">✓</span>다운로드 완료</div><div class="a" style="right:24px;top:526px;font-size:28px">✕</div><div class="a" style="left:22px;top:594px;width:496px;height:278px;border-radius:14px;background:#eef0f3"></div><div class="u-page is-small js-draft" style="left:186px;top:615px;width:168px;height:238px;box-shadow:0 2px 8px rgba(0,0,0,.2)"><b class="t js-phrase" style="top:18px;font-size:14px;color:#111;text-shadow:0 0 8px rgba(255,255,255,.8);"></b><b class="c" style="top:212px;font-size:8px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7);">AI로 만든 그림을 사용했어요.</b></div><div class="a b" style="left:22px;top:887px;font-size:18px">단락 텍스트</div><div class="a" style="left:22px;top:925px;font-size:15px;color:#6a6c7a">카메라 롤에 저장했어요</div><div class="u-btn is-line" style="top:982px;height:52px;font-weight:700">공유</div><div class="u-btn is-on" style="top:1045px;height:52px;font-weight:700">열기</div></div>
 
               <div data-k="tabs"><div class="u-tabs is-white" id="p09Tabs" data-hit="swipe"><div class="u-track"><div class="u-tab" data-tab="추천 템플릿" data-icon="template"><i></i>추천 템플릿</div><div class="u-tab" data-tab="요소" data-icon="elements"><i></i>요소</div><div class="u-tab" data-tab="텍스트" data-hit="tabtext" data-icon="text"><i></i>텍스트</div><div class="u-tab" data-tab="갤러리" data-icon="gallery"><i></i>갤러리</div><div class="u-tab" data-tab="브랜드 센터" data-icon="brand"><i></i>브랜드 센터</div><div class="u-tab" data-tab="업로드 항목" data-icon="upload"><i></i>업로드 항목</div><div class="u-tab" data-tab="도구" data-icon="tool"><i></i>도구</div><div class="u-tab" data-tab="프로젝트" data-icon="project"><i></i>프로젝트</div><div class="u-tab" data-tab="앱" data-icon="apps"><i></i>앱</div><div class="u-tab" data-tab="Magic Media" data-hit="mmtab" data-icon="magic"><i></i>Magic Media</div><div class="u-tab" data-tab="AI 음성" data-icon="voice"><i></i>AI 음성</div></div></div></div>
-              <div data-k="tbar"><div class="a" style="left:12px;top:1030px;width:516px;height:80px;border-radius:24px;background:#fff;box-shadow:0 6px 20px rgba(27,23,56,.16);overflow:hidden"><img class="a" src="img/ui/tb_all.png" style="left:0;top:-4px;width:500px;height:84px" alt=""></div><button type="button" class="p09-tb" data-hit="tbfont" style="left:92px;top:1033px;width:108px;height:78px"></button><button type="button" class="p09-tb" data-hit="tbok" style="left:456px;top:1035px;width:76px;height:76px"></button></div>
-              <div data-k="tbarfont"><div class="a" style="left:12px;top:1030px;width:516px;height:80px;border-radius:24px;background:#fff;box-shadow:0 6px 20px rgba(27,23,56,.16);overflow:hidden"><img class="a" src="img/ui/tb_font.png" style="left:0;top:-4px;width:500px;height:84px" alt=""></div><img class="a" src="img/ui/fchip.png" style="left:22px;top:947px;width:252px;height:78px" alt=""><button type="button" class="p09-tb" data-hit="more" style="left:205px;top:965px;width:59px;height:53px"></button></div>
+              <div data-k="tbar"><div class="a" style="left:12px;top:1020px;width:516px;height:80px;border-radius:24px;background:#fff;box-shadow:0 6px 20px rgba(27,23,56,.16);overflow:hidden"><img class="a" src="img/ui/tb_all.png" style="left:0;top:-4px;width:500px;height:84px" alt=""></div><button type="button" class="p09-tb" data-hit="tbfont" style="left:92px;top:1018px;width:108px;height:78px"></button><button type="button" class="p09-tb" data-hit="tbok" style="left:456px;top:1020px;width:76px;height:76px"></button></div>
+              <div data-k="tbarfont"><div class="a" style="left:12px;top:1020px;width:516px;height:80px;border-radius:24px;background:#fff;box-shadow:0 6px 20px rgba(27,23,56,.16);overflow:hidden"><img class="a" src="img/ui/tb_font.png" style="left:0;top:-4px;width:500px;height:84px" alt=""></div><img class="a" src="img/ui/fchip.png" style="left:22px;top:937px;width:252px;height:78px" alt=""><button type="button" class="p09-tb" data-hit="more" style="left:205px;top:950px;width:59px;height:53px"></button></div>
               <div data-k="pbar"><div class="u-pbar is-edit" style="top:1034px"><span>↻</span><span style="color:#444">A</span><span>글꼴</span><span>50 pt</span><b style="font-size:21px">B</b><i style="font-size:21px;color:#999">I</i><u style="font-size:21px">U</u><span style="flex:1"></span><span class="u-ok" data-hit="check"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></div></div>
             </div>
 
@@ -256,6 +257,7 @@
   <script src="../../js/header.js" data-title="인권 존중 포스터 제작소" data-next="page10.html"></script>
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
+  <script src="../../js/box-edit.js"></script>
   <script>
   (function () {
     const CASES = [
@@ -275,48 +277,48 @@
     // hit = 눌러야 하는 곳(data-hit) — 분홍으로 깜빡이고 손가락이 가리킴. 나머지 필드는 포스터·탭·오른쪽 버튼 등 그 단계의 상태.
     const POS_NONE = { };
     const STEPS = [
-      { bubble: 'Canva를 클릭해요.', show: 'home', hit: 'canva' },
-      { bubble: '검색창을 클릭해요.', show: 'app', hit: 'search' },
-      { bubble: '오른쪽의 버튼을 클릭해<br>포스터를 검색해요.', show: 'app', focus: true, btns: [{ t: '포스터' }] },
-      { bubble: '세로형 포스터를 만들어볼까요?<br>포스터(세로형 A2)를 클릭해요.', show: 'result', hit: 'poster' },
-      { bubble: '좋아요!<br>이제 AI를 활용해 포스터를<br>디자인해봐요.', show: 'ed pg dots tabs', pg: {}, next: true },
-      { bubble: '아래의 메뉴 탭을<br>오른쪽으로 슬라이드 해요.', show: 'ed pg dots tabs', pg: {}, hit: 'swipe' },
-      { bubble: 'Magic Media를 클릭해요.', show: 'ed pg dots tabs', pg: {}, tabs: { off: TAB_MAX }, hit: 'mmtab' },
-      { bubble: '이미지의 비율을 먼저 정해봐요.<br>정사각형 버튼을 클릭해요.', show: 'ed mm0 tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, hit: 'ratio' },
-      { bubble: '세로형 버튼을 클릭해요.', show: 'ed layout', hit: 'tall' },
-      { bubble: '좋아요!<br>세로형 포스터에 맞도록<br>이미지 비율을 설정했어요.', show: 'ed mm1 tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, next: true },
-      { bubble: '이제 프롬프트를 입력해봐요.<br>입력창을 클릭해요.', show: 'ed mm1 tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, hit: 'prompt' },
-      { bubble: '오른쪽 버튼을 클릭해<br>내가 조립한 프롬프트를<br>불러와봐요.', show: 'ed mm2 tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, btns: [{ t: '인권 존중 포스터<br>프롬프트 불러오기' }] },
-      { bubble: '세 가지 경우 중 하나를 클릭해<br>내가 만들고 싶은 포스터의<br>프롬프트를 입력해요.', show: 'ed mm2 tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, cases: true },
-      { bubble: '이미지 생성 버튼을<br>클릭해요.', show: 'ed mm3 tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, hit: 'generate' },
-      { bubble: '내가 요청한 디자인을<br>AI가 만들어주고 있어요.', show: 'ed load tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, loading: true },
-      { bubble: '포스터 초안이 완성되었어요!<br>화살표를 클릭해 4장을 모두<br>확인해봐요.', show: 'ed mmres tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, car: 'view', hit: 'arrow' },
-      { bubble: '어떤 이미지를 사용할까요?<br>프롬프트와 맞는 초안을 골라<br>이미지를 클릭해봐요.', show: 'ed mmres tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, car: 'pick', hit: 'pick', noFinger: true },
-      { bubble: '해당 이미지로 포스터를<br>제작할까요?', show: 'ed pg dots imgsel tabs', pg: { small: true }, tabs: { off: TAB_MAX, on: 'Magic Media' }, btns: [{ t: '다시하기', back: 'pick' }, { t: '결정하기' }] },
-      { bubble: '오른쪽의 버튼을 눌러<br>이미지의 크기를 알맞게 조정해요.', show: 'ed pg dots imgsel tabs', pg: { small: true }, tabs: { off: TAB_MAX, on: 'Magic Media' }, btns: [{ t: '크기 조정하기' }] },
-      { bubble: '초안 이미지를 선택했어요!<br>이제 포스터에 들어갈 문구를<br>정해봐요.', show: 'ed pg dots tabs', pg: { draft: 1 }, next: true },
-      { bubble: '텍스트를 클릭해요.', show: 'ed pg dots tabs', pg: { draft: 1 }, hit: 'tabtext' },
-      { bubble: '텍스트 상자 추가<br>버튼을 클릭해요.', show: 'ed pg text tabs', pg: { draft: 1 }, tabs: { off: 0, on: '텍스트' }, hit: 'insert' },
-      { bubble: '포스터와 어울리는 문구를<br>입력해볼까요? 오른쪽 버튼 중<br>원하는 문구를 선택해봐요.', show: 'ed pg pbar', typing: 'phrase', phrases: true },
-      { bubble: '확인 버튼을 눌러<br>문구를 입력해요.', show: 'ed pg pbar', typing: 'phrase', hit: 'check' },
-      { bubble: '위치를 포스터의 상단으로<br>옮겨 봐요. 문구를 클릭해요.', show: 'ed pg dots tabs', pg: { draft: 1, t: 334 }, hit: 'ptext' },
-      { bubble: MOVE + '이동 버튼을 꾹 눌러<br>위쪽으로 드래그 해보세요.', show: 'ed pg tbar tobj', pg: { draft: 1 }, drag: { text: () => st.phrase || PHRASES[1], fs: () => fsPhrase(), cx: 50, top: 45.8, end: 21.9, zone: [17, 27] }, hit: 'move' },
-      { bubble: '좋아요! 이번에는<br>문구의 글씨체를 바꿔봐요.<br>글꼴을 클릭해요.', show: 'ed pg sel tbar', pg: { draft: 1, t: 52 }, sel: { yc: 256 }, hit: 'tbfont' },
-      { bubble: UP + '더보기 버튼을 클릭해요.', show: 'ed pg sel tbarfont', pg: { draft: 1, t: 52 }, sel: { yc: 256 }, hit: 'more' },
-      { bubble: '포스터를 만들 때는 대부분<br>눈에 잘 띄는 굵은 글씨를 사용해요.<br>추천 폰트를 사용해볼까요?', show: 'ed pg selS flist', pg: { draft: 1, t: 36, style: 'left:115px;top:128px;width:310px;height:440px', small0: true }, selS: true, hit: 'han', setFont: true },
-      { bubble: '좋아요! 확인 버튼을 클릭해<br>편집을 완료해요.', show: 'ed pg selS fpick', pg: { draft: 1, t: 36, style: 'left:115px;top:128px;width:310px;height:440px', small0: true }, selS: true, hit: 'fontok' },
-      { bubble: '마지막으로 AI를 활용한 제작물임을<br>밝히는 문구를 추가해야 해요.<br>다시 한번 텍스트를 클릭해요.', show: 'ed pg dots tabs', pg: { draft: 1, t: 52 }, hit: 'tabtext' },
-      { bubble: '텍스트 상자 추가<br>버튼을 클릭해요.', show: 'ed pg text tabs', pg: { draft: 1, t: 52 }, tabs: { off: 0, on: '텍스트' }, hit: 'insert' },
-      { bubble: '오른쪽 버튼을 눌러<br>문구를 입력해요.', show: 'ed pg pbar', typing: 'credit', btns: [{ t: 'AI로 만든 그림을<br>사용했어요.', credit: true }] },
-      { bubble: '확인 버튼을 클릭해요.', show: 'ed pg pbar', typing: 'credit', hit: 'check' },
-      { bubble: '위치를 포스터의 하단으로<br>옮겨 봐요. 문구를 클릭해요.', show: 'ed pg dots tabs', pg: { draft: 1, t: 52, c: 334 }, hit: 'ctext' },
-      { bubble: MOVE + '이동 버튼을 꾹 눌러<br>아래쪽으로 드래그 해보세요.', show: 'ed pg tbar tobj', pg: { draft: 1, t: 52 }, drag: { cred: true, text: () => CREDIT, fs: () => 24, cx: 50, top: 45.8, end: 73.2, zone: [68, 78] }, hit: 'move' },
-      { bubble: '좋아요! 확인 버튼을 클릭해<br>포스터 만들기를 완료해요.', show: 'ed pg tbar', pg: { draft: 1, t: 52, c: 660 }, hit: 'tbok' },
-      { bubble: '인권 존중 포스터를<br>완성했어요!', show: 'ed pg dots tabs', pg: { draft: 1, t: 52, c: 660 }, next: true },
-      { bubble: '오른쪽 위의 버튼을 클릭해<br>포스터를 다운로드 해봐요.', show: 'ed pg dots tabs dlbtn', pg: { draft: 1, t: 52, c: 660 }, hit: 'download' },
-      { bubble: '아래의 다운로드 버튼을<br>클릭해요.', show: 'ed share', dark: true, hit: 'dl1' },
-      { bubble: '아래의 다운로드 버튼을<br>클릭해요.', show: 'ed dl', dark: true, hit: 'dl2' },
-      { bubble: '내가 만든 인권 존중 포스터를<br>저장했어요!', show: 'ed done', dark: true, next: true },
+      { pose: 'wink_point2', bubble: 'Canva를 클릭해요.', show: 'home', hit: 'canva' },
+      { pose: 'wink_point', bubble: '검색창을 클릭해요.', show: 'app', hit: 'search' },
+      { pose: 'wink_point3', bubble: '오른쪽의 버튼을 클릭해<br>포스터를 검색해요.', show: 'app', focus: true, btns: [{ t: '포스터' }] },
+      { pose: 'wink_point2', bubble: '세로형 포스터를 만들어볼까요?<br>포스터(세로형 A2)를 클릭해요.', show: 'result', hit: 'poster' },
+      { pose: 'main', bubble: '좋아요!<br>이제 AI를 활용해 포스터를<br>디자인해봐요.', show: 'ed pg dots tabs', pg: {}, next: true },
+      { pose: 'wink_present', bubble: '아래의 메뉴 탭을<br>오른쪽으로 슬라이드 해요.', show: 'ed pg dots tabs', pg: {}, hit: 'swipe' },
+      { pose: 'wink_point4', bubble: 'Magic Media를 클릭해요.', show: 'ed pg dots tabs', pg: {}, tabs: { off: TAB_MAX }, hit: 'mmtab' },
+      { pose: 'wink_point2', bubble: '이미지의 비율을 먼저 정해봐요.<br>정사각형 버튼을 클릭해요.', show: 'ed mm0 tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, hit: 'ratio' },
+      { pose: 'wink_point', bubble: '세로형 버튼을 클릭해요.', show: 'ed layout', hit: 'tall' },
+      { pose: 'main', bubble: '좋아요!<br>세로형 포스터에 맞도록<br>이미지 비율을 설정했어요.', show: 'ed mm1 tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, next: true },
+      { pose: 'wink_point', bubble: '이제 프롬프트를 입력해봐요.<br>입력창을 클릭해요.', show: 'ed mm1 tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, hit: 'prompt' },
+      { pose: 'wink_point2', bubble: '오른쪽 버튼을 클릭해<br>내가 조립한 프롬프트를<br>불러와봐요.', show: 'ed mm2 tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, btns: [{ t: '인권 존중 포스터<br>프롬프트 불러오기' }] },
+      { pose: 'main', bubble: '세 가지 경우 중 하나를 클릭해<br>내가 만들고 싶은 포스터의<br>프롬프트를 입력해요.', show: 'ed mm2 tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, cases: true },
+      { pose: 'wink_point2', bubble: '이미지 생성 버튼을<br>클릭해요.', show: 'ed mm3 tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, hit: 'generate' },
+      { pose: 'main', bubble: '내가 요청한 디자인을<br>AI가 만들어주고 있어요.', show: 'ed load tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, loading: true },
+      { pose: 'wink_point2', bubble: '포스터 초안이 완성되었어요!<br>화살표를 클릭해 4장을 모두<br>확인해봐요.', show: 'ed mmres tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, car: 'view', hit: 'arrow' },
+      { pose: 'wink_open', bubble: '어떤 이미지를 사용할까요?<br>프롬프트와 맞는 초안을 골라<br>이미지를 클릭해봐요.', show: 'ed mmres tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, car: 'pick', hit: 'pick', noFinger: true },
+      { pose: 'main', bubble: '해당 이미지로 포스터를<br>제작할까요?', show: 'ed pg dots imgsel tabs', pg: { small: true }, tabs: { off: TAB_MAX, on: 'Magic Media' }, btns: [{ t: '다시하기', back: 'pick' }, { t: '결정하기' }] },
+      { pose: 'wink_point3', bubble: '오른쪽의 버튼을 눌러<br>이미지의 크기를 알맞게 조정해요.', show: 'ed pg dots imgsel tabs', pg: { small: true }, tabs: { off: TAB_MAX, on: 'Magic Media' }, btns: [{ t: '크기 조정하기' }] },
+      { pose: 'main', bubble: '초안 이미지를 선택했어요!<br>이제 포스터에 들어갈 문구를<br>정해봐요.', show: 'ed pg dots tabs', pg: { draft: 1 }, next: true },
+      { pose: 'wink_point4', bubble: '텍스트를 클릭해요.', show: 'ed pg dots tabs', pg: { draft: 1 }, hit: 'tabtext' },
+      { pose: 'wink_point', bubble: '텍스트 상자 추가<br>버튼을 클릭해요.', show: 'ed pg text tabs', pg: { draft: 1 }, tabs: { off: 0, on: '텍스트' }, hit: 'insert' },
+      { pose: 'main', bubble: '포스터와 어울리는 문구를<br>입력해볼까요? 오른쪽 버튼 중<br>원하는 문구를 선택해봐요.', show: 'ed pg pbar', typing: 'phrase', phrases: true },
+      { pose: 'wink_point4', bubble: '확인 버튼을 눌러<br>문구를 입력해요.', show: 'ed pg pbar', typing: 'phrase', hit: 'check' },
+      { pose: 'wink_point2', bubble: '위치를 포스터의 상단으로<br>옮겨 봐요. 문구를 클릭해요.', show: 'ed pg dots tabs', pg: { draft: 1, t: 334 }, hit: 'ptext' },
+      { pose: 'wink_present', bubble: MOVE + '이동 버튼을 꾹 눌러<br>위쪽으로 드래그 해보세요.', show: 'ed pg tbar tobj', pg: { draft: 1 }, drag: { text: () => st.phrase || PHRASES[1], fs: () => fsPhrase(), cx: 50, top: 45.8, end: 21.9, zone: [17, 27] }, hit: 'move' },
+      { pose: 'wink_point4', bubble: '좋아요! 이번에는<br>문구의 글씨체를 바꿔봐요.<br>글꼴을 클릭해요.', show: 'ed pg sel tbar', pg: { draft: 1, t: 52 }, sel: { yc: 256 }, hit: 'tbfont' },
+      { pose: 'wink_point4', bubble: UP + '더보기 버튼을 클릭해요.', show: 'ed pg sel tbarfont', pg: { draft: 1, t: 52 }, sel: { yc: 256 }, hit: 'more' },
+      { pose: 'wink_point4', bubble: '포스터를 만들 때는 대부분<br>눈에 잘 띄는 굵은 글씨를 사용해요.<br>추천 폰트를 사용해볼까요?', show: 'ed pg selS flist', pg: { draft: 1, t: 36, style: 'left:115px;top:128px;width:310px;height:440px', small0: true }, selS: true, hit: 'han', setFont: true },
+      { pose: 'wink_point2', bubble: '좋아요! 확인 버튼을 클릭해<br>편집을 완료해요.', show: 'ed pg selS fpick', pg: { draft: 1, t: 36, style: 'left:115px;top:128px;width:310px;height:440px', small0: true }, selS: true, hit: 'fontok' },
+      { pose: 'wink_point4', bubble: '마지막으로 AI를 활용한 제작물임을<br>밝히는 문구를 추가해야 해요.<br>다시 한번 텍스트를 클릭해요.', show: 'ed pg dots tabs', pg: { draft: 1, t: 52 }, hit: 'tabtext' },
+      { pose: 'wink_point', bubble: '텍스트 상자 추가<br>버튼을 클릭해요.', show: 'ed pg text tabs', pg: { draft: 1, t: 52 }, tabs: { off: 0, on: '텍스트' }, hit: 'insert' },
+      { pose: 'wink_point3', bubble: '오른쪽 버튼을 눌러<br>문구를 입력해요.', show: 'ed pg pbar', typing: 'credit', btns: [{ t: 'AI로 만든 그림을<br>사용했어요.', credit: true }] },
+      { pose: 'wink_point4', bubble: '확인 버튼을 클릭해요.', show: 'ed pg pbar', typing: 'credit', hit: 'check' },
+      { pose: 'wink_point2', bubble: '위치를 포스터의 하단으로<br>옮겨 봐요. 문구를 클릭해요.', show: 'ed pg dots tabs', pg: { draft: 1, t: 52, c: 334 }, hit: 'ctext' },
+      { pose: 'wink_present', bubble: MOVE + '이동 버튼을 꾹 눌러<br>아래쪽으로 드래그 해보세요.', show: 'ed pg tbar tobj', pg: { draft: 1, t: 52 }, drag: { cred: true, text: () => CREDIT, fs: () => 24, cx: 50, top: 45.8, end: 73.2, zone: [68, 78] }, hit: 'move' },
+      { pose: 'wink_point4', bubble: '좋아요! 확인 버튼을 클릭해<br>포스터 만들기를 완료해요.', show: 'ed pg tbar', pg: { draft: 1, t: 52, c: 660 }, hit: 'tbok' },
+      { pose: 'main', bubble: '인권 존중 포스터를<br>완성했어요!', show: 'ed pg dots tabs', pg: { draft: 1, t: 52, c: 660 }, next: true },
+      { pose: 'wink_point', bubble: '오른쪽 위의 버튼을 클릭해<br>포스터를 다운로드 해봐요.', show: 'ed pg dots tabs dlbtn', pg: { draft: 1, t: 52, c: 660 }, hit: 'download' },
+      { pose: 'wink_point4', bubble: '아래의 다운로드 버튼을<br>클릭해요.', show: 'ed share', dark: true, hit: 'dl1' },
+      { pose: 'wink_point4', bubble: '아래의 다운로드 버튼을<br>클릭해요.', show: 'ed dl', dark: true, hit: 'dl2' },
+      { pose: 'happy_jump', bubble: '내가 만든 인권 존중 포스터를<br>저장했어요!', show: 'ed done', dark: true, next: true },
       { end: true }
     ];
     const CUSTOM = new Set(['swipe', 'move', 'arrow', 'pick']);
@@ -324,6 +326,8 @@
     const phone = $('p09Phone');
     const ui = $('p09Ui');
     const bubble = $('p09Bubble');
+    const set = $('p09Set');
+    const say = initGuideSay({ bubble: bubble, img: $('p09Char'), set: set });
     const right = $('p09Right');
     const nextBtn = $('p09Next');
     const status = phone.querySelector('.phone-status');
@@ -408,7 +412,7 @@
         const b = document.createElement('button');
         b.className = 'card-btn ' + (o.cls || '');
         b.innerHTML = o.t;
-        b.addEventListener('click', o.fn);
+        b.addEventListener('click', () => { playClick(); o.fn(); });
         right.appendChild(b);
       });
       return right.firstChild;
@@ -434,8 +438,8 @@
       if (s.end) { end(); return; }
 
       show($('p09Phone'), true);
-      show($('p09Char'), true);
-      bubble.innerHTML = s.bubble;
+      show(set, true);
+      say(s.bubble, s.pose || 'wink_point2');
 
       const keys = s.show.split(' ');
       parts.forEach((el) => { el.hidden = !keys.includes(el.dataset.k); });
@@ -507,8 +511,14 @@
       }
     }
 
+    const syncUrl = () => {
+      if (!BoxEdit.on) return;
+      const q = location.search.replace(/([?&])step=\d+/, '$1step=' + (i + 1));
+      history.replaceState(null, '', /[?&]step=/.test(location.search) ? q : location.search + (location.search ? '&' : '?') + 'step=' + (i + 1));
+    };
     function go(n) {
       i = n === undefined ? i + 1 : n;
+      syncUrl();
       render();
     }
 
@@ -675,9 +685,7 @@
 
     function end() {
       show($('p09Phone'), false);
-      show($('p09Char'), false);
-      bubble.innerHTML = '';
-      bubble.classList.add('is-hide');
+      show(set, false);
       right.classList.add('is-off');
       $('p09EndTitle').classList.remove('is-hide');
       const p = $('p09Poster');
@@ -691,6 +699,49 @@
     $('p09WrongOk').addEventListener('click', () => $('p09Wrong').classList.add('is-off'));
     st.c = CASES[1];
     initPhoneBars();
+
+    /* ?edit&step=N : 단계 N 으로 바로 열기(] [ 또는 아래 버튼으로 이동). 그 앞 단계에서 정해지는 값(문구·초안·글꼴·AI 문구)은 미리 채워 둠.
+       화면 왼쪽 아래 포즈 선택판에서 그 단계 캐릭터 포즈를 눌러 보고, 이름을 STEPS 의 해당 줄 pose 에 옮겨 적음 */
+    if (BoxEdit.on) {
+      const prep = (idx) => {
+        const at = (f) => STEPS.findIndex(f);
+        st.draft = idx > at((x) => x.car === 'pick') ? 1 : 0;
+        st.phrase = idx > at((x) => x.phrases) ? PHRASES[1] : '';
+        st.credit = idx > at((x) => x.btns && x.btns[0] && x.btns[0].credit);
+        st.font = idx > at((x) => x.setFont);
+      };
+      // 눌러야 하는 버튼(.p09-tb)의 클릭 영역: 클릭 → 방향키로 위치, Alt+방향키로 크기. 표시줄 값을 해당 버튼 style 의 left/top/width/height 에 옮겨 적음
+      document.querySelectorAll('.p09-tb').forEach((b) => {
+        const v = (k) => parseFloat(b.style[k]) || 0;
+        b._name = b.dataset.hit || b.dataset.k;
+        b._sel = '.p09-tb[data-hit="' + b._name + '"]';
+        BoxEdit.tag(b, [v('left'), v('top'), v('width'), v('height')]);
+      });
+      BoxEdit.init({
+        apply: (el) => { const r = el._ref; el.style.left = r[0] + 'px'; el.style.top = r[1] + 'px'; el.style.width = r[2] + 'px'; el.style.height = r[3] + 'px'; },
+        format: (el) => '[' + el._name + '] left:' + el._ref[0] + 'px;top:' + el._ref[1] + 'px;width:' + el._ref[2] + 'px;height:' + el._ref[3] + 'px',
+        step: {
+          count: STEPS.length + 1,
+          get: () => i + 1,
+          set: (n) => { i = Math.max(0, n - 1); prep(i); },
+          go: (n) => { if (n < 1) return; i = n - 1; prep(i); syncUrl(); render(); },
+          label: (n) => '단계 ' + n + ' / ' + STEPS.length
+        }
+      });
+      const POSES = ['main', 'main_wave', 'wink_open', 'wink_point', 'wink_point2', 'wink_point3', 'wink_point4', 'wink_present', 'smile_present', 'point_front', 'wink_jump', 'happy_jump'];
+      const pp = document.createElement('div');
+      pp.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:99999;display:flex;flex-wrap:wrap;gap:4px;max-width:640px;padding:8px;border-radius:8px;background:rgba(0,0,0,.82);color:#fff;font:13px sans-serif';
+      pp.innerHTML = '<div id="p09PoseInfo" style="width:100%">캐릭터 포즈 — 눌러서 바꾸기 (STEPS 의 pose 에 옮겨 적음)</div>' +
+        POSES.map((n) => '<button type="button" data-pose="' + n + '" style="width:70px;padding:2px;border:2px solid transparent;border-radius:6px;background:#fff;cursor:pointer;font-size:10px"><img src="../img/character/sa_' + n + '.png" alt="" style="display:block;width:100%;height:56px;object-fit:contain">' + n + '</button>').join('');
+      pp.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-pose]');
+        if (!b) return;
+        say(bubble.innerHTML, b.dataset.pose);
+        pp.querySelectorAll('[data-pose]').forEach((x) => { x.style.borderColor = x === b ? '#e8317f' : 'transparent'; });
+        $('p09PoseInfo').textContent = '단계 ' + (i + 1) + " → pose: '" + b.dataset.pose + "'";
+      });
+      document.body.appendChild(pp);
+    }
     render();
   })();
   </script>
