@@ -105,7 +105,6 @@
     let ri = 0, found = [], locked = false, els = [];
     if (BoxEdit.on) document.body.classList.add('is-edit');
 
-    const place = (el, b) => { el.style.cssText = 'left:' + b[0] + '%;top:' + b[1] + '%;width:' + b[2] + '%;height:' + b[3] + '%'; };
 
     function render() {
       const r = ROUNDS[ri];
@@ -122,7 +121,7 @@
         el.className = 'p02-box';
         el.dataset.k = 't' + i;
         photo.appendChild(el);
-        place(el, b);
+        placePct(el, b);
         BoxEdit.tag(el, b);
         els.push(el);
       });
@@ -131,7 +130,7 @@
         el.className = 'p02-box is-decoy';
         el.dataset.k = 'd' + i;
         photo.appendChild(el);
-        place(el, d.box);
+        placePct(el, d.box);
         BoxEdit.tag(el, d.box);
         els.push(el);
       });
@@ -211,8 +210,8 @@
       BoxEdit.init({
         unit: 0.1,
         name: (el) => '사진' + (ri + 1) + ' ' + (el.dataset.k[0] === 't' ? '개인정보 ' : '오답 ') + (parseInt(el.dataset.k.slice(1), 10) + 1),
-        apply: (el) => place(el, el._ref),
-        step: { count: ROUNDS.length, get: () => ri, set: (n) => { ri = n; }, go: (n) => { location.search = '?edit&step=' + n; }, label: (n) => '사진 ' + (n + 1) + ' / ' + ROUNDS.length }
+        apply: (el) => placePct(el, el._ref),
+        step: { count: ROUNDS.length, get: () => ri, set: (n) => { ri = n; }, go: (n) => { ri = n; BoxEdit.syncStep(n); $('p02Wrong').classList.add('is-off'); $('p02Done').classList.add('is-off'); render(); }, label: (n) => '사진 ' + (n + 1) + ' / ' + ROUNDS.length }
       });
     }
     render();

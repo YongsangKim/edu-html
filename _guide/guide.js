@@ -7,9 +7,11 @@
     { file: 'modals.html', label: '팝업·모달' },
     { file: 'progress.html', label: '진행도(게이지·별·배지)' },
     { file: 'characters.html', label: '안내 캐릭터·말풍선' },
+    { file: 'steps.html', label: '단계형 실습 표준' },
     { file: 'drag.html', label: '끌어 놓기' },
     { file: 'puzzle.html', label: '퍼즐·빙고' },
     { file: 'phone.html', label: '폰 화면 틀' },
+    { file: 'icons.html', label: '공용 아이콘' },
     { file: 'title.html', label: '제목(리본·알약)' },
     { file: 'intro.html', label: '도입·마무리 화면' },
     { file: 'quiz.html', label: '퀴즈 풀기' }

@@ -4,56 +4,56 @@
   const VL = window.VL = {};
   const S = (d, o = {}) => '<svg viewBox="0 0 ' + (o.w || 24) + ' ' + (o.h || 24) + '"' + (o.c ? ' class="' + o.c + '"' : '') + '>' + d + '</svg>';
   const I = {
-    back: S('<path d="M15 4.5L7.5 12l7.5 7.5"/>'),
-    help: S('<circle cx="12" cy="12" r="10"/><path d="M8.8 9.2a3.2 3.2 0 116.2 1c0 1.6-2.2 2.2-2.2 3.8M12.8 17.4h.01" stroke-width="2.2"/>'),
-    dots: S('<circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/>'),
-    gear: S('<circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/>'),
-    out: S('<path d="M5 15v4.5h14V15M12 4v11M7.5 8.5L12 4l4.5 4.5"/>'),
-    play: S('<path d="M8 5.5v13l11-6.5z"/>'),
-    full: S('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>'),
-    undo: S('<path d="M8.5 6.5H15a5 5 0 010 10H8.5M11.5 3.5l-3 3 3 3"/>'),
-    redo: S('<path d="M15.5 6.5H9a5 5 0 000 10h6.5M12.5 3.5l3 3-3 3"/>'),
-    first: S('<path d="M5 5v14M19 5L8.5 12 19 19z"/>'),
-    prev: S('<path d="M8.5 5v14M20 5l-10 7 10 7z"/>'),
-    next: S('<path d="M15.5 5v14M4 5l10 7L4 19z"/>'),
-    last: S('<path d="M19 5v14M5 5l10.5 7L5 19z"/>'),
-    plus: S('<circle cx="12" cy="12" r="10"/><path d="M6.5 12h11M12 6.5v11"/>'),
-    music: S('<path d="M8 18.5V5h11v12M8 9.5h11"/><circle cx="5.8" cy="18.3" r="2.4"/><circle cx="16.8" cy="16.6" r="2.4"/>'),
-    wave: S('<path d="M2 12h3.5l2-5 3 11 3-15 3 17 2-8h4"/>'),
-    mic: S('<rect x="8.5" y="2.5" width="7" height="12" rx="3.5"/><path d="M5 11.5a7 7 0 0014 0M12 18.5v3"/>'),
-    aiv: S('<path d="M5 4h8M4 8v9h6l3 3.5 3-3.5h4V8"/><path d="M9 10v5M12 9v7M15 10v5"/>'),
-    text: S('<path d="M5 8V5h14v3M12 5v14M9 19h6"/>'),
-    label: S('<path d="M4 10.5l8-7 8 7V20H4z"/><path d="M8 15h8M8 18h5"/>'),
-    sub: S('<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M3.5 14.5h17M7 17.5h7"/>'),
-    autosub: S('<path d="M13 4.5H4.5v15h15V11"/><path d="M4.5 14.5h15M8 17.5h6"/><text x="15.5" y="9.5" font-size="8" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">AI</text>'),
-    filter: S('<circle cx="9" cy="9.5" r="5.5"/><circle cx="14.5" cy="14.5" r="5.5"/>'),
-    special: S('<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M7 17l5-5M15 7v2M14 8h2"/>'),
-    distort: S('<rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M3.5 9.2h17M3.5 14.8h17M9.2 3.5v17M14.8 3.5v17"/>'),
-    trash: S('<path d="M5 6.5h14M9.5 6.5V4h5v2.5M7 6.5l1 13h8l1-13M10 10v6M14 10v6"/>'),
-    listen: S('<path d="M7 4.5v15l12-7.5z"/>'),
-    moveto: S('<path d="M12 3.5v11M7.5 10.5l4.5 4.5 4.5-4.5M5 19.5h14"/>'),
-    pencil: S('<path d="M4 20l1-4.5L16.5 4a2 2 0 012.8 0l.7.7a2 2 0 010 2.8L8.5 19zM4 21h16"/>'),
-    start: S('<path d="M4 4v16M7.5 12h10M12 7.5L17.5 12 12 16.5"/>', {}),
-    scissors: S('<circle cx="7" cy="7" r="2.8"/><circle cx="17" cy="7" r="2.8"/><path d="M9 9l9 11M15 9L6 20"/>'),
-    chevL: S('<path d="M15 4.5L7.5 12l7.5 7.5"/>'),
-    chevR: S('<path d="M9 4.5l7.5 7.5L9 19.5"/>'),
-    swap: S('<path d="M20 8H5.5l3-3M4 16h14.5l-3 3"/>'),
-    folder: S('<path d="M3.5 7.5v10h17V9.5h-8l-2-2z"/>'),
-    waveform: S('<path d="M4 9v6M8 6v12M12 3v18M16 7v10M20 10v4"/>'),
-    check: S('<path d="M4.5 12.5l5 5L19.5 7"/>'),
-    mute: S('<path d="M4 9.5v5h4l5 4v-13l-5 4zM17 9.5l4 5M21 9.5l-4 5"/>'),
-    noise: S('<path d="M3 12h2M7 7v10M11 4v16M15 8v8M19 10v4M22 12h0"/>'),
-    echo: S('<path d="M12 3.5a4 4 0 014 4V12a4 4 0 01-8 0V7.5a4 4 0 014-4zM5 11.5a7 7 0 0014 0M12 18.5v3"/>'),
-    fade: S('<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8v8M12 8v8M16 8v8"/>'),
-    speed: S('<text x="12" y="16" font-size="12" font-weight="600" fill="currentColor" stroke="none" text-anchor="middle">1.0x</text>'),
-    vol: S('<path d="M12 4l7 8-7 8-7-8z"/>'),
-    keyfr: S('<path d="M12 3.5l6 8.5-6 8.5-6-8.5z"/>'),
-    gridI: S('<rect x="3.5" y="3.5" width="17" height="17" rx="1.5"/><path d="M9.2 3.5v17M14.8 3.5v17M3.5 9.2h17M3.5 14.8h17"/>'),
-    magnet: S('<path d="M6 4v9a6 6 0 0012 0V4h-4v9a2 2 0 01-4 0V4z"/>'),
-    crown: S('<path d="M3.5 9l4 3.5L12 5l4.5 7.5 4-3.5-1.5 10h-14z"/>', {}),
-    gift: S('<rect x="4" y="9" width="16" height="11" rx="1"/><path d="M3 9h18v3.5H3zM12 9v11M12 9c-3 0-5-1.2-5-3s2.5-2 5 3c2.5-5 5-4.8 5-3s-2 3-5 3z"/>'),
-    menu: S('<path d="M3.5 7h17M3.5 12h17M3.5 17h17"/>'),
-    mark: S('<path d="M14.5 4v6l5 5-5 1v4"/>')
+    back: ICONS.chevL,
+    help: ICONS.help,
+    dots: ICONS.dotsH,
+    gear: ICONS.gear,
+    out: ICONS.out,
+    play: ICONS.play,
+    full: ICONS.expand,
+    undo: ICONS.undo,
+    redo: ICONS.redo,
+    first: ICONS.first,
+    prev: ICONS.prev,
+    next: ICONS.next,
+    last: ICONS.last,
+    plus: ICONS.plusCircle,
+    music: ICONS.music,
+    wave: ICONS.wave,
+    mic: ICONS.mic,
+    aiv: ICONS.aiv,
+    text: ICONS.text,
+    label: ICONS.label,
+    sub: ICONS.sub,
+    autosub: ICONS.autosub,
+    filter: ICONS.filter,
+    special: ICONS.special,
+    distort: ICONS.distort,
+    trash: ICONS.trash,
+    listen: ICONS.listen,
+    moveto: ICONS.moveto,
+    pencil: ICONS.pencil,
+    start: ICONS.start,
+    scissors: ICONS.scissors,
+    chevL: ICONS.chevL,
+    chevR: ICONS.chevR,
+    swap: ICONS.swap,
+    folder: ICONS.folder,
+    waveform: ICONS.waveform,
+    check: ICONS.check,
+    mute: ICONS.mute,
+    noise: ICONS.noise,
+    echo: ICONS.mic,
+    fade: ICONS.fade,
+    speed: ICONS.speed,
+    vol: ICONS.vol,
+    keyfr: ICONS.keyfr,
+    gridI: ICONS.gridI,
+    magnet: ICONS.magnet,
+    crown: ICONS.crown,
+    gift: ICONS.gift,
+    menu: ICONS.menu,
+    mark: ICONS.markFlag
   };
   VL.I = I;
 
@@ -67,7 +67,7 @@
     if (o.back) s += '<i class="v-ic" style="left:20px;top:58px;width:34px;height:34px">' + I.back + '</i>';
     s += '<i class="v-ic is-help" style="left:81px;top:60px;width:32px;height:32px">' + I.help + '</i>';
     if (o.title) {
-      s += txt('v-title', 120, 66, '제목 없음 (2.12:1)<i class="v-ic" style="width:15px;height:15px;margin-left:6px;vertical-align:-1px">' + I.gear + '</i>', 300);
+      s += txt('v-title', 120, 66, '제목 없음 (2.12:1)<i class="v-ic" style="width:20px;height:20px;margin-left:6px;vertical-align:-4px">' + I.gear + '</i>', 300);
       s += '<div class="v-out" style="left:438px;top:61px"><i class="v-ic" style="width:18px;height:18px">' + I.out + '</i>추출하기</div>';
     }
     if (o.grid) s += '<i class="v-ic is-blue" style="left:503px;top:56px;width:30px;height:30px;left:' + 428 + 'px">' + I.gridI + '</i><i class="v-ic is-blue" style="left:476px;top:56px;width:30px;height:30px">' + I.magnet + '</i>';
@@ -133,7 +133,7 @@
     + '<div class="v-crown" style="left:467px;top:70px"><i class="v-ic">' + I.crown + '</i></div>'
     + '<div class="v-banner"><img src="img/p09_banner.png" alt=""></div>'
     + '<p class="v-mp">내 프로젝트 (0) <i class="v-ic is-down">' + S('<circle cx="12" cy="12" r="10" fill="currentColor" stroke="none"/><path d="M7.5 10.5l4.5 4.5 4.5-4.5" stroke="#16171b" stroke-width="2.4"/>') + '</i></p>'
-    + '<i class="v-ic v-lv" style="left:372px;top:455px">' + S('<rect x="4" y="5.5" width="16" height="13" rx="2.5" fill="currentColor" stroke="none"/><rect x="6.5" y="8" width="11" height="8" rx="1" fill="#16171b" stroke="none"/>') + '</i><i class="v-ic v-lv" style="left:431px;top:455px">' + S('<rect x="5" y="3.5" width="9" height="6.5" rx="1.5"/><rect x="5" y="13.5" width="9" height="6.5" rx="1.5"/><path d="M18 5v11M15 13.5l3 3 3-3"/>') + '</i><span class="v-sel">선택</span>'
+    + '<i class="v-ic v-lv" style="left:372px;top:455px">' + ICONS.watch + '</i><i class="v-ic v-lv" style="left:431px;top:455px">' + ICONS.blocksDown + '</i><span class="v-sel">선택</span>'
     + '<div class="v-load"><i class="v-ic">' + S('<path d="M7 3.5h7l4 4v13H7zM13 3.5v5h5M12 11v6M9.5 14.5l2.5 2.5 2.5-2.5"/>') + '</i>프로젝트 불러오기</div>'
     + '</div>';
 
@@ -190,7 +190,7 @@
   /* ---------- 자막 수정·효과·블러·트래킹·추출 (디자인 8~23) ---------- */
   const faces = (sel) => ['블러', '픽셀', '확대', '볼록 렌즈'].map((t, i) => '<div class="v-fc' + (sel && i === 0 ? ' is-sel' : '') + '" style="left:' + (30 + i * 118.5) + 'px"><img src="img/p09_face_' + (i + 1) + '.png" alt=""></div><span class="v-fl" style="left:' + (30 + i * 118.5) + 'px">' + t + '</span>').join('');
   const dimBtns = (ok) => bigBtn(17, 1112, 245, 55, '취소', '#4c4d50') + bigBtn(279, 1112, 245, 55, '완료', ok ? '#0a9cf7' : '#2c4a6c', ok ? 'is-done' : 'is-dimbtn');
-  const crownI = S('<path d="M3.5 9l4 3.5L12 5l4.5 7.5 4-3.5-1.5 10h-14z" fill="currentColor"/>');
+  const crownI = ICONS.crown;
 
   /* 글자 탭 편집기(디자인 12, 20, 23) */
   SC.subed = () => editor({ undo: 1, rows: sideIcon(I.plus, 779, '미디어') + sideIcon(I.text, 853, '글자') + sideIcon(I.label, 921, '라벨') + sideIcon(I.sub, 991, '자막') + sideIcon(I.autosub, 1058, '자동 자막'), tab: 2, dots: [360, 450, 539], t2: '00:05' })
@@ -234,11 +234,11 @@
   /* 추출하기(디자인 21) */
   SC.export = () => '<div class="v-full is-exp"><i class="v-ic" style="left:22px;top:60px;width:34px;height:34px">' + I.back + '</i><p class="v-et">추출하기</p>'
     + '<div class="v-etabs"><span class="is-on">비디오</span><span>GIF</span><span>프로젝트</span><span>자막</span><span>오디오</span><u></u></div>'
-    + '<p class="v-es" style="top:238px">파일</p><div class="v-ebox" style="top:262px;height:118px"><div class="v-er"><span>파일명</span><em>제목 없음</em></div><div class="v-er is-2"><span>저장 위치</span><em><b>앨범</b> | 파일</em></div></div>'
-    + '<p class="v-es" style="top:400px">추출 옵션</p><div class="v-ebox" style="top:424px;height:54px"><div class="v-er"><span>추출 범위</span><em><b>전체</b> &gt;</em></div></div>'
-    + '<p class="v-es" style="top:500px">포맷</p><div class="v-ebox" style="top:524px;height:324px"><div class="v-er is-fmt"><b>기본값 (추천)</b><u>▲</u></div><div class="v-er is-sl"><span>해상도</span><em>1920 x 906 / 기본값</em></div><div class="v-sl"><i style="width:55%"></i><b style="left:55%"></b></div><div class="v-ticks"><span>SD</span><span>HD</span><span>Full HD</span><span>QHD</span><span>4K UHD</span></div><div class="v-er is-sl" style="margin-top:12px"><span>프레임레이트</span><em>기본값</em></div><div class="v-sl"><i style="width:84%"></i><b style="left:84%"></b></div><div class="v-ticks"><span>18</span><span>24</span><span>25</span><span>30</span><span>60</span></div></div>'
+    + '<p class="v-es" style="top:236px">파일</p><div class="v-ebox" style="top:262px;height:118px"><div class="v-er"><span>파일명</span><em>제목 없음</em></div><div class="v-er is-2"><span>저장 위치</span><em><b>앨범</b> | 파일</em></div></div>'
+    + '<p class="v-es" style="top:398px">추출 옵션</p><div class="v-ebox" style="top:424px;height:54px"><div class="v-er"><span>추출 범위</span><em><b>전체</b> &gt;</em></div></div>'
+    + '<p class="v-es" style="top:498px">포맷</p><div class="v-ebox" style="top:524px;height:324px"><div class="v-er is-fmt"><b>기본값 (추천)</b><u>▲</u></div><div class="v-er is-sl"><span>해상도</span><em>1920 x 906 / 기본값</em></div><div class="v-sl"><i style="width:55%"></i><b style="left:55%"></b></div><div class="v-ticks"><span>SD</span><span>HD</span><span>Full HD</span><span>QHD</span><span>4K UHD</span></div><div class="v-er is-sl" style="margin-top:12px"><span>프레임레이트</span><em>기본값</em></div><div class="v-sl"><i style="width:84%"></i><b style="left:84%"></b></div><div class="v-ticks"><span>18</span><span>24</span><span>25</span><span>30</span><span>60</span></div></div>'
     + '<div class="v-eb"><span>완료 알람</span><u class="v-tog is-on"><b></b></u></div>'
-    + '<div class="v-bigb">추출하기 (약 5.56 MB)</div></div>';
+    + '<div class="v-bigb"><i class="v-ic">' + I.out + '</i>추출하기 (약 5.56 MB)</div></div>';
   /* 저장 완료(디자인 22) */
   SC.saved = () => '<div class="v-full is-saved"><i class="v-ic" style="left:22px;top:60px;width:34px;height:34px">' + I.back + '</i><i class="v-ic" style="left:489px;top:60px;width:34px;height:34px">' + S('<path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/>') + '</i>'
     + '<div class="v-chk"><svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="95" fill="none" stroke="#e9416a" stroke-width="5"/><path d="M62 98l30 40 60-84" fill="none" stroke="#e9416a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'

@@ -141,19 +141,6 @@
       if (width) el.style.width = width + 'px';
     }
 
-    function type(el, text, done) {
-      let i = 0;
-      el.textContent = '';
-      const timer = setInterval(() => {
-        i += 1;
-        el.textContent = text.slice(0, i);
-        if (i >= text.length) {
-          clearInterval(timer);
-          if (done) setTimeout(done, 600);
-        }
-      }, 60);
-    }
-
     function ask(meText, aiText, done) {
       me.textContent = meText;
       me.style.top = '13px';
@@ -162,7 +149,7 @@
         ai.innerHTML = LOADING;
         place(ai, 28, 13 + me.offsetHeight + 15);
         ai.classList.add('is-show');
-        setTimeout(() => type(ai, aiText, done), 2000);
+        setTimeout(() => typeText(ai, aiText, { speed: 60, clear: true, onDone: done, doneDelay: 600 }), 2000);
       }, 700);
     }
 

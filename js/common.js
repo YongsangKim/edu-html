@@ -1748,6 +1748,8 @@ function initPromptBuilder() {
     builder.dataset.currentStep = String(idx + 1);
   };
   updateDots(panels[0]);
+  // ?edit 처럼 단계를 건너뛰어 다시 열 때 쓰는 초기화: 쌓인 문구를 모두 지움(builder.resetClauses())
+  builder.resetClauses = () => { clauseByPanel.fill(''); clauseClassByPanel.fill(''); renderPreview(); };
 
   // 옵션(.multi-option이든 곧바로 넘어가는 옵션이든)을 클릭하는 즉시
   // 그 스텝 칸의 문구가 미리보기에 반영됨(다음을 눌러야 넘어가는
@@ -2342,12 +2344,139 @@ function resetImageSwap(root) {
    opts.x: 가로 어디를 가리킬지(0=왼쪽 끝 ~ 1=오른쪽 끝, 기본 1). 긴 입력창처럼 오른쪽 끝에 다른 버튼이 있을 때
    opts.dx / opts.dy: 손가락 위치를 px로 더 옮김(예: dy:-50이면 위로)
    opts.w: 손가락 너비(px, 기본 110). 버튼이 화면 맨 아래라 손가락이 잘릴 때 줄여서 씀 */
+/* 폰 화면 공용 아이콘(24x24 선 아이콘). 페이지는 같은 뜻의 아이콘을 따로 그리지 않고 ICONS.이름 을 씀(비교·목록은 _guide/icons.html) */
+const ICONS = {
+  // 같은 뜻을 여러 페이지가 함께 쓰는 것
+  back: '<svg viewBox="0 0 24 24"><path d="M19 12H5M11 5l-7 7 7 7"/></svg>',
+  check: '<svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>',
+  chev: '<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>',
+  dotsH: '<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>',
+  expand: '<svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 15v5h-5M20 9V4h-5M4 15v5h5"/></svg>',
+  menu: '<svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
+  mic: '<svg viewBox="0 0 24 24"><rect x="8.5" y="2.5" width="7" height="12" rx="3.5"/><path d="M5 11.5a7 7 0 0014 0M12 18.5v3"/></svg>',
+  mute: '<svg viewBox="0 0 24 24"><path d="M4 9.5v5h4l5 4v-13l-5 4zM17 9.5l4 5M21 9.5l-4 5"/></svg>',
+  plus: '<svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg>',
+  redo: '<svg viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 000 12h3"/></svg>',
+  share: '<svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.2"/><circle cx="17" cy="6" r="2.2"/><circle cx="17" cy="18" r="2.2"/><path d="M8 11l7-4M8 13l7 4"/></svg>',
+  trash: '<svg viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><path d="m9.4 16.5 2.6-2.6 2.6 2.6 1.4-1.4-2.6-2.6L16 9.9l-1.4-1.4-2.6 2.6-2.6-2.6L8 9.9l2.6 2.6L8 15.1zM7 21q-.824 0-1.412-.587A1.93 1.93 0 0 1 5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .824-.587 1.413A1.93 1.93 0 0 1 17 21zM17 6H7v13h10z"/></g></svg>',
+  undo: '<svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/></svg>',
+  // 같은 뜻이지만 다른 모양(원래 페이지의 디자인 그대로)
+  dotsV: '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg>',
+  expandDiag: '<svg viewBox="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>',
+  plusCircle: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M6.5 12h11M12 6.5v11"/></svg>',
+  shareUp: '<svg viewBox="0 0 32 32"><g fill="currentColor" stroke="none"><path d="M14.9844 7.86035H6.31445C6.26941 7.86048 6.20467 7.881 6.13574 7.96582C6.06494 8.05326 6.00394 8.19678 6.00391 8.37988V25.2871C6.00409 25.47 6.06495 25.6139 6.13574 25.7012C6.20455 25.7857 6.26947 25.8065 6.31445 25.8066H25.6973C25.7422 25.8065 25.8072 25.7857 25.876 25.7012C25.9468 25.6139 26.0076 25.47 26.0078 25.2871V21.4189H28.0068V25.2871C28.0065 26.6608 27.0793 27.9997 25.6973 28H6.31445C4.93238 27.9997 4.00526 26.6608 4.00488 25.2871V8.37988C4.00495 7.00596 4.93215 5.66727 6.31445 5.66699H14.9844V7.86035ZM28.0049 12.2646L22.3594 18.4277L20.9434 16.8799L24.2285 13.2939H18.8027C17.3144 13.2939 16.2659 13.8154 15.582 14.6348C14.8872 15.4678 14.458 16.7431 14.458 18.4639V20.3584H12.458V18.4639C12.458 16.3564 12.9876 14.4968 14.1074 13.1543C15.2392 11.7981 16.8649 11.1006 18.8027 11.1006H24.1064L20.9434 7.64844L22.3594 6.10059L28.0049 12.2646Z"/></g></svg>',
+  playBox: '<svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><path d="M10 9l5 3-5 3z"/></svg>',
+  swapDual: '<svg viewBox="0 0 24 24"><path d="M4.3 9.45h15.4M19.7 9.45l-3.9-4.3"/><path d="M19.7 14.55H4.3M4.3 14.55l3.9 4.3" opacity=".55"/></svg>',
+  markFlag: '<svg viewBox="0 0 24 24"><path d="M14.5 4v6l5 5-5 1v4"/></svg>',
+  chevL: '<svg viewBox="0 0 24 24"><path d="M15 4.5L7.5 12l7.5 7.5"/></svg>',
+  chevR: '<svg viewBox="0 0 24 24"><path d="M9 4.5l7.5 7.5L9 19.5"/></svg>',
+  // 그 밖의 아이콘(지금은 한 곳에서 쓰지만 다른 곳에서도 쓸 수 있음)
+  aiv: '<svg viewBox="0 0 24 24"><path d="M5 4h8M4 8v9h6l3 3.5 3-3.5h4V8"/><path d="M9 10v5M12 9v7M15 10v5"/></svg>',
+  autosub: '<svg viewBox="0 0 24 24"><path d="M13 4.5H4.5v15h15V11"/><path d="M4.5 14.5h15M8 17.5h6"/><text x="15.5" y="9.5" font-size="8" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">AI</text></svg>',
+  bs: '<svg viewBox="0 0 24 24"><path d="M9 5h10a2 2 0 012 2v10a2 2 0 01-2 2H9l-6-7z"/><path d="M12 9.500l5 5M17 9.500l-5 5"/></svg>',
+  cam: '<svg viewBox="0 0 100 100"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="6"><rect x="18" y="18" width="64" height="64" rx="8"/><circle cx="50" cy="50" r="16"/></g><circle cx="31" cy="31" r="3.5" fill="currentColor"/></svg>',
+  copy: '<svg viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/></svg>',
+  corner: '<svg viewBox="0 0 24 24"><path d="M5 20v-4a10 10 0 0110-10h2"/><circle cx="19" cy="6" r="1.6" fill="currentColor"/><circle cx="5" cy="20" r="1.6" fill="currentColor"/></svg>',
+  crown: '<svg viewBox="0 0 100 100"><g fill="currentColor" stroke="none"><path d="M16 63L17.5 24C17.8 21.2 20.6 19.6 23.2 20.7L38 27L50 14C51.3 12.6 53.5 12.6 54.8 14L66.8 27L81.6 20.7C84.2 19.6 87 21.2 87.3 24L88.8 63C89 65.5 87 67.5 84.5 67.5H20.3C17.8 67.5 15.8 65.5 16 63Z"/><rect x="16" y="74.5" width="72.8" height="10" rx="3.5"/></g></svg>',
+  distort: '<svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M3.5 9.2h17M3.5 14.8h17M9.2 3.5v17M14.8 3.5v17"/></svg>',
+  doc: '<svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>',
+  edit: '<svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg>',
+  fade: '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8v8M12 8v8M16 8v8"/></svg>',
+  filter: '<svg viewBox="0 0 24 24"><circle cx="9" cy="9.5" r="5.5"/><circle cx="14.5" cy="14.5" r="5.5"/></svg>',
+  first: '<svg viewBox="0 0 24 24"><path d="M5 5v14M19 5L8.5 12 19 19z"/></svg>',
+  flash: '<svg viewBox="0 0 24 24"><path d="M13 3L5 13.500h6L10 21l8-10.500h-6z" fill="currentColor"/></svg>',
+  folder: '<svg viewBox="0 0 24 24"><path d="M3.5 7.5v10h17V9.5h-8l-2-2z"/></svg>',
+  format: '<svg viewBox="0 0 24 24"><path d="M4 5h5a3 3 0 010 6H4zM4 11h6a3.2 3.2 0 010 6.4H4zM15 7h6M15 12h6M15 17h6"/></svg>',
+  funnel: '<svg viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><path d="M11.003 20a.96.96 0 0 1-.711-.288.97.97 0 0 1-.287-.712v-6L4.22 5.6q-.375-.5-.112-1.05.261-.55.91-.55h13.964q.648 0 .91.55T19.78 5.6L13.995 13v6q0 .424-.287.712a.96.96 0 0 1-.71.288z"/></g></svg>',
+  gal: '<svg viewBox="0 0 24 24"><path d="M3 18l5-7 4 5 3-3 6 5M16 7.500h.01" stroke-width="2.4"/></svg>',
+  gear: '<svg viewBox="0 0 100 100"><g fill="currentColor" stroke="none"><path fill-rule="evenodd" transform="translate(0 -10)" d="M43 18L57 18L59.5 27.5A32 32 0 0 1 66.8 30.5L75.8 24.2L85.7 34.1L79.5 43.2A32 32 0 0 1 82.5 50.5L92 53L92 67L82.5 69.5A32 32 0 0 1 79.5 76.8L85.7 85.8L75.8 95.7L66.8 89.5A32 32 0 0 1 59.5 92.5L57 102L43 102L40.5 92.5A32 32 0 0 1 33.2 89.5L24.2 95.7L14.3 85.8L20.5 76.8A32 32 0 0 1 17.5 69.5L8 67L8 53L17.5 50.5A32 32 0 0 1 20.5 43.2L14.3 34.1L24.2 24.2L33.2 30.5A32 32 0 0 1 40.5 27.5ZM50 42A18 18 0 1 0 50 78A18 18 0 1 0 50 42Z"/></g></svg>',
+  gift: '<svg viewBox="0 0 24 24"><rect x="4" y="9" width="16" height="11" rx="1"/><path d="M3 9h18v3.5H3zM12 9v11M12 9c-3 0-5-1.2-5-3s2.5-2 5 3c2.5-5 5-4.8 5-3s-2 3-5 3z"/></svg>',
+  gridI: '<svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="1.5"/><path d="M9.2 3.5v17M14.8 3.5v17M3.5 9.2h17M3.5 14.8h17"/></svg>',
+  help: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8.8 9.2a3.2 3.2 0 116.2 1c0 1.6-2.2 2.2-2.2 3.8M12.8 17.4h.01" stroke-width="2.2"/></svg>',
+  keyfr: '<svg viewBox="0 0 24 24"><path d="M12 3.5l6 8.5-6 8.5-6-8.5z"/></svg>',
+  label: '<svg viewBox="0 0 24 24"><path d="M4 10.5l8-7 8 7V20H4z"/><path d="M8 15h8M8 18h5"/></svg>',
+  last: '<svg viewBox="0 0 24 24"><path d="M19 5v14M5 5l10.5 7L5 19z"/></svg>',
+  learn: '<svg viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 011-1h3M16 4h3a1 1 0 011 1v3M20 16v3a1 1 0 01-1 1h-3M8 20H5a1 1 0 01-1-1v-3"/><path d="M8 9h8M8 12h8M8 15h5"/></svg>',
+  lib: '<svg viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><path d="M3.987 4A.99.99 0 0 0 3 4.995v13.93c0 .55.442.995.987.995a.99.99 0 0 0 .986-.995V4.995A.99.99 0 0 0 3.987 4M7.933 4a.99.99 0 0 0-.987.995v13.93c0 .55.442.995.987.995a.99.99 0 0 0 .987-.995V4.995A.99.99 0 0 0 7.933 4M10.893 4.995A.99.99 0 0 1 11.879 4a.99.99 0 0 1 .987.995v13.93a.99.99 0 0 1-.987.995.99.99 0 0 1-.986-.995zM15.065 4.243a.997.997 0 0 0-.618 1.26l4.631 13.82c.175.52.735.8 1.251.624a.997.997 0 0 0 .619-1.26l-4.632-13.82a.985.985 0 0 0-1.25-.624"/></g></svg>',
+  listen: '<svg viewBox="0 0 100 100"><path d="M32 20L72 44C78 47.5 78 52.5 72 56L32 80C26 83.5 22 80 22 73L22 27C22 20 26 16.5 32 20Z" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  lock: '<svg viewBox="0 0 24 24"><path d="M7.6 11V8a4.4 4.4 0 018.8 0v3" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><rect x="4" y="10" width="16" height="12" rx="3" fill="currentColor" stroke="none"/><circle cx="12" cy="15.4" r="1.7" fill="#0c0c0e" stroke="none"/></svg>',
+  magnet: '<svg viewBox="0 0 24 24"><path d="M6 4v9a6 6 0 0012 0V4h-4v9a2 2 0 01-4 0V4z"/></svg>',
+  mark: '<svg viewBox="0 0 24 24"><path d="M7 4h10v17l-5-4-5 4z"/></svg>',
+  moveto: '<svg viewBox="0 0 100 100"><g fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"><path d="M40 18H60V42H72L50 68L28 42H40Z"/><line x1="24" y1="80" x2="76" y2="80"/></g></svg>',
+  music: '<svg viewBox="0 0 24 24"><path d="M8 18.5V5h11v12M8 9.5h11"/><circle cx="5.8" cy="18.3" r="2.4"/><circle cx="16.8" cy="16.6" r="2.4"/></svg>',
+  next: '<svg viewBox="0 0 24 24"><path d="M15.5 5v14M4 5l10 7L4 19z"/></svg>',
+  noise: '<svg viewBox="0 0 24 24"><path d="M3 12h2M7 7v10M11 4v16M15 8v8M19 10v4M22 12h0"/></svg>',
+  note: '<svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>',
+  noteStar: '<svg viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><path d="m10.35 7.232-2.446.244a.865.865 0 0 0-.78.859v7.558a3 3 0 0 0-.521-.042C5.165 15.851 4 16.78 4 17.926 4 19.07 5.165 20 6.603 20c1.437 0 2.602-.929 2.602-2.074v-6.431l4.77-.475a3 3 0 0 1-.077-.173l-.572-1.395-1.4-.57a2.7 2.7 0 0 1-1.576-1.65M15.452 12.38v2.475a3 3 0 0 0-.521-.041c-1.437 0-2.603.929-2.603 2.074 0 1.146 1.166 2.075 2.603 2.075s2.603-.929 2.603-2.075V12.36a2.86 2.86 0 0 1-2.082.02M11.96 6.56a1.02 1.02 0 0 1 .647-1.004l1.67-.68a1.04 1.04 0 0 0 .57-.567l.682-1.664c.352-.86 1.575-.86 1.927 0l.682 1.664c.106.258.311.463.57.568l1.67.68c.344.14.551.417.621.722.017.407-.199.822-.646 1.004l-1.67.68c-.26.105-.465.31-.57.568l-.682 1.663c-.353.86-1.576.86-1.928 0l-.682-1.663a1.04 1.04 0 0 0-.57-.569l-1.67-.679a1.02 1.02 0 0 1-.62-.723"/></g></svg>',
+  out: '<svg viewBox="0 0 24 24"><path d="M5 15v4.5h14V15M12 4v11M7.5 8.5L12 4l4.5 4.5"/></svg>',
+  pencil: '<svg viewBox="0 0 24 24"><path d="M4 20l1-4.5L16.5 4a2 2 0 012.8 0l.7.7a2 2 0 010 2.8L8.5 19zM4 21h16"/></svg>',
+  play: '<svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg>',
+  prev: '<svg viewBox="0 0 24 24"><path d="M8.5 5v14M20 5l-10 7 10 7z"/></svg>',
+  refresh: '<svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 01-14 5.3M4 12a8 8 0 0114-5.3M18 3v4h-4M6 21v-4h4"/></svg>',
+  rot: '<svg viewBox="0 0 16 16"><g fill="currentColor" stroke="none" transform="rotate(-90 8 8)"><path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2z"/><path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466"/></g></svg>',
+  scissors: '<svg viewBox="0 0 24 24"><circle cx="7" cy="7" r="2.8"/><circle cx="17" cy="7" r="2.8"/><path d="M9 9l9 11M15 9L6 20"/></svg>',
+  search: '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l5 5"/></svg>',
+  set: '<svg viewBox="0 0 24 24"><path d="M5 8h9M18 8h1M5 16h1M10 16h9"/><circle cx="16" cy="8" r="2"/><circle cx="8" cy="16" r="2"/></svg>',
+  shape: '<svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="4"/><rect x="11" y="11" width="9" height="9" rx="1"/></svg>',
+  shift: '<svg viewBox="0 0 24 24"><path d="M12 4l8 9h-5v6H9v-6H4z"/></svg>',
+  sig: '<svg viewBox="0 0 24 24"><path d="M4 20V14M9 20V10M14 20V6M19 20V3"/></svg>',
+  spark: '<svg viewBox="0 0 100 100"><g fill="currentColor" stroke="none"><path d="M34 32C34 42 24 52 14 52C24 52 34 62 34 72C34 62 44 52 54 52C44 52 34 42 34 32Z"/><path d="M70 19C70 25 63 32 56 32C63 32 70 39 70 45C70 39 77 32 84 32C77 32 70 25 70 19Z"/><path d="M67 67C67 71 62 76 57 76C62 76 67 81 67 85C67 81 72 76 77 76C72 76 67 71 67 67Z"/></g></svg>',
+  special: '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M7 17l5-5M15 7v2M14 8h2"/></svg>',
+  speed: '<svg viewBox="0 0 24 24"><text x="12" y="16" font-size="12" font-weight="600" fill="currentColor" stroke="none" text-anchor="middle">1.0x</text></svg>',
+  spk: '<svg viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M13.5957 3.0386C14.26 2.59634 15.15 3.07249 15.1504 3.87064V20.1343L15.1406 20.2798C15.0472 20.9413 14.325 21.3274 13.7227 21.0386L13.5957 20.9663L7.77637 17.0865C7.71489 17.0455 7.64473 17.0191 7.57227 17.0083L7.49902 17.0025H3.65039L3.54785 16.9976C3.04374 16.9462 2.64941 16.5201 2.64941 16.0025V8.00247C2.64966 7.48503 3.04391 7.05968 3.54785 7.00833L3.65039 7.00247H7.49902L7.57227 6.99759C7.62055 6.99038 7.66776 6.97543 7.71191 6.95462L7.77637 6.91849L13.5957 3.0386ZM8.6084 8.16653C8.28 8.38548 7.89372 8.50237 7.49902 8.50247H4.15039V15.5025H7.49902C7.84426 15.5026 8.18324 15.5923 8.48242 15.7613L8.6084 15.8384L13.6504 19.1997V4.80423L8.6084 8.16653Z"/><path d="M20.7373 4.85892C21.1512 4.85918 21.4871 5.19502 21.4873 5.60892V18.396C21.4872 18.81 21.1512 19.1458 20.7373 19.146C20.3232 19.146 19.9874 18.8101 19.9873 18.396V5.60892C19.9875 5.19486 20.3232 4.85892 20.7373 4.85892Z"/><path d="M17.7852 7.3179C18.1993 7.3179 18.535 7.65378 18.5352 8.0679V15.937C18.535 16.3511 18.1993 16.687 17.7852 16.687C17.3712 16.6869 17.0353 16.351 17.0352 15.937V8.0679C17.0353 7.65387 17.3711 7.31803 17.7852 7.3179Z"/></g></svg>',
+  star: '<svg viewBox="0 0 24 24"><path d="M12 3.500l2.600 5.400 5.900.8-4.300 4.100 1 5.900L12 16.900 6.800 19.700l1-5.900L3.500 9.700l5.900-.8z"/></svg>',
+  start: '<svg viewBox="0 0 24 24"><path d="M4 4v16M7.5 12h10M12 7.5L17.5 12 12 16.5"/></svg>',
+  style: '<svg viewBox="0 0 24 24"><path d="M4 8h16M4 16h16" stroke-width="3.2"/></svg>',
+  sub: '<svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M3.5 14.5h17M7 17.5h7"/></svg>',
+  sug: '<svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2.500"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>',
+  swap: '<svg viewBox="0 0 24 24"><path d="M20 8H5.5l3-3M4 16h14.5l-3 3"/></svg>',
+  talk: '<svg viewBox="0 0 100 100"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M56.8 12.8A24 24 0 0 1 84 47.7L84 60L79 60" stroke-width="5" opacity=".9"/><path d="M25.2 69.8L21 82L37.8 77A28 28 0 1 0 25.2 69.8Z" stroke-width="6"/><line x1="36" y1="42" x2="36" y2="64" stroke-width="5"/><line x1="45" y1="47" x2="45" y2="59" stroke-width="5"/><line x1="54" y1="44" x2="54" y2="62" stroke-width="5"/></g></svg>',
+  text: '<svg viewBox="0 0 24 24"><path d="M5 8V5h14v3M12 5v14M9 19h6"/></svg>',
+  thumb: '<svg viewBox="0 0 24 24"><path d="M7 11v9H4v-9zM7 11l4-7c1.6 0 2.6 1.1 2.1 3l-.6 3H19a2 2 0 012 2.3l-1 6A2 2 0 0118 20H7"/></svg>',
+  tsel: '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8.500 9V8h7v1M12 8v8M10.500 16h3"/></svg>',
+  vol: '<svg viewBox="0 0 24 24"><path d="M12 4l7 8-7 8-7-8z"/></svg>',
+  wand: '<svg viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><path fill-rule="evenodd" d="M16.887 8.504c.77.736.77 1.947 0 2.684L6.137 21.464a1.954 1.954 0 0 1-2.689 0l-.87-.832a1.85 1.85 0 0 1 0-2.684l10.75-10.277a1.954 1.954 0 0 1 2.688 0zm-3.743 1.12a.46.46 0 0 0 0 .671l1.043.997a.49.49 0 0 0 .672 0l1.002-.957a.46.46 0 0 0 0-.67l-1.044-.998a.49.49 0 0 0-.672 0z" clip-rule="evenodd"/><path d="M18.275 13.726c.232-.613 1.12-.613 1.353 0l.398 1.052a.71.71 0 0 0 .426.416l1.078.39a.7.7 0 0 1 0 1.32l-1.078.39a.71.71 0 0 0-.426.415l-.398 1.053c-.233.613-1.12.613-1.353 0l-.398-1.053a.71.71 0 0 0-.426-.416l-1.077-.389a.699.699 0 0 1 0-1.32l1.077-.39a.71.71 0 0 0 .426-.416zM6.744 4.337c.232-.613 1.12-.613 1.352 0l.399 1.053a.71.71 0 0 0 .426.415l1.077.39a.7.7 0 0 1 0 1.321l-1.077.389a.71.71 0 0 0-.426.416l-.4 1.053c-.231.613-1.12.613-1.351 0L6.346 8.32a.71.71 0 0 0-.426-.416l-1.078-.389a.699.699 0 0 1 0-1.321l1.078-.39a.71.71 0 0 0 .426-.415zM18.275 2.46c.232-.613 1.12-.613 1.353 0l.398 1.052a.71.71 0 0 0 .426.416l1.078.39a.7.7 0 0 1 0 1.32l-1.078.39a.71.71 0 0 0-.426.415l-.398 1.053c-.233.613-1.12.613-1.353 0l-.398-1.053a.71.71 0 0 0-.426-.416l-1.077-.389a.699.699 0 0 1 0-1.32l1.077-.39a.71.71 0 0 0 .426-.416z"/></g></svg>',
+  wave: '<svg viewBox="0 0 24 24"><path d="M2 12h3.5l2-5 3 11 3-15 3 17 2-8h4"/></svg>',
+  waveform: '<svg viewBox="0 0 24 24"><path d="M4 9v6M8 6v12M12 3v18M16 7v10M20 10v4"/></svg>',
+  wifi: '<svg viewBox="0 0 24 24"><path d="M2 9a15 15 0 0120 0M5 12.5a10 10 0 0114 0M8.5 16a5 5 0 017 0"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg>',
+  x: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  eduLogo: '<svg viewBox="0 0 120 100"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M52 48V22A6 6 0 0 1 58 16H94A6 6 0 0 1 100 22V74A6 6 0 0 1 94 80H86" stroke-width="5"/><line x1="71" y1="32" x2="81" y2="32" stroke-width="5"/></g><text x="8" y="84" fill="currentColor" stroke="none" font-family="Pretendard,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif" font-size="44" font-weight="bold" letter-spacing="-1.5">edu</text></svg>',
+  blocksDown: '<svg viewBox="0 0 100 100"><g fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><rect x="20" y="16" width="30" height="14" rx="4"/><rect x="20" y="43" width="30" height="14" rx="4"/><rect x="20" y="70" width="30" height="14" rx="4"/><path d="M72 35V65"/><path d="M61 54L72 65L83 54"/></g></svg>',
+  watch: '<svg viewBox="0 0 100 100"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M32 23H68" stroke-width="7"/><path d="M32 77H68" stroke-width="7"/><rect x="20" y="30" width="60" height="40" rx="10" stroke-width="6"/><rect x="27" y="37" width="46" height="26" rx="4" fill="currentColor" stroke="none"/></g></svg>'
+};
+
+/* 글자를 한 자씩 써 넣는 연출(채팅 답변·프롬프트 입력 등). 멈추는 함수를 돌려줌.
+   typeText(el, '문구', { speed: 60, html, render, clear, onTick, onDone, doneDelay })
+   speed 한 글자 간격(ms, 기본 60) · html true 면 innerHTML 로 넣고 <태그> 는 통째로 넘김 · render (일부문구) => html 로 직접 그림 ·
+   clear true 면 시작할 때 비움 · onTick 글자마다 · onDone 끝나면(doneDelay ms 뒤) */
+function typeText(el, text, o) {
+  o = o || {};
+  const set = (s) => { if (o.render) el.innerHTML = o.render(s); else if (o.html) el.innerHTML = s; else el.textContent = s; };
+  let i = 0;
+  if (o.clear) set('');
+  const timer = setInterval(() => {
+    i += 1;
+    if (o.html && text.charAt(i - 1) === '<') i = text.indexOf('>', i) + 1;
+    set(text.slice(0, i));
+    if (o.onTick) o.onTick();
+    if (i >= text.length) {
+      clearInterval(timer);
+      if (o.onDone) { if (o.doneDelay) setTimeout(o.onDone, o.doneDelay); else o.onDone(); }
+    }
+  }, o.speed || 60);
+  return () => clearInterval(timer);
+}
+/* 요소를 보이고 숨김(.is-hide, 공용 CSS 는 display:none) */
+function showIf(el, on) { el.classList.toggle('is-hide', !on); }
+/* 요소를 부모 기준 [왼쪽%, 위%, 폭%, 높이%(, 모서리 px)] 로 놓음 */
+function placePct(el, b) { el.style.cssText = 'left:' + b[0] + '%;top:' + b[1] + '%;width:' + b[2] + '%;height:' + b[3] + '%' + (b[4] !== undefined ? ';border-radius:' + b[4] + 'px' : ''); }
+
 /* 말풍선 + 캐릭터 포즈 한 세트 바꾸기(사회 폰 실습 페이지 공용). 페이지에서 한 번 만들고 단계마다 say 를 부름.
    const say = initGuideSay({ bubble: $('bub'), img: $('char'), set: $('set') });   // set 은 .guide-set 요소(선택): 포즈에 맞는 좌표 클래스(.is-wink-point2 …)를 같이 바꿈
    say('문구<br>문구', 'wink_point2');            // 문구 + 포즈(sa/img/character/sa_*.png 의 * 부분)
    say('문구', 'wink_point4', true);              // 세 번째 true 는 말풍선에 .is-medium(넓은 말풍선), 안 주면 뗌
    줄이 길어지면 .is-long(44px)을 자동으로 붙이고 .is-medium(넓은 말풍선)도 같이 붙임: 기본 모양으로 그려 본 줄 수가 opts.longLines(기본 5)줄 이상일 때. say('문구', 포즈, medium, true|false) 네 번째 값으로 강제로 켜고 끌 수 있음(직접 주면 .is-medium 은 따라붙지 않고 세 번째 값만 따름)
-   문구가 빈 문자열('')이면 말풍선을 숨김.
+   문구가 빈 문자열('')이면 말풍선을 숨김. 포즈가 빈 문자열('')이면 sa_main, 아예 안 주면(undefined) 지금 포즈 그대로.
    처음에는 캐릭터를 숨겨 두었다가 첫 포즈가 로드되면 보여 주고(기본 그림이 잠깐 비치지 않게), 포즈를 바꿀 때도 새 그림이 로드된 뒤에 그림·좌표를 함께 바꿈.
    opts.dir: 그림 폴더(기본: img 의 현재 src 에서 sa_ 앞부분), opts.poses: 미리 불러올 포즈 목록(기본: 사회 공용 포즈 전부) */
 function initGuideSay(opts) {
@@ -2374,7 +2503,8 @@ function initGuideSay(opts) {
     const isLong = long === undefined ? countLines() >= longLines : !!long;
     bubble.classList.toggle('is-medium', !!medium || (long === undefined && isLong));
     bubble.classList.toggle('is-long', isLong);
-    if (!pose) return;
+    if (pose === undefined || pose === null) return;
+    if (pose === '') pose = 'main';
     const src = dir + 'sa_' + pose + '.png';
     const my = ++seq;
     const apply = () => {
@@ -2393,7 +2523,78 @@ function initGuideSay(opts) {
   };
 }
 
-/* 버튼 옆에 손가락 안내. opts: dx/dy 보정, w 손가락 폭, onMain(el이 main 안 스케일된 요소일 때 화면 좌표로 환산), x(onMain에서 폭 비율), beside(대상을 가리지 않게 옆에 둠) */
+/* 앱 실행 연출(폰 화면 공용, Suno 앱 실행 녹화 기준 약 1.6초): 앱 아이콘 자리에서 흰 카드가 펼쳐져 화면을 덮고 → 로고가 둥근 사각형이 되며 글자가 나타나고 → 그라데이션이 노이즈(그레인) 질감으로 중앙에서 번져 화면 전체를 덮고 → 글자는 둔 채 다음 화면으로 크로스페이드.
+   playAppLaunch({ icon: 앱 아이콘 요소(.phone-screen 안), text: 'SUNO', logo: 로고 그림 주소(기본 img/common/logo_suno.png), colors: [노랑, 주황, 분홍](노이즈 3색, 기본 Suno),
+                   onMid: () => 크로스페이드가 시작될 때 — 여기서 다음 화면을 아래에 그려 둠, onDone: () => 연출이 끝나면 })
+   cancelAppLaunch() — 연출 중에 단계를 되돌릴 때(남은 타이머·덮개를 지움). 같은 화면에서 다시 부르면 이전 것은 자동으로 지움 */
+let appLaunch = null;
+function cancelAppLaunch() {
+  if (!appLaunch) return;
+  appLaunch.timers.forEach(clearTimeout);
+  appLaunch.el.remove();
+  appLaunch.icon.style.opacity = '';
+  appLaunch = null;
+}
+function appLaunchNoise(cv, W, H, colors) {
+  const cw = Math.round(W / 2), ch = Math.round(H / 2);
+  cv.width = cw; cv.height = ch;
+  const rgb = colors.map((c) => [1, 3, 5].map((i) => parseInt(c.substr(i, 2), 16)));
+  const grid = (n) => Array.from({ length: n + 2 }, () => Array.from({ length: n + 2 }, Math.random));
+  const octave = (g, cells, x, y) => {
+    const u = x * cells, v = y * cells, i = Math.floor(u), j = Math.floor(v);
+    const fx = u - i, fy = v - j, sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+    const a = g[j][i], b = g[j][i + 1], c = g[j + 1][i], d = g[j + 1][i + 1];
+    return a + (b - a) * sx + (c - a) * sy + (a - b - c + d) * sx * sy;
+  };
+  const g1 = grid(12), g2 = grid(24);
+  const ctx = cv.getContext('2d');
+  const img = ctx.createImageData(cw, ch);
+  for (let y = 0; y < ch; y++) {
+    for (let x = 0; x < cw; x++) {
+      const nx = x / cw, ny = y / ch;
+      const v = (octave(g1, 2.6, nx, ny * 2) * 0.78 + octave(g2, 6, nx, ny * 2) * 0.22);
+      const t = (v - 0.5) * 1.55 + 0.5 + (Math.random() - 0.5) * 0.2;
+      const c = rgb[t < 0.33 ? 0 : t < 0.72 ? 1 : 2];
+      const k = (y * cw + x) * 4;
+      img.data[k] = c[0]; img.data[k + 1] = c[1]; img.data[k + 2] = c[2]; img.data[k + 3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+}
+function playAppLaunch(o) {
+  cancelAppLaunch();
+  const screen = o.icon.closest('.phone-screen');
+  const W = screen.offsetWidth, H = screen.offsetHeight;
+  const sr = screen.getBoundingClientRect(), ir = o.icon.getBoundingClientRect();
+  const sc = sr.width / W;
+  const x = (ir.left - sr.left) / sc, y = (ir.top - sr.top) / sc, w = ir.width / sc, h = ir.height / sc;
+  const colors = o.colors || ['#fbb116', '#ff5a1f', '#ff2368'];
+  const S = Math.round(W * 0.41);
+  const el = document.createElement('div');
+  el.className = 'al-overlay';
+  el.style.cssText = '--al-a:' + colors[0] + ';--al-b:' + colors[1] + ';--al-c:' + colors[2] + ';--al-s:' + S + 'px;--al-l:' + Math.round(W * 0.13) + 'px;--al-f:' + Math.round(W * 0.135) + 'px';
+  el.innerHTML = '<div class="al-card"></div><i class="al-fill"></i><canvas class="al-noise"></canvas><img class="al-logo" alt="" src="' + (o.logo || ASSET_BASE + 'img/common/logo_suno.png') + '"><b class="al-text">' + (o.text || '') + '</b>';
+  screen.appendChild(el);
+  appLaunchNoise(el.querySelector('.al-noise'), W, H, colors);
+  const A = (q, frames, ms, delay, ease) => { const n = el.querySelector(q); if (n) n.animate(frames, { duration: ms, delay: delay, easing: ease || 'ease-out', fill: 'both' }); return n; };
+  const out = 'cubic-bezier(.2,.8,.2,1)';
+  o.icon.style.opacity = '.55';
+  A('.al-card', [{ clipPath: 'inset(' + y + 'px ' + (W - x - w) + 'px ' + (H - y - h) + 'px ' + x + 'px round 28px)', opacity: 0.4 }, { clipPath: 'inset(0px 0px 0px 0px round 32px)', opacity: 1 }], 380, 50, 'cubic-bezier(.3,.6,.3,1)');
+  A('.al-logo', [{ opacity: 0, transform: 'scale(.6)', offset: 0 }, { opacity: 1, transform: 'scale(1)', offset: 0.34 }, { opacity: 1, offset: 0.43 }, { opacity: 0, offset: 1 }], 350, 110, 'linear');
+  A('.al-fill', [{ opacity: 0, transform: 'scale(.74)' }, { opacity: 1, transform: 'scale(1)' }], 260, 150, out);
+  el.querySelector('.al-fill').animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, delay: 260, easing: 'ease-in', fill: 'both', pseudoElement: '::after' });
+  A('.al-text', [{ opacity: 0 }, { opacity: 1 }], 200, 280, 'linear');
+  const noise = el.querySelector('.al-noise');
+  noise.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 120, delay: 430, easing: 'linear', fill: 'both' });
+  const grow = [{ maskSize: S + 'px ' + S + 'px', webkitMaskSize: S + 'px ' + S + 'px' }, { maskSize: W * 3 + 'px ' + H * 2.4 + 'px', webkitMaskSize: W * 3 + 'px ' + H * 2.4 + 'px' }];
+  noise.animate(grow, { duration: 560, delay: 430, easing: 'cubic-bezier(.4,.1,.5,1)', fill: 'both' });
+  const timers = [];
+  appLaunch = { el, icon: o.icon, timers };
+  timers.push(setTimeout(() => { if (o.onMid) o.onMid(); el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 400, easing: 'ease-in-out', fill: 'both' }); }, 1150));
+  timers.push(setTimeout(() => { cancelAppLaunch(); if (o.onDone) o.onDone(); }, 1560));
+}
+
+/* 버튼 옆에 손가락 안내. opts: dx/dy 보정, w 손가락 폭, onMain(el이 main 안 스케일된 요소일 때 화면 좌표로 환산), x(onMain에서 폭 비율), beside(대상을 가리지 않게 옆에 둠), pulse(눌러야 할 요소를 .hit-pulse 로 깜빡임 — clearFingers 때 같이 꺼짐) */
 function pointFingerAt(el, opts) {
   if (opts && opts.onMain) {
     const main = el.closest('main');
@@ -2411,6 +2612,7 @@ function pointFingerAt(el, opts) {
       offsetLeft: (r.left - m.left) / s, offsetTop: (r.top - m.top) / s,
       offsetWidth: r.width / s * (opts.x === undefined ? 1 : opts.x), offsetHeight: r.height / s, offsetParent: main
     }, o);
+    if (opts.pulse) { el.classList.add('hit-pulse'); el._fgPulse = true; }
     return;
   }
   clearFingers();
@@ -2426,9 +2628,11 @@ function pointFingerAt(el, opts) {
   finger.style.top = (el.offsetTop + el.offsetHeight - 10 + ((opts && opts.dy) || 0)) + 'px';
   (el.offsetParent || el.parentElement).appendChild(finger);
   initFingerGuide();
+  if (opts && opts.pulse && el.classList) { el.classList.add('hit-pulse'); el._fgPulse = true; }
 }
 
 function clearFingers() {
+  document.querySelectorAll('.hit-pulse').forEach((e) => { if (e._fgPulse) { e.classList.remove('hit-pulse'); e._fgPulse = false; } });
   document.querySelectorAll('.js-point-finger').forEach((f) => f.remove());
 }
 
@@ -2703,10 +2907,17 @@ window.kbdDbHtml = function (dark) {
     row([sp('!#1', 'is-fn'), sp('한/영', 'is-fn'), sp('한국어', 'is-wide'), sp('.'), sp('↵', 'is-fn')]) + '</div></div>';
 };
 
+/* 한글 천지인 키보드(공용 .kbd-cj) 마크업. 페이지에는 비어 있는 <div class="kbd-cj"></div> 만 두면 initKbdCj 가 채움(cfUI.kb() 도 같은 것) */
+const KBD_CJ = '<div class="kbd-cj"><div class="kbd-cj-tools"><i><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M8.6 14.2c1.8 2 5 2 6.8 0"/><path d="M9 9.6h.01M15 9.6h.01" stroke-width="2.2"/></svg></i><i><svg viewBox="0 0 24 24"><path d="M9.5 8.5V6.2a2 2 0 012-2h6.3a2 2 0 012 2v6.3a2 2 0 01-2 2h-2.3"/><rect x="3.7" y="9.5" width="10.8" height="10.3" rx="2.2"/><path d="M6.9 17.2l2.2-5.4 2.2 5.4M7.7 15.4h2.8"/></svg></i><i><svg viewBox="0 0 24 24"><rect x="5.3" y="4.6" width="13.4" height="16" rx="3.6"/><path d="M9.6 8.6h4.8"/></svg></i><i><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" transform="translate(1.5 1.5) scale(.875)"/></svg></i><i class="is-bare"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.7" fill="currentColor" stroke="none"/></svg></i></div><div class="kbd-cj-rows"><div class="kbd-cj-row"><div class="kbd-cj-key"><small>1</small>ㅣ</div><div class="kbd-cj-key"><small>2</small>·</div><div class="kbd-cj-key"><small>3</small>ㅡ</div><div class="kbd-cj-key is-dk"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.8 5.6h9.8a2.4 2.4 0 012.4 2.4v8a2.4 2.4 0 01-2.4 2.4H8.8a2 2 0 01-1.5-.7l-4.6-4.9a1.2 1.2 0 010-1.7l4.6-4.9a2 2 0 011.5-.7z"/><path d="M12 9.5l5 5M17 9.5l-5 5"/></svg></div></div><div class="kbd-cj-row"><div class="kbd-cj-key"><small>4</small>ㄱㅋ</div><div class="kbd-cj-key"><small>5</small>ㄴㄹ</div><div class="kbd-cj-key"><small>6</small>ㄷㅌ</div><div class="kbd-cj-key is-dk"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 5v8a2 2 0 01-2 2H5M9 11l-4 4 4 4"/></svg></div></div><div class="kbd-cj-row"><div class="kbd-cj-key"><small>7</small>ㅂㅍ</div><div class="kbd-cj-key"><small>8</small>ㅅㅎ</div><div class="kbd-cj-key"><small>9</small>ㅈㅊ</div><div class="kbd-cj-key is-dk" style="letter-spacing:0;font-size:26px">.,?!</div></div><div class="kbd-cj-row"><div class="kbd-cj-key is-s">!#1</div><div class="kbd-cj-key is-s2">한 &nbsp; &nbsp; &nbsp;<br>&nbsp; &nbsp; &nbsp; 영</div><div class="kbd-cj-key"><small>0</small>ㅇㅁ</div><div class="kbd-cj-key  is-dk"><svg viewBox="0 0 44 20" width="46" height="20" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5v9h38V5"/></svg></div><div class="kbd-cj-key is-dk" style="letter-spacing:0;font-size:18px">한자</div></div></div></div>';
+function initKbdCj() {
+  document.querySelectorAll('.kbd-cj:empty').forEach((el) => { el.outerHTML = KBD_CJ; });
+}
+initKbdCj();
+
 /* 사회 4차시 폰 채팅 화면 부품(그림 대신 HTML로 그림). 키보드는 공용 .kbd-cj(cfUI.kb()).
    페이지의 폰 화면 안 .cf-input / .cf-panel / .cf-find 에 넣어 씀: cfUI.bar(false|true), cfUI.searchSheet(), cfUI.resultSheet(), cfUI.emojiSheet(), cfUI.findScreen() */
 window.cfUI = (function () {
-  const KB = '<div class="kbd-cj"><div class="kbd-cj-tools"><i><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M8.6 14.2c1.8 2 5 2 6.8 0"/><path d="M9 9.6h.01M15 9.6h.01" stroke-width="2.2"/></svg></i><i><svg viewBox="0 0 24 24"><path d="M9.5 8.5V6.2a2 2 0 012-2h6.3a2 2 0 012 2v6.3a2 2 0 01-2 2h-2.3"/><rect x="3.7" y="9.5" width="10.8" height="10.3" rx="2.2"/><path d="M6.9 17.2l2.2-5.4 2.2 5.4M7.7 15.4h2.8"/></svg></i><i><svg viewBox="0 0 24 24"><rect x="5.3" y="4.6" width="13.4" height="16" rx="3.6"/><path d="M9.6 8.6h4.8"/></svg></i><i><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" transform="translate(1.5 1.5) scale(.875)"/></svg></i><i class="is-bare"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.7" fill="currentColor" stroke="none"/></svg></i></div><div class="kbd-cj-rows"><div class="kbd-cj-row"><div class="kbd-cj-key"><small>1</small>ㅣ</div><div class="kbd-cj-key"><small>2</small>·</div><div class="kbd-cj-key"><small>3</small>ㅡ</div><div class="kbd-cj-key is-dk"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.8 5.6h9.8a2.4 2.4 0 012.4 2.4v8a2.4 2.4 0 01-2.4 2.4H8.8a2 2 0 01-1.5-.7l-4.6-4.9a1.2 1.2 0 010-1.7l4.6-4.9a2 2 0 011.5-.7z"/><path d="M12 9.5l5 5M17 9.5l-5 5"/></svg></div></div><div class="kbd-cj-row"><div class="kbd-cj-key"><small>4</small>ㄱㅋ</div><div class="kbd-cj-key"><small>5</small>ㄴㄹ</div><div class="kbd-cj-key"><small>6</small>ㄷㅌ</div><div class="kbd-cj-key is-dk"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 5v8a2 2 0 01-2 2H5M9 11l-4 4 4 4"/></svg></div></div><div class="kbd-cj-row"><div class="kbd-cj-key"><small>7</small>ㅂㅍ</div><div class="kbd-cj-key"><small>8</small>ㅅㅎ</div><div class="kbd-cj-key"><small>9</small>ㅈㅊ</div><div class="kbd-cj-key is-dk" style="letter-spacing:0;font-size:26px">.,?!</div></div><div class="kbd-cj-row"><div class="kbd-cj-key is-s">!#1</div><div class="kbd-cj-key is-s2">한 &nbsp; &nbsp; &nbsp;<br>&nbsp; &nbsp; &nbsp; 영</div><div class="kbd-cj-key"><small>0</small>ㅇㅁ</div><div class="kbd-cj-key  is-dk"><svg viewBox="0 0 44 20" width="46" height="20" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5v9h38V5"/></svg></div><div class="kbd-cj-key is-dk" style="letter-spacing:0;font-size:18px">한자</div></div></div></div>';
+  const KB = KBD_CJ;
   const SMILE = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#b9bec7"/><circle cx="8.6" cy="10" r="1.3" fill="#111"/><circle cx="15.4" cy="10" r="1.3" fill="#111"/><path d="M7.5 14c1.2 2.600 7.800 2.600 9 0" fill="none" stroke="#111" stroke-width="1.8" stroke-linecap="round"/></svg>';
   const LOCK = '<svg class="lk" viewBox="0 0 16 16"><path d="M4 7V5a4 4 0 0 1 8 0v2h1v8H3V7zm2 0h4V5a2 2 0 0 0-4 0z"/></svg>';
   const MAG = '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.500"/><path d="M20 20l-4.500-4.500"/></svg>';
@@ -3338,6 +3549,105 @@ initConfirmQuiz();
 initRevealStagger();
 initParticleEffect();
 initIdlePreload();
+/* 직업 힌트 퀴즈 — sa/01 page02 · sa/09 page02. 페이지는 <main class="bg-default"></main> 안에 아무것도 없이 두고 호출하면 안에 모두 그려 줌
+   initJobHintQuiz({ question: '어떤 직업일까?', next: 'page03.html', jobs: [{ id: 'police', label: '경찰관', hints: ['경광등', '호루라기', '순찰'], sounds: { 2: 'sound/p02_whistle.mp3' }, text: '정답 사진 아래 설명' }, …6개] })
+   그림(페이지 img/): 힌트 p02_hint_{id}_{1~3}.png · 보기 카드 p02_card_{id}.png · 정답 사진 p02_photo_{id}.png · 가림 버튼 p02_hint.png.
+   6개 중 3개를 무작위로 STAGE1~3 출제, 보기 카드 순서도 스테이지마다 섞음. sounds {2|3}: 그 번째 힌트를 열 때(클릭음 뒤 0.4초) 재생 */
+function initJobHintQuiz(opts) {
+  const main = document.querySelector('main');
+  const star = ASSET_BASE + 'img/common/icon_star';
+  main.insertAdjacentHTML('beforeend',
+    '<div class="jh-badge"><span class="jh-badge-num">STAGE <span id="jhStage">1</span></span><span class="jh-badge-q">' + opts.question + '</span></div>' +
+    '<div class="jh-stars">' + [0, 1, 2].map(() => '<img class="find-star" src="' + star + '.png" data-src-on="' + star + '_on.png" alt="">').join('') + '</div>' +
+    '<div class="jh-hints" id="jhHints"></div>' +
+    '<div class="job-quiz"><button type="button" class="hint-reveal-btn jh-hint-btn slot2" aria-label="다른 힌트 보기"></button><button type="button" class="hint-reveal-btn jh-hint-btn slot3" aria-label="다른 힌트 보기"></button><div class="hint-cards jh-cards" id="jhCards"></div></div>' +
+    '<div class="hint-quiz-wrong is-off" data-sound="sound/incorrect.mp3"><div class="avatar-popup-panel"><div class="avatar-popup-avatar"><img src="' + ASSET_BASE + 'img/common/avatar_quiz.png" alt=""></div><div class="avatar-popup-body"><p class="avatar-popup-text is-small">다시 한 번 힌트를 확인하고<br>알맞은 직업을 찾아볼까요?</p></div></div></div>' +
+    '<div class="hint-quiz-correct photo-modal is-off" data-sound="sound/correct.mp3"><div class="photo-card"><div class="photo-card-img" id="jhPhoto"></div><p class="photo-card-title">정답이에요!</p><p class="photo-card-text" id="jhText"></p></div><button type="button" id="jhConfirm" class="hint-quiz-confirm card-btn is-popup next-btn">확인</button></div>');
+
+  const jobs = shuffleArray(opts.jobs).slice(0, 3);
+  let stage = 0;
+  let answered = false;
+  const hintsBox = $('jhHints'), cardsBox = $('jhCards');
+  const stars = Array.from(main.querySelectorAll('.jh-stars .find-star'));
+  const revealBtns = Array.from(main.querySelectorAll('.hint-reveal-btn'));
+  const wrongLayer = main.querySelector('.hint-quiz-wrong');
+  const correctLayer = main.querySelector('.hint-quiz-correct');
+  const wrongSound = new Audio(ASSET_BASE + wrongLayer.dataset.sound);
+  const correctSound = new Audio(ASSET_BASE + correctLayer.dataset.sound);
+  const LEFT = [105, 393, 681, 969, 1257, 1545];
+  revealBtns.forEach((b) => { b.style.backgroundImage = "url('img/p02_hint.png')"; });
+
+  const fillStars = (n) => stars.forEach((s, k) => { s.src = k < n ? s.dataset.srcOn : star + '.png'; });
+
+  function setup() {
+    const job = jobs[stage];
+    answered = false;
+    $('jhStage').textContent = String(stage + 1);
+    fillStars(stage);
+    hintsBox.innerHTML = job.hints.map((t, k) => '<div class="jh-hint slot' + (k + 1) + '"><i style="background-image:url(\x27img/p02_hint_' + job.id + '_' + (k + 1) + '.png\x27)"></i><span>' + t + '</span></div>').join('');
+    const ph = $('jhPhoto');
+    ph.style.backgroundImage = "url('img/p02_photo_" + job.id + ".png')";
+    ph.style.backgroundPosition = 'center';
+    ph.style.backgroundSize = 'cover';
+    $('jhText').textContent = job.text;
+    cardsBox.innerHTML = '';
+    shuffleArray(opts.jobs).forEach((j, k) => {
+      const c = document.createElement('button');
+      c.className = 'hint-card pick-card jh-card';
+      c.style.left = LEFT[k] + 'px';
+      c.dataset.correct = String(j.id === job.id);
+      c.setAttribute('aria-label', j.label);
+      c.innerHTML = '<i style="background-image:url(\x27img/p02_card_' + j.id + '.png\x27)"></i><span>' + j.label + '</span>';
+      c.addEventListener('click', () => pick(c));
+      cardsBox.appendChild(c);
+    });
+    revealBtns.forEach((b) => b.classList.remove('hidden'));
+    wrongLayer.classList.add('is-off');
+    correctLayer.classList.add('is-off');
+  }
+
+  function pick(card) {
+    if (answered) return;
+    if (card.dataset.correct === 'true') {
+      answered = true;
+      cardsBox.querySelectorAll('.jh-card').forEach((c) => c.classList.toggle('is-selected', c === card));
+      const wasRevealing = revealBtns.some((b) => !b.classList.contains('hidden'));
+      revealBtns.forEach((b) => b.classList.add('hidden'));
+      fillStars(stage + 1);
+      setTimeout(() => {
+        correctLayer.classList.remove('is-off');
+        correctSound.cloneNode().play().catch(() => {});
+      }, wasRevealing ? 1000 : 0);
+    } else {
+      wrongLayer.classList.remove('is-off');
+      wrongSound.cloneNode().play().catch(() => {});
+      clearTimeout(wrongLayer.__hideTimer);
+      wrongLayer.__hideTimer = setTimeout(() => wrongLayer.classList.add('is-off'), 2000);
+    }
+  }
+
+  revealBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      playClick();
+      btn.classList.add('hidden');
+      const sounds = jobs[stage].sounds;
+      const path = sounds && sounds[btn.classList.contains('slot2') ? 2 : 3];
+      if (path) setTimeout(() => new Audio(path).play().catch(() => {}), 400);
+    });
+  });
+
+  $('jhConfirm').addEventListener('click', () => {
+    playClick();
+    setTimeout(() => {
+      stage += 1;
+      if (stage >= jobs.length) navigateTo(opts.next);
+      else setup();
+    }, 300);
+  });
+
+  setup();
+}
+
 /* 폰 화면 위·아래 표시줄 자동 채우기: 비어 있는 <div class="phone-status"></div> / <div class="phone-nav"></div>에
    시간·상태 아이콘·배터리(data-time 기본 13:13, data-bat 기본 64), 하단 버튼 3개를 넣음. 스타일은 css/common.css의 .phone-status·.phone-nav */
 function initPhoneBars() {

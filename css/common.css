@@ -572,6 +572,7 @@ html:not(.is-shown) *,html:not(.is-shown) *:before,html:not(.is-shown) *:after{a
   word-break: keep-all;
   cursor: pointer;
 }
+.opts .card-btn{box-shadow:0 10px 0 0 #a9a2ff, 0 10px 0 10px #1e4ea7}
 .card-btn.is-wide {
   width: 100%;
 }
@@ -895,21 +896,9 @@ html:not(.is-shown) *,html:not(.is-shown) *:before,html:not(.is-shown) *:after{a
 .guide-set{position:absolute;left:0;top:0;width:720px;height:960px;pointer-events:none}
 .guide-set .guide-bubble{left:var(--gb-left,160px);bottom:var(--gb-bottom,636px);width:var(--gb-w,510px);min-height:170px;pointer-events:auto}
 .guide-set .guide-bubble.is-medium{left:var(--gb-left,110px);width:var(--gb-w,610px)}
-.guide-set .guide-character{position:absolute;left:var(--gc-left,150px);bottom:var(--gc-bottom,40px);top:auto;width:var(--gc-w,auto);height:auto;display:block}
+.guide-set .guide-character{position:absolute;left:var(--gc-left,110px);bottom:var(--gc-bottom,40px);top:auto;width:var(--gc-w,auto);height:auto;display:block}
 .guide-set .guide-character img{display:block;width:100%;height:auto;max-width:none;max-height:none}
-/* 포즈별 캐릭터 기본 좌표(sa/img/character/sa_*.png 와 같은 이름): <div class="guide-set is-wink-point4"> 처럼 붙이면 적용. 페이지에서 --gc-left/--gc-bottom 을 다시 쓰면 그 값이 이김 */
-.guide-set.is-main{--gc-left:145px;--gc-bottom:40px}
-.guide-set.is-main-wave{--gc-left:145px;--gc-bottom:40px}
-.guide-set.is-wink-open{--gc-left:150px;--gc-bottom:40px}
-.guide-set.is-wink-point{--gc-left:140px;--gc-bottom:40px}
-.guide-set.is-wink-point2{--gc-left:110px;--gc-bottom:60px}
-.guide-set.is-wink-point3{--gc-left:110px;--gc-bottom:60px}
-.guide-set.is-wink-point4{--gc-left:110px;--gc-bottom:60px}
-.guide-set.is-wink-present{--gc-left:150px;--gc-bottom:40px}
-.guide-set.is-smile-present{--gc-left:150px;--gc-bottom:40px}
-.guide-set.is-point-front{--gc-left:130px;--gc-bottom:40px}
-.guide-set.is-wink-jump{--gc-left:140px;--gc-bottom:40px}
-.guide-set.is-happy-jump{--gc-left:110px;--gc-bottom:60px}
+/* 캐릭터 그림(sa/img/character/sa_*.png)은 전부 같은 캔버스(576×603)라 포즈와 상관없이 위치가 같음. 페이지에서 --gc-left/--gc-bottom 을 다시 쓰면 그 값이 이김 */
 
 /* ---------------- 아바타 배지가 달린 딤 팝업 패널(sa/04/page08) ---------------- */
 .avatar-popup-panel{display:flex;align-items:flex-start;gap:40px;max-width:1500px;padding:10px 70px 10px 10px;box-sizing:border-box;background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:120px;box-shadow:0 12px 0 0 color-mix(in srgb,var(--c-purple) 30%,transparent)}
@@ -1210,6 +1199,12 @@ div:where(.phone-frame){position:absolute;left:725px;top:36px;width:470px;height
 .phone-nav.is-dark b{border-color:#ddd}
 .phone-nav.is-dark u{border-color:#ddd}
 .phone-nav u{position:absolute;left:77%;top:18px;width:10px;height:10px;border:solid #666;border-width:0 0 2px 2px;transform:rotate(45deg)}
+/* 밝은 홈 화면용(어두운 폰 틀 안에서도): 상단바 글자 어둡게, 하단바 흰색 */
+.phone-screen.is-dark .phone-status.is-light{color:#111}
+.phone-screen.is-dark .phone-status.is-light em{background:#333;color:#fff}
+.phone-screen.is-dark .phone-nav.is-light{background:#fff}
+.phone-screen.is-dark .phone-nav.is-light i{background:repeating-linear-gradient(90deg,#666 0 2px,transparent 2px 8.5px)}
+.phone-screen.is-dark .phone-nav.is-light b,.phone-screen.is-dark .phone-nav.is-light u{border-color:#666}
 .phone-screen{position:relative;width:100%;height:100%;box-sizing:border-box;background:#fff;overflow:hidden;font-family:'Pretendard';color:#111}
 .phone-screen.is-dark{background:#111;color:#fff}
 .phone-screen .phone-bg-chat, .phone-bg-chat{background:linear-gradient(180deg,var(--c-cream) 0,var(--c-cream) 55%,var(--c-pale) 75%,#a9c8f7 100%)}
@@ -1438,12 +1433,15 @@ div:where(.phone-frame){position:absolute;left:725px;top:36px;width:470px;height
 .cv-body{position:absolute;left:0;top:206px;width:100%;bottom:90px;overflow-y:auto;padding:0 16px 16px;box-sizing:border-box}
 .cv-body::-webkit-scrollbar{width:6px}
 .cv-body::-webkit-scrollbar-thumb{background:#c9cad3;border-radius:3px}
-.cv .is-target{cursor:pointer;animation:cv-target 1.2s ease-in-out infinite}
-@keyframes cv-target{50%{box-shadow:0 0 0 5px rgba(255,79,139,.75)}}
-@keyframes cv-target-in{50%{box-shadow:inset 0 0 0 5px rgba(255,79,139,.75)}}
-.cv .cv-tab.is-target{animation:none}
-.cv .cv-tab.is-target i{animation:cv-target 1.2s ease-in-out infinite}
-.cv .cv-tabs.is-target{animation:cv-target-in 1.2s ease-in-out infinite}
+.hit-pulse,.cv .hit-pulse{cursor:pointer;animation:cv-target 1.2s ease-in-out infinite}
+@keyframes cv-target{0%,100%{animation-composition:add;box-shadow:0 0 0 0 rgba(255,79,139,0)}50%{animation-composition:add;box-shadow:0 0 0 var(--pulse-w,5px) var(--pulse-c,rgba(255,79,139,.75))}}
+@keyframes cv-target-in{50%{box-shadow:inset 0 0 0 var(--pulse-w,5px) var(--pulse-c,rgba(255,79,139,.75))}}
+.cv .cv-tab.hit-pulse{animation:none}
+.cv .cv-tab.hit-pulse i{animation:cv-target 1.2s ease-in-out infinite}
+.cv .cv-tabs.hit-pulse{animation:cv-target-in 1.2s ease-in-out infinite}
+
+/* 보였다 안 보였다 하는 부품은 .is-hide 를 붙였다 뗌(공용 showIf(el, on)) */
+.is-hide{display:none!important}
 
 /* ---------------- Gemini Notebook 폰 화면(gwa/01 page10~25): 틀은 공용 .phone-frame.has-cam, 안쪽 화면만 .gn-screen ---------------- */
 .gn-screen{position:relative;width:100%;height:100%;border-radius:32px;overflow:hidden;background:#fff;font-family:'Pretendard';font-size:21px;color:#1b1b1f;font-weight:500}
@@ -1672,7 +1670,7 @@ a.gn-hl, button.gn-hl{cursor:pointer}
 .u-pbar svg{width:30px;height:30px}
 .u-ok{width:56px;height:56px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(27,23,56,.22);display:flex;align-items:center;justify-content:center}
 .u-ok svg{width:30px;height:30px}
-.cv .u-ok.is-target{animation:u-ok-pulse 1.2s ease-in-out infinite}
+.cv .u-ok.hit-pulse{animation:u-ok-pulse 1.2s ease-in-out infinite}
 @keyframes u-ok-pulse{0%,100%{box-shadow:0 2px 8px rgba(27,23,56,.22),0 0 0 0 rgba(255,79,139,0)}50%{box-shadow:0 2px 8px rgba(27,23,56,.22),0 0 0 5px rgba(255,79,139,.75)}}
 .u-tb{position:absolute;left:12px;width:516px;height:80px;border-radius:24px;background:#fff;box-shadow:0 6px 20px rgba(27,23,56,.16);display:flex;align-items:center;justify-content:space-between;padding:0 14px 0 8px}
 .u-tb span{display:flex;flex-direction:column;align-items:center;gap:6px;width:78px;font-size:13px;font-weight:600;color:#222}
@@ -1741,7 +1739,7 @@ a.gn-hl, button.gn-hl{cursor:pointer}
 
 /* ---------------- Canva 앱 화면 공용 부품 ---------------- */
 .cv-home{position:absolute;inset:0;z-index:20}
-.cv-home .is-target{animation:none}
+.cv-home .hit-pulse{animation:none}
 .cv-app{position:absolute;inset:0;z-index:5;background:radial-gradient(ellipse 62% 13% at 0% 2%,#9fe6e3,transparent),radial-gradient(ellipse 75% 15% at 100% 5%,#c6b4fb,transparent),linear-gradient(180deg,#d3e4fb 0%,#e6dffc 11%,#fff 26%)}
 .cv-app-title{position:absolute;left:0;top:110px;width:100%;margin:0;text-align:center;font-size:31px;font-weight:700;color:#4e52e1;background:linear-gradient(180deg,#6367e5,#4a4edf);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .cv-app-search{position:absolute;left:16px;top:176px;width:calc(100% - 32px);height:60px;box-sizing:border-box;border:solid 2px #e6e2f6;border-radius:18px;background:var(--c-white);
@@ -1772,7 +1770,7 @@ a.gn-hl, button.gn-hl{cursor:pointer}
 .cv-textbar .is-gap{flex:1}
 .cv-check{width:56px;height:56px;padding:0;border:0;border-radius:50%;background:var(--c-white);box-shadow:0 2px 8px rgba(27,23,56,.2);display:flex;align-items:center;justify-content:center}
 .cv-check svg{width:28px;height:28px}
-.cv .cv-check.is-target{box-shadow:none}
+.cv .cv-check.hit-pulse{box-shadow:none}
 .cv-tsheet .cv-search{top:28px}
 .cv-tbtn{position:absolute;left:16px;width:calc(100% - 32px);height:52px;padding:0;border-radius:14px;font-size:21px;font-weight:700}
 .cv-tbtn.is-add{top:104px;border:0;background:linear-gradient(90deg,#8b5cf6,#7a45ee);color:var(--c-white) !important}
@@ -1783,8 +1781,8 @@ a.gn-hl, button.gn-hl{cursor:pointer}
 .cv-tstyle.is-3{top:442px;height:56px;font-size:20px}
 .cv-track{display:flex;flex:0 0 auto;transition:transform .4s ease}
 .cv-track.is-drag{transition:none}
-.cv-tabs.is-target{touch-action:none;cursor:grab}
-.cv-tabs.is-target .cv-tab{pointer-events:none}
+.cv-tabs.hit-pulse{touch-action:none;cursor:grab}
+.cv-tabs.hit-pulse .cv-tab{pointer-events:none}
 .cv-vsheet h4{margin:0;padding:24px 16px 18px;font-size:24px;border-bottom:solid 2px #eee}
 .cv-vsheet h5{position:absolute;left:16px;margin:0;font-size:21px}
 .cv-vtext{position:absolute;left:16px;top:116px;width:calc(100% - 32px);height:170px;box-sizing:border-box;padding:14px 16px;border:solid 2px #e1e2e8;border-radius:16px;font-size:19px;line-height:1.5;color:#8a8c99;overflow:hidden}
@@ -2005,11 +2003,11 @@ a.gn-hl, button.gn-hl{cursor:pointer}
 .gn-bar svg{flex:0 0 auto;width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .gn-bar em.is-title{font-size:23px;font-weight:600}
 .gn-sec{position:absolute;left:26px;right:26px;top:122px;display:flex;align-items:center;justify-content:space-between;font-size:22px;font-weight:700}
-.gn-sec b{text-decoration:underline;text-underline-offset:5px;font-weight:700}
+.gn-sec b{font-weight:700}
 .gn-sec svg{width:24px;height:24px;fill:currentColor}
 .gn-srcs{position:absolute;left:26px;right:26px;top:178px;display:flex;flex-direction:column;gap:14px}
 .gn-src{display:flex;align-items:center;gap:14px;min-height:46px;font-size:23px;font-weight:500;cursor:default}
-.gn-src .gn-pdf{flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border:solid 3px #d93a35;border-radius:6px;box-sizing:border-box;font-size:10px;font-weight:800;color:#d93a35;letter-spacing:-.02em}
+.gn-src .gn-pdf{flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:30px;height:30px;border:solid 3px #d93a35;border-radius:6px;box-sizing:border-box;font-size:12px;font-weight:800;color:#d93a35;letter-spacing:-.02em}
 .gn-src .gn-spin{margin:5px}
 .gn-src.is-ok:after{content:'✓';margin-left:auto;font-size:26px;color:#1a7f37}
 .gn-src.is-no{opacity:.45}
@@ -2081,7 +2079,8 @@ a.gn-hl, button.gn-hl{cursor:pointer}
 .pp-top{position:absolute;left:0;top:40px;width:100%;height:56px;display:flex;align-items:center;padding:0 18px}
 .pp-top svg{width:28px;height:28px}
 .pp-top b{flex:1 1 auto;text-align:center;font-size:28px;font-weight:800;letter-spacing:-0.03em}
-.pp-top em{font-style:normal;display:inline-flex;align-items:center;justify-content:center;width:40px;height:30px;font-size:12px;font-weight:700}
+.pp-top em{font-style:normal;display:inline-flex;align-items:center;justify-content:center;width:54px;height:46px;color:#2c3338}
+.pp-top em svg{width:54px;height:45px}
 .pp-langs{position:absolute;left:0;top:96px;width:100%;height:50px;display:flex;align-items:center;justify-content:center;gap:34px;font-size:18px;font-weight:600}
 .pp-bar{position:absolute;left:0;top:40px;width:100%;height:58px;display:flex;align-items:center;justify-content:center;gap:12px;padding:0 14px}
 .pp-bar>svg{position:absolute;left:14px;width:26px;height:26px}
@@ -2089,7 +2088,7 @@ a.gn-hl, button.gn-hl{cursor:pointer}
 .pp-lang{display:inline-flex;align-items:center;gap:4px;font-size:17px;font-weight:600;border:0;background:none;color:inherit;font-family:inherit;padding:6px 4px;cursor:default}
 .pp-lang svg{width:14px;height:14px;stroke-width:2.4}
 .pp-swap{display:inline-flex;align-items:center;justify-content:center;width:50px;height:34px;border-radius:17px;border:solid 1.5px #cfd3da;background:#fff;color:#444}
-.pp-swap svg{width:20px;height:20px}
+.pp-swap svg{width:24px;height:24px}
 .pp.is-green .pp-swap,.pp.is-blue .pp-swap{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.4);color:#fff}
 .pp-line{position:absolute;left:0;top:146px;width:100%;height:1px;background:#e4e7ec}
 .pp-hint{position:absolute;left:10px;top:250px;width:calc(100% - 20px);height:200px;display:flex;align-items:center;justify-content:center;font-size:19px;color:#8b909b}
@@ -2109,6 +2108,7 @@ a.gn-hl, button.gn-hl{cursor:pointer}
 .pp-chips{display:flex;gap:10px;margin:0 0 12px}
 .pp-chips span{display:inline-flex;align-items:center;justify-content:center;width:44px;height:34px;border-radius:17px;background:rgba(255,255,255,.2)}
 .pp-chips svg{width:18px;height:18px}
+.pp-in .pp-chips span,.pp-tr .pp-chips span{border:solid 1px #ddd;background:none;color:#333}
 .pp-res{position:absolute;left:0;top:112px;width:100%;padding:0 26px;overflow:hidden}
 .pp-res.is-white{top:108px}
 .pp-src{margin:0 0 20px;font-size:22px;line-height:1.4;font-weight:500}
@@ -2122,11 +2122,13 @@ a.gn-hl, button.gn-hl{cursor:pointer}
 .pp-in p{margin:0;font-size:19px;line-height:1.45;font-weight:500;min-height:30px}
 .pp-in .ph{color:#9097a3;font-weight:400}
 .pp-in .caret{display:inline-block;width:2px;height:22px;margin-right:2px;vertical-align:-4px;background:#111}
-.pp-tr{position:absolute;left:0;top:200px;width:100%;padding:0 26px}
+.pp-tr{position:absolute;left:0;top:250px;width:100%;padding:0 26px}
 .pp-tr .big{margin:0;font-size:28px;line-height:1.3;font-weight:500;color:#111;letter-spacing:-0.01em;font-family: 'Noto Sans SC', 'Pretendard', sans-serif;}
 .pp-tr .pr{margin:12px 0 0;font-size:14px;color:#9097a3}
 .pp-tr .fb{display:flex;gap:8px;margin:18px 0 0}
-.pp-tr .fb span{display:inline-flex;align-items:center;height:32px;padding:0 14px;border:solid 1px #d6d9df;border-radius:16px;font-size:13px;color:#333}
+.pp-tr .fb span{display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 14px;border:solid 1px #d6d9df;border-radius:16px;font-size:13px;color:#333}
+.pp-tr .fb svg{width:16px;height:16px}
+.pp-tr .fb span:last-child svg{transform:rotate(180deg)}
 .pp-tools{position:absolute;left:18px;bottom:0;display:flex;gap:12px}
 .pp-dict{position:absolute;left:18px;right:18px;top:330px;bottom:60px;border:solid 1px #eceef2;border-radius:10px;padding:14px 16px;font-size:14px;color:#333;overflow:hidden}
 .pp-dict b{display:block;margin-bottom:6px;font-size:16px;color:#17a84b}
@@ -2164,9 +2166,10 @@ a.gn-hl, button.gn-hl{cursor:pointer}
 .pp-cam-b .modes span{flex:1 1 0;text-align:center}
 .pp-cam-b .modes span.is-on{color:#fff;font-weight:700}
 .pp-cam-b .modes span.is-on:before{content:'';display:block;width:0;height:0;margin:-8px auto 3px;border:solid transparent;border-width:0 5px 7px;border-bottom-color:#fff}
-.pp-cam-r{position:absolute;left:0;bottom:0;width:100%;height:92px;z-index:4;background:#000;display:flex;align-items:center;justify-content:space-around;color:#fff;font-size:10px;padding-bottom:46px}
+.pp-cam-r{position:absolute;left:0;bottom:0;width:100%;height:110px;z-index:4;background:linear-gradient(to top,#000,transparent);display:flex;align-items:center;justify-content:space-around;color:#fff;font-size:10px;padding-bottom:46px}
 .pp-cam-r span{display:flex;flex-direction:column;align-items:center;gap:3px}
 .pp-cam-r svg{width:26px;height:26px}
+.pp-cam-r .cc{width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center}
 .pp-cam-r .ai{width:40px;height:40px;border-radius:50%;background:#1573ff;display:flex;align-items:center;justify-content:center}
 .pp-err{position:absolute;right:12px;top:10px;z-index:5;display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 12px;border-radius:14px;background:rgba(0,0,0,.55);font-size:12px;color:#fff}
 .pp-load{position:absolute;inset:0;z-index:6;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center}
@@ -2182,11 +2185,9 @@ a.gn-hl, button.gn-hl{cursor:pointer}
 .pp-ttl svg{position:absolute;left:14px;width:26px;height:26px}
 .pp [data-hot]{cursor:pointer}
 .pp-hot{position:absolute;z-index:8;border:solid 3px transparent;border-radius:12px;background:transparent;cursor:pointer;padding:0}
-.pp-hot:hover{border-color:#ff0e7f;box-shadow:0 0 0 6px rgba(255,79,249,.6)}
 .phone-nav.is-ghost{background:transparent}
 .phone-nav.is-ghost i{background:repeating-linear-gradient(90deg,rgba(255,255,255,.55) 0 2px,transparent 2px 8.5px)}
 .phone-nav.is-ghost b,.phone-nav.is-ghost u{border-color:rgba(255,255,255,.55)}
-.pp [data-hot]:hover{outline:4px solid #ff0e7f;outline-offset:-2px;box-shadow:0 0 0 8px rgba(255,79,249,.6);border-radius:10px}
 .pp-launch{background:linear-gradient(160deg,#9fd8f0,#b9a8f5 55%,#f3b6d8)}
 .pp-app{position:absolute;left:50%;top:44%;width:120px;margin-left:-60px;display:flex;flex-direction:column;align-items:center;gap:10px;font-size:20px;font-weight:600;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.3);cursor:pointer}
 .pp-app i{position:relative;display:flex;align-items:center;justify-content:center;width:110px;height:110px;border-radius:28px;overflow:hidden;background:#fff;box-shadow:0 6px 14px rgba(0,0,0,.2)}
@@ -2200,3 +2201,39 @@ a.gn-hl, button.gn-hl{cursor:pointer}
 .pp-story-cap p{flex:1 1 auto;margin:0;font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.25;color:var(--c-ink);letter-spacing:-0.06em;word-break:keep-all}
 .pp-story-cap .card-btn{flex:0 0 auto;min-width:0;width:300px;margin-bottom:20px}
 .pp-story.is-off{display:none}
+
+
+/* 직업 힌트 퀴즈(initJobHintQuiz) — sa/01 page02 · sa/09 page02 공용. STAGE 배지·별·힌트 3칸·보기 카드 6장 */
+.jh-badge{position:absolute;left:140px;top:48px;display:flex;align-items:stretch;height:108px;border-radius:54px;overflow:hidden;border:solid 5px var(--c-ink);box-shadow:0 10px 0 0 var(--c-sky-pale)}
+.jh-badge-num{display:flex;align-items:center;justify-content:center;padding:6px 50px 0 50px;background:var(--c-sky);font-family:'Cafe24 Ssurround';font-size:70px;letter-spacing:0em;color:var(--c-white);gap:20px}
+.jh-badge-q{display:flex;align-items:center;padding:6px 70px 0 70px;background:var(--c-cream);font-family:'Cafe24 Ssurround';font-size:70px;letter-spacing:0em;color:var(--c-ink)}
+.jh-stars{position:absolute;left:1317px;top:48px;display:flex;align-items:center;justify-content:center;gap:56px;width:462px;height:104px;border-radius:52px;background:var(--c-cream);border:solid 5px var(--c-ink);box-sizing:border-box}
+.jh-stars .find-star{width:72px;height:68px}
+.jh-hints{position:absolute;left:0;top:0}
+.jh-hint{position:absolute;top:200px;width:557px;height:314px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:14px;overflow:hidden;background:var(--c-white);display:flex;flex-direction:column}
+.jh-hint i{flex:1 1 auto;background:var(--c-mist) top center / cover no-repeat}
+.jh-hint span{flex:0 0 92px;display:flex;align-items:center;justify-content:center;padding-top:6px;background:var(--c-sky);font-family:'Cafe24 Ssurround';font-size:56px;color:var(--c-white);letter-spacing:-0.05em;text-align:center;line-height:1}
+.jh-hint.slot1{left:82px}
+.jh-hint.slot2{left:683px}
+.jh-hint.slot3{left:1282px}
+.jh-hint-btn{position:absolute;background:url('img/p02_hint.png') no-repeat;background-size:contain;top:200px;width:557px;height:314px;border:0;padding:0;cursor:pointer}
+.jh-hint-btn.slot2{left:683px}
+.jh-hint-btn.slot3{left:1282px}
+.jh-cards{position:absolute;left:0;top:0}
+.jh-cards:before{content:'';position:absolute;left:82px;top:545px;width:1756px;height:384px;border-radius:14px;background:var(--c-navy)}
+.jh-card{top:565px;width:271px;height:343px;background:var(--c-white);border:solid 5px var(--c-white);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.jh-card:hover{border-color:var(--c-sky)}
+.jh-card.is-selected{border-color:#ff2fc2;box-shadow:0 0 0 3px #ff2fc2}
+.jh-card i{flex:1 1 auto;background:var(--c-mist) center / cover no-repeat}
+.jh-card span{flex:0 0 84px;display:flex;align-items:center;justify-content:center;padding-top:6px;background:var(--c-white);font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-ink);letter-spacing:-0.05em;line-height:1}
+
+/* 앱 실행 연출(playAppLaunch): 흰 카드가 펼쳐지고 로고가 둥근 사각형으로 → 그라데이션이 노이즈 질감으로 번짐. 크기·색은 JS 가 --al-* 변수로 넣음 */
+.al-overlay{position:absolute;inset:0;z-index:20;overflow:hidden;border-radius:inherit}
+.al-card{position:absolute;inset:0;background:#fdf7ff}
+.al-fill{position:absolute;left:50%;top:49%;width:var(--al-s);height:var(--al-s);margin:calc(var(--al-s) / -2) 0 0 calc(var(--al-s) / -2);box-sizing:border-box;border:3px solid var(--al-b);border-radius:34%;background:linear-gradient(135deg,var(--al-a),var(--al-b) 55%,var(--al-b));opacity:0}
+.al-fill:after{content:'';position:absolute;inset:0;border-radius:inherit;background:#fdf7ff}
+.al-noise{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;opacity:0;
+  -webkit-mask-image:radial-gradient(closest-side,#000 62%,transparent 100%);mask-image:radial-gradient(closest-side,#000 62%,transparent 100%);
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:50% 49%;mask-position:50% 49%}
+.al-logo{position:absolute;left:50%;top:49%;width:var(--al-l);height:var(--al-l);margin:calc(var(--al-l) / -2) 0 0 calc(var(--al-l) / -2);border-radius:50%;object-fit:cover;opacity:0}
+.al-text{position:absolute;left:0;right:0;top:49%;transform:translateY(-50%);text-align:center;color:#fff;font-family:'Cafe24 Ssurround';font-size:var(--al-f);letter-spacing:.04em;line-height:1;opacity:0}

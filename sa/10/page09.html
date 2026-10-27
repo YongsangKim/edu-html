@@ -2,11 +2,11 @@
 <!--
   [편집 모드 사용법] 주소 뒤에 ?edit 을 붙여 열 때만 동작(평소 화면은 그대로)
     page09.html?edit&step=26&place=park
-      step=N     N번째 단계(0부터)에서 바로 시작. 위쪽 노란 막대의 [◀ 이전][다음 ▶], ] [ , PageDown/PageUp 으로도 이동
+      step=N     N번째 단계(1부터)에서 바로 시작. 위쪽 노란 막대의 [◀ 이전][다음 ▶], ] [ , PageDown/PageUp 으로도 이동
       place=이름 library 도서관(기본) · mart 마트 · post 우체국 · park 공원
     자주 쓰는 단계: 17~21 효과·블러 고르기 · 22,23 도구 탭 밀기·얼굴 트래킹 · 24 트래킹 영역 설정 · 25 트래킹 중(자동으로 안 넘어감) · 26 영상 재생 확인 · 32 저장 완료 · 33 영상 재생
-    박스·손가락 좌표: 박스를 클릭 → 방향키 1px(Shift 10px) 이동, Alt+방향키 폭·높이. 노란 막대에 나오는 값을 STEPS 의 그 단계(hot / finger / swipe / swhand)에 붙여 넣음
-    손가락 'finger = [dx, dy]' · 밀기 손 'swhand = [dx, dy]' · 로고 모션 위치 VL.LOGO = [x, y, 폭, 높이] (vllo-ui.js, 단계 10 같은 로딩 화면에서 맞춤)
+    손가락·클릭 영역: 손가락/붉은 점선 박스를 클릭 → 방향키 1px(Shift 10px) 이동, Alt+방향키 폭·높이. 노란 막대에 나오는 '이름: [값],' 를 아래 FG(손가락, 밀기 손 swipe1·swipe2) · HOT(클릭 영역) 표의 같은 이름 줄과 바꿔 넣음. 밀기 영역 swipe 박스는 STEPS 줄에 직접
+    로고 모션 위치 VL.LOGO = [x, y, 폭, 높이] (vllo-ui.js, 단계 10 같은 로딩 화면에서 맞춤)
     얼굴 따라가기(PLACES 의 size·keys)는 7페이지 ?edit&scene=1~5 에서 영상을 멈춰 가며 맞춘 뒤 [복사]한 값을 붙여 넣음 (scene 1=library · 2=mart · 3=post · 4=park)
 -->
 <html lang="ko">
@@ -43,9 +43,6 @@
         .v-layer{position:absolute;inset:0}
         .v-layer.is-in{animation:v-in .24s ease both}
         @keyframes v-in{from{opacity:0}to{opacity:1}}
-        .p09-hot{position:absolute;border:solid 3px transparent;border-radius:14px;background:transparent;padding:0;cursor:pointer;transition:box-shadow .15s,border-color .15s}
-        .p09-hot:hover{border-color:var(--c-hotpink);box-shadow:0 0 0 5px rgba(255,79,249,.7)}
-        body.is-edit .p09-hot{border:3px dashed #e60000;background:rgba(255,79,249,.4)}
 
         /* ---- 공통 조각 ---- */
         .v-ic{position:absolute;display:block;color:#cdced1}
@@ -72,7 +69,7 @@
         .v-trk.is-rec{height:124px;background:#2d2e32;background-image:linear-gradient(90deg,#24252a 80px,transparent 80px);}
         .v-side{position:absolute;left:0;width:80px;height:66px;text-align:center;color:#d3d4d7}
         .v-side .v-ic{position:relative;display:inline-block;width:27px;height:27px;margin-top:3px}
-        .v-side span{position:absolute;left:0;right:0;bottom:8px;font-size:16px;line-height:1.25;white-space:nowrap}
+        .v-side span{position:absolute;left:0;right:0;bottom:5px;font-size:16px;line-height:1;white-space:nowrap}
         .v-side em{position:absolute;left:6px;top:3px;height:15px;padding:1px 5px;border-radius:3px;background:#ee4374;color:#fbe9ef;font-size:10.5px;font-weight:700;line-height:12px}
         .v-tabs{position:absolute;left:21px;top:1112px;width:498px;height:48px;border-radius:24px;background:#4a4b4d}
         .v-tab-on{position:absolute;top:1118px;width:88px;height:36px;border-radius:18px}
@@ -113,7 +110,7 @@
         .v-rbtn{position:absolute;left:228px;top:978px;width:84px;height:84px;border-radius:50%;border:5px solid #fff;display:flex;align-items:center;justify-content:center}
         .v-rbtn b{display:block;width:46px;height:46px;border-radius:50%;background:#e0373a}
         .v-rbtn b.is-stop{width:40px;height:40px;border-radius:9px}
-        .v-cancel{position:absolute;left:17px;top:1112px;width:507px;height:54px;border-radius:27px;background:#3a3b3e;color:#d3d4d7;font-size:14.5px;display:flex;align-items:center;justify-content:center}
+        .v-cancel{position:absolute;left:17px;top:1112px;width:507px;height:54px;border-radius:27px;background:#3a3b3e;color:#d3d4d7;font-size:20px;display:flex;align-items:center;justify-content:center}
         .v-name{position:absolute;left:27px;top:912px;width:486px;height:54px;border-radius:10px;background:#303135;font-size:14px;color:#d3d4d7;display:flex;align-items:center;padding:0 16px 0 26px;gap:12px}
         .v-name b{font-weight:600;color:#fff}
         .v-name .v-ic{position:relative;margin-left:auto;width:26px;height:26px;color:#fff}
@@ -134,7 +131,7 @@
         .v-row2{position:absolute;left:0;top:1026px;width:540px;height:80px;background:#232428}
         .v-row2-fix{position:absolute;left:0;top:0;width:88px;height:80px;border-right:2px solid #35363b;text-align:center;font-size:16px;color:#d3d4d7;padding-top:14px}
         .v-row2-fix .v-ic{position:relative;display:block;width:25px;height:25px;margin:2px auto 6px}
-        .v-row2-clip{position:absolute;left:100px;top:0;width:440px;height:80px;overflow:hidden}
+        .v-row2-clip{position:absolute;left:100px;top:0;width:440px;height:80px;overflow:visible;clip-path:inset(-8px 0)}
         .v-row2-in{position:absolute;left:0;top:0;width:900px;height:80px;transition:transform .25s ease}
         .v-r2{position:absolute;top:0;width:90px;height:80px;text-align:center;font-size:16px;color:#d3d4d7;padding-top:16px}
         .v-r2 .v-ic{position:relative;display:block;width:26px;height:26px;margin:2px auto 5px}
@@ -168,7 +165,7 @@
         .v-mp{position:absolute;left:22px;top:455px;font-size:15px;color:#e1e2e5;display:flex;align-items:center;gap:7px}
         .v-mp .v-ic{position:relative;width:22px;height:22px;color:#dcdddf}
         .v-lv{width:30px;height:30px}
-        .v-sel{position:absolute;left:489px;top:458px;font-size:14px;color:#d3d4d7}
+        .v-sel{position:absolute;left:489px;top:458px;font-size:18px;color:#d3d4d7}
         .v-load{position:absolute;left:22px;top:507px;width:170px;height:43px;border-radius:21px;background:#303135;color:#bfc0c3;font-size:16px;display:flex;align-items:center;gap:9px;padding-left:14px}
         .v-load .v-ic{position:relative;width:20px;height:20px}
         .v-new{position:absolute;left:160px;top:1036px;width:220px;height:82px;border-radius:41px;background:linear-gradient(#ff5b8b,#ee2f66);color:#fff;text-align:center;padding-top:12px;z-index:3}
@@ -240,21 +237,21 @@
         .v-prem .v-ic{position:relative;width:30px;height:30px;margin:0 auto 5px;border-radius:50%;background:#ff2d63;color:#fff;padding:6px}
         .v-row2-clip.is-w2{width:355px}
         .v-ti{position:absolute;left:204px;top:309px;width:100px;height:100px;border:1.5px solid #3d93e6;border-radius:6px;z-index:2;pointer-events:none;display:none}
-        .v-tinfo{position:absolute;left:0;width:540px;top:943px;text-align:center;font-size:11.8px;line-height:1.55;color:#d3d4d7}
+        .v-tinfo{position:absolute;left:0;width:540px;top:943px;text-align:center;font-size:16px;line-height:1.55;color:#d3d4d7}
         .v-cancel2{position:absolute;left:17px;top:1116px;width:507px;height:48px;border-radius:24px;background:#3a3b3e;color:#d3d4d7;font-size:14px;display:flex;align-items:center;justify-content:center}
         .v-btn.is-dimbtn{color:#5b6f86}
         .v-sidetabs.is-s{height:62px}
         .v-full.is-exp{background:#17181c}
-        .v-et{position:absolute;left:0;width:540px;top:66px;text-align:center;font-size:17px;color:#e4e5e8}
-        .v-etabs{position:absolute;left:0;top:142px;width:540px;height:34px;border-bottom:1px solid #2c2d31;font-size:14px;color:#d3d4d7}
+        .v-et{position:absolute;left:0;width:540px;top:66px;text-align:center;font-size:22px;color:#e4e5e8}
+        .v-etabs{position:absolute;left:0;top:142px;width:540px;height:34px;border-bottom:1px solid #2c2d31;font-size:18px;color:#d3d4d7}
         .v-etabs span{position:absolute;top:2px;width:108px;text-align:center}
         .v-etabs span:nth-child(1){left:0}.v-etabs span:nth-child(2){left:108px}.v-etabs span:nth-child(3){left:216px}.v-etabs span:nth-child(4){left:324px}.v-etabs span:nth-child(5){left:432px}
         .v-etabs span.is-on{color:#3d93e6}
         .v-etabs u{position:absolute;left:0;top:31px;width:108px;height:3px;background:#3d93e6}
-        .v-es{position:absolute;left:28px;font-size:11px;color:#9fa0a3}
+        .v-es{position:absolute;left:28px;font-size:16px;color:#9fa0a3}
         .v-ebox{position:absolute;left:23px;width:494px;border-radius:9px;background:#232428;padding:6px 18px}
-        .v-er{display:flex;justify-content:space-between;align-items:center;height:54px;font-size:13.5px;color:#e4e5e8}
-        .v-er em{font-style:normal;color:#9fa0a3;font-size:12px}
+        .v-er{display:flex;justify-content:space-between;align-items:center;height:54px;font-size:16px;color:#e4e5e8}
+        .v-er em{font-style:normal;color:#9fa0a3;font-size:16px}
         .v-er em b{color:#3d93e6;font-weight:500}
         .v-er.is-fmt b{color:#3d93e6;font-weight:500}
         .v-er.is-fmt u{color:#d3d4d7;font-size:10px}
@@ -262,13 +259,14 @@
         .v-sl{position:relative;height:5px;margin:6px 8px;border-radius:3px;background:#3d3e42}
         .v-sl i{display:block;height:100%;border-radius:3px;background:#3a9afe}
         .v-sl b{position:absolute;top:-8px;width:20px;height:20px;margin-left:-10px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.4)}
-        .v-ticks{display:flex;justify-content:space-between;padding:0 4px;font-size:9px;color:#6f7074;margin-top:12px}
-        .v-eb{position:absolute;left:0;top:870px;width:540px;height:100px;border-top:1px solid #2c2d31;background:#1d1e22;padding:36px 54px 0 28px;display:flex;justify-content:space-between;font-size:13.5px;color:#d3d4d7}
-        .v-eb .v-tog{width:57px;height:29px;border-radius:15px}
+        .v-ticks{display:flex;justify-content:space-between;padding:0 4px;font-size:12px;color:#6f7074;margin-top:12px}
+        .v-eb{position:absolute;left:0;top:870px;width:540px;height:100px;border-top:1px solid #2c2d31;background:#1d1e22;padding:36px 54px 0 28px;display:flex;justify-content:space-between;font-size:16px;color:#d3d4d7}
+        .v-eb .v-tog{width:57px;height:29px;border-radius:15px;margin:0}
         .v-eb .v-tog b{width:25px;height:25px;left:2px;top:2px}
         .v-eb .v-tog.is-on b{left:30px}
-        .v-bigb{position:absolute;left:53px;top:1050px;width:434px;height:92px;border-radius:46px;background:#0a9cf7;color:#fff;font-size:26px;font-weight:600;text-align:center;padding-top:26px;line-height:1.2}
+        .v-bigb{position:absolute;left:53px;top:1050px;width:434px;height:90px;border-radius:45px;background:#0a9cf7;color:#fff;font-size:26px;font-weight:600;text-align:center;padding-top:26px;line-height:1.2}
         .v-bigb small{display:block;font-size:11px;font-weight:400;margin-top:3px}
+        .v-bigb .v-ic{position:relative;display:inline-block;width:32px;height:32px;margin-right:10px;vertical-align:-7px;color:#fff}
         .v-full.is-saved{background:#17181c}
         .v-chk{position:absolute;left:190px;top:315px;width:160px;height:160px}
         .v-sv1{position:absolute;left:0;width:540px;top:495px;text-align:center;font-size:24px;color:#e9416a}
@@ -303,7 +301,6 @@
         .p09-cmp button.is-mark,.p09-cmp span.is-mark{background:#ffe27a}
         .p09-cmp button.is-wrong{animation:fix-word-shake .3s ease}
         .p09-next.card-btn{display:flex;align-items:center;justify-content:center;min-width:0;width:300px;height:110px;margin-bottom:20px;padding:8px 10px 0;font-size:56px;z-index:7}
-        .is-hide{display:none!important}
 
         .p09-vlog{position:absolute;left:380px;top:100px;width:1160px;height:653px;box-sizing:border-box;border:solid 6px var(--c-ink);background:#000 center / cover no-repeat;overflow:hidden;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);z-index:2}
         .p09-vlog video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -399,7 +396,6 @@
     hand.innerHTML = '<i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i>';
     viewer.appendChild(hand);
     const say = initGuideSay({ bubble: $('p09Bubble'), img: $('p09Char'), set: $('p09Set') });
-    const show = (el, on) => el.classList.toggle('is-hide', !on);
     const errWords = () => st.pl.words.map((w, k) => (k === st.pl.bad ? st.pl.err : w));
     const sentence = (ws) => ws.slice(0, 3).join(' ') + ' ' + ws[3] + '입니다.';
     const okText = () => sentence(st.pl.words);
@@ -438,39 +434,39 @@
 
     /* ---- 단계 목록 ----
        scr: 화면 이름(vllo-ui.js) · view: 영상 칸 보이기 · sub: 'err'|'fix' 자막 · mos: 블러 · play: 영상 재생 방식
-       hot: 누를 곳 [[왼쪽, 위, 폭, 높이]] · finger: [dx, dy] 손가락 보정 · next: 다음 버튼 · swipe: 밀기 영역 */
+       hit: 눌러야 할 곳 이름(TARGET 표로 요소를 찾고 FG·HOT 표의 키로 씀) · next: 다음 버튼 · swipe: 밀기 영역 */
     const STEPS = [
-      { home: true, bubble: 'VLLO를 클릭해요.', hot: [[200, 520, 140, 170]], homeHot: true },
+      { home: true, bubble: 'VLLO를 클릭해요.', hit: 'app' },
       { scr: 'list', place: true, bubble: '우리 동네를 소개하는<br>브이로그를 만들어볼까요?<br>원하는 장소를 하나 선택해요.' },
-      { scr: 'audio', view: 1, bubble: '먼저, 우리 동네를 소개해봐요.<br>음성 녹음을 클릭해요.', hot: [[0, 969, 80, 75]], finger: [10, -40], pose: 'wink_point4' },
-      { scr: 'record', view: 1, bubble: '녹음 버튼을 클릭해<br>우리 동네를 소개하는 말을 녹음해봐요.', hot: [[228, 978, 84, 84]], info: true, pose: 'wink_point4' },
-      { scr: 'record', opt: { rec: 1 }, view: 1, bubble: '녹음이 완료되면<br>정지 버튼을 클릭해요.', tts: true, hot: [[228, 978, 84, 84]], pose: 'wink_point4' },
-      { scr: 'recdone', view: 1, bubble: '완료 버튼을 클릭해요.', hot: [[200, 1112, 324, 55]], finger: [-2, 34], pose: 'wink_point4' },
+      { scr: 'audio', view: 1, bubble: '먼저, 우리 동네를 소개해봐요.<br>음성 녹음을 클릭해요.', hit: 'audio', pose: 'wink_point4' },
+      { scr: 'record', view: 1, bubble: '녹음 버튼을 클릭해<br>우리 동네를 소개하는 말을 녹음해봐요.', hit: 'recStart', info: true, pose: 'wink_point4' },
+      { scr: 'record', opt: { rec: 1 }, view: 1, bubble: '녹음이 완료되면<br>정지 버튼을 클릭해요.', tts: true, hit: 'recStop', pose: 'wink_point4' },
+      { scr: 'recdone', view: 1, bubble: '완료 버튼을 클릭해요.', hit: 'recDone', pose: 'wink_point4' },
       { scr: 'clip', view: 1, bubble: '좋아요!<br>이제 녹음한 음성을<br>AI 기능을 활용해 자막으로<br>만들어봐요.', next: true },
-      { scr: 'clip', view: 1, bubble: '하단의 메뉴 바를<br>오른쪽으로 슬라이드 해요.', swipe: [0, 1026, 540, 80], pose: 'wink_point4' },
-      { scr: 'clip', opt: { slide: 1 }, view: 1, bubble: '자동 자막을 클릭해요.', hot: [[385, 1030, 86, 76]], finger: [10, -40], pose: 'wink_point4' },
-      { scr: 'subrange', view: 1, bubble: '생성하기 버튼을 클릭해요.', hot: [[272, 1112, 252, 55]], finger: [-30, 36], pose: 'wink_point4' },
+      { scr: 'clip', view: 1, bubble: '하단의 메뉴 바를<br>오른쪽으로 슬라이드 해요.', swipe: [0, 1026, 540, 80], hit: 'swipe1', pose: 'wink_point4' },
+      { scr: 'clip', opt: { slide: 1 }, view: 1, bubble: '자동 자막을 클릭해요.', hit: 'autoSub', pose: 'wink_point4' },
+      { scr: 'subrange', view: 1, bubble: '생성하기 버튼을 클릭해요.', hit: 'generate', pose: 'wink_point4' },
       { scr: 'loading', opt: { back: 1, msg: '자막 생성하는 중...', warn: '네트워크 연결을 유지하세요. 네트워크가<br>불안정할 경우 작업이 중단될 수 있습니다.' }, bubble: '자막을 생성하는 중이에요.', load: 6200 },
       { scr: 'subdone', view: 1, sub: 'err', bubble: 'AI 자동 자막을 생성했어요!<br>음성을 알맞게 인식했는지<br>확인해볼까요?', next: true },
       { scr: 'subdone', view: 1, sub: 'err', bubble: '음성 녹음 내용과<br>AI가 만든 자동 자막을 비교해<br>틀린 부분을 클릭해보세요.', cmp: true },
-      { scr: 'subdone', view: 1, sub: 'err', bubble: 'AI는 틀릴 수 있으니<br>꼭 다시 한번 확인해야 해요!<br>아래의 편집을 클릭해요.', hot: [[440, 1030, 70, 76]], finger: [10, -40], pose: 'wink_point4' },
+      { scr: 'subdone', view: 1, sub: 'err', bubble: 'AI는 틀릴 수 있으니<br>꼭 다시 한번 확인해야 해요!<br>아래의 편집을 클릭해요.', hit: 'edit', pose: 'wink_point4' },
       { scr: 'keyboard', opt: 'err', view: 1, sub: 'err', bubble: '오른쪽 버튼을 클릭해<br>틀린 부분을 수정해요.', fix: true },
-      { scr: 'keyboard', opt: 'fix', view: 1, sub: 'fix', bubble: '좋아요!<br>자막을 올바르게 수정했어요.<br>확인 버튼을 클릭해요.', hot: [[477, 638, 54, 54]], finger: [10, -20] },
-      { scr: 'subdone', view: 1, sub: 'fix', bubble: '아래의 완료 버튼을 눌러<br>자막 수정을 마무리해요.', hot: [[10, 1112, 521, 55]], finger: [-140, 38], pose: 'wink_point4' },
+      { scr: 'keyboard', opt: 'fix', view: 1, sub: 'fix', bubble: '좋아요!<br>자막을 올바르게 수정했어요.<br>확인 버튼을 클릭해요.', hit: 'fixOk' },
+      { scr: 'subdone', view: 1, sub: 'fix', bubble: '아래의 완료 버튼을 눌러<br>자막 수정을 마무리해요.', hit: 'fixDone', pose: 'wink_point4' },
       { scr: 'subed', view: 1, sub: 'fix', bubble: '이제 영상에 찍힌<br>이웃의 얼굴을 가려볼까요?', next: true },
-      { scr: 'subed', view: 1, sub: 'fix', bubble: '하단의 효과 탭을 클릭해요.', hot: [[422, 1113, 94, 48]], finger: [0, 36], pose: 'wink_point4' },
-      { scr: 'fx', view: 1, sub: 'fix', bubble: '왜곡(모자이크)를 클릭해요.', hot: [[2, 962, 76, 84]], finger: [9, -47], pose: 'wink_point4' },
-      { scr: 'faces', view: 1, sub: 'fix', bubble: '얼굴을 흐릿하게 만드는 효과인<br>‘블러’를 클릭해요.', hot: [[28, 944, 114, 151]], finger: [4, -47], pose: 'wink_point4' },
-      { scr: 'blursel', view: 1, sub: 'fix', mos: 'edit', bubble: '현재 장면의 얼굴을 가렸어요.<br>완료 버튼을 클릭해요.', hot: [[279, 1112, 245, 55]], finger: [-50, 34], pose: 'wink_point4' },
-      { scr: 'blurclip', view: 1, sub: 'fix', mos: 'edit', bubble: '이제 모자이크를 이웃의 얼굴에 고정시켜 볼까요? 하단의 도구 탭을 오른쪽으로 슬라이드 해요.', swipe: [0, 1026, 455, 80], wide: VL.TRKW, pose: 'wink_point4' },
-      { scr: 'blurclip', opt: { slide: 1 }, view: 1, sub: 'fix', mos: 'edit', bubble: '얼굴 트래킹을 클릭해요.', hot: [[180, 1030, 92, 76]], finger: [8, -39], pose: 'wink_point4' },
-      { scr: 'trackset', view: 1, sub: 'fix', mos: 'track', bubble: '모자이크 효과를 추가한 부분이<br>트래킹 영역으로 설정됐어요.<br>트래킹하기 버튼을 클릭해요.', hot: [[172, 1026, 196, 54]], finger: [0, -18], pose: 'wink_point4' },
+      { scr: 'subed', view: 1, sub: 'fix', bubble: '하단의 효과 탭을 클릭해요.', hit: 'fxTab', pose: 'wink_point4' },
+      { scr: 'fx', view: 1, sub: 'fix', bubble: '왜곡(모자이크)를 클릭해요.', hit: 'distort', pose: 'wink_point4' },
+      { scr: 'faces', view: 1, sub: 'fix', bubble: '얼굴을 흐릿하게 만드는 효과인<br>‘블러’를 클릭해요.', hit: 'blur', pose: 'wink_point4' },
+      { scr: 'blursel', view: 1, sub: 'fix', mos: 'edit', bubble: '현재 장면의 얼굴을 가렸어요.<br>완료 버튼을 클릭해요.', hit: 'blurDone', pose: 'wink_point4' },
+      { scr: 'blurclip', view: 1, sub: 'fix', mos: 'edit', bubble: '이제 모자이크를 이웃의 얼굴에 고정시켜 볼까요? 하단의 도구 탭을 오른쪽으로 슬라이드 해요.', swipe: [0, 1026, 455, 80], hit: 'swipe2', wide: VL.TRKW, pose: 'wink_point4' },
+      { scr: 'blurclip', opt: { slide: 1 }, view: 1, sub: 'fix', mos: 'edit', bubble: '얼굴 트래킹을 클릭해요.', hit: 'track', pose: 'wink_point4' },
+      { scr: 'trackset', view: 1, sub: 'fix', mos: 'track', bubble: '모자이크 효과를 추가한 부분이<br>트래킹 영역으로 설정됐어요.<br>트래킹하기 버튼을 클릭해요.', hit: 'trackGo', pose: 'wink_point4' },
       { scr: 'loading', opt: { msg: '트래킹 하는 중...', cls: 'is-trkld' }, bubble: '트래킹하는 중이에요.', load: 6200 },
       { scr: 'blurclip', opt: { slide: 1 }, view: 1, sub: 'fix', mos: 'play', play: true, bubble: '영상 끝까지 얼굴이<br>잘 가려졌나요?', choices: ['잘 가려졌어요.', '다시 한번 확인해볼래요.'] },
-      { scr: 'blurclip', opt: { slide: 1 }, view: 1, sub: 'fix', mos: 'play', bubble: '아래의 완료 버튼을 클릭해 얼굴 트래킹을 마무리해보세요.', hot: [[10, 1112, 521, 55]], finger: [-140, 41], pose: 'wink_point4' },
+      { scr: 'blurclip', opt: { slide: 1 }, view: 1, sub: 'fix', mos: 'play', bubble: '아래의 완료 버튼을 클릭해 얼굴 트래킹을 마무리해보세요.', hit: 'trackDone', pose: 'wink_point4' },
       { scr: 'subed', view: 1, sub: 'fix', mos: 'play', bubble: '좋아요!<br>우리 동네 브이로그 편집을 완료했어요.', next: true },
-      { scr: 'subed', view: 1, sub: 'fix', mos: 'play', bubble: '추출하기 버튼을 클릭해<br>영상을 저장해봐요.', hot: [[436, 58, 97, 40]], finger: [13, -27], pose: 'wink_point' },
-      { scr: 'export', bubble: '아래의 추출하기 버튼을<br>한 번 더 클릭해요.', hot: [[53, 1050, 434, 92]], finger: [-36, -47], pose: 'wink_point4' },
+      { scr: 'subed', view: 1, sub: 'fix', mos: 'play', bubble: '추출하기 버튼을 클릭해<br>영상을 저장해봐요.', hit: 'export', pose: 'wink_point' },
+      { scr: 'export', bubble: '아래의 추출하기 버튼을<br>한 번 더 클릭해요.', hit: 'export2', pose: 'wink_point4' },
       { scr: 'loading', opt: { msg: '비디오 만드는 중...', warn: 'VLLO를 끄거나 기기를 잠그지 마세요.', cls: 'is-mk' }, bubble: '비디오를 만드는 중이에요.', load: 6200 },
       { scr: 'saved', bubble: '완성했어요!<br>내가 만든 브이로그를<br>한 번 재생해볼까요?', next: true },
       { vlog: true, bubble: '', nochar: true }
@@ -484,36 +480,50 @@
       if (tts) { tts.pause(); tts = null; }
       hots.innerHTML = '';
       right.innerHTML = ''; right.classList.add('is-off');
-      show(nextBtn, false);
+      showIf(nextBtn, false);
       clearFingers();
       document.querySelectorAll('.p09-swhand').forEach((h) => h.remove());
     }
     const place = (el, b) => { el.style.cssText += ';left:' + b[0] + 'px;top:' + b[1] + 'px;width:' + b[2] + 'px;height:' + b[3] + 'px'; };
-    function hotBtn(box, fn) {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'p09-hot';
-      place(b, box);
-      BoxEdit.tag(b, box);
-      b.addEventListener('click', () => { if (BoxEdit.on) return; playClick(); fn(); });
-      hots.appendChild(b);
-      return b;
-    }
-    const fingerOff = () => STEPS[st.i].finger || [0, 0];
-    function tagFinger() {
-      if (!BoxEdit.on) return;
-      const f = main.querySelector('.js-point-finger');
-      if (!f) return;
-      f.style.pointerEvents = 'auto';
-      f._last = fingerOff().slice();
-      BoxEdit.tag(f, STEPS[st.i].finger);
-    }
-    function fingerTo(el, dy) {
+    // 눌러야 할 곳 = vllo-ui.js 가 그린 실제 요소: 이름 → [CSS 선택자, 글자(앞부분), 몇 번째(기본 0)]
+    const TARGET = {
+      audio: ['.v-side', '음성 녹음'], recStart: ['.v-rbtn'], recStop: ['.v-rbtn'], recDone: ['.v-btn', '완료'], autoSub: ['.v-r2', 'AI자동 자막'],
+      generate: ['.v-btn', '생성하기'], edit: ['.v-r2', '편집'], fixOk: ['.v-ok'], fixDone: ['.v-btn', '완료'], fxTab: ['.v-tab', '효과'],
+      distort: ['.v-side', '왜곡(모자이크)'], blur: ['.v-fc'], blurDone: ['.v-btn', '완료'], track: ['.v-r2', '얼굴 트래킹'], trackGo: ['.v-btn', '트래킹하기'],
+      trackDone: ['.v-btn', '완료'], export: ['.v-out'], export2: ['.v-bigb']
+    };
+    const findHit = (name) => {
+      const t = TARGET[name];
+      const list = Array.from(stack.lastElementChild.querySelectorAll(t[0])).filter((e) => !t[1] || e.textContent.trim().indexOf(t[1]) === 0);
+      return list[t[2] || 0];
+    };
+    // 손가락 위치 보정 [dx, dy] — 눌러야 할 곳(hit)별. swipe1·swipe2 는 밀기 손. ?edit 로 손가락을 눌러 맞춘 뒤 표시줄 값을 옮겨 적음
+    const FG = {
+      app: [15, -37], audio: [10, -37.7], recStart: [0, 0],
+      recStop: [0, 0], recDone: [-2, -36], autoSub: [8.5, -40],
+      generate: [-30, -34], edit: [3.9, -40], fixOk: [11.5, -20],
+      fixDone: [-140, -32], fxTab: [2.7, -28.7], distort: [7.5, -43.2],
+      blur: [3.2, -18.1], blurDone: [-50, -36], track: [8, -39],
+      trackGo: [0, -18], trackDone: [-140, -29], export: [14.5, -24.7],
+      export2: [-36, -47], swipe1: [0, 0], swipe2: [0, 0]
+    };
+    // 클릭 영역 보정 [dx, dy, dw, dh] — 버튼 모양은 그대로, 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
+    const HOT = {
+      audio: [0, -6, 0, 9], recStart: [0, 0, 0, 0], recStop: [0, 0, 0, 0],
+      recDone: [0, 0, 0, 0], autoSub: [2, 4, -4, -4], generate: [0, 0, 0, 0],
+      edit: [12, 4, -20, -4], fixOk: [0, -2, 2, 2], fixDone: [0, 0, 0, 0],
+      fxTab: [-2.5, -5, 6, 12], distort: [2, -13, -4, 18], blur: [-2, 1, 1, 37],
+      blurDone: [0, 0, 0, 0], track: [-2, 4, 2, -4], trackGo: [0, 0, 0, 0],
+      trackDone: [0, 0, 0, 0], export: [-2, -3, 4, 6], export2: [0, 0, 0, 0]
+    };
+    let fgKey = '?';
+    BoxEdit.fingerTag(() => fgKey);
+    function fingerTo(el, key) {
       setTimeout(() => {
         if (!el || !el.isConnected) return;
-        const o = fingerOff();
-        pointFingerAt(el, { onMain: true, dx: o[0], dy: (dy || 0) + o[1] });
-        tagFinger();
+        fgKey = key;
+        const o = FG[key] || [0, 0];
+        pointFingerAt(el, { onMain: true, dx: o[0], dy: o[1] });
       }, 380);
     }
 
@@ -553,22 +563,21 @@
       st.i = n;
       render();
       if (BoxEdit.on) {
-        try { const q = /[?&]step=/.test(location.search) ? location.search.replace(/([?&]step=)\d+/, '$1' + n) : location.search + '&step=' + n; history.replaceState(null, '', q); } catch (e) { /* 주소 갱신이 막힌 환경 */ }
+        try { const q = /[?&]step=/.test(location.search) ? location.search.replace(/([?&]step=)\d+/, '$1' + (n + 1)) : location.search + '&step=' + (n + 1); history.replaceState(null, '', q); } catch (e) { /* 주소 갱신이 막힌 환경 */ }
       }
     }
     const advance = () => go(st.i + 1);
 
     function render() {
       const s = STEPS[st.i];
-      if (BoxEdit.on && (s.hot || s.home) && !s.finger) s.finger = [0, 0];
       clearAll();
       st.vdone = false;
-      show($('p09End'), false);
-      say(s.bubble, s.pose || (s.next ? 'wink_present' : s.hot || s.swipe || s.home ? 'wink_point2' : 'main'));
+      showIf($('p09End'), false);
+      say(s.bubble, s.pose || (s.next ? 'wink_present' : s.hit ? 'wink_point2' : 'main'));
       $('p09Set').style.display = s.nochar ? 'none' : '';
       if (s.vlog) { vlog(); return; }
-      show($('p09Phone'), true);
-      show($('p09Vlog'), false);
+      showIf($('p09Phone'), true);
+      showIf($('p09Vlog'), false);
       if (s.home) {
         $('p09Home').style.display = '';
         vl.style.opacity = '0';
@@ -576,9 +585,7 @@
         const icon = screen.querySelector('.app-icon');
         icon.style.cursor = 'pointer';
         icon.onclick = () => { if (BoxEdit.on || st.i !== 0) return; playClick(); icon.onclick = null; advance(); };
-        const o = fingerOff();
-        if (BoxEdit.on) setTimeout(() => { pointFingerAt(icon, { onMain: true, dx: 15 + o[0], dy: -37 + o[1] }); tagFinger(); }, 200);
-        else setTimeout(() => { pointFingerAt(icon, { onMain: true, dx: 15 + o[0], dy: -37 + o[1] }); }, 350);
+        setTimeout(() => { fgKey = 'app'; pointFingerAt(icon, { onMain: true, dx: FG.app[0], dy: FG.app[1] }); }, BoxEdit.on ? 200 : 350);
         return;
       }
       $('p09Home').style.display = 'none';
@@ -592,13 +599,17 @@
       lastScr = s.scr;
       if (s.opt && s.opt.msg !== undefined) { /* 로딩 */ }
       if (s.place) placePick();
-      if (s.hot) {
-        const hs = s.hot.map((box) => hotBtn(box, () => { if (s.info) { $('p09Info').classList.remove('is-off'); return; } advance(); }));
-        if (s.tts) ttsRun(hs[0]);
-        else fingerTo(hs[0], s.hot[0][1] > 1050 ? -70 : 0);
+      if (s.hit && TARGET[s.hit]) {
+        const el = findHit(s.hit);
+        el.dataset.hit = s.hit;
+        el.classList.add('hit-pulse');
+        BoxEdit.padEl(el, s.hit, HOT);
+        el.addEventListener('click', () => { if (BoxEdit.on) return; playClick(); if (s.info) { $('p09Info').classList.remove('is-off'); return; } advance(); });
+        if (s.tts) ttsRun(el, s.hit);
+        else fingerTo(el, s.hit);
       }
       if (s.swipe) swipe(s.swipe);
-      if (s.next) show(nextBtn, true);
+      if (s.next) showIf(nextBtn, true);
       if (s.load) load(s.load);
       if (s.cmp) compare();
       if (s.fix) setRight([{ t: '‘' + st.pl.err + '’를 ‘' + st.pl.words[st.pl.bad] + '’로<br>수정하기', fn: () => advance() }]);
@@ -634,9 +645,10 @@
     }
 
     // 녹음: 장소별 소리 파일(sound/sa10_vllo_{mart,post,library,park}.mp3)이 끝나면 정지 버튼 손가락 안내
-    function ttsRun(btn) {
+    function ttsRun(btn, key) {
       let done = false;
-      const end = () => { if (done) return; done = true; if (btn.isConnected) fingerTo(btn); };
+      const end = () => { if (done) return; done = true; if (btn.isConnected) fingerTo(btn, key); };
+      if (BoxEdit.on) { end(); return; }
       try {
         const a = new Audio(ASSET_BASE + 'sound/sa10_vllo_' + st.key + '.mp3');
         a.onended = end;
@@ -707,8 +719,8 @@
     }
     // 완성 영상
     function vlog() {
-      show($('p09Phone'), false);
-      show($('p09Vlog'), true);
+      showIf($('p09Phone'), false);
+      showIf($('p09Vlog'), true);
       vlogBox.style.backgroundImage = "url('img/" + st.pl.thumb + ".jpg')";
       vlogVid.src = st.pl.video;
       vlogVid.currentTime = 0;
@@ -717,16 +729,16 @@
       vlogBlur.classList.add('is-on');
       $('p09VlogSub').textContent = okText();
       $('p09VlogSub').classList.add('is-on');
-      show($('p09Play'), true);
+      showIf($('p09Play'), true);
     }
     $('p09Play').addEventListener('click', () => {
       playClick();
-      show($('p09Play'), false);
+      showIf($('p09Play'), false);
       vlogVid.style.opacity = '1';
       vlogVid.currentTime = 0;
       vlogVid.play().catch(() => {});
       let spoke = false, timed = false;
-      const finish = () => { if (spoke && timed) { say('완성했어요!', 'wink_jump'); st.vdone = true; show(nextBtn, true); } };
+      const finish = () => { if (spoke && timed) { say('완성했어요!', 'wink_jump'); st.vdone = true; showIf(nextBtn, true); } };
       vlogVid.onended = () => { timed = true; finish(); };
       setTimeout(() => { timed = true; finish(); }, 5600);
       try {
@@ -752,9 +764,10 @@
       hand.src = '../../img/common/img_finger01.png';
       hand.style.left = ((sr.left - mr.left) / sc + sr.width / sc * 0.72) + 'px';
       hand.style.top = ((sr.top - mr.top) / sc + (box[1] + box[3] / 2) * k - 10) + 'px';
-      hand.style.marginLeft = (STEPS[st.i].swhand || [0, 0])[0] + 'px';
-      hand.style.marginTop = (STEPS[st.i].swhand || [0, 0])[1] + 'px';
-      if (BoxEdit.on) { if (!STEPS[st.i].swhand) STEPS[st.i].swhand = [0, 0]; BoxEdit.tag(hand, STEPS[st.i].swhand); hand._base = true; hand._fg = 'swhand'; hand.style.pointerEvents = 'auto'; }
+      const swh = FG[STEPS[st.i].hit] || [0, 0];
+      hand.style.marginLeft = swh[0] + 'px';
+      hand.style.marginTop = swh[1] + 'px';
+      if (BoxEdit.on) { BoxEdit.tag(hand, swh); hand._base = true; hand._fg = 'FG.' + STEPS[st.i].hit; hand.style.pointerEvents = 'auto'; }
       main.appendChild(hand);
       let x0 = null, off = 0;
       const set = (v, anim) => { off = v; row.style.transition = anim ? 'transform .25s ease' : 'none'; row.style.transform = 'translateX(' + (-v) + 'px)'; };
@@ -771,23 +784,26 @@
     }
 
     nextBtn.addEventListener('click', () => {
-      if (st.vdone) { show($('p09End'), true); return; }
+      if (st.vdone) { showIf($('p09End'), true); return; }
       advance();
     });
     $('p09InfoOk').addEventListener('click', () => { $('p09Info').classList.add('is-off'); advance(); });
     window.addEventListener('resize', fit);
 
-    BoxEdit.init({
+    BoxEdit.stepEdit({
       setup: () => { const m = location.search.match(/[?&]place=([a-z]+)/); applyPlace(PLACES[(m && m[1]) || 'library'] || PLACES.library); },
-      name: (el) => (el.classList.contains('js-point-finger') ? '손가락 finger: ' : el.classList.contains('p09-swhand') ? '밀기 손 swhand: ' : '박스 '),
-      apply: (el) => el.classList.contains('p09-swhand') ? (el.style.marginLeft = el._ref[0] + 'px', el.style.marginTop = el._ref[1] + 'px') : el.classList.contains('js-point-finger')
-        ? (el.style.left = parseFloat(el.style.left) + el._ref[0] - el._last[0] + 'px', el.style.top = parseFloat(el.style.top) + el._ref[1] - el._last[1] + 'px', el._last = el._ref.slice())
-        : place(el, el._ref),
-      unit: 1,
-      step: { count: STEPS.length, get: () => st.i, set: (n) => { st.i = n; }, go,
-        label: (n) => '단계 ' + n + ' / ' + (STEPS.length - 1) + ' (' + (STEPS[n].scr || (STEPS[n].home ? 'home' : '—')) + ')' }
+      name: (el) => el._hot ? '[클릭 영역 → HOT.' + el._hot + '] ' : el._base ? '[' + (el.classList.contains('p09-swhand') ? '밀기 손' : '손가락') + ' → ' + el._fg + '] ' : '박스 ',
+      apply: (el) => {
+        if (el._hot) { BoxEdit.padApply(el); return; }
+        if (el.classList.contains('p09-swhand')) { el.style.marginLeft = el._ref[0] + 'px'; el.style.marginTop = el._ref[1] + 'px'; return; }
+        if (el._base) { el.style.left = (el._base[0] + el._ref[0]) + 'px'; el.style.top = (el._base[1] + el._ref[1]) + 'px'; return; }
+        place(el, el._ref);
+      },
+      key: () => fgKey, unit: 1,
+      count: STEPS.length + 1, get: () => st.i + 1, set: (n) => { st.i = n - 1; }, go: (n) => { if (n >= 1) go(n - 1); },
+      label: (n) => '단계 ' + n + ' / ' + STEPS.length + ' (' + (STEPS[n - 1].scr || (STEPS[n - 1].home ? 'home' : '—')) + ')',
+      say, bubble: $('p09Bubble'), img: $('p09Char')
     });
-    const startStep = () => { const m = location.search.match(/[?&]step=([0-9]+)/); return m ? parseInt(m[1], 10) : st.i; };
     Promise.all(['300', '400', '500', '600', '700', '800'].map((w) => document.fonts.load(w + ' 16px Pretendard', '가A1'))).then(() => { fit(); render(); }, () => { fit(); render(); });
   })();
   </script>

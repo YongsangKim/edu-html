@@ -31,7 +31,7 @@
           <div class="pp-story" id="p12Story">
             <div class="ph" id="p12Ph"></div>
             <img class="pic" id="p12Pic" alt="" onerror="this.style.display='none'">
-            <div class="pp-story-cap"><p id="p12Cap"></p><button type="button" class="card-btn is-popup js-sfx" id="p12StoryNext" data-sound="sound/click.mp3">다음</button></div>
+            <div class="pp-story-cap"><p id="p12Cap"></p><button type="button" class="card-btn is-popup next-btn js-sfx" id="p12StoryNext" data-sound="sound/click.mp3">다음</button></div>
           </div>
 
           <div class="guide-set is-main" id="p12Set">
@@ -39,7 +39,7 @@
             <div class="guide-character"><img id="p12Char" src="../img/character/sa_main.png" alt="메인 캐릭터"></div>
           </div>
           <div class="phone-frame has-cam" id="p12Phone"><div class="phone-screen" id="p12Screen"></div></div>
-          <button type="button" class="card-btn is-start p12-next is-off js-sfx" id="p12Next" data-sound="sound/click.mp3">다음</button>
+          <button type="button" class="card-btn is-start next-btn p12-next is-off js-sfx" id="p12Next" data-sound="sound/click.mp3">다음</button>
         </main>
       </div>
     </div>
@@ -50,6 +50,7 @@
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
   <script src="../../js/papago.js"></script>
+  <script src="../../js/box-edit.js"></script>
   <script>
   (function () {
     const PHOTO = { src: 'img/photo_hanok.png', pos: '80% 50%', box: [24.5, 13, 52, 52] };
@@ -58,20 +59,22 @@
     const camDone = () => PP.cam({ to: '영어', photo: PHOTO.src, pos: PHOTO.pos, mode: 'result', overlays: [{ cls: 'is-hanok-ov', html: 'Please take off your shoes before entering.<br>Please put the shoes in the shoe rack.' }] });
     const STEPS = [
       { story: '한옥마을에서 미국인 친구가 신발을 신고 대청마루에 들어가려는 장면 삽화(안내문 포함)', cap: '한옥마을에 도착했어요. 미국인 친구가 신발을 신고 대청마루에 들어가려고 해요. 안내문을 번역해서 한옥의 규칙을 알려줘요.' },
-      { say: '이미지 기능을 사용해서<br>미국인 친구에게 한옥의<br>규칙을 설명해봐요.', pose: 'wink_point2', screen: () => PP.home({ to: '영어', hot: ['image'] }), hot: 'image' },
-      { say: '촬영 버튼을 클릭해<br>한옥의 안내판을 촬영해요.', pose: 'wink_point2', screen: camLive, hot: 'shoot' },
+      { say: '이미지 기능을 사용해서<br>미국인 친구에게 한옥의<br>규칙을 설명해봐요.', pose: 'wink_present', screen: () => PP.home({ to: '영어', hot: ['image'] }), hot: 'image' },
+      { say: '촬영 버튼을 클릭해<br>한옥의 안내판을 촬영해요.', pose: 'wink_point4', screen: camLive, hot: 'shoot' },
       { say: '촬영 버튼을 클릭해<br>한옥의 안내판을 촬영해요.', pose: 'main', screen: camLoad, auto: 1000 },
-      { say: '좋아요!<br>한옥의 규칙이 적힌<br>안내판을 번역했어요.', pose: 'wink_point4', screen: camDone, next: true },
+      { say: '좋아요!<br>한옥의 규칙이 적힌<br>안내판을 번역했어요.', pose: 'wink_present', screen: camDone, next: true },
       { story: '미국인 친구도 함께 규칙에 따라 신발을 벗고 한옥을 체험하는 장면 삽화', cap: '미국인 친구도 함께 규칙에 따라 신발을 벗고 한옥을 체험했어요.<br>이제 카페로 이동해요.', last: true }
     ];
     const story = $('p12Story'), screen = $('p12Screen'), next = $('p12Next');
     const say = initGuideSay({ bubble: $('p12Bubble'), img: $('p12Char'), set: $('p12Set') });
-    let si = 0, handler = null, timer = 0, imgN = 0;
+    let si = 0, handler = null, timer = 0;
+    const FG = { image: [-10, -20], shoot: [-10, -20] };
+    // 클릭 영역 보정 [dx, dy, dw, dh] — 버튼 모양은 그대로, 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
+    const HOT = { image: [0, 0, 0, 0], shoot: [0, 0, 0, 0] };
+    const storyNo = (i) => STEPS.slice(0, i + 1).filter((x) => x.story).length;
 
     function finger(name) {
-      clearFingers();
-      const el = screen.querySelector('[data-hot="' + name + '"]');
-      if (el) setTimeout(() => { if (el.isConnected) pointFingerAt(el, { onMain: true, dx: -10, dy: -20 }); }, 300);
+      PP.finger(screen.querySelector('[data-hot="' + name + '"]'), { key: name, FG, HOT });
     }
 
     function go(n) {
@@ -82,14 +85,13 @@
       next.classList.add('is-off');
       handler = null;
       if (s.story) {
-        imgN += 1;
         story.classList.remove('is-off');
         $('p12Set').style.display = 'none';
         $('p12Phone').style.display = 'none';
         $('p12Ph').textContent = s.story;
         const p = $('p12Pic');
         p.style.display = '';
-        p.src = 'img/p12_story_' + imgN + '.png';
+        p.src = 'img/p12_story_' + storyNo(si) + '.png';
         $('p12Cap').innerHTML = s.cap;
         return;
       }
@@ -99,20 +101,31 @@
       say(s.say, s.pose, true);
       PP.mount(screen, s.screen());
       if (s.hot) { handler = () => go(si + 1); finger(s.hot); }
-      if (s.auto) timer = setTimeout(() => go(si + 1), s.auto);
+      if (s.auto && !BoxEdit.on) timer = setTimeout(() => go(si + 1), s.auto);
       if (s.next) next.classList.remove('is-off');
     }
 
     screen.addEventListener('click', (e) => {
       const t = e.target.closest('[data-hot]');
-      if (t && handler) { playClick(); const h = handler; handler = null; clearFingers(); h(t.dataset.hot); }
+      if (t && handler && !BoxEdit.on) { playClick(); const h = handler; handler = null; clearFingers(); h(t.dataset.hot); }
     });
     $('p12StoryNext').addEventListener('click', () => {
+      if (BoxEdit.on) return;
       if (STEPS[si].last) { setTimeout(() => { location.href = 'page13.html'; }, 250); return; }
       go(si + 1);
     });
-    next.addEventListener('click', () => go(si + 1));
-    go(0);
+    next.addEventListener('click', () => { if (!BoxEdit.on) go(si + 1); });
+    /* ?edit&step=N : 단계 N 으로 바로 열기(] [ 로 이동). 손가락(FG)·클릭 영역(HOT)을 클릭해 방향키로 조정(Alt+방향키 = 폭·높이), 오른쪽 아래 포즈판에서 포즈를 눌러 본 뒤 STEPS 줄의 pose 에 옮겨 적음 (_guide/steps.html 기준) */
+    BoxEdit.stepEdit({
+      key: () => STEPS[si].hot || '?',
+      count: STEPS.length + 1,
+      get: () => si + 1,
+      set: (n) => { si = Math.max(0, Math.min(n, STEPS.length) - 1); },
+      go: (n) => { if (n < 1) return; BoxEdit.syncStep(n); go(n - 1); },
+      label: (n) => '단계 ' + n + ' / ' + STEPS.length,
+      say, bubble: $('p12Bubble'), img: $('p12Char')
+    });
+    go(si);
   })();
   </script>
 </body>

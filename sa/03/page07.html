@@ -178,12 +178,12 @@
     ];
     const SVG = (d) => '<svg viewBox="0 0 24 24">' + d + '</svg>';
     const ICON = {
-      shape: SVG('<circle cx="8" cy="8" r="4"/><rect x="11" y="11" width="9" height="9" rx="1"/>'),
-      edit: SVG('<rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>'),
-      style: SVG('<path d="M4 8h16M4 16h16" stroke-width="3.2"/>'),
-      corner: SVG('<path d="M5 20v-4a10 10 0 0110-10h2"/><circle cx="19" cy="6" r="1.6" fill="currentColor"/><circle cx="5" cy="20" r="1.6" fill="currentColor"/>'),
-      format: SVG('<path d="M4 5h5a3 3 0 010 6H4zM4 11h6a3.2 3.2 0 010 6.4H4zM15 7h6M15 12h6M15 17h6"/>'),
-      check: SVG('<path d="M5 12l5 5L20 7"/>')
+      shape: ICONS.shape,
+      edit: ICONS.edit,
+      style: ICONS.style,
+      corner: ICONS.corner,
+      format: ICONS.format,
+      check: ICONS.check
     };
 
     const phone = $('p07Phone');
@@ -374,8 +374,17 @@
       showSub('p07-size');
       sub.innerHTML = '<p>글꼴 크기</p><div><input type="range" min="24" max="72" value="40" id="p07Range"><span><button type="button" id="p07Minus">−</button><b id="p07Num">40</b><button type="button" id="p07Plus">+</button></span></div>';
       const range = $('p07Range');
+      const fits = (v) => {
+        text.style.fontSize = v + 'px';
+        return text.offsetTop + text.offsetHeight <= text.parentNode.clientHeight;
+      };
+      const prev = text.style.fontSize;
+      let top = 72;
+      while (top > 24 && !fits(top)) top -= 1;
+      text.style.fontSize = prev;
+      range.max = top;
       const apply = (v) => {
-        v = Math.max(24, Math.min(72, v));
+        v = Math.max(24, Math.min(top, v));
         range.value = v;
         $('p07Num').textContent = v;
         text.style.fontSize = v + 'px';
