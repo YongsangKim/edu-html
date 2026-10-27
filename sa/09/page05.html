@@ -8,33 +8,50 @@
     <style>
         /* 기획서 10~12p. 왼쪽 '인물 카드' 3줄(사진+직업명 + 끌어 놓을 칸), 오른쪽 '역할 카드' 6장(무작위 배치) → 알맞은 칸에 끌어 넣으면 부착, 틀리면 제자리로.
            2판(구급대원·환경미화원·버스 기사 → 경찰관·택배 기사·급식 조리사), 끝나면 활동 종료 팝업 */
-        .p05-tag{position:absolute;margin:0;top:148px;width:253px;height:80px;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;background:var(--c-navy);border:solid 5px var(--c-ink);border-radius:39px;z-index:2;
-          font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-white);letter-spacing:-0.04em}
-        .p05-tag.is-person{left:312px}
-        .p05-tag.is-role{left:1247px}
+        .p05-panel{position:absolute;top:182px;height:730px;box-sizing:border-box;border-radius:14px}
+        .p05-panel.is-person{left:35px;width:811px;background:#dff6ff;border:solid 3px #91b9e7}
+        .p05-panel.is-role{left:867px;width:1022px;background:#266cc8}
 
-        .p05-person{position:absolute;left:107px;width:250px;height:230px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:20px 0 0 20px;overflow:hidden;background:var(--c-white);display:flex;flex-direction:column}
-        .p05-person i{flex:1 1 auto;background:var(--c-mist) center / cover no-repeat}
-        .p05-person span{flex:0 0 40px;display:flex;align-items:center;justify-content:center;padding-top:5px;background:var(--c-white);font-family:'Cafe24 Ssurround';font-size:36px;color:var(--c-ink);letter-spacing:-0.05em;line-height:1;white-space:nowrap}
-        .p05-slot{position:absolute;left:357px;width:400px;height:230px;box-sizing:border-box;background:#d6d6d6;border:solid 8px #bdbdbd;border-radius:0 20px 20px 0;border-left:0;display:flex;align-items:center;justify-content:center;text-align:center;
-          font-family:'Cafe24 Ssurround';font-size:34px;line-height:1.15;letter-spacing:-0.04em;color:#8c8c93;white-space:nowrap}
-        .p05-slot[data-filled]{background:none;border:0}
+        .p05-rb{position:absolute;top:148px;margin:0;z-index:3}
+        .p05-rb:before{content:'';position:absolute}
+        .p05-rb span{position:relative;display:flex;align-items:center;justify-content:center;height:100%;box-sizing:border-box;padding-top:6px;font-family:'Cafe24 Ssurround';font-size:52px;letter-spacing:-0.04em;color:#1b1738}
+        .p05-rb.is-person{left:262px;width:357px;height:82px}
+        .p05-rb.is-person:before{left:-45px;top:37px;width:447px;height:70px;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'447'%20height%3D'70'%3E%3Cpath%20fill%3D'%238196a8'%20d%3D'M75%2020H372V57H75Z'%2F%3E%3Cpath%20fill%3D'%238196a8'%20d%3D'M0%2013H90V70H0L22%2041Z'%2F%3E%3Cpath%20fill%3D'%238196a8'%20d%3D'M357%2013H447L425%2041L447%2070H357Z'%2F%3E%3Cpath%20fill%3D'%2391b9e7'%20d%3D'M0%200H90V57H0L22%2028Z'%2F%3E%3Cpath%20fill%3D'%2391b9e7'%20d%3D'M357%200H447L425%2028L447%2057H357Z'%2F%3E%3Cpath%20fill%3D'%237f9be6'%20d%3D'M48%2045H75V57Z'%2F%3E%3Cpath%20fill%3D'%237f9be6'%20d%3D'M372%2045H399L372%2057Z'%2F%3E%3C%2Fsvg%3E") no-repeat}
+        .p05-rb.is-person span{background:#dff6ff;border:solid 5px #fff}
+        .p05-rb.is-role{left:1219px;width:315px;height:73px}
+        .p05-rb.is-role:before{left:-54px;top:32px;width:423px;height:66px;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'423'%20height%3D'66'%3E%3Cpath%20fill%3D'%237ad1ed'%20d%3D'M26%200H85V66H26L0%2033Z'%2F%3E%3Cpath%20fill%3D'%237ad1ed'%20d%3D'M397%200H338V66H397L423%2033Z'%2F%3E%3Cpath%20fill%3D'%237fb7e8'%20d%3D'M60%2041H85V66Z'%2F%3E%3Cpath%20fill%3D'%237fb7e8'%20d%3D'M363%2041H338V66Z'%2F%3E%3C%2Fsvg%3E") no-repeat}
+        .p05-rb.is-role span{background:#cfffff}
+
+        .p05-person{position:absolute;left:75px;width:253px;height:198px;box-sizing:border-box;padding:5px 5px 0 5px;background:#fff;border-radius:22px 0 0 22px;box-shadow:0 7px 0 #a3b5cf;overflow:hidden;display:flex;flex-direction:column}
+        .p05-person i{flex:1 1 auto;border-radius:17px 0 0 0;background:var(--c-mist) 0 0 / cover no-repeat}
+        .p05-person span{flex:0 0 58px;display:flex;align-items:center;justify-content:center;padding-top:4px;font-family:'Cafe24 Ssurround';font-size:38px;color:#1b1738;letter-spacing:-0.05em;line-height:1;white-space:nowrap}
+
+        .p05-slot,.p05-card{box-sizing:border-box;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center;font-family:'Cafe24 Ssurround';letter-spacing:-0.04em;word-break:keep-all}
+        .p05-slot:after,.p05-card:after{content:'';position:absolute;left:10px;top:10px;right:10px;bottom:10px;border:dashed 4px rgba(255,255,255,.55);border-radius:14px;pointer-events:none}
+        .p05-slot:before,.p05-card:before{content:'';position:absolute;left:-33px;top:50%;width:66px;height:66px;margin-top:-33px;box-sizing:border-box;border-radius:50%;z-index:1}
+
+        .p05-slot{position:absolute;left:328px;width:478px;height:198px;background:#cdddf2;border:solid 5px #fff;border-left:0;border-radius:0 22px 22px 0;box-shadow:0 7px 0 #a3b5cf;font-size:40px;color:#8892a9;white-space:nowrap}
+        .p05-slot:after{border-color:#e6eef9}
+        .p05-slot:before{background:#fff}
+        .p05-slot[data-filled]{background:none;border:0;box-shadow:none;overflow:visible}
+        .p05-slot[data-filled]:before,.p05-slot[data-filled]:after{display:none}
         .p05-slot[data-filled] .p05-hint{display:none}
 
-        .p05-panel{position:absolute;left:864px;top:190px;width:1016px;height:745px;box-sizing:border-box;background:var(--c-white);border:solid 5px var(--c-navy);border-radius:20px;box-shadow:0 10px 0 0 rgba(86,148,231,.2)}
-        .p05-hold{position:absolute;width:413px;height:185px}
-        .p05-card{width:413px;height:185px;box-sizing:border-box;padding:10px 20px 0;border:solid 7px var(--c-ink);border-radius:26px;cursor:grab;user-select:none;position:relative;z-index:5;
-          display:flex;align-items:center;justify-content:center;text-align:center;font-family:'Cafe24 Ssurround';font-size:36px;line-height:1.3;letter-spacing:-0.05em;color:var(--c-ink);word-break:keep-all;
-          color:var(--c-ink);-webkit-text-stroke:8px #fff;paint-order:stroke fill;box-shadow:inset 6px 8px 8px rgba(255,255,255,.3),inset -6px -10px 10px rgba(0,0,0,.18)}
-        .p05-card[data-key="police"]{background:linear-gradient(180deg,#ffcf0e,#ffb70e)}
-        .p05-card[data-key="cleaner"]{background:linear-gradient(180deg,#4bcc24,#19aa73)}
-        .p05-card[data-key="bus"]{background:linear-gradient(180deg,#4e97ff,#7272fe)}
-        .p05-card[data-key="paramedic"]{background:linear-gradient(180deg,#da5ba6,#bf4573)}
-        .p05-card[data-key="cook"]{background:linear-gradient(180deg,#fb8b16,#ef6a59)}
-        .p05-card[data-key="courier"]{background:linear-gradient(180deg,#b463ca,#a043ed)}
+        .p05-hold{position:absolute;width:435px;height:180px}
+        .p05-card{width:435px;height:180px;padding:4px 24px 0;border:solid 5px #fff;border-left:0;border-radius:10px 20px 20px 10px;cursor:grab;user-select:none;z-index:5;
+          font-size:36px;line-height:1.2z;color:#14285f;box-shadow:inset 4px 0 0 #fff,0 7px 0 #1f5eb9}
+        .p05-card:before{background:#266cc8;border:solid 4px #fff}
+        .p05-card:after{left:10px}
+        .p05-card[data-key="police"]{background:#df9af9}
+        .p05-card[data-key="cleaner"]{background:#94d2f9}
+        .p05-card[data-key="bus"]{background:#e6cfa4}
+        .p05-card[data-key="paramedic"]{background:#a2eea4}
+        .p05-card[data-key="cook"]{background:#a79af9}
+        .p05-card[data-key="courier"]{background:#e6a8a4}
         .p05-card:hover{filter:brightness(1.06)}
         .p05-card.is-dragging{cursor:grabbing;z-index:50}
-        .p05-slot .p05-card{cursor:default;width:100%;height:100%;white-space:normal;font-size:38px;border-radius:0 20px 20px 0;border-left:0}
+        .p05-slot .p05-card{cursor:default;width:100%;height:100%;white-space:normal;font-size:38px;line-height:1.25;padding-left:40px;border-width:4px 4px 4px 0;border-radius:0 22px 22px 0;box-shadow:0 7px 0 #a3b5cf}
+        .p05-slot .p05-card:before{background:#fff;border:0}
 
         #p05Done{z-index:120}
 
@@ -49,9 +66,10 @@
         <main class="bg-default">
           <p class="ask-pill is-fit ask05"><span>역할 카드를 드래그해 인물 카드와 알맞게 연결해보세요</span></p>
 
-          <p class="p05-tag is-person">인물 카드</p>
-          <p class="p05-tag is-role">역할 카드</p>
-          <div class="p05-panel"></div>
+          <div class="p05-panel is-person"></div>
+          <div class="p05-panel is-role"></div>
+          <p class="p05-rb is-person"><span>인물 카드</span></p>
+          <p class="p05-rb is-role"><span>역할 카드</span></p>
 
           <div id="p05Persons"></div>
           <div id="p05Slots"></div>
@@ -82,15 +100,15 @@
     const ROLES = [
       { id: 'police', label: '경찰관', role: '동네를 살피고<br>안전을 지켜요' },
       { id: 'cleaner', label: '환경미화원', role: '쓰레기를 치워<br>거리를 깨끗하게 해요' },
-      { id: 'bus', label: '버스 기사', role: '버스를 운전해<br>사람들을 안전하게 태워줘요' },
-      { id: 'paramedic', label: '구급대원', role: '다친 사람이 있을 때<br>응급처치를 하고 병원으로 옮겨요' },
+      { id: 'bus', label: '버스 기사', role: '버스를 운전해<br>사람들을 안전하게<br>태워줘요' },
+      { id: 'paramedic', label: '구급대원', role: '다친 사람이 있을 때<br>응급처치를 하고<br>병원으로 옮겨요' },
       { id: 'cook', label: '급식 조리사', role: '학생들이 먹을<br>급식을 만들어요' },
       { id: 'courier', label: '택배 기사', role: '주문한 물건을<br>집까지 배달해요' },
     ];
     const byId = (id) => ROLES.find((r) => r.id === id);
     const ROUNDS = [['paramedic', 'cleaner', 'bus'], ['police', 'courier', 'cook']];
-    const ROW_TOP = [239, 478, 717];
-    const CARD_POS = [[947, 259], [1387, 259], [947, 481], [1387, 481], [947, 703], [1387, 703]];
+    const ROW_TOP = [265, 477, 689];
+    const CARD_POS = [[918, 285], [1400, 285], [918, 489], [1400, 489], [918, 693], [1400, 693]];
     let round = 0;
 
     const persons = $('p05Persons');
