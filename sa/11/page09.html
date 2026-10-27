@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="../../css/common.css">
     <style>
         /* ?edit&step=N 으로 단계를 바로 열고 캐릭터 포즈를 골라 볼 수 있음. 캐릭터 포즈는 STEPS 각 줄의 pose(sa/img/character/sa_*.png 의 * 부분) */
-        /* 기획서 26~68p. Canva로 인권 존중 포스터 만들기 실습. 가운데 휴대폰은 sa/02 page08·10과 같은 공용 .cv 틀 + 같은 방식(화면은 마크업에 모두 있고 단계마다 data-k로 보이기 · 누를 곳은 data-hit + .is-target 깜빡임 · 손가락은 pointFingerAt).
+        /* 기획서 26~68p. Canva로 인권 존중 포스터 만들기 실습. 가운데 휴대폰은 sa/02 page08·10과 같은 공용 .cv 틀 + 같은 방식(화면은 마크업에 모두 있고 단계마다 data-k로 보이기 · 누를 곳은 data-hit + .hit-pulse 깜빡임 · 손가락은 pointFingerAt).
            앱 첫 화면·검색 화면은 공용 .cv-app 부품, 편집 화면은 기획서 캡처를 540x1170 좌표(.cu-ui, 화면에 맞춰 줄임)로 그린 것.
            아이콘·썸네일처럼 그리기 어려운 조각만 캡처에서 오려 img/ui/ 에 둠. 고른 값(프롬프트 · 초안 이미지 · 문구 · 글꼴)은 화면 안에 그대로 그려짐.
            흐름: 홈에서 Canva → 포스터(세로형 A2) → Magic Media 세로형 → 프롬프트(3가지 중 선택) → 이미지 생성(2초) → 초안 4장 보기(화살표)·고르기(프롬프트에 맞는 2장만 통과) → 포스터 제작 확인 → 크기 조정 → 문구 넣기(3가지 중 선택, 글꼴 바꾸기, 위로 옮기기) → AI 문구 넣기(아래로 옮기기) → 완성 → 다운로드 → 완성 포스터(68p).
@@ -19,16 +19,39 @@
         .p09-set .guide-bubble img{height:1em;vertical-align:-0.15em;margin:0 6px}
 
         /* 540x1170 좌표로 그린 편집 화면: 화면(522x1053)에 맞춰 가로 .967 · 세로 .9로 줄임 */
-        .p09-ui{transform:scale(.967,.9);background:none}
+        .p09-ui{transform:scale(.967,.9);background:none;--pulse-w:5.4px}
         .p09-ui>.a,.p09-ui>div,.p09-ui>img{max-width:none}
-        .p09-ui .u-tabs.is-target{animation:cv-target-in 1.2s ease-in-out infinite;touch-action:none;cursor:grab}
-        .p09-ui .u-tabs.is-target .u-tab{pointer-events:none}
+        .p09-ui .u-tabs.hit-pulse{animation:cv-target-in 1.2s ease-in-out infinite;touch-action:none;cursor:grab}
+        .p09-ui .u-tabs.hit-pulse .u-tab{pointer-events:none}
         .p09-ui .u-track.is-drag{transition:none}
-        .p09-ui .u-tab.is-target{animation:none}
+        .p09-ui .u-tab.hit-pulse{animation:none}
         /* 줄어든 그림(가로 .967 · 세로 .9) 안이라 sa/02 하단 탭과 같은 화면 크기가 되도록 크기·테두리 굵기를 보정 */
-        .p09-ui .u-tab.is-target i{width:49.7px;height:46.7px;border-radius:13px;animation:p09-tab-ring 1.2s ease-in-out infinite}
-        @keyframes p09-tab-ring{50%{box-shadow:0 0 0 5.4px rgba(255,79,139,.75)}}
-        .p09-tb{position:absolute;padding:0;border:0;background:transparent;border-radius:14px;cursor:pointer;z-index:3}
+        .p09-ui .u-tab.hit-pulse i{width:49.7px;height:46.7px;border-radius:13px;animation:cv-target 1.2s ease-in-out infinite}
+        /* 하단 도구 막대(편집·글꼴·텍스트 스타일·글꼴 크기·색상·확인) — 500x84 그림 좌표로 맞춤 */
+        .tbx{position:absolute;left:18px;top:1010px;width:500px;height:80px;border-radius:24px;background:#fff;box-shadow:0 6px 20px rgba(27,23,56,.16);padding:0}
+        .tbx-in{position:absolute;left:0;top:-4px;width:500px;height:84px;font-family:'Pretendard';display:flex;align-items:center}
+        .tbx-t{height:84px;padding:0;border:0;border-radius:18px;background:none;color:#14161f;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+        .tbx-t.is-on{background:#e2e3e7}
+        .tbx-t .tbi{height:30px;display:flex;flex-direction:row;align-items:center;justify-content:center;font-weight:400;line-height:1}
+        .tbx-t .tbi svg{display:block;fill:none;stroke:#14161f;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+        .tbx-t b{text-align:center;font:700 16px 'Pretendard';letter-spacing:-.01em;white-space:nowrap}
+        .tbx-t .tbi.is-ff{font-size:27px}
+        .tbx-t .tbi.is-ff em{font-size:27px;margin-left:-5px;    font-family:'Times New Roman', Times, serif}
+        .tbx-t .tbi.is-h{font-size:32px;font-family:'Times New Roman',Times,serif;}
+        .tbx-t .tbi.is-aa{font-size:28px;align-items:baseline}
+        .tbx-t .tbi.is-aa small{font-size:15px;margin-right:-5px}
+        .tbx-t .tbi.is-col{font-family:'Pretendard';font-weight:800;font-size:27px;flex-direction:column;justify-content:center}
+        .tbx-t .tbi.is-col i{display:block;flex:none;width:26px;height:5px;margin-top:-5px;border-radius:3px;background:linear-gradient(90deg,#f0622a,#f5c93a,#8ee05a,#4cc4e8,#2b5be3)}
+        .tbx-ok{width:52px;height:52px;box-sizing:border-box;padding:0;border:1px solid #e4e6ec;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:2px 2px 5px 2px #e4e6ec}
+        .tbx-ok svg{width:24px;height:18px;fill:none;stroke:#14161f;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+        /* 글꼴 고르기 위쪽 칩(현재 글꼴 이름 + 더보기 화살표) */
+        .tbx-chip{position:absolute;left:22px;top:930px;width:251px;height:73px;border-radius:24px;background:#fff}
+        .tbx-chip .nm{position:absolute;left:11px;top:10px;width:154px;height:53px;box-sizing:border-box;border:3px solid #7a3aee;border-radius:27px;background:#f4f5f8;display:flex;align-items:center;justify-content:center;font:500 19px 'Pretendard';color:#14161f;white-space:nowrap}
+        .tbx-chip .up{position:absolute;left:186.5px;top:9.5px;width:54px;height:54px;box-sizing:border-box;padding:0;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 7px rgba(27,23,56,.22);display:flex;align-items:center;justify-content:center}
+        .tbx-chip .up svg{width:24px;height:24px;fill:none;stroke:#14161f;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+        /* 위쪽 막대의 다운로드 아이콘 버튼 */
+        .u-bar .tbx-ib{position:absolute;top:14px;width:31px;height:31px;padding:0;border:0;background:none;color:inherit}
+        .u-bar .tbx-ib svg{position:static;top:auto;width:31px;height:31px}
         .p09-ph{position:absolute;left:197px;top:517px;width:146px;height:36px;background:#d9e8ff;border-radius:3px;font-size:16px;color:#2b4a8a;display:flex;align-items:center;justify-content:center}
         .p09-pg .t,.p09-pg .c{cursor:default}
         .p09-selbox{position:absolute;z-index:3}
@@ -42,8 +65,6 @@
         .p09-tobj .sel-ctx{left:-96px;top:-102px}
         .p09-tobj .tx{left:0;transform:translateX(-50%);top:-23px;width:max-content;padding:0 10px;height:46px;border:solid 2px #7c3aed;display:flex;align-items:center;justify-content:center;white-space:nowrap}
         .p09-tobj .mv{cursor:grab;touch-action:none;border-radius:50%}
-        .cv .p09-tobj .mv.is-target{animation:p09-mv-pulse 2s ease-in-out infinite}
-        @keyframes p09-mv-pulse{0%,100%{box-shadow:0 1px 4px rgba(0,0,0,.22),0 0 0 0 rgba(255,79,139,0)}50%{box-shadow:0 1px 4px rgba(0,0,0,.22),0 0 0 6px rgba(255,79,139,.75)}}
         .p09-ui [data-k=flist],.p09-ui [data-k=fpick]{transform:translateY(-10px)}
         .p09-tobj>*:not(.mv){pointer-events:none}
 
@@ -54,12 +75,6 @@
         .p09-arrow svg{width:24px;height:24px;fill:none;stroke:#222;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
         .p09-arrow.is-prev{left:6%}
         .p09-arrow.is-next{right:3%}
-        /* 어떤 이미지가 맞는지는 학생이 골라야 하므로 손가락 없이, 깜빡임도 약하게 */
-        .cv .p09-pick.is-target{animation:p09-pick-pulse 2.4s ease-in-out infinite}
-        @keyframes p09-pick-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,79,139,0)}50%{box-shadow:0 0 0 4px rgba(255,79,139,.45)}}
-        /* 화살표는 원래 그림자가 있어서 공용 깜빡임(cv-target)을 쓰면 그림자 모양이 섞여 들쭉날쭉함 → 같은 그림자 위에 테두리만 천천히 */
-        .cv .p09-arrow.is-target{animation:p09-arrow-pulse 2s ease-in-out infinite}
-        @keyframes p09-arrow-pulse{0%,100%{box-shadow:0 2px 8px rgba(0,0,0,.3),0 0 0 0 rgba(255,79,139,0)}50%{box-shadow:0 2px 8px rgba(0,0,0,.3),0 0 0 6px rgba(255,79,139,.75)}}
         .p09-bar{position:absolute;left:22px;top:915px;width:497px;height:13px;background:#e1e3ea;border-radius:99px;overflow:hidden;z-index:3}
         .p09-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3cc5c9,#7b3fe4)}
         .p09-bar.is-run i{width:100%;transition:width 2s linear}
@@ -84,7 +99,6 @@
         .p09-right .card-btn{width:100%;min-width:0;height:auto;min-height:100px;padding:14px 30px 10px;font-size:44px;line-height:1.2}
         .p09-right .card-btn.is-small{font-size:38px;padding-left:0;padding-right:0;letter-spacing:-0.1em}
         .p09-next.card-btn{display:flex;align-items:center;justify-content:center;min-width:0;width:300px;height:110px;margin-bottom:20px;padding:8px 10px 0;font-size:56px;z-index:7}
-        .is-hide{display:none!important}
 
         .p09-poster{position:absolute;left:674px;top:135px;width:572px;height:790px;box-sizing:border-box;border:solid 4px var(--c-ink);background:#fff center / cover no-repeat;overflow:hidden;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
         .p09-poster b{position:absolute;left:0;width:100%;text-align:center;font-family:'Pretendard';font-weight:800;letter-spacing:-0.03em;line-height:1.2}
@@ -172,8 +186,7 @@
 
             <div class="cu-ui p09-ui" id="p09Ui">
               <div class="a" data-k="ed" style="inset:0;background:#f2f3f7"></div>
-              <div data-k="ed" id="p09Head"><div class="u-head"><div class="u-bar"><svg style="left:22px" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-5h4v5"/></svg><svg style="left:73px" class="dim" viewBox="0 0 24 24"><path d="M9 13L4 8l5-5"/><path d="M4 8h10a6 6 0 010 12h-3"/></svg><svg class="dim" style="left:124px" viewBox="0 0 24 24"><path d="M15 13l5-5-5-5"/><path d="M20 8H10a6 6 0 000 12h3"/></svg><svg style="left:334px" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/><circle cx="19" cy="12" r="1.4" fill="currentColor"/></svg><svg style="left:385px;color:#e8dcff" viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z" fill="currentColor"/></svg><svg style="left:436px" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 20h14" fill="currentColor"/></svg><svg style="left:487px" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M5 13v7h14v-7"/></svg></div></div></div>
-              <button type="button" class="p09-tb" data-k="dlbtn" data-hit="download" style="left:416px;top:44px;width:76px;height:64px"></button>
+              <div data-k="ed" id="p09Head"><div class="u-head"><div class="u-bar"><svg style="left:22px" viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-5h4v5"/></svg><svg style="left:73px" class="dim" viewBox="0 0 24 24"><path d="M9 13L4 8l5-5"/><path d="M4 8h10a6 6 0 010 12h-3"/></svg><svg class="dim" style="left:124px" viewBox="0 0 24 24"><path d="M15 13l5-5-5-5"/><path d="M20 8H10a6 6 0 000 12h3"/></svg><svg style="left:334px" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/><circle cx="19" cy="12" r="1.4" fill="currentColor"/></svg><svg style="left:385px;color:#e8dcff" viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z" fill="currentColor"/></svg><button type="button" class="tbx-ib" data-hit="download" style="left:436px"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 20h14" fill="currentColor"/></svg></button><svg style="left:487px" viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M5 13v7h14v-7"/></svg></div></div></div>
 
               <div class="u-page p09-pg" id="p09Pg" data-k="pg"><b class="t js-phrase" id="p09PgT" data-hit="ptext"></b><b class="c" id="p09PgC" data-hit="ctext">AI로 만든 그림을 사용했어요.</b></div>
               <div data-k="dots"><div class="u-dots"><i></i><i></i></div></div>
@@ -222,8 +235,8 @@
               <div data-k="done"><div class="u-page js-draft" style=""><b class="t js-phrase" style="top:52px;font-size:41px;color:#111;text-shadow:0 0 8px rgba(255,255,255,.8);"></b><b class="c" style="top:660px;font-size:24px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7);">AI로 만든 그림을 사용했어요.</b></div><div class="a" style="left:0;top:108px;width:540px;height:1062px;background:rgba(40,44,70,.55)"></div><div class="u-modal" style="top:509px;height:661px"></div><div class="l b" style="left:22px;top:524px;height:40px;font-size:19px;gap:12px"><span style="display:flex;width:30px;height:30px;border-radius:50%;background:#22a355;color:#fff;align-items:center;justify-content:center;font-size:18px">✓</span>다운로드 완료</div><div class="a" style="right:24px;top:526px;font-size:28px">✕</div><div class="a" style="left:22px;top:594px;width:496px;height:278px;border-radius:14px;background:#eef0f3"></div><div class="u-page is-small js-draft" style="left:186px;top:615px;width:168px;height:238px;box-shadow:0 2px 8px rgba(0,0,0,.2)"><b class="t js-phrase" style="top:18px;font-size:14px;color:#111;text-shadow:0 0 8px rgba(255,255,255,.8);"></b><b class="c" style="top:212px;font-size:8px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7);">AI로 만든 그림을 사용했어요.</b></div><div class="a b" style="left:22px;top:887px;font-size:18px">단락 텍스트</div><div class="a" style="left:22px;top:925px;font-size:15px;color:#6a6c7a">카메라 롤에 저장했어요</div><div class="u-btn is-line" style="top:982px;height:52px;font-weight:700">공유</div><div class="u-btn is-on" style="top:1045px;height:52px;font-weight:700">열기</div></div>
 
               <div data-k="tabs"><div class="u-tabs is-white" id="p09Tabs" data-hit="swipe"><div class="u-track"><div class="u-tab" data-tab="추천 템플릿" data-icon="template"><i></i>추천 템플릿</div><div class="u-tab" data-tab="요소" data-icon="elements"><i></i>요소</div><div class="u-tab" data-tab="텍스트" data-hit="tabtext" data-icon="text"><i></i>텍스트</div><div class="u-tab" data-tab="갤러리" data-icon="gallery"><i></i>갤러리</div><div class="u-tab" data-tab="브랜드 센터" data-icon="brand"><i></i>브랜드 센터</div><div class="u-tab" data-tab="업로드 항목" data-icon="upload"><i></i>업로드 항목</div><div class="u-tab" data-tab="도구" data-icon="tool"><i></i>도구</div><div class="u-tab" data-tab="프로젝트" data-icon="project"><i></i>프로젝트</div><div class="u-tab" data-tab="앱" data-icon="apps"><i></i>앱</div><div class="u-tab" data-tab="Magic Media" data-hit="mmtab" data-icon="magic"><i></i>Magic Media</div><div class="u-tab" data-tab="AI 음성" data-icon="voice"><i></i>AI 음성</div></div></div></div>
-              <div data-k="tbar"><div class="a" style="left:12px;top:1020px;width:516px;height:80px;border-radius:24px;background:#fff;box-shadow:0 6px 20px rgba(27,23,56,.16);overflow:hidden"><img class="a" src="img/ui/tb_all.png" style="left:0;top:-4px;width:500px;height:84px" alt=""></div><button type="button" class="p09-tb" data-hit="tbfont" style="left:92px;top:1018px;width:108px;height:78px"></button><button type="button" class="p09-tb" data-hit="tbok" style="left:456px;top:1020px;width:76px;height:76px"></button></div>
-              <div data-k="tbarfont"><div class="a" style="left:12px;top:1020px;width:516px;height:80px;border-radius:24px;background:#fff;box-shadow:0 6px 20px rgba(27,23,56,.16);overflow:hidden"><img class="a" src="img/ui/tb_font.png" style="left:0;top:-4px;width:500px;height:84px" alt=""></div><img class="a" src="img/ui/fchip.png" style="left:22px;top:937px;width:252px;height:78px" alt=""><button type="button" class="p09-tb" data-hit="more" style="left:205px;top:950px;width:59px;height:53px"></button></div>
+              <div data-k="tbar"><div class="tbx"><div class="tbx-in"><button type="button" class="tbx-t" style="width:84px"><span class="tbi"><svg width="26" height="18" viewBox="0 0 26 18"><rect x="1" y="1" width="24" height="16" rx="3.5"/><path d="M6.5 6h1.5M12 6h2M18 6h1.5M7 12h12"/></svg></span><b>편집</b></button><button type="button" class="tbx-t" data-hit="tbfont" style="width:83px"><span class="tbi is-ff">F<em>f</em></span><b>글꼴</b></button><button type="button" class="tbx-t" style="width:100px"><span class="tbi is-h">H</span><b>텍스트 스타일</b></button><button type="button" class="tbx-t" style="width:84px"><span class="tbi is-aa"><small>A</small>A</span><b>글꼴 크기</b></button><button type="button" class="tbx-t" style="width:84px"><span class="tbi is-col">A<i></i></span><b>색상</b></button><button type="button" class="tbx-ok" data-hit="tbok"><svg viewBox="0 0 24 18"><path d="M3 9.5l5.5 5.5L21 3"/></svg></button></div></div></div>
+              <div data-k="tbarfont"><div class="tbx"><div class="tbx-in"><button type="button" class="tbx-t" style="left:3.5px;width:84px"><span class="tbi"><svg width="26" height="18" viewBox="0 0 26 18"><rect x="1" y="1" width="24" height="16" rx="3.5"/><path d="M6.5 6h1.5M12 6h2M18 6h1.5M7 12h12"/></svg></span><b>편집</b></button><button type="button" class="tbx-t is-on" data-hit="tbfont" style="left:94px;width:83px"><span class="tbi is-ff">F<em>f</em></span><b>글꼴</b></button><button type="button" class="tbx-t" style="left:176.5px;width:100px"><span class="tbi is-h">H</span><b>텍스트 스타일</b></button><button type="button" class="tbx-t" style="left:276px;width:84px"><span class="tbi is-aa"><small>a</small>A</span><b>글꼴 크기</b></button><button type="button" class="tbx-t" style="left:366px;width:84px"><span class="tbi is-col">A<i></i></span><b>색상</b></button><button type="button" class="tbx-ok" data-hit="tbok"><svg viewBox="0 0 24 18"><path d="M3 9.5l5.5 5.5L21 3"/></svg></button></div></div><div class="tbx-chip"><span class="nm">Noto Sans Kr</span><button type="button" class="up" data-hit="more"><svg viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button></div></div>
               <div data-k="pbar"><div class="u-pbar is-edit" style="top:1034px"><span>↻</span><span style="color:#444">A</span><span>글꼴</span><span>50 pt</span><b style="font-size:21px">B</b><i style="font-size:21px;color:#999">I</i><u style="font-size:21px">U</u><span style="flex:1"></span><span class="u-ok" data-hit="check"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></span></div></div>
             </div>
 
@@ -298,12 +311,14 @@
       { pose: 'wink_point3', bubble: '오른쪽의 버튼을 눌러<br>이미지의 크기를 알맞게 조정해요.', show: 'ed pg dots imgsel tabs', pg: { small: true }, tabs: { off: TAB_MAX, on: 'Magic Media' }, btns: [{ t: '크기 조정하기' }] },
       { pose: 'main', bubble: '초안 이미지를 선택했어요!<br>이제 포스터에 들어갈 문구를<br>정해봐요.', show: 'ed pg dots tabs', pg: { draft: 1 }, next: true },
       { pose: 'wink_point4', bubble: '텍스트를 클릭해요.', show: 'ed pg dots tabs', pg: { draft: 1 }, hit: 'tabtext' },
-      { pose: 'wink_point', bubble: '텍스트 상자 추가<br>버튼을 클릭해요.', show: 'ed pg text tabs', pg: { draft: 1 }, tabs: { off: 0, on: '텍스트' }, hit: 'insert' },
+      { pose: 'wink_point', bubble: '텍스트 상자 추가<br>버튼을 클릭해요.', show: 'ed pg text tabs', pg: { draft: 1 }, tabs: { off: 0, on: '텍스트' }, hit: 'insert', fg: [80, -30] },
       { pose: 'main', bubble: '포스터와 어울리는 문구를<br>입력해볼까요? 오른쪽 버튼 중<br>원하는 문구를 선택해봐요.', show: 'ed pg pbar', typing: 'phrase', phrases: true },
       { pose: 'wink_point4', bubble: '확인 버튼을 눌러<br>문구를 입력해요.', show: 'ed pg pbar', typing: 'phrase', hit: 'check' },
       { pose: 'wink_point2', bubble: '위치를 포스터의 상단으로<br>옮겨 봐요. 문구를 클릭해요.', show: 'ed pg dots tabs', pg: { draft: 1, t: 334 }, hit: 'ptext' },
       { pose: 'wink_present', bubble: MOVE + '이동 버튼을 꾹 눌러<br>위쪽으로 드래그 해보세요.', show: 'ed pg tbar tobj', pg: { draft: 1 }, drag: { text: () => st.phrase || PHRASES[1], fs: () => fsPhrase(), cx: 50, top: 45.8, end: 21.9, zone: [17, 27] }, hit: 'move' },
+      //
       { pose: 'wink_point4', bubble: '좋아요! 이번에는<br>문구의 글씨체를 바꿔봐요.<br>글꼴을 클릭해요.', show: 'ed pg sel tbar', pg: { draft: 1, t: 52 }, sel: { yc: 256 }, hit: 'tbfont' },
+      //
       { pose: 'wink_point4', bubble: UP + '더보기 버튼을 클릭해요.', show: 'ed pg sel tbarfont', pg: { draft: 1, t: 52 }, sel: { yc: 256 }, hit: 'more' },
       { pose: 'wink_point4', bubble: '포스터를 만들 때는 대부분<br>눈에 잘 띄는 굵은 글씨를 사용해요.<br>추천 폰트를 사용해볼까요?', show: 'ed pg selS flist', pg: { draft: 1, t: 36, style: 'left:115px;top:128px;width:310px;height:440px', small0: true }, selS: true, hit: 'han', setFont: true },
       { pose: 'wink_point2', bubble: '좋아요! 확인 버튼을 클릭해<br>편집을 완료해요.', show: 'ed pg selS fpick', pg: { draft: 1, t: 36, style: 'left:115px;top:128px;width:310px;height:440px', small0: true }, selS: true, hit: 'fontok' },
@@ -313,8 +328,10 @@
       { pose: 'wink_point4', bubble: '확인 버튼을 클릭해요.', show: 'ed pg pbar', typing: 'credit', hit: 'check' },
       { pose: 'wink_point2', bubble: '위치를 포스터의 하단으로<br>옮겨 봐요. 문구를 클릭해요.', show: 'ed pg dots tabs', pg: { draft: 1, t: 52, c: 334 }, hit: 'ctext' },
       { pose: 'wink_present', bubble: MOVE + '이동 버튼을 꾹 눌러<br>아래쪽으로 드래그 해보세요.', show: 'ed pg tbar tobj', pg: { draft: 1, t: 52 }, drag: { cred: true, text: () => CREDIT, fs: () => 24, cx: 50, top: 45.8, end: 73.2, zone: [68, 78] }, hit: 'move' },
+      // 
       { pose: 'wink_point4', bubble: '좋아요! 확인 버튼을 클릭해<br>포스터 만들기를 완료해요.', show: 'ed pg tbar', pg: { draft: 1, t: 52, c: 660 }, hit: 'tbok' },
       { pose: 'main', bubble: '인권 존중 포스터를<br>완성했어요!', show: 'ed pg dots tabs', pg: { draft: 1, t: 52, c: 660 }, next: true },
+      //
       { pose: 'wink_point', bubble: '오른쪽 위의 버튼을 클릭해<br>포스터를 다운로드 해봐요.', show: 'ed pg dots tabs dlbtn', pg: { draft: 1, t: 52, c: 660 }, hit: 'download' },
       { pose: 'wink_point4', bubble: '아래의 다운로드 버튼을<br>클릭해요.', show: 'ed share', dark: true, hit: 'dl1' },
       { pose: 'wink_point4', bubble: '아래의 다운로드 버튼을<br>클릭해요.', show: 'ed dl', dark: true, hit: 'dl2' },
@@ -333,13 +350,21 @@
     const status = phone.querySelector('.phone-status');
     const parts = Array.from(phone.querySelectorAll('[data-k]'));
     const hits = Array.from(phone.querySelectorAll('[data-hit]'));
+    // 클릭 영역 보정 [dx, dy, dw, dh] — 버튼 모양은 그대로, 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
+    const HOT = {
+      canva: [0, 0, 0, 0], search: [0, 0, 0, 0], poster: [0, 0, 0, 0], mmtab: [0, 0, 0, 0], ratio: [0, 0, 0, 0],
+      tall: [0, 0, 0, 0], prompt: [0, 0, 0, 0], generate: [0, 0, 0, 0], arrow: [0, 0, 0, 0], pick: [0, 0, 0, 0],
+      tabtext: [0, 0, 0, 0], insert: [0, 0, 0, 0], check: [0, 0, 0, 0], ptext: [0, 0, 0, 0], move: [0, 0, 0, 0],
+      tbfont: [0, 0, 0, 0], more: [-3.5, 0.5, 5, -1], han: [0, 0, 0, 0], fontok: [-2, -2, 2, 2], ctext: [0, 0, 0, 0],
+      tbok: [0, 0, 0, 0], download: [-20, -20, 45, 33], dl1: [0, 0, 0, 0], dl2: [0, 0, 0, 0]
+    };
+    BoxEdit.hitPad(hits, HOT);
     const pg = $('p09Pg');
     const pgT = $('p09PgT');
     const pgC = $('p09PgC');
     const track = ui.querySelector('.u-track');
     const tabsEl = $('p09Tabs');
     const swipeFinger = $('p09Swipe');
-    const show = (el, on) => el.classList.toggle('is-hide', !on);
     let i = 0;
 
     const POSTER_T = () => st.phrase || PHRASES[1];
@@ -395,13 +420,25 @@
       $('p09SelMv').style.cssText = 'left:277px;top:229px';
     }
 
-    function fingerTo(el, opt, delay) {
+    // 손가락 위치 보정 [dx, dy] — 눌러야 할 곳(data-hit 이름, 그 밖에는 next·btn·mv·arrow)별, 표에 없으면 [0, 0]. ?edit 로 손가락을 눌러 맞춘 뒤 표시줄 값을 옮겨 적음
+    const FG = {
+      canva: [15, -37], search: [20, -30], poster: [0, 0], mmtab: [0, 0], ratio: [0, 0],
+      tall: [0, 0], prompt: [0, -60], generate: [50, -20], arrow: [0, 0], pick: [0, 0],
+      tabtext: [0, 0], insert: [80, -20], check: [0, 0], ptext: [0, 0], move: [0, 0],
+      tbfont: [12.1, 6.8], more: [1.2, 0], han: [0, -30], fontok: [0, 0], ctext: [0, 0],
+      tbok: [1.8, -2.5], download: [0.2, -7.4], dl1: [40, -20], dl2: [30, -20], next: [0, -50],
+      btn: [0, 0], mv: [0, 0]
+    };
+    let fgKey = '?';
+    function fingerTo(el, opt, delay, key) {
       const at = i;
       setTimeout(() => {
         if (i !== at || !el || !el.isConnected) return;
-        pointFingerAt(el, Object.assign({ onMain: true, beside: true }, opt || {}));
-        // 하단 탭·버튼을 가리킬 때 손가락이 화면(960px) 아래로 잘리지 않게
-        document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.top = Math.min(parseFloat(f.style.top), 850) + 'px'; });
+        fgKey = key || '?';
+        const fg = FG[fgKey] || [0, 0];
+        pointFingerAt(el, Object.assign({ onMain: true, beside: true }, opt || {}, { dx: fg[0], dy: fg[1] }));
+        // 하단 탭·버튼을 가리킬 때 손가락이 화면(960px) 아래로 잘리지 않게(편집 모드에서는 끔)
+        if (!BoxEdit.on) document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.top = Math.min(parseFloat(f.style.top), 850) + 'px'; });
       }, delay || 350);
     }
 
@@ -431,14 +468,17 @@
       const s = STEPS[i];
       right.classList.add('is-off');
       right.innerHTML = '';
-      show(nextBtn, false);
+      showIf(nextBtn, false);
       nextBtn.onclick = null;
       clearFingers();
       swipeFinger.classList.add('is-hide');
+      $('p09EndTitle').classList.add('is-hide');
+      $('p09Poster').classList.add('is-hide');
+      $('p09Wrong').classList.add('is-off');
       if (s.end) { end(); return; }
 
-      show($('p09Phone'), true);
-      show(set, true);
+      showIf($('p09Phone'), true);
+      showIf(set, true);
       say(s.bubble, s.pose || 'wink_point2');
 
       const keys = s.show.split(' ');
@@ -464,7 +504,7 @@
 
       if (s.car) setupCar(s.car);
       // 눌러야 할 곳: 깜빡임 + 손가락 (sa/02와 같은 방식)
-      hits.forEach((h) => h.classList.toggle('is-target', h.dataset.hit === s.hit && !h.closest('[hidden]')));
+      hits.forEach((h) => h.classList.toggle('hit-pulse', h.dataset.hit === s.hit && !h.closest('[hidden]')));
       const target = hits.find((h) => h.dataset.hit === s.hit && !h.closest('[hidden]'));
       let first = null;
       if (s.hit === 'swipe') {
@@ -472,16 +512,16 @@
       } else if (target) {
         first = target;
         if (s.noFinger) { /* 손가락 없음 */ }
-        else if (target.closest('.u-track')) fingerTo(target, null, 750);
-        else fingerTo(target, s.hit === 'canva' ? { dx: 15, dy: -37, beside: false } : null);
+        else if (target.closest('.u-track')) fingerTo(target, null, 750, s.hit);
+        else fingerTo(target, s.hit === 'canva' ? { beside: false } : null, 0, s.hit);
       }
 
       if (s.drag) setupDrag(s);
       if (s.next) {
-        show(nextBtn, true);
+        showIf(nextBtn, true);
         nextBtn.onclick = () => go();
         clearFingers();
-        fingerTo(nextBtn, { beside: false, x: 0.88, dy: -50 });
+        fingerTo(nextBtn, { beside: false, x: 0.88 }, 0, 'next');
       }
       if (s.btns) {
         setRight(s.btns.map((o) => ({
@@ -492,14 +532,14 @@
             go();
           }
         })));
-        fingerTo(right.lastChild, { beside: false, x: 0.6 });
+        fingerTo(right.lastChild, { beside: false, x: 0.6 }, 0, 'btn');
       }
       if (s.cases) setRight(CASES.map((c) => ({ t: c.t, cls: 'is-small', fn: () => { st.c = c; go(); } })));
       if (s.phrases) {
         setRight(PHRASES.map((p) => ({ t: p, fn: () => { st.phrase = p; render(); } })));
         if (st.phrase) {
           Array.from(right.children).forEach((b, n) => b.classList.toggle('is-selected', PHRASES[n] === st.phrase));
-          show(nextBtn, true);
+          showIf(nextBtn, true);
           nextBtn.onclick = () => go();
         }
       }
@@ -524,7 +564,7 @@
 
     hits.forEach((h) => h.addEventListener('click', () => {
       const s = STEPS[i];
-      if (!h.classList.contains('is-target') || CUSTOM.has(h.dataset.hit)) return;
+      if (!h.classList.contains('hit-pulse') || CUSTOM.has(h.dataset.hit)) return;
       playClick();
       if (s.setFont) st.font = true;
       go();
@@ -627,7 +667,7 @@
         tobj.style.left = d.cx + '%';
         tobj.style.top = d.top + '%';
         playWrong();
-        fingerTo(mv, { beside: true });
+        fingerTo(mv, { beside: true }, 0, 'mv');
       }
     };
     mv.addEventListener('pointerup', endDrag);
@@ -646,7 +686,7 @@
       nxt.hidden = st.car >= cards.length - 1;
       if (carMode === 'view') {
         const all = seen.size === cards.length;
-        show(nextBtn, all);
+        showIf(nextBtn, all);
         if (all) nextBtn.onclick = () => go();
       }
     }
@@ -665,8 +705,8 @@
       layoutCar();
       // 4장을 다 볼 때까지 다음 화살표가 계속 깜빡이고 손가락이 따라감
       const more = carMode === 'view' && !nxt.hidden;
-      nxt.classList.toggle('is-target', more);
-      if (more) fingerTo(nxt, null);
+      nxt.classList.toggle('hit-pulse', more);
+      if (more) fingerTo(nxt, null, 0, 'arrow');
     }
     prev.addEventListener('click', () => toCard(st.car - 1));
     nxt.addEventListener('click', () => { if (STEPS[i].car) toCard(st.car + 1); });
@@ -684,15 +724,15 @@
     });
 
     function end() {
-      show($('p09Phone'), false);
-      show(set, false);
+      showIf($('p09Phone'), false);
+      showIf(set, false);
       right.classList.add('is-off');
       $('p09EndTitle').classList.remove('is-hide');
       const p = $('p09Poster');
       p.style.backgroundImage = "url('" + dsrc(st.draft + 1) + "')";
       $('p09PosterTop').textContent = st.phrase || PHRASES[1];
       p.classList.remove('is-hide');
-      show(nextBtn, true);
+      showIf(nextBtn, true);
       nextBtn.onclick = () => setTimeout(() => navigateTo('page10.html'), 400);
     }
 
@@ -701,7 +741,7 @@
     initPhoneBars();
 
     /* ?edit&step=N : 단계 N 으로 바로 열기(] [ 또는 아래 버튼으로 이동). 그 앞 단계에서 정해지는 값(문구·초안·글꼴·AI 문구)은 미리 채워 둠.
-       화면 왼쪽 아래 포즈 선택판에서 그 단계 캐릭터 포즈를 눌러 보고, 이름을 STEPS 의 해당 줄 pose 에 옮겨 적음 */
+       화면 오른쪽 아래 포즈 선택판에서 그 단계 캐릭터 포즈를 눌러 보고, 이름을 STEPS 의 해당 줄 pose 에 옮겨 적음 */
     if (BoxEdit.on) {
       const prep = (idx) => {
         const at = (f) => STEPS.findIndex(f);
@@ -710,37 +750,11 @@
         st.credit = idx > at((x) => x.btns && x.btns[0] && x.btns[0].credit);
         st.font = idx > at((x) => x.setFont);
       };
-      // 눌러야 하는 버튼(.p09-tb)의 클릭 영역: 클릭 → 방향키로 위치, Alt+방향키로 크기. 표시줄 값을 해당 버튼 style 의 left/top/width/height 에 옮겨 적음
-      document.querySelectorAll('.p09-tb').forEach((b) => {
-        const v = (k) => parseFloat(b.style[k]) || 0;
-        b._name = b.dataset.hit || b.dataset.k;
-        b._sel = '.p09-tb[data-hit="' + b._name + '"]';
-        BoxEdit.tag(b, [v('left'), v('top'), v('width'), v('height')]);
+      BoxEdit.stepEdit({
+        key: () => fgKey, count: STEPS.length + 1, get: () => i + 1, set: (n) => { i = Math.max(0, n - 1); prep(i); },
+        go: (n) => { if (n < 1) return; i = n - 1; prep(i); syncUrl(); render(); }, label: (n) => '단계 ' + n + ' / ' + STEPS.length,
+        say, bubble, img: $('p09Char')
       });
-      BoxEdit.init({
-        apply: (el) => { const r = el._ref; el.style.left = r[0] + 'px'; el.style.top = r[1] + 'px'; el.style.width = r[2] + 'px'; el.style.height = r[3] + 'px'; },
-        format: (el) => '[' + el._name + '] left:' + el._ref[0] + 'px;top:' + el._ref[1] + 'px;width:' + el._ref[2] + 'px;height:' + el._ref[3] + 'px',
-        step: {
-          count: STEPS.length + 1,
-          get: () => i + 1,
-          set: (n) => { i = Math.max(0, n - 1); prep(i); },
-          go: (n) => { if (n < 1) return; i = n - 1; prep(i); syncUrl(); render(); },
-          label: (n) => '단계 ' + n + ' / ' + STEPS.length
-        }
-      });
-      const POSES = ['main', 'main_wave', 'wink_open', 'wink_point', 'wink_point2', 'wink_point3', 'wink_point4', 'wink_present', 'smile_present', 'point_front', 'wink_jump', 'happy_jump'];
-      const pp = document.createElement('div');
-      pp.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:99999;display:flex;flex-wrap:wrap;gap:4px;max-width:640px;padding:8px;border-radius:8px;background:rgba(0,0,0,.82);color:#fff;font:13px sans-serif';
-      pp.innerHTML = '<div id="p09PoseInfo" style="width:100%">캐릭터 포즈 — 눌러서 바꾸기 (STEPS 의 pose 에 옮겨 적음)</div>' +
-        POSES.map((n) => '<button type="button" data-pose="' + n + '" style="width:70px;padding:2px;border:2px solid transparent;border-radius:6px;background:#fff;cursor:pointer;font-size:10px"><img src="../img/character/sa_' + n + '.png" alt="" style="display:block;width:100%;height:56px;object-fit:contain">' + n + '</button>').join('');
-      pp.addEventListener('click', (e) => {
-        const b = e.target.closest('[data-pose]');
-        if (!b) return;
-        say(bubble.innerHTML, b.dataset.pose);
-        pp.querySelectorAll('[data-pose]').forEach((x) => { x.style.borderColor = x === b ? '#e8317f' : 'transparent'; });
-        $('p09PoseInfo').textContent = '단계 ' + (i + 1) + " → pose: '" + b.dataset.pose + "'";
-      });
-      document.body.appendChild(pp);
     }
     render();
   })();

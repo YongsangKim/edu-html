@@ -10,8 +10,7 @@
            1라운드는 두 카드를 하나씩 Gemini에게 물어본 뒤 고르고, 2라운드·결승은 바로 고름. 결과 문구는 최종 선택에 따라 다름.
            기획서 46p 접이식 우산 답변은 앞 문장이 빠져 있어 49p 요약 문구로 채움 */
 
-        .p10-bubble{left:111px;width:555px;min-height:217px;font-size:48px}
-        .p10-character{left:128px;top:307px;width:472px;height:629px}
+        .p10-character{display:none;left:0;top:130px;width:770px;height:791px;z-index:2}
 
         .scr{display:none;position:absolute;inset:0;font-family:'Pretendard';color:var(--c-ink)}
         .p10-phone[data-screen="home"] .scr-home, .p10-phone[data-screen="chat"] .scr-chat, .p10-phone[data-screen="live"] .scr-live, .p10-phone[data-screen="answer"] .scr-live{display:block}
@@ -89,12 +88,11 @@
         .p10-result .p10-item:hover{border-color:#2a6bd0}
         .p10-result-type{position:absolute;left:474px;top:224px;width:680px;margin:0;text-align:left;font-family:'Cafe24 Ssurround';font-size:54px;line-height:1;color:#1f5fd0;letter-spacing:-0.05em;word-break:keep-all}
         .p10-result-type small{display:block;margin-top:48px;font-size:48px;line-height:1.15;color:var(--c-ink)}
-        .p10.is-result .p10-character{left:0;top:130px;width:770px;height:791px;z-index:2}
+        .p10.is-result .p10-character{display:flex}
 
-        .p10-hit{position:absolute;z-index:10}
 
-        .p10.is-overview .p10-bubble, .p10.is-overview .p10-character, .p10.is-result .p10-bubble{display:none}
-        .p10 .hit-area{padding:0;border:0;background:transparent;border-radius:30px;cursor:pointer}
+        .p10.is-overview .guide-set, .p10.is-result .guide-set{display:none}
+        .p10 .scr-home .app-icon.is-static, .scr-wave{cursor:pointer}
 
         .p10 .is-off{display:none}
     </style>
@@ -105,8 +103,11 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default p10">
-          <p class="guide-bubble is-center p10-bubble" id="p10Bubble"></p>
-          <div class="char-box p10-character"><img src="../img/character/sa_main.png" id="p10Char" alt="메인 캐릭터"></div>
+          <div class="guide-set is-main" id="p10Set">
+            <p class="guide-bubble is-center" id="p10Bubble"></p>
+            <div class="guide-character"><img id="p10Char" src="../img/character/sa_main.png" alt="메인 캐릭터"></div>
+          </div>
+          <div class="char-box p10-character"><img src="img/p10_character08.png" alt="메인 캐릭터"></div>
 
           <div class="p10-overview" id="p10Overview">
             <p class="ribbon p10-overview-title">어떤 준비물을 챙겨갈까요?</p>
@@ -139,7 +140,6 @@
             </div>
           </div></div>
           <div class="p10-answer is-off" id="p10Answer"></div>
-          <button type="button" class="hit-area p10-hit is-off" id="p10Hit" aria-label="클릭"></button>
           <div class="p10-side is-off" id="p10Side">
             <p class="ribbon p10-side-title">준비물 카드</p>
             <div class="p10-side-list" id="p10SideList"></div>
@@ -169,6 +169,7 @@
   <script src="../../js/header.js" data-title="1박 2일 수학여행 준비물 토너먼트" data-next="page11.html"></script>
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
+  <script src="../../js/box-edit.js"></script>
   <script>
   (function () {
     const ITEMS = {
@@ -211,12 +212,12 @@
     const bubble = $('p10Bubble');
     const phone = $('p10Phone');
     const answer = $('p10Answer');
-    const hit = $('p10Hit');
     const sideList = $('p10SideList');
     const vs = $('p10Vs');
     const nextBtn = $('p10Next');
 
     let onNext = null;
+    let stopType = null;
     let chosen = null;
 
     function itemBtn(key, withSummary) {
@@ -229,7 +230,7 @@
     }
 
     function show(ids) {
-      ['p10Overview', 'p10Phone', 'p10Answer', 'p10Hit', 'p10Side', 'p10VsView', 'p10Result', 'p10Next'].forEach((id) => $(id).classList.toggle('is-off', !ids.includes(id)));
+      ['p10Overview', 'p10Phone', 'p10Answer', 'p10Side', 'p10VsView', 'p10Result', 'p10Next'].forEach((id) => $(id).classList.toggle('is-off', !ids.includes(id)));
       document.querySelector('.p10').classList.remove('is-overview', 'is-result');
       document.querySelector('.p10').classList.toggle('is-vs', ids.includes('p10VsView'));
       // 다음 버튼: 큰 패널 화면은 패널 안 가운데 빈 공간에, 나머지는 기본(오른쪽 아래)
@@ -244,42 +245,24 @@
       resetImageSwap(nextBtn);
     }
 
-    function typeText(el, text, done) {
-      let i = 0;
-      el.textContent = '';
-      const timer = setInterval(() => {
-        i += 1;
-        el.textContent = text.slice(0, i);
-        if (i >= text.length) {
-          clearInterval(timer);
-          done();
-        }
-      }, 50);
-    }
+    const say = initGuideSay({ bubble, img: $('p10Char'), set: $('p10Set') });
+    const POSE = { home: 'point_front', live: 'wink_point4', pick: 'wink_open', ask: 'smile_present', round: 'main' };
 
-    // 단계마다 캐릭터가 바뀜(img/p10_character01~08.png). 아직 없는 이미지는 p_character_main.png로 대신 보여줌
-    // 01 앱 첫 화면 · 02 Live 모드 버튼 · 03 준비물 카드 고르기 · 04 Gemini 답변 · 05 ROUND 1 · 06 ROUND 2 · 07 FINAL · 08 결과
-    const charImg = $('p10Char');
-    charImg.addEventListener('error', () => { if (!charImg.src.endsWith('p_character_main.png')) charImg.src = '../img/character/sa_main.png'; });
-    const charOk = {};
-    for (let n = 1; n <= 8; n++) {
-      const pre = new Image();
-      pre.onload = () => { charOk[n] = true; };
-      pre.onerror = () => { charOk[n] = false; };
-      pre.src = 'img/p10_character0' + n + '.png';
-    }
-    function setChar(n) {
-      charImg.src = charOk[n] === false ? '../img/character/sa_main.png' : 'img/p10_character0' + n + '.png';
-    }
+    // 눌러야 할 곳은 폰 화면 속 실제 요소. 눌리는 범위 보정은 HOT, 손가락 보정은 FG (?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
+    const TARGET = { app: document.querySelector('.scr-home .app-icon > i'), live: document.querySelector('.scr-chat .scr-wave') };
+    const HOT = { app: [0, 0, 0, 0], live: [0, 0, 0, 0] };
+    const FG = { app: [0, 0], live: [0, 0] };
+    BoxEdit.fingerTag();
 
-    function clickGuide(bubbleHtml, screen, rect, then) {
-      show(['p10Phone', 'p10Hit']);
-      setChar(screen === 'home' ? 1 : 2);
-      bubble.innerHTML = bubbleHtml;
+    function clickGuide(bubbleHtml, screen, key, then) {
+      show(['p10Phone']);
+      say(bubbleHtml, key === 'app' ? POSE.home : POSE.live);
       phone.dataset.screen = screen;
-      hit.style.cssText = 'left:' + rect[0] + 'px;top:' + rect[1] + 'px;width:' + rect[2] + 'px;height:' + rect[3] + 'px;border-radius:' + (rect[4] || '30px');
-      pointFingerAt(hit);
-      hit.onclick = () => { playClick(); then(); };
+      Object.values(TARGET).forEach((t) => { t.onclick = null; });
+      const el = TARGET[key];
+      BoxEdit.padEl(el, key, HOT);
+      pointFingerAt(el, BoxEdit.fgo(FG, key, key === 'app' ? {} : { pulse: true }));
+      el.onclick = () => { playClick(); el.onclick = null; then(); };
     }
 
     function overview() {
@@ -290,20 +273,19 @@
     }
 
     function step2() {
-      clickGuide('Gemini 앱을 클릭해요.', 'home', [905, 416, 110, 110, '28px'], step3);
+      clickGuide('Gemini 앱을 클릭해요.', 'home', 'app', step3);
     }
 
     function step3() {
-      clickGuide('Gemini Live 모드<br>버튼을 클릭해요.', 'chat', [1072, 778, 82, 82, '50%'], () => match(0));
+      clickGuide('Gemini Live 모드<br>버튼을 클릭해요.', 'chat', 'live', () => match(0));
     }
 
     function match(m, asked) {
       asked = asked || [];
       const pair = ROUND1[m];
       show(['p10Phone', 'p10Side']);
-      setChar(3);
       phone.dataset.screen = 'live';
-      bubble.innerHTML = PICK_ASK;
+      say(PICK_ASK, POSE.pick);
       sideList.innerHTML = '';
       pair.forEach((key) => {
         const btn = itemBtn(key);
@@ -326,14 +308,13 @@
 
     function askGemini(m, key, asked) {
       show(['p10Phone', 'p10Answer']);
-      setChar(4);
       phone.dataset.screen = 'answer';
-      bubble.innerHTML = '수학여행에 ' + ITEMS[key].obj + '<br>가져가면 좋은 점은<br>무엇인가요?';
+      say('수학여행에 ' + ITEMS[key].obj + '<br>가져가면 좋은 점은<br>무엇인가요?', POSE.ask);
       answer.innerHTML = '<span></span>';
-      typeText(answer.firstChild, ITEMS[key].answer, () => { answer.insertAdjacentHTML('beforeend', ACTS); nextThen(() => {
+      stopType = typeText(answer.firstChild, ITEMS[key].answer, { speed: 50, clear: true, onDone: () => { answer.insertAdjacentHTML('beforeend', ACTS); nextThen(() => {
         if (asked.length < 2) match(m, asked);
         else round1(m);
-      }); });
+      }); } });
     }
 
     function round1(m) {
@@ -346,7 +327,7 @@
 
     const round1Winners = [];
     const round2Winners = [];
-    const NEED_ASK = '나에게 가장 필요할 것 같은<br>준비물을 골라봐요.';
+    const NEED_ASK = '나에게 가장 필요할 것 같은 준비물을 골라봐요.';
 
     function round2(i) {
       choose('<i>ROUND 2</i><span>' + (i + 1) + '/2</span>', NEED_ASK, round1Winners.slice(i * 2, i * 2 + 2), true, (w) => {
@@ -362,10 +343,9 @@
 
     function choose(roundText, ask, pair, withSummary, done) {
       show(['p10VsView']);
-      setChar(roundText.includes('ROUND 1') ? 5 : roundText.includes('ROUND 2') ? 6 : 7);
       vs.classList.remove('has-next');
       $('p10Round').innerHTML = roundText;
-      bubble.innerHTML = ask;
+      say(ask, POSE.round);
       vs.innerHTML = '';
       chosen = null;
       pair.forEach((key) => {
@@ -383,7 +363,6 @@
 
     function result(key) {
       show(['p10Result']);
-      setChar(8);
       document.querySelector('.p10').classList.add('is-result');
       const btn = itemBtn(key);
       btn.disabled = false;
@@ -399,12 +378,36 @@
       setTimeout(() => { nextBtn.classList.add('is-off'); fn(); }, 400);
     });
 
-    // ?step=N 으로 단계별 보기: 1 준비물 안내 · 2 앱 클릭 · 3 Live 버튼 클릭 · 4 질문할 카드 고르기 · 5 Gemini 답변 · 6 ROUND 1 · 7 ROUND 2 · 8 FINAL · 9 결과
-    const wantStep = parseInt(new URLSearchParams(location.search).get('step'), 10);
-    if (wantStep >= 7) round1Winners.push('charger', 'carrier', 'umbrella', 'tablet');
-    if (wantStep >= 8) round2Winners.push('charger', 'umbrella');
-    const STEPS = [overview, step2, step3, () => match(0), () => askGemini(0, 'charger', ['charger']), () => round1(0), () => round2(0), finalRound, () => result('charger')];
-    (STEPS[wantStep - 1] || overview)();
+    const STEPS = [
+      ['준비물 안내', overview], ['앱 클릭', step2], ['Live 버튼 클릭', step3], ['질문할 카드 고르기', () => match(0)],
+      ['Gemini 답변', () => askGemini(0, 'charger', ['charger'])], ['ROUND 1', () => round1(0)], ['ROUND 2', () => round2(0)],
+      ['FINAL', finalRound], ['결과', () => result('charger')]
+    ];
+    let cur = 1;
+    function gotoStep(n) {
+      cur = n;
+      if (stopType) stopType();
+      onNext = null;
+      Object.values(TARGET).forEach((t) => { t.onclick = null; });
+      sideList.innerHTML = '';
+      $('p10OverviewGrid').innerHTML = '';
+      round1Winners.length = 0;
+      round2Winners.length = 0;
+      if (n >= 7) round1Winners.push('charger', 'carrier', 'umbrella', 'tablet');
+      if (n >= 8) round2Winners.push('charger', 'umbrella');
+      STEPS[n - 1][1]();
+    }
+
+    // 좌표 수정 모드(?edit): 눌러야 할 곳(점선 박스)과 손가락을 눌러 방향키(1px, Shift 10px)로 맞추고 표시줄 값을 HOT·FG 표에 붙여 넣음. ?step=N 으로 단계 바로 보기
+    const want = parseInt(new URLSearchParams(location.search).get('step'), 10);
+    if (want >= 1 && want <= STEPS.length) cur = want;
+    BoxEdit.stepEdit({
+      unit: 1,
+      count: STEPS.length + 1, get: () => cur, set: (n) => { cur = n; }, go: (n) => { if (n < 1) return; BoxEdit.syncStep(n); gotoStep(n); },
+      label: (n) => '단계 ' + n + ' / ' + STEPS.length + ' (' + STEPS[n - 1][0] + ')',
+      say, bubble, img: $('p10Char')
+    });
+    gotoStep(cur);
   })();
   </script>
 </body>

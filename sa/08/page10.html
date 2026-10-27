@@ -8,13 +8,8 @@
     <style>
         /* 기획서 32~73p. 네이버 지도 실습(안동 하회마을). 휴대폰 화면은 기획서에 들어 있는 실제 네이버 지도 앱 캡처(img/p10_img{번호}.png, 기획서 그림 번호)를 그대로 쓰고,
            식당 이름 가림·새 글자·사진 자리는 기획서 슬라이드의 위치·크기·색을 따라 위에 얹음(좌표는 휴대폰 화면 기준 %). 예약 폼·확인 화면은 실제 앱 모양을 HTML로 그림.
-           누를 곳(.p10-hot)은 투명 — 마우스를 올리면 초록 테두리, 왼쪽 손가락이 위치를 알려줌. 사진 자리는 임시 이모지 이미지(img/p10_ph_*.png) — 실제 사진이 오면 같은 파일명으로 덮어쓰면 됨.
+           누를 곳(.p10-hot)은 투명 — 위치는 HIT 표(기본)+HOT 표(보정), 손가락은 FG 표. 사진 자리는 임시 이모지 이미지(img/p10_ph_*.png) — 실제 사진이 오면 같은 파일명으로 덮어쓰면 됨.
            고른 식당·인원·날짜·시간은 예약 확인(46p)·완료(47p) 화면에 그대로 보여줌. 캐릭터는 임시로 sa/06 캐릭터 복사본 */
-
-        .p10-bubble{position:absolute;left:30px;top:auto;bottom:560px;width:580px;margin:0;box-sizing:border-box;padding:30px;background:var(--c-cream);border:solid 5px var(--c-purple);border-radius:30px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
-          font-family:'Cafe24 Ssurround';font-size:38px;line-height:1.35;color:var(--c-purple);text-align:center;letter-spacing:-0.05em;word-break:keep-all;z-index:3}
-        .p10-bubble:before{content:'';position:absolute;left:230px;bottom:-58px;width:100px;height:70px;background:url('../../img/common/p_guide_tail.png') 0 0 / contain no-repeat}
-        .p10-character{left:40px;top:470px;width:540px;height:470px}
 
         .p10-pic{position:absolute;overflow:hidden}
         .p10-pic img{position:absolute;display:block;max-width:none}
@@ -24,9 +19,8 @@
         .p10-chip44{position:absolute;top:64.4%;width:21.5%;height:5.4%;border:1px solid #d6d9df;border-radius:12px;background:#fff}
         .p10-d44{top:64.4%;width:21.5%;height:5.4%;padding:0;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;color:#222}
 
-        /* 누를 곳: 투명, 올리면 초록 테두리 */
-        .p10-hot{z-index:7;position:absolute;box-sizing:border-box;padding:0;border:solid 3px transparent;border-radius:14px;background:transparent;cursor:pointer;transition:box-shadow .15s,border-color .15s}
-        .p10-hot:hover{border-color:var(--c-pink);box-shadow:0 0 0 4px rgba(255,14,128,.28)}
+        /* 누를 곳: 투명(깜빡임은 공용 .hit-pulse) */
+        .p10-hot{z-index:7;position:absolute;box-sizing:border-box;padding:0;border:0;border-radius:14px;background:transparent;cursor:pointer}
         .p10-hot.is-off{pointer-events:none}
         .p10-hot.is-wrong{animation:fix-word-shake .3s ease}
 
@@ -73,7 +67,6 @@
         .f-chev{position:absolute;right:34px;width:28px;height:28px;margin-top:20px;border:solid #444;border-width:0 5px 5px 0;transform:rotate(45deg)}
         .f-chv{display:inline-block;width:14px;height:14px;margin:0 0 6px 18px;border:solid #444;border-width:0 3px 3px 0;vertical-align:middle;transform:rotate(45deg)}
         .p10-toast{display:none}
-        .is-hide{display:none!important}
 
         .p10-input.card-btn{position:absolute;left:1290px;top:50%;transform:translateY(-50%);width:560px;height:auto;min-height:100px;padding:14px 30px 10px;display:flex;align-items:center;justify-content:center;font-size:44px;line-height:1.2}
         .p10-opts.cf-opts{top:50%;transform:translateY(-50%);gap:30px}
@@ -87,8 +80,10 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <p class="p10-bubble" id="p10Bubble"></p>
-          <div class="char-box p10-character"><img src="../img/character/sa_main.png" alt="메인 캐릭터"></div>
+          <div class="guide-set is-main" id="p10Set">
+            <p class="guide-bubble is-center" id="p10Bubble"></p>
+            <div class="guide-character"><img id="p10Char" src="../img/character/sa_main.png" alt="메인 캐릭터"></div>
+          </div>
           <div class="phone-frame has-cam p10-phone"><div class="phone-screen" id="p10Screen"></div></div>
           <button class="card-btn p10-input is-hide" id="p10Input"></button>
           <div class="cf-opts p10-opts is-hide" id="p10Opts"></div>
@@ -225,58 +220,85 @@
           ["s",0,31.7,100.1,62.8,"#ffffff",0]];
     LAY[72] = [["p",49,0,0,100.1,100,0,0,0,0]];
 
-    // 화면 안 누를 곳 [x%, y%, w%, h%] — 실제 캡처 위치 기준
-    const H = {
-      search: [2.7, 4.8, 80.6, 5.9], star: [75, 52, 13, 5.5], save: [3.7, 88.1, 92.7, 5.8],
-      topBack: [4, 5.4, 10, 4.8], navBack: [70, 94.7, 17, 4.7]
+    // 눌러야 할 곳의 기본 위치 [x%, y%, 폭%, 높이%] — 지도 캡처 위라 기준 요소가 없어서 이 표가 기준. 같은 자리는 같은 이름으로 씀
+    const HIT = {
+      search: [2.7, 4.8, 80.6, 5.9], star: [75, 52, 13, 5.5], save: [3.7, 88.1, 92.7, 5.8], topBack: [4, 5.4, 10, 4.8], navBack: [70, 94.7, 17, 4.7],
+      info: [0.7, 56.7, 98.6, 8.8], hours: [0, 68.5, 99.2, 5.9], nearbyTab: [68, 49.8, 14, 5.2], reserve: [38, 65.8, 19.6, 6.1], searchOpt: [3.4, 16.7, 93.1, 4.9],
+      play: [57, 16.2, 15, 4.4], arrive1: [21, 63.6, 17.5, 5], arrive2: [20.5, 66.5, 18, 5], homeBtn: [3.5, 10, 10, 5], arrive3: [21, 17.6, 17, 5],
+      depart: [4.5, 5, 91, 5.2], depart2: [3, 17.6, 18, 5], save2: [79, 21.4, 19, 5],
+      row1: [0, 28.7, 100, 31], row2: [0, 60.1, 100, 31.4], route1: [0, 36, 100, 31], route2: [0, 67.6, 100, 27.4],
+      list1: [0, 15.5, 100, 7.5], list2: [0, 23.8, 100, 7.5], final1: [0, 27, 100, 31], final2: [0, 59.5, 100, 34]
     };
-    const ROW1 = [0, 28.7, 100, 31], ROW2 = [0, 60.1, 100, 31.4];
     const STEPS = [
-      { s: 32, bubble: '네이버 지도를 클릭해요.', home: true, hot: [[36.4, 44, 27.2, 16.2]] },
-      { s: 33, bubble: '검색창을 클릭해요.', hot: [H.search] },
-      { s: 34, bubble: '오른쪽의 버튼을 눌러<br>여행지를 검색해요.', input: '안동 하회마을' },
-      { s: 35, bubble: '좋아요! 여행 장소를 저장해봐요.<br>별 버튼을 클릭해요.', hot: [H.star] },
-      { s: 36, bubble: '저장 버튼을 클릭해요.', hot: [H.save] },
-      { s: 37, bubble: '잘했어요!<br>본격적으로 여행 계획을<br>세워봐요.', next: true },
-      { s: 38, bubble: '운영 시간을 확인해볼까요?<br>아래의 정보창을 클릭해요.', hot: [[0.7, 56.7, 98.6, 8.8]] },
-      { s: 39, bubble: '운영 시간 부분을<br>클릭해서 자세히 살펴봐요.', hot: [[0, 68.5, 99.2, 5.9]] },
-      { s: 40, bubble: '운영 시간을 확인했어요!', next: true },
-      { s: 41, bubble: '이번엔 여행지 주변의<br>맛집과 카페를 탐방해봐요.<br>주변 탭을 클릭해요.', hot: [[68, 49.8, 14, 5.2]] },
-      { s: 42, bubble: '여행지 주변에 맛있는<br>식당이 있어요!<br>가고 싶은 식당을 선택해요.', rows: [{ r: ROW1, pick: '국특원 찜닭' }, { r: ROW2, pick: '에듀국시' }] },
-      { s: 43, bubble: '원활한 여행을 위해<br>식당을 예약해볼까요?<br>예약 버튼을 클릭해요.', hot: [[38, 65.8, 19.6, 6.1]] },
-      { s: 44, bubble: '‘인원, 날짜, 시간으로 검색’을<br>클릭해 예약을 진행해요.', hot: [[3.4, 16.7, 93.1, 4.9]] },
-      { s: 45, bubble: '식당 방문을 희망하는<br>인원, 날짜, 시간을 순서대로<br>선택해요.', form: 'reserve' },
-      { s: 46, bubble: '내가 선택한 내용을 확인하고<br>화면을 아래로 내려 개인정보 수집 및 제공에 동의함 버튼을 클릭해요.', form: 'confirm' },
-      { s: 47, bubble: '예약을 완료했어요!<br>남은 여행 계획을 마저 세워봐요.', next: true },
-      { s: 48, bubble: '뒤로 가기를 눌러<br>주변에 함께 가볼 만한 곳을<br>찾아봐요.', hot: [H.topBack, H.navBack] },
-      { s: 49, bubble: '놀거리 버튼을 클릭해요.', hot: [[57, 16.2, 15, 4.4]] },
-      { s: 50, bubble: '다양한 곳이 있어요!<br>각 장소의 정보를 확인해 1시간 이내로<br>이동할 수 있는 곳을 찾아볼까요?', next: true },
-      { s: 51, bubble: '하회마을 나룻배부터<br>확인해봐요. 장소를 클릭해요.', rows: [{ r: ROW1 }, { r: ROW2, off: true }] },
-      { s: 52, bubble: '도착 버튼을 클릭해<br>이동 시간을 확인해요.', hot: [[21, 63.6, 17.5, 5]] },
-      { s: 53, bubble: '하회마을 나룻배까지는<br>12분이 소요돼요. 이어서<br>다음 장소를 확인해봐요.', next: true },
-      { s: 54, bubble: '도산서원을 클릭해<br>이동 시간을 확인해봐요.', rows: [{ r: ROW1, off: true }, { r: ROW2 }] },
-      { s: 55, bubble: '도착 버튼을 클릭해요.', hot: [[20.5, 66.5, 18, 5]] },
-      { s: 56, bubble: '도산서원까지는<br>2시간 23분이 소요돼요.', next: true },
-      { s: 57, bubble: '1시간 이내로 이동할 수 있는<br>장소는 어디인가요?', rows: [{ r: ROW1, right: true }, { r: ROW2, wrong: '하회마을 나룻배까지는 12분,<br>도산서원까지는 2시간 23분이<br>소요돼요.' }] },
-      { s: 58, bubble: '좋아요!<br>하회마을 나룻배로 결정했어요.', next: true },
-      { s: 59, bubble: '별 모양 버튼을 클릭해<br>장소를 저장해요.', hot: [H.star] },
-      { s: 60, bubble: '저장 버튼을 클릭해요.', hot: [H.save] },
-      { s: 61, bubble: '좋아요! 이제 마지막으로<br>장소 별 이동 시간을 확인해봐요.', next: true },
-      { s: 62, bubble: '뒤로가기 버튼을 클릭해요.', hot: [H.topBack, H.navBack] },
-      { s: 63, bubble: '홈 버튼을 클릭해요.', hot: [[3.5, 10, 10, 5]] },
-      { s: 64, bubble: '안동역에서 안동 하회마을까지의<br>이동 경로를 알아봐요.<br>도착 버튼을 클릭해요.', hot: [[21, 17.6, 17, 5]] },
-      { s: 65, bubble: '출발지 입력창을 클릭해요.', hot: [[4.5, 5, 91, 5.2]] },
-      { s: 66, bubble: '오른쪽의 버튼을 클릭해<br>안동역을 입력해요.', input: '안동역' },
-      { s: 67, bubble: '추천된 이동 경로를 확인했어요!<br>시간과 이동 방법을 비교해<br>나에게 알맞은 경로를 골라봐요.', rows: [{ r: [0, 36, 100, 31] }, { r: [0, 67.6, 100, 27.4] }], opts: ['급행2번 버스<br>탑승하기', '210번 버스<br>탑승하기'] },
-      { s: 68, bubble: '뒤로 가기 버튼을 눌러<br>이전 화면으로 돌아가요.', hot: [H.navBack] },
-      { s: 69, bubble: '마지막으로, 안동 하회마을에서<br>하회마을 나룻배까지의<br>이동 경로를 확인해봐요.<br>출발 버튼을 클릭해요.', hot: [[3, 17.6, 18, 5]] },
-      { s: 70, bubble: '저장 버튼을 클릭해요.', hot: [[79, 21.4, 19, 5]] },
-      { s: 71, bubble: '내가 저장한 장소들의 목록이에요!<br>하회마을 나룻배를 클릭해요.', rows: [{ r: [0, 15.5, 100, 7.5], off: true }, { r: [0, 23.8, 100, 7.5] }] },
-      { s: 72, bubble: '나에게 알맞은 이동 경로를<br>고르면 여행 계획 세우기 완료!', rows: [{ r: [0, 27, 100, 31] }, { r: [0, 59.5, 100, 34] }], opts: ['풍천2번 버스<br>탑승 후 도보로 이동', '210번 버스<br>탑승 후 도보로 이동'], last: true }
+      { s: 32, bubble: '네이버 지도를 클릭해요.', home: true, pose: '' },
+      { s: 33, bubble: '검색창을 클릭해요.', hot: ['search'], pose: 'wink_point' },
+      { s: 34, bubble: '오른쪽의 버튼을 눌러<br>여행지를 검색해요.', input: '안동 하회마을', pose: '' },
+      { s: 35, bubble: '좋아요! 여행 장소를 저장해봐요.<br>별 버튼을 클릭해요.', hot: ['star'], pose: 'wink_present' },
+      { s: 36, bubble: '저장 버튼을 클릭해요.', hot: ['save'], pose: 'wink_point4' },
+      { s: 37, bubble: '잘했어요!<br>본격적으로 여행 계획을<br>세워봐요.', next: true, pose: '' },
+      { s: 38, bubble: '운영 시간을 확인해볼까요?<br>아래의 정보창을 클릭해요.', hot: ['info'], pose: 'wink_present' },
+      { s: 39, bubble: '운영 시간 부분을<br>클릭해서 자세히 살펴봐요.', hot: ['hours'], pose: 'wink_point3' },
+      { s: 40, bubble: '운영 시간을 확인했어요!', next: true, pose: '' },
+      { s: 41, bubble: '이번엔 여행지 주변의<br>맛집과 카페를 탐방해봐요.<br>주변 탭을 클릭해요.', hot: ['nearbyTab'], pose: 'wink_point2' },
+      { s: 42, bubble: '여행지 주변에 맛있는<br>식당이 있어요!<br>가고 싶은 식당을 선택해요.', rows: [{ r: 'row1', pick: '국특원 찜닭' }, { r: 'row2', pick: '에듀국시' }], pose: '' },
+      { s: 43, bubble: '원활한 여행을 위해<br>식당을 예약해볼까요?<br>예약 버튼을 클릭해요.', hot: ['reserve'], pose: 'wink_present' },
+      { s: 44, bubble: '‘인원, 날짜, 시간으로 검색’을 클릭해 예약을 진행해요.', hot: ['searchOpt'], pose: 'wink_point' },
+      { s: 45, bubble: '식당 방문을 희망하는<br>인원, 날짜, 시간을 순서대로 선택해요.', form: 'reserve', pose: '' },
+      { s: 46, bubble: '내가 선택한 내용을 확인하고<br>화면을 아래로 내려<br>개인정보 수집 및 제공에 동의함 버튼을 클릭해요.', form: 'confirm', pose: 'wink_present' },
+      { s: 47, bubble: '예약을 완료했어요!<br>남은 여행 계획을 마저 세워봐요.', next: true, pose: '' },
+      { s: 48, bubble: '뒤로 가기를 눌러 주변에 함께 가볼 만한 곳을 찾아봐요.', hot: ['topBack', 'navBack'], pose: 'wink_open' },
+      { s: 49, bubble: '놀거리 버튼을 클릭해요.', hot: ['play'], pose: 'wink_point' },
+      { s: 50, bubble: '다양한 곳이 있어요!<br>각 장소의 정보를 확인해 1시간 이내로 이동할 수 있는 곳을 찾아볼까요?', next: true, pose: '' },
+      { s: 51, bubble: '하회마을 나룻배부터<br>확인해봐요. 장소를 클릭해요.', rows: [{ r: 'row1' }, { r: 'row2', off: true }], pose: 'wink_point2' },
+      { s: 52, bubble: '도착 버튼을 클릭해<br>이동 시간을 확인해요.', hot: ['arrive1'], pose: 'wink_point3' },
+      { s: 53, bubble: '하회마을 나룻배까지는<br>12분이 소요돼요. 이어서<br>다음 장소를 확인해봐요.', next: true, pose: '' },
+      { s: 54, bubble: '도산서원을 클릭해<br>이동 시간을 확인해봐요.', rows: [{ r: 'row1', off: true }, { r: 'row2' }], pose: 'wink_point3' },
+      { s: 55, bubble: '도착 버튼을 클릭해요.', hot: ['arrive2'], pose: 'wink_present' },
+      { s: 56, bubble: '도산서원까지는<br>2시간 23분이 소요돼요.', next: true, pose: '' },
+      { s: 57, bubble: '1시간 이내로 이동할 수 있는 장소는 어디인가요?', rows: [{ r: 'row1', right: true }, { r: 'row2', wrong: '하회마을 나룻배까지는 12분,<br>도산서원까지는 2시간 23분이<br>소요돼요.' }], pose: 'wink_open' },
+      { s: 58, bubble: '좋아요!<br>하회마을 나룻배로 결정했어요.', next: true, pose: '' },
+      { s: 59, bubble: '별 모양 버튼을 클릭해<br>장소를 저장해요.', hot: ['star'], pose: 'wink_point2' },
+      { s: 60, bubble: '저장 버튼을 클릭해요.', hot: ['save'], pose: 'wink_point4' },
+      { s: 61, bubble: '좋아요!<br>이제 마지막으로 장소 별 이동 시간을 확인해봐요.', next: true, pose: '' },
+      { s: 62, bubble: '뒤로가기 버튼을 클릭해요.', hot: ['topBack', 'navBack'], pose: 'wink_present' },
+      { s: 63, bubble: '홈 버튼을 클릭해요.', hot: ['homeBtn'], pose: 'wink_open' },
+      { s: 64, bubble: '안동역에서 안동 하회마을까지의<br>이동 경로를 알아봐요.<br>도착 버튼을 클릭해요.', hot: ['arrive3'], pose: 'wink_point' },
+      { s: 65, bubble: '출발지 입력창을 클릭해요.', hot: ['depart'], pose: 'wink_present' },
+      { s: 66, bubble: '오른쪽의 버튼을 클릭해<br>안동역을 입력해요.', input: '안동역', pose: '' },
+      { s: 67, bubble: '추천된 이동 경로를 확인했어요! 시간과 이동 방법을 비교해 나에게 알맞은 경로를 골라봐요.', rows: [{ r: 'route1' }, { r: 'route2' }], opts: ['급행2번 버스<br>탑승하기', '210번 버스<br>탑승하기'], pose: 'wink_present' },
+      { s: 68, bubble: '뒤로 가기 버튼을 눌러<br>이전 화면으로 돌아가요.', hot: ['navBack'], pose: '' },
+      { s: 69, bubble: '마지막으로, 안동 하회마을에서<br>하회마을 나룻배까지의<br>이동 경로를 확인해봐요.<br>출발 버튼을 클릭해요.', hot: ['depart2'], pose: 'wink_point' },
+      { s: 70, bubble: '저장 버튼을 클릭해요.', hot: ['save2'], pose: 'wink_present' },
+      { s: 71, bubble: '내가 저장한 장소들의 목록이에요!<br>하회마을 나룻배를 클릭해요.', rows: [{ r: 'list1', off: true }, { r: 'list2' }], pose: '' },
+      { s: 72, bubble: '나에게 알맞은 이동 경로를<br>고르면 여행 계획 세우기 완료!', rows: [{ r: 'final1' }, { r: 'final2' }], opts: ['풍천2번 버스<br>탑승 후 도보로 이동', '210번 버스<br>탑승 후 도보로 이동'], last: true, pose: 'wink_present' }
     ];
 
     const screen = $('p10Screen');
     const bubble = $('p10Bubble');
+    const say = initGuideSay({ bubble, img: $('p10Char'), set: $('p10Set') });
+    // 손가락 위치 보정 [dx, dy] — 눌러야 할 곳 이름별. ?edit 로 손가락을 눌러 맞춘 뒤 표시줄 값을 옮겨 적음. 포즈는 STEPS 각 줄에 pose: '…' 를 적음('' 이면 main)
+    const FG = {
+      app: [15, -37], search: [-140, -20], star: [0, 0], save: [-150, -30],
+      topBack: [0, 0], navBack: [10, -30], info: [-210, -40], hours: [-80, -30],
+      nearbyTab: [0, 0], reserve: [0, 0], searchOpt: [-190, -20], play: [0, 0],
+      arrive1: [0, 0], arrive2: [0, 0], arrive3: [0, 0], depart: [-210, -20],
+      depart2: [0, 0], save2: [0, 0], homeBtn: [20, -10], agree: [0, 0],
+      book: [0, 0]
+    };
+    // 클릭 영역 보정 [dx, dy, dw, dh] — HIT 기본 위치에서 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
+    const HOT = {
+      search: [0, 0, 0, 0], star: [0, 0, 0, 0], save: [0, 0, 0, 0],
+      topBack: [0, 0, 0, 0], navBack: [0, 0, 0, 0], info: [0, 0, 0, 0],
+      hours: [0, 0, 0, 0], nearbyTab: [0, 0, 0, 0], reserve: [0, 0, 0, 0],
+      searchOpt: [0, 0, 0, 0], play: [0, 0, 0, 0], arrive1: [0, 0, 0, 0],
+      arrive2: [0, 0, 0, 0], arrive3: [0, 0, 0, 0], depart: [0, 0, 0, 0],
+      depart2: [0, 0, 0, 0], save2: [0, 0, 0, 0], homeBtn: [0, 0, 0, 0],
+      row1: [0, 0, 0, 0], row2: [0, 0, 0, 0], route1: [0, 0, 0, 0],
+      route2: [0, 0, 0, 0],
+      list1: [0, 0, 0, 0], list2: [0, 0, 0, 0], final1: [0, 0, 0, 0], final2: [0, 0, 0, 0]
+    };
+    const fgo = (key, extra) => BoxEdit.fgo(FG, key, extra);
+    BoxEdit.fingerTag();
     const input = $('p10Input');
     const nextBtn = $('p10Next');
     const picked = { restaurant: '국특원 찜닭', people: '', date: '', time: '' };
@@ -286,7 +308,6 @@
     const IC_C = '<svg viewBox="0 0 24 24" width="46" height="46" style="vertical-align:-8px;margin-right:14px"><rect x="3" y="4.5" width="18" height="16" rx="2" fill="#222"/><rect x="6" y="10" width="3" height="3" fill="#fff"/><rect x="10.5" y="10" width="3" height="3" fill="#fff"/><rect x="15" y="10" width="3" height="3" fill="#fff"/><rect x="6" y="14.5" width="3" height="3" fill="#fff"/><rect x="10.5" y="14.5" width="3" height="3" fill="#fff"/></svg>';
     let i = 0;
 
-    const show = (el, on) => el.classList.toggle('is-hide', !on);
     const go = () => { clearFingers(); i += 1; render(); };
     const pct = (v) => v + '%';
     const isNoodle = () => picked.restaurant === '에듀국시';
@@ -378,35 +399,38 @@
       });
     }
 
-    function hot(r, onClick, cls) {
+    function hot(name, onClick, cls) {
+      const r = HIT[name];
       const b = document.createElement('button');
       b.className = 'p10-hot' + (cls ? ' ' + cls : '');
+      b.dataset.hit = name;
       b.style.cssText = 'left:' + pct(r[0]) + ';top:' + pct(r[1]) + ';width:' + pct(r[2]) + ';height:' + pct(r[3]);
-      BoxEdit.tag(b, r);
       b.addEventListener('click', onClick);
       screen.appendChild(b);
+      BoxEdit.padEl(b, name, HOT);
       return b;
     }
 
     function render() {
       const st = STEPS[i];
-      bubble.innerHTML = st.bubble;
+      say(st.bubble, st.pose || 'main');
+      $('p10Done').classList.add('is-off');
       screen.innerHTML = '';
-      show(input, false);
-      show(nextBtn, false);
-      show($('p10Opts'), !!st.opts);
+      showIf(input, false);
+      showIf(nextBtn, false);
+      showIf($('p10Opts'), !!st.opts);
       $('p10Opts').innerHTML = '';
       clearFingers();
 
       if (st.home) { screen.innerHTML = '<div class="app-home is-sky"><div class="phone-status is-dark"></div><button type="button" class="app-icon is-dark" id="p10App"><i style="background:#fff"><img src="../../img/common/logo_navermap.png" alt="" style="object-fit:contain"></i>네이버 지도</button><div class="phone-nav"></div></div>'; initPhoneBars();
         $('p10App').addEventListener('click', () => { playClick(); go(); });
-        pointFingerAt($('p10App'), { onMain: true, dx: 15, dy: -37 });
+        pointFingerAt($('p10App'), fgo('app'));
       }
       else if (!st.form) layers(st.s);
 
       if (st.hot && !st.home) {
-        const hs = st.hot.map((r) => hot(r, () => { playClick(); go(); }));
-        pointFingerAt(hs[0], { onMain: true });
+        const hs = st.hot.map((n) => hot(n, () => { playClick(); go(); }, 'hit-pulse'));
+        pointFingerAt(hs[0], fgo(st.hot[0]));
       }
       if (st.rows) {
         st.rows.forEach((row) => {
@@ -417,14 +441,14 @@
               b.classList.remove('is-wrong');
               void b.offsetWidth;
               b.classList.add('is-wrong');
-              bubble.innerHTML = row.wrong;
+              say(row.wrong, st.pose || 'main');
               return;
             }
             if (row.pick) picked.restaurant = row.pick;
             if (st.last) { playCorrect(); $('p10Done').classList.remove('is-off'); return; }
             if (row.right) playCorrect(); else playClick();
             go();
-          }, row.off ? 'is-off' : '');
+          }, row.off ? 'is-off' : (st.rows.some((x) => x.wrong || x.right) ? '' : 'hit-pulse'));
         });
       }
       if (st.opts) {
@@ -444,11 +468,11 @@
       }
       if (st.input) {
         input.textContent = st.input;
-        show(input, true);
+        showIf(input, true);
       }
       if (st.form === 'reserve') reserveForm();
       if (st.form === 'confirm') confirmForm();
-      if (st.next) show(nextBtn, true);
+      if (st.next) showIf(nextBtn, true);
     }
 
     input.addEventListener('click', () => { playClick(); go(); });
@@ -542,27 +566,24 @@
         '<div class="f-bar"><button class="f-btn is-sub" style="left:42px;width:200px">이전</button><button class="f-btn is-main" id="fBook" style="left:262px;width:776px" disabled>예약하기</button></div><div class="f-nav"></div>';
       screen.appendChild(f);
       const agree = $('fAgree');
-      pointFingerAt(agree, { onMain: true });
+      pointFingerAt(agree, fgo('agree', { pulse: true }));
       agree.addEventListener('click', () => {
         playClick();
         $('fBox').style.cssText += ';background:#2f6bf5;border-color:#2f6bf5';
         $('fBox').innerHTML = '<svg viewBox="0 0 24 24" width="40" height="40" style="display:block;margin:7px"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
         $('fBook').disabled = false;
-        bubble.innerHTML = '예약하기 버튼을 클릭해<br>마무리해요!';
-        pointFingerAt($('fBook'), { onMain: true });
+        say('예약하기 버튼을 클릭해<br>마무리해요!', 'main');
+        pointFingerAt($('fBook'), fgo('book', { pulse: true }));
       });
       $('fBook').addEventListener('click', () => { playCorrect(); go(); });
     }
 
-    // 좌표 수정 모드(?edit): 누를 곳(%)을 클릭 → 방향키(0.1%, Shift 1%)로 맞추고 표시줄 값을 STEPS 에 붙여 넣음. H.search 같은 공용 좌표는 쓰는 모든 단계가 같이 바뀜
-    BoxEdit.init({
-      unit: 0.1,
-      step: { count: STEPS.length, get: () => i, set: (n) => { i = n; }, go: (n) => { i = n; render(); },
-        label: (n) => '단계 ' + n + ' / ' + (STEPS.length - 1) + ' (캡처 ' + STEPS[n].s + ')' },
-      apply: (el) => {
-        const r = el._ref;
-        el.style.left = pct(r[0]); el.style.top = pct(r[1]); el.style.width = pct(r[2]); el.style.height = pct(r[3]);
-      }
+    // 좌표 수정 모드(?edit): 눌러야 할 곳(점선 박스)과 손가락을 눌러 방향키(1px, Shift 10px)로 맞추고 표시줄 값을 HOT·FG 표에 붙여 넣음
+    BoxEdit.stepEdit({
+      unit: 1,
+      count: STEPS.length + 1, get: () => i + 1, set: (n) => { i = n - 1; }, go: (n) => { if (n < 1) return; BoxEdit.syncStep(n); i = n - 1; render(); },
+      label: (n) => '단계 ' + n + ' / ' + STEPS.length + ' (캡처 ' + STEPS[n - 1].s + ')',
+      say, bubble, img: $('p10Char')
     });
     render();
   })();

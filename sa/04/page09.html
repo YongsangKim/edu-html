@@ -96,16 +96,9 @@
     const resultHint = document.getElementById('p09ResultHint');
     const nextBtn = document.querySelector('.next-btn');
 
-    let i = 0;
-    let typer;
-    const startTyping = () => { typer = setInterval(type, 70); };
-    function type() {
-      i += 1;
-      // 태그(<b>…</b>)는 글자 사이에 끼어 보이지 않게 한 번에 통째로 넘김
-      if (PROMPT.charAt(i - 1) === '<') i = PROMPT.indexOf('>', i) + 1;
-      textEl.innerHTML = PROMPT.slice(0, i);
-      if (i >= PROMPT.length) {
-        clearInterval(typer);
+    const startTyping = () => typeText(textEl, PROMPT, {
+      speed: 70, html: true,
+      onDone: () => {
         // 글자가 다 나온 뒤에 아래 안내 문구와 손가락 안내가 나옴
         if (pulled) return;
         resultHint.style.visibility = '';
@@ -114,7 +107,7 @@
         $('p09Finger').classList.add('swipe-guide-finger');
         initSwipeGuide();
       }
-    }
+    });
     // 페이지가 다 보인 뒤에 타이핑 시작
     pageShown.then(() => setTimeout(startTyping, 400));
 

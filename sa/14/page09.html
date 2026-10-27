@@ -6,19 +6,15 @@
     <title>우리 가족 AI 안심 통화 설정</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 기획서 33~47p. 가운데 공용 폰 틀 안에 whowho(후후) 앱 캡처 이미지(img/m_image*.png)를 그대로 깔고 그 위에 누를 곳(투명 버튼)·손가락·경고 팝업만 얹음(캡처를 부품으로 나누지 않는 예외, sa/13 page09와 같은 방식).
+        /* 기획서 33~47p. 가운데 공용 폰 틀 안에 whowho(후후) 앱 캡처 이미지(img/m_image*.png)를 그대로 깔고 그 위에 누를 곳(투명 버튼)·손가락·경고 팝업만 얹음(캡처를 부품으로 나누지 않으므로 HIT 기본 위치 표 + HOT 보정, sa/13 page09와 같은 방식).
            흐름: 홈 → 후후 앱 → AI 보이스피싱 → 바로가기 → 메뉴 → 탐지 기능 켜기 → 다음 → (보이스피싱 전화가 걸려온다면) 수신 전화 + 벨소리 → 1초 뒤 후후 경고 팝업 → 다음
                  → 모르고 전화를 받으면 → 통화 중 나레이션(TTS) → 안내 문구 → 2초 뒤 후후 위험 감지 팝업 → [통화 종료] → 활동 종료 팝업 → 서약서 팝업 → 다음 페이지
-           누를 곳은 화면에 대한 [왼쪽%, 위%, 폭%, 높이%] (?edit&step=N, N은 0부터). 캡처에 찍혀 있던 사람 이름·번호는 위에 덮개를 얹어 '알 수 없는 사용자 010-XXXX-XXXX'로 가림 */
+           누를 곳 위치는 아래 HIT 표(화면에 대한 [왼쪽%, 위%, 폭%, 높이%(, 모서리 px)]) + HOT 보정 (?edit&step=N, N은 1부터). 캡처에 찍혀 있던 사람 이름·번호는 위에 덮개를 얹어 '알 수 없는 사용자 010-XXXX-XXXX'로 가림 */
         .p09-img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:fill;display:block;user-select:none;-webkit-user-drag:none}
         .p09-home{position:absolute;inset:0;background:linear-gradient(180deg,#f2f2f6,#e6e8f2)}
         .p09-home img{position:absolute;left:50%;top:44%;width:120px;margin:-60px 0 0 -60px;border-radius:30px;box-shadow:0 6px 16px rgba(0,0,0,.2)}
         .p09-home>span{position:absolute;left:0;right:0;top:44%;margin-top:78px;text-align:center;font-size:22px;color:#222}
         .p09-hot{position:absolute;border:0;padding:0;background:transparent;cursor:pointer;z-index:5;border-radius:10px}
-        .p09-hot:hover{outline:5px solid #ff0e7f;animation:p09-pulse .4s ease-in-out infinite alternate}
-        .p09-hot.is-plain:hover{outline:none;animation:none}
-        @keyframes p09-pulse{to{box-shadow:0 0 0 10px rgba(255,79,249,.8)}}
-        body.is-edit .p09-hot{outline:3px dashed #e60000;background:rgba(255,79,249,.5);z-index:20}
         .p09-mask{position:absolute;left:8%;width:84%;display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;z-index:3}
         .p09-mask b{font-size:34px;letter-spacing:.01em}
         .p09-mask small{font-size:20px;opacity:.9;margin-top:6px}
@@ -65,12 +61,12 @@
           </div>
           <div class="phone-frame has-cam p09-phone" id="p09Phone"><div class="phone-screen is-dark" id="p09Screen">
             <img class="p09-img" id="p09Img" alt="" draggable="false">
-            <div class="p09-home" id="p09Home"><div class="phone-status is-dark" data-time="19:26"></div><img src="img/m_image25.png" alt=""><span>whowho</span></div>
+            <div class="p09-home" id="p09Home"><div class="phone-status is-light" data-time="19:26"></div><img src="img/m_image25.png" alt=""><span>whowho</span><div class="phone-nav is-light"></div></div>
             <div class="p09-mask" id="p09Mask"></div>
             <div id="p09Over"></div>
             <div id="p09Hots"></div>
           </div></div>
-          <button type="button" class="card-btn is-start p09-btn is-off js-sfx" id="p09Btn" data-sound="sound/click.mp3">다음</button>
+          <button type="button" class="card-btn is-start p09-btn next-btn is-off js-sfx" id="p09Btn" data-sound="sound/click.mp3">다음</button>
 
           <div class="avatar-modal is-off" id="p09Done">
             <div class="avatar-popup-panel">
@@ -106,24 +102,36 @@
     const bell = new Audio(ASSET_BASE + 'sound/sa14_ring.mp3');
     const stopBell = () => { bell.pause(); bell.currentTime = 0; };
     const playBell = () => { stopBell(); bell.play().catch(() => {}); };
-    const FG = { hot: [-10, -20] };
+    // 손가락 위치 보정 [dx, dy] — 단계의 눌러야 할 곳(hit)별. ?edit 로 손가락을 눌러 맞춘 뒤 표시줄 값을 옮겨 적음
+    const FG = { whowho: [-10, -20], phishing: [10, -20], shortcut: [-10, -20], menu: [20, 10], toggle: [10, -10], answer: [-10, -20] };
     const CARD = '<div class="p09-card"><i class="x"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></i><span class="chev"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></span><div class="t"><div class="ic"><svg viewBox="0 0 24 24"><path d="M7 17v-4a5 5 0 0 1 10 0v4M5 17h14v3H5zM12 3v2M4.500 6l1.500 1.500M19.500 6L18 7.500"/></svg></div><div><b>보이스피싱 주의</b><small>010-0000-0000</small></div></div><div class="tag"><em>who<br>who</em>보이스피싱 의심 번호</div><div class="row"><span><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.500 1.500a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>통화</span><span><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 12.500h8M8 16h5"/></svg>문자</span><span><svg viewBox="0 0 24 24" style="width:30px"><rect x="2" y="7" width="20" height="10" rx="5"/><circle cx="8" cy="12" r="2.500"/></svg>스팸 해제</span></div></div>';
     const BANNER = '<div class="p09-card"><div class="t"><div class="ic"><svg viewBox="0 0 24 24"><path d="M7 17v-4a5 5 0 0 1 10 0v4M5 17h14v3H5zM12 3v2M4.500 6l1.500 1.500M19.500 6L18 7.500"/></svg></div><div><b>보이스피싱 위험 감지</b><small>보이스피싱일 확률이 높아요.<br>통화를 종료하고 경찰(☎︎112) 또는 금융감독원(☎︎1332)에 도움을 요청하세요.</small></div></div><div class="stop">탐지중지</div></div>';
+    // 눌러야 할 곳의 기본 위치 [x%, y%, 폭%, 높이%] — 화면이 캡처 그림이라 기준 요소가 없어서 이 표가 기준(?edit&step=N 으로 보며 맞춤)
+    const HIT = {
+      whowho: [37, 37.6, 26, 13], phishing: [6, 57, 20.5, 14.5],
+      shortcut: [64.8, 56.6, 24, 6.6], menu: [3.6, 5.4, 8.2, 4.2],
+      toggle: [76.2, 34.5, 14.3, 3.8, 16], answer: [13.2, 83, 16.8, 7.8]
+    };
+    // 클릭 영역 보정 [dx, dy, dw, dh] — HIT 기본 위치에서 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
+    const HOT = {
+      whowho: [0, 0, 0, 0], phishing: [0, 0, 0, 0], shortcut: [0, 0, 0, 0],
+      menu: [0, 0, 0, 0], toggle: [0, 0, 0, 0], answer: [0, 0, 0, 0]
+    };
     const STEPS = [
-      { home: true, say: 'whowho(후후)를 클릭해요.', pose: 'wink_point2', hot: [37, 37.6, 26, 13] },
-      { img: 26, say: 'AI 보이스피싱을 클릭해요.', pose: 'wink_point2', hot: [6, 57, 20.5, 14.5], fg: [10, -20] },
-      { img: 27, say: '바로가기 버튼을 클릭해<br>보이스피싱 탐지 기능을 켜봐요.', pose: 'wink_point2', hot: [64.8, 56.6, 24, 6.6] },
-      { img: 28, say: '화면 위쪽의<br>메뉴 버튼을 클릭해요.', pose: 'wink_point2', hot: [3.6, 5.4, 8.2, 4.2], fg: [20, 10] },
-      { img: 29, say: '통화 내용을 분석해 보이스피싱<br>위험을 알려주는 기능을 켜요.', pose: 'wink_point2', hot: [76.2, 34.5, 14.3, 3.8, 16], fg: [10, -10] },
-      { img: 30, say: '좋아요!<br> AI 보이스피싱 탐지<br>기능을 켰어요.', pose: 'wink_point4', next: '다음' },
-      { img: 31, say: '만약 보이스피싱 전화가<br>걸려온다면 어떻게 될까요?', pose: 'main', next: '다음' },
-      { img: 31, say: '만약 보이스피싱 전화가<br>걸려온다면 어떻게 될까요?', pose: 'main', auto: 1000 },
-      { img: 6, say: '만약 보이스피싱 전화가<br>걸려온다면 어떻게 될까요?', pose: 'main', auto: 1000, ring: true, mask: ['010-0000-0000', '', 13.5, 8.5] },
-      { img: 6, say: 'AI가 통화 내용을 살펴보고<br>위험을 알려줬어요.', pose: 'wink_point4', next: '다음', card: true, mask: ['010-0000-0000', '', 13.5, 8.5] },
-      { img: 33, say: '만약 보이스피싱 전화임을 모르고<br>받았다면 어떻게 될까요?', pose: 'main', hot: [13.2, 83, 16.8, 7.8], ring: true, mask: ['010-XXXX-XXXX', '알 수 없는 사용자', 15, 9.6] },
-      { img: 34, say: '', pose: 'main', narr: true, mask: ['알 수 없는 사용자', '폰 010-XXXX-XXXX', 17.5, 9] },
+      { home: true, say: 'whowho(후후)를 클릭해요.', pose: 'wink_point2', hit: 'whowho' },
+      { img: 26, say: 'AI 보이스피싱을 클릭해요.', pose: 'wink_point3', hit: 'phishing' },
+      { img: 27, say: '바로가기 버튼을 클릭해<br>보이스피싱 탐지 기능을 켜봐요.', pose: 'wink_point2', hit: 'shortcut' },
+      { img: 28, say: '화면 위쪽의<br>메뉴 버튼을 클릭해요.', pose: 'wink_point', hit: 'menu', pulse: '#fff' },
+      { img: 29, say: '통화 내용을 분석해 보이스피싱<br>위험을 알려주는 기능을 켜요.', pose: 'wink_point2', hit: 'toggle' },
+      { img: 30, say: '좋아요!<br> AI 보이스피싱 탐지<br>기능을 켰어요.', pose: 'main', next: '다음' },
+      { img: 31, say: '만약 보이스피싱 전화가 걸려온다면 어떻게 될까요?', pose: 'wink_open', next: '다음' },
+      { img: 31, say: '만약 보이스피싱 전화가 걸려온다면 어떻게 될까요?', pose: 'main', auto: 1000 },
+      { img: 6, say: '만약 보이스피싱 전화가 걸려온다면 어떻게 될까요?', pose: 'wink_open', auto: 1000, ring: true, mask: ['010-0000-0000', '', 13.5, 8.5] },
+      { img: 6, say: 'AI가 통화 내용을 살펴보고<br>위험을 알려줬어요.', pose: 'wink_present', next: '다음', card: true, mask: ['010-0000-0000', '', 13.5, 8.5] },
+      { img: 33, say: '만약 보이스피싱 전화임을 모르고<br>받았다면 어떻게 될까요?', pose: 'main', hit: 'answer', ring: true, mask: ['010-XXXX-XXXX', '알 수 없는 사용자', 15, 9.6] },
+      { img: 34, say: '', pose: 'wink_open', narr: true, mask: ['알 수 없는 사용자', '폰 010-XXXX-XXXX', 17.5, 9] },
       { img: 34, say: '통화를 들어보니, 상대방이 돈이나<br>개인정보를 요구하고 있어요.', pose: 'main', auto: 3000, mask: ['알 수 없는 사용자', '폰 010-XXXX-XXXX', 17.5, 9] },
-      { img: 34, say: 'AI가 통화 내용을 살펴보고 위험을 알려줬어요.', pose: 'wink_point4', banner: true, next: '통화 종료', mask: ['알 수 없는 사용자', '폰 010-XXXX-XXXX', 17.5, 9] },
+      { img: 34, say: 'AI가 통화 내용을 살펴보고 위험을 알려줬어요.', pose: 'wink_present', banner: true, next: '통화 종료', mask: ['알 수 없는 사용자', '폰 010-XXXX-XXXX', 17.5, 9] },
       { end: true }
     ];
     const phone = $('p09Phone'), screen = $('p09Screen'), hots = $('p09Hots'), btn = $('p09Btn'), mask = $('p09Mask'), over = $('p09Over');
@@ -131,8 +139,7 @@
     let si = 0, timer = 0, narr = null;
     if (BoxEdit.on) document.body.classList.add('is-edit');
 
-    const place = (el, b) => { el.style.cssText = 'left:' + b[0] + '%;top:' + b[1] + '%;width:' + b[2] + '%;height:' + b[3] + '%' + (b[4] !== undefined ? ';border-radius:' + b[4] + 'px' : ''); };
-    const guide = (el) => { const f = STEPS[si].fg || FG.hot; pointFingerAt(el, { onMain: true, dx: f[0], dy: f[1] }); };
+    const guide = (el) => { const f = FG[STEPS[si].hit] || [-10, -20]; pointFingerAt(el, { onMain: true, dx: f[0], dy: f[1] }); };
 
     function speak(done) {
       let fired = false;
@@ -151,6 +158,8 @@
       clearTimeout(timer);
       clearFingers();
       if (narr) { narr.pause(); narr = null; }
+      $('p09Done').classList.add('is-off');
+      $('p09Oath').classList.add('is-off');
       si = n;
       const s = STEPS[si];
       if (s.end) {
@@ -182,18 +191,21 @@
       }
       if (s.next) {
         btn.textContent = s.next;
+        btn.classList.toggle('next-btn', s.next !== '통화 종료');
         btn.classList.remove('is-off');
         btn.onclick = () => { if (!BoxEdit.on) { stopBell(); go(si + 1); } };
         if (BoxEdit.on) { /* 단추 위치는 CSS */ }
         return;
       }
       const b = document.createElement('button');
-      if (!s.hot) return;
+      if (!s.hit) return;
       b.type = 'button';
-      b.className = 'p09-hot' + (s.home ? ' is-plain' : '');
-      place(b, s.hot);
-      BoxEdit.tag(b, s.hot);
+      b.className = 'p09-hot' + (s.home ? '' : ' hit-pulse');
+      placePct(b, HIT[s.hit]);
+      b.dataset.hit = s.hit;
+      if (s.pulse) b.style.setProperty('--pulse-c', s.pulse);
       hots.appendChild(b);
+      BoxEdit.padEl(b, s.hit, HOT);
       b.addEventListener('click', () => {
         if (BoxEdit.on) return;
         playClick();
@@ -207,24 +219,11 @@
 
     if (BoxEdit.on) {
       const m = location.search.match(/[?&]step=([0-9]+)/);
-      si = m ? Math.max(0, Math.min(STEPS.length - 1, parseInt(m[1], 10))) : 0;
-      const origFinger = window.pointFingerAt;
-      window.pointFingerAt = function (el, opts) {
-        origFinger(el, opts);
-        const fs = document.querySelectorAll('.js-point-finger');
-        const fg = fs[fs.length - 1];
-        if (!fg) return;
-        const dx = (opts && opts.dx) || 0, dy = (opts && opts.dy) || 0;
-        fg._base = [parseFloat(fg.style.left) - dx, parseFloat(fg.style.top) - dy];
-        fg.style.pointerEvents = 'auto';
-        fg._fg = 'STEPS[' + si + '].fg';
-        BoxEdit.tag(fg, [dx, dy]);
-      };
-      BoxEdit.init({
-        unit: 0.1,
-        name: () => '단계' + (si + 1),
-        apply: (el) => { const r = el._ref; if (el._base) { el.style.left = (el._base[0] + r[0]) + 'px'; el.style.top = (el._base[1] + r[1]) + 'px'; } else place(el, r); },
-        step: { count: STEPS.length, get: () => si, set: (n) => { si = n; }, go: (n) => { location.search = '?edit&step=' + n; }, label: (n) => '단계 ' + (n + 1) + ' / ' + STEPS.length }
+      si = m ? Math.max(0, Math.min(STEPS.length - 1, parseInt(m[1], 10) - 1)) : 0;
+      BoxEdit.stepEdit({
+        key: () => STEPS[si].hit || '?', unit: 1,
+        count: STEPS.length + 1, get: () => si + 1, set: (n) => { si = n - 1; }, go: (n) => { if (n < 1) return; BoxEdit.syncStep(n); go(n - 1); }, label: (n) => '단계 ' + n + ' / ' + STEPS.length,
+        say, bubble: $('p09Bubble'), img: $('p09Char')
       });
     }
     go(si);

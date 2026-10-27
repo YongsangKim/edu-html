@@ -45,8 +45,10 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default p08">
-          <p class="guide-bubble" id="p08Bubble"></p>
-          <div class="guide-character"><img src="../img/character/sa_main.png" alt="메인 캐릭터"></div>
+          <div class="guide-set is-main" id="p08Set">
+            <p class="guide-bubble is-center" id="p08Bubble"></p>
+            <div class="guide-character"><img id="p08Char" src="../img/character/sa_main.png" alt="메인 캐릭터"></div>
+          </div>
 
           <div class="phone-frame has-cam cv has-nav" id="p08Phone" data-screen="home">
             <div class="phone-screen">
@@ -136,6 +138,7 @@
   <script src="../../js/header.js" data-title="나만의 뉴스데스크 꾸미기" data-next="page09.html"></script>
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
+  <script src="../../js/box-edit.js"></script>
   <script>document.getElementById('kbdHost').outerHTML = kbdDbHtml();</script>
   <script>
   (function () {
@@ -145,15 +148,15 @@
       c: '화려한 연예 뉴스<br>스타일을 선택할까요?'
     };
     const STEPS = [
-      { bubble: '먼저, 템플릿을 골라볼까요?<br>아래의 ‘추천 템플릿’을<br>클릭해요.', screen: 'home', hit: 'template' },
+      { bubble: '먼저, 템플릿을 골라볼까요?<br>아래의 ‘추천 템플릿’을<br>클릭해요.', screen: 'home', hit: 'template', pose: 'wink_point4' },
       { bubble: '마음에 드는<br>템플릿을 선택해요.', screen: 'list', pick: 'tpl' },
-      { bubble: '뉴스 스타일을 선택했어요!<br>이제 아나운서 스티커를<br>붙여봐요.', screen: 'edit', next: true },
-      { bubble: '아래 편집 도구창에서<br>‘요소’를 클릭해요.', screen: 'edit', hit: 'elements' },
-      { bubble: '검색창을 클릭해요.', screen: 'elements', hit: 'searchbar' },
-      { bubble: '버튼을 눌러 ‘아나운서’를<br>입력하고 검색을 클릭해요.', screen: 'search', type: true },
-      { bubble: '버튼을 눌러 ‘아나운서’를<br>입력하고 검색을 클릭해요.', screen: 'search', typed: true, hit: 'search' },
+      { bubble: '뉴스 스타일을 선택했어요!<br>이제 아나운서 스티커를<br>붙여봐요.', screen: 'edit', next: true, pose: 'wink_open' },
+      { bubble: '아래 편집 도구창에서<br>‘요소’를 클릭해요.', screen: 'edit', hit: 'elements', pose: 'wink_point4' },
+      { bubble: '검색창을 클릭해요.', screen: 'elements', hit: 'searchbar', pose: 'wink_point' },
+      { bubble: '버튼을 눌러 ‘아나운서’를 입력하고 검색을 클릭해요.', screen: 'search', type: true },
+      { bubble: '버튼을 눌러 ‘아나운서’를 입력하고 검색을 클릭해요.', screen: 'search', typed: true, hit: 'search', pose: 'wink_point' },
       { bubble: '넣고 싶은<br>아나운서 스티커를 선택해요.', screen: 'stickers', pick: 'sticker' },
-      { bubble: '뉴스 데스크를 모두 꾸몄어요!<br>이제 본격적으로 뉴스를<br>만들어볼까요?', screen: 'edit', result: true, next: true, href: 'page09.html' }
+      { bubble: '뉴스 데스크를 모두 꾸몄어요!<br>이제 본격적으로 뉴스를<br>만들어볼까요?', screen: 'edit', result: true, next: true, pose: 'wink_present', href: 'page09.html' }
     ];
     const SEARCH = {
       list: { lead: '', text: '동영상 템플릿 검색', end: 'mic', title: '추천 템플릿' },
@@ -163,9 +166,9 @@
       stickers: { lead: 'plus', text: '아나운서', end: 'clear', filled: true, title: '검색 결과' }
     };
     const ICON = {
-      plus: '<svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg>',
-      back: '<svg viewBox="0 0 24 24"><path d="M20 12H4M10 6l-6 6 6 6"/></svg>',
-      mic: '<svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M6 11a6 6 0 0012 0M12 17v4"/></svg>',
+      plus: ICONS.plus,
+      back: ICONS.back,
+      mic: ICONS.mic,
       clear: '<span class="cv-clear">✕</span>'
     };
     const STICKER_LAYER = (s) => "url('img/p08_sticker_" + s + ".png') 0 36% / 66% auto no-repeat, ";
@@ -173,6 +176,7 @@
 
     const phone = $('p08Phone');
     const bubble = $('p08Bubble');
+    const say = initGuideSay({ bubble: bubble, img: $('p08Char'), set: $('p08Set') });
     const search = $('p08Search');
     const body = $('p08Body');
     const typeBtn = $('p08TypeBtn');
@@ -181,11 +185,16 @@
     const picks = Array.from(phone.querySelectorAll('.cv-pick'));
 
     const chosen = { tpl: '', sticker: '' };
+    // 손가락 위치 보정 [dx, dy] — 단계의 눌러야 할 곳(hit)별. ?edit 로 손가락을 눌러 맞춘 뒤 표시줄 값을 옮겨 적음
+    const FG = { template: [0, 0], elements: [0, 0], searchbar: [-30, -30], search: [0, 0] };
+    // 클릭 영역 보정 [dx, dy, dw, dh] — 버튼 모양은 그대로, 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
+    const HOT = { template: [0, 0, 0, 0], elements: [0, 0, 0, 0], searchbar: [0, 0, 0, 0], search: [0, 0, 0, 0] };
+    BoxEdit.hitPad(hits, HOT);
     let index = 0;
 
     function render() {
       const step = STEPS[index];
-      bubble.innerHTML = step.bubble;
+      say(step.bubble, step.pose || 'main');
       phone.dataset.screen = step.screen;
       phone.classList.toggle('is-typed', !!step.typed);
       phone.classList.toggle('is-edited', !!chosen.tpl && step.screen === 'edit');
@@ -212,22 +221,24 @@
       resetImageSwap(nextBtn);
 
       clearFingers();
-      hits.forEach((h) => h.classList.toggle('is-target', h.dataset.hit === step.hit));
+      hits.forEach((h) => h.classList.toggle('hit-pulse', h.dataset.hit === step.hit));
       const target = hits.find((h) => h.dataset.hit === step.hit);
       if (target) {
-        pointFingerAt(target, { onMain: true, beside: true, x: target === search ? 0.5 : 1 });
+        const fg = FG[step.hit] || [0, 0];
+        pointFingerAt(target, { onMain: true, beside: true, x: target === search ? 0.5 : 1, dx: fg[0], dy: fg[1] });
         // 하단 탭을 가리킬 때 손가락이 화면(960px) 아래로 잘리지 않게
-        document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.top = Math.min(parseFloat(f.style.top), 850) + 'px'; });
+        if (!BoxEdit.on) document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.top = Math.min(parseFloat(f.style.top), 850) + 'px'; });
       }
     }
 
     function go() {
       index += 1;
+      BoxEdit.syncStep(index + 1);
       render();
     }
 
     hits.forEach((h) => h.addEventListener('click', () => {
-      if (!h.classList.contains('is-target')) return;
+      if (!h.classList.contains('hit-pulse')) return;
       playClick();
       go();
     }));
@@ -239,7 +250,7 @@
       playClick();
       picks.forEach((b) => { if (b.dataset.kind === key) b.classList.toggle('is-selected', b === btn); });
       chosen[key] = btn.dataset.pick;
-      if (key === 'tpl') bubble.innerHTML = TPL_FEEDBACK[chosen.tpl];
+      if (key === 'tpl') say(TPL_FEEDBACK[chosen.tpl], STEPS[index].pose || 'main');
       nextBtn.classList.remove('is-off');
     }));
 
@@ -253,6 +264,17 @@
       setTimeout(go, 300);
     });
 
+    /* ?edit&step=N : 단계 N 으로 바로 열기(] [ 로 이동). 손가락(FG)·버튼 클릭 영역(HOT)을 클릭해 방향키로 조정(Alt+방향키 = 폭·높이). 앞 단계에서 고르는 값(템플릿 a · 스티커 1)은 미리 채움. 오른쪽 아래 포즈판에서 캐릭터 포즈를 눌러 본 뒤 STEPS 줄의 pose 에 옮겨 적음 */
+    const prep = () => { chosen.tpl = chosen.tpl || 'a'; chosen.sticker = index >= 7 ? (chosen.sticker || '1') : chosen.sticker; };
+    BoxEdit.stepEdit({
+      key: () => STEPS[index].hit || '?',
+      count: STEPS.length + 1,
+      get: () => index + 1,
+      set: (n) => { index = Math.max(0, Math.min(n, STEPS.length) - 1); if (index >= 2) prep(); },
+      go: (n) => { if (n < 1) return; index = n - 1; if (index >= 2) prep(); BoxEdit.syncStep(n); render(); },
+      label: (n) => '단계 ' + n + ' / ' + STEPS.length,
+      say, bubble, img: $('p08Char')
+    });
     render();
   })();
   </script>

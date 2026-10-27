@@ -66,6 +66,7 @@
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
   <script src="../../js/papago.js"></script>
+  <script src="../../js/box-edit.js"></script>
   <script>
   (function () {
     const SUBWAY = {
@@ -84,7 +85,7 @@
       { story: '공항에서 인사하는 미국인 친구와 한국인 학생 장면 삽화', cap: '미국인 친구가 한국에 놀러 왔어요!<br>공항에서 만나 지하철을 타고 이동하기로 했어요.' },
       { story: '지하철에서 미국인 친구가 임산부 배려석에 앉으려고 하는 장면 삽화', cap: '앗! 지하철에서 미국인 친구가 임산부 배려석에 앉으려고 해요.<br>친구에게 안내문에 적힌 규칙을 설명해줘요.' },
       { say: 'Papago를 클릭해요.', pose: 'wink_point2', screen: () => PP.launcher({ hot: ['app'] }), hot: 'app' },
-      { say: '음성인식 기능을 사용해서<br>미국인 친구에게 지하철의<br>규칙을 설명해봐요.', pose: 'wink_point2', screen: () => PP.home({ to: '영어', hot: ['voice'] }), hot: 'voice' },
+      { say: '음성인식 기능을 사용해서<br>미국인 친구에게 지하철의<br>규칙을 설명해봐요.', pose: 'wink_present', screen: () => PP.home({ to: '영어', hot: ['voice'] }), hot: 'voice' },
       { say: '오른쪽의 지하철 안내문을 잘 읽고 알맞은 내용을 클릭해요.', pose: 'main', screen: () => PP.voice({ to: '영어', state: 'listen' }), quiz: SUBWAY },
       { story: '친구에게 지하철의 규칙을 안내하는 장면 삽화', cap: '친구에게 지하철의 규칙을 안내했어요!<br>이제 서울 올림픽 공원으로 이동해봐요.' },
       { story: '올림픽 공원에서 산책하고 휴식을 취하는 사람들 삽화', cap: '서울 올림픽 공원에 도착했어요.<br>놀러 온 사람들이 아주 많네요.' },
@@ -96,13 +97,14 @@
     const story = $('p11Story'), set = $('p11Set'), phone = $('p11Phone'), screen = $('p11Screen'), panel = $('p11Panel'), next = $('p11Next');
     const say = initGuideSay({ bubble: $('p11Bubble'), img: $('p11Char'), set });
     let si = 0, found = 0, busy = false, handler = null;
-    let imgN = 0;
+    const FG = { app: [-10, -20], voice: [-10, -20] };
+    // 클릭 영역 보정 [dx, dy, dw, dh] — 버튼 모양은 그대로, 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
+    const HOT = { app: [0, 0, 0, 0], voice: [0, 0, 0, 0] };
+    const storyNo = (i) => STEPS.slice(0, i + 1).filter((x) => x.story).length;
 
     function show(html) { PP.mount(screen, html); }
     function finger(name) {
-      clearFingers();
-      const el = screen.querySelector('[data-hot="' + name + '"]');
-      if (el) setTimeout(() => { if (el.isConnected) pointFingerAt(el, { onMain: true, dx: -10, dy: -20 }); }, 300);
+      PP.finger(screen.querySelector('[data-hot="' + name + '"]'), { key: name, FG, HOT, noPulse: name === 'app' });
     }
 
     function go(n) {
@@ -112,15 +114,15 @@
       next.classList.add('is-off');
       panel.classList.add('is-off');
       handler = null;
+      $('p11Wrong').classList.add('is-off');
       if (s.story) {
-        imgN += 1;
         story.classList.remove('is-off');
         $('p11Set').style.display = 'none';
         $('p11Phone').style.display = 'none';
         $('p11Ph').textContent = s.story;
         const p = $('p11Pic');
         p.style.display = '';
-        p.src = 'img/p11_story_' + imgN + '.png';
+        p.src = 'img/p11_story_' + storyNo(si) + '.png';
         $('p11Cap').innerHTML = s.cap;
         return;
       }
@@ -172,11 +174,11 @@
         PP.speak(o[2], 'en-US', 'sa12_tts_' + q.tts + '_' + n + '_en.mp3', () => {
           busy = false;
           if (found >= 2) {
-            say('좋아요!<br>안내문의 모든 내용을 번역했어요.', 'wink_point4');
+            say('좋아요!<br>안내문의 모든 내용을 번역했어요.', 'wink_present');
             panel.classList.add('is-off');
             next.classList.remove('is-off');
           } else {
-            say('좋아요!<br>알맞은 내용을 찾아 번역했어요.', 'wink_point4');
+            say('좋아요!<br>알맞은 내용을 찾아 번역했어요.', 'wink_open');
           }
         });
       });
@@ -184,15 +186,26 @@
 
     screen.addEventListener('click', (e) => {
       const t = e.target.closest('[data-hot]');
-      if (t && handler) { playClick(); const h = handler; handler = null; clearFingers(); h(t.dataset.hot); }
+      if (t && handler && !BoxEdit.on) { playClick(); const h = handler; handler = null; clearFingers(); h(t.dataset.hot); }
     });
     $('p11StoryNext').addEventListener('click', () => {
+      if (BoxEdit.on) return;
       if (STEPS[si].last) { setTimeout(() => { location.href = 'page12.html'; }, 250); return; }
       go(si + 1);
     });
-    next.addEventListener('click', () => go(si + 1));
+    next.addEventListener('click', () => { if (!BoxEdit.on) go(si + 1); });
     $('p11WrongOk').addEventListener('click', () => $('p11Wrong').classList.add('is-off'));
-    go(0);
+    /* ?edit&step=N : 단계 N 으로 바로 열기(] [ 로 이동). 손가락(FG)·클릭 영역(HOT)을 클릭해 방향키로 조정(Alt+방향키 = 폭·높이), 오른쪽 아래 포즈판에서 포즈를 눌러 본 뒤 STEPS 줄의 pose 에 옮겨 적음 (_guide/steps.html 기준) */
+    BoxEdit.stepEdit({
+      key: () => STEPS[si].hot || '?',
+      count: STEPS.length + 1,
+      get: () => si + 1,
+      set: (n) => { si = Math.max(0, Math.min(n, STEPS.length) - 1); },
+      go: (n) => { if (n < 1) return; BoxEdit.syncStep(n); go(n - 1); },
+      label: (n) => '단계 ' + n + ' / ' + STEPS.length,
+      say, bubble: $('p11Bubble'), img: $('p11Char')
+    });
+    go(si);
   })();
   </script>
 </body>

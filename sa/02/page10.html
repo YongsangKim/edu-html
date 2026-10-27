@@ -64,8 +64,10 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default p10">
-          <p class="guide-bubble" id="p10Bubble"></p>
-          <div class="guide-character"><img src="../img/character/sa_main.png" alt="메인 캐릭터"></div>
+          <div class="guide-set is-main" id="p10Set">
+            <p class="guide-bubble is-center" id="p10Bubble"></p>
+            <div class="guide-character"><img id="p10Char" src="../img/character/sa_main.png" alt="메인 캐릭터"></div>
+          </div>
 
           <div class="phone-frame has-cam cv has-nav" id="p10Phone" data-screen="phone">
             <div class="phone-screen">
@@ -210,11 +212,12 @@
   <script src="../../js/header.js" data-title="나의 자랑거리를 소개하는 뉴스" data-next="page11.html"></script>
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
+  <script src="../../js/box-edit.js"></script>
   <script>document.getElementById('kbdHost').outerHTML = kbdDbHtml();</script>
   <script>
   (function () {
     // 기획서 28p: 앞 활동 없이 목차로 들어오면 기본 기사문 + 아침 뉴스·여자 아나운서 조합
-    const DEFAULT_ARTICLE = '오늘의 주인공은 매일 꾸준히 노력하여 스스로 세운 목표를 이뤘다고 합니다. 매우 자랑스러운 기분이라고 전해왔습니다.';
+    const DEFAULT_ARTICLE = '오늘의 주인공은 매일 꾸준히 연습해서 스스로 세운 목표를 이뤘다고 합니다. 매우 자랑스러운 기분이라고 전해왔습니다.';
     const DEFAULT_DESK = 'a1';
     const read = (k) => { try { return sessionStorage.getItem(k); } catch (e) { return null; } };
     const article = read('sa02_article') || DEFAULT_ARTICLE;
@@ -222,24 +225,25 @@
     const SHORT = article.split(' ').slice(0, 2).join(' ') + ' ···';
 
     const STEPS = [
-      { bubble: 'Canva를 클릭해요.', screen: 'phone', hit: 'canva' },
+      { bubble: 'Canva를 클릭해요.', screen: 'phone', hit: 'canva', pose: 'point_front' },
       { bubble: '앞서 내가 만든<br>템플릿을 클릭해요.', screen: 'app', hit: 'design' },
-      { bubble: '아래의 ‘텍스트’를<br>클릭해요.', screen: 'edit', hit: 'text' },
-      { bubble: '‘텍스트 상자 추가’<br>버튼을 클릭해요.', screen: 'text', hit: 'textbox' },
+      { bubble: '아래의 ‘텍스트’를<br>클릭해요.', screen: 'edit', hit: 'text', pose: 'wink_point4' },
+      { bubble: '‘텍스트 상자 추가’<br>버튼을 클릭해요.', screen: 'text', hit: 'textbox', pose: 'wink_point' },
       { bubble: '만들어 둔<br>나만의 기사문 블록을<br>입력해 볼까요?', screen: 'typing', txt: '단락 텍스트', sel: true, load: true },
-      { bubble: '체크 버튼을 눌러<br>텍스트 작업을 마무리해요.', screen: 'typing', txt: SHORT, sel: true, hit: 'check' },
+      { bubble: '체크 버튼을 눌러<br>텍스트 작업을 마무리해요.', screen: 'typing', txt: SHORT, sel: true, hit: 'check', pose: 'wink_present' },
       { bubble: '좋아요!<br>이제 AI 음성 보이스를<br>골라봐요.', screen: 'edit', txt: SHORT, next: true },
-      { bubble: '아래의 편집 도구창을<br>오른쪽으로 슬라이드 해요.', screen: 'edit', txt: SHORT, hit: 'swipe' },
-      { bubble: 'AI 음성 버튼을<br>클릭해요.', screen: 'edit', txt: SHORT, tools: true, hit: 'voice' },
-      { bubble: 'AI 음성 아이콘을 클릭하여<br>예시 음성을 들어보고<br>선택해요.', screen: 'voice', tools: true, voice: true },
+      { bubble: '아래의 편집 도구창을<br>오른쪽으로 슬라이드 해요.', screen: 'edit', txt: SHORT, hit: 'swipe', pose: 'wink_point4' },
+      { bubble: 'AI 음성 버튼을<br>클릭해요.', screen: 'edit', txt: SHORT, tools: true, hit: 'voice', pose: 'wink_point4' },
+      { bubble: 'AI 음성 아이콘을 클릭하여<br>예시 음성을 들어보고<br>선택해요.', screen: 'voice', tools: true, voice: true, pose: 'wink_present' },
       { bubble: '만들어 둔<br>나만의 기사문 블록을<br>다시 한 번 입력해요.', screen: 'voice', tools: true, voice: true, load: true },
-      { bubble: '‘AI 음성 생성’<br>버튼을 클릭해요.', screen: 'voice', tools: true, voice: true, filled: true, hit: 'make' },
-      { bubble: '좋아요!<br>‘완성하기’ 버튼을 눌러<br>뉴스 제작을 마무리해보세요.', screen: 'edit', txt: SHORT, tools: true, finish: true }
+      { bubble: '‘AI 음성 생성’<br>버튼을 클릭해요.', screen: 'voice', tools: true, voice: true, filled: true, hit: 'make', pose: 'wink_point4' },
+      { bubble: '좋아요!<br>‘완성하기’ 버튼을 눌러<br>뉴스 제작을 마무리해보세요.', screen: 'edit', txt: SHORT, tools: true, finish: true, pose: 'smile_present' }
     ];
     const TRACK_END = -372;
 
     const phone = $('p10Phone');
     const bubble = $('p10Bubble');
+    const say = initGuideSay({ bubble: bubble, img: $('p10Char'), set: $('p10Set') });
     const txt = $('p10Txt');
     const track = $('p10Track');
     const tabs = $('p10Tabs');
@@ -258,12 +262,17 @@
     phone.style.setProperty('--desk', "url('img/p08_sticker_" + desk.charAt(1) + ".png') 0 36% / 66% auto no-repeat, url('img/p08_tpl_" + desk.charAt(0) + ".png') center / cover no-repeat");
     phone.classList.add('is-edited');
 
+    // 손가락 위치 보정 [dx, dy] — 단계의 눌러야 할 곳(hit)별. ?edit 로 손가락을 눌러 맞춘 뒤 표시줄 값을 옮겨 적음
+    const FG = { canva: [15, -37], design: [0, 0], text: [0, 0], textbox: [80, -30], check: [0, 0], voice: [0, 0], make: [40, -30] };
+    // 클릭 영역 보정 [dx, dy, dw, dh] — 버튼 모양은 그대로, 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
+    const HOT = { canva: [0, 0, 0, 0], design: [0, 0, 0, 0], text: [0, 0, 0, 0], textbox: [0, 0, 0, 0], check: [0, 0, 0, 0], voice: [0, 0, 0, 0], make: [0, 0, 0, 0] };
+    BoxEdit.hitPad(hits, HOT);
     let index = 0;
     let voicePicked = false;
 
     function render() {
       const step = STEPS[index];
-      bubble.innerHTML = step.bubble;
+      say(step.bubble, step.pose || 'main');
       phone.dataset.screen = step.screen;
       phone.classList.toggle('has-text', !!step.txt);
       txt.textContent = step.txt || '';
@@ -282,16 +291,17 @@
       finishBtn.classList.toggle('is-off', !step.finish);
 
       clearFingers();
-      hits.forEach((h) => h.classList.toggle('is-target', h.dataset.hit === step.hit));
+      hits.forEach((h) => h.classList.toggle('hit-pulse', h.dataset.hit === step.hit));
       swipeFinger.classList.toggle('is-off', step.hit !== 'swipe');
       const target = hits.find((h) => h.dataset.hit === step.hit);
       if (target && step.hit !== 'swipe') {
         const at = index;
         const point = () => {
           if (index !== at) return;
-          pointFingerAt(target, step.hit === 'canva' ? { onMain: true, dx: 15, dy: -37 } : { onMain: true, beside: true });
+          const fg = FG[step.hit] || [0, 0];
+          pointFingerAt(target, step.hit === 'canva' ? { onMain: true, dx: fg[0], dy: fg[1] } : { onMain: true, beside: true, dx: fg[0], dy: fg[1] });
           // 하단 탭·버튼을 가리킬 때 손가락이 화면(960px) 아래로 잘리지 않게
-          document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.top = Math.min(parseFloat(f.style.top), 850) + 'px'; });
+          if (!BoxEdit.on) document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.top = Math.min(parseFloat(f.style.top), 850) + 'px'; });
         };
         if (target.closest('.cv-track')) setTimeout(point, 450); else point();
       }
@@ -299,11 +309,12 @@
 
     function go() {
       index += 1;
+      BoxEdit.syncStep(index + 1);
       render();
     }
 
     hits.forEach((h) => h.addEventListener('click', () => {
-      if (!h.classList.contains('is-target') || h.dataset.hit === 'swipe') return;
+      if (!h.classList.contains('hit-pulse') || h.dataset.hit === 'swipe') return;
       playClick();
       go();
     }));
@@ -384,6 +395,16 @@
       }
     });
 
+    /* ?edit&step=N : 단계 N 으로 바로 열기(] [ 로 이동). 손가락(FG)·버튼 클릭 영역(HOT)을 클릭해 방향키로 조정(Alt+방향키 = 폭·높이). 오른쪽 아래 포즈판에서 캐릭터 포즈를 눌러 본 뒤 STEPS 줄의 pose 에 옮겨 적음 */
+    BoxEdit.stepEdit({
+      key: () => STEPS[index].hit || '?',
+      count: STEPS.length + 1,
+      get: () => index + 1,
+      set: (n) => { index = Math.max(0, Math.min(n, STEPS.length) - 1); },
+      go: (n) => { if (n < 1) return; index = n - 1; BoxEdit.syncStep(n); render(); },
+      label: (n) => '단계 ' + n + ' / ' + STEPS.length,
+      say, bubble, img: $('p10Char')
+    });
     render();
   })();
   </script>

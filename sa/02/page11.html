@@ -59,14 +59,22 @@
   <script>
   (function () {
     const read = (k) => { try { return sessionStorage.getItem(k); } catch (e) { return null; } };
-    const article = read('sa02_article') || '오늘의 주인공은 매일 꾸준히 노력하여 스스로 세운 목표를 이뤘다고 합니다. 매우 자랑스러운 기분이라고 전해왔습니다.';
+    // 기사문 9가지(행동 3 × 결과 3) — page06 에서 만든 문장과 같은 순서·같은 글. 음성 파일 번호(행동_결과)가 이 순서와 같음
+    const ARTICLES = [
+      '오늘의 주인공은 매일 꾸준히 연습해서 스스로 세운 목표를 이뤘다고 합니다.', '오늘의 주인공은 매일 꾸준히 연습해서 대회에 출전하여 상을 받았습니다.', '오늘의 주인공은 매일 꾸준히 연습해서 부모님과 선생님께 칭찬을 받았습니다.',
+      '오늘의 주인공은 친구의 이야기를 잘 들어줘서 부모님과 선생님께 칭찬을 받았습니다.', '오늘의 주인공은 친구의 이야기를 잘 들어줘서 진심을 담은 감사 인사를 받았습니다.', '오늘의 주인공은 친구의 이야기를 잘 들어줘서 친구와의 사이가 좋아졌다고 합니다.',
+      '오늘의 주인공은 수업 시간에 열심히 참여해서 공부에 자신감이 생겼다고 합니다.', '오늘의 주인공은 수업 시간에 열심히 참여해서 부모님과 선생님께 칭찬을 받았습니다.', '오늘의 주인공은 수업 시간에 열심히 참여해서 어려웠던 시험에서 좋은 점수를 받았습니다.'
+    ].map((s) => s + ' 매우 자랑스러운 기분이라고 전해왔습니다.');
+    const article = read('sa02_article') || ARTICLES[0];
     const desk = read('sa02_desk') || 'a1';
 
     const screen = document.getElementById('p11Screen');
     const caption = document.getElementById('p11CaptionText');
     const playBtn = document.getElementById('p11PlayBtn');
-    const voice = read('sa02_voice') || 'yuna';
-    const pick = read('sa02_pick') || '1_1';
+    // 목소리: 10페이지에서 고른 것, 없으면 고른 아나운서(스티커 1 여자 · 2 남자)에 맞춤. 번호: 기사문 글에서 찾고(없으면 저장된 번호, 그것도 없으면 1_1)
+    const voice = read('sa02_voice') || (desk.charAt(1) === '2' ? 'minjun' : 'yuna');
+    const at = ARTICLES.indexOf(article);
+    const pick = at >= 0 ? (Math.floor(at / 3) + 1) + '_' + (at % 3 + 1) : (read('sa02_pick') || '1_1');
     const tts = new Audio('sound/p11_tts_' + voice + '_' + pick + '.m4a');
     tts.addEventListener('error', () => { tts.src = 'sound/p11_tts.m4a'; });
     tts.preload = 'auto';

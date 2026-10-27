@@ -77,7 +77,6 @@
     let pi = 0, on = false, busy = false, mark = null, toastTimer = 0;
     if (BoxEdit.on) document.body.classList.add('is-edit');
 
-    const place = (el, b) => { el.style.cssText = 'left:' + b[0] + '%;top:' + b[1] + '%;width:' + b[2] + '%;height:' + b[3] + '%'; };
     const px = (b) => [b[0] * W / 100, b[1] * H / 100, b[2] * W / 100, b[3] * H / 100];
     function say(t) {
       toast.textContent = t;
@@ -92,7 +91,7 @@
       mark = document.createElement('div');
       mark.className = 'p07-box';
       photo.appendChild(mark);
-      place(mark, PHOTOS[pi].box);
+      placePct(mark, PHOTOS[pi].box);
       BoxEdit.tag(mark, PHOTOS[pi].box);
       busy = false;
     }
@@ -166,8 +165,8 @@
       BoxEdit.init({
         unit: 0.1,
         name: () => '사진' + (pi + 1) + ' 개인정보',
-        apply: (el) => place(el, el._ref),
-        step: { count: PHOTOS.length, get: () => pi, set: (n) => { pi = n; }, go: (n) => { location.search = '?edit&step=' + n; }, label: (n) => '사진 ' + (n + 1) + ' / ' + PHOTOS.length }
+        apply: (el) => placePct(el, el._ref),
+        step: { count: PHOTOS.length, get: () => pi, set: (n) => { pi = n; }, go: (n) => { pi = n; BoxEdit.syncStep(n); $('p07Done').classList.add('is-off'); render(); }, label: (n) => '사진 ' + (n + 1) + ' / ' + PHOTOS.length }
       });
     }
     render();

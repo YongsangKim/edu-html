@@ -16,8 +16,10 @@
       <div id="stage" class="stage">
         <main class="bg-default">
 
-          <p class="guide-bubble" id="p13Guide">이렇게 이모티콘을 사용하면<br>자신의 마음을 더 분명하게<br>전달할 수 있어요.</p>
-          <div class="guide-character"><img id="p13Char" src="../img/character/sa_wink_open.png" alt="메인 캐릭터"></div>
+          <div class="guide-set is-wink-open" id="p13Set">
+            <p class="guide-bubble is-center" id="p13Guide"></p>
+            <div class="guide-character"><img id="p13Char" src="../img/character/sa_wink_open.png" alt="메인 캐릭터"></div>
+          </div>
 
           <div class="phone-frame has-cam cf-phone"><div class="phone-screen" id="cfScreen">
             <div class="phone-status is-dark"></div>
@@ -51,48 +53,68 @@
     const input = document.getElementById('p13Input');
     const panel = document.getElementById('p13Panel');
     const next = document.getElementById('p13Next');
+    const say = initGuideSay({ bubble: guide, img: character, set: document.getElementById('p13Set') });
     const play = makeSfx('sound/click.mp3');
     // 상호작용에서 고른 이모티콘 중 4종만 노출
     const USED = ['stk_dog_thanks', 'stk_sad', 'stk_party', 'stk_cry', 'stk_comfort', 'stk_cheer'];
-    // 눌러야 할 곳 좌표 [x, y, 폭, 높이](폰 화면 기준). ?edit 으로 열면 두 곳이 한꺼번에 보이고, 맞춘 값을 여기에 붙여 넣음
-    const HOT = { open: [327, 468, 48, 48], tab: [144, 575, 84, 38, 10] };   // 5번째 값은 모서리(없으면 원)
-    const radiusOf = (b) => (b[4] === undefined ? '50%' : typeof b[4] === 'number' ? b[4] + 'px' : b[4]);
+    // 눌러야 할 곳 = 폰 화면 안의 실제 요소: 이름 → [CSS 선택자, 글자(앞부분)]
+    const TARGET = { open: ['#cfScreen .cf-bar .cf-smile'], tab: ['#cfScreen .cf-tabs span', '이모티콘'] };
+    // 클릭 영역 보정 [dx, dy, dw, dh] — 버튼 모양은 그대로, 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
+    const HOT = { open: [-6, -5, 10, 10], tab: [-7.3, -3, 10.3, 6] };
+    // 손가락 위치 보정 [dx, dy] — 눌러야 할 곳별. ?edit 로 손가락을 눌러 맞춘 뒤 표시줄 값을 옮겨 적음
+    const FG = { open: [4, 5], tab: [3, 3] };
+    let fgKey = '?';
     let hot = null;
+    let hotFn = null;
     let phase = 0;
+    let cur = 1;
 
     function clearHot() {
-      if (hot) { hot.remove(); hot = null; }
+      if (hot) {
+        hot.removeEventListener('click', hotFn);
+        hot.classList.remove('hit-pulse');
+        hot.removeAttribute('data-hit');
+        hot.querySelectorAll(':scope > hit-pad').forEach((p) => p.remove());
+        hot = null;
+      }
       clearFingers();
     }
     function setHot(name, fn) {
       clearHot();
-      const [x, y, w, h] = HOT[name];
-      hot = document.createElement('button');
-      hot.type = 'button';
-      hot.className = 'cf-hot';
-      hot.style.cssText = 'left:' + x + 'px;top:' + y + 'px;width:' + w + 'px;height:' + h + 'px;border-radius:' + radiusOf(HOT[name]);
-      hot.addEventListener('click', () => { play(); clearHot(); fn(); });
-      screen.appendChild(hot);
+      const t = TARGET[name];
+      hot = Array.from(screen.querySelectorAll(t[0])).filter((e) => !t[1] || e.textContent.trim().indexOf(t[1]) === 0)[0];
+      hot.dataset.hit = name;
+      hot.classList.add('hit-pulse');
+      BoxEdit.padEl(hot, name, HOT);
+      hotFn = () => { if (BoxEdit.on) return; play(); clearHot(); fn(); };
+      hot.addEventListener('click', hotFn);
       const mine = hot;
-      setTimeout(() => { if (mine.isConnected) pointFingerAt(mine, { onMain: true }); }, 300);
+      fgKey = name;
+      setTimeout(() => { if (mine.isConnected) pointFingerAt(mine, { onMain: true, dx: FG[name][0], dy: FG[name][1] }); }, 300);
     }
     function showNext(on) {
       next.classList.toggle('is-off', !on);
       next.classList.remove('is-selected');
     }
 
+    function leavePhone() {
+      chat.classList.add('is-tall');
+      input.classList.add('is-bottom');
+      panel.style.display = 'none';
+    }
     function stepIntro1() {
       phase = 0;
-      guide.innerHTML = '이렇게 이모티콘을 사용하면<br>자신의 마음을 더 분명하게<br>전달할 수 있어요.';
+      leavePhone();
+      say('이렇게 이모티콘을 사용하면<br>자신의 마음을 더 분명하게<br>전달할 수 있어요.', 'wink_open');
       showNext(true);
     }
     function stepIntro2() {
       phase = 1;
-      guide.innerHTML = '내가 사용한 이모티콘도<br>한 번에 모아보는 것도 가능해요.<br>함께 확인해볼까요?';
+      leavePhone();
+      say('내가 사용한 이모티콘도<br>한 번에 모아보는 것도 가능해요.<br>함께 확인해볼까요?', 'wink_open');
       showNext(true);
     }
     function enterPhone() {
-      character.src = '../img/character/sa_wink_point.png';
       chat.classList.remove('is-tall');
       input.classList.remove('is-bottom');
       panel.style.display = '';
@@ -102,7 +124,7 @@
     function stepOpen() {
       phase = 2;
       enterPhone();
-      guide.innerHTML = '이모티콘 버튼을 클릭해요.';
+      say('이모티콘 버튼을 클릭해요.', 'wink_point');
       showNext(false);
       setHot('open', stepTab);
     }
@@ -110,13 +132,13 @@
       phase = 2;
       panel.style.backgroundImage = 'none';
       panel.innerHTML = cfUI.searchSheet();
-      guide.innerHTML = '이모티콘 탭을 클릭해요.';
+      say('이모티콘 탭을 클릭해요.', 'wink_point');
       setHot('tab', stepBook);
     }
     function stepBook() {
       phase = 3;
       panel.innerHTML = cfUI.emojiSheet() + '<div class="cf-recent">' + USED.map((n) => '<img src="img/' + n + '.png" alt="">').join('') + '</div>';
-      guide.innerHTML = '최근 사용한 이모티콘을<br>한 번에 모아볼 수 있는<br>나만의 이모티콘 수첩이에요!';
+      say('최근 사용한 이모티콘을<br>한 번에 모아볼 수 있는<br>나만의 이모티콘 수첩이에요!', 'wink_point');
       showNext(true);
     }
 
@@ -127,31 +149,18 @@
       else if (phase === 3) setTimeout(() => navigateTo('page14.html'), 300);
     });
 
-    if (BoxEdit.on) {
-      enterPhone();
-      panel.style.backgroundImage = 'none';
-      panel.innerHTML = cfUI.searchSheet();
-      showNext(false);
-      const NAME = { open: '이모티콘 버튼', tab: '이모티콘 탭' };
-      const place = (el) => { const b = el._ref; el.style.left = b[0] + 'px'; el.style.top = b[1] + 'px'; el.style.width = b[2] + 'px'; el.style.height = b[3] + 'px'; el.style.borderRadius = radiusOf(b); };
-      Object.keys(HOT).forEach((k) => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'cf-hot';
-        b.dataset.name = NAME[k];
-        b.style.animation = 'none';
-        BoxEdit.tag(b, HOT[k]);
-        place(b);
-        screen.appendChild(b);
-      });
-      BoxEdit.init({ name: (el) => '[' + el.dataset.name + '] ', apply: place });
-      guide.textContent = '좌표 수정 모드 — 버튼을 클릭해 방향키로 맞춰요(Shift 10px, Alt+방향키 크기)';
-      return;
-    }
-
     const STEPS = [stepIntro1, () => { stepIntro2(); }, stepOpen, () => { enterPhone(); stepTab(); }, () => { enterPhone(); stepBook(); }];
+    const run = (n) => { clearHot(); (STEPS[n - 1] || stepIntro1)(); };
     const want = parseInt(new URLSearchParams(location.search).get('step'), 10);
-    (STEPS[want - 1] || stepIntro1)();
+    /* ?edit&step=N : 단계 N 으로 바로 열기(] [ 로 이동). 손가락(FG)·클릭 영역(HOT = [x, y, 폭, 높이(, 모서리])을 클릭해 방향키로 조정, 오른쪽 아래 포즈판에서 포즈를 골라 say(문구, 포즈) 에 옮겨 적음 (_guide/steps.html 기준) */
+    if (BoxEdit.on) {
+      cur = want >= 1 && want <= STEPS.length ? want : 1;
+      BoxEdit.stepEdit({
+        key: () => fgKey, count: STEPS.length + 1, get: () => cur, set: (n) => { cur = n; }, go: (n) => { if (n < 1) return; cur = n; BoxEdit.syncStep(n); run(n); }, label: (n) => '단계 ' + n + ' / ' + STEPS.length,
+        say, bubble: guide, img: character
+      });
+    }
+    run(BoxEdit.on ? cur : (want >= 1 && want <= STEPS.length ? want : 1));
   })();
   </script>
 </body>
