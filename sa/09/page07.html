@@ -10,31 +10,37 @@
            → 완성되면 직업·말투를 sessionStorage(sa09_job, sa09_style)에 저장하고 안내 팝업 2개 → page08 */
 
         .p07-person{position:absolute;top:210px;width:480px;height:560px;box-sizing:border-box;padding:0;border:solid 5px var(--c-ink);border-radius:24px;overflow:hidden;background:var(--c-white);cursor:pointer;display:flex;flex-direction:column}
-        .p07-person:hover{border-color:var(--c-sky)}
+        .p07-person:hover{border-color:#8278ff}
+        .p07-person:active{border-color:#ff4ff9}
         .p07-person i{flex:1 1 auto;background:var(--c-white) center / cover no-repeat}
         .p07-person span{flex:0 0 80px;display:flex;align-items:center;justify-content:center;padding-top:6px;background:var(--c-white);font-family:'Cafe24 Ssurround';font-size:64px;color:var(--c-ink);letter-spacing:-0.05em;line-height:1}
 
-        .p07-me{left:60px;top:190px;width:410px;height:410px;cursor:default}
-        .p07-me:hover{border-color:var(--c-ink)}
-        .p07-me i{background-size:contain;background-position:center bottom;background-repeat:no-repeat}
-        .p07-me span{background:var(--c-sky);color:var(--c-ink)}
+        .p07-pickbg{position:absolute;left:100px;top:164px;width:1720px;height:654px;border-radius:20px;background:#266cc8}
+
+        .p07-me{left:50px;top:172px;width:465px;height:435px;cursor:default}
+        .p07-me,.p07-me:hover,.p07-me:active{border-color:#91b9e7}
+        .p07-me.is-hot,.p07-me.is-hot:hover,.p07-me.is-hot:active{border-color:#023187}
+        .p07-me i{background-size:contain;background-position:center bottom;background-repeat:no-repeat;background-color:transparent}
+        .p07-me span{flex-basis:110px;background:#266cc8;color:var(--c-white)}
+        .p07-me:not(.is-hot){overflow:visible}
+        .p07-me:not(.is-hot) i{position:absolute;left:-40px;top:-37px;width:468px;height:475px;background-position:left bottom}
+        .p07-me:not(.is-hot) span{display:none}
         .p07-me.is-hot{animation:p07-hot .5s ease 3}
         .p07-me.is-hot i{background-size:cover;background-position: 0 0;}
-        .p07-me.is-hot span{background:#f4b400}
         @keyframes p07-hot{50%{transform:scale(1.04)}}
 
-        .p07-input{position:absolute;left:530px;top:230px;width:1340px;height:385px;box-sizing:border-box;background:var(--c-white);border:solid 5px var(--c-navy);border-radius:20px;box-shadow:0 10px 0 0 rgba(86,148,231,.2)}
-        .p07-input-tab{position:absolute;left:30px;top:-62px;height:62px;padding:8px 40px 0;box-sizing:border-box;display:flex;align-items:center;background:var(--c-navy);border-radius:20px 20px 0 0;font-family:'Cafe24 Ssurround';font-size:38px;color:var(--c-white);letter-spacing:-0.04em}
+        .p07-input{position:absolute;left:530px;top:172px;width:1343px;height:460px;box-sizing:border-box;overflow:hidden;background:var(--c-white);border:solid 5px #91b9e7;border-radius:24px}
+        .p07-input-tab{position:absolute;left:0;top:0;width:100%;height:100px;padding-top:8px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:#023187;font-family:'Cafe24 Ssurround';font-size:50px;color:var(--c-white);letter-spacing:-0.04em}
         .p07-blank{position:absolute;width:360px;height:110px;box-sizing:border-box;background:#d6d6d6;border:solid 8px #bdbdbd;border-radius:26px;display:flex;align-items:center;justify-content:center;text-align:center;
           font-family:'Cafe24 Ssurround';font-size:30px;line-height:1.15;letter-spacing:-0.04em;color:#8c8c93}
-        .p07-blank[data-filled]{background:none;border-color:transparent}
+        .p07-blank[data-filled]{background:none;border:0}
         .p07-blank[data-filled] .p07-hint{display:none}
-        .p07-blank.b1{left:60px;top:55px}
-        .p07-blank.b2{left:490px;top:55px}
-        .p07-blank.b3{left:920px;top:55px}
-        .p07-blank.b4{left:60px;top:215px}
-        .p07-blank.b5{left:490px;top:215px}
-        .p07-blank.b6{left:920px;top:215px}
+        .p07-blank.b1{left:57px;top:140px}
+        .p07-blank.b2{left:487px;top:140px}
+        .p07-blank.b3{left:917px;top:140px}
+        .p07-blank.b4{left:57px;top:290px}
+        .p07-blank.b5{left:487px;top:290px}
+        .p07-blank.b6{left:917px;top:290px}
 
         .p07-tab{left:52px;top:615px}
         .jig-tray.p07-tray{top:699px;height:250px;padding:0 40px;flex-wrap:wrap;justify-content:center;align-content:center;gap:5px 24px}
@@ -45,7 +51,7 @@
         .p07-card.is-job{background:linear-gradient(180deg,#4e97ff,#7272fe)}
         .p07-card.is-tail{background:linear-gradient(180deg,#b463ca,#a043ed)}
         .p07-card.is-dragging{cursor:grabbing;z-index:50}
-        .p07-blank .p07-card{cursor:default;width:100%;height:100%;border-radius:18px}
+        .p07-blank .p07-card{cursor:default;width:100%;height:100%;border-radius:26px}
 
         .p07-popup{z-index:130}
     </style>
@@ -58,12 +64,13 @@
         <main class="bg-default">
 
           <div id="p07Pick">
+            <div class="p07-pickbg"></div>
             <p class="ask-pill"><span>누구와 이야기하고 싶나요?</span></p>
           </div>
 
           <div id="p07Build" style="display:none">
             <p class="ask-pill is-small is-fit"><span>프롬프트 블록을 알맞은 자리에 조립해 가상의 안전 지킴이를 만나보세요!</span></p>
-            <div class="p07-person p07-me" id="p07Me"><i id="p07Char" style="background-image:url('../img/character/sa_main.png')"></i><span id="p07MeName">아로</span></div>
+            <div class="p07-person p07-me" id="p07Me"><i id="p07Char" style="background-image:url('img/p07_aro.png')"></i><span id="p07MeName">아로</span></div>
 
             <div class="p07-input">
               <span class="p07-input-tab">프롬프트 입력창</span>

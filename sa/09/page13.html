@@ -9,24 +9,24 @@
         /* 기획서 54~64p. AI 인물 5명의 말(사실 O / 거짓 X)을 하나씩 판별. 맞으면 정답 팝업, 틀리면 고른 카드가 흔들리고 오답 팝업(확인 → 같은 문제로 돌아감).
            마지막 문제를 맞히면 배지 팝업 → page14. 인물 사진 img/p13_{id}.png (없으면 회색 칸) */
         /* 기획서 54p 구조: 위쪽 AI 인물 카드(사진+AI 직업명) + 말풍선, 가운데 가로선 위에 질문 상자, 아래 O/X 카드 2장 */
-        .p13-person{position:absolute;left:354px;top:190px;width:327px;height:350px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:24px;overflow:hidden;background:var(--c-white);display:flex;flex-direction:column}
-        .p13-person i{flex:1 1 auto;background:var(--c-mist) center / cover no-repeat}
-        .p13-person span{flex:0 0 76px;display:flex;align-items:center;justify-content:center;padding-top:6px;background:var(--c-sky);font-family:'Cafe24 Ssurround';font-size:46px;color:var(--c-white);letter-spacing:-0.05em;line-height:1}
+        .p13-panel{position:absolute;left:97px;top:163px;width:1725px;height:748px;box-sizing:border-box;border:solid 5px #266cc8;border-radius:16px;background:linear-gradient(#266cc8 0 370px,#fff 370px)}
+        .p13-person{position:absolute;left:124px;top:185px;width:791px;height:331px;box-sizing:border-box;padding:5px 5px 0;border-radius:14px;overflow:hidden;background:var(--c-white);display:flex;flex-direction:column}
+        .p13-person i{flex:1 1 auto;border-radius:10px 10px 0 0;background:var(--c-mist) 0 0 / cover no-repeat}
+        .p13-person span{flex:0 0 77px;display:flex;align-items:center;justify-content:center;padding-top:6px;background:var(--c-white);font-family:'Cafe24 Ssurround';font-size:50px;color:var(--c-ink);letter-spacing:-0.05em;line-height:1}
 
-        .p13-say{position:absolute;left:789px;top:225px;width:816px;height:279px;box-sizing:border-box;padding:30px 40px 24px;display:flex;align-items:center;justify-content:center;text-align:center;
-          background:var(--c-cream);border:solid 5px var(--c-purple);border-radius:30px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
-          font-family:'Cafe24 Ssurround';font-size:54px;line-height:1.35;color:var(--c-purple);letter-spacing:-0.05em;word-break:keep-all}
-        .p13-say:before{content:'';position:absolute;left:-52px;top:50%;margin-top:-30px;width:0;height:0;border-style:solid;border-width:30px 52px 30px 0;border-color:transparent var(--c-purple) transparent transparent}
-        .p13-say:after{content:'';position:absolute;left:-36px;top:50%;margin-top:-22px;width:0;height:0;border-style:solid;border-width:22px 38px 22px 0;border-color:transparent var(--c-cream) transparent transparent}
+        .p13-say{position:absolute;left:982px;top:206px;width:790px;height:286px;box-sizing:border-box;padding:20px 40px;display:flex;align-items:center;justify-content:center;text-align:center;
+          background:var(--c-white);border:solid 5px #053c85;border-radius:22px;box-shadow:0 9px 0 #2961b9;
+          font-family:'Cafe24 Ssurround';font-size:50px;line-height:1.3;color:#266cc8;letter-spacing:-0.05em;word-break:keep-all}
+        .p13-say:before{content:'';position:absolute;left:-52px;top:50%;margin-top:-30px;width:0;height:0;border-style:solid;border-width:30px 52px 30px 0;border-color:transparent #053c85 transparent transparent}
+        .p13-say:after{content:'';position:absolute;left:-41px;top:50%;margin-top:-23px;width:0;height:0;border-style:solid;border-width:23px 42px 23px 0;border-color:transparent var(--c-white) transparent transparent}
 
-
-        .p13-opt{position:absolute;top:585px;width:540px;height:350px;box-sizing:border-box;padding:10px 20px 10px;border:0;border-radius:30px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:space-between;background:none;
+        .p13-opt{position:absolute;top:552px;width:540px;height:326px;box-sizing:border-box;padding:0 20px;border:0;border-radius:30px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:space-between;background:none;
           font-family:'Cafe24 Ssurround';font-size:64px;line-height:1.1;color:var(--c-ink);letter-spacing:-0.05em;white-space:nowrap}
         .p13-opt img{width:250px;height:auto;display:block}
         .p13-opt:hover img{transform:scale(1.08)}
         .p13-opt img{transition:transform .15s}
         .p13-opt.is-o{left:370px}
-        .p13-opt.is-x{left:1010px}
+        .p13-opt.is-x{left:1011px}
         .p13-opt.is-wrong{animation:p13-shake .4s}
         @keyframes p13-shake{20%{transform:translateX(-14px)}40%{transform:translateX(14px)}60%{transform:translateX(-10px)}80%{transform:translateX(10px)}}
         .p13-opt:disabled{cursor:default;pointer-events:none}
@@ -40,6 +40,7 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
+          <div class="p13-panel"></div>
           <div class="p13-person"><i id="p13Photo"></i><span id="p13Name"></span></div>
           <div class="p13-say" id="p13Say"></div>
           <p class="ask-pill is-fit"><span>AI의 답변은 사실일까요 거짓일까요?</span></p>
