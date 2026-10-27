@@ -6,16 +6,21 @@
     <title>존중을 전하는 문장 만들기</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 기획서 12~17p. 인권 존중 포스터 2장의 빈칸(문구 일부를 가린 ?)에 들어갈 말을 보기 3개 중 고르기. 맞으면 빈칸이 사라지며 포스터 원본이 보이고 2초 뒤 다음 문제, 틀리면 카드 흔들림 + 오답 팝업(확인). 두 문제 뒤 활동 종료 팝업.
-           포스터 img/p05_poster_{1,2}.png(기획서 그림, 문구가 그림에 들어 있음). 빈칸 위치는 그림 속 문구 자리 기준 % */
+        /* 기획서 12~17p. 인권 존중 포스터 2장의 빈칸(문구 일부를 가린 ?)에 들어갈 말을 보기 3개 중 고르기. 맞으면 빈칸 자리에 고른 말이 나타나고 2초 뒤 다음 문제, 틀리면 카드 흔들림 + 오답 팝업(확인). 두 문제 뒤 활동 종료 팝업.
+           포스터 사진 img/p05_poster_{1,2}.png(글자 없음). 문구 앞부분(.p05-lead)과 빈칸 위치는 사진 기준 % */
 
-        .p05-poster{position:absolute;left:92px;top:181px;width:1228px;height:690px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:20px;background:var(--c-white) center / cover no-repeat;overflow:hidden}
-        .p05-blank{position:absolute;display:flex;align-items:center;justify-content:center;background:var(--c-white);border-radius:14px;font-family:'Cafe24 Ssurround';font-size:110px;color:var(--c-purple);transition:opacity .4s}
+        .p05-frame{position:absolute;left:36px;top:95px;width:1848px;height:835px;background:var(--c-navy);border-radius:15px}
+        .p05-poster{position:absolute;left:75px;top:171px;width:1227px;height:735px;box-sizing:border-box;border:solid 5px var(--c-white);border-radius:20px;background:var(--c-white) center / cover no-repeat;overflow:hidden}
+        .p05-blank{position:absolute;box-sizing:border-box;display:flex;align-items:center;justify-content:center;padding-top:15px;background:var(--c-white);border:solid 10px #2d5ee6;border-radius:20px;font-family:'Cafe24 Ssurround';font-size:105px;color:#2d5ee6;transition:opacity .4s}
         .p05-blank.is-off{opacity:0;pointer-events:none}
+        .p05-lead,.p05-ans{position:absolute;margin:0;display:flex;align-items:center;font-family:'Cafe24 Ssurround';font-size:112px;line-height:1;color:#2d5ee6;letter-spacing:-0.04em;white-space:nowrap;-webkit-text-stroke:16px var(--c-white);paint-order:stroke fill}
+        .p05-lead{left:8.3%;top:6.2%;height:16.6%}
+        .p05-ans{justify-content:center;opacity:0;transition:opacity .4s}
+        .p05-ans.is-on{opacity:1}
 
-        .p05-opts{position:absolute;left:1386px;top:266px;width:452px;height:520px;box-sizing:border-box;padding:34px 40px;display:flex;flex-direction:column;justify-content:space-between;background:var(--c-navy);border-radius:15px}
+        .p05-opts{position:absolute;left:1325px;top:171px;width:539px;height:735px;box-sizing:border-box;padding:95px 23px 0;display:flex;flex-direction:column;gap:42px;background:#2d6fd6;border-radius:12px}
         .p05-opts.is-locked{pointer-events:none}
-        .p05-opts .card-btn{width:100%;min-width:0;height:130px;padding:6px 10px 0;font-size:48px}
+        .p05-opts .card-btn{width:100%;min-width:0;height:150px;padding:6px 10px 0;font-size:70px}
     </style>
 </head>
 <body>
@@ -24,9 +29,10 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
+          <div class="p05-frame"></div>
           <p class="ask-pill is-fit">빈칸에 들어갈 알맞은 말을 선택해보세요.</p>
-          <div class="p05-poster" id="p05Poster"><div class="p05-blank" id="p05Blank">?</div></div>
-          <div class="p05-opts" id="p05Opts"></div>
+          <div class="p05-poster" id="p05Poster"><p class="p05-lead" id="p05Lead"></p><div class="p05-blank" id="p05Blank">?</div><p class="p05-ans" id="p05Ans"></p></div>
+          <div class="p05-opts opts" id="p05Opts"></div>
 
           <div class="avatar-modal is-wrong is-off" id="p05Wrong">
             <div class="avatar-popup-panel">
@@ -59,12 +65,12 @@
   <script>
   (function () {
     const QUESTIONS = [
-      { poster: 'p05_poster_1', blank: [56.5, 6, 39, 19], opts: [
+      { poster: 'p05_poster_1', lead: '우리는 모두', blank: [55.6, 5.8, 37.5, 17.0], opts: [
         { t: '키가 커요', hint: '사람마다 키와 힘은 달라요.<br>키나 힘에 관계없이 우리는 모두 소중해요.' },
         { t: '힘이 세요', hint: '사람마다 키와 힘은 달라요.<br>키나 힘에 관계없이 우리는 모두 소중해요.' },
         { t: '소중해요', right: true }
       ] },
-      { poster: 'p05_poster_2', blank: [55, 5.5, 35, 20], opts: [
+      { poster: 'p05_poster_2', lead: '서로 다름을', blank: [55.6, 6.2, 37.5, 16.6], opts: [
         { t: '고쳐봐요', hint: '나와 다르다고 잘못된 것은 아니에요.<br>꼭 고칠 필요는 없어요.' },
         { t: '존중해요', right: true },
         { t: '숨겨봐요', hint: '나와 다르다는 이유로 친구의 모습을<br>숨기게 할 필요는 없어요.' }
@@ -72,14 +78,20 @@
     ];
     const poster = $('p05Poster');
     const blank = $('p05Blank');
+    const ans = $('p05Ans');
     const box = $('p05Opts');
     let index = 0;
 
     function show() {
       const q = QUESTIONS[index];
       poster.style.backgroundImage = "url('img/" + q.poster + ".png')";
-      blank.style.cssText = 'left:' + q.blank[0] + '%;top:' + q.blank[1] + '%;width:' + q.blank[2] + '%;height:' + q.blank[3] + '%';
+      const pos = 'left:' + q.blank[0] + '%;top:' + q.blank[1] + '%;width:' + q.blank[2] + '%;height:' + q.blank[3] + '%';
+      $('p05Lead').textContent = q.lead;
+      blank.style.cssText = pos;
       blank.classList.remove('is-off');
+      ans.style.cssText = pos;
+      ans.textContent = q.opts.find((o) => o.right).t;
+      ans.classList.remove('is-on');
       box.classList.remove('is-locked');
       box.innerHTML = '';
       q.opts.forEach((o) => {
@@ -105,6 +117,7 @@
       b.classList.add('is-selected');
       box.classList.add('is-locked');
       blank.classList.add('is-off');
+      ans.classList.add('is-on');
       setTimeout(() => {
         if (index === QUESTIONS.length - 1) { $('p05Done').classList.remove('is-off'); return; }
         index += 1;

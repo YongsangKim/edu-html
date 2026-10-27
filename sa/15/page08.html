@@ -130,24 +130,21 @@
     const PDF = '<span class="gn-pdf">PDF</span>';
     const topbar = (t) => '<div class="gn-bar">' + ICON.back + '<em class="is-title">' + t + '</em>' + ICON.share + ICON.more + '</div>';
     const TAB_ICON = {
-      source: ['<path d="M3.2 5.7A1.6 1.6 0 014.8 4.1h4.4l2 2.1h8A1.6 1.6 0 0121 7.8v10.5a1.6 1.6 0 01-1.6 1.6H4.8a1.6 1.6 0 01-1.6-1.6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M7.5 11.2h9M7.5 14.9h5.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"/>',
-        '<path fill-rule="evenodd" d="M3.2 5.7A1.6 1.6 0 014.8 4.1h4.4l2 2.1h8A1.6 1.6 0 0121 7.8v10.5a1.6 1.6 0 01-1.6 1.6H4.8a1.6 1.6 0 01-1.6-1.6zM7.2 10.4v1.7h9.6v-1.7zM7.2 14v1.7h5.6V14z" fill="currentColor"/>'],
-      chat: ['<path d="M3.4 4.6A1.6 1.6 0 015 3h9.4A1.6 1.6 0 0116 4.6v5.2a1.6 1.6 0 01-1.6 1.6H7.6l-4.2 3.8z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M18 8h1.4A1.6 1.6 0 0121 9.6v10.8l-3.8-3.4H9.6A1.6 1.6 0 018 15.4v-1.9h6.4A3.6 3.6 0 0018 9.9z" fill="currentColor"/>',
-        '<path d="M3.4 4.6A1.6 1.6 0 015 3h9.4A1.6 1.6 0 0116 4.6v5.2a1.6 1.6 0 01-1.6 1.6H7.6l-4.2 3.8z" fill="currentColor"/><path d="M18 8h1.4A1.6 1.6 0 0121 9.6v10.8l-3.8-3.4H9.6A1.6 1.6 0 018 15.4v-1.9h6.4A3.6 3.6 0 0018 9.9z" fill="currentColor"/>'],
-      studio: ['<path fill-rule="evenodd" d="M4.1 19.9a1.2 1.2 0 010-1.7L12.6 9.7a2 2 0 012.8 0l.9.9a2 2 0 010 2.8l-8.5 8.5a1.2 1.2 0 01-1.7 0zM12 12.4l-1.9 1.9 1.1 1.1 1.9-1.9z" fill="currentColor"/><path d="M18.4 2.6l1.1 2.5 2.5 1.1-2.5 1.1-1.1 2.5-1.1-2.5-2.5-1.1 2.5-1.1zM6.4 3.6l.9.9-.9.9-.9-.9zM18 14.4l.9.9-.9.9-.9-.9z" fill="currentColor"/>']
+      source: [ICONS.nbSource, ICONS.nbSourceOn],
+      chat: [ICONS.nbChat, ICONS.nbChatOn],
+      studio: [ICONS.nbStudio, ICONS.nbStudio]
     };
-    TAB_ICON.studio[1] = TAB_ICON.studio[0];
-    const tabs = (on) => '<div class="gn-tabs">' + [['source', '소스'], ['chat', '채팅'], ['studio', '스튜디오']].map(([k, l]) => '<div' + (on === k ? ' class="is-on"' : '') + ' data-tab="' + k + '"><span class="p07-ico"><svg viewBox="0 0 24 24">' + TAB_ICON[k][on === k ? 1 : 0] + '</svg></span>' + l + '</div>').join('') + '</div>';
+    const tabs = (on) => '<div class="gn-tabs">' + [['source', '소스'], ['chat', '채팅'], ['studio', '스튜디오']].map(([k, l]) => '<div' + (on === k ? ' class="is-on"' : '') + ' data-tab="' + k + '"><span class="p07-ico">' + TAB_ICON[k][on === k ? 1 : 0] + '</span>' + l + '</div>').join('') + '</div>';
     const fab = (txt, id) => '<div class="gn-fab" style="bottom:150px"><span class="gn-cam"><img src="' + I + 'gn_photo.png" alt=""></span><span class="gn-btn" id="' + (id || '') + '">＋ ' + txt + '</span></div>';
     const TILES = [
-      ['audio', '<path d="M3 11.3v1.4M6.4 9v6M9.8 5.5v13M13.2 8.4v7.2M16.4 10.6v2.8"/><path d="M18.6 2.6l1 2.3 2.3 1-2.3 1-1 2.3-1-2.3-2.3-1 2.3-1z" fill="currentColor" stroke="none"/>', 'AI 오디오 오버뷰'],
-      ['video', '<path d="M8.4 3.2h7.2M6.4 5.6h11.2"/><rect x="3" y="8.2" width="18" height="12" rx="2.2"/><path d="M10.2 11.4v5.6l4.8-2.8z" fill="currentColor" stroke="none"/>', 'AI 동영상 오버뷰'],
-      ['slide', '<rect x="3" y="6" width="18" height="12" rx="1.7"/><path d="M6.2 6v12M17.8 6v12"/>', '슬라이드 자료'],
-      ['card', '<path d="M5 7.2l.7 9.9a2 2 0 002 1.9l10.7-.9"/><rect x="8" y="3.7" width="12" height="12" rx="2.2"/><path d="M14 7.6l.9 1.9 2.1.3-1.5 1.5.4 2.1-1.9-1-1.9 1 .4-2.1-1.5-1.5 2.1-.3z" fill="currentColor" stroke="none"/>', '플래시카드'],
-      ['quiz', '<path d="M6.4 5.7H6A2.2 2.2 0 003.8 7.9v10a2.2 2.2 0 002.2 2.2h11.8"/><rect x="6.9" y="3.8" width="13.3" height="12.7" rx="2.2"/><path d="M11.5 8.6a2.3 2.3 0 014.4.8c0 1.7-2.2 1.9-2.2 3.6M13.7 14.6v.1"/>', '퀴즈'],
-      ['info', '<path d="M3.4 8.4h3.1V20H3.4zM9 11.6h3V20H9zM14.4 14.2h3V20h-3z" fill="currentColor" stroke="none"/><path d="M3.4 4.4h3.1v2.2H3.4zM9 7.8h3V10H9zM14.4 10.4h3v2.2h-3z" fill="currentColor" stroke="none"/>', '인포그래픽'],
-      ['report', '<path d="M6.4 5.7H6A2.2 2.2 0 003.8 7.9v10a2.2 2.2 0 002.2 2.2h11.8"/><path d="M11.7 3.8H9.2A2.2 2.2 0 007 6v8.4a2.2 2.2 0 002.2 2.2h9.1a2.2 2.2 0 002.2-2.2v-2.2"/><path d="M17.6 3.5l1 2.7 2.7 1-2.7 1-1 2.7-1-2.7-2.7-1 2.7-1z" fill="currentColor" stroke="none"/>', '보고서'],
-    ].map(([c, s, l]) => '<button type="button" class="gn-tile is-' + c + '" data-tile="' + c + '"><svg viewBox="0 0 24 24">' + s + '</svg>' + l + '</button>').join('');
+      ['audio', ICONS.nbAudio, 'AI 오디오 오버뷰'],
+      ['video', ICONS.nbVideo, 'AI 동영상 오버뷰'],
+      ['slide', ICONS.film, '슬라이드 자료'],
+      ['card', ICONS.nbCard, '플래시카드'],
+      ['quiz', ICONS.nbQuiz, '퀴즈'],
+      ['info', ICONS.nbInfo, '인포그래픽'],
+      ['report', ICONS.nbReport, '보고서'],
+    ].map(([c, s, l]) => '<button type="button" class="gn-tile is-' + c + '" data-tile="' + c + '">' + s + l + '</button>').join('');
 
     $('p07MdX').addEventListener('click', () => $('p07Md').classList.remove('is-on'));
     new MutationObserver(() => initPhoneBars()).observe(scr, { childList: true, subtree: true });
@@ -264,7 +261,7 @@
     }
     /* 8 슬라이드 자료 */
     function s8() {
-      scr.innerHTML = ST('9:44') + topbar('우리 동네 안전 PPT 슬라이드') + '<div class="gn-grid-title">새로 생성</div><div class="gn-grid">' + TILES + '</div><div class="gn-empty"><svg viewBox="0 0 24 24" class="p07-wand">' + TAB_ICON.studio[1] + '</svg>스튜디오 출력이 여기에 저장됩니다</div>' + tabs('studio') + NAV;
+      scr.innerHTML = ST('9:44') + topbar('우리 동네 안전 PPT 슬라이드') + '<div class="gn-grid-title">새로 생성</div><div class="gn-grid">' + TILES + '</div><div class="gn-empty">' + ic('nbStudio', 'class="p07-wand"') + '스튜디오 출력이 여기에 저장됩니다</div>' + tabs('studio') + NAV;
       say('‘슬라이드 자료’를 클릭하세요.', 'wink_point');
       const t = scr.querySelector('[data-tile="slide"]');
       t.onclick = () => { playClick(); go(s9); };
@@ -279,7 +276,7 @@
       { q: '슬라이드 방향은 어떻게 할까요?', ok: '가로형', no: '세로형' },
     ];
     function s9() {
-      scr.innerHTML = ST('9:45') + '<div class="gn-set"><svg class="gn-set-x" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg><div class="gn-set-ico"><svg viewBox="0 0 24 24"><path d="M8 4v2M7 5h2M18.5 9.5l-9 9L6 19l.5-3.5 9-9z"/></svg></div><p class="gn-set-title">슬라이드 맞춤설정</p><p class="gn-set-lab">언어</p><div class="gn-chips"><span class="gn-chip is-fill">한국어(기본)</span></div><p class="gn-set-lab">소스</p><div class="gn-chips"><span class="gn-chip is-fill">2</span></div><p class="gn-set-lab">프롬프트</p><div class="gn-text" id="p07Prompt" style="min-height:230px">질문에 답하면 프롬프트가 여기에 만들어져요.</div></div>';
+      scr.innerHTML = ST('9:45') + '<div class="gn-set">' + ic('x', 'class="gn-set-x"') + '<div class="gn-set-ico">' + ic('wandS') + '</div><p class="gn-set-title">슬라이드 맞춤설정</p><p class="gn-set-lab">언어</p><div class="gn-chips"><span class="gn-chip is-fill">한국어(기본)</span></div><p class="gn-set-lab">소스</p><div class="gn-chips"><span class="gn-chip is-fill">2</span></div><p class="gn-set-lab">프롬프트</p><div class="gn-text" id="p07Prompt" style="min-height:230px">질문에 답하면 프롬프트가 여기에 만들어져요.</div></div>';
       say('질문에 답하며,<br>프롬프트를 입력해볼까요?', 'main');
       setSide(QS.map((x, i) => '<div class="p07-q" data-i="' + i + '"' + (i ? ' style="display:none"' : '') + '><h5>' + x.q + '</h5><div>' + shuffleArray([['1', x.ok], ['', x.no]]).map(([o, t]) => '<button type="button" data-ok="' + o + '">' + t + '</button>').join('') + '</div></div>').join(''));
       const parts = [];
@@ -314,12 +311,12 @@
     /* 11 생성 중 7초 */
     function s11() {
       say('생성 중이에요..', 'main');
-      scr.innerHTML = ST('9:45') + topbar('우리 동네 안전 PPT 슬라이드') + '<div class="gn-grid-title">새로 생성</div><div class="gn-grid">' + TILES + '</div><div class="gn-gen"><div class="gn-gen-card"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="1.7"/><path d="M6.2 6v12M17.8 6v12"/></svg><div><b>생성 중…</b><small>잠시 후 다시 시도해 주세요</small></div></div><span class="gn-ghost">닫기</span></div>' + tabs('studio') + NAV;
+      scr.innerHTML = ST('9:45') + topbar('우리 동네 안전 PPT 슬라이드') + '<div class="gn-grid-title">새로 생성</div><div class="gn-grid">' + TILES + '</div><div class="gn-gen"><div class="gn-gen-card">' + ic('film') + '<div><b>생성 중…</b><small>잠시 후 다시 시도해 주세요</small></div></div><span class="gn-ghost">닫기</span></div>' + tabs('studio') + NAV;
       setTimeout(() => go(s12), 7000);
     }
     /* 12 생성 완료 → 열기 */
     function s12() {
-      scr.innerHTML = ST('9:57') + topbar('우리 동네 안전 PPT 슬라이드') + '<div class="gn-grid-title">새로 생성</div><div class="gn-grid">' + TILES + '</div><div class="gn-out" id="p07Out"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="1.7"/><path d="M6.2 6v12M17.8 6v12"/></svg><div><b>에듀테크 AI 학습 경험 설계 블루프린트</b><small>소스 2개 • 방금</small></div></div>' + tabs('studio') + NAV;
+      scr.innerHTML = ST('9:57') + topbar('우리 동네 안전 PPT 슬라이드') + '<div class="gn-grid-title">새로 생성</div><div class="gn-grid">' + TILES + '</div><div class="gn-out" id="p07Out">' + ic('film') + '<div><b>에듀테크 AI 학습 경험 설계 블루프린트</b><small>소스 2개 • 방금</small></div></div>' + tabs('studio') + NAV;
       say('슬라이드가 생성 되었어요!<br>확인해볼까요?', 'wink_point3');
       $('p07Out').onclick = () => { playClick(); go(s13); };
       finger('#p07Out', 'open');

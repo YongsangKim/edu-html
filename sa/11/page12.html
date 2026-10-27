@@ -9,7 +9,7 @@
         /* 기획서 73~81p. 도입(2초 뒤 출발!) → 생활 속 상황 7개: 두 보기 중 배려하고 존중하는 쪽을 고르면 정답 효과음과 함께 왼쪽 지도 위 메인 캐릭터가 길을 따라 한 칸 이동, 틀리면 카드 흔들림(오답 효과음). 마지막 정답 뒤 도착(2초) → page13.
            지도는 기획서처럼 건물 12칸(4×3) 사이의 길(교차점 5×4). 출발(왼쪽 아래) → 도착(오른쪽 위), 정답 보기 카드의 화살표(위쪽 카드 ↑, 아래쪽 카드 →)가 이동 방향. 정답 위치는 기획서 슬라이드 순서대로 고정 */
 
-        .p12-board{position:absolute;left:72px;top:35px;width:1074px;height:857px;box-sizing:border-box;border-radius:10px;background:#cfe8b5 center / 100% 100% no-repeat}
+        .p12-board{position:absolute;left:41px;top:48px;width:1074px;height:857px;box-sizing:border-box;border-radius:10px;background:#cfe8b5 center / 100% 100% no-repeat}
         .p12-board.is-fallback{border:solid 6px var(--c-purple)}
         .p12-road{position:absolute;left:0;top:0;width:100%;height:100%}
         .p12-board:not(.is-fallback) .p12-flag{display:none}
@@ -21,8 +21,9 @@
         @keyframes p12-trail{to{stroke-dashoffset:0}}
         .p12-char{position:absolute;left:0;top:0;width:auto;max-width:none;transform:translate(-50%,-100%);transition:left 1.1s ease,top 1.1s ease;z-index:3;pointer-events:none}
 
-        .p12-q{position:absolute;left:1190px;top:30px;width:700px;height:240px;margin:0;display:flex;align-items:center;justify-content:center;text-align:center;font-family:'Cafe24 Ssurround';font-size:58px;line-height:1.3;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all}
-        .p12-opts{position:absolute;left:1243px;top:300px;width:620px;height:520px}
+        .p12-panel{position:absolute;left:1121px;top:48px;width:756px;height:857px;box-sizing:border-box;border:solid 5px var(--c-purple);background:#dff6ff;border-radius:15px}
+        .p12-q{position:absolute;left:1149px;top:70px;width:700px;height:240px;margin:0;display:flex;align-items:center;justify-content:center;text-align:center;font-family:'Cafe24 Ssurround';font-size:58px;line-height:1.2;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all}
+        .p12-opts{position:absolute;left:1189px;top:340px;width:620px;height:520px}
         .p12-card{position:absolute;left:0;width:620px;height:190px;box-sizing:border-box;padding:0 30px 0 26px;display:flex;align-items:center;gap:24px;text-align:left;border:solid 6px var(--c-purple);border-radius:30px;background:var(--c-white);cursor:pointer;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
           font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.25;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all;transition:border-color .15s,background .15s}
         .p12-card:nth-of-type(1){top:0}
@@ -36,8 +37,14 @@
         .p12-opts.is-locked{pointer-events:none}
         .p12-opts.is-off,.p12-q.is-off{display:none}
 
-        .p12-big{position:absolute;left:1243px;top:0;width:620px;height:960px;margin:0;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:130px;color:var(--c-purple);letter-spacing:-0.05em}
+        .p12-big{position:absolute;left:1121px;top:48px;width:756px;height:857px;margin:0;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:130px;color:var(--c-purple);letter-spacing:-0.05em}
         .p12-big.is-off{display:none}
+        .p12-arrive.is-off{display:none}
+        .p12-bubble{position:absolute;left:1224px;top:96px;width:498px;height:226px;margin:0;box-sizing:border-box;padding-top:10px;display:flex;align-items:center;justify-content:center;border:solid 5px var(--c-purple);border-radius:20px;background:var(--c-white);font-family:'Cafe24 Ssurround';font-size:130px;color:var(--c-purple);letter-spacing:-0.05em;z-index:2;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p12-bubble:before,.p12-bubble:after{content:'';position:absolute;clip-path:polygon(0 0,100% 0,100% 100%)}
+        .p12-bubble:before{left:190px;top:100%;width:86px;height:58px;background:var(--c-purple)}
+        .p12-bubble:after{left:196px;top:calc(100% - 6px);width:70px;height:50px;background:var(--c-white);z-index:1}
+        .p12-robot{position:absolute;right:0px;bottom:28px;height:776px;width:auto;pointer-events:none}
     </style>
 </head>
 <body>
@@ -53,9 +60,14 @@
             <img class="p12-char" id="p12Char" alt="캐릭터">
           </div>
 
+          <div class="p12-panel"></div>
           <p class="p12-big" id="p12Big">출발!</p>
           <p class="p12-q is-off" id="p12Q"></p>
           <div class="p12-opts is-off" id="p12Opts"></div>
+          <div class="p12-arrive is-off" id="p12Arrive">
+            <p class="p12-bubble">도착!</p>
+            <img class="p12-robot" src="img/p12_arrive.png" onerror="this.onerror=null;this.src='img/p13_character.png'" alt="메인 캐릭터">
+          </div>
         </main>
       </div>
     </div>
@@ -91,8 +103,8 @@
       { pos: 'bottom', q: '학급 대표 후보가 되고 싶은 학생을 모집해요. 어떻게 정할까요?', right: '원하는 학생 모두에게<br>후보가 될 기회를 줘요.', wrong: '잘할 것 같은 학생만<br>후보로 정해요.' }
     ];
     const ARROWS = {
-      top: '<i><svg viewBox="0 0 24 24"><path d="M12 20V5M6 11l6-6 6 6"/></svg></i>',
-      bottom: '<i><svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg></i>'
+      top: '<i>' + ic('arrowUp') + '</i>',
+      bottom: '<i>' + ic('arrowR2') + '</i>'
     };
     const W = 1074, H = 857;
     const road = $('p12Road');
@@ -177,8 +189,7 @@
         if (step < QUESTIONS.length) { showQuestion(); return; }
         qBox.classList.add('is-off');
         optsBox.classList.add('is-off');
-        big.textContent = '도착!';
-        big.classList.remove('is-off');
+        $('p12Arrive').classList.remove('is-off');
         setTimeout(() => navigateTo('page13.html'), 2000);
       }, 1300);
     }
