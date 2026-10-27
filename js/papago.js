@@ -7,7 +7,6 @@
    PP.text({from,to,input,kb,sug,result:{big,pron},hot:['input','sug','enter'],time})
    PP.lang({sel,hot:['한국어','영어',…],time}) */
 (function () {
-  const S = (d, a) => '<svg viewBox="0 0 24 24"' + (a ? ' ' + a : '') + '>' + d + '</svg>';
   const I = {
     mic: ICONS.mic,
     talk: ICONS.talk,
@@ -109,7 +108,7 @@
           '<div class="kbd-db-row"><span class="is-fn">' + I.shift + '</span>' + 'ㅋㅌㅊㅍㅠㅜㅡ'.split('').map((c) => '<span>' + c + '</span>').join('') + '<span class="is-fn">⌫</span></div>' +
           '<div class="kbd-db-row"><span class="is-fn">!#1</span><span class="is-fn">한/영</span><span class="is-wide">한국어</span><span>.</span><span class="is-go"' + h('enter') + '>이동</span></div></div></div>';
       }
-      return '<div class="pp">' + status(o, true) + '<div class="pp-bar">' + I.back + langRow(o, h) + '<svg class="is-r" viewBox="0 0 24 24">' + '<path d="M5 8h9M18 8h1M5 16h1M10 16h9"/><circle cx="16" cy="8" r="2"/><circle cx="8" cy="16" r="2"/></svg></div>' +
+      return '<div class="pp">' + status(o, true) + '<div class="pp-bar">' + I.back + langRow(o, h) + '' + ic('set', 'class="is-r"') + '</div>' +
         '<div class="pp-x">' + I.x + '</div>' +
         '<div class="pp-in">' + (hasIn ? chips : '') + '<p' + h('input') + '>' + (hasIn ? o.input : '<span class="caret"></span><span class="ph">번역할 내용을 입력하세요</span>') + '</p></div>' + tr + kb + (o.kb ? '' : nav()) + '</div>';
     },

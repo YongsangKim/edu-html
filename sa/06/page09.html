@@ -228,7 +228,6 @@
 
     const ALL = ['p09Load', 'p09Genres', 'p09Next'];
     const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    const sv = (d, extra) => '<svg viewBox="0 0 24 24"' + (extra || '') + '>' + d + '</svg>';
     const IC = {
       chev: ICONS.chev,
       plus: ICONS.plus,
@@ -299,7 +298,7 @@
       c1 += circ('is-wand', 396, 24, IC.wand, 's6Wand1');
       const br1 = filled ? 275 : 197;
       c1 += A('s6-ic', 'left:22px;top:' + br1 + 'px;width:50px;height:50px', IC.lib);
-      c1 += A('s6-chip', 'left:87px;top:' + (br1 + 1) + 'px;width:146px;background:rgba(255,255,255,.4);border:1px solid rgba(0,0,0,.08)', '<svg viewBox="0 0 24 24" style="fill:#111;stroke:none"><circle cx="12" cy="12" r="10"/><path d="M7 12.5l3.5 3.5L17 9" stroke="#fff" stroke-width="2.6" fill="none"/></svg>인스트루멘탈');
+      c1 += A('s6-chip', 'left:87px;top:' + (br1 + 1) + 'px;width:146px;background:rgba(255,255,255,.4);border:1px solid rgba(0,0,0,.08)', '' + ic('checkCircle', 'style="fill:#111;stroke:none"') + '인스트루멘탈');
       c1 += '<button type="button" id="s6Exp1" class="a s6-ic" style="left:388px;top:' + br1 + 'px;width:50px;height:50px;border:0;padding:0;background:none">' + IC.expand + '</button>';
       h += A('s6-card s6-lyr', 'left:20px;top:227px;width:457px;height:' + H1 + 'px', c1).replace('class="a s6-card s6-lyr"', 'class="a s6-card' + (o.lyrHot ? ' hit-pulse' : '') + '" id="s6Lyr"');
 
@@ -351,7 +350,7 @@
 
     function bannerUI(ready) {
       let h = '<div class="a s6-banner' + (ready ? ' is-ready' : '') + '"' + (ready ? '' : ' style="background:#7a2517"') + '>';
-      if (ready) h += '<div class="th"></div><div class="tx" style="left:97px">노래가 준비되었습니다. 탭하여 재생하세요!</div><div class="pl">' + sv('<path d="M8 5v14l11-7z"/>') + '</div>';
+      if (ready) h += '<div class="th"></div><div class="tx" style="left:97px">노래가 준비되었습니다. 탭하여 재생하세요!</div><div class="pl">' + ICONS.play + '</div>';
       else h += '<div class="tx" style="left:29px">멋진 그루브가 탄생하고 있어요</div><div class="ring"></div>';
       return h + '</div>';
     }
@@ -368,7 +367,7 @@
       } else {
         const desc = GENRE_NAME[state.genre] || '';
         [1, 2].forEach((n, k) => {
-          h += '<div class="a s6-row hit-pulse p09-song" data-n="' + n + '" style="top:' + (367 + k * 87) + 'px"><div class="th"></div><div class="t"><svg class="eq" viewBox="0 0 15 15"><rect x="0" y="0" width="3.4" height="15" rx="1"/><rect x="5.8" y="3" width="3.4" height="12" rx="1"/><rect x="11.6" y="1" width="3.4" height="14" rx="1"/></svg>재화와 서비스<small>V6-MINI</small></div><div class="d">' + esc(desc) + '</div><button type="button" class="more is-off" aria-label="더보기">' + IC.dots + '</button></div>';
+          h += '<div class="a s6-row hit-pulse p09-song" data-n="' + n + '" style="top:' + (367 + k * 87) + 'px"><div class="th"></div><div class="t">' + ic('eqBars', 'class="eq"') + '재화와 서비스<small>V6-MINI</small></div><div class="d">' + esc(desc) + '</div><button type="button" class="more is-off" aria-label="더보기">' + IC.dots + '</button></div>';
         });
       }
       h += nav('lib') + sysnav();

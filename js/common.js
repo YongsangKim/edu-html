@@ -2348,6 +2348,7 @@ function resetImageSwap(root) {
 const ICONS = {
   // 같은 뜻을 여러 페이지가 함께 쓰는 것
   back: '<svg viewBox="0 0 24 24"><path d="M19 12H5M11 5l-7 7 7 7"/></svg>',
+  forward: '<svg viewBox="0 0 24 24"><g transform="translate(24 0) scale(-1 1)"><path d="M19 12H5M11 5l-7 7 7 7"/></g></svg>',
   check: '<svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>',
   chev: '<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>',
   dotsH: '<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>',
@@ -2356,12 +2357,12 @@ const ICONS = {
   mic: '<svg viewBox="0 0 24 24"><rect x="8.5" y="2.5" width="7" height="12" rx="3.5"/><path d="M5 11.5a7 7 0 0014 0M12 18.5v3"/></svg>',
   mute: '<svg viewBox="0 0 24 24"><path d="M4 9.5v5h4l5 4v-13l-5 4zM17 9.5l4 5M21 9.5l-4 5"/></svg>',
   plus: '<svg viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></svg>',
-  redo: '<svg viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 000 12h3"/></svg>',
-  share: '<svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.2"/><circle cx="17" cy="6" r="2.2"/><circle cx="17" cy="18" r="2.2"/><path d="M8 11l7-4M8 13l7 4"/></svg>',
+  redo: '<svg viewBox="0 0 24 24"><path d="M15 13l5-5-5-5"/><path d="M20 8H10a6 6 0 000 12h3"/></svg>',
+  share: '<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.6l6.8-4M8.6 13.4l6.8 4"/></svg>',
   trash: '<svg viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><path d="m9.4 16.5 2.6-2.6 2.6 2.6 1.4-1.4-2.6-2.6L16 9.9l-1.4-1.4-2.6 2.6-2.6-2.6L8 9.9l2.6 2.6L8 15.1zM7 21q-.824 0-1.412-.587A1.93 1.93 0 0 1 5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .824-.587 1.413A1.93 1.93 0 0 1 17 21zM17 6H7v13h10z"/></g></svg>',
-  undo: '<svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/></svg>',
+  undo: '<svg viewBox="0 0 24 24"><path d="M9 13L4 8l5-5"/><path d="M4 8h10a6 6 0 010 12h-3"/></svg>',
   // 같은 뜻이지만 다른 모양(원래 페이지의 디자인 그대로)
-  dotsV: '<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg>',
+  dotsV: '<svg viewBox="0 0 24 24"><path d="M12 6h.01M12 12h.01M12 18h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>',
   expandDiag: '<svg viewBox="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>',
   plusCircle: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M6.5 12h11M12 6.5v11"/></svg>',
   shareUp: '<svg viewBox="0 0 32 32"><g fill="currentColor" stroke="none"><path d="M14.9844 7.86035H6.31445C6.26941 7.86048 6.20467 7.881 6.13574 7.96582C6.06494 8.05326 6.00394 8.19678 6.00391 8.37988V25.2871C6.00409 25.47 6.06495 25.6139 6.13574 25.7012C6.20455 25.7857 6.26947 25.8065 6.31445 25.8066H25.6973C25.7422 25.8065 25.8072 25.7857 25.876 25.7012C25.9468 25.6139 26.0076 25.47 26.0078 25.2871V21.4189H28.0068V25.2871C28.0065 26.6608 27.0793 27.9997 25.6973 28H6.31445C4.93238 27.9997 4.00526 26.6608 4.00488 25.2871V8.37988C4.00495 7.00596 4.93215 5.66727 6.31445 5.66699H14.9844V7.86035ZM28.0049 12.2646L22.3594 18.4277L20.9434 16.8799L24.2285 13.2939H18.8027C17.3144 13.2939 16.2659 13.8154 15.582 14.6348C14.8872 15.4678 14.458 16.7431 14.458 18.4639V20.3584H12.458V18.4639C12.458 16.3564 12.9876 14.4968 14.1074 13.1543C15.2392 11.7981 16.8649 11.1006 18.8027 11.1006H24.1064L20.9434 7.64844L22.3594 6.10059L28.0049 12.2646Z"/></g></svg>',
@@ -2379,7 +2380,7 @@ const ICONS = {
   corner: '<svg viewBox="0 0 24 24"><path d="M5 20v-4a10 10 0 0110-10h2"/><circle cx="19" cy="6" r="1.6" fill="currentColor"/><circle cx="5" cy="20" r="1.6" fill="currentColor"/></svg>',
   crown: '<svg viewBox="0 0 100 100"><g fill="currentColor" stroke="none"><path d="M16 63L17.5 24C17.8 21.2 20.6 19.6 23.2 20.7L38 27L50 14C51.3 12.6 53.5 12.6 54.8 14L66.8 27L81.6 20.7C84.2 19.6 87 21.2 87.3 24L88.8 63C89 65.5 87 67.5 84.5 67.5H20.3C17.8 67.5 15.8 65.5 16 63Z"/><rect x="16" y="74.5" width="72.8" height="10" rx="3.5"/></g></svg>',
   distort: '<svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M3.5 9.2h17M3.5 14.8h17M9.2 3.5v17M14.8 3.5v17"/></svg>',
-  doc: '<svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>',
+  doc: '<svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM15 3v4h4"/></svg>',
   edit: '<svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg>',
   fade: '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8v8M12 8v8M16 8v8"/></svg>',
   filter: '<svg viewBox="0 0 24 24"><circle cx="9" cy="9.5" r="5.5"/><circle cx="14.5" cy="14.5" r="5.5"/></svg>',
@@ -2413,9 +2414,9 @@ const ICONS = {
   play: '<svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg>',
   prev: '<svg viewBox="0 0 24 24"><path d="M8.5 5v14M20 5l-10 7 10 7z"/></svg>',
   refresh: '<svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 01-14 5.3M4 12a8 8 0 0114-5.3M18 3v4h-4M6 21v-4h4"/></svg>',
-  rot: '<svg viewBox="0 0 16 16"><g fill="currentColor" stroke="none" transform="rotate(-90 8 8)"><path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2z"/><path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466"/></g></svg>',
+  rot: '<svg viewBox="0 0 24 24"><g transform="translate(24 0) scale(-1 1)"><path d="M20 12a8 8 0 11-2.4-5.7M20 4v5h-5"/></g></svg>',
   scissors: '<svg viewBox="0 0 24 24"><circle cx="7" cy="7" r="2.8"/><circle cx="17" cy="7" r="2.8"/><path d="M9 9l9 11M15 9L6 20"/></svg>',
-  search: '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l5 5"/></svg>',
+  search: '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>',
   set: '<svg viewBox="0 0 24 24"><path d="M5 8h9M18 8h1M5 16h1M10 16h9"/><circle cx="16" cy="8" r="2"/><circle cx="8" cy="16" r="2"/></svg>',
   shape: '<svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="4"/><rect x="11" y="11" width="9" height="9" rx="1"/></svg>',
   shift: '<svg viewBox="0 0 24 24"><path d="M12 4l8 9h-5v6H9v-6H4z"/></svg>',
@@ -2432,7 +2433,7 @@ const ICONS = {
   swap: '<svg viewBox="0 0 24 24"><path d="M20 8H5.5l3-3M4 16h14.5l-3 3"/></svg>',
   talk: '<svg viewBox="0 0 100 100"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M56.8 12.8A24 24 0 0 1 84 47.7L84 60L79 60" stroke-width="5" opacity=".9"/><path d="M25.2 69.8L21 82L37.8 77A28 28 0 1 0 25.2 69.8Z" stroke-width="6"/><line x1="36" y1="42" x2="36" y2="64" stroke-width="5"/><line x1="45" y1="47" x2="45" y2="59" stroke-width="5"/><line x1="54" y1="44" x2="54" y2="62" stroke-width="5"/></g></svg>',
   text: '<svg viewBox="0 0 24 24"><path d="M5 8V5h14v3M12 5v14M9 19h6"/></svg>',
-  thumb: '<svg viewBox="0 0 24 24"><path d="M7 11v9H4v-9zM7 11l4-7c1.6 0 2.6 1.1 2.1 3l-.6 3H19a2 2 0 012 2.3l-1 6A2 2 0 0118 20H7"/></svg>',
+  thumb: '<svg viewBox="0 0 24 24"><path d="M7 11v9H4v-9zM7 11l4-7c1.5 0 2.5 1.2 2.2 2.7L12.7 9H19a2 2 0 011.9 2.6l-1.8 6.5A2 2 0 0117.2 20H7"/></svg>',
   tsel: '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8.500 9V8h7v1M12 8v8M10.500 16h3"/></svg>',
   vol: '<svg viewBox="0 0 24 24"><path d="M12 4l7 8-7 8-7-8z"/></svg>',
   wand: '<svg viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><path fill-rule="evenodd" d="M16.887 8.504c.77.736.77 1.947 0 2.684L6.137 21.464a1.954 1.954 0 0 1-2.689 0l-.87-.832a1.85 1.85 0 0 1 0-2.684l10.75-10.277a1.954 1.954 0 0 1 2.688 0zm-3.743 1.12a.46.46 0 0 0 0 .671l1.043.997a.49.49 0 0 0 .672 0l1.002-.957a.46.46 0 0 0 0-.67l-1.044-.998a.49.49 0 0 0-.672 0z" clip-rule="evenodd"/><path d="M18.275 13.726c.232-.613 1.12-.613 1.353 0l.398 1.052a.71.71 0 0 0 .426.416l1.078.39a.7.7 0 0 1 0 1.32l-1.078.39a.71.71 0 0 0-.426.415l-.398 1.053c-.233.613-1.12.613-1.353 0l-.398-1.053a.71.71 0 0 0-.426-.416l-1.077-.389a.699.699 0 0 1 0-1.32l1.077-.39a.71.71 0 0 0 .426-.416zM6.744 4.337c.232-.613 1.12-.613 1.352 0l.399 1.053a.71.71 0 0 0 .426.415l1.077.39a.7.7 0 0 1 0 1.321l-1.077.389a.71.71 0 0 0-.426.416l-.4 1.053c-.231.613-1.12.613-1.351 0L6.346 8.32a.71.71 0 0 0-.426-.416l-1.078-.389a.699.699 0 0 1 0-1.321l1.078-.39a.71.71 0 0 0 .426-.415zM18.275 2.46c.232-.613 1.12-.613 1.353 0l.398 1.052a.71.71 0 0 0 .426.416l1.078.39a.7.7 0 0 1 0 1.32l-1.078.39a.71.71 0 0 0-.426.415l-.398 1.053c-.233.613-1.12.613-1.353 0l-.398-1.053a.71.71 0 0 0-.426-.416l-1.077-.389a.699.699 0 0 1 0-1.32l1.077-.39a.71.71 0 0 0 .426-.416z"/></g></svg>',
@@ -2442,7 +2443,94 @@ const ICONS = {
   x: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   eduLogo: '<svg viewBox="0 0 120 100"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M52 48V22A6 6 0 0 1 58 16H94A6 6 0 0 1 100 22V74A6 6 0 0 1 94 80H86" stroke-width="5"/><line x1="71" y1="32" x2="81" y2="32" stroke-width="5"/></g><text x="8" y="84" fill="currentColor" stroke="none" font-family="Pretendard,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif" font-size="44" font-weight="bold" letter-spacing="-1.5">edu</text></svg>',
   blocksDown: '<svg viewBox="0 0 100 100"><g fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><rect x="20" y="16" width="30" height="14" rx="4"/><rect x="20" y="43" width="30" height="14" rx="4"/><rect x="20" y="70" width="30" height="14" rx="4"/><path d="M72 35V65"/><path d="M61 54L72 65L83 54"/></g></svg>',
-  watch: '<svg viewBox="0 0 100 100"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M32 23H68" stroke-width="7"/><path d="M32 77H68" stroke-width="7"/><rect x="20" y="30" width="60" height="40" rx="10" stroke-width="6"/><rect x="27" y="37" width="46" height="26" rx="4" fill="currentColor" stroke="none"/></g></svg>'
+  watch: '<svg viewBox="0 0 100 100"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M32 23H68" stroke-width="7"/><path d="M32 77H68" stroke-width="7"/><rect x="20" y="30" width="60" height="40" rx="10" stroke-width="6"/><rect x="27" y="37" width="46" height="26" rx="4" fill="currentColor" stroke="none"/></g></svg>',
+  gemini: '<svg viewBox="0 0 100 100" style="fill:url(#gstar)"><path d="M50 4C54 30 70 46 96 50C70 54 54 70 50 96C46 70 30 54 4 50C30 46 46 30 50 4Z"/></svg>',
+  menuHalf: '<svg viewBox="0 0 24 24"><path d="M4 9h16M4 15h11"/></svg>',
+  tempChat: '<svg viewBox="0 0 24 24"><circle cx="7" cy="6.07" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.07" cy="9" r="1.2" fill="currentColor" stroke="none"/><circle cx="3" cy="13" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.07" cy="17" r="1.2" fill="currentColor" stroke="none"/><circle cx="7" cy="19.93" r="1.2" fill="currentColor" stroke="none"/><circle cx="11" cy="21" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="19.93" r="1.2" fill="currentColor" stroke="none"/><circle cx="17.93" cy="17" r="1.2" fill="currentColor" stroke="none"/><path d="M9.5 15.8l.8-3.4 8-8a1.8 1.8 0 012.5 0 1.8 1.8 0 010 2.5l-8 8z"/></svg>',
+  avatarG: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#d3d6db" stroke="none"/><circle cx="12" cy="10" r="3.2" fill="#fff" stroke="none"/><path d="M5.8 18.2c1.2-3 3.6-4.2 6.2-4.2s5 1.2 6.2 4.2" fill="#fff" stroke="none"/></svg>',
+  micG: '<svg viewBox="0 0 24 24"><rect x="9" y="2.5" width="6" height="11.5" rx="3"/><path d="M5.5 11a6.5 6.5 0 0013 0M12 17.5v3.5M9 21h6"/></svg>',
+  voice: '<svg viewBox="0 0 24 24"><path d="M7 9v6M12 5.5v13M17 8v8" stroke-width="2.2"/></svg>',
+  sendUp: '<svg viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg>',
+  thumbDown: '<svg viewBox="0 0 24 24"><path d="M7 13V4H4v9zM7 13l4 7c1.5 0 2.5-1.2 2.2-2.7L12.7 15H19a2 2 0 001.9-2.6L19.1 5.9A2 2 0 0017.2 4H7"/></svg>',
+  reload: '<svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 11-2.4-5.7M20 4v5h-5"/></svg>',
+  speakerWave: '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12"/></svg>',
+  chat: '<svg viewBox="0 0 24 24"><path d="M5 18l1.2-3.6A7.5 7.5 0 1112 19.5a7.6 7.6 0 01-3.3-.8z"/></svg>',
+  photo: '<svg viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="3"/><circle cx="15.5" cy="9" r="1.6"/><path d="M3.5 17l5-5 4 4 2.5-2.5 5.5 5"/></svg>',
+  compose: '<svg viewBox="0 0 24 24"><path d="M12 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-6"/><path d="M17.5 3.5l3 3-8 8-4 1 1-4z"/></svg>',
+  download: '<svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
+  penSlant: '<svg viewBox="0 0 24 24"><path d="M5 19l.9-3.6L15.6 5.7a2 2 0 012.8 0l-.1.1 0 0 .9.9a2 2 0 010 2.8L9.5 19.1z"/><path d="M13.8 7.6l3.6 3.6"/></svg>',
+  chatPlus: '<svg viewBox="0 0 24 24"><path d="M12 4a8 8 0 100 16 8 8 0 003.6-.9l3.6.9-1.1-3.4A8 8 0 0012 4z"/><path d="M12 8.6v6M9 11.6h6"/></svg>',
+  boxArrow: '<svg viewBox="0 0 24 24"><rect x="3.8" y="5.5" width="16.4" height="13" rx="2.4"/><path d="M10.5 18.5v-3.6a1.6 1.6 0 011.6-1.6h8.1"/></svg>',
+  pill: '<svg viewBox="0 0 24 24"><g transform="rotate(-45 12 12)"><rect x="4.2" y="7.6" width="15.6" height="8.8" rx="2.8"/><path d="M9.4 7.6v8.8"/></g></svg>',
+  menuEq: '<svg viewBox="0 0 24 24"><path d="M4 9h16M4 15h16"/></svg>',
+  msg: '<svg viewBox="0 0 24 24"><path d="M7 4h10a3.500 3.500 0 013.500 3.500v8a3.500 3.500 0 01-3.500 3.500H3.500V7.500A3.500 3.500 0 017 4z"/><path d="M8 10h8M8 14h5"/></svg>',
+  battery: '<svg viewBox="0 0 24 24"><rect x="2" y="6" width="15.500" height="12" rx="4.500"/><path d="M21.500 10.500v3"/></svg>',
+  sendBox: '<svg viewBox="0 0 24 24"><rect x="2.500" y="5" width="19" height="14" rx="4.500"/><path d="M12 15v-6.500M9 11.500l3-3 3 3"/></svg>',
+  home: '<svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-5h4v5"/></svg>',
+  crownPro: '<svg viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z" fill="currentColor"/></svg>',
+  moveAll: '<svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg>',
+  bulb: '<svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z"/></svg>',
+  crop: '<svg viewBox="0 0 24 24"><path d="M7 3v14h14M3 7h14v14"/></svg>',
+  keyboard: '<svg viewBox="0 0 26 18"><rect x="1" y="1" width="24" height="16" rx="3.5"/><path d="M6.5 6h1.5M12 6h2M18 6h1.5M7 12h12"/></svg>',
+  elements: '<svg viewBox="0 0 24 24"><circle cx="7" cy="7" r="3"/><path d="M14 10l3.5-6 3.5 6z"/><rect x="4" y="14" width="6" height="6" rx="1"/><circle cx="17.5" cy="17" r="3"/></svg>',
+  userFill: '<svg viewBox="0 0 24 24"><circle cx="12" cy="7.5" r="4.5" fill="#222"/><path d="M3 21c0-5 4-8 9-8s9 3 9 8z" fill="#222"/></svg>',
+  translate: '<svg viewBox="0 0 24 24"><path d="M3 6h10M8 4v2M5 6c1 4 4 7 7 8M11 6c-1 4-4 7-8 9M14 20l4-10 4 10M15.5 17h5"/></svg>',
+  chevUp: '<svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg>',
+  siren: '<svg viewBox="0 0 24 24"><path d="M7 17v-4a5 5 0 0 1 10 0v4M5 17h14v3H5zM12 3v2M4.500 6l1.500 1.500M19.500 6L18 7.500"/></svg>',
+  phone: '<svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.500 1.500a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>',
+  memo: '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 12.500h8M8 16h5"/></svg>',
+  toggle: '<svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="10" rx="5"/><circle cx="8" cy="12" r="2.500"/></svg>',
+  calendarFill: '<svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2" fill="#222"/><rect x="6" y="10" width="3" height="3" fill="#fff"/><rect x="10.5" y="10" width="3" height="3" fill="#fff"/><rect x="15" y="10" width="3" height="3" fill="#fff"/><rect x="6" y="14.5" width="3" height="3" fill="#fff"/><rect x="10.5" y="14.5" width="3" height="3" fill="#fff"/></svg>',
+  arrowUp: '<svg viewBox="0 0 24 24"><path d="M12 20V5M6 11l6-6 6 6"/></svg>',
+  arrowR2: '<svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg>',
+  eraser: '<svg viewBox="0 0 24 24"><path d="M4.5 14.5l9-9 6 6-7 7H8z"/><path d="M9 10l6.5 6.5M12.5 18.5H20.5"/></svg>',
+  heart: '<svg viewBox="0 0 24 24"><path d="M12 21C5 16 2 12.5 2 9a5 5 0 0 1 10-1 5 5 0 0 1 10 1c0 3.5-3 7-10 12z"/></svg>',
+  alertCircle: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/></svg>',
+  wandS: '<svg viewBox="0 0 24 24"><g fill="currentColor" stroke="none"><path d="M7 2.8c.3 2.4 1.8 3.9 4.2 4.2-2.4.3-3.9 1.8-4.2 4.2-.3-2.4-1.8-3.9-4.2-4.2 2.4-.3 3.9-1.8 4.2-4.2z"/><path d="M3.6 15.6L5 17l-1.4 1.4L2.2 17zM17.5 3.6L18.9 5l-1.4 1.4L16.1 5z"/></g><path transform="translate(2.5 2.5)" d="M18.5 9.5l-9 9L6 19l.5-3.5 9-9z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+  film: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="1.7"/><path d="M6.2 6v12M17.8 6v12"/></svg>',
+  textDir: '<svg viewBox="0 0 24 24"><path d="M5 5h10M10 5v14M16 15l3 4 3-4M19 8v11"/></svg>',
+  alignL: '<svg viewBox="0 0 24 24"><path d="M4 6h16M4 11h10M4 16h16M4 21h10"/></svg>',
+  alignC: '<svg viewBox="0 0 24 24"><path d="M4 6h16M7 11h10M4 16h16M7 21h10"/></svg>',
+  alignR: '<svg viewBox="0 0 24 24"><path d="M4 6h16M10 11h10M4 16h16M10 21h10"/></svg>',
+  alignJ: '<svg viewBox="0 0 24 24"><path d="M4 6h16M4 11h16M4 16h16M4 21h16"/></svg>',
+  listUl: '<svg viewBox="0 0 24 24"><circle cx="5" cy="7" r="1.4" fill="currentColor"/><circle cx="5" cy="14" r="1.4" fill="currentColor"/><path d="M10 7h10M10 14h10"/></svg>',
+  listOl: '<svg viewBox="0 0 24 24"><path d="M10 7h10M10 14h10M4 5l1.5-1v6M4 13h3l-3 4h3"/></svg>',
+  grid4: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+  home2: '<svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/></svg>',
+  doneRed: '<svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="95" fill="none" stroke="#e9416a" stroke-width="5"/><path d="M62 98l30 40 60-84" fill="none" stroke="#e9416a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  playClip: '<svg viewBox="0 0 24 24"><rect x="4" y="5" width="12" height="14" rx="2"/><path d="M8 9v6l5-3z"/><path d="M18 6v12" /><circle cx="18" cy="14" r="2.5"/></svg>',
+  chevCircle: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor" stroke="none"/><path d="M7.5 10.5l4.5 4.5 4.5-4.5" stroke="#16171b" stroke-width="2.4"/></svg>',
+  fileDown: '<svg viewBox="0 0 24 24"><path d="M7 3.5h7l4 4v13H7zM13 3.5v5h5M12 11v6M9.5 14.5l2.5 2.5 2.5-2.5"/></svg>',
+  timer3: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><text x="12" y="16" font-size="9" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">3</text></svg>',
+  warn: '<svg viewBox="0 0 24 24"><path d="M12 3.5l10 17H2z" fill="#f5c518" stroke="none"/><path d="M12 10v5M12 17.5h.01" stroke="#232428" stroke-width="2"/></svg>',
+  trend: '<svg viewBox="0 0 24 24"><path d="M5 5v14h14M5 15l4-4 4 4 5-8"/></svg>',
+  frame: '<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/></svg>',
+  alignL2: '<svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h16"/></svg>',
+  alignC2: '<svg viewBox="0 0 24 24"><path d="M4 7h16M7 12h10M4 17h16"/></svg>',
+  alignR2: '<svg viewBox="0 0 24 24"><path d="M4 7h16M10 12h10M4 17h16"/></svg>',
+  square: '<svg viewBox="0 0 24 24"><rect x="4.5" y="4.5" width="15" height="15" rx="2"/></svg>',
+  pct40: '<svg viewBox="0 0 24 24"><text x="12" y="16" font-size="11" fill="currentColor" stroke="none" text-anchor="middle">40%</text></svg>',
+  flip: '<svg viewBox="0 0 24 24"><path d="M12 3v18M4 6.5l5 2.5v6l-5 2.5zM20 6.5L15 9v6l5 2.5z"/></svg>',
+  focus: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6.5"/><path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4M12 10v4M10 12h4"/></svg>',
+  layers: '<svg viewBox="0 0 24 24"><path d="M12 4l8 4-8 4-8-4zM4 12l8 4 8-4M4 16l8 4 8-4"/></svg>',
+  home3: '<svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg>',
+  nbSource: '<svg viewBox="0 0 24 24"><path d="M3.2 5.7A1.6 1.6 0 014.8 4.1h4.4l2 2.1h8A1.6 1.6 0 0121 7.8v10.5a1.6 1.6 0 01-1.6 1.6H4.8a1.6 1.6 0 01-1.6-1.6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M7.5 11.2h9M7.5 14.9h5.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="square"/></svg>',
+  nbSourceOn: '<svg viewBox="0 0 24 24"><path fill-rule="evenodd" d="M3.2 5.7A1.6 1.6 0 014.8 4.1h4.4l2 2.1h8A1.6 1.6 0 0121 7.8v10.5a1.6 1.6 0 01-1.6 1.6H4.8a1.6 1.6 0 01-1.6-1.6zM7.2 10.4v1.7h9.6v-1.7zM7.2 14v1.7h5.6V14z" fill="currentColor"/></svg>',
+  nbChat: '<svg viewBox="0 0 24 24"><path d="M3.4 4.6A1.6 1.6 0 015 3h9.4A1.6 1.6 0 0116 4.6v5.2a1.6 1.6 0 01-1.6 1.6H7.6l-4.2 3.8z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M18 8h1.4A1.6 1.6 0 0121 9.6v10.8l-3.8-3.4H9.6A1.6 1.6 0 018 15.4v-1.9h6.4A3.6 3.6 0 0018 9.9z" fill="currentColor"/></svg>',
+  nbChatOn: '<svg viewBox="0 0 24 24"><path d="M3.4 4.6A1.6 1.6 0 015 3h9.4A1.6 1.6 0 0116 4.6v5.2a1.6 1.6 0 01-1.6 1.6H7.6l-4.2 3.8z" fill="currentColor"/><path d="M18 8h1.4A1.6 1.6 0 0121 9.6v10.8l-3.8-3.4H9.6A1.6 1.6 0 018 15.4v-1.9h6.4A3.6 3.6 0 0018 9.9z" fill="currentColor"/></svg>',
+  nbStudio: '<svg viewBox="0 0 24 24"><path fill-rule="evenodd" d="M4.1 19.9a1.2 1.2 0 010-1.7L12.6 9.7a2 2 0 012.8 0l.9.9a2 2 0 010 2.8l-8.5 8.5a1.2 1.2 0 01-1.7 0zM12 12.4l-1.9 1.9 1.1 1.1 1.9-1.9z" fill="currentColor"/><path d="M18.4 2.6l1.1 2.5 2.5 1.1-2.5 1.1-1.1 2.5-1.1-2.5-2.5-1.1 2.5-1.1zM6.4 3.6l.9.9-.9.9-.9-.9zM18 14.4l.9.9-.9.9-.9-.9z" fill="currentColor"/></svg>',
+  nbAudio: '<svg viewBox="0 0 24 24"><path d="M3 11.3v1.4M6.4 9v6M9.8 5.5v13M13.2 8.4v7.2M16.4 10.6v2.8"/><path d="M18.6 2.6l1 2.3 2.3 1-2.3 1-1 2.3-1-2.3-2.3-1 2.3-1z" fill="currentColor" stroke="none"/></svg>',
+  nbVideo: '<svg viewBox="0 0 24 24"><path d="M8.4 3.2h7.2M6.4 5.6h11.2"/><rect x="3" y="8.2" width="18" height="12" rx="2.2"/><path d="M10.2 11.4v5.6l4.8-2.8z" fill="currentColor" stroke="none"/></svg>',
+  nbCard: '<svg viewBox="0 0 24 24"><path d="M5 7.2l.7 9.9a2 2 0 002 1.9l10.7-.9"/><rect x="8" y="3.7" width="12" height="12" rx="2.2"/><path d="M14 7.6l.9 1.9 2.1.3-1.5 1.5.4 2.1-1.9-1-1.9 1 .4-2.1-1.5-1.5 2.1-.3z" fill="currentColor" stroke="none"/></svg>',
+  nbQuiz: '<svg viewBox="0 0 24 24"><path d="M6.4 5.7H6A2.2 2.2 0 003.8 7.9v10a2.2 2.2 0 002.2 2.2h11.8"/><rect x="6.9" y="3.8" width="13.3" height="12.7" rx="2.2"/><path d="M11.5 8.6a2.3 2.3 0 014.4.8c0 1.7-2.2 1.9-2.2 3.6M13.7 14.6v.1"/></svg>',
+  nbInfo: '<svg viewBox="0 0 24 24"><path d="M3.4 8.4h3.1V20H3.4zM9 11.6h3V20H9zM14.4 14.2h3V20h-3z" fill="currentColor" stroke="none"/><path d="M3.4 4.4h3.1v2.2H3.4zM9 7.8h3V10H9zM14.4 10.4h3v2.2h-3z" fill="currentColor" stroke="none"/></svg>',
+  nbReport: '<svg viewBox="0 0 24 24"><path d="M6.4 5.7H6A2.2 2.2 0 003.8 7.9v10a2.2 2.2 0 002.2 2.2h11.8"/><path d="M11.7 3.8H9.2A2.2 2.2 0 007 6v8.4a2.2 2.2 0 002.2 2.2h9.1a2.2 2.2 0 002.2-2.2v-2.2"/><path d="M17.6 3.5l1 2.7 2.7 1-2.7 1-1 2.7-1-2.7-2.7-1 2.7-1z" fill="currentColor" stroke="none"/></svg>',
+  checkCircle: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M7 12.5l3.5 3.5L17 9" stroke="#fff" stroke-width="2.6" fill="none"/></svg>',
+  eqBars: '<svg viewBox="0 0 15 15"><rect x="0" y="0" width="3.4" height="15" rx="1"/><rect x="5.8" y="3" width="3.4" height="12" rx="1"/><rect x="11.6" y="1" width="3.4" height="14" rx="1"/></svg>',
+  nbFnSlide: '<svg viewBox="0 0 44 44"><rect x="4" y="9" width="36" height="26" rx="2"/><rect x="8" y="13" width="28" height="18"/></svg>',
+  nbFnInfo: '<svg viewBox="0 0 44 44"><path d="M10 10v24M10 10h4v24M22 18v16M22 18h4v16M33 24v10M33 24h4v10"/></svg>',
+  nbFnReport: '<svg viewBox="0 0 44 44"><path d="M8 14v24h22M14 8h16l4 4v18H14z"/><path d="M34 4l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></svg>',
+  nbFnAudio: '<svg viewBox="0 0 44 44"><path d="M8 20v4M14 14v16M20 8v28M26 16v12M32 12v20"/><path d="M38 6l1.5 3.5L43 11l-3.5 1.5L38 16l-1.5-3.5L33 11l3.5-1.5z"/></svg>'
 };
 
 /* 글자를 한 자씩 써 넣는 연출(채팅 답변·프롬프트 입력 등). 멈추는 함수를 돌려줌.
@@ -3366,29 +3454,43 @@ function initIdlePreload() {
 /* 지그소 조각 그리기(initJigsawPuzzle과 직접 만든 퍼즐 화면이 같이 씀).
    jigPath(크기, 여백, [위,오른,아래,왼]) 변 모양 0 평평/1 튀어나옴/-1 들어감, jigSvg(...)는 색 칠한 조각 svg 문자열(colors 없으면 빈 칸 모양), labelBox는 글자 상자 위치 */
 function jigPath(s, m, edges) {
-  const corners = [[m, m], [m + s, m], [m + s, m + s], [m, m + s]];
+  return jigPathRect(s, s, m, edges);
+}
+
+// 가로 w, 세로 h 직사각형 조각. 꼭지 깊이·모서리는 짧은 쪽(min(w,h)) 기준, 꼭지 위치는 그 변 길이 기준
+function jigPathRect(w, h, m, edges) {
+  const D = Math.min(w, h);
+  const len = [w, h, w, h];
+  const corners = [[m, m], [m + w, m], [m + w, m + h], [m, m + h]];
   const dirs = [[1, 0], [0, 1], [-1, 0], [0, -1]];
   const knob = [[0.36, 0, 0.38, 0, 0.38, 0.02], [0.38, 0.0863, 0.4337, 0.14, 0.5, 0.14], [0.5663, 0.14, 0.62, 0.0863, 0.62, 0.02], [0.62, 0, 0.64, 0, 0.67, 0]];
-  const r = 0.075;
-  let d = 'M' + (m + r * s) + ' ' + m;
+  const R = 0.075 * D;
+  let d = 'M' + (m + R) + ' ' + m;
   edges.forEach((e, k) => {
     const [x0, y0] = corners[k];
     const [dx, dy] = dirs[k];
-    const pt = (u, v) => (x0 + (u * dx + v * e * dy) * s).toFixed(1) + ' ' + (y0 + (u * dy - v * e * dx) * s).toFixed(1);
+    const L = len[k];
+    const pt = (a, v) => (x0 + a * dx + v * e * D * dy).toFixed(1) + ' ' + (y0 + a * dy - v * e * D * dx).toFixed(1);
     if (e) {
-      d += ' L' + pt(0.33, 0);
-      knob.forEach((c) => { d += ' C' + pt(c[0], c[1]) + ' ' + pt(c[2], c[3]) + ' ' + pt(c[4], c[5]); });
+      d += ' L' + pt(0.33 * L, 0);
+      knob.forEach((c) => { d += ' C' + pt(c[0] * L, c[1]) + ' ' + pt(c[2] * L, c[3]) + ' ' + pt(c[4] * L, c[5]); });
     }
     const [nx, ny] = corners[(k + 1) % 4];
     const [ndx, ndy] = dirs[(k + 1) % 4];
-    d += ' L' + pt(1 - r, 0) + ' Q' + nx + ' ' + ny + ' ' + (nx + ndx * r * s).toFixed(1) + ' ' + (ny + ndy * r * s).toFixed(1);
+    d += ' L' + pt(L - R, 0) + ' Q' + nx + ' ' + ny + ' ' + (nx + ndx * R).toFixed(1) + ' ' + (ny + ndy * R).toFixed(1);
   });
   return d + ' Z';
 }
 
 function jigSvg(s, m, edges, colors, id) {
-  const w = s + m * 2;
-  const d = jigPath(s, m, edges);
+  return jigSvgRect(s, s, m, edges, colors, id);
+}
+
+function jigSvgRect(sw, sh, m, edges, colors, id) {
+  const s = Math.min(sw, sh);
+  const w = sw + m * 2;
+  const hh = sh + m * 2;
+  const d = jigPathRect(sw, sh, m, edges);
   const o = (s * 0.015).toFixed(1);
   const shine = colors
     ? '<g clip-path="url(#clip-' + id + ')"><g filter="url(#blur-' + id + ')">' +
@@ -3398,7 +3500,7 @@ function jigSvg(s, m, edges, colors, id) {
       '</g></g><path d="' + d + '" style="fill:none"/>'
     : '';
   if (!colors) {colors = ['transparent', 'transparent'];}
-  return '<svg class="jig" width="' + w + '" height="' + w + '" viewBox="0 0 ' + w + ' ' + w + '">' + '<defs>' + '<linearGradient id="grad-' + id + '" x1="0%" y1="0%" x2="0%" y2="100%">' + '<stop offset="0%" stop-color="' + colors[0] + '"/>' + '<stop offset="100%" stop-color="' + colors[1] + '"/>' + '</linearGradient>' + '<clipPath id="clip-' + id + '"><path d="' + d + '"/></clipPath>' + '<filter id="blur-' + id + '" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="' + (s * 0.01).toFixed(1) + '"/></filter>' + '</defs>' + '<path d="' + d + '" style="fill:url(#grad-' + id + ')" />' + shine + '</svg>';
+  return '<svg class="jig" width="' + w + '" height="' + hh + '" viewBox="0 0 ' + w + ' ' + hh + '">' + '<defs>' + '<linearGradient id="grad-' + id + '" x1="0%" y1="0%" x2="0%" y2="100%">' + '<stop offset="0%" stop-color="' + colors[0] + '"/>' + '<stop offset="100%" stop-color="' + colors[1] + '"/>' + '</linearGradient>' + '<clipPath id="clip-' + id + '"><path d="' + d + '"/></clipPath>' + '<filter id="blur-' + id + '" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="' + (s * 0.01).toFixed(1) + '"/></filter>' + '</defs>' + '<path d="' + d + '" style="fill:url(#grad-' + id + ')" />' + shine + '</svg>';
 }
 
 // 들어간 변 쪽은 홈 깊이만큼 비워서 글자·아이콘이 조각 밖으로 안 나가게 함
@@ -3680,3 +3782,20 @@ function initFontPreload() {
   return Promise.all(loads);
 }
 initFontPreload();
+
+/* HTML에 <i data-ic="이름" class=".." style=".."></i> 로 적어 두면 ICONS.이름 의 svg로 바꿔 줌(그 밖의 속성은 svg에 그대로 옮김). 나중에 넣는 마크업은 fillIcons(부모)로 */
+function fillIcons(root) {
+  (root || document).querySelectorAll('[data-ic]').forEach((e) => {
+    const t = document.createElement('template');
+    t.innerHTML = ICONS[e.dataset.ic];
+    const v = t.content.firstChild;
+    Array.from(e.attributes).forEach((a) => { if (a.name !== 'data-ic') v.setAttribute(a.name, a.value); });
+    e.replaceWith(v);
+  });
+}
+fillIcons();
+
+/* JS 문자열에 넣을 아이콘: ic('이름', 'width="46" style="..."') — 속성을 svg에 더해 줌 */
+function ic(name, attrs) {
+  return ICONS[name].replace('<svg ', '<svg ' + (attrs ? attrs + ' ' : ''));
+}

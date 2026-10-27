@@ -2,7 +2,6 @@
    VL.screen(이름, 옵션) 이 화면 한 장의 HTML 글자를 돌려줌. 영상 칸(#vlViewer)·자막·블러는 화면에 포함되지 않고 페이지가 따로 둠(영상이 끊기지 않게). 스타일은 page09.html 의 .v-* */
 (function () {
   const VL = window.VL = {};
-  const S = (d, o = {}) => '<svg viewBox="0 0 ' + (o.w || 24) + ' ' + (o.h || 24) + '"' + (o.c ? ' class="' + o.c + '"' : '') + '>' + d + '</svg>';
   const I = {
     back: ICONS.chevL,
     help: ICONS.help,
@@ -96,13 +95,13 @@
     L.forEach((n, i) => { s += '<span class="v-tab' + (i === active ? ' is-on' : '') + '" style="left:' + (X[i] - 44) + 'px">' + n + '</span>'; });
     return s;
   };
-  // const template = () => '<div class="v-tpl"><i class="v-ic">' + S('<rect x="4" y="5" width="12" height="14" rx="2"/><path d="M8 9v6l5-3z"/><path d="M18 6v12" /><circle cx="18" cy="14" r="2.5"/>') + '</i><span>템플릿</span></div>';
+  // const template = () => '<div class="v-tpl"><i class="v-ic">' + ICONS.playClip + '</i><span>템플릿</span></div>';
   const template = () => '';
   const bigBtn = (x, y, w, h, label, c, cls) => '<div class="v-btn ' + (cls || '') + '" style="left:' + x + 'px;top:' + y + 'px;width:' + w + 'px;height:' + h + 'px;background:' + c + '">' + label + '</div>';
   const clipThumb = (x, w, cls, inner) => '<div class="v-clip ' + (cls || '') + '" style="left:' + x + 'px;width:' + w + 'px"><div class="v-frames"></div>' + (inner || '') + '</div>';
   const badge = (x2, y, tt, o = {}) => '<em class="v-badge' + (o.c ? ' ' + o.c : '') + '" style="left:' + (x2 - (o.w || 41)) + 'px;top:' + y + 'px;width:' + (o.w || 41) + 'px">' + tt + '</em>';
   const swapIc = () => '<i class="v-ic" style="left:508px;top:783px;width:26px;height:26px">' + I.swap + '</i>';
-  const moveBtn = (cx) => '<i class="v-move" style="left:' + (cx - 17.5) + 'px;top:777px">' + S('<path d="M12 3v18M3 12h18M8.5 6.5L12 3l3.5 3.5M8.5 17.5L12 21l3.5-3.5M6.5 8.5L3 12l3.5 3.5M17.5 8.5L21 12l-3.5 3.5"/>') + '</i>';
+  const moveBtn = (cx) => '<i class="v-move" style="left:' + (cx - 17.5) + 'px;top:777px">' + ICONS.moveAll + '</i>';
   const wave = (x0, n, bot, seed, c) => {
     let s = '', r = seed || 7;
     for (let i = 0; i < n; i++) { r = (r * 9301 + 49297) % 233280; const h = 3 + (r / 233280) * 22 * (0.4 + 0.6 * Math.abs(Math.sin(i * 0.31 + seed))); s += '<b style="left:' + (x0 + i * 3) + 'px;height:' + h.toFixed(1) + 'px;bottom:' + bot + 'px;background:' + (c || '#b9babd') + '"></b>'; }
@@ -132,9 +131,9 @@
     + '<div class="v-pill is-blue" style="left:348px;top:72px;width:97px;height:34px"><i class="v-ic" style="width:17px;height:17px">' + I.gift + '</i>친구 초대</div>'
     + '<div class="v-crown" style="left:467px;top:70px"><i class="v-ic">' + I.crown + '</i></div>'
     + '<div class="v-banner"><img src="img/p09_banner.png" alt=""></div>'
-    + '<p class="v-mp">내 프로젝트 (0) <i class="v-ic is-down">' + S('<circle cx="12" cy="12" r="10" fill="currentColor" stroke="none"/><path d="M7.5 10.5l4.5 4.5 4.5-4.5" stroke="#16171b" stroke-width="2.4"/>') + '</i></p>'
+    + '<p class="v-mp">내 프로젝트 (0) <i class="v-ic is-down">' + ICONS.chevCircle + '</i></p>'
     + '<i class="v-ic v-lv" style="left:372px;top:455px">' + ICONS.watch + '</i><i class="v-ic v-lv" style="left:431px;top:455px">' + ICONS.blocksDown + '</i><span class="v-sel">선택</span>'
-    + '<div class="v-load"><i class="v-ic">' + S('<path d="M7 3.5h7l4 4v13H7zM13 3.5v5h5M12 11v6M9.5 14.5l2.5 2.5 2.5-2.5"/>') + '</i>프로젝트 불러오기</div>'
+    + '<div class="v-load"><i class="v-ic">' + ICONS.fileDown + '</i>프로젝트 불러오기</div>'
     + '</div>';
 
   /* 1: 편집기 첫 화면(디자인 1) */
@@ -143,12 +142,12 @@
   SC.record = (o = {}) => appBar({}) + playRow({ undo: 0 }) + ruler(o.rec ? [60, 130, 200, 245, 270, 330, 400, 460] : [360, 450, 539]) + transport(o.rec ? '00:01<sup>02</sup>' : '00:00<sup>00</sup>', '00:05') + '<div class="v-trk is-rec"></div>'
     + (o.rec ? '<div class="v-recclip" style="left:79px;width:190px"></div>' : '') + clipThumb(271, 270, 'is-main is-dimclip', '') + playhead(878)
     + '<div class="v-recpanel"></div>'
-    + (o.rec ? '' : '<div class="v-timer"><i class="v-ic">' + S('<circle cx="12" cy="12" r="9.5"/><text x="12" y="16" font-size="9" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">3</text>') + '</i>타이머</div>')
+    + (o.rec ? '' : '<div class="v-timer"><i class="v-ic">' + ICONS.timer3 + '</i>타이머</div>')
     + '<p class="v-rtime">' + (o.rec ? '00:01' : '00:00') + '</p>'
     + '<div class="v-rbtn"><b class="' + (o.rec ? 'is-stop' : '') + '"></b></div>'
     + '<div class="v-cancel">취소</div>';
   /* 4: 녹음 파일(디자인 4) */
-  SC.recdone = () => clipTop({ undo: 1, full: 0 }) + moveBtn(193) + '<div class="v-aclip"><i class="v-lh">' + I.chevL + '</i><div class="v-ab"><span class="v-an"><i class="v-ic">' + S('<rect x="9.5" y="3" width="5" height="10" rx="2.5"/><path d="M6.5 11a5.5 5.5 0 0011 0M12 17v3"/>', { c: '' }) + '</i>V1</span>' + wave(8, 82, 8, 5, '#fff') + '<em class="v-badge is-a" style="right:4px;bottom:3px">00:04</em></div></div>'
+  SC.recdone = () => clipTop({ undo: 1, full: 0 }) + moveBtn(193) + '<div class="v-aclip"><i class="v-lh">' + I.chevL + '</i><div class="v-ab"><span class="v-an"><i class="v-ic">' + ICONS.mic + '</i>V1</span>' + wave(8, 82, 8, 5, '#fff') + '<em class="v-badge is-a" style="right:4px;bottom:3px">00:04</em></div></div>'
     + playhead(876) + '<div class="v-name"><span>파일명 :</span><b>V1</b><i class="v-ic">' + I.pencil + '</i></div>'
     + '<div class="v-act" style="left:152px"><i class="v-ic">' + I.trash + '</i><span>삭제</span></div><div class="v-act" style="left:270px"><i class="v-ic">' + I.listen + '</i><span>듣기</span></div><div class="v-act" style="left:388px"><i class="v-ic">' + I.moveto + '</i><span>여기로 이동</span></div>'
     + '<div class="v-add"><b class="v-rdot"></b>추가</div>' + bigBtn(200, 1112, 324, 55, '완료', '#0a9cf7', 'is-done');
@@ -157,7 +156,7 @@
   const row2items = [['추가', I.plus, 164], ['음소거', I.mute, 251], ['음량', I.vol, 339], ['노이즈 제거', I.noise, 434], ['페이드', I.fade, 512], ['오디오 이펙트', I.waveform, 605], ['에코&amp;리버브', I.echo, 698], ['자동 자막', I.autosub, 786], ['배속', I.speed, 866]];
   SC.clip = (o = {}) => {
     const off = (o.slide || 0) * VL.NAVW;
-    let s = clipTop({ undo: 1, grid: 0 }) + moveBtn(193) + '<div class="v-aclip"><i class="v-lh">' + I.chevL + '</i><div class="v-ab"><span class="v-an"><i class="v-ic">' + S('<rect x="9.5" y="3" width="5" height="10" rx="2.5"/><path d="M6.5 11a5.5 5.5 0 0011 0M12 17v3"/>') + '</i>V1</span>' + wave(8, 82, 8, 5, '#fff') + '<em class="v-badge is-a" style="right:4px;bottom:3px">00:04</em></div></div>'
+    let s = clipTop({ undo: 1, grid: 0 }) + moveBtn(193) + '<div class="v-aclip"><i class="v-lh">' + I.chevL + '</i><div class="v-ab"><span class="v-an"><i class="v-ic">' + ICONS.mic + '</i>V1</span>' + wave(8, 82, 8, 5, '#fff') + '<em class="v-badge is-a" style="right:4px;bottom:3px">00:04</em></div></div>'
       + '<div class="v-sidetabs"><i class="v-ic">' + I.folder + '</i><i class="v-ic">' + I.waveform + '</i></div>' + wave(274, 60, 12, 3, '#b9babd').replace('class="v-wave"', 'class="v-wave is-low"') + playhead(951) + tools1([2, 3]);
     s += '<div class="v-row2"><div class="v-row2-fix"><i class="v-ic">' + I.trash + '</i><span>삭제</span></div><div class="v-row2-clip"><div class="v-row2-in" id="vlRow2" style="transform:translateX(' + (-off) + 'px)">';
     row2items.forEach((a) => { s += '<div class="v-r2" style="left:' + (a[2] - 45 - 100) + 'px"><i class="v-ic">' + a[1] + '</i><span>' + a[0] + '</span></div>'; });
@@ -168,7 +167,7 @@
   SC.subrange = () => clipTop({ undo: 1 }) + moveBtn(193) + '<div class="v-aclip is-ai"><i class="v-lh">' + I.chevL + '</i><div class="v-ab"><span class="v-an is-sm">자막 생성 범위</span>' + wave(8, 82, 14, 11, '#cfd8e6') + '<em class="v-badge is-a" style="right:4px;bottom:3px">00:04</em></div></div>'
     + '<div class="v-tools4"><div class="v-tool is-dim" style="left:46px;top:886px"><i class="v-ic">' + I.start + '</i><span>처음부터</span></div><div class="v-tool is-dim" style="left:163px;top:886px"><i class="v-ic">' + I.first + '</i><span>여기부터</span></div><div class="v-tool is-dim" style="left:277px;top:886px"><i class="v-ic">' + I.last + '</i><span>여기까지</span></div><div class="v-tool" style="left:400px;top:886px"><i class="v-ic">' + I.next + '</i><span>끝까지</span></div></div>'
     + '<div class="v-aiopt"><i>AI</i>더 정확한 처리<u class="v-tog"><b></b></u></div>'
-    + '<div class="v-sel2" style="left:17px"><span>오디오 : <b>음성 녹음</b></span><i class="v-ic">' + S('<path d="M5 12a7 7 0 0112-5l2 2M19 12a7 7 0 01-12 5l-2-2M17 4v5h-5M7 20v-5h5"/>') + '</i></div><div class="v-sel2" style="left:278px"><span>언어 : <b>한국어</b></span><i class="v-ic">' + S('<path d="M5 12a7 7 0 0112-5l2 2M19 12a7 7 0 01-12 5l-2-2M17 4v5h-5M7 20v-5h5"/>') + '</i></div>'
+    + '<div class="v-sel2" style="left:17px"><span>오디오 : <b>음성 녹음</b></span><i class="v-ic">' + ICONS.refresh + '</i></div><div class="v-sel2" style="left:278px"><span>언어 : <b>한국어</b></span><i class="v-ic">' + ICONS.refresh + '</i></div>'
     + bigBtn(17, 1112, 238, 55, '취소', '#4c4d50') + bigBtn(272, 1112, 252, 55, '생성하기', '#0a9cf7', 'is-done');
   /* 로딩 화면(자막 생성 중 / 트래킹 중 / 비디오 만드는 중): msg, warn, pct(0~1), cls */
   SC.loading = (o = {}) => '<div class="v-full is-load' + (o.cls ? ' ' + o.cls : '') + '">'
@@ -176,12 +175,12 @@
     + '<div class="v-logo" id="vlLogo">' + VL.logoSvg + '</div>'
     + '<p class="v-lmsg">' + o.msg + '</p>'
     + '<div class="v-lbar"><i id="vlLoadBar"></i></div><u class="v-lpct" id="vlLoadPct">0%</u>'
-    + (o.warn ? '<p class="v-lwarn"><i class="v-ic is-warn">' + S('<path d="M12 3.5l10 17H2z" fill="#f5c518" stroke="none"/><path d="M12 10v5M12 17.5h.01" stroke="#232428" stroke-width="2"/>') + '</i>' + o.warn + '</p>' : '')
+    + (o.warn ? '<p class="v-lwarn"><i class="v-ic is-warn">' + ICONS.warn + '</i>' + o.warn + '</p>' : '')
     + (o.tip ? '<div class="v-tip"><b>VLLO TIP</b><div class="v-tipc"><span>' + o.tip + '</span></div></div>' : '') + '</div>';
   /* 8: 자막 만들어진 뒤 글자 탭(디자인 8) */
   SC.subdone = (o = {}) => clipTop({ undo: 1, grid: 1 }) + moveBtn(193) + '<div class="v-aclip is-sub"><i class="v-lh">' + I.chevL + '</i><div class="v-ab"><span class="v-an"><i class="v-ic">' + I.sub + '</i>' + (o.text || '') + '</span><em class="v-badge is-a" style="right:4px;bottom:3px">00:03</em></div></div>'
     + '<div class="v-kf"><i class="v-ic">' + I.keyfr + '</i><span>변형<br>키프레임</span><u class="v-tog"><b></b></u></div><div class="v-sidetabs"><i class="v-ic">' + I.folder + '</i><i class="v-ic">' + I.waveform + '</i></div>' + playhead(951) + tools1([2, 3])
-    + '<div class="v-row2"><div class="v-row2-fix"><i class="v-ic">' + I.trash + '</i><span>삭제</span></div><div class="v-all"><u class="v-tog is-on"><b></b></u><span>전체 적용</span></div><div class="v-row2-in2"><div class="v-r2" style="left:0"><i class="v-ic">' + I.plus + '</i><span>추가</span></div><div class="v-r2" style="left:67px"><i class="v-ic">' + S('<path d="M5 5v14h14M5 15l4-4 4 4 5-8"/>') + '</i><span>변형</span></div><div class="v-r2" style="left:132px"><i class="v-ic">' + S('<rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="12" cy="12" r="3.5"/>') + '</i><span>마스크</span><em class="v-new2">New</em></div><div class="v-r2" style="left:198px"><i class="v-ic">' + I.pencil + '</i><span>편집</span></div></div></div>'
+    + '<div class="v-row2"><div class="v-row2-fix"><i class="v-ic">' + I.trash + '</i><span>삭제</span></div><div class="v-all"><u class="v-tog is-on"><b></b></u><span>전체 적용</span></div><div class="v-row2-in2"><div class="v-r2" style="left:0"><i class="v-ic">' + I.plus + '</i><span>추가</span></div><div class="v-r2" style="left:67px"><i class="v-ic">' + ICONS.trend + '</i><span>변형</span></div><div class="v-r2" style="left:132px"><i class="v-ic">' + ICONS.frame + '</i><span>마스크</span><em class="v-new2">New</em></div><div class="v-r2" style="left:198px"><i class="v-ic">' + I.pencil + '</i><span>편집</span></div></div></div>'
     + bigBtn(10, 1112, 521, 55, '완료', '#0a9cf7', 'is-done');
 
   SC.todo = () => editor({ rows: textRows(), tab: 2 }) + '<p class="v-todo">이후 화면은 준비 중이에요</p>';
@@ -197,7 +196,7 @@
     + '<div class="v-subbar"></div><span class="v-subtag" style="left:272px;top:1082px">여기</span><div class="v-edbox"><i class="v-ic">' + I.pencil + '</i></div>';
   /* 키보드(디자인 9, 10) */
   SC.keyboard = (o = {}) => appBar({ grid: 1 }) + playRow({ play: 0 }) + '<div class="v-kpanel"></div>'
-    + '<div class="v-align"><span><i class="v-ic">' + S('<path d="M4 7h16M4 12h10M4 17h16"/>') + '</i>왼쪽</span><span class="is-on"><i class="v-ic">' + S('<path d="M4 7h16M7 12h10M4 17h16"/>') + '</i>가운데</span><span><i class="v-ic">' + S('<path d="M4 7h16M10 12h10M4 17h16"/>') + '</i>오른쪽</span></div>'
+    + '<div class="v-align"><span><i class="v-ic">' + ICONS.alignL2 + '</i>왼쪽</span><span class="is-on"><i class="v-ic">' + ICONS.alignC2 + '</i>가운데</span><span><i class="v-ic">' + ICONS.alignR2 + '</i>오른쪽</span></div>'
     + '<div class="v-input"><span>' + (o.text || '') + '</span><i class="v-x"><b></b></i></div><div class="v-ok"><i class="v-ic">' + I.check + '</i></div>'
     + ''
     + '<div class="v-knav"><i class="v-ic">' + I.mic + '</i><u>|||</u><u>□</u><u>◁</u><u>⌄</u></div></div>';
@@ -212,8 +211,8 @@
     + faces(true) + dimBtns(true);
   /* 블러 클립 편집(디자인 16, 17) */
   VL.TRKW = 366;
-  const r2a = [['추가', I.plus, 160], ['변형', S('<path d="M5 5v14h14M5 15l4-4 4 4 5-8"/>'), 248], ['모양', S('<rect x="4.5" y="4.5" width="15" height="15" rx="2"/>'), 335], ['40%<br>강도', S('<text x="12" y="16" font-size="11" fill="currentColor" stroke="none" text-anchor="middle">40%</text>'), 419]];
-  const r2b = [['반전', S('<path d="M12 3v18M4 6.5l5 2.5v6l-5 2.5zM20 6.5L15 9v6l5 2.5z"/>'), 142 + VL.TRKW], ['얼굴 트래킹', S('<circle cx="12" cy="12" r="6.5"/><path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4M12 10v4M10 12h4"/>'), 227 + VL.TRKW], ['정렬', S('<path d="M12 4l8 4-8 4-8-4zM4 12l8 4 8-4M4 16l8 4 8-4"/>'), 316 + VL.TRKW], ['여기로 이동', I.moveto, 402 + VL.TRKW]];
+  const r2a = [['추가', I.plus, 160], ['변형', ICONS.trend, 248], ['모양', ICONS.square, 335], ['40%<br>강도', ICONS.pct40, 419]];
+  const r2b = [['반전', ICONS.flip, 142 + VL.TRKW], ['얼굴 트래킹', ICONS.focus, 227 + VL.TRKW], ['정렬', ICONS.layers, 316 + VL.TRKW], ['여기로 이동', I.moveto, 402 + VL.TRKW]];
   SC.blurclip = (o = {}) => {
     const off = (o.slide || 0) * VL.TRKW;
     let s = appBar({ grid: 1 }) + playRow({ undo: 1 }) + ruler([360, 450, 539]) + transport('00:00<sup>18</sup>', '00:05') + '<div class="v-trk is-clip"></div>' + moveBtn(193)
@@ -240,8 +239,8 @@
     + '<div class="v-eb"><span>완료 알람</span><u class="v-tog is-on"><b></b></u></div>'
     + '<div class="v-bigb"><i class="v-ic">' + I.out + '</i>추출하기 (약 5.56 MB)</div></div>';
   /* 저장 완료(디자인 22) */
-  SC.saved = () => '<div class="v-full is-saved"><i class="v-ic" style="left:22px;top:60px;width:34px;height:34px">' + I.back + '</i><i class="v-ic" style="left:489px;top:60px;width:34px;height:34px">' + S('<path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/>') + '</i>'
-    + '<div class="v-chk"><svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="95" fill="none" stroke="#e9416a" stroke-width="5"/><path d="M62 98l30 40 60-84" fill="none" stroke="#e9416a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>'
+  SC.saved = () => '<div class="v-full is-saved"><i class="v-ic" style="left:22px;top:60px;width:34px;height:34px">' + I.back + '</i><i class="v-ic" style="left:489px;top:60px;width:34px;height:34px">' + ICONS.home3 + '</i>'
+    + '<div class="v-chk">' + ic('doneRed') + '</div>'
     + '<p class="v-sv1">저장 완료</p><p class="v-sv2">저장 위치 : 앨범</p><div class="v-sv3">추출한 파일 확인하기 &gt;</div><p class="v-sv4"><i></i>공유하기<i></i></p>'
     + '<div class="v-soc"><img src="img/p09_share_1.png" alt=""><img src="img/p09_share_2.png" alt=""><img src="img/p09_share_3.png" alt=""><img src="img/p09_share_4.png" alt=""></div></div>';
 
