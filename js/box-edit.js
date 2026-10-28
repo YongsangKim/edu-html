@@ -67,7 +67,7 @@
     const UNIT = o.unit || 1;
     if (o.setup) o.setup();
     const style = document.createElement('style');
-    style.textContent = '.is-box-edit [data-box]{outline:2px dashed #e5342f}.is-box-edit .js-point-finger[data-box],.is-box-edit hit-pad[data-box]{animation:none !important}.is-box-edit [data-box].is-box-sel{outline:3px solid #2fbf71}.is-box-edit :not(.hit-pulse):not(.is-fg-target)>hit-pad{display:none !important}';
+    style.textContent = '.is-box-edit [data-box]{outline:2px dashed #e5342f}.is-box-edit .js-point-finger[data-box]{animation:none !important}.is-box-edit [data-box].is-box-sel{outline:3px solid #2fbf71}.is-box-edit :not(.hit-pulse):not(.is-fg-target)>hit-pad{display:none !important}';
     document.head.appendChild(style);
     document.body.classList.add('is-box-edit');
 
@@ -150,6 +150,13 @@
       const k = e.altKey
         ? { ArrowLeft: [2, -d], ArrowRight: [2, d], ArrowUp: [3, -d], ArrowDown: [3, d] }
         : { ArrowLeft: [0, -d], ArrowRight: [0, d], ArrowUp: [1, -d], ArrowDown: [1, d] };
+      if (e.ctrlKey && sel._hot) {
+        if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+        while (sel._ref.length < 5) sel._ref.push(0);
+        sel._ref[4] = Math.max(0, sel._ref[4] + (e.key === 'ArrowUp' ? d : -d));
+        refresh();
+        return;
+      }
       if (k[e.key][0] >= sel._ref.length) return;
       sel._ref[k[e.key][0]] = Math.round((sel._ref[k[e.key][0]] + k[e.key][1]) * 1000) / 1000;
       refresh();
@@ -166,10 +173,11 @@
   };
 
   /* 눌러야 하는 버튼(data-hit)의 클릭 영역을 버튼 모양은 그대로 두고 늘리거나 줄이거나 옮김. HOT = { 이름: [dx, dy, dw, dh] } — 버튼 기준 왼쪽·위로 dx·dy px 옮기고 폭·높이에 dw·dh px 더함(음수면 줄임).
-     [0,0,0,0] 이면 아무것도 안 만듦(그 버튼 그대로). 투명한 칸을 버튼 안에 넣어 두고 거기를 눌러도 버튼이 눌린 것으로 처리됨. ?edit 에서는 모든 칸을 만들어 클릭→방향키(Alt=폭·높이)로 맞추고 표시줄의 'HOT.이름 = [...]' 를 코드에 옮겨 적음
+     [0,0,0,0] 이면 아무것도 안 만듦(그 버튼 그대로). 다섯째 값 [dx, dy, dw, dh, 모서리px] 를 주면 클릭 영역·깜빡임 테두리의 모서리를 둥글게(생략·0 이면 버튼 모서리를 따름, ?edit 에서는 Ctrl+↑↓ 로 조정). 투명한 칸을 버튼 안에 넣어 두고 거기를 눌러도 버튼이 눌린 것으로 처리됨. ?edit 에서는 모든 칸을 만들어 클릭→방향키(Alt=폭·높이)로 맞추고 표시줄의 'HOT.이름 = [...]' 를 코드에 옮겨 적음
      BoxEdit.hitPad(hits, HOT)  — 화면이 그대로인 페이지: 한 번 부름(?edit 아닐 때도 동작). BoxEdit.padEl(요소, 이름, HOT) — 단계마다 화면을 새로 그리는 페이지: 그릴 때마다 */
   BoxEdit.padApply = function (el) {
     const r = el._ref;
+    el.classList.toggle('is-hot', r.some((v) => v));
     /* 버튼에 테두리가 있어도 [0,0,0,0] 이면 테두리 바깥(버튼 전체)과 같게 맞춤 */
     const cs = getComputedStyle(el.parentNode);
     const bl = parseFloat(cs.borderLeftWidth) || 0, bt = parseFloat(cs.borderTopWidth) || 0;
@@ -178,6 +186,7 @@
     el.style.top = (r[1] - bt) + 'px';
     el.style.width = 'calc(100% + ' + (r[2] + bw) + 'px)';
     el.style.height = 'calc(100% + ' + (r[3] + bh) + 'px)';
+    el.style.borderRadius = r[4] ? r[4] + 'px' : '';
   };
   BoxEdit.padEl = function (el, key, HOT) {
     const r = HOT[key];
@@ -238,11 +247,14 @@
   BoxEdit.posePicker = function (o) {
     if (!ON) return;
     const POSES = o.poses || ['main', 'main_wave', 'wink_open', 'wink_point', 'wink_point2', 'wink_point3', 'wink_point4', 'wink_present', 'smile_present', 'point_front', 'wink_jump', 'happy_jump'];
-    const dir = (o.img.getAttribute('src') || '').replace(/sa_[^/]*$/, '');
+    const srcAttr = o.img.getAttribute('src') || '';
+    const pm = srcAttr.match(/(?:^|\/)(sa|gwa)_[^/]*$/);
+    const pre = (pm ? pm[1] : 'sa') + '_';
+    const dir = srcAttr.replace(/(sa|gwa)_[^/]*$/, '');
     const pp = document.createElement('div');
-    pp.style.cssText = 'position:fixed;right:8px;bottom:8px;z-index:99999;display:flex;flex-wrap:wrap;gap:4px;max-width:640px;padding:8px;border-radius:8px;background:rgba(0,0,0,.82);color:#fff;font:13px sans-serif';
-    pp.innerHTML = '<div data-info style="width:100%">캐릭터 포즈 — 눌러서 바꾸기 (표시된 이름을 STEPS 의 pose: 뒤 또는 say(…, 포즈) 에 옮겨 적음)</div>' +
-      POSES.map((n) => '<button type="button" data-pose="' + n + '" style="width:70px;padding:2px;border:2px solid transparent;border-radius:6px;background:#fff;cursor:pointer;font-size:10px"><img src="' + dir + 'sa_' + n + '.png" alt="" style="display:block;width:100%;height:56px;object-fit:contain">' + n + '</button>').join('');
+    pp.style.cssText = 'position:fixed;right:8px;bottom:8px;z-index:99999;display:flex;flex-direction:column;gap:4px;max-width:calc(100vw - 16px);padding:8px;border-radius:8px;background:rgba(0,0,0,.82);color:#fff;font:13px sans-serif';
+    pp.innerHTML = '<div data-info>캐릭터 포즈 — 눌러서 바꾸기 (표시된 이름을 STEPS 의 pose: 뒤 또는 say(…, 포즈) 에 옮겨 적음)</div><div style="display:flex;flex-wrap:nowrap;gap:4px;overflow-x:auto">' +
+      POSES.map((n) => '<button type="button" data-pose="' + n + '" style="flex:0 0 auto;width:70px;padding:2px;border:2px solid transparent;border-radius:6px;background:#fff;cursor:pointer;font-size:10px"><img src="' + dir + pre + n + '.png" alt="" style="display:block;width:100%;height:56px;object-fit:contain">' + n + '</button>').join('') + '</div>';
     pp.addEventListener('click', (e) => {
       const b = e.target.closest('[data-pose]');
       if (!b) return;

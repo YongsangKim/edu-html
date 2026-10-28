@@ -31,9 +31,7 @@
 
         .p07-input{position:absolute;left:530px;top:172px;width:1343px;height:460px;box-sizing:border-box;overflow:hidden;background:var(--c-white);border:solid 5px #91b9e7;border-radius:24px}
         .p07-input-tab{position:absolute;left:0;top:0;width:100%;height:100px;padding-top:8px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:#023187;font-family:'Cafe24 Ssurround';font-size:50px;color:var(--c-white);letter-spacing:-0.04em}
-        .p07-blank{position:absolute;width:360px;height:110px;box-sizing:border-box;background:#d6d6d6;border:solid 8px #bdbdbd;border-radius:26px;display:flex;align-items:center;justify-content:center;text-align:center;
-          font-family:'Cafe24 Ssurround';font-size:30px;line-height:1.15;letter-spacing:-0.04em;color:#8c8c93}
-        .p07-blank[data-filled]{background:none;border:0}
+        .p07-blank{position:absolute;width:360px;height:110px}
         .p07-blank[data-filled] .p07-hint{display:none}
         .p07-blank.b1{left:57px;top:140px}
         .p07-blank.b2{left:487px;top:140px}
@@ -44,14 +42,6 @@
 
         .p07-tab{left:52px;top:615px}
         .jig-tray.p07-tray{top:699px;height:250px;padding:0 40px;flex-wrap:wrap;justify-content:center;align-content:center;gap:5px 24px}
-        .p07-hold{width:360px;height:110px}
-        .p07-card{width:360px;height:110px;box-sizing:border-box;padding:6px 10px 0;border:solid 7px var(--c-ink);border-radius:26px;cursor:grab;user-select:none;position:relative;z-index:5;
-          display:flex;align-items:center;justify-content:center;text-align:center;font-family:'Cafe24 Ssurround';font-size:34px;line-height:1.05;letter-spacing:-0.06em;color:var(--c-ink);white-space:nowrap;
-          background:linear-gradient(180deg,#ffc80d,#ffb70e);box-shadow:inset 6px 8px 8px rgba(255,255,255,.3),inset -6px -10px 10px rgba(0,0,0,.18)}
-        .p07-card.is-job{background:linear-gradient(180deg,#4e97ff,#7272fe)}
-        .p07-card.is-tail{background:linear-gradient(180deg,#b463ca,#a043ed)}
-        .p07-card.is-dragging{cursor:grabbing;z-index:50}
-        .p07-blank .p07-card{cursor:default;width:100%;height:100%;border-radius:26px}
 
         .p07-popup{z-index:130}
     </style>
@@ -74,12 +64,12 @@
 
             <div class="p07-input">
               <span class="p07-input-tab">프롬프트 입력창</span>
-              <div class="p07-blank b1" data-keys="intro"><span class="p07-hint">이곳에<br>드래그해 보세요.</span></div>
-              <div class="p07-blank b2" data-keys="job"><span class="p07-hint">이곳에<br>드래그해 보세요.</span></div>
-              <div class="p07-blank b3" data-keys="role"><span class="p07-hint">이곳에<br>드래그해 보세요.</span></div>
-              <div class="p07-blank b4" data-keys="ask"><span class="p07-hint">이곳에<br>드래그해 보세요.</span></div>
-              <div class="p07-blank b5" data-keys="view"><span class="p07-hint">이곳에<br>드래그해 보세요.</span></div>
-              <div class="p07-blank b6" data-keys="easy example"><span class="p07-hint">이곳에<br>드래그해 보세요.</span></div>
+              <div class="dc-slot is-sm p07-blank b1" data-keys="intro"><span class="p07-hint">이곳에<br>드래그해 보세요.</span></div>
+              <div class="dc-slot is-sm p07-blank b2" data-keys="job"><span class="p07-hint">이곳에<br>드래그해 보세요.</span></div>
+              <div class="dc-slot is-sm p07-blank b3" data-keys="role"><span class="p07-hint">이곳에<br>드래그해 보세요.</span></div>
+              <div class="dc-slot is-sm p07-blank b4" data-keys="ask"><span class="p07-hint">이곳에<br>드래그해 보세요.</span></div>
+              <div class="dc-slot is-sm p07-blank b5" data-keys="view"><span class="p07-hint">이곳에<br>드래그해 보세요.</span></div>
+              <div class="dc-slot is-sm p07-blank b6" data-keys="easy example"><span class="p07-hint">이곳에<br>드래그해 보세요.</span></div>
             </div>
 
             <div class="jig-tray-label p07-tab">프롬프트 블록</div>
@@ -156,7 +146,7 @@
     });
 
     function card(key, text, cls) {
-      return '<div class="p07-hold"><div class="p07-card ' + (cls || '') + '" data-key="' + key + '">' + text + '</div></div>';
+      return '<div class="dc-hold is-sm"><div class="dc-card is-sm ' + (cls || 'is-yellow') + '" data-key="' + key + '">' + text + '</div></div>';
     }
 
     function startBuild(j) {
@@ -166,16 +156,16 @@
       new Image().src = 'img/p07_' + j.id + '.png';
       tray.innerHTML = shuffleArray([
         card('intro', '너는 지금부터'),
-        card('job', j.label, 'is-job'),
+        card('job', j.label, 'is-blue'),
         card('role', '역할을 해줘.'),
         card('ask', '내가 묻는 말에'),
-        card('view', j.label + '의 입장에서', 'is-job'),
-        card('easy', STYLES.easy, 'is-tail'),
-        card('example', STYLES.example, 'is-tail'),
+        card('view', j.label + '의 입장에서', 'is-blue'),
+        card('easy', STYLES.easy, 'is-purple'),
+        card('example', STYLES.example, 'is-purple'),
       ]).join('');
       let style = null;
       initMatchDrag({
-        cards: Array.from(tray.querySelectorAll('.p07-card')),
+        cards: Array.from(tray.querySelectorAll('.dc-card')),
         zones: Array.from(build.querySelectorAll('.p07-blank')),
         match: (c, z) => z.dataset.keys.split(' ').includes(c.dataset.key),
         onRight: (c) => {
@@ -202,6 +192,9 @@
         }
       });
     }
+
+    const startJob = JOBS.find((j) => j.id === new URLSearchParams(location.search).get('job'));
+    if (startJob) startBuild(startJob);
 
     $('p07WrongOk').addEventListener('click', () => $('p07Wrong').classList.add('is-off'));
     $('p07Next1').addEventListener('click', () => {

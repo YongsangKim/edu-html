@@ -6,56 +6,50 @@
     <title>생선 무게를 재고 블록으로 나타내요</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 5~6p. 왼쪽에 page02 무게 기록표, 그 아래 100g 블록(무한)을 생선별 받침대로 끌어 쌓고(생선 아래 무게는 쌓은 만큼), 생선마다 [제출]. 맞으면 블록이 초록으로 바뀌고 [완성], 틀리면 생선별 오답 문구.
-           쌓은 블록은 맨 위 블록을 아래로 끌어내리면 빠짐. 4개 다 완성하면 반짝 테두리 + 게이지 100% → 왼쪽이 말풍선+캐릭터(버튼 없음)로 바뀌고 1초 뒤 정리 모달 3단계 → page04.
-           생선 그림 img/p02_fish_*.png(page02와 같은 이미지, 없으면 이모지), 블록을 칸에 놓으면 sound/drag.mp3 */
+        .p03-ask{left:1235px;top:35px;width:1310px;font-size:64px;letter-spacing:-0.1em}
+        .p03-gauge{left:62px;top:40px;width:503px}
+        .p03-gauge:before{left:-61px;top:-19px;width:115px;height:124px;background-image:url('img/icon_fish.png')}
 
-        .p03-ask{position:absolute;left:620px;top:34px;width:1240px;height:100px;margin:0;box-sizing:border-box;padding:6px 40px 0;display:flex;align-items:center;
-          background:var(--c-white);border:solid 5px var(--c-ink);border-radius:50px;box-shadow:0 10px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:55px;color:var(--c-ink);letter-spacing:-0.05em}
-        .p03-gauge{left:100px;top:52px;width:450px}
+        .p03-frame{position:absolute;left:30px;top:165px;width:1863px;height:777px;box-sizing:border-box;border:solid 4px #0a3f8f;border-radius:22px;background:#dfeaf6 url('img/p02_bg.jpg') 0 0 / 1855px 772px no-repeat;overflow:hidden}
+        .p03-frame.is-all{animation:p03-glow 1s ease-in-out 3}
+        @keyframes p03-glow{50%{box-shadow:0 0 0 12px var(--c-orchid),0 0 40px 10px var(--c-orchid)}}
+        .p03-counter{position:absolute;left:-32px;top:608px;width:1920px;display:block}
 
-        .p03-board{position:absolute;left:640px;top:170px;width:1220px;height:770px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:36px;background:var(--c-white);
-          display:flex;justify-content:space-around;align-items:flex-end;padding:0 10px 26px}
-        .p03-board.is-all{animation:p03-glow 1s ease-in-out 3}
-        @keyframes p03-glow{50%{box-shadow:0 0 0 12px var(--c-yellow),0 0 40px 10px var(--c-yellow)}}
-        .p03-col{width:270px;display:flex;flex-direction:column;align-items:center;gap:12px}
-        .p03-stack{width:220px;height:470px;display:flex;flex-direction:column-reverse;align-items:center;gap:4px;box-sizing:border-box;border-bottom:solid 10px #9aa3b8;border-radius:6px}
-        .p03-stack.is-over{background:#fff7d6}
-        .p03-fish{width:200px;height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:center / contain no-repeat;
-          font-family:'Cafe24 Ssurround';font-size:42px;color:var(--c-ink)}
-        .p03-fish i{font-style:normal;font-size:64px;line-height:1}
-        .p03-fish.is-img i{visibility:hidden}
-        .p03-weight{margin:0;font-family:'Cafe24 Ssurround';font-size:38px;color:var(--c-blue)}
-        .p03-submit{width:220px;height:84px;min-width:0;padding:6px 10px 0;font-size:44px}
+        .p03-panel{position:absolute;left:50px;width:618px;box-sizing:border-box;border:solid 5px #0a3f8f;border-radius:16px;background:var(--c-white)}
+        .p03-rec{top:185px;height:425px;font-family:'Cafe24 Ssurround';color:var(--c-ink)}
+        .p03-rec h2{margin:0;height:90px;display:flex;align-items:center;justify-content:center;padding-top:6px;background:#2a6dd0;font-weight:normal;font-size:58px;letter-spacing:-0.06em;color:var(--c-white)}
+        .p03-rows{padding:4px 0 0;display:flex;flex-direction:column;gap:4px}
+        .p03-row{height:76px;margin:0 5px;display:grid;grid-template-columns:180px 100px 1fr;align-items:center;text-align:center;border-radius:10px;background:#dff6ff;font-size:50px;letter-spacing:-0.04em}
+        .p03-ico{width:130px;height:68px;margin:0 auto;background:center / contain no-repeat}
+        .p03-row b{font-weight:normal;font-size:54px;color:#2a6dd0;letter-spacing:-0.02em}
+        .p03-talkpanel{top:185px;height:425px;display:none}
+        .p03-talkpanel img{position:absolute;left:16px;top:49px;display:block}
+        main.is-selected .p03-rec{display:none}
+        main.is-selected .p03-talkpanel{display:block}
+        .p03-bubble{left:138px;top:155px;bottom:auto;width:662px;min-height:0;padding:12px 22px 6px;font-size:38px;line-height:1.3;z-index:6}
+        .p03-bubble.is-off{display:none}
+        .p03-source{top:625px;height:300px}
+        .p03-source .p03-block{position:absolute;left:50px;top:53px;width:512px}
+
+        .p03-col{position:absolute;top:125px;width:280px;height:880px}
+        .p03-col:nth-child(1){left:685px}
+        .p03-col:nth-child(2){left:987px}
+        .p03-col:nth-child(3){left:1288px}
+        .p03-col:nth-child(4){left:1587px}
+        .p03-scale-img{position:absolute;left:2px;top:430px;width:276px;display:block}
+        .p03-stack{position:absolute;left:0;top:50px;width:280px;height:400px;box-sizing:border-box;padding-bottom:0;display:flex;flex-direction:column-reverse;align-items:center;border-radius:20px;z-index:2}
+        .p03-stack.is-over{background:rgba(255,247,214,.45)}
+        .p03-name{position:absolute;left:0;top:456px;width:280px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:52px;line-height:1;letter-spacing:-0.04em;color:#2a6dd0;-webkit-text-stroke:9px var(--c-white);paint-order:stroke fill;z-index:3;pointer-events:none}
+        .p03-weight{position:absolute;left:0;top:572px;width:280px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:62px;line-height:1;color:#2a6dd0;z-index:3;pointer-events:none}
+        .p03-submit{position:absolute;left:25px;top:719px;width:230px;height:64px;min-width:0;padding:0 10px 0 12px;font-size:42px;line-height:1;letter-spacing:0.1em;z-index:3}
         .p03-submit:disabled{opacity:.5;cursor:default}
-        /* 누르면 눌림(공용 .card-btn.is-selected와 같은 그림자), 정답이면 눌린 채로 완성 */
-        .p03-submit:not(:disabled):active, .p03-submit.is-done{translate:0 10px;box-shadow:0 4px 0 0 #a9a2ff,0 3px 0 10px #035fd3;color:#d168fb}
-        .p03-submit.is-done{pointer-events:none}
+        /* .card-btn.p03-submit:not(.is-selected):not(:disabled):not(.is-disabled):active, .card-btn.p03-submit.is-selected{translate:none;box-shadow:0 5px 0 0 #a9a2ff,0 5px 0 5px #035fd3;color:#d168fb} */
+        .p03-submit.is-selected{pointer-events:none}
 
-        .p03-block{width:200px;height:70px;box-sizing:border-box;border:solid 4px #a3101e;border-radius:8px;background:#ef4444;display:flex;align-items:center;justify-content:center;
-          font-family:'Cafe24 Ssurround';font-size:34px;color:var(--c-white);touch-action:none;cursor:grab;flex:0 0 auto}
-        .p03-stack.is-ok .p03-block{background:#22a35a;border-color:#11703a;cursor:default}
-        .p03-block.is-drag{position:absolute;z-index:60;cursor:grabbing;pointer-events:none;box-shadow:0 8px 16px rgba(0,0,0,.25)}
-
-        .p03-source{position:absolute;left:60px;top:680px;width:540px;height:260px;box-sizing:border-box;border:solid 6px var(--c-ink);border-radius:36px;background:var(--c-pale);
-          display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-family:'Cafe24 Ssurround';font-size:34px;color:var(--c-ink);text-align:center}
-        .p03-table{position:absolute;left:60px;top:170px;width:540px;border-collapse:separate;border-spacing:0;border:solid 5px var(--c-ink);border-radius:24px;overflow:hidden;background:var(--c-white);
-          font-family:'Cafe24 Ssurround';font-size:40px;color:var(--c-ink);text-align:center}
-        .p03-table th{height:76px;background:var(--c-sky);color:var(--c-white);font-weight:normal}
-        .p03-table td{height:96px;border-top:solid 3px var(--c-mist)}
-        .p03-table td + td, .p03-table th + th{border-left:solid 3px var(--c-mist)}
-        .p03-table td:last-child{color:var(--c-blue)}
-        .p03-emoji{margin-right:8px;font-size:42px;vertical-align:-4px}
-        .p03-source p{margin:0}
-        /* 4개 다 완성하면 왼쪽 기록표·블록 자리가 말풍선 + 메인 캐릭터로 바뀜(기획서 5~6p, 모달 아님) */
-        main.is-done .p03-table, main.is-done .p03-source{display:none}
-        .p03-talk{position:absolute;left:40px;top:170px;width:580px;height:770px}
-        .p03-talk.is-off{display:none}
-        .p03-bubble{position:relative;box-sizing:border-box;padding:30px 30px 24px;background:var(--c-cream);border:solid 5px var(--c-purple);border-radius:30px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);z-index:2}
-        .p03-bubble:before{content:'';position:absolute;left:230px;bottom:-58px;width:100px;height:70px;background:url('../../img/common/p_guide_tail.png') 0 0 / contain no-repeat}
-        .p03-bubble p{margin:0;font-family:'Cafe24 Ssurround';font-size:38px;line-height:1.35;color:var(--c-purple);letter-spacing:-0.05em;word-break:keep-all}
-        .p03-char{position:absolute;left:60px;top:310px;width:460px;height:330px;display:flex;align-items:flex-start;justify-content:center}
-        .p03-char img{max-width:100%;max-height:100%;object-fit:contain}
+        .p03-block{position:relative;width:240px;aspect-ratio:512 / 176;flex:0 0 auto;background:url('img/p03_block.png') 0 0 / 100% 100% no-repeat;touch-action:none;cursor:grab}
+        .p03-block + .p03-block{margin-bottom:-13px}
+        .p03-stack.is-ok .p03-block{background-image:url('img/p03_block_ok.png');cursor:default}
+        .p03-block.is-drag{position:absolute;z-index:60;z-index:60;cursor:grabbing;pointer-events:none;filter:drop-shadow(0 8px 6px rgba(0,0,0,.3))}
     </style>
 </head>
 <body>
@@ -64,15 +58,21 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default" id="p03Main">
-          <p class="p03-ask">생선의 무게만큼 100g 블록을 쌓아 보세요!</p>
-          <div class="gauge is-thin is-star-on p03-gauge"><div class="gauge-fill" id="p03Fill"></div></div>
+          <p class="ask-pill p03-ask"><span>생선의 무게만큼 100G 블록을 쌓아 보세요!</span></p>
+          <div class="gauge p03-gauge"><div class="gauge-fill" id="p03Fill"></div></div>
 
-          <table class="p03-table"><thead><tr><th>생선</th><th>무게</th></tr></thead><tbody id="p03Rows"></tbody></table>
-          <div class="p03-board" id="p03Board"></div>
-          <div class="p03-source">
-            <p>100g 블록</p>
-            <div class="p03-block" id="p03Source">100g</div>
+          <div class="p03-frame" id="p03Frame"><img class="p03-counter" src="img/p02_counter.png" alt=""></div>
 
+          <div class="p03-panel p03-rec">
+            <h2>무게기록표 (g)</h2>
+            <div class="p03-rows" id="p03Rows"></div>
+          </div>
+          <div class="p03-panel p03-talkpanel"><img src="img/p03_character.png" alt="메인 캐릭터"></div>
+
+          <div id="p03Board"></div>
+
+          <div class="p03-panel p03-source">
+            <div class="p03-block" id="p03Source"></div>
           </div>
 
           <div class="ox-result-correct is-avatar is-off" id="p03Right">
@@ -94,10 +94,7 @@
             </div>
           </div>
 
-          <div class="p03-talk is-off" id="p03Talk">
-            <div class="p03-bubble"><p>우와! 한 화면에 모아서 보니까 숫자를 하나씩 읽지 않아도 광어가 가장 무겁고, 멍게가 가장 가볍다는 것을 알 수 있네!</p></div>
-            <div class="p03-char"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
-          </div>
+          <p class="guide-bubble is-center is-tail-right p03-bubble is-off" id="p03Talk">우와! 한 화면에 모아서 보니까 숫자를 하나씩 읽지 않아도 광어가 가장 무겁고, 멍게가 가장 가볍다는 것을 알 수 있네!</p>
 
           <div class="avatar-modal is-off" id="p03Done">
             <div class="avatar-card">
@@ -113,7 +110,7 @@
                 </div>
                 <div class="step-panel">
                   <div class="avatar-card-body is-side"><p class="avatar-card-text">이제 데이터의 측정과 시각화에 대해 더 자세히 알아볼까요?</p></div>
-                  <a href="page04.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+                  <a href="page04.html" class="js-nav-effect avatar-card-btn card-btn next-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
                 </div>
               </div>
             </div>
@@ -130,31 +127,30 @@
   <script>
   (function () {
     const FISH = [
-      { key: 'dom', name: '도미', josa: '는', g: 200, emoji: '🐟' },
-      { key: 'gwang', name: '광어', josa: '는', g: 500, emoji: '🐠' },
-      { key: 'urok', name: '우럭', josa: '은', g: 300, emoji: '🐡' },
-      { key: 'mung', name: '멍게', josa: '는', g: 100, emoji: '🪸' }
+      { key: 'dom', name: '도미', josa: '는', g: 200 },
+      { key: 'gwang', name: '광어', josa: '는', g: 500 },
+      { key: 'urok', name: '우럭', josa: '은', g: 300 },
+      { key: 'mung', name: '멍게', josa: '는', g: 100 }
     ];
+    const MAX_BLOCKS = 5;
     const main = $('p03Main');
     const board = $('p03Board');
-    // 끌어 놓는 소리가 커서 절반 볼륨으로
 
     FISH.forEach((f) => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = '<td><span class="p03-emoji">' + f.emoji + '</span>' + f.name + '</td><td>' + f.g + 'g</td>';
-      $('p03Rows').appendChild(tr);
+      const row = document.createElement('div');
+      row.className = 'p03-row';
+      row.innerHTML = '<i class="p03-ico" style="background-image:url(img/p02_fish_' + f.key + '.png)"></i><span>' + f.name + '</span><b>' + f.g + 'g</b>';
+      $('p03Rows').appendChild(row);
     });
 
     const stacks = FISH.map((f) => {
       const col = document.createElement('div');
       col.className = 'p03-col';
-      col.innerHTML = '<div class="p03-stack" data-key="' + f.key + '"></div>' +
-        '<div class="p03-fish">' + f.name + '</div>' +
+      col.innerHTML = '<img class="p03-scale-img" src="img/p02_scale.png" alt="">' +
+        '<div class="p03-stack" data-key="' + f.key + '"></div>' +
+        '<p class="p03-name">' + f.name + '</p>' +
         '<p class="p03-weight">0g</p>' +
         '<button type="button" class="card-btn p03-submit js-sfx" data-sound="sound/click.mp3" disabled>제출</button>';
-      const img = new Image();
-      img.onload = () => { const el = col.querySelector('.p03-fish'); el.style.backgroundImage = "url('" + img.src + "')"; el.classList.add('is-img'); };
-      img.src = 'img/p02_fish_' + f.key + '.png';
       board.appendChild(col);
       const stack = col.querySelector('.p03-stack');
       const btn = col.querySelector('.p03-submit');
@@ -168,7 +164,6 @@
       stack.parentNode.querySelector('.p03-weight').textContent = (stack.children.length * 100) + 'g';
     };
 
-    // 끌기(마우스·손가락): 왼쪽 아래 100g 블록에서 새 블록, 쌓인 맨 위 블록은 끌어내리면 빠짐
     const scaleOf = () => main.getBoundingClientRect().width / 1920;
     const stackAt = (x, y) => stacks.find((s) => {
       if (s.classList.contains('is-ok')) return false;
@@ -181,11 +176,10 @@
       const s = scaleOf();
       const ghost = document.createElement('div');
       ghost.className = 'p03-block is-drag';
-      ghost.textContent = '100g';
       main.appendChild(ghost);
       const move = (ev) => {
-        ghost.style.left = ((ev.clientX - m.left) / s - 100) + 'px';
-        ghost.style.top = ((ev.clientY - m.top) / s - 35) + 'px';
+        ghost.style.left = ((ev.clientX - m.left) / s - 120) + 'px';
+        ghost.style.top = ((ev.clientY - m.top) / s - 41) + 'px';
         const over = stackAt(ev.clientX, ev.clientY);
         stacks.forEach((st) => st.classList.toggle('is-over', st === over));
       };
@@ -198,12 +192,14 @@
         const target = stackAt(ev.clientX, ev.clientY);
         if (from && target === from) return;
         if (from) { from.lastElementChild.remove(); refresh(from); }
-        if (target && target.children.length < 6) {
+        if (target && target.children.length < MAX_BLOCKS) {
           const b = document.createElement('div');
           b.className = 'p03-block';
-          b.textContent = '100g';
+          b.style.zIndex = target.children.length + 1;
           target.appendChild(b);
           refresh(target);
+          playDrag();
+        } else if (from) {
           playDrag();
         }
       };
@@ -232,19 +228,19 @@
       flashLayer($('p03Right'));
       stack.classList.add('is-ok');
       btn.textContent = '완성';
-      btn.classList.add('is-done');
+      btn.classList.add('is-selected');
       solved += 1;
       $('p03Fill').style.width = (solved * 25) + '%';
       if (solved === FISH.length) {
         setTimeout(() => {
-          board.classList.add('is-all');
+          $('p03Frame').classList.add('is-all');
         }, 2100);
         setTimeout(() => {
-          main.classList.add('is-done');
+          main.classList.add('is-selected');
           $('p03Talk').classList.remove('is-off');
           makeSfx('sound/bubble.mp3')();
         }, 2600);
-        setTimeout(() => $('p03Done').classList.remove('is-off'), 5200);
+        setTimeout(() => $('p03Done').classList.remove('is-off'), 6200);
       }
     }
   })();
