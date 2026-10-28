@@ -7,19 +7,6 @@
     <link rel="stylesheet" href="../../css/common.css">
     <style>
         /* 디자인 없음 - 기획서 47~52p. Q1 3지선다, Q2·Q4 맞아요/아니에요, Q3 '중심 두뇌' 카드를 빈칸에 끌어 놓기, Q5 A/B/C. 오답은 문항별 힌트(data-wrong) */
-        .quiz-ask-box{padding:30px 60px 30px 30px}
-
-        .p11-flow{position:absolute;left:200px;top:470px;width:1520px;height:210px;box-sizing:border-box;padding:0 60px;display:flex;align-items:center;justify-content:space-between;
-          background:var(--c-white);border:solid 5px var(--c-purple);border-radius:50px}
-        .p11-slot{width:400px;height:130px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border:solid 5px var(--c-ink);border-radius:28px;background:var(--c-pale);
-          font-family:'Cafe24 Ssurround';font-size:56px;color:var(--c-indigo);letter-spacing:-0.06em}
-        .p11-blank{position:relative;border:dashed 6px var(--c-violet);background:var(--c-white);transition:transform .2s}
-        .p11-cards{position:absolute;left:0;top:740px;width:1920px;display:flex;justify-content:center;gap:120px}
-        .p11-card.multi-option{position:relative;width:400px;height:130px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:var(--c-white) padding-box;box-shadow:inset 0 0 0 4px var(--c-ink);border-radius:28px;
-          font-family:'Cafe24 Ssurround';font-size:56px;color:var(--c-indigo);letter-spacing:-0.06em;touch-action:none;cursor:grab;z-index:5}
-        .p11-card.is-dragging{cursor:grabbing;z-index:60}
-        .p11-card.is-wrong{animation:fix-word-shake .3s ease}
-        .p11-blank .p11-card{position:absolute;left:-6px;top:-6px;width:calc(100% + 12px);height:calc(100% + 12px);cursor:default}
     </style>
 </head>
 <body>
@@ -67,14 +54,14 @@
                   <p class="quiz-ask">센서가 보낸 정보를 모아서 상황을 판단하고 스마트 가전에 명령을 내리는 '중심 두뇌' 카드를 빈칸에 끌어다 놓아보세요!</p>
                 </div>
               </div>
-              <div class="p11-flow">
-                <div class="p11-slot">센서</div>
-                <div class="p11-slot p11-blank drop-zone" id="p11Blank"></div>
-                <div class="p11-slot">스마트 가전</div>
+              <div class="quiz-flow">
+                <div class="quiz-slot">센서</div>
+                <div class="quiz-slot quiz-blank drop-zone" id="p11Blank"></div>
+                <div class="quiz-slot">스마트 가전</div>
               </div>
-              <div class="p11-cards">
-                <div class="multi-option p11-card" data-correct="true">AI 허브</div>
-                <div class="multi-option p11-card">허브 화분</div>
+              <div class="quiz-cards">
+                <div class="multi-option quiz-card" data-correct="true">AI 허브</div>
+                <div class="multi-option quiz-card">허브 화분</div>
               </div>
             </div>
 
@@ -139,60 +126,31 @@
   <script>
   (function () {
     const HINT = "집 안의 모든 스마트 가전제품을 조종하는 똑똑한 중심 두뇌는 'AI 허브'랍니다!";
-    const blank = document.getElementById('p11Blank');
-    const cards = Array.from(document.querySelectorAll('.p11-card'));
     const rightLayer = document.querySelector('.ox-result-correct');
     const wrongLayer = document.querySelector('.ox-result-wrong');
     const wrongText = wrongLayer.querySelector('.avatar-popup-text');
-    const stage = document.getElementById('stage');
-    let done = false;
+    const blank = document.getElementById('p11Blank');
 
-    const overBlank = (x, y) => {
-      const r = blank.getBoundingClientRect();
-      return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
-    };
-
-    cards.forEach((card) => {
-      card.addEventListener('pointerdown', (e) => {
-        if (done) return;
-        e.preventDefault();
-        const s = stage.getBoundingClientRect().width / 1920;
-        const sx = e.clientX;
-        const sy = e.clientY;
-        card.setPointerCapture(e.pointerId);
-        card.classList.add('is-dragging');
-        const move = (ev) => {
-          card.style.transform = 'translate(' + (ev.clientX - sx) / s + 'px,' + (ev.clientY - sy) / s + 'px)';
-          blank.classList.toggle('is-over', overBlank(ev.clientX, ev.clientY));
-        };
-        const up = (ev) => {
-          card.removeEventListener('pointermove', move);
-          card.removeEventListener('pointerup', up);
-          card.removeEventListener('pointercancel', up);
-          card.classList.remove('is-dragging');
-          blank.classList.remove('is-over');
-          card.style.transform = '';
-          if (!overBlank(ev.clientX, ev.clientY)) return;
-          if (card.dataset.correct) {
-            done = true;
-            blank.appendChild(card);
-            playCorrect();
-            flashLayer(rightLayer);
-            setTimeout(() => advancePanelOrNavigate(blank, null), 2000);
-          } else {
-            playWrong();
-            card.classList.remove('is-wrong');
-            void card.offsetWidth;
-            card.classList.add('is-wrong');
-            wrongText.textContent = HINT;
-            wrongText.className = 'avatar-popup-text';
-            flashLayer(wrongLayer);
-          }
-        };
-        card.addEventListener('pointermove', move);
-        card.addEventListener('pointerup', up);
-        card.addEventListener('pointercancel', up);
-      });
+    initMatchDrag({
+      cards: Array.from(document.querySelectorAll('.quiz-card')),
+      zones: [blank],
+      silent: true,
+      match: (card) => !!card.dataset.correct,
+      onRight: () => {
+        playCorrect();
+        flashLayer(rightLayer);
+        setTimeout(() => advancePanelOrNavigate(blank, null), 2000);
+      },
+      onWrong: (card, zone) => {
+        if (!zone) return;
+        playWrong();
+        card.classList.remove('is-wrong');
+        void card.offsetWidth;
+        card.classList.add('is-wrong');
+        wrongText.textContent = HINT;
+        wrongText.className = 'avatar-popup-text';
+        flashLayer(wrongLayer);
+      }
     });
   })();
   </script>

@@ -2,19 +2,21 @@
    카테고리를 추가하려면 CATEGORIES에 한 줄 넣고 같은 이름의 html을 만들면 됨(todo:true면 메뉴에 회색 글자로만 표시) */
 (function () {
   const CATEGORIES = [
-    { file: 'buttons.html', label: '버튼' },
+    { file: 'design.html', label: '디자인 기초(색·글꼴)' },
+    { file: 'templates.html', label: '템플릿' },
     { file: 'screens.html', label: '레이아웃' },
+    { file: 'title.html', label: '제목(리본·알약)' },
+    { file: 'buttons.html', label: '버튼' },
     { file: 'modals.html', label: '팝업·모달' },
     { file: 'progress.html', label: '진행도(게이지·별·배지)' },
+    { file: 'intro.html', label: '도입·영상·마무리' },
+    { file: 'quiz.html', label: '퀴즈 풀기' },
+    { file: 'drag.html', label: '끌어 놓기' },
+    { file: 'puzzle.html', label: '퍼즐' },
     { file: 'characters.html', label: '안내 캐릭터·말풍선' },
     { file: 'steps.html', label: '단계형 실습 표준' },
-    { file: 'drag.html', label: '끌어 놓기' },
-    { file: 'puzzle.html', label: '퍼즐·빙고' },
     { file: 'phone.html', label: '폰 화면 틀' },
-    { file: 'icons.html', label: '공용 아이콘' },
-    { file: 'title.html', label: '제목(리본·알약)' },
-    { file: 'intro.html', label: '도입·마무리 화면' },
-    { file: 'quiz.html', label: '퀴즈 풀기' }
+    { file: 'icons.html', label: '공용 아이콘' }
   ];
 
   const here = location.pathname.split('/').pop() || 'index.html';
@@ -90,9 +92,12 @@ window.initGuideTabs = function (secs) {
     if (window.scaleGuideViews) window.scaleGuideViews();
     history.replaceState(null, '', '#t=' + (i + 1));
   }
-  const m = /#t=(\d+)/.exec(location.hash);
-  const start = m && frameSecs[Number(m[1]) - 1] ? Number(m[1]) - 1 : 0;
-  show(start);
+  const fromHash = () => {
+    const m = /#t=(\d+)/.exec(location.hash);
+    return m && frameSecs[Number(m[1]) - 1] ? Number(m[1]) - 1 : 0;
+  };
+  show(fromHash());
+  window.addEventListener('hashchange', () => show(fromHash()));
 };
 
 /* 미리보기 칸(.g-view > .g-stage, .w-thumb/.q-thumb > iframe)의 안쪽 1920px 화면을 칸 폭에 맞춰 축소.

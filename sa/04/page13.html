@@ -54,6 +54,15 @@
     const panel = document.getElementById('p13Panel');
     const next = document.getElementById('p13Next');
     const say = initGuideSay({ bubble: guide, img: character, set: document.getElementById('p13Set') });
+    // 단계별 말풍선 문구와 캐릭터 포즈 한 곳. 포즈 이름은 ?edit 오른쪽 아래 포즈판에서 눌러 보고 pose: 뒤에 옮겨 적음
+    const SAYS = {
+      intro1: { pose: 'wink_open', bubble: '이렇게 이모티콘을 사용하면<br>자신의 마음을 더 분명하게<br>전달할 수 있어요.' },
+      intro2: { pose: 'main', bubble: '내가 사용한 이모티콘도<br>한 번에 모아보는 것도 가능해요.<br>함께 확인해볼까요?' },
+      open: { pose: 'wink_point2', bubble: '이모티콘 버튼을 클릭해요.' },
+      tab: { pose: 'wink_point3', bubble: '이모티콘 탭을 클릭해요.' },
+      book: { pose: 'wink_present', bubble: '최근 사용한 이모티콘을<br>한 번에 모아볼 수 있는<br>나만의 이모티콘 수첩이에요!' }
+    };
+    const sayStep = (k) => say(SAYS[k].bubble, SAYS[k].pose);
     const play = makeSfx('sound/click.mp3');
     // 상호작용에서 고른 이모티콘 중 4종만 노출
     const USED = ['stk_dog_thanks', 'stk_sad', 'stk_party', 'stk_cry', 'stk_comfort', 'stk_cheer'];
@@ -105,13 +114,13 @@
     function stepIntro1() {
       phase = 0;
       leavePhone();
-      say('이렇게 이모티콘을 사용하면<br>자신의 마음을 더 분명하게<br>전달할 수 있어요.', 'wink_open');
+      sayStep('intro1');
       showNext(true);
     }
     function stepIntro2() {
       phase = 1;
       leavePhone();
-      say('내가 사용한 이모티콘도<br>한 번에 모아보는 것도 가능해요.<br>함께 확인해볼까요?', 'wink_open');
+      sayStep('intro2');
       showNext(true);
     }
     function enterPhone() {
@@ -124,7 +133,7 @@
     function stepOpen() {
       phase = 2;
       enterPhone();
-      say('이모티콘 버튼을 클릭해요.', 'wink_point');
+      sayStep('open');
       showNext(false);
       setHot('open', stepTab);
     }
@@ -132,13 +141,13 @@
       phase = 2;
       panel.style.backgroundImage = 'none';
       panel.innerHTML = cfUI.searchSheet();
-      say('이모티콘 탭을 클릭해요.', 'wink_point');
+      sayStep('tab');
       setHot('tab', stepBook);
     }
     function stepBook() {
       phase = 3;
       panel.innerHTML = cfUI.emojiSheet() + '<div class="cf-recent">' + USED.map((n) => '<img src="img/' + n + '.png" alt="">').join('') + '</div>';
-      say('최근 사용한 이모티콘을<br>한 번에 모아볼 수 있는<br>나만의 이모티콘 수첩이에요!', 'wink_point');
+      sayStep('book');
       showNext(true);
     }
 

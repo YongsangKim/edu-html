@@ -10,8 +10,6 @@
            언어 예절 확인(체크 2개) → 다운로드 완료 → 마음 전달 → page11. 카드 삽화 img/p10_illust_{key}.png, 도움말 그림 img/p10_help{1|2}.png, 게이지 별 img/p05_star.png,
            Canva 아이콘 ../../img/common/logo_canva.png. 가운데 휴대폰은 sa/02·page07과 같은 공용 Canva 틀(.cv)에 CSS로 그린 것. */
 
-        .p10-bubble{left:185px;bottom:615px;width:500px;z-index:5;margin:0}
-        .p10-character{left:80px;top:380px;width:541px;height:548px}
         .cv9-home,.cv-app,.cv9-proj,.cv9-edit,.cv9-saved{display:none}
         .cv[data-screen="home"] .cv9-home,.cv[data-screen="design"] .cv-app,.cv[data-screen="projects"] .cv9-proj{display:block}
         .cv[data-screen="edit"] .cv9-edit,.cv[data-screen="saved"] .cv9-edit,.cv[data-screen="saved"] .cv9-saved{display:block}
@@ -100,9 +98,6 @@
 
         .p10-help{position:absolute;right:36px;top:34px;width:190px;height:83px;font-size:40px;min-width:0;padding:6px 0 0}
         .p10-finish{position:absolute;left:1496px;top:800px;width:360px;min-width:0;white-space:nowrap}
-        .p10-catch{position:absolute;left:735px;top:21px;width:450px;height:895px;border-radius:40px;z-index:10}
-        .p10-target{position:absolute;z-index:11;padding:0;border:0;border-radius:12px;background:transparent;cursor:pointer;animation:cv-target 1.2s ease-in-out infinite}
-        main:has(#p10Phone[data-screen="home"]) .p10-target{animation:none}
 
         .p10-helpbox{position:absolute;left:402px;top:120px;width:1117px;height:720px;box-sizing:border-box;background:var(--c-white);border:solid 6px var(--c-purple);border-radius:48px;box-shadow:0 12px 0 0 color-mix(in srgb,var(--c-purple) 30%,transparent)}
         .p10-helpshot{position:absolute;left:362px;top:44px;width:368px;height:500px;border-radius:24px;overflow:hidden;background:var(--c-pale);box-shadow:0 0 0 3px #d9d3ee;font-family:'Pretendard';color:var(--c-ink)}
@@ -135,11 +130,6 @@
         .p10-check-title{position:absolute;left:0;top:78px;width:100%;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:48px;line-height:1.35;color:var(--c-purple);letter-spacing:-0.04em}
         .p10-check-card{position:absolute;left:90px;top:176px;width:384px;height:484px}
         .p10-checks{position:absolute;left:522px;top:176px;width:645px;display:flex;flex-direction:column;gap:20px}
-        .p10-checkbox{position:relative;display:flex;align-items:center;gap:26px;min-height:140px;padding:14px 28px 14px 30px;border:solid 4px var(--c-purple);border-radius:22px;background:var(--c-white);cursor:pointer;text-align:left;
-          font-family:'Cafe24 Ssurround';font-size:40px;line-height:1.3;color:var(--c-purple);letter-spacing:-0.04em}
-        .p10-checkbox:before{content:'';flex:0 0 auto;width:52px;height:52px;box-sizing:border-box;border:solid 5px var(--c-purple);border-radius:10px;background:var(--c-white) center / 100% no-repeat}
-        .p10-checkbox.is-checked{background:#6a2cc8;border-color:#6a2cc8;color:var(--c-white)}
-        .p10-checkbox.is-checked:before{background-color:var(--c-white);border-color:var(--c-white);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='74px' height='79px'%3E%3Cpath fill-rule='evenodd' fill='rgb(255, 79, 249)' d='M69.913,1.205 C68.821,0.698 67.582,0.430 66.330,0.430 C63.814,0.430 61.444,1.517 60.129,3.269 L30.171,40.064 L13.608,27.472 C12.225,26.180 10.240,25.441 8.135,25.441 C6.557,25.441 5.053,25.850 3.787,26.624 C0.694,28.514 -0.057,32.057 2.077,34.689 L25.352,63.405 C26.704,65.072 28.969,66.067 31.412,66.067 C31.529,66.067 31.647,66.065 31.765,66.060 C34.312,65.959 36.637,64.752 37.834,62.909 L72.748,9.183 C74.613,6.313 73.368,2.809 69.913,1.205 Z'/%3E%3C/svg%3E")}
         .p10-check-ok{position:absolute;left:990px;top:575px;width:200px;height:100px;min-width:0;padding:8px 0 4px;font-size:50px}
 
         .p10-send-card{position:absolute;left:740px;top:60px;width:440px;height:560px}
@@ -160,14 +150,16 @@
         <main data-preload-fonts="KCC-DodamDodam,KCC-MurukMuruk" class="bg-default p10">
           <!-- 3. Canva 편집 -->
           <div id="p10EditView">
-            <p class="guide-bubble is-center p10-bubble" id="p10Bubble"></p>
-            <div class="char-box p10-character"><img src="../img/character/sa_point_front.png" alt="메인 캐릭터"></div>
+            <div class="guide-set is-point-front" id="p10Set">
+              <p class="guide-bubble is-center" id="p10Bubble"></p>
+              <div class="guide-character"><img id="p10Char" src="../img/character/sa_point_front.png" alt="메인 캐릭터"></div>
+            </div>
 
             <div class="phone-frame has-cam cv has-nav" id="p10Phone" data-screen="home">
               <div class="phone-screen">
               <div class="phone-status"><span>13:13</span><span class="sys"><i data-ic="mute"></i><i data-ic="wifi"></i><i data-ic="sig"></i><em>64</em></span></div>
               <div class="cv9-home app-home is-purple">
-                <button type="button" class="app-icon" id="p10CanvaIcon"><i><img src="../../img/common/logo_canva.png" alt=""></i>Canva</button>
+                <button type="button" class="app-icon" id="p10CanvaIcon" data-hit="canva"><i><img src="../../img/common/logo_canva.png" alt=""></i>Canva</button>
                 <div class="phone-nav"><i></i><b></b><u></u></div>
               </div>
 
@@ -195,7 +187,7 @@
                 <p class="cv-app-h" style="top:846px">기능 바로가기</p>
                 <div class="cv-appnav">
                   <span class="is-on"><img src="img/p10_ui_nav_home.png" alt="">홈</span>
-                  <span id="p10DesignTab" style="cursor:pointer"><img src="img/p10_ui_nav_design.png" alt="">디자인</span>
+                  <span id="p10DesignTab" data-hit="design" style="cursor:pointer"><img src="img/p10_ui_nav_design.png" alt="">디자인</span>
                   <span><img src="img/p10_ui_nav_tpl.png" alt="">템플릿</span>
                   <span><img src="img/p10_ui_nav_ai.png" alt="">Canva AI</span>
                   <span><img src="img/p10_ui_nav_more.png" alt="">더 보기</span>
@@ -207,7 +199,7 @@
                 <div class="cv9-search" style="top:150px"><i data-ic="search"></i>디자인, 폴더, 업로드 항목을 검색해 보세요</div>
                 <div class="cv9-chips"><span>유형<i class="cv9-down"></i></span><span>카테고리<i class="cv9-down"></i></span><span>소유자<i class="cv9-down"></i></span></div>
                 <p class="cv9-h" style="top:300px">최근</p>
-                <button type="button" class="cv9-proj-card" id="p10ProjCard">
+                <button type="button" class="cv9-proj-card" id="p10ProjCard" data-hit="project">
                   <i><i data-ic="grid4"></i></i>
                   마음 카드<small>방금 전 편집함</small>
                 </button>
@@ -230,7 +222,7 @@
                   <span class="is-gap"></span>
                   <i data-ic="dotsH"></i>
                   <i data-ic="crownPro" style="color:#e3d8ff"></i>
-                  <button type="button" class="cv9-top-btn" id="p10Save" aria-label="저장"><i data-ic="download"></i></button>
+                  <button type="button" class="cv9-top-btn" id="p10Save" data-hit="save" aria-label="저장"><i data-ic="download"></i></button>
                   <i data-ic="out"></i>
                 </div>
 
@@ -272,7 +264,7 @@
                   <div class="cv9-thumb"><div class="p10-snap" id="p10Thumb"></div></div>
                   <p class="cv9-tit">마음 카드</p>
                   <small>카메라 롤에 저장했어요</small>
-                  <button type="button" class="cv9-share" id="p10Share">공유</button>
+                  <button type="button" class="cv9-share" id="p10Share" data-hit="share">공유</button>
                   <button type="button" class="cv9-open">열기</button>
                 </div>
               </div>
@@ -281,8 +273,6 @@
 
             <button type="button" class="card-btn p10-help is-off" id="p10HelpBtn">도움말</button>
             <button type="button" class="card-btn is-popup p10-finish is-off" id="p10Finish">완성하기</button>
-            <div class="p10-catch is-off" id="p10Catch"></div>
-            <button type="button" class="p10-target is-off" id="p10Target" aria-label="안내된 곳"></button>
           </div>
 
           <!-- 4. 마음 전달 -->
@@ -311,8 +301,8 @@
               <p class="p10-check-title">언어 예절을 지킨 올바른 표현인지 다시 한 번 확인해볼까요?</p>
               <div class="p10-check-card" id="p10CheckCard"></div>
               <div class="p10-checks">
-                <button type="button" class="p10-checkbox">상대가 처한 상황을<br>생각한 메시지인가요?</button>
-                <button type="button" class="p10-checkbox">이 메시지를 받았을 때<br>상대방의 기분이 나쁘지는<br>않을까요?</button>
+                <button type="button" class="check-row">상대가 처한 상황을<br>생각한 메시지인가요?</button>
+                <button type="button" class="check-row">이 메시지를 받았을 때<br>상대방의 기분이 나쁘지는<br>않을까요?</button>
               </div>
               <button type="button" class="card-btn is-popup p10-check-ok is-disabled" id="p10CheckOk">확인</button>
             </div>
@@ -343,6 +333,7 @@
   <script src="../../js/header.js" data-title="마음을 전하는 카드 만들기" data-next="page11.html"></script>
   <script src="../../js/toc.js"></script>
   <script src="../../js/common.js"></script>
+  <script src="../../js/box-edit.js"></script>
   <script>
   (function () {
     const COLORS = [
@@ -356,13 +347,12 @@
     const HELP = ['배경을 클릭해 색상을 바꿀 수 있어요.', '텍스트를 클릭해<br>글꼴, 크기, 형식을 변경할 수 있어요.'];
 
     const bubble = $('p10Bubble');
+    const say = initGuideSay({ bubble: bubble, img: $('p10Char'), set: $('p10Set') });
     const phone = $('p10Phone');
     const card = $('p10Card');
     const text = $('p10Text');
     const tools = $('p10Tools');
     const row = $('p10ToolsRow');
-    const catcher = $('p10Catch');
-    const target = $('p10Target');
     const oops = $('p10Oops');
     const learn = $('p10Learn');
     const warn = (layer) => { playWrong(); flashLayer(layer); };
@@ -383,70 +373,134 @@
     };
     let bgNow = '#ffffff';
 
-    function say(html) {
-      bubble.classList.remove('is-small');
-      bubble.innerHTML = html;
-      if (bubble.offsetHeight > 220) bubble.classList.add('is-small');
-    }
-    function nudgeFinger() {
-      document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.top = Math.min(parseFloat(f.style.top), 850) + 'px'; });
-    }
-    function guideTo(el, then) {
-      clearFingers();
-      catcher.classList.remove('is-off');
-      catcher.onclick = () => warn(oops);
-      const pr = el.getBoundingClientRect();
-      const mr = document.querySelector('main').getBoundingClientRect();
-      const s = mr.width / 1920;
-      target.style.cssText = 'left:' + (pr.left - mr.left) / s + 'px;top:' + (pr.top - mr.top) / s + 'px;width:' + pr.width / s + 'px;height:' + pr.height / s + 'px';
-      target.classList.remove('is-off');
-      pointFingerAt(target, el.id === 'p10CanvaIcon' ? { onMain: true, dx: 15, dy: -37 } : { onMain: true, beside: true });
-      nudgeFinger();
-      target.onclick = () => {
-        playClick();
-        target.classList.add('is-off');
-        catcher.classList.add('is-off');
-        clearFingers();
-        then();
-      };
-    }
-    function guideApp() {
-      say('Canva의 편집 기능을 이용하여<br>마음을 전하는 카드를<br>만들어봐요!');
-      phone.dataset.screen = 'home';
-      guideTo($('p10CanvaIcon'), () => {
-        say('디자인 버튼을 클릭해요');
-        phone.dataset.screen = 'design';
-        guideTo($('p10DesignTab'), () => {
-          say('내가 편집할<br>프로젝트를 선택해요.');
-          phone.dataset.screen = 'projects';
-          guideTo($('p10ProjCard'), startEdit);
-        });
-      });
-    }
-
-    // 4. 자유 편집: 배경 색상 / 텍스트 글꼴·크기·형식만
+    const STEPS = [
+      { pose: 'point_front', bubble: 'Canva의 편집 기능을 이용하여<br>마음을 전하는 카드를<br>만들어봐요!', screen: 'home', hit: 'canva' },
+      { pose: 'wink_point4', bubble: '디자인 버튼을 클릭해요', screen: 'design', hit: 'design' },
+      { pose: 'point_front', bubble: '내가 편집할<br>프로젝트를 선택해요.', screen: 'projects', hit: 'project' },
+      { pose: 'wink_present', bubble: '학습한 기능을 바탕으로<br>마음 카드를 자유롭게 꾸며봐요!', screen: 'edit', free: true },
+      { pose: 'wink_point', bubble: '완성한 카드를 저장하려면<br>오른쪽 위의 저장 버튼을 눌러요.', screen: 'edit', hit: 'save' },
+      { pose: 'main', bubble: '카드를 저장하고 있어요.', screen: 'edit', saving: true },
+      { pose: 'wink_point4', bubble: '카드를 저장했어요!<br>이제 공유 버튼을 클릭해<br>친구에게 마음을 전달해요.', screen: 'saved', hit: 'share' },
+      { pose: 'main', bubble: '카드를 저장했어요!<br>이제 공유 버튼을 클릭해<br>친구에게 마음을 전달해요.', screen: 'saved', check: true },
+      { pose: 'main', bubble: '카드를 저장했어요!<br>이제 공유 버튼을 클릭해<br>친구에게 마음을 전달해요.', screen: 'saved', send: true }
+    ];
+    const FG = { canva: [15, -37], design: [0, 0], project: [0, 0], save: [0, 0], share: [30, -20] };
+    const HOT = { canva: [0, 0, 0, 0], design: [-20, -4, 40, 0, 10], project: [0, 0, 0, 0, 10], save: [0, 0, 0, 0], share: [0, 0, 0, 0] };
+    const hits = Array.from(phone.querySelectorAll('[data-hit]'));
+    BoxEdit.hitPad(hits, HOT);
+    const checks = Array.from(document.querySelectorAll('.check-row'));
+    let index = 0;
     let edited = false;
-    let freeEdit = false;
+    let tok = 0;
+
+    $('p10Illust').style.backgroundImage = "url('img/p10_illust_" + sitKey + ".png')";
+    text.innerHTML = expr.t.replace(/<br>/g, ' ');
+
     function markEdited() {
       phone.classList.add('is-edited');
       if (edited) return;
       edited = true;
       $('p10Finish').classList.remove('is-off');
     }
-    function startEdit() {
-      say('학습한 기능을 바탕으로<br>마음 카드를 자유롭게 꾸며봐요!');
-      phone.dataset.screen = 'edit';
-      $('p10Illust').style.backgroundImage = "url('img/p10_illust_" + sitKey + ".png')";
-      text.innerHTML = expr.t.replace(/<br>/g, ' ');
-      $('p10HelpBtn').classList.remove('is-off');
-      freeEdit = true;
+
+    function render() {
+      const step = STEPS[index];
+      const my = ++tok;
+      say(step.bubble, step.pose);
+      if (index >= 4) markEdited();
+      phone.dataset.screen = step.screen;
+      phone.classList.toggle('is-saving', !!step.saving);
+      $('p10EditView').classList.toggle('is-off', !!step.send);
+      $('p10SendView').classList.toggle('is-off', !step.send);
+      $('p10CheckModal').classList.toggle('is-off', !step.check);
+      $('p10HelpModal').classList.add('is-off');
+      $('p10HelpBtn').classList.toggle('is-off', !step.free);
+      $('p10Finish').classList.toggle('is-off', !(step.free && (edited || BoxEdit.on)));
+      if (!step.free) deselect();
+
+      if (step.screen === 'saved') cardSnapshot($('p10Thumb'), 150);
+      if (step.check) {
+        cardSnapshot($('p10CheckCard'), 384);
+        checks.forEach((c) => c.classList.remove('is-on'));
+        $('p10CheckOk').classList.add('is-disabled');
+      }
+      renderSend(step, my);
+
+      clearFingers();
+      hits.forEach((h) => h.classList.toggle('hit-pulse', h.dataset.hit === step.hit && step.screen !== 'home'));
+      const target = hits.find((h) => h.dataset.hit === step.hit);
+      if (target) {
+        pointFingerAt(target, BoxEdit.fgo(FG, step.hit, step.hit === 'canva' ? {} : { beside: true }));
+        if (!BoxEdit.on) document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.top = Math.min(parseFloat(f.style.top), 850) + 'px'; });
+      }
+      if (step.saving && !BoxEdit.on) setTimeout(() => { if (my === tok) go(); }, 2000);
     }
+
+    function renderSend(step, my) {
+      const fill = $('p10Fill');
+      const next = $('p10SendNext');
+      if (!step.send) {
+        fill.style.transition = 'none';
+        fill.classList.remove('is-go');
+        next.classList.add('is-off');
+        return;
+      }
+      cardSnapshot($('p10SendCard'), 440);
+      if (BoxEdit.on) {
+        fill.style.transition = 'none';
+        fill.classList.add('is-go');
+        $('p10Status').textContent = '마음을 성공적으로 전달했어요!';
+        next.classList.remove('is-off');
+        return;
+      }
+      $('p10Status').textContent = '마음을 전달하는 중이에요';
+      fill.style.transition = '';
+      void fill.offsetWidth;
+      fill.classList.add('is-go');
+      next.classList.add('is-off');
+      setTimeout(() => {
+        if (my !== tok) return;
+        playCorrect();
+        $('p10Status').textContent = '마음을 성공적으로 전달했어요!';
+        next.classList.remove('is-off');
+      }, 2600);
+    }
+
+    function go() {
+      index += 1;
+      BoxEdit.syncStep(index + 1);
+      render();
+    }
+
+    function reset() {
+      tok += 1;
+      clearFingers();
+      deselect();
+      phone.classList.remove('is-edited', 'is-saving');
+      card.removeAttribute('style');
+      text.removeAttribute('style');
+      bgNow = '#ffffff';
+      edited = false;
+    }
+
+    hits.forEach((h) => h.addEventListener('click', (e) => {
+      if (BoxEdit.on || h.dataset.hit !== STEPS[index].hit) return;
+      e.stopPropagation();
+      playClick();
+      go();
+    }));
     phone.addEventListener('click', (e) => {
-      if (!freeEdit) return;
-      if (e.target.closest('.p10-card')) { playClick(); if (e.target.closest('.p10-text')) textTools(); else bgTools(); return; }
-      if (e.target.closest('.cv7-bar,.cv7-sub,.cv7-fmt')) return;
-      warn(learn);
+      const step = STEPS[index];
+      if (step.free) {
+        if (e.target.closest('.p10-card')) { playClick(); if (e.target.closest('.p10-text')) textTools(); else bgTools(); return; }
+        if (e.target.closest('.cv7-bar,.cv7-sub,.cv7-fmt')) return;
+        warn(learn);
+        return;
+      }
+      if (step.saving || BoxEdit.on) return;
+      warn(oops);
     });
+
     function deselect() {
       tools.classList.add('is-off');
       sub.classList.add('is-off');
@@ -632,29 +686,6 @@
     $('p10HelpPrev').addEventListener('click', () => { playClick(); helpPage = 0; showHelp(); });
     $('p10HelpClose').addEventListener('click', () => { playClick(); $('p10HelpModal').classList.add('is-off'); });
 
-    // 5. 완성 → 저장 → 공유
-    $('p10Finish').addEventListener('click', () => {
-      playClick();
-      freeEdit = false;
-      $('p10Finish').classList.add('is-off');
-      $('p10HelpBtn').classList.add('is-off');
-      deselect();
-      say('완성한 카드를 저장하려면<br>오른쪽 위의 저장 버튼을 눌러요.');
-      guideTo($('p10Save'), () => {
-        say('카드를 저장하고 있어요.');
-        phone.classList.add('is-saving');
-        catcher.classList.remove('is-off');
-        catcher.onclick = null;
-        setTimeout(() => {
-          phone.classList.remove('is-saving');
-          cardSnapshot($('p10Thumb'), 150);
-          phone.dataset.screen = 'saved';
-          say('카드를 저장했어요!<br>이제 공유 버튼을 클릭해<br>친구에게 마음을 전달해요.');
-          guideTo($('p10Share'), openCheck);
-        }, 2000);
-      });
-    });
-
     function cardSnapshot(box, w) {
       const c = card.cloneNode(true);
       c.removeAttribute('id');
@@ -665,41 +696,32 @@
       box.appendChild(c);
     }
 
-    // 6. 언어 예절 확인
-    function openCheck() {
-      cardSnapshot($('p10CheckCard'), 384);
-      $('p10CheckModal').classList.remove('is-off');
-    }
-    const checks = Array.from(document.querySelectorAll('.p10-checkbox'));
     checks.forEach((c) => c.addEventListener('click', () => {
       playClick();
-      c.classList.toggle('is-checked');
-      $('p10CheckOk').classList.toggle('is-disabled', !checks.every((x) => x.classList.contains('is-checked')));
+      c.classList.toggle('is-on');
+      $('p10CheckOk').classList.toggle('is-disabled', !checks.every((x) => x.classList.contains('is-on')));
     }));
     $('p10CheckOk').addEventListener('click', () => {
-      if ($('p10CheckOk').classList.contains('is-disabled')) return;
+      if (BoxEdit.on || $('p10CheckOk').classList.contains('is-disabled')) return;
       playClick();
-      $('p10CheckModal').classList.add('is-off');
-      send();
+      go();
+    });
+    $('p10Finish').addEventListener('click', () => {
+      if (BoxEdit.on) return;
+      playClick();
+      go();
     });
 
-    // 7. 마음 전달
-    function send() {
-      $('p10EditView').classList.add('is-off');
-      $('p10SendView').classList.remove('is-off');
-      cardSnapshot($('p10SendCard'), 440);
-      $('p10Status').textContent = '마음을 전달하는 중이에요';
-      const fill = $('p10Fill');
-      void fill.offsetWidth;
-      fill.classList.add('is-go');
-      setTimeout(() => {
-        playCorrect();
-        $('p10Status').textContent = '마음을 성공적으로 전달했어요!';
-        $('p10SendNext').classList.remove('is-off');
-      }, 2600);
-    }
-
-    guideApp();
+    BoxEdit.stepEdit({
+      key: () => STEPS[index].hit || '?',
+      count: STEPS.length + 1,
+      get: () => index + 1,
+      set: (n) => { index = Math.max(0, Math.min(n, STEPS.length) - 1); },
+      go: (n) => { if (n < 1) return; index = n - 1; BoxEdit.syncStep(n); reset(); render(); },
+      label: (n) => '단계 ' + n + ' / ' + STEPS.length,
+      say, bubble, img: $('p10Char')
+    });
+    render();
   })();
   </script>
 </body>

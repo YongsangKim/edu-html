@@ -6,45 +6,46 @@
     <title>생선 무게를 재고 블록으로 나타내요</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 3~4p. 매대 생선 4개(도미 200·광어 500·우럭 300·멍게 100g)를 접시저울로 끌어 놓으면 바늘이 움직이고, 표에 숫자로 무게 입력.
-           맞으면 정답 팝업 + 게이지 25%, 틀리면 입력 지우고 바늘·눈금 반짝. 4개 다 맞히면 완료 안내 → page03.
-           생선 그림 img/p02_fish_{dom|gwang|urok|mung}.png(없으면 이모지), 저울은 SVG */
+        .p02-ask{left:1235px;top:35px;padding-left:38px;padding-right:38px;font-size:64px;letter-spacing:-0.1em}
+        .p02-gauge{left:62px;top:40px;width:503px}
+        .p02-gauge:before{left:-61px;top:-19px;width:115px;height:124px;background-image:url('img/icon_fish.png')}
 
-        .p02-ask{left:1240px;top:34px}
-        .p02-gauge{left:100px;top:52px;width:450px}
+        .p02-photo{position:absolute;left:30px;top:165px;width:1863px;height:795px;box-sizing:border-box;border:solid 4px #0a3f8f;border-radius:22px 22px 0 0;background:#dfeaf6 url('img/p02_bg.jpg') 0 0 / 1855px 772px no-repeat}
+        .p02-char{position:absolute;left:0;top:193px;width:539px;height:725px}
+        .p02-char img{display:block;width:100%;height:100%}
+        .p02-counter{position:absolute;left:0;top:734px;width:1920px;height:226px;z-index:3}
+        .p02-counter img{display:block}
 
-        .p02-scale{position:absolute;left:460px;top:190px;width:600px;height:520px}
-        .p02-char{position:absolute;left:50px;top:170px;width:360px;height:520px;display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
-        .p02-char img{max-width:100%;max-height:100%;object-fit:contain}
-        .p02-scale svg{width:100%;height:100%;display:block}
-        .p02-needle{transform-origin:300px 320px;transition:transform 1s cubic-bezier(.3,1.4,.6,1)}
+        .p02-scale{position:absolute;left:600px;top:324px;width:394px;height:455px;z-index:2}
+        .p02-scale>img{display:block}
+        .p02-scale svg{position:absolute;left:0;top:0;width:394px;height:455px}
+        .p02-needle{transform-origin:196.5px 240.5px;transition:transform 1s cubic-bezier(.3,1.4,.6,1)}
         .p02-scale.is-hint .p02-needle line, .p02-scale.is-hint .p02-tick.is-on{animation:p02-hint .4s ease-in-out 5}
         @keyframes p02-hint{50%{stroke:var(--c-yellow);fill:#ff9f1a}}
-        .p02-plate{position:absolute;left:150px;top:0;width:300px;height:120px}
-        .p02-plate .p02-fish{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);cursor:default}
+        .p02-plate{position:absolute;left:40px;top:-130px;width:314px;height:170px}
+        .p02-plate .p02-fish{position:absolute;left:50%;bottom:0;width:260px;transform:translateX(-50%);cursor:default}
+        .p02-drop{position:absolute;left:600px;top:180px;width:394px;height:190px}
 
-        .p02-table{position:absolute;left:1320px;top:200px;width:500px;border-collapse:separate;border-spacing:0;border:solid 5px var(--c-ink);border-radius:24px;overflow:hidden;background:var(--c-white);
-          font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-ink);text-align:center}
-        .p02-table th{height:90px;background:var(--c-sky);color:var(--c-white);font-weight:normal}
-        .p02-table td{height:104px;border-top:solid 3px var(--c-mist)}
-        .p02-table td + td, .p02-table th + th{border-left:solid 3px var(--c-mist)}
-        .p02-table tr.is-now td{background:#fff7d6}
-        .p02-table input{width:170px;height:70px;box-sizing:border-box;border:solid 4px #b9b3dd;border-radius:14px;font:inherit;font-size:42px;text-align:center;color:var(--c-blue);background:var(--c-white)}
-        .p02-table input:disabled{border-color:var(--c-mist);background:var(--c-pale)}
-        .p02-table input.is-ok{border-color:transparent;background:transparent;color:var(--c-blue)}
-        .p02-table b{font-weight:normal;margin-left:6px}
-        .p02-check{margin-left:10px;height:70px;padding:0 20px;font-size:34px;vertical-align:middle}
+        .p02-rec{position:absolute;left:1088px;top:185px;width:774px;height:533px;box-sizing:border-box;border:solid 5px #0a3f8f;border-radius:18px;background:var(--c-white);overflow:hidden;z-index:2;font-family:'Cafe24 Ssurround';color:var(--c-ink)}
+        .p02-rec h2{margin:0;height:108px;display:flex;align-items:center;justify-content:center;padding-top:6px;background:#2a6dd0;font-weight:normal;font-size:64px;letter-spacing:-0.06em;color:var(--c-white)}
+        .p02-rows{padding:10px 5px 0;display:flex;flex-direction:column;gap:8px}
+        .p02-row{height:94px;display:grid;grid-template-columns:202px 170px 43px 270px 1fr;align-items:center;border-radius:12px;background:#dff6ff;font-size:64px;letter-spacing:-0.04em}
+        .p02-ico{width:150px;height:86px;margin-left:26px;background:center / contain no-repeat}
+        .p02-row input{grid-column:4;width:270px;height:84px;box-sizing:border-box;border:solid 4px #1b57c2;border-radius:24px;background:var(--c-white);font:inherit;font-size:56px;text-align:center;color:var(--c-ink)}
+        .p02-row input:focus{outline:0;box-shadow:0 0 0 6px rgba(42,109,208,.35)}
+        .p02-row input.is-ok{border-color:transparent;background:transparent}
+        .p02-row b{grid-column:5;font-weight:normal;font-size:56px;padding-left:8px}
 
-        .p02-shelf{position:absolute;left:200px;top:730px;width:1080px;height:190px;box-sizing:border-box;border-radius:30px;background:#c98c56;box-shadow:inset 0 -18px 0 #a86c3a;
-          display:flex;align-items:center;justify-content:space-around;padding-bottom:18px}
-        .p02-fish{width:200px;height:160px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;border-radius:20px;background:center top / contain no-repeat;
-          font-family:'Cafe24 Ssurround';font-size:30px;color:var(--c-white);text-shadow:0 2px 3px rgba(0,0,0,.35);touch-action:none;cursor:grab}
-        .p02-fish i{font-style:normal;font-size:130px;line-height:1}
-        .p02-emoji{margin-right:10px;font-size:46px;vertical-align:-4px}
-        .p02-fish.is-img i{visibility:hidden}
-        .p02-fish.is-dragging{z-index:50;cursor:grabbing}
+        .p02-shelf{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:4;pointer-events:none}
+        .p02-hold{position:absolute}
+        .p02-hold.is-dom{left:33px;top:705px;width:474px;height:214px}
+        .p02-hold.is-gwang{left:514px;top:697px;width:497px;height:237px}
+        .p02-hold.is-urok{left:1038px;top:708px;width:449px;height:224px}
+        .p02-hold.is-mung{left:1509px;top:710px;width:359px;height:220px}
+        .p02-fish{filter:url(#p02Ol);touch-action:none;cursor:grab;pointer-events:auto}
+        .p02-fish img{display:block;width:100%;pointer-events:none;user-select:none}
+        .p02-fish.is-dragging{position:relative;z-index:50;cursor:grabbing}
         .p02-fish.is-done{opacity:.35;cursor:default;pointer-events:none}
-        .p02-drop{position:absolute;left:600px;top:155px;width:320px;height:150px}
     </style>
 </head>
 <body>
@@ -53,19 +54,30 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <p class="ask-pill is-small is-fit p02-ask">생선을 접시저울에 하나씩 올려 무게를 재어 보세요!</p>
-          <div class="gauge is-thin is-star-on p02-gauge"><div class="gauge-fill" id="p02Fill"></div></div>
+          <p class="ask-pill is-fit p02-ask"><span>생선을 접시저울에 하나씩 올려 무게를 재어 보세요!</span></p>
+          <div class="gauge p02-gauge"><div class="gauge-fill" id="p02Fill"></div></div>
 
-          <div class="p02-char"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
-          <div class="p02-scale" id="p02Scale"></div>
+          <div class="p02-photo"></div>
+          <div class="p02-char"><img src="img/p02_character.png" alt="메인 캐릭터"></div>
+          <div class="p02-scale" id="p02Scale"><img src="img/p02_scale.png" alt=""></div>
           <div class="p02-drop" id="p02Drop" data-key="fish"></div>
+          <div class="p02-counter"><img src="img/p02_counter.png" alt=""></div>
 
-          <table class="p02-table">
-            <thead><tr><th>생선</th><th>무게</th></tr></thead>
-            <tbody id="p02Rows"></tbody>
-          </table>
+          <div class="p02-rec">
+            <h2>무게기록표 (g)</h2>
+            <div class="p02-rows" id="p02Rows"></div>
+          </div>
 
           <div class="p02-shelf" id="p02Shelf"></div>
+
+          <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+            <filter id="p02Ol" x="-10%" y="-10%" width="120%" height="125%" color-interpolation-filters="sRGB">
+              <feMorphology in="SourceAlpha" operator="dilate" radius="7" result="d"/>
+              <feFlood flood-color="#fff"/><feComposite in2="d" operator="in" result="w"/>
+              <feDropShadow in="w" dx="0" dy="6" stdDeviation="3" flood-color="#000" flood-opacity=".3" result="s"/>
+              <feMerge><feMergeNode in="s"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs></svg>
 
           <div class="ox-result-correct is-avatar is-off" id="p02Right">
             <div class="avatar-popup-panel">
@@ -119,32 +131,29 @@
   <script>
   (function () {
     const FISH = [
-      { key: 'dom', name: '도미', g: 200, emoji: '🐟' },
-      { key: 'gwang', name: '광어', g: 500, emoji: '🐠' },
-      { key: 'urok', name: '우럭', g: 300, emoji: '🐡' },
-      { key: 'mung', name: '멍게', g: 100, emoji: '🪸' }
+      { key: 'dom', name: '도미', g: 200 },
+      { key: 'gwang', name: '광어', g: 500 },
+      { key: 'urok', name: '우럭', g: 300 },
+      { key: 'mung', name: '멍게', g: 100 }
     ];
     const MAX = 600;
+    const CX = 196.5;
+    const CY = 240.5;
     const scale = $('p02Scale');
-    // 저울에 올려놓는 소리(page03과 같은 소리, 절반 볼륨)
 
-    // 접시저울: 위 접시 + 둥근 눈금판(0~600g, 100g마다 큰 눈금)
     let ticks = '';
     for (let v = 0; v <= MAX; v += 20) {
       const a = (-120 + (v / MAX) * 240) * Math.PI / 180;
       const big = v % 100 === 0;
-      const r1 = big ? 136 : 148;
-      ticks += '<line class="p02-tick' + (big ? ' is-big' : '') + '" data-v="' + v + '" x1="' + (300 + r1 * Math.sin(a)) + '" y1="' + (320 - r1 * Math.cos(a)) + '" x2="' + (300 + 162 * Math.sin(a)) + '" y2="' + (320 - 162 * Math.cos(a)) + '" stroke="#1b1738" stroke-width="' + (big ? 6 : 3) + '"/>';
-      if (big) ticks += '<text class="p02-tick" data-v="' + v + '" x="' + (300 + 104 * Math.sin(a)) + '" y="' + (320 - 104 * Math.cos(a) + 12) + '" text-anchor="middle" font-size="34" fill="#1b1738" font-family="Cafe24 Ssurround">' + v + '</text>';
+      const r1 = big ? 112 : 122;
+      ticks += '<line class="p02-tick' + (big ? ' is-big' : '') + '" data-v="' + v + '" x1="' + (CX + r1 * Math.sin(a)) + '" y1="' + (CY - r1 * Math.cos(a)) + '" x2="' + (CX + 132 * Math.sin(a)) + '" y2="' + (CY - 132 * Math.cos(a)) + '" stroke="#1b1738" stroke-width="' + (big ? 5 : 3) + '"/>';
+      if (big) ticks += '<text class="p02-tick" data-v="' + v + '" x="' + (CX + 88 * Math.sin(a)) + '" y="' + (CY - 88 * Math.cos(a) + 9) + '" text-anchor="middle" font-size="25" fill="#1b1738" font-family="Cafe24 Ssurround">' + v + '</text>';
     }
-    scale.innerHTML = '<svg viewBox="0 0 600 520" aria-hidden="true">' +
-      '<rect x="150" y="96" width="300" height="24" rx="12" fill="#9aa3b8"/><rect x="285" y="116" width="30" height="40" fill="#9aa3b8"/>' +
-      '<rect x="80" y="140" width="440" height="370" rx="60" fill="#e84b4b"/>' +
-      '<circle cx="300" cy="320" r="182" fill="#fff" stroke="#1b1738" stroke-width="8"/>' + ticks +
-      '<text x="300" y="430" text-anchor="middle" font-size="30" fill="#5b5e6e" font-family="Cafe24 Ssurround">g</text>' +
-      '<g class="p02-needle" id="p02Needle"><line x1="300" y1="320" x2="300" y2="180" stroke="#e84b4b" stroke-width="8" stroke-linecap="round"/></g>' +
-      '<circle cx="300" cy="320" r="18" fill="#1b1738"/></svg>' +
-      '<div class="p02-plate" id="p02Plate"></div>';
+    scale.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 394 455" aria-hidden="true">' + ticks +
+      '<text x="' + CX + '" y="' + (CY + 64) + '" text-anchor="middle" font-size="26" fill="#5b5e6e" font-family="Cafe24 Ssurround">g</text>' +
+      '<g class="p02-needle" id="p02Needle"><line x1="' + CX + '" y1="' + CY + '" x2="' + CX + '" y2="' + (CY - 112) + '" stroke="#e84b4b" stroke-width="7" stroke-linecap="round"/></g>' +
+      '<circle cx="' + CX + '" cy="' + CY + '" r="14" fill="#1b1738"/></svg>' +
+      '<div class="p02-plate" id="p02Plate"></div>');
     const needle = $('p02Needle');
     const setNeedle = (g) => { needle.style.transform = 'rotate(' + (-120 + (g / MAX) * 240) + 'deg)'; };
     setNeedle(0);
@@ -154,28 +163,30 @@
       el.className = 'p02-fish';
       el.dataset.key = 'fish';
       el.dataset.id = f.key;
-      el.innerHTML = '<i>' + f.emoji + '</i>';
-      el.setAttribute('aria-label', f.name);
-      const img = new Image();
-      img.onload = () => { el.style.backgroundImage = "url('" + img.src + "')"; el.classList.add('is-img'); };
-      img.src = 'img/p02_fish_' + f.key + '.png';
+      el.innerHTML = '<img src="img/p02_fish_' + f.key + '.png" alt="' + f.name + '" draggable="false">';
       return el;
     }
 
     const rows = $('p02Rows');
     FISH.forEach((f) => {
-      const tr = document.createElement('tr');
-      tr.dataset.id = f.key;
-      tr.innerHTML = '<td><span class="p02-emoji">' + f.emoji + '</span>' + f.name + '</td><td><input type="text" inputmode="numeric" maxlength="3" disabled><b>g</b></td>';
-      rows.appendChild(tr);
+      const row = document.createElement('div');
+      row.className = 'p02-row';
+      row.dataset.id = f.key;
+      row.innerHTML = '<i class="p02-ico" style="background-image:url(img/p02_fish_' + f.key + '.png)"></i><span>' + f.name + '</span><i></i><input type="text" inputmode="numeric" maxlength="3" disabled><b>g</b>';
+      rows.appendChild(row);
     });
     const shelf = $('p02Shelf');
-    const cards = FISH.map((f) => { const el = fishEl(f); shelf.appendChild(el); return el; });
+    const holds = FISH.map((f) => {
+      const hold = document.createElement('div');
+      hold.className = 'p02-hold is-' + f.key;
+      shelf.appendChild(hold);
+      return hold;
+    });
+    const cards = FISH.map((f, i) => { const el = fishEl(f); holds[i].appendChild(el); return el; });
 
     let current = null;
     let solved = 0;
 
-    // 숫자만 입력, 세 자리 입력하면(또는 엔터) 바로 확인
     rows.addEventListener('input', (e) => {
       e.target.value = e.target.value.replace(/[^0-9]/g, '');
       if (e.target.value.length === 3) check(e.target);
@@ -186,14 +197,13 @@
       current = FISH.find((f) => f.key === card.dataset.id);
       const plate = $('p02Plate');
       plate.innerHTML = '';
-      const copy = fishEl(current);
-      plate.appendChild(copy);
+      plate.appendChild(fishEl(current));
       card.classList.add('is-done');
       setNeedle(current.g);
-      rows.querySelectorAll('tr').forEach((tr) => {
-        const on = tr.dataset.id === current.key;
-        tr.classList.toggle('is-now', on);
-        const input = tr.querySelector('input');
+      rows.querySelectorAll('.p02-row').forEach((row) => {
+        const on = row.dataset.id === current.key;
+        row.classList.toggle('is-now', on);
+        const input = row.querySelector('input');
         if (on) { input.disabled = false; setTimeout(() => input.focus(), 1000); }
       });
       dropZone.dataset.filled = '1';
@@ -213,7 +223,7 @@
       }
       input.disabled = true;
       input.classList.add('is-ok');
-      input.closest('tr').classList.remove('is-now');
+      input.closest('.p02-row').classList.remove('is-now');
       playCorrect();
       $('p02RightText').textContent = current.name + ' ' + current.g + 'g!';
       flashLayer($('p02Right'));
@@ -231,7 +241,7 @@
     }
 
     const dropZone = $('p02Drop');
-    initMatchDrag({ cards: cards, zones: [dropZone], slop: 60, onRight: (card) => { shelf.insertBefore(card, shelf.children[cards.indexOf(card)] || null); place(card); } });
+    initMatchDrag({ cards: cards, zones: [dropZone], slop: 60, onRight: (card) => { holds[cards.indexOf(card)].appendChild(card); place(card); } });
   })();
   </script>
 </body>

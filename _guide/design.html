@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI 가이드 - 디자인 기초</title>
+    <link rel="stylesheet" href="../css/common.css">
+    <link rel="stylesheet" href="guide.css">
+    <style>
+        .d-sw{display:flex;flex-wrap:wrap;gap:18px}
+        .d-sw-item{width:180px;background:#fff;border-radius:14px;padding:10px;box-shadow:0 2px 8px rgba(0,0,0,.08);font-size:14px;line-height:1.5}
+        .d-sw-chip{height:96px;border-radius:10px;border:1px solid #d5dbe6;margin-bottom:8px}
+        .d-sw-item b{display:block;font-size:16px}
+        .d-sw-item code{background:#eef1f6;padding:1px 5px;border-radius:4px;font-size:13px}
+        .d-sw-item span{display:block;color:#5a6478;margin-top:2px}
+
+        .d-type{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+        .d-type th,.d-type td{padding:12px 18px;border-bottom:1px solid #e3e8f0;text-align:left;font-size:15px;vertical-align:middle}
+        .d-type th{background:#eef1f6;font-size:14px}
+        .d-type code{background:#eef1f6;padding:1px 6px;border-radius:4px;font-size:13px}
+        .d-cafe{font-family:'Cafe24 Ssurround';color:var(--c-ink);line-height:1.2;white-space:nowrap}
+        .d-pret{font-family:'Pretendard';color:var(--c-ink);line-height:1.3;white-space:nowrap}
+
+        .d-shape{display:flex;flex-wrap:wrap;gap:30px;align-items:flex-end}
+        .d-shape-item{font-size:14px;line-height:1.5;max-width:300px}
+        .d-box{width:260px;height:110px;margin-bottom:22px;background:var(--c-white);box-sizing:border-box}
+        .d-spec{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+        .d-spec th,.d-spec td{padding:10px 18px;border-bottom:1px solid #e3e8f0;text-align:left;font-size:15px}
+        .d-spec th{width:260px;background:#eef1f6;font-size:14px}
+        .d-spec code{background:#eef1f6;padding:1px 6px;border-radius:4px;font-size:13px}
+    </style>
+</head>
+<body>
+  <div class="g-wrap">
+    <h1>디자인 기초 (색 · 글꼴 · 모양)</h1>
+    <p class="g-note">
+      <code>css/common.css</code>에 정해 둔 값을 한곳에 모은 기준 페이지. 새 요소를 만들 때 색·글꼴·크기는 여기 값에서 고르고, 값을 새로 만들지 않음.
+      견본은 공용 CSS 변수로 그리므로 <code>:root</code> 값을 고치면 이 페이지도 같이 바뀜.
+    </p>
+    <ul class="g-toc"></ul>
+
+    <h2>1. 색 — <code>:root</code> 의 <code>--c-*</code></h2>
+    <p class="g-note">CSS에서는 <code>var(--c-ink)</code> 처럼 이름으로 씀. 이미지 안의 색은 이 표에 없음.</p>
+    <div class="d-sw" id="swatches"></div>
+
+    <h2>2. 버튼 색 (<code>.card-btn</code> 전용 값)</h2>
+    <p class="g-note">변수가 아니라 <code>.card-btn</code> 규칙 안에 직접 적힌 값. 버튼 모양을 바꿀 때만 봄.</p>
+    <div class="d-sw" id="btnSwatches"></div>
+
+    <h2>3. 글꼴</h2>
+    <table class="d-type">
+      <tr><th>글꼴</th><th>쓰임</th><th>견본</th></tr>
+      <tr><td><code>Cafe24 Ssurround</code><br>(<code>fonts/Cafe24Ssurround.woff2</code>)</td><td>제목·말풍선·버튼·모달·알약 등 화면 안 글자 대부분(공용 CSS에서 38곳)</td><td class="d-cafe" style="font-size:44px">오늘 배운 내용을 확인해 볼까요?</td></tr>
+      <tr><td><code>Pretendard</code><br>(Regular 400 · Medium 500 · Light 300 · SemiBold 600 · Bold 700)</td><td>작은 안내·폰 화면 안 글자·가이드 페이지 본문</td><td class="d-pret" style="font-size:34px">오늘 배운 내용을 확인해 볼까요?</td></tr>
+      <tr><td><code>KCC-DodamDodam</code> · <code>KCC-MurukMuruk</code> · <code>Black Han Sans</code></td><td>특정 페이지의 장식용(공용 CSS에 선언만 되어 있음). 새 화면의 기본으로 쓰지 않음</td><td class="d-pret" style="font-size:20px">필요한 페이지에서만 사용</td></tr>
+    </table>
+
+    <h2>4. 글자 크기 단계 (Cafe24 Ssurround, 화면 기준 px)</h2>
+    <p class="g-note">공용 CSS에서 쓰는 큰 글자 크기. 말풍선은 글이 길면 자동으로 <code>is-medium</code>(44px) → <code>is-large</code>로 커짐.</p>
+    <table class="d-type">
+      <tr><th>크기</th><th>쓰는 곳</th><th>견본</th></tr>
+      <tr><td>80px</td><td>모달 제목 <code>.avatar-card-title</code></td><td class="d-cafe" style="font-size:80px;letter-spacing:-0.04em">모달 제목</td></tr>
+      <tr><td>76px</td><td>페이지 제목 <code>.page-title</code> · 목차 제목</td><td class="d-cafe" style="font-size:76px;letter-spacing:-0.06em">페이지 제목</td></tr>
+      <tr><td>70px</td><td>카드 버튼 <code>.card-btn</code> · 제목 알약 <code>.ask-pill</code></td><td class="d-cafe" style="font-size:70px;letter-spacing:-0.06em">카드 버튼</td></tr>
+      <tr><td>60px</td><td>모달 본문 <code>.avatar-card-text</code> · 힌트</td><td class="d-cafe" style="font-size:60px;letter-spacing:-0.06em">모달 본문 글자</td></tr>
+      <tr><td>50px</td><td>작은 알약 <code>.ask-pill.is-small</code></td><td class="d-cafe" style="font-size:50px;letter-spacing:-0.05em">작은 알약 글자</td></tr>
+      <tr><td>48px</td><td>말풍선 기본 <code>.guide-bubble</code></td><td class="d-cafe" style="font-size:48px;letter-spacing:-0.06em">말풍선 기본 글자</td></tr>
+      <tr><td>44px</td><td>말풍선 긴 글 <code>.is-long</code></td><td class="d-cafe" style="font-size:44px;letter-spacing:-0.06em">말풍선 긴 글자</td></tr>
+      <tr><td>40px</td><td>말풍선 작게 <code>.is-small</code></td><td class="d-cafe" style="font-size:40px;letter-spacing:-0.06em">말풍선 작은 글자</td></tr>
+    </table>
+    <p class="g-note" style="margin-top:14px">글자 간격은 대부분 <code>-0.04em ~ -0.08em</code>(좁게). 더 좁혀야 할 때 쓰는 클래스: 말풍선 <code>.is-tight</code>(-0.08em), 알약 <code>.ask-pill.is-tight</code>.</p>
+
+    <h2>5. 모양 — 테두리 · 둥글기 · 그림자</h2>
+    <div class="d-shape">
+      <div class="d-shape-item"><div class="d-box" style="border:solid 5px var(--c-purple);border-radius:18px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)"></div><b>말풍선</b><br>테두리 5 purple · 둥글기 18 · 그림자 -7 10 6 2 (보라 17%)</div>
+      <div class="d-shape-item"><div class="d-box" style="border:solid 5px var(--c-ink);border-radius:55px;box-shadow:0 15px 0 0 rgba(86,148,231,0.2)"></div><b>제목 알약</b><br>테두리 5 ink · 둥글기 90 · 아래 그림자 15 (하늘 20%)</div>
+      <div class="d-shape-item"><div class="d-box" style="border:solid 3px #eae0fd;border-radius:15px;background:linear-gradient(180deg,#e6dafe,var(--c-cream));box-shadow:0 10px 0 0 #a9a2ff,0 10px 0 10px #035fd3"></div><b>카드 버튼</b><br>테두리 3 · 둥글기 15 · 아래 그림자 2겹(10 + 바깥 테두리 10)</div>
+      <div class="d-shape-item"><div class="d-box" style="border:solid 6px var(--c-purple);border-radius:60px;background:var(--c-cream);box-shadow:0 12px 0 0 color-mix(in srgb,var(--c-purple) 30%,transparent)"></div><b>모달 카드</b><br>테두리 6 purple · 둥글기 130 · cream · 아래 그림자 12 (보라 30%)</div>
+      <div class="d-shape-item"><div class="d-box" style="border:solid 15px var(--c-ink);border-radius:25px;box-shadow:0 0 0 5px var(--c-white)"></div><b>도입 패널</b><br>테두리 15 ink · 둥글기 25 · 바깥 흰 링 5</div>
+    </div>
+
+    <h2>6. 화면 기준</h2>
+    <table class="d-spec">
+      <tr><th>스테이지</th><td>1920×1080 고정(<code>#stage</code>), 화면 크기에 맞춰 <code>transform: scale</code></td></tr>
+      <tr><th>헤더 · 본문</th><td>헤더 120px, 그 아래 <code>main</code> 1920×960 (공용이라 페이지에서 크기를 다시 쓰지 않음)</td></tr>
+      <tr><th>제목 알약 자리</th><td><code>.ask-pill</code> 기본 top 40px, 알약 아래 내용은 top 175px부터</td></tr>
+      <tr><th>말풍선 폭</th><td>기본 510 · <code>is-medium</code> 610 · <code>is-large</code> 660 (꼬리 위치는 모두 같음)</td></tr>
+      <tr><th>모달 글자</th><td>제목·짧은 한 줄 80px / 본문·힌트 60px(<code>.is-small</code>) 두 단계만</td></tr>
+    </table>
+
+    <h2>7. 요소별 가이드 바로가기</h2>
+    <table class="d-spec">
+      <tr><th>버튼 · 선택지</th><td><a href="buttons.html">버튼</a></td></tr>
+      <tr><th>레이아웃 · 배경 · 패널</th><td><a href="screens.html">레이아웃</a> · <a href="intro.html#t=2">도입·마무리 화면</a></td></tr>
+      <tr><th>팝업 · 모달</th><td><a href="modals.html">팝업·모달</a></td></tr>
+      <tr><th>제목 알약 · 리본</th><td><a href="title.html#pill">제목 알약</a> · <a href="title.html#ribbon">리본 제목</a></td></tr>
+      <tr><th>게이지 · 별 · 배지</th><td><a href="progress.html">진행도</a></td></tr>
+      <tr><th>안내 캐릭터 · 말풍선</th><td><a href="characters.html">안내 캐릭터·말풍선</a> · <a href="steps.html">단계형 실습 표준</a></td></tr>
+      <tr><th>폰 화면 · 아이콘</th><td><a href="phone.html">폰 화면 틀</a> · <a href="icons.html">공용 아이콘</a></td></tr>
+      <tr><th>끌어 놓기 · 퍼즐 · 퀴즈</th><td><a href="drag.html">끌어 놓기</a> · <a href="puzzle.html#t=1">퍼즐</a> · <a href="quiz.html#t=1">퀴즈 풀기</a></td></tr>
+    </table>
+  </div>
+
+  <script src="guide.js"></script>
+  <script>
+    (function () {
+      const COLORS = [
+        ['ink', '글자·테두리 기본색(어두운 남색)'], ['white', '흰색 바탕'], ['purple', '말풍선·모달 테두리와 글자'], ['cream', '모달 카드·버튼 바탕'],
+        ['yellow', '강조·끌어 놓기 올릴 때 테두리'], ['indigo', '버튼 글자'], ['navy', '진한 파랑'], ['blue', '파랑 포인트'],
+        ['violet', '버튼 글자 마우스 올림'], ['sky', '게이지·알약 하늘색'], ['sky-pale', '연한 하늘색'], ['pale', '아주 연한 파랑'],
+        ['mist', '연한 회청색'], ['pink', '분홍 포인트'], ['hotpink', '진한 분홍'], ['orchid', '버튼 선택·눌림 글자']
+      ];
+      const BTN = [
+        ['#e6dafe', '버튼 바탕 위쪽'], ['#eae0fd', '버튼 테두리'], ['#a9a2ff', '버튼 아래 그림자 1겹'], ['#035fd3', '그림자 바깥 테두리(파랑)'], ['#6b03d6', '그림자 바깥 테두리(보라 버튼)']
+      ];
+      const cs = getComputedStyle(document.documentElement);
+      const item = (bg, name, hex, use) => '<div class="d-sw-item"><div class="d-sw-chip" style="background:' + bg + '"></div><b>' + name + '</b><code>' + hex + '</code><span>' + use + '</span></div>';
+      document.getElementById('swatches').innerHTML = COLORS.map((c) => {
+        const v = '--c-' + c[0];
+        return item('var(' + v + ')', v, cs.getPropertyValue(v).trim(), c[1]);
+      }).join('');
+      document.getElementById('btnSwatches').innerHTML = BTN.map((c) => item(c[0], c[0], '.card-btn', c[1])).join('');
+    })();
+  </script>
+</body>
+</html>

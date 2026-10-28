@@ -6,42 +6,44 @@
     <title>직접 만드는 막대그래프와 꺾은선그래프</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 16~18p. page08에서 완성한 막대그래프 위 점을 0시부터 24시까지 차례로 끌어 이음(지금 점에서 다음 점까지).
-           다음 점만 노랗게 크게, 다른 곳에 놓으면 2초 오답 팝업 + 지금/다음 점 반짝. 다 이으면 막대가 사라지고 꺾은선만 → 미니퀴즈 2개(2지선다) → 정리 4단계 → page10 */
+        .ask-pill{font-size:64px;letter-spacing:-0.1em}
 
-        .p09-ask{position:absolute;left:60px;top:30px;width:1800px;height:100px;margin:0;box-sizing:border-box;padding:6px 40px 0;display:flex;align-items:center;justify-content:center;
-          background:var(--c-white);border:solid 5px var(--c-ink);border-radius:50px;box-shadow:0 10px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:60px;color:var(--c-ink);letter-spacing:-0.05em}
+        .temp-table{position:absolute;left:35px;top:174px;width:520px;height:756px;box-sizing:border-box;border-collapse:separate;border-spacing:0;border:solid 4px #023186;border-radius:14px;overflow:hidden;background:#dff6ff;
+        font-family:'Cafe24 Ssurround';text-align:center}
+        .temp-table th{height:68px;padding-top:4px;background:#266cc8;color:var(--c-white);font-weight:normal;font-size:42px;letter-spacing:-0.04em}
+        .temp-table th:first-child{width:190px}
+        .temp-table th + th{background:#69a0e8}
+        .temp-table td{height:73px;padding:2px 0 0;font-size:48px;line-height:1;letter-spacing:-0.04em;color:var(--c-ink);background:#b7d9f7}
+        .temp-table td + td{background:#dff6ff;color:#266cc8}
+        .temp-table tr:nth-child(even) td{background:#b7dff5}
+        .temp-table tr:nth-child(even) td + td{background:#dffffb}
+        .temp-table tr.is-now td{background:#c5c2f6;color:#49225f;box-shadow:inset 0 3px 0 #a1b2e5,inset 0 -3px 0 #a1b2e5}
+        .temp-table tr.is-now td + td{background:#e5dcfb;color:#5166d2;box-shadow:inset 0 3px 0 #c1c9eb,inset 0 -3px 0 #c1c9eb}
+        .deg{font-family:'Pretendard', sans-serif;line-height:1;font-weight:500}
+        .temp-table{transition:opacity .4s}
+        .temp-table.is-off{opacity:0;pointer-events:none}
 
-        .temp-table{position:absolute;left:60px;top:170px;width:340px;border-collapse:separate;border-spacing:0;border:solid 5px var(--c-ink);border-radius:20px;overflow:hidden;background:var(--c-white);
-          font-family:'Cafe24 Ssurround';font-size:34px;color:var(--c-ink);text-align:center}
-        .temp-table th{height:66px;background:var(--c-sky);color:var(--c-white);font-weight:normal;font-size:32px}
-        .temp-table td{height:72px;border-top:solid 3px var(--c-mist)}
-        .temp-table td + td, .temp-table th + th{border-left:solid 3px var(--c-mist)}
-        .deg{font-family:sans-serif}
-
-        .p09-chart{position:absolute;left:460px;top:170px;width:1400px;height:770px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:36px;background:var(--c-white)}
-        .p09-plot{position:absolute;left:100px;top:110px;width:1250px;height:540px;border-left:solid 4px var(--c-ink);border-bottom:solid 4px var(--c-ink);
-          background-image:linear-gradient(var(--c-mist) 2px,transparent 2px);background-size:100% 90px;background-position:0 -2px;touch-action:none}
-        .p09-yl{position:absolute;left:-74px;width:60px;text-align:right;font-family:'Cafe24 Ssurround';font-size:26px;color:#5b5e6e;transform:translateY(-50%)}
-        .p09-yt{position:absolute;left:-90px;top:-78px;font-family:'Cafe24 Ssurround';font-size:24px;color:#5b5e6e;white-space:nowrap}
-        .p09-x{position:absolute;bottom:-46px;width:120px;margin-left:-60px;text-align:center;font-family:'Cafe24 Ssurround';font-size:28px;color:var(--c-ink)}
+        .p09-chart{position:absolute;left:580px;top:174px;width:1305px;height:756px;box-sizing:border-box;border:solid 4px #2a6dd0;border-radius:20px;background:var(--c-white);transition:left .6s ease}
+        .p09-chart.is-quiz{left:40px}
+        .p09-plot{position:absolute;left:84px;top:138px;width:1184px;height:473px;border-left:solid 4px var(--c-ink);border-bottom:solid 4px var(--c-ink);
+          background-image:linear-gradient(#dde3ee 2px,transparent 2px);background-size:100% 94.6px;touch-action:none}
+        .p09-yl{position:absolute;left:-76px;width:60px;text-align:right;font-family:'Cafe24 Ssurround';font-size:26px;color:#5b5e6e;transform:translateY(-50%)}
+        .p09-yt{position:absolute;left:-82px;top:-55px;font-family:'Cafe24 Ssurround';font-size:24px;color:#5b5e6e;white-space:nowrap}
+        .p09-x{position:absolute;bottom:-46px;width:120px;margin-left:-60px;text-align:center;font-family:'Cafe24 Ssurround';font-size:28px;color:var(--c-ink);letter-spacing:-0.04em}
         .p09-bar{position:absolute;bottom:0;width:80px;margin-left:-40px;background:#ffc89a;transition:opacity .8s}
         .p09-plot.is-line .p09-bar{opacity:0}
         .p09-plot svg{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible}
         .p09-dot{fill:var(--c-white);stroke:#ff7a1a;stroke-width:5}
         .p09-dot.is-done{fill:#ff7a1a}
-        .p09-dot.is-next{fill:var(--c-yellow);stroke:#ff9f1a;stroke-width:6}
+        .p09-dot.is-next{fill:#ffd633;stroke:#ff9f1a;stroke-width:6}
         .p09-dot.is-now{fill:#ff7a1a;stroke:#ff4ff9;stroke-width:6;cursor:grab}
         .p09-dot.is-blink{animation:p09-blink .4s ease-in-out 5}
         @keyframes p09-blink{50%{opacity:.2}}
         .p09-plot.is-line .p09-dot{fill:#ff7a1a;stroke:#ff7a1a}
 
-        .p09-opts{position:absolute;left:460px;top:836px;width:1400px;display:flex;justify-content:center;gap:60px}
-        .p09-opts .card-btn{width:520px;min-width:0;height:92px;padding-top:8px;font-size:44px}
+        .p09-opts{position:absolute;left:1370px;top:174px;width:522px;height:756px;box-sizing:border-box;padding-top:164px;display:flex;flex-direction:column;align-items:center;gap:74px;border-radius:20px;background:#2a6dd0}
+        .p09-opts .card-btn{width:466px;min-width:0;height:170px;padding-top:8px;font-size:62px;letter-spacing:-0.04em}
         .p09-opts.is-off{display:none}
-        .p09-chart, .temp-table{transition:transform .4s}
-        .p09-chart.is-quiz{transform:scale(.84);transform-origin:50% 0}
-        .p09-chart.is-quiz ~ .p09-opts{display:flex}
     </style>
 </head>
 <body>
@@ -50,15 +52,15 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <p class="p09-ask" id="p09Ask">시간 순서대로 점을 이어 보세요!</p>
+          <p class="ask-pill is-fit"><span id="p09Ask">시간 순서대로 점을 이어 보세요!</span></p>
 
-          <table class="temp-table"><thead><tr><th>시간</th><th>기온(<span class="deg">℃</span>)</th></tr></thead><tbody id="p09Rows"></tbody></table>
+          <table class="temp-table" id="p09Table"><thead><tr><th>시간</th><th>기온(<span class="deg">℃</span>)</th></tr></thead><tbody id="p09Rows"></tbody></table>
 
           <div class="p09-chart" id="p09Chart">
             <div class="p09-plot" id="p09Plot"><span class="p09-yt">기온(<span class="deg">℃</span>)</span></div>
           </div>
 
-          <div class="p09-opts is-off" id="p09Opts">
+          <div class="p09-opts opts is-off" id="p09Opts">
             <button type="button" class="card-btn js-sfx" data-sound="sound/click.mp3" data-pick="up">점점 올라간다</button>
             <button type="button" class="card-btn js-sfx" data-sound="sound/click.mp3" data-pick="down">점점 내려간다</button>
           </div>
@@ -99,7 +101,7 @@
                 </div>
                 <div class="step-panel">
                   <div class="avatar-card-body is-side"><p class="avatar-card-text">숫자를 그림이나 그래프로 한눈에 보기 쉽게 나타내는 것을 ‘시각화’라고 해요.<br>이제 AI에게 그래프 만들기를 부탁해 볼까요?</p></div>
-                  <a href="page10.html" class="js-nav-effect avatar-card-btn is-popup js-sfx card-btn" data-sound="sound/click.mp3">확인</a>
+                  <a href="page10.html" class="js-nav-effect avatar-card-btn is-popup next-btn js-sfx card-btn" data-sound="sound/click.mp3">확인</a>
                 </div>
               </div>
             </div>
@@ -117,8 +119,10 @@
   (function () {
     const TEMPS = [15, 15, 12, 20, 25, 30, 20, 15, 14];
     const MAX = 30;
-    const W = 1250;
-    const H = 540;
+    const W = 1184;
+    const H = 473;
+    const PX = H / MAX;
+    const PITCH = (W - 118) / 8;
     const QUIZ = [
       { ask: '3시 ~ 15시까지 기온은 어떻게 변화하고 있나요?', answer: 'up' },
       { ask: '15시 ~ 24시까지 기온은 어떻게 변화하고 있나요?', answer: 'down' }
@@ -130,10 +134,9 @@
       tr.innerHTML = '<td>' + i * 3 + '시</td><td>' + t + '</td>';
       $('p09Rows').appendChild(tr);
     });
-    for (let v = 0; v <= MAX; v += 5) plot.insertAdjacentHTML('beforeend', '<span class="p09-yl" style="top:' + (H - v * 18) + 'px">' + v + '</span>');
+    for (let v = 0; v <= MAX; v += 5) plot.insertAdjacentHTML('beforeend', '<span class="p09-yl" style="top:' + (H - v * PX) + 'px">' + v + '</span>');
 
-    const gap = W / TEMPS.length;
-    const pts = TEMPS.map((t, i) => ({ x: gap * i + gap / 2, y: H - t * 18 }));
+    const pts = TEMPS.map((t, i) => ({ x: 59 + PITCH * i, y: H - t * PX }));
     pts.forEach((p, i) => {
       plot.insertAdjacentHTML('beforeend', '<div class="p09-bar" style="left:' + p.x + 'px;height:' + (H - p.y) + 'px"></div><span class="p09-x" style="left:' + p.x + 'px">' + i * 3 + '시</span>');
     });
@@ -154,7 +157,7 @@
       const c = document.createElementNS(NS, 'circle');
       c.setAttribute('cx', p.x);
       c.setAttribute('cy', p.y);
-      c.setAttribute('r', 14);
+      c.setAttribute('r', 12);
       c.setAttribute('class', 'p09-dot');
       svg.appendChild(c);
       return c;
@@ -164,7 +167,7 @@
     function mark() {
       dots.forEach((d, i) => {
         d.setAttribute('class', 'p09-dot' + (i < now ? ' is-done' : i === now ? ' is-now' : i === now + 1 ? ' is-next' : ''));
-        d.setAttribute('r', i === now + 1 ? 22 : 14);
+        d.setAttribute('r', i === now + 1 ? 20 : 12);
       });
     }
     mark();
@@ -233,6 +236,7 @@
       q = n;
       $('p09Ask').textContent = QUIZ[n].ask;
       $('p09Chart').classList.add('is-quiz');
+      $('p09Table').classList.add('is-off');
       opts.classList.remove('is-off');
     }
     opts.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {

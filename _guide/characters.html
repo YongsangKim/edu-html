@@ -7,119 +7,25 @@
     <link rel="stylesheet" href="../css/common.css">
     <link rel="stylesheet" href="guide.css">
     <style>
-        /* 페이지 전용 위치 덮어쓰기 복사본(모양은 공용 그대로) */
-        .g-bubble-top{left:111px;top:58px;bottom:auto;width:555px;min-height:217px;display:flex;align-items:center;justify-content:center}
-        .g-char-big{position:absolute;left:195px;top:300px;width:472px;height:629px;display:flex;align-items:flex-end;justify-content:center}
-        .g-char-big img, .g-char-small img{max-width:100%;max-height:100%;object-fit:contain}
-        .g-bubble-small{left:92px;top:60px;bottom:auto;width:529px;min-height:235px;display:flex;align-items:center;justify-content:center;font-size:50px}
-        .g-bubble-small::before{left:120px}
-        .g-char-small{position:absolute;left:140px;top:340px;width:230px;height:250px;display:flex;align-items:flex-end;justify-content:center}
-        .g-bubble-right{left:1143px;top:150px;bottom:auto;width:520px;padding:40px 20px}
-        /* 꼬리 테두리형 말풍선 복사본(sa/06:02·12) */
-        .g-side-bubble{position:absolute;margin:0;min-height:188px;box-sizing:border-box;padding:28px 34px;display:flex;align-items:center;justify-content:center;text-align:center;background:#fefbf9;border:solid 6px #48159c;border-radius:40px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);font-family:'Cafe24 Ssurround';font-size:52px;line-height:1.3;color:#48159c;letter-spacing:-0.04em;word-break:keep-all}
-        .g-side-bubble:before{content:'';position:absolute;left:-52px;top:50%;margin-top:-28px;border-style:solid;border-width:28px 52px 28px 0;border-color:transparent #48159c transparent transparent}
-        .g-side-bubble:after{content:'';position:absolute;left:-42px;top:50%;margin-top:-21px;border-style:solid;border-width:21px 43px 21px 0;border-color:transparent #fefbf9 transparent transparent}
-        .g-diff{width:100%;border-collapse:collapse;font-size:15px;background:#fff}
-        .g-diff th, .g-diff td{padding:8px 12px;border:1px solid #cfd6e2;text-align:left}
-        .g-diff th{background:#eef1f6}
-        .g-bub{margin:0;line-height:1.25;box-sizing:border-box}
-        .g-cmp .g-view{width:640px;height:320px}
-        .g-cmp .g-stage{transform:scale(.3333)}
-        .g-cmp .g-item{width:672px}
-        .g-list.g-chars{gap:12px!important}
-        .g-list.g-chars .g-item{flex:0 0 calc(25% - 9px)!important;max-width:calc(25% - 9px)!important;padding:10px}
-        .g-chars .g-meta,.g-sets .g-meta{font-size:12.5px}
+        .g-sets .g-meta{font-size:12.5px}
         .g-list.g-sets{gap:12px!important}
         .g-list.g-sets .g-item{flex:0 0 calc(25% - 9px)!important;max-width:calc(25% - 9px)!important;padding:10px}
         .g-sets .g-view{aspect-ratio:5/6!important}
         .g-sets .g-stage{height:2304px}
-        .g-ref .guide-character{opacity:.3}
         .g-crop{position:absolute;left:0;top:0;width:1920px;height:960px;transform:scale(2.4);transform-origin:0 0}
-        .g-chars .g-view{aspect-ratio:3/4!important}
-        .g-chars .g-stage{position:absolute;inset:0;width:auto;height:auto;transform:none!important}
-        .g-chars .g-stage img{height:92%!important;max-width:96%;object-fit:contain;margin-bottom:3%!important}
     </style>
 </head>
 <body>
   <div class="g-wrap">
     <h1>안내 캐릭터 · 말풍선</h1>
-    <p class="g-note">실제 화면(1920×960)을 절반 크기로 보여줌. 모양은 공용 <code>.guide-bubble</code>(흰 말풍선 · 보라 테두리 · 48px · 꼬리 <code>img/common/p_guide_tail.png</code>)과
-      <code>.guide-character</code>(캐릭터 자리)로 통일. 캐릭터 이미지는 차시마다 다를 수 있어 각 차시 <code>img/p_character_main.png</code>를 &lt;img&gt;로 넣음.
-      위치·크기만 다른 변형은 <span class="g-local">페이지 전용 스타일</span>로 덮어씀.</p>
+    <p class="g-note">실제 화면(1920×960)을 절반 크기로 보여줌. 모양은 공용 <code>.guide-bubble</code>(흰 말풍선 · 보라 테두리 · 48px · 꼬리 <code>img/common/p_guide_tail.png</code>)과 <code>.guide-character</code>(캐릭터 자리)로 통일. 말풍선과 캐릭터는 한 묶음으로 놓는 <code>.guide-set</code>을 쓰고, 캐릭터 그림은 사회 <code>sa/img/character/sa_*.png</code>, 과학 <code>gwa/img/character/gwa_*.png</code>(지금은 사회 그림 복사본, 같은 파일 이름으로 바꿔 끼우면 됨)에서 가져옴.</p>
     <ul class="g-toc"></ul>
 
-    <h2>0. 사회용 캐릭터 이미지 — 공용 파일(<code>sa/img/character/</code> 정리본)</h2>
+    <h2>말풍선 + 캐릭터 한 세트 <code>.guide-set</code> — 공용, 모든 포즈 같은 위치·크기</h2>
     <p class="g-note">
-      몸통에 <b>지구본 문양</b>이 있는 사회용 안내 로봇입니다. 포즈별로 이름을 정해 한 곳에 모았고, 여러 페이지에서 같은 파일을 가져다 씁니다(페이지 폴더에 복사하지 않음).
-      이름 규칙은 <code>sa_&lt;표정&gt;_&lt;동작&gt;.png</code>.
-    </p>
-    <p class="g-note">
-      <b>쓰는 법</b> — 페이지 깊이가 <code>sa/NN/pageNN.html</code>이면 경로는 <code>../img/이름.png</code>입니다.<br>
-      <code>&lt;div class="guide-character"&gt;&lt;img src="../img/character/sa_wink_point.png" alt=""&gt;&lt;/div&gt;</code>
-      (아래 1번 말풍선과 함께). 도입 화면은 <code>.intro-character</code>, 말풍선 없이 놓을 땐 <code>.char-box</code> 안에 <code>&lt;img&gt;</code>를 넣고 left/top/width/height만 페이지에서 정합니다.<br>
-      포즈를 단계마다 바꿀 때는 JS로 <code>img.src</code>만 교체하면 되고, 없는 이미지는 <code>onerror</code>로 <code>sa_main.png</code>를 대신 보여주는 방식을 <code>sa/05/page10.html</code>·<code>page08.html</code>에서 씁니다.
-    </p>
-    <div class="g-list g-chars" style="display:flex;flex-wrap:wrap;gap:20px">
-        <div class="g-item" style="width:560px">
-          <p class="g-meta"><b><code>sa_main.png</code></b> 498×600<br>기본 — 정면, 두 팔을 벌리고 웃음<br><span style="color:#666">인사·안내 기본</span></p>
-          <div class="g-view"><div class="g-stage bg-default" style="display:flex;align-items:flex-end;justify-content:center"><img src="../sa/img/character/sa_main.png" style="height:860px;width:auto;margin-bottom:50px" alt=""></div></div>
-        </div>
-        <div class="g-item" style="width:560px">
-          <p class="g-meta"><b><code>sa_main_wave.png</code></b> 447×581<br>일반 웃는 얼굴(윙크 아님), 한 손을 들어 흔드는 인사<br><span style="color:#666">인사·시작·안내 도입</span></p>
-          <div class="g-view"><div class="g-stage bg-default" style="display:flex;align-items:flex-end;justify-content:center"><img src="../sa/img/character/sa_main_wave.png" style="height:860px;width:auto;margin-bottom:50px" alt=""></div></div>
-        </div>
-        <div class="g-item" style="width:560px">
-          <p class="g-meta"><b><code>sa_wink_open.png</code></b> 493×599<br>정면, 두 팔을 벌리고 윙크<br><span style="color:#666">선택·확인 안내</span></p>
-          <div class="g-view"><div class="g-stage bg-default" style="display:flex;align-items:flex-end;justify-content:center"><img src="../sa/img/character/sa_wink_open.png" style="height:860px;width:auto;margin-bottom:50px" alt=""></div></div>
-        </div>
-        <div class="g-item" style="width:560px">
-          <p class="g-meta"><b><code>sa_wink_point.png</code></b> 527×576<br>윙크, 오른손으로 오른쪽 위를 가리킴(왼발을 뒤로 참) — 4장 중 가장 위<br><span style="color:#666">위쪽 대상(화면 윗부분)을 가리킬 때</span></p>
-          <div class="g-view"><div class="g-stage bg-default" style="display:flex;align-items:flex-end;justify-content:center"><img src="../sa/img/character/sa_wink_point.png" style="height:860px;width:auto;margin-bottom:50px" alt=""></div></div>
-        </div>
-        <div class="g-item" style="width:560px">
-          <p class="g-meta"><b><code>sa_wink_point2.png</code></b> 541×548<br>윙크, 오른손으로 오른쪽 위를 조금 낮게 가리킴<br><span style="color:#666">오른쪽 위 대상</span></p>
-          <div class="g-view"><div class="g-stage bg-default" style="display:flex;align-items:flex-end;justify-content:center"><img src="../sa/img/character/sa_wink_point2.png" style="height:860px;width:auto;margin-bottom:50px" alt=""></div></div>
-        </div>
-        <div class="g-item" style="width:560px">
-          <p class="g-meta"><b><code>sa_wink_point3.png</code></b> 548×548<br>윙크, 오른손을 오른쪽으로 거의 수평하게 가리킴<br><span style="color:#666">정면 오른쪽 대상(폰 화면 가운데)</span></p>
-          <div class="g-view"><div class="g-stage bg-default" style="display:flex;align-items:flex-end;justify-content:center"><img src="../sa/img/character/sa_wink_point3.png" style="height:860px;width:auto;margin-bottom:50px" alt=""></div></div>
-        </div>
-        <div class="g-item" style="width:560px">
-          <p class="g-meta"><b><code>sa_wink_point4.png</code></b> 535×545<br>윙크, 오른손을 오른쪽 아래로 뻗어 가리킴<br><span style="color:#666">오른쪽 아래 대상·화면 아래쪽 버튼·입력창(page11 사용)</span></p>
-          <div class="g-view"><div class="g-stage bg-default" style="display:flex;align-items:flex-end;justify-content:center"><img src="../sa/img/character/sa_wink_point4.png" style="height:860px;width:auto;margin-bottom:50px" alt=""></div></div>
-        </div>
-        <div class="g-item" style="width:560px">
-          <p class="g-meta"><b><code>sa_point_front.png</code></b> 537×595<br>정면, 오른쪽 위를 가리키고 왼팔은 내림(얼굴이 어두운 화면색)<br><span style="color:#666">화면 속 폰·모니터 가리킬 때</span></p>
-          <div class="g-view"><div class="g-stage bg-default" style="display:flex;align-items:flex-end;justify-content:center"><img src="../sa/img/character/sa_point_front.png" style="height:860px;width:auto;margin-bottom:50px" alt=""></div></div>
-        </div>
-        <div class="g-item" style="width:560px">
-          <p class="g-meta"><b><code>sa_wink_present.png</code></b> 504×582<br>윙크, 왼손은 가슴에 얹고 오른손을 펴서 오른쪽으로 내밂(소개·제시 동작)<br><span style="color:#666">선택지·목록을 소개할 때(page12 2단계)</span></p>
-          <div class="g-view"><div class="g-stage bg-default" style="display:flex;align-items:flex-end;justify-content:center"><img src="../sa/img/character/sa_wink_present.png" style="height:860px;width:auto;margin-bottom:50px" alt=""></div></div>
-        </div>
-        <div class="g-item" style="width:560px">
-          <p class="g-meta"><b><code>sa_smile_present.png</code></b> 528×595<br>웃는 눈(^ ^)과 활짝 벌린 입, 오른팔을 오른쪽으로 내밂(소개·제시 동작)<br><span style="color:#666">선택지·목록을 소개할 때(윙크 없는 버전)</span></p>
-          <div class="g-view"><div class="g-stage bg-default" style="display:flex;align-items:flex-end;justify-content:center"><img src="../sa/img/character/sa_smile_present.png" style="height:860px;width:auto;margin-bottom:50px" alt=""></div></div>
-        </div>
-        <div class="g-item" style="width:560px">
-          <p class="g-meta"><b><code>sa_wink_jump.png</code></b> 567×601<br>윙크, 한 손을 흔들며 점프<br><span style="color:#666">반가움·성공</span></p>
-          <div class="g-view"><div class="g-stage bg-default" style="display:flex;align-items:flex-end;justify-content:center"><img src="../sa/img/character/sa_wink_jump.png" style="height:860px;width:auto;margin-bottom:50px" alt=""></div></div>
-        </div>
-        <div class="g-item" style="width:560px">
-          <p class="g-meta"><b><code>sa_happy_jump.png</code></b> 538×558<br>활짝 웃는 눈, 두 팔을 들고 점프<br><span style="color:#666">마무리·축하(page12 사용)</span></p>
-          <div class="g-view"><div class="g-stage bg-default" style="display:flex;align-items:flex-end;justify-content:center"><img src="../sa/img/character/sa_happy_jump.png" style="height:860px;width:auto;margin-bottom:50px" alt=""></div></div>
-        </div>
-    </div>
-    </div>
-    </div>
-    </div>
-    </div>
-    </div>
-
-    <h2>0-1. 말풍선 + 캐릭터 한 세트 <code>.guide-set</code> — 공용, 모든 포즈 같은 위치·크기</h2>
-    <p class="g-note">
-      말풍선과 캐릭터를 한 묶음으로 놓는 방법입니다. 말풍선 자리는 공용으로 고정(아래 모서리 기준이라 글이 길어지면 위로 늘어남)이고, 캐릭터 그림은 전부 같은 캔버스(576×603)로 만들어져 있어서 <b>포즈가 달라도 위치·크기가 같습니다</b>(왼쪽 110px · 아래 40px). 포즈별 좌표를 따로 적지 않고, 아래 각 칸의 흐린 그림(<code>g-ref</code>, 기본 포즈)과 겹쳐 보면 위치가 같은 것을 확인할 수 있습니다. <code>is-포즈</code> 클래스는 이름표일 뿐 위치에는 영향이 없습니다.
+      말풍선과 캐릭터를 한 묶음으로 놓는 방법입니다. 말풍선 자리는 공용으로 고정(아래 모서리 기준이라 글이 길어지면 위로 늘어남)이고, 캐릭터 그림은 전부 같은 캔버스(576×603)로 만들어져 있어서 <b>포즈가 달라도 위치·크기가 같습니다</b>(왼쪽 110px · 아래 40px). 포즈별 좌표를 따로 적지 않습니다. <code>is-포즈</code> 클래스는 이름표일 뿐 위치에는 영향이 없습니다.
       마크업: <code>&lt;div class="guide-set is-wink-point4"&gt;&lt;p class="guide-bubble is-center"&gt;문구&lt;/p&gt;&lt;div class="guide-character"&gt;&lt;img src="../img/character/sa_wink_point4.png" alt=""&gt;&lt;/div&gt;&lt;/div&gt;</code>.
-      말풍선 폭 <code>--gb-w</code>·위치 <code>--gb-left</code>/<code>--gb-bottom</code>·캐릭터 <code>--gc-left</code>/<code>--gc-bottom</code>/<code>--gc-w</code> 는 페이지에서 덮어쓸 수 있음.
+      말풍선 크기는 글 줄 수에 따라 <code>initGuideSay</code>가 자동으로 정함: 기본(폭 510 · 글자 48px) → 5줄 이상이면 <code>.is-medium</code> + <code>.is-long</code>(폭 610 · 44px) → 그래도 5줄 이상이면 <code>.is-large</code>(폭 660, 왼쪽으로 넓어짐). 꼬리 위치는 세 크기가 같고, 글자 간격을 더 좁힐 때는 <code>.is-tight</code>(-0.08em). 말풍선 폭 <code>--gb-w</code>·위치 <code>--gb-left</code>/<code>--gb-bottom</code>·캐릭터 <code>--gc-left</code>/<code>--gc-bottom</code>/<code>--gc-w</code> 는 페이지에서 덮어쓸 수 있음.
     </p>
     <div class="g-list g-sets">
       <div class="g-item">
@@ -134,7 +40,7 @@
       <div class="g-item">
         <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-main-wave</code></b></p>
         <div class="g-view"><div class="g-stage">
-          <div class="g-crop"><div class="guide-set is-main g-ref"><div class="guide-character"><img src="../sa/img/character/sa_main.png" alt=""></div></div><div class="guide-set is-main-wave">
+          <div class="g-crop"><div class="guide-set is-main-wave">
             <p class="guide-bubble is-center is-medium">친구의 메시지를 읽었을 때<br>어떤 감정이 드나요?</p>
             <div class="guide-character"><img src="../sa/img/character/sa_main_wave.png" alt=""></div>
           </div></div>
@@ -143,7 +49,7 @@
       <div class="g-item">
         <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-wink-open</code></b></p>
         <div class="g-view"><div class="g-stage">
-          <div class="g-crop"><div class="guide-set is-main g-ref"><div class="guide-character"><img src="../sa/img/character/sa_main.png" alt=""></div></div><div class="guide-set is-wink-open">
+          <div class="g-crop"><div class="guide-set is-wink-open">
             <p class="guide-bubble is-center">마음에 드는 것을<br>골라 볼까요?</p>
             <div class="guide-character"><img src="../sa/img/character/sa_wink_open.png" alt=""></div>
           </div></div>
@@ -152,7 +58,7 @@
       <div class="g-item">
         <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-wink-point</code></b></p>
         <div class="g-view"><div class="g-stage">
-          <div class="g-crop"><div class="guide-set is-main g-ref"><div class="guide-character"><img src="../sa/img/character/sa_main.png" alt=""></div></div><div class="guide-set is-wink-point">
+          <div class="g-crop"><div class="guide-set is-wink-point">
             <p class="guide-bubble is-center">위쪽 화면을<br>살펴봐요.</p>
             <div class="guide-character"><img src="../sa/img/character/sa_wink_point.png" alt=""></div>
           </div></div>
@@ -161,7 +67,7 @@
       <div class="g-item">
         <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-wink-point2</code></b></p>
         <div class="g-view"><div class="g-stage">
-          <div class="g-crop"><div class="guide-set is-main g-ref"><div class="guide-character"><img src="../sa/img/character/sa_main.png" alt=""></div></div><div class="guide-set is-wink-point2">
+          <div class="g-crop"><div class="guide-set is-wink-point2">
             <p class="guide-bubble is-center">오른쪽 위를<br>눌러요.</p>
             <div class="guide-character"><img src="../sa/img/character/sa_wink_point2.png" alt=""></div>
           </div></div>
@@ -170,7 +76,7 @@
       <div class="g-item">
         <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-wink-point3</code></b></p>
         <div class="g-view"><div class="g-stage">
-          <div class="g-crop"><div class="guide-set is-main g-ref"><div class="guide-character"><img src="../sa/img/character/sa_main.png" alt=""></div></div><div class="guide-set is-wink-point3">
+          <div class="g-crop"><div class="guide-set is-wink-point3">
             <p class="guide-bubble is-center">폰 화면을<br>눌러요.</p>
             <div class="guide-character"><img src="../sa/img/character/sa_wink_point3.png" alt=""></div>
           </div></div>
@@ -179,7 +85,7 @@
       <div class="g-item">
         <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-wink-point4</code></b></p>
         <div class="g-view"><div class="g-stage">
-          <div class="g-crop"><div class="guide-set is-main g-ref"><div class="guide-character"><img src="../sa/img/character/sa_main.png" alt=""></div></div><div class="guide-set is-wink-point4">
+          <div class="g-crop"><div class="guide-set is-wink-point4">
             <p class="guide-bubble is-center">입력창을<br>클릭해보세요.</p>
             <div class="guide-character"><img src="../sa/img/character/sa_wink_point4.png" alt=""></div>
           </div></div>
@@ -188,7 +94,7 @@
       <div class="g-item">
         <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-point-front</code></b></p>
         <div class="g-view"><div class="g-stage">
-          <div class="g-crop"><div class="guide-set is-main g-ref"><div class="guide-character"><img src="../sa/img/character/sa_main.png" alt=""></div></div><div class="guide-set is-point-front">
+          <div class="g-crop"><div class="guide-set is-point-front">
             <p class="guide-bubble is-center">화면 속 폰을<br>살펴봐요.</p>
             <div class="guide-character"><img src="../sa/img/character/sa_point_front.png" alt=""></div>
           </div></div>
@@ -197,7 +103,7 @@
       <div class="g-item">
         <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-wink-present</code></b></p>
         <div class="g-view"><div class="g-stage">
-          <div class="g-crop"><div class="guide-set is-main g-ref"><div class="guide-character"><img src="../sa/img/character/sa_main.png" alt=""></div></div><div class="guide-set is-wink-present">
+          <div class="g-crop"><div class="guide-set is-wink-present">
             <p class="guide-bubble is-center">이런 선택지가<br>있어요.</p>
             <div class="guide-character"><img src="../sa/img/character/sa_wink_present.png" alt=""></div>
           </div></div>
@@ -206,7 +112,7 @@
       <div class="g-item">
         <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-smile-present</code></b></p>
         <div class="g-view"><div class="g-stage">
-          <div class="g-crop"><div class="guide-set is-main g-ref"><div class="guide-character"><img src="../sa/img/character/sa_main.png" alt=""></div></div><div class="guide-set is-smile-present">
+          <div class="g-crop"><div class="guide-set is-smile-present">
             <p class="guide-bubble is-center">이런 선택지가<br>있어요.</p>
             <div class="guide-character"><img src="../sa/img/character/sa_smile_present.png" alt=""></div>
           </div></div>
@@ -215,7 +121,7 @@
       <div class="g-item">
         <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-wink-jump</code></b></p>
         <div class="g-view"><div class="g-stage">
-          <div class="g-crop"><div class="guide-set is-main g-ref"><div class="guide-character"><img src="../sa/img/character/sa_main.png" alt=""></div></div><div class="guide-set is-wink-jump">
+          <div class="g-crop"><div class="guide-set is-wink-jump">
             <p class="guide-bubble is-center">잘했어요!</p>
             <div class="guide-character"><img src="../sa/img/character/sa_wink_jump.png" alt=""></div>
           </div></div>
@@ -224,142 +130,13 @@
       <div class="g-item">
         <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-happy-jump</code></b></p>
         <div class="g-view"><div class="g-stage">
-          <div class="g-crop"><div class="guide-set is-main g-ref"><div class="guide-character"><img src="../sa/img/character/sa_main.png" alt=""></div></div><div class="guide-set is-happy-jump">
+          <div class="g-crop"><div class="guide-set is-happy-jump">
             <p class="guide-bubble is-center">모두 끝냈어요!<br>축하해요!</p>
             <div class="guide-character"><img src="../sa/img/character/sa_happy_jump.png" alt=""></div>
           </div></div>
         </div></div>
       </div>
     </div>
-
-    <h2>1. 기본 배치 <code>.guide-bubble</code> + <code>.guide-character</code> — 공용</h2>
-    <p class="g-note">
-      마크업: <code>&lt;p class="guide-bubble"&gt;문구&lt;/p&gt;</code> + <code>&lt;div class="guide-character"&gt;&lt;img src="img/p_character_main.png"&gt;&lt;/div&gt;</code>.
-      왼쪽 아래에 캐릭터, 그 위에 말풍선(꼬리가 캐릭터를 가리킴). 문구는 단계마다 스크립트에서 바꿈.
-    </p>
-    <div class="g-list">
-      <div class="g-item">
-        <p class="g-meta"><b>왼쪽 캐릭터 + 위 말풍선</b><br>sa/04:12~13 채팅 앱 · sa/02:08·10 Canva 클릭 안내 · sa/03:07·10 Canva 안내<br>위치만 덮어쓴 것: sa/03:05 어떤 말을 전할까 · sa/03:13 마음 배달 · sa/06:07·09 가사·노래 만들기 (말풍선은 <code>bottom</code>으로 붙여서 글이 늘면 위로 커짐)</p>
-        <div class="g-view"><div class="g-stage">
-          <p class="guide-bubble">마음에 드는<br>템플릿을 선택해요.</p>
-          <div class="guide-character"><img src="../sa/img/character/sa_main.png" alt=""></div>
-        </div></div>
-      </div>
-    </div>
-
-    <h2>2. 위치만 다른 변형</h2>
-    <p class="g-note">모양은 1번 그대로, <code>left/top/width</code>(와 꼬리 위치 <code>::before</code>)만 페이지에서 덮어씀. 기획서 배치를 따르다 보니 생긴 차이라 더 줄일지는 디자인 나오면 결정.</p>
-    <div class="g-list">
-      <div class="g-item">
-        <p class="g-meta"><b>큰 캐릭터 + 위 말풍선</b> <span class="g-local">페이지 전용 스타일</span><br>sa/05:10 토너먼트 · sa/05:07 순서 카드(캐릭터 작게)</p>
-        <div class="g-view"><div class="g-stage">
-          <p class="guide-bubble g-bubble-top">질문하고 싶은<br>준비물 카드를 클릭해요.</p>
-          <div class="g-char-big"><img src="../sa/img/character/sa_main.png" alt=""></div>
-        </div></div>
-      </div>
-      <div class="g-item">
-        <p class="g-meta"><b>작은 캐릭터 + 위 말풍선</b> <span class="g-local">페이지 전용 스타일</span><br>sa/05:05 조건 퍼즐(틀리면 "다시 생각해볼까요?"로 1초 바뀜)</p>
-        <div class="g-view"><div class="g-stage">
-          <p class="guide-bubble g-bubble-small">박물관에 갈 계획을<br>세우려고 해요.<br>무엇을 생각해야 할까요?</p>
-          <div class="g-char-small"><img src="../sa/img/character/sa_main.png" alt=""></div>
-        </div></div>
-      </div>
-      <div class="g-item">
-        <p class="g-meta"><b>말풍선만 (오른쪽)</b> <span class="g-local">페이지 전용 스타일</span><br>sa/02:02 룰렛</p>
-        <div class="g-view"><div class="g-stage">
-          <p class="guide-bubble g-bubble-right">룰렛을 돌려서<br>나의 자랑거리를 찾아보세요!</p>
-        </div></div>
-      </div>
-    </div>
-
-    <h2>3. 꼬리 테두리형 말풍선 <span class="g-local">페이지 전용 스타일</span></h2>
-    <p class="g-note">공용 <code>.guide-bubble</code>과 같은 색(흰 바탕 · 6px 보라 테두리 · 그림자)인데 꼬리를 <b>옆</b>에 단 것. 꼬리는 <code>:before</code>(보라 삼각형) 위에 <code>:after</code>(바탕색 삼각형)를 조금 작게 겹쳐 테두리만 보이게 함.
-      꼬리 위치는 <code>top:50%</code>로 두어 글이 늘어도 가운데에 붙음. 아래쪽 꼬리가 필요하면 공용 꼬리 이미지(<code>img/common/p_guide_tail.png</code>)를 씀(sa/06:05).</p>
-    <div class="g-list">
-      <div class="g-item">
-        <p class="g-meta"><b>왼쪽 꼬리</b><br>sa/06:02 심부름 질문 · sa/06:12 손님 주문</p>
-        <div class="g-view"><div class="g-stage bg-default">
-          <p class="g-side-bubble" style="left:560px;top:300px;width:900px">배가 너무 고파요.<br>달콤한 빵 주세요!</p>
-        </div></div>
-      </div>
-    </div>
-
-    <p class="g-note">캐릭터 + "게임 방법" 패널로 된 활동 도입 화면(<code>.intro-*</code>)은 <a href="screens.html">레이아웃</a> 3번으로 옮김.</p>
-    <h2>4. 캐릭터 위 말풍선 — 위치 비교(기준 정하기)</h2>
-    <p class="g-note">
-      말풍선이 캐릭터 머리 위에 오는 화면을 실제 값 그대로 나열. 공통: <code>bottom</code>으로 위치를 잡아서 문구 줄 수가 늘면 말풍선이 <b>위로</b> 자라고, 꼬리 끝과 캐릭터 머리 사이 거리는 그대로.
-      차이는 <code>left</code> · <code>bottom</code> · 폭 · 글자 크기 · 캐릭터 위치/크기가 페이지마다 다르다는 것. 기준(예: 말풍선 bottom은 <b>캐릭터 top에서 몇 px 위</b>인지, 폭과 글자 크기 몇 단계)을 정하면 공용 클래스로 합칠 수 있음.
-    </p>
-    <div class="g-list g-cmp">
-      <div class="g-item">
-        <p class="g-meta"><b>sa/03:05</b><br>말풍선 left 95 · <b>bottom 600</b> · 폭 416 · 글자 42px<br>캐릭터 left 69 · top 300 · 381×504</p>
-        <div class="g-view"><div class="g-stage bg-default">
-          <p class="guide-bubble is-center g-bub" style="left:95px;bottom:600px;width:416px;font-size:42px;padding:26px 12px;">어떤 말을 전할까요?</p>
-          <div class="char-box" style="left:69px;top:300px;width:381px;height:504px"><img src="../sa/img/character/sa_main.png" alt=""></div>
-        </div></div>
-      </div>
-      <div class="g-item">
-        <p class="g-meta"><b>sa/03:07·10</b><br>말풍선 left 90 · <b>bottom 619</b> · 폭 607 · 글자 42px<br>캐릭터 left 170 · top 360 · 480×580</p>
-        <div class="g-view"><div class="g-stage bg-default">
-          <p class="guide-bubble is-center g-bub" style="left:90px;bottom:619px;width:607px;font-size:42px;padding:26px 12px;">마음에 드는<br>템플릿을 선택해요.</p>
-          <div class="char-box" style="left:170px;top:360px;width:480px;height:580px"><img src="../sa/img/character/sa_main.png" alt=""></div>
-        </div></div>
-      </div>
-      <div class="g-item">
-        <p class="g-meta"><b>sa/03:13</b><br>말풍선 left 37 · <b>bottom 562</b> · 폭 434 · 글자 40px<br>캐릭터 left 100 · top 380 · 482×581</p>
-        <div class="g-view"><div class="g-stage bg-default">
-          <p class="guide-bubble is-center g-bub" style="left:37px;bottom:562px;width:434px;font-size:40px;padding:26px 12px;">마음을 담아<br>배달해요!</p>
-          <div class="char-box" style="left:100px;top:380px;width:482px;height:581px"><img src="../sa/img/character/sa_main.png" alt=""></div>
-        </div></div>
-      </div>
-      <div class="g-item">
-        <p class="g-meta"><b>sa/05:05 · sa/08:06</b><br>말풍선 left 92 · <b>bottom 691</b> · 폭 480 · 글자 40px<br>캐릭터 left 140 · top 271 · 258×313</p>
-        <div class="g-view"><div class="g-stage bg-default">
-          <p class="guide-bubble is-center g-bub" style="left:92px;bottom:691px;width:480px;font-size:40px;padding:26px 12px;">박물관에 갈 계획을<br>세우려고 해요.</p>
-          <div class="char-box" style="left:140px;top:271px;width:258px;height:313px"><img src="../sa/img/character/sa_main.png" alt=""></div>
-        </div></div>
-      </div>
-      <div class="g-item">
-        <p class="g-meta"><b>sa/05:07</b><br>말풍선 left 109 · <b>bottom 620</b> · 폭 552 · 글자 46px<br>캐릭터 left 200 · top 300 · 300×330</p>
-        <div class="g-view"><div class="g-stage bg-default">
-          <p class="guide-bubble is-center g-bub" style="left:109px;bottom:620px;width:552px;font-size:46px;padding:26px 12px;">질문하고 싶은<br>준비물 카드를 클릭해요.</p>
-          <div class="char-box" style="left:200px;top:300px;width:300px;height:330px"><img src="../sa/img/character/sa_main.png" alt=""></div>
-        </div></div>
-      </div>
-      <div class="g-item">
-        <p class="g-meta"><b>sa/06:07</b><br>말풍선 left 80 · <b>bottom 622</b> · 폭 490 · 글자 44px<br>캐릭터 left 90 · top 212 · 360×560</p>
-        <div class="g-view"><div class="g-stage bg-default">
-          <p class="guide-bubble is-center g-bub" style="left:80px;bottom:622px;width:490px;font-size:44px;padding:26px 12px;">가사를 만들어<br>볼까요?</p>
-          <div class="char-box" style="left:90px;top:212px;width:360px;height:560px"><img src="../sa/img/character/sa_main.png" alt=""></div>
-        </div></div>
-      </div>
-      <div class="g-item">
-        <p class="g-meta"><b>sa/06:09</b><br>말풍선 left 132 · <b>bottom 620</b> · 폭 553 · 글자 42px<br>캐릭터 left 90 · top 212 · 360×560</p>
-        <div class="g-view"><div class="g-stage bg-default">
-          <p class="guide-bubble is-center g-bub" style="left:132px;bottom:620px;width:553px;font-size:42px;padding:26px 12px;">노래를 만들어<br>볼까요?</p>
-          <div class="char-box" style="left:90px;top:212px;width:360px;height:560px"><img src="../sa/img/character/sa_main.png" alt=""></div>
-        </div></div>
-      </div>
-      <div class="g-item">
-        <p class="g-meta"><b>gwa/01:10 흐름 16단계 (.gn-bubble)</b><br>말풍선 left 150 · <b>bottom 520</b> · 폭 540 · 글자 44px<br>캐릭터 left 100 · top 380 · 482×581</p>
-        <div class="g-view"><div class="g-stage bg-default">
-          <p class="guide-bubble is-center g-bub" style="left:150px;bottom:520px;width:540px;font-size:44px;padding:26px 12px;">내가 수집한 날씨 데이터를<br>Gemini Notebook을 활용하여<br>AI에게 질문해볼까요?</p>
-          <div class="char-box" style="left:100px;top:380px;width:482px;height:581px"><img src="../sa/img/character/sa_main.png" alt=""></div>
-        </div></div>
-      </div>
-    </div>
-    <table class="g-diff" style="margin-top:20px">
-      <tr><th>화면</th><th>말풍선 bottom</th><th>캐릭터 top</th><th>꼬리 끝~머리 거리(bottom 기준)</th></tr>
-      <tr><td>sa/03:05</td><td>600</td><td>300</td><td>60</td></tr>
-      <tr><td>sa/03:07·10</td><td>619</td><td>360</td><td>-19</td></tr>
-      <tr><td>sa/03:13</td><td>562</td><td>380</td><td>18</td></tr>
-      <tr><td>sa/05:05 · sa/08:06</td><td>691</td><td>271</td><td>-2</td></tr>
-      <tr><td>sa/05:07</td><td>620</td><td>300</td><td>40</td></tr>
-      <tr><td>sa/06:07</td><td>622</td><td>212</td><td>126</td></tr>
-      <tr><td>sa/06:09</td><td>620</td><td>212</td><td>128</td></tr>
-      <tr><td>gwa/01:10 흐름 16단계 (.gn-bubble)</td><td>520</td><td>380</td><td>60</td></tr>
-    </table>
-
   </div>
   <script src="guide.js"></script>
 </body>

@@ -15,19 +15,13 @@
         .p07-character{left:57px;top:164px;width:485px;height:516px;z-index:3}
 
         .p07-boardbg{position:absolute;left:660px;top:15px;width:1210px;height:515px;box-sizing:border-box;background:var(--c-navy);border:solid 10px var(--c-sky);border-radius:40px}
-        .p07-board{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none;z-index:2}
-        .p07-piece{position:absolute;padding:0;border:0;background:none;cursor:pointer;pointer-events:auto;transition:transform .15s ease}
-        .p07-piece path{stroke:var(--c-ink);stroke-width:8}
-        .p07-piece:hover{transform:scale(1.08)}
-        .p07-piece.is-used{visibility:hidden}
-        .p07-piece.is-wrong{animation:fix-word-shake .3s ease}
+        #p07Board{z-index:2}
         
         .p07-tab{left:52px;top:444px;width:580px;min-width:0;height:107px;padding:8px 0 10px 66px;white-space:nowrap;z-index:6;background:var(--c-white);border-color:var(--c-blue);color:var(--c-blue);font-size:62px;border-width:10px}
         .p07-tab:after{background:radial-gradient(circle 30px at 100% 0,transparent 20px,var(--c-blue) 20px 30px,var(--c-white) 30px);bottom:-3px}
         .p07-tray{position:absolute;left:52px;top:535px;width:1818px;height:415px;box-sizing:border-box;background:var(--c-white);border:solid 10px var(--c-blue);border-radius:30px;border-top-left-radius:0;z-index:4}
-        .p07-slots{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none;z-index:5}
-        .p07-slot{position:absolute}
-        .p07-slot .jig-label{font-size:60px}
+        #p07Slots{z-index:5}
+        #p07Slots .jig-label{font-size:60px}
         .p07-sentence{position:absolute;z-index:5;left:92px;top:700px;width:1340px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:70px;color:var(--c-purple);letter-spacing:-0.04em;
           animation:p07-shine 1s ease}
         @keyframes p07-shine{0%{opacity:0;transform:scale(.9);filter:brightness(2)}60%{opacity:1;transform:scale(1.05)}100%{transform:none;filter:none}}
@@ -35,7 +29,7 @@
 
         /* 마지막 스텝(디자인 7p-4): 큰 패널 + 리본 제목 + 알약 안내 + 하늘색 가사 상자 + 다음 */
         .p07-sum-panel{position:absolute;left:57px;top:105px;width:1806px;height:803px;box-sizing:border-box;background:#f8f6f6;border:solid 5px var(--c-ink);border-radius:14px}
-        .p07-sum-ribbon{--rb-w:1514px;--rb-h:122px;--rb-fs:76px;--rb-th:133px;--rb-drop:68px;position:absolute;left:203px;top:45px;z-index:2}
+        .p07-sum-ribbon{--rb-w:1514px;position:absolute;left:203px;top:45px;z-index:2}
         .p07-sum-pill{position:absolute;left:320px;top:208px;width:1282px;height:104px;margin:0;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;background:#fdf9f6;border:solid 5px var(--c-ink);border-radius:52px;box-shadow:0 10px 0 0 rgba(86,148,231,.2);
           font-family:'Cafe24 Ssurround';font-size:62px;color:var(--c-ink);letter-spacing:-0.05em;white-space:nowrap;z-index:2}
         .p07-summary{position:absolute;left:193px;top:343px;width:1534px;height:387px;box-sizing:border-box;padding:0 30px;display:flex;flex-direction:column;justify-content:center;background:#dff6ff;border:solid 5px var(--c-navy);border-radius:14px;
@@ -55,10 +49,10 @@
             <p class="guide-bubble is-center p07-bubble" id="p07Bubble"></p>
             <div class="char-box p07-character"><img src="img/r7.png" alt="메인 캐릭터"></div>
             <div class="p07-boardbg"></div>
-            <div class="p07-board" id="p07Board"></div>
+            <div class="jig-layer" id="p07Board"></div>
             <div class="jig-tray-label p07-tab">퍼즐 조각 조립대</div>
             <div class="p07-tray"></div>
-            <div class="p07-slots" id="p07Slots"></div>
+            <div class="jig-layer" id="p07Slots"></div>
             <p class="p07-sentence is-off" id="p07Sentence"></p>
             <a href="javascript:;" class="js-sfx p07-next is-off" id="p07Next" data-sound="sound/click.mp3">
               <img src="../../img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../img/common/btn_next_content_on.png" data-src-over="../../img/common/btn_next_content_over.png" alt="다음">
@@ -67,7 +61,7 @@
 
           <div class="is-off" id="p07Summary">
             <div class="p07-sum-panel"></div>
-            <p class="ribbon p07-sum-ribbon">재화와 서비스에 대한 노래 가사를 만들었어요!</p>
+            <p class="ribbon is-title p07-sum-ribbon">재화와 서비스에 대한 노래 가사를 만들었어요!</p>
             <p class="p07-sum-pill">조립한 가사들을 활용해서 노래를 만들어볼까요?</p>
             <div class="p07-summary" id="p07SummaryList"></div>
             <a href="page08.html" class="js-nav-effect p07-summary-next">
@@ -129,11 +123,7 @@
       slotsBox.classList.remove('is-off');
       slotsBox.innerHTML = '';
       p.answer.forEach((t, k) => {
-        const slot = document.createElement('div');
-        slot.className = 'jig-slot p07-slot';
-        slot.style.cssText = 'left:' + (TRAY_X + k * STEP - TM) + 'px;top:' + (TRAY_Y - TM) + 'px';
-        slot.innerHTML = jigSvg(TS, TM, EDGES[k], null, 'p07-s' + k) + '<span class="jig-label is-hint" style="' + labelBox(TS, TM, EDGES[k], 0, 0) + '">' + t + '</span>';
-        slotsBox.appendChild(slot);
+        jigAddSlot(slotsBox, TRAY_X + k * STEP, TRAY_Y, TS, TM, EDGES[k], t, 'p07-s' + k);
       });
       board.innerHTML = '';
       const spots = shuffleArray(SPOTS);
@@ -141,13 +131,8 @@
         .concat(p.extra.map((t, j) => ({ t, i: -1, edges: EXTRA_EDGES[j], color: EXTRA_COLORS[j] })));
       shuffleArray(pieces).forEach((b, k) => {
         const [x, y] = spots[k];
-        const el = document.createElement('button');
-        el.type = 'button';
-        el.className = 'p07-piece';
-        el.style.cssText = 'left:' + (x - BM) + 'px;top:' + (y - BM) + 'px;width:' + (BS + BM * 2) + 'px;height:' + (BS + BM * 2) + 'px';
-        el.innerHTML = jigSvg(BS, BM, b.edges, b.color, 'p07-b' + k) + '<span class="jig-label" style="' + labelBox(BS, BM, b.edges, 0, 0) + '">' + b.t + '</span>';
+        const el = jigAddPiece(board, x, y, BS, BM, b.edges, b.color, b.t, 'p07-b' + k, 'is-click');
         el.addEventListener('click', () => pick(el, b));
-        board.appendChild(el);
       });
     }
 
@@ -169,8 +154,7 @@
       if (!quiet) playClick();
       el.classList.add('is-used');
       const slot = slotsBox.children[b.i];
-      slot.classList.add('is-filled');
-      slot.innerHTML = jigSvg(TS, TM, b.edges, b.color, 'p07-f' + b.i) + '<span class="jig-label" style="' + labelBox(TS, TM, b.edges, 0, 0) + '">' + b.t + '</span>';
+      jigFillSlot(slot, TS, TM, b.edges, b.color, b.t, 'p07-f' + b.i);
       filled += 1;
       if (filled === p.answer.length) complete();
     }

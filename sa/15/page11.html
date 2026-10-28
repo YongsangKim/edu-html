@@ -11,18 +11,12 @@
         .p10-bubble{left:92px;bottom:691px;width:480px;padding:26px 10px;font-size:40px;margin:0;z-index:5}
         .p10-character{left:100px;top:300px;width:380px;height:325px;z-index:3}
         .p10-jigboard{left:640px;top:30px;width:1240px;height:500px}
-        .p10-board{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none;z-index:6}
-        .p10-piece{position:absolute;padding:0;border:0;background:none;cursor:grab;pointer-events:auto;touch-action:none}
-        .p10-piece path{stroke:var(--c-ink);stroke-width:8}
-        .p10-piece .jig-label{font-size:36px;line-height:1.2;white-space:nowrap}
-        .p10-piece.is-dragging{cursor:grabbing;z-index:60}
-        .p10-piece.is-back{transition:transform .25s ease}
-        .p10-piece.is-used{visibility:hidden}
+        #p10Board{z-index:6}
+        #p10Board .jig-label{font-size:36px;line-height:1.2;white-space:nowrap}
 
-        .p10-slots{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none;z-index:5}
-        .p10-slot{position:absolute}
-        .p10-slot .jig-label{font-size:40px;line-height:1.2;white-space:nowrap}
-        .p10-slot .jig-label.is-hint{font-size:110px;opacity:.5}
+        #p10Slots{z-index:5}
+        #p10Slots .jig-label{font-size:40px;line-height:1.2;white-space:nowrap}
+        #p10Slots .jig-label.is-hint{font-size:110px;opacity:.5}
         #p10Wrong,#p10Done{z-index:120}
     </style>
 </head>
@@ -35,10 +29,10 @@
           <p class="guide-bubble is-center p10-bubble" id="p10Bubble">퍼즐 조각을 끌어<br>1번부터 4번까지<br>알맞은 순서로 놓아요!</p>
           <div class="char-box p10-character"><img src="img/p10_character.png" alt="메인 캐릭터"></div>
           <div class="jig-board p10-jigboard"></div>
-          <div class="p10-board" id="p10Board"></div>
+          <div class="jig-layer" id="p10Board"></div>
           <div class="jig-tray-label">슬라이드 퍼즐 조각</div>
           <div class="jig-tray"></div>
-          <div class="p10-slots" id="p10Slots"></div>
+          <div class="jig-layer" id="p10Slots"></div>
 
           <div class="avatar-modal is-wrong is-off" id="p10Wrong">
             <div class="avatar-popup-panel">
@@ -88,23 +82,14 @@
     let filled = 0;
 
     STEPS.forEach((st, k) => {
-      const slot = document.createElement('div');
-      slot.className = 'jig-slot p10-slot';
-      slot.style.cssText = 'left:' + (TRAY_X + k * STEP - TM) + 'px;top:' + (TRAY_Y - TM) + 'px';
-      slot.innerHTML = jigSvg(TS, TM, EDGES[k], null, 'p10-s' + k) + '<span class="jig-label is-hint" style="' + labelBox(TS, TM, EDGES[k], 0, 0) + '">' + (k + 1) + '</span>';
-      slotsBox.appendChild(slot);
+      jigAddSlot(slotsBox, TRAY_X + k * STEP, TRAY_Y, TS, TM, EDGES[k], k + 1, 'p10-s' + k);
     });
 
     const spots = shuffleArray(SPOTS);
     const pieces = shuffleArray(STEPS.map((st, i) => ({ st, i, edges: EDGES[i], color: COLORS[i] })));
     pieces.forEach((b, k) => {
       const [x, y] = spots[k];
-      const el = document.createElement('button');
-      el.type = 'button';
-      el.className = 'p10-piece';
-      el.style.cssText = 'left:' + (x - BM) + 'px;top:' + (y - BM) + 'px;width:' + (BS + BM * 2) + 'px;height:' + (BS + BM * 2) + 'px';
-      el.innerHTML = jigSvg(BS, BM, b.edges, b.color, 'p10-b' + k) + '<span class="jig-label" style="' + labelBox(BS, BM, b.edges, 0, 0) + '">' + b.st.t + '</span>';
-      board.appendChild(el);
+      const el = jigAddPiece(board, x, y, BS, BM, b.edges, b.color, b.st.t, 'p10-b' + k, 'is-drag');
 
       el.addEventListener('pointerdown', (e) => {
         if (el.dataset.placed) return;
@@ -135,8 +120,7 @@
             el.classList.add('is-used');
             el.style.transform = '';
             playDrag();
-            slot.classList.add('is-filled');
-            slot.innerHTML = jigSvg(TS, TM, b.edges, b.color, 'p10-f' + b.i) + '<span class="jig-label" style="' + labelBox(TS, TM, b.edges, 0, 0) + '">' + b.st.t + '</span>';
+            jigFillSlot(slot, TS, TM, b.edges, b.color, b.st.t, 'p10-f' + b.i);
             filled += 1;
             if (filled === STEPS.length) {
               playCorrect();

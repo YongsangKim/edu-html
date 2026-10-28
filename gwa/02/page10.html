@@ -24,12 +24,14 @@
         .gpt-ai .p10-chart{position:relative;margin:4px 0 10px;border-radius:8px;background:var(--c-white);cursor:pointer;touch-action:none}
         .gpt-ai .p10-chart svg{display:block;width:100%;height:auto}
         .gpt-ai .p10-chart.is-press{outline:4px solid var(--c-blue)}
-        .p10-dl{display:flex;align-items:center;gap:8px;margin:0 0 10px;padding:8px 16px;border:solid 2px #d9dbe4;border-radius:20px;background:var(--c-white);font-size:18px;font-weight:700;cursor:pointer}
-        .p10-dl svg{width:22px;height:22px}
+        .gpt-tools .p10-tool{display:flex;padding:0;border:0;background:none;color:inherit;cursor:default}
+        .gpt-tools .p10-tool.is-target{cursor:pointer}
+        .p10-ctx{position:absolute;inset:0;z-index:30;display:flex;align-items:flex-end;justify-content:center;padding-bottom:120px;background:rgba(0,0,0,.18)}
+        .p10-ctx ul{margin:0;padding:10px 6px;width:300px;list-style:none;border-radius:26px;background:var(--c-white);box-shadow:0 8px 30px rgba(0,0,0,.25)}
+        .p10-ctx li{display:flex;align-items:center;gap:18px;height:62px;padding:0 22px;font-size:24px;font-weight:600;color:#111;cursor:pointer}
+        .p10-ctx li svg{width:30px;height:30px;flex:0 0 auto}
 
-        .p10-phone .is-target{cursor:pointer;animation:p10-target 1.2s ease-in-out infinite}
-        .p10-phone .app-icon.is-target{animation:none}
-        @keyframes p10-target{50%{box-shadow:0 0 0 5px rgba(255,79,139,.75)}}
+        .p10-phone .is-target{cursor:pointer}
 
         .p10-cards{position:absolute;left:1250px;top:120px;width:620px;box-sizing:border-box;padding:30px;border:solid 6px var(--c-purple);border-radius:36px;background:var(--c-cream);
           display:flex;flex-direction:column;gap:22px;font-family:'Cafe24 Ssurround'}
@@ -51,8 +53,10 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default p10">
-          <p class="guide-bubble" id="p10Bubble"></p>
-          <div class="guide-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+          <div class="guide-set is-main" id="p10Set">
+            <p class="guide-bubble is-center" id="p10Bubble"></p>
+            <div class="guide-character"><img id="p10Char" src="../img/character/gwa_main.png" alt="메인 캐릭터"></div>
+          </div>
 
           <div class="phone-frame has-cam p10-phone" id="p10Phone" data-screen="home"><div class="phone-screen is-gpt">
             <div class="p10-scr p10-home app-home is-pink">
@@ -166,216 +170,253 @@
       bar: { name: '막대 그래프', text: '기온표를 막대그래프로 시각화했어요. 막대의 높이를 비교하면 15시의 기온이 30도로 가장 높고, 6시의 기온이 12도로 가장 낮다는 것을 확인할 수 있어요.' },
       line: { name: '꺾은선 그래프', text: '요청하신 기온 표 이미지를 분석하여 꺾은선그래프로 시각화했습니다. 낮 동안 기온이 올라갔다가 저녁에 내려가는 패턴을 확인할 수 있습니다.' }
     };
-    const phone = $('p10Phone');
-    const bubble = $('p10Bubble');
-    const log = $('p10Log');
-    const bar = $('p10Bar');
-    const input = $('p10Input');
-    const send = $('p10Send');
-    const cards = $('p10Cards');
+    const SAYS = {
+      start: ['기온표 이미지를 ChatGPT에 첨부하고, 원하는 그래프를 만들어 달라고 부탁해 보세요!', 'wink_point3'],
+      plus: ['아래의 + 버튼을 클릭해보세요.', 'wink_point4'],
+      photo: ['‘사진’ 버튼을 눌러, 하루 기온 표 파일을 선택해주세요.', 'wink_point3'],
+      table: ['‘사진’ 버튼을 눌러, 하루 기온 표 파일을 선택해주세요.', 'wink_present'],
+      uploaded: ['기온 표 이미지가 ChatGPT 입력창에 업로드되었어! 이제 표 데이터를 그림으로 시각화해 달라고 명령을 입력해 볼까?', 'main_wave'],
+      cards: ['카드 중 노란색, 빨간색, 파란색 카드를 각각 하나씩 골라 문장을 만들고, 전송 버튼을 눌러봐!', 'wink_present'],
+      download: ['완성된 그래프를 핸드폰에 저장해 볼까요? 그래프를 꾹 눌러 저장을 하거나, 그래프 아래에 있는 다운로드 아이콘을 눌러보세요', 'wink_point2'],
+      saved: ['다운로드 완료!', 'happy_jump']
+    };
+    const FG = { app: [15, -37], plus: [20, -20], photo: [0, 0], table: [0, 0], send: [20, -20], download: [20, -10], save: [-120, -30] };
+    const HOT = { app: [0, 0, 0, 0], plus: [-10, -10, 20, 20, 30], photo: [0, 0, 0, 0], table: [0, 0, 0, 0], send: [0, 0, 0, 0], download: [-10, -10, 20, 20, 10], save: [0, 0, 0, 0] };
+    const say = initGuideSay({ bubble: $('p10Bubble'), img: $('p10Char'), set: $('p10Set') });
+    const talk = (k, name) => {
+      const s = k === 'result' ? ['숫자로 된 기온표가 ' + name + '로 바뀌었어요! 기온의 변화를 한눈에 볼 수 있네요', 'main_wave'] : SAYS[k];
+      say(s[0], s[1]);
+    };
 
-    const tableHtml = '<table><tr><th>시간</th><th>기온(℃)</th></tr>' + DATA.map((d) => '<tr><td>' + d.label + '</td><td>' + d.value + '</td></tr>').join('') + '</table>';
-    $('p10Thumb').innerHTML = tableHtml;
-    $('p10TableBig').innerHTML = tableHtml;
+    const KEEP = ['p10Phone', 'p10Cards', 'p10HintPop', 'p10Wrong', 'p10Done'];
+    const saved0 = KEEP.map((id) => $(id).outerHTML);
+    let tok = 0;
+    let cur = 1;
+    let quiet = false;
+    const later = (fn, ms, my) => {
+      if (BoxEdit.on) fn();
+      else setTimeout(() => { if (my === tok) fn(); }, ms);
+    };
+    const click = () => { if (!quiet) playClick(); };
 
-    // 말풍선은 아래가 고정이라 글이 길면 위로 늘어남 → 위쪽 끝(30px)을 넘으면 글자를 2px씩 줄임
-    function say(html) {
-      bubble.style.fontSize = '';
-      bubble.innerHTML = html;
-      let size = parseFloat(getComputedStyle(bubble).fontSize);
-      while (bubble.offsetTop < 30 && size > 28) { size -= 2; bubble.style.fontSize = size + 'px'; }
-    }
-    function target(hit) {
-      clearFingers();
-      phone.querySelectorAll('[data-hit]').forEach((h) => h.classList.toggle('is-target', h.dataset.hit === hit));
-      const el = phone.querySelector('[data-hit="' + hit + '"]');
-      if (el) setTimeout(() => {
-        if (!el.classList.contains('is-target')) return;
-        pointFingerAt(el, hit === 'app' ? { onMain: true, dx: 15, dy: -37 } : { onMain: true });
-        document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.top = Math.min(parseFloat(f.style.top), 850) + 'px'; });
-      }, 50);
-    }
-    function onHit(hit, fn) {
-      phone.querySelector('[data-hit="' + hit + '"]').addEventListener('click', (e) => {
-        if (!e.currentTarget.classList.contains('is-target')) return;
-        e.currentTarget.classList.remove('is-target');
+    function boot() {
+      const my = ++tok;
+      const phone = $('p10Phone');
+      const log = $('p10Log');
+      const bar = $('p10Bar');
+      const input = $('p10Input');
+      const send = $('p10Send');
+      const cards = $('p10Cards');
+
+      const tableHtml = '<table><tr><th>시간</th><th>기온(℃)</th></tr>' + DATA.map((d) => '<tr><td>' + d.label + '</td><td>' + d.value + '</td></tr>').join('') + '</table>';
+      $('p10Thumb').innerHTML = tableHtml;
+      $('p10TableBig').innerHTML = tableHtml;
+
+      BoxEdit.hitPad(phone.querySelectorAll('[data-hit]'), HOT);
+
+      function target(hit) {
         clearFingers();
-        playClick();
-        fn();
+        phone.querySelectorAll('[data-hit]').forEach((h) => h.classList.toggle('is-target', h.dataset.hit === hit));
+        const el = phone.querySelector('[data-hit="' + hit + '"]');
+        if (el) setTimeout(() => {
+          if (my !== tok || !el.classList.contains('is-target')) return;
+          pointFingerAt(el, BoxEdit.fgo(FG, hit, hit === 'app' ? {} : { pulse: true }));
+        }, 50);
+      }
+      function onHit(hit, fn) {
+        phone.querySelector('[data-hit="' + hit + '"]').addEventListener('click', (e) => {
+          if (!e.currentTarget.classList.contains('is-target')) return;
+          e.currentTarget.classList.remove('is-target');
+          clearFingers();
+          click();
+          fn();
+        });
+      }
+
+      // 1) 홈 → ChatGPT
+      talk('start');
+      target('app');
+      onHit('app', () => {
+        phone.dataset.screen = 'chat';
+        talk('plus');
+        target('plus');
       });
-    }
-
-    // ?edit : 손가락 dx,dy 를 클릭해 방향키로 맞춤(표시줄 값을 target()의 pointFingerAt 옵션에 옮겨 적음). ?edit&step=N : 1 앱 · 2 + · 3 사진 · 4 기온표 · 5 전송 · 6 다운로드
-    if (BoxEdit.on) {
-      const origFinger = window.pointFingerAt;
-      window.pointFingerAt = function (el, opts) {
-        origFinger(el, opts);
-        const fs = document.querySelectorAll('.js-point-finger');
-        const fg = fs[fs.length - 1];
-        if (!fg) return;
-        const dx = (opts && opts.dx) || 0, dy = (opts && opts.dy) || 0;
-        fg._base = [parseFloat(fg.style.left) - dx, parseFloat(fg.style.top) - dy];
-        fg._name = '손가락 dx,dy';
-        fg.style.pointerEvents = 'auto';
-        BoxEdit.tag(fg, [dx, dy]);
-      };
-    }
-
-    // 1) 홈 → ChatGPT
-    say('기온표 이미지를 ChatGPT에 첨부하고, 원하는 그래프를 만들어 달라고 부탁해 보세요!');
-    target('app');
-    onHit('app', () => {
-      phone.dataset.screen = 'chat';
-      say('아래의 + 버튼을 클릭해보세요.');
-      target('plus');
-    });
-    // 2) + → 사진 → 기온표 고르기(다른 사진은 오답)
-    onHit('plus', () => {
-      $('p10Menu').classList.remove('is-off');
-      say('‘사진’ 버튼을 눌러, 하루 기온 표 파일을 선택해주세요.');
-      target('photo');
-    });
-    onHit('photo', () => {
-      $('p10Menu').classList.add('is-off');
-      $('p10Gallery').classList.remove('is-off');
-      target('table');
-    });
-    $('p10Grid').addEventListener('click', (e) => {
-      const b = e.target.closest('button');
-      if (!b || b.dataset.pick !== 'photo' || $('p10Gallery').classList.contains('is-off')) return;
-      playWrong();
-      $('p10WrongText').innerHTML = '하루 기온 표 파일을 선택해주세요.';
-      flashLayer($('p10Wrong'), 'is-off', 3000);
-    });
-    onHit('table', () => {
-      $('p10Gallery').classList.add('is-off');
-      bar.classList.add('has-file');
-      phone.classList.add('is-talk');
-      say('기온 표 이미지가 ChatGPT 입력창에 업로드되었어! 이제 표 데이터를 그림으로 시각화해 달라고 명령을 입력해 볼까?');
-      setTimeout(() => {
-        say('카드 중 노란색, 빨간색, 파란색 카드를 각각 하나씩 골라 문장을 만들고, 전송 버튼을 눌러봐!');
-        cards.classList.remove('is-off');
-      }, 3000);
-    });
-
-    // 3) 프롬프트 카드: 노랑 → 빨강 → 파랑 순서로 한 장씩, 고른 문구가 입력창에 쌓임
-    const ORDER = ['y', 'r', 'b'];
-    const picked = [];
-    let kind = '';
-    const cardBtns = Array.from(cards.querySelectorAll('.p10-card'));
-    const syncCards = () => cardBtns.forEach((c) => { c.disabled = c.dataset.color !== ORDER[picked.length]; });
-    syncCards();
-    cardBtns.forEach((c) => c.addEventListener('click', () => {
-      if (c.disabled) return;
-      if (c.dataset.wrong) {
+      // 2) + → 사진 → 기온표 고르기(다른 사진은 오답)
+      onHit('plus', () => {
+        $('p10Menu').classList.remove('is-off');
+        talk('photo');
+        target('photo');
+      });
+      onHit('photo', () => {
+        $('p10Menu').classList.add('is-off');
+        $('p10Gallery').classList.remove('is-off');
+        talk('table');
+        target('table');
+      });
+      $('p10Grid').addEventListener('click', (e) => {
+        const b = e.target.closest('button');
+        if (!b || b.dataset.pick !== 'photo' || $('p10Gallery').classList.contains('is-off')) return;
         playWrong();
-        $('p10WrongText').innerHTML = '‘그려줘’라고 입력해야 해요.';
+        $('p10WrongText').innerHTML = '하루 기온 표 파일을 선택해주세요.';
         flashLayer($('p10Wrong'), 'is-off', 3000);
-        return;
-      }
-      playClick();
-      c.classList.add('is-on');
-      picked.push({ color: c.dataset.color, text: c.textContent });
-      if (c.dataset.kind) kind = c.dataset.kind;
-      input.classList.add('is-filled');
-      input.innerHTML = picked.map((p) => '<b class="' + (p.color === 'b' ? 'bl' : p.color) + '">' + p.text + '</b>').join(' ');
-      syncCards();
-      if (picked.length === ORDER.length) {
-        send.classList.add('is-send');
-        target('send');
-      }
-    }));
-    $('p10Hint').addEventListener('click', () => flashLayer($('p10HintPop'), 'is-off', 3000));
-
-    // 4) 전송 → 분석 중 → 그래프 + 설명
-    let chartSvgText = '';
-    onHit('send', () => {
-      send.classList.remove('is-send');
-      cards.classList.add('is-off');
-      phone.classList.add('is-talk');
-      bar.classList.remove('has-file');
-      log.insertAdjacentHTML('beforeend', '<div class="gpt-me"><div class="gpt-thumb">' + tableHtml + '</div>' + picked.map((p) => p.text).join(' ') + '</div>');
-      input.classList.remove('is-filled');
-      input.textContent = '';
-      const wait = document.createElement('div');
-      wait.className = 'gpt-ai gpt-wait';
-      wait.textContent = '이미지 분석 중 …';
-      log.appendChild(wait);
-      const r = RESULT[kind];
-      chartSvgText = chartSvg(DATA, { type: kind, width: 900, height: 560, title: '하루 기온 변화', color: kind === 'line' ? '#1f77b4' : '#ff7a1a' });
-      setTimeout(() => {
-        wait.remove();
-        log.insertAdjacentHTML('beforeend', '<div class="gpt-ai"><p style="margin:0 0 8px">' + r.text + '</p><div class="p10-chart" id="p10Chart">' + chartSvgText + '</div>' +
-          '<button type="button" class="p10-dl" data-hit="download"><svg class="ic" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>다운로드</button>' +
-          '<div class="gpt-tools"><svg class="ic" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 012-2h10"/></svg><svg class="ic" viewBox="0 0 24 24"><path d="M11 5L6 9H3v6h3l5 4zM15.5 8.5a5 5 0 010 7"/></svg><svg class="ic" viewBox="0 0 24 24"><path d="M7 11v9H4v-9zM7 11l4-7a2 2 0 013 2v4h5a2 2 0 012 2.3l-1.2 7A2 2 0 0117.8 21H7"/></svg></div></div>');
-        log.scrollTop = log.scrollHeight;
-        say('숫자로 된 기온표가 ' + r.name + '로 바뀌었어요! 기온의 변화를 한눈에 볼 수 있네요');
-        setTimeout(download, 5000);
-      }, 2000);
-    });
-
-    // 5) 다운로드: 아래 버튼을 누르거나 그래프를 꾹 누르면 실제 PNG 저장
-    function download() {
-      say('완성된 그래프를 핸드폰에 저장해 볼까요? 그래프를 꾹 눌러 저장을 하거나, 그래프 아래에 있는 다운로드 버튼을 눌러보세요');
-      target('download');
-      const chart = $('p10Chart');
-      const btn = phone.querySelector('[data-hit="download"]');
-      let timer = null;
-      chart.addEventListener('pointerdown', () => { chart.classList.add('is-press'); timer = setTimeout(save, 700); });
-      ['pointerup', 'pointerleave', 'pointercancel'].forEach((t) => chart.addEventListener(t, () => { chart.classList.remove('is-press'); clearTimeout(timer); }));
-      btn.addEventListener('click', save);
-    }
-    let saved = false;
-    function save() {
-      if (saved) return;
-      saved = true;
-      clearFingers();
-      playClick();
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = 1800;
-        canvas.height = 1120;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#fff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        try {
-          const a = document.createElement('a');
-          a.download = '하루_기온_그래프.png';
-          a.href = canvas.toDataURL('image/png');
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-        } catch (err) { console.warn('그래프 저장 실패:', err); }
-        say('다운로드 완료!');
-        setTimeout(() => $('p10Done').classList.remove('is-off'), 1200);
-      };
-      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(chartSvgText.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" width="900" height="560" '));
-    }
-
-    if (BoxEdit.on) {
-      let cur = parseInt(new URLSearchParams(location.search).get('step'), 10) || 1;
-      const waitFor = (fn, then) => { const t = setInterval(() => { if (fn()) { clearInterval(t); then(); } }, 100); };
-      const hitReady = (h) => () => { const e = phone.querySelector('[data-hit="' + h + '"]'); return e && e.classList.contains('is-target'); };
-      const press = (h, then) => waitFor(hitReady(h), () => { phone.querySelector('[data-hit="' + h + '"]').click(); setTimeout(then, 300); });
-      const HITS = ['app', 'plus', 'photo', 'table'];
-      const pickCards = (i, then) => {
-        const sel = ['.p10-card.y', '.p10-card.r[data-kind="bar"]', '.p10-card.b:not([data-wrong])'][i];
-        if (!sel) return then();
-        waitFor(() => !document.querySelector(sel).disabled, () => { document.querySelector(sel).click(); setTimeout(() => pickCards(i + 1, then), 200); });
-      };
-      const run = (list, n) => { if (n >= list.length) return after(); press(list[n], () => run(list, n + 1)); };
-      const after = () => {
-        if (cur >= 5) pickCards(0, () => { if (cur >= 6) press('send', () => {}); });
-      };
-      run(HITS.slice(0, Math.min(cur - 1, 4)), 0);
-      BoxEdit.init({
-        apply: (el) => { const r = el._ref; el.style.left = (el._base[0] + r[0]) + 'px'; el.style.top = (el._base[1] + r[1]) + 'px'; },
-        name: (el) => '[' + el._name + '] ',
-        step: { count: 7, get: () => cur, set: (n) => { cur = n; }, go: (n) => { if (n >= 1) location.search = '?edit&step=' + n; }, label: (n) => '단계 ' + n + ' / 6' }
       });
+      onHit('table', () => {
+        $('p10Gallery').classList.add('is-off');
+        bar.classList.add('has-file');
+        phone.classList.add('is-talk');
+        talk('uploaded');
+        later(() => {
+          talk('cards');
+          cards.classList.remove('is-off');
+        }, 3000, my);
+      });
+
+      // 3) 프롬프트 카드: 노랑 → 빨강 → 파랑 순서로 한 장씩, 고른 문구가 입력창에 쌓임
+      const ORDER = ['y', 'r', 'b'];
+      const picked = [];
+      let kind = '';
+      const cardBtns = Array.from(cards.querySelectorAll('.p10-card'));
+      const syncCards = () => cardBtns.forEach((c) => { c.disabled = c.dataset.color !== ORDER[picked.length]; });
+      syncCards();
+      cardBtns.forEach((c) => c.addEventListener('click', () => {
+        if (c.disabled) return;
+        if (c.dataset.wrong) {
+          playWrong();
+          $('p10WrongText').innerHTML = '‘그려줘’라고 입력해야 해요.';
+          flashLayer($('p10Wrong'), 'is-off', 3000);
+          return;
+        }
+        click();
+        c.classList.add('is-on');
+        picked.push({ color: c.dataset.color, text: c.textContent });
+        if (c.dataset.kind) kind = c.dataset.kind;
+        input.classList.add('is-filled');
+        input.innerHTML = picked.map((p) => '<b class="' + (p.color === 'b' ? 'bl' : p.color) + '">' + p.text + '</b>').join(' ');
+        syncCards();
+        if (picked.length === ORDER.length) {
+          send.classList.add('is-send');
+          target('send');
+        }
+      }));
+      $('p10Hint').addEventListener('click', () => flashLayer($('p10HintPop'), 'is-off', 3000));
+
+      // 4) 전송 → 분석 중 → 그래프 + 설명
+      let chartSvgText = '';
+      onHit('send', () => {
+        send.classList.remove('is-send');
+        cards.classList.add('is-off');
+        phone.classList.add('is-talk');
+        bar.classList.remove('has-file');
+        log.insertAdjacentHTML('beforeend', '<div class="gpt-me"><div class="gpt-thumb">' + tableHtml + '</div>' + picked.map((p) => p.text).join(' ') + '</div>');
+        input.classList.remove('is-filled');
+        input.textContent = '';
+        const wait = document.createElement('div');
+        wait.className = 'gpt-ai gpt-wait';
+        wait.textContent = '이미지 분석 중 …';
+        log.appendChild(wait);
+        const r = RESULT[kind];
+        chartSvgText = chartSvg(DATA, { type: kind, width: 900, height: 560, title: '하루 기온 변화', color: kind === 'line' ? '#1f77b4' : '#ff7a1a' });
+        later(() => {
+          wait.remove();
+          log.insertAdjacentHTML('beforeend', '<div class="gpt-ai"><p style="margin:0 0 8px">' + r.text + '</p><div class="p10-chart" id="p10Chart">' + chartSvgText + '</div>' +
+            '<div class="gpt-tools">' + ['copy', 'speakerWave', 'thumb', 'thumbDown'].map((n) => '<span class="p10-tool">' + ic(n, 'class="ic"') + '</span>').join('') +
+            '<button type="button" class="p10-tool" data-hit="download" aria-label="그래프 저장">' + ic('shareUp', 'class="ic"') + '</button><span class="p10-tool">' + ic('dotsH', 'class="ic"') + '</span></div></div>');
+          log.scrollTop = log.scrollHeight;
+          BoxEdit.padEl(phone.querySelector('[data-hit="download"]'), 'download', HOT);
+          talk('result', r.name);
+          later(download, 5000, my);
+        }, 2000, my);
+      });
+
+      // 5) 다운로드: 아래 버튼을 누르거나 그래프를 꾹 누르면 실제 PNG 저장
+      function download() {
+        talk('download');
+        target('download');
+        const chart = $('p10Chart');
+        const btn = phone.querySelector('[data-hit="download"]');
+        let timer = null;
+        let ctx = null;
+        const menu = () => {
+          if (done || ctx) return;
+          chart.classList.remove('is-press');
+          ctx = document.createElement('div');
+          ctx.className = 'p10-ctx';
+          ctx.innerHTML = '<ul>' + [['복사', 'copy'], ['저장', 'download'], ['공유', 'share'], ['좋아요', 'thumb'], ['별로예요', 'thumbDown']]
+            .map((m) => '<li data-act="' + m[1] + '"' + (m[1] === 'download' ? ' data-hit="save"' : '') + '>' + ic(m[1], 'class="ic"') + m[0] + '</li>').join('') + '</ul>';
+          phone.querySelector('.phone-screen').appendChild(ctx);
+          const saveItem = ctx.querySelector('[data-hit="save"]');
+          BoxEdit.padEl(saveItem, 'save', HOT);
+          pointFingerAt(saveItem, BoxEdit.fgo(FG, 'save', { pulse: true }));
+          ctx.addEventListener('click', (e) => {
+            const li = e.target.closest('li');
+            ctx.remove();
+            ctx = null;
+            clearFingers();
+            if (li && li.dataset.act === 'download') save();
+          });
+        };
+        chart.addEventListener('contextmenu', (e) => e.preventDefault());
+        chart.addEventListener('pointerdown', () => { chart.classList.add('is-press'); timer = setTimeout(menu, 700); });
+        ['pointerup', 'pointerleave', 'pointercancel'].forEach((t) => chart.addEventListener(t, () => { chart.classList.remove('is-press'); clearTimeout(timer); }));
+        btn.addEventListener('click', save);
+      }
+      let done = false;
+      function save() {
+        if (done) return;
+        done = true;
+        clearFingers();
+        click();
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = 1800;
+          canvas.height = 1120;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#fff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          try {
+            const a = document.createElement('a');
+            a.download = '하루_기온_그래프.png';
+            a.href = canvas.toDataURL('image/png');
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+          } catch (err) { console.warn('그래프 저장 실패:', err); }
+          talk('saved');
+          setTimeout(() => { if (my === tok) $('p10Done').classList.remove('is-off'); }, 1200);
+        };
+        img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(chartSvgText.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" width="900" height="560" '));
+      }
+
+      if (BoxEdit.on) {
+        quiet = true;
+        const press = (h) => { const e = phone.querySelector('[data-hit="' + h + '"]'); if (e && e.classList.contains('is-target')) e.click(); };
+        ['app', 'plus', 'photo', 'table'].slice(0, Math.min(cur - 1, 4)).forEach(press);
+        if (cur >= 5) {
+          ['.p10-card.y', '.p10-card.r[data-kind="bar"]', '.p10-card.b:not([data-wrong])'].forEach((s) => cards.querySelector(s).click());
+        }
+        if (cur >= 6) press('send');
+        quiet = false;
+      }
     }
+
+    BoxEdit.stepEdit({
+      count: 7,
+      get: () => cur,
+      set: (n) => { cur = n; },
+      go: (n) => {
+        if (n < 1) return;
+        cur = n;
+        BoxEdit.syncStep(n);
+        clearFingers();
+        KEEP.forEach((id, i) => { $(id).outerHTML = saved0[i]; });
+        boot();
+      },
+      label: (n) => '단계 ' + n + ' / 6',
+      say, bubble: $('p10Bubble'), img: $('p10Char')
+    });
+    boot();
   })();
   </script>
 </body>

@@ -2268,11 +2268,12 @@ function waveSvg(amp, cycles, opts) {
 
 /* 막대·꺾은선 그래프 SVG 문자열(gwa/02 기온 그래프). data: [{ label: '0시', value: 15 }, ...]
    opts: type('bar'|'line'), width/height(viewBox), max/step(세로축), unit(세로축 제목), xTitle, color, title,
-   hide(물음표로 가릴 칸 번호), mark(강조 칸 번호), font(글꼴) */
+   hide(물음표로 가릴 칸 번호), mark(강조 칸 번호), font(글꼴),
+   pad({l,r,t,b} 여백 일부만 덮어씀), fs(숫자·시간 글자 크기, 기본 22), fsUnit(세로축 제목·가로축 제목 글자 크기, 기본 20) */
 function chartSvg(data, opts) {
-  const o = Object.assign({ type: 'bar', width: 900, height: 480, max: 35, step: 5, unit: '기온(℃)', xTitle: '시간', color: '#ff7a1a', title: '', hide: -1, mark: -1, font: 'Pretendard' }, opts);
+  const o = Object.assign({ type: 'bar', width: 900, height: 480, max: 35, step: 5, unit: '기온(℃)', xTitle: '시간', color: '#ff7a1a', title: '', hide: -1, mark: -1, font: 'Pretendard', pad: null, fs: 22, fsUnit: 20 }, opts);
   const top = o.title ? 70 : 40;
-  const pad = { l: 80, r: 30, t: top, b: 70 };
+  const pad = Object.assign({ l: 80, r: 30, t: top, b: 70 }, o.pad);
   const w = o.width - pad.l - pad.r;
   const h = o.height - pad.t - pad.b;
   const gap = w / data.length;
@@ -2282,15 +2283,15 @@ function chartSvg(data, opts) {
   if (o.title) s += '<text x="' + o.width / 2 + '" y="38" text-anchor="middle" font-size="30" font-weight="700" fill="#1b1738">' + o.title + '</text>';
   for (let v = 0; v <= o.max; v += o.step) {
     s += '<line x1="' + pad.l + '" x2="' + (pad.l + w) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="#e1e4ec" stroke-width="2"/>';
-    s += '<text x="' + (pad.l - 12) + '" y="' + (y(v) + 8) + '" text-anchor="end" font-size="22" fill="#5b5e6e">' + v + '</text>';
+    s += '<text x="' + (pad.l - 12) + '" y="' + (y(v) + 8) + '" text-anchor="end" font-size="' + o.fs + '" fill="#5b5e6e">' + v + '</text>';
   }
-  s += '<text x="' + (pad.l - 12) + '" y="' + (pad.t - 14) + '" text-anchor="end" font-size="20" fill="#5b5e6e">' + o.unit + '</text>';
+  s += '<text x="' + (pad.l - 12) + '" y="' + (pad.t - 14) + '" text-anchor="end" font-size="' + o.fsUnit + '" fill="#5b5e6e">' + o.unit + '</text>';
   s += '<line x1="' + pad.l + '" x2="' + pad.l + '" y1="' + pad.t + '" y2="' + (pad.t + h) + '" stroke="#1b1738" stroke-width="3"/>';
   s += '<line x1="' + pad.l + '" x2="' + (pad.l + w) + '" y1="' + (pad.t + h) + '" y2="' + (pad.t + h) + '" stroke="#1b1738" stroke-width="3"/>';
   data.forEach((d, i) => {
     const hidden = i === o.hide;
     const marked = i === o.mark;
-    s += '<text x="' + x(i) + '" y="' + (pad.t + h + 34) + '" text-anchor="middle" font-size="22" fill="#1b1738"' + (marked ? ' font-weight="700"' : '') + '>' + d.label + '</text>';
+    s += '<text x="' + x(i) + '" y="' + (pad.t + h + 34) + '" text-anchor="middle" font-size="' + o.fs + '" fill="#1b1738"' + (marked ? ' font-weight="700"' : '') + '>' + d.label + '</text>';
     if (hidden) {
       s += '<rect x="' + (x(i) - gap * 0.35) + '" y="' + pad.t + '" width="' + gap * 0.7 + '" height="' + h + '" rx="10" fill="#d9dbe4" opacity=".8"/>' +
         '<text x="' + x(i) + '" y="' + (pad.t + h / 2 + 22) + '" text-anchor="middle" font-size="64" font-weight="700" fill="#48159c">?</text>';
@@ -2310,7 +2311,7 @@ function chartSvg(data, opts) {
       s += '<circle cx="' + x(i) + '" cy="' + y(d.value) + '" r="' + (i === o.mark ? 13 : 8) + '" fill="' + (i === o.mark ? '#ffd83d' : o.color) + '"' + (i === o.mark ? ' stroke="#ff9f1a" stroke-width="4"' : '') + '/>';
     });
   }
-  if (o.xTitle) s += '<text x="' + (pad.l + w) + '" y="' + (pad.t + h + 62) + '" text-anchor="end" font-size="20" fill="#5b5e6e">' + o.xTitle + '</text>';
+  if (o.xTitle) s += '<text x="' + (pad.l + w) + '" y="' + (pad.t + h + 62) + '" text-anchor="end" font-size="' + o.fsUnit + '" fill="#5b5e6e">' + o.xTitle + '</text>';
   return s + '</svg>';
 }
 
@@ -2561,12 +2562,13 @@ function placePct(el, b) { el.style.cssText = 'left:' + b[0] + '%;top:' + b[1] +
 
 /* 말풍선 + 캐릭터 포즈 한 세트 바꾸기(사회 폰 실습 페이지 공용). 페이지에서 한 번 만들고 단계마다 say 를 부름.
    const say = initGuideSay({ bubble: $('bub'), img: $('char'), set: $('set') });   // set 은 .guide-set 요소(선택): 포즈에 맞는 좌표 클래스(.is-wink-point2 …)를 같이 바꿈
-   say('문구<br>문구', 'wink_point2');            // 문구 + 포즈(sa/img/character/sa_*.png 의 * 부분)
+   say('문구<br>문구', 'wink_point2');            // 문구 + 포즈(sa/img/character/sa_*.png · gwa/img/character/gwa_*.png 의 * 부분)
    say('문구', 'wink_point4', true);              // 세 번째 true 는 말풍선에 .is-medium(넓은 말풍선), 안 주면 뗌
    줄이 길어지면 .is-long(44px)을 자동으로 붙이고 .is-medium(넓은 말풍선)도 같이 붙임: 기본 모양으로 그려 본 줄 수가 opts.longLines(기본 5)줄 이상일 때. say('문구', 포즈, medium, true|false) 네 번째 값으로 강제로 켜고 끌 수 있음(직접 주면 .is-medium 은 따라붙지 않고 세 번째 값만 따름)
    문구가 빈 문자열('')이면 말풍선을 숨김. 포즈가 빈 문자열('')이면 sa_main, 아예 안 주면(undefined) 지금 포즈 그대로.
+   글꼴이 늦게 내려받아져 줄 수가 달라질 수 있어 글꼴이 준비되면(document.fonts.ready) 줄 수를 다시 재서 .is-long/.is-medium 을 다시 정함. .is-medium 으로도 5줄 이상이면 .is-large(더 넓게, 꼬리 위치는 그대로)를 더 붙임.
    처음에는 캐릭터를 숨겨 두었다가 첫 포즈가 로드되면 보여 주고(기본 그림이 잠깐 비치지 않게), 포즈를 바꿀 때도 새 그림이 로드된 뒤에 그림·좌표를 함께 바꿈.
-   opts.dir: 그림 폴더(기본: img 의 현재 src 에서 sa_ 앞부분), opts.poses: 미리 불러올 포즈 목록(기본: 사회 공용 포즈 전부) */
+   opts.dir: 그림 폴더(기본: img 의 현재 src 에서 sa_/gwa_ 앞부분, 파일 접두사 sa_·gwa_ 도 src 로 알아냄), opts.poses: 미리 불러올 포즈 목록(기본: 사회 공용 포즈 전부, 빈 배열 []이면 포즈를 안 바꾸는 한 장짜리 캐릭터로 보고 처음부터 보임) */
 function initGuideSay(opts) {
   const bubble = opts.bubble, img = opts.img, set = opts.set || null;
   const longLines = opts.longLines || 5;
@@ -2577,23 +2579,35 @@ function initGuideSay(opts) {
     Array.from(r.getClientRects()).forEach((q) => { if (q.width > 1 && q.height > 1) tops.add(Math.round(q.top / 4)); });
     return tops.size;
   };
-  const dir = opts.dir || (img.getAttribute('src') || '').replace(/sa_[^/]*$/, '');
+  const srcAttr = img.getAttribute('src') || '';
+  const pm = srcAttr.match(/(?:^|\/)(sa|gwa)_[^/]*$/);
+  const pre = opts.prefix || (pm ? pm[1] : 'sa') + '_';
+  const dir = opts.dir || srcAttr.replace(/(sa|gwa)_[^/]*$/, '');
   const poses = opts.poses || ['main', 'main_wave', 'wink_open', 'wink_point', 'wink_point2', 'wink_point3', 'wink_point4', 'wink_present', 'smile_present', 'point_front', 'wink_jump', 'happy_jump'];
-  poses.forEach((p) => { new Image().src = dir + 'sa_' + p + '.png'; });
-  img.style.visibility = 'hidden';
-  setTimeout(() => { img.style.visibility = ''; }, 1500);
-  let seq = 0;
-  return function say(html, pose, medium, long) {
-    bubble.innerHTML = html;
-    bubble.style.display = html === '' ? 'none' : '';
+  poses.forEach((p) => { new Image().src = dir + pre + p + '.png'; });
+  if (!(opts.poses && !opts.poses.length)) {
+    img.style.visibility = 'hidden';
+    setTimeout(() => { img.style.visibility = ''; }, 1500);
+  }
+  let seq = 0, said = 0;
+  const layout = (medium, long) => {
+    bubble.classList.remove('is-large');
     bubble.classList.toggle('is-medium', !!medium);
     bubble.classList.remove('is-long');
     const isLong = long === undefined ? countLines() >= longLines : !!long;
     bubble.classList.toggle('is-medium', !!medium || (long === undefined && isLong));
     bubble.classList.toggle('is-long', isLong);
+    if (long === undefined && isLong && countLines() >= longLines) bubble.classList.add('is-large');
+  };
+  return function say(html, pose, medium, long) {
+    bubble.innerHTML = html;
+    bubble.style.display = html === '' ? 'none' : '';
+    layout(medium, long);
+    const mine = ++said;
+    if (document.fonts) document.fonts.ready.then(() => { if (mine === said && html !== '') layout(medium, long); });
     if (pose === undefined || pose === null) return;
     if (pose === '') pose = 'main';
-    const src = dir + 'sa_' + pose + '.png';
+    const src = dir + pre + pose + '.png';
     const my = ++seq;
     const apply = () => {
       if (my !== seq) return;
@@ -2700,7 +2714,7 @@ function pointFingerAt(el, opts) {
       offsetLeft: (r.left - m.left) / s, offsetTop: (r.top - m.top) / s,
       offsetWidth: r.width / s * (opts.x === undefined ? 1 : opts.x), offsetHeight: r.height / s, offsetParent: main
     }, o);
-    if (opts.pulse) { el.classList.add('hit-pulse'); el._fgPulse = true; }
+    if (opts.pulse && !el.classList.contains('card-btn')) { el.classList.add('hit-pulse'); el._fgPulse = true; }
     return;
   }
   clearFingers();
@@ -2716,7 +2730,7 @@ function pointFingerAt(el, opts) {
   finger.style.top = (el.offsetTop + el.offsetHeight - 10 + ((opts && opts.dy) || 0)) + 'px';
   (el.offsetParent || el.parentElement).appendChild(finger);
   initFingerGuide();
-  if (opts && opts.pulse && el.classList) { el.classList.add('hit-pulse'); el._fgPulse = true; }
+  if (opts && opts.pulse && el.classList && !el.classList.contains('card-btn')) { el.classList.add('hit-pulse'); el._fgPulse = true; }
 }
 
 function clearFingers() {
@@ -3046,6 +3060,12 @@ function initEmotionChatFlow(config) {
   const nextBtn = document.getElementById('chatappNext');
   const popup = document.getElementById('chatappPopup');
   const popupText = document.getElementById('chatappPopupText');
+  const charEl = document.getElementById('chatappChar');
+  const POSES = Object.assign({ emotion: 'wink_point', sent: 'wink_point', open: 'wink_point', search: 'wink_point', keyword: 'wink_point', pick: 'wink_point', send: 'wink_point', done: 'wink_point' }, config.poses || {});
+  const sayRaw = charEl ? initGuideSay({ bubble: guideEl, img: charEl, set: document.getElementById('chatappSet') }) : null;
+  const say = (html, stage) => { if (sayRaw) sayRaw(html, POSES[stage]); else guideEl.innerHTML = html; };
+  const EDIT = !!(charEl && window.BoxEdit && BoxEdit.on);
+  const STAGES = ['emotion', 'sent', 'open', 'search', 'keyword', 'pick', 'send', 'done'];
 
   const correctSound = new Audio(ASSET_BASE + 'sound/correct.mp3');
   const wrongSound = new Audio(ASSET_BASE + 'sound/incorrect.mp3');
@@ -3107,11 +3127,12 @@ function initEmotionChatFlow(config) {
     chatBox.appendChild(line);
   }
 
-  // 눌러야 할 곳(분홍 깜빡임) — 폰 화면 좌표(434x879)
+  // 눌러야 할 곳(분홍 깜빡임) — 폰 화면 좌표(434x879). 손가락 위치 보정 fg: { 이름: [dx, dy] }, 말풍선 캐릭터 포즈 poses: { emotion·sent·open·search·keyword·pick·send·done: '포즈' } 도 같은 식으로 넘김
   // 눌러야 할 곳 좌표 [x, y, 폭, 높이, 모서리(선택: 숫자px 또는 '50%'; 안 적으면 원)](폰 화면 기준). 페이지에서 initEmotionChatFlow({ hot: { open: [...] } })로 덮어씀
   // ?edit 으로 열면 세 곳이 한꺼번에 보이고 box-edit.js(클릭 → 방향키)로 맞춘 뒤 표시줄 값을 hot 에 붙여 넣음
   const HOT = Object.assign({ open: [328, 468, 48, 48], search: [389, 619, 50, 50], send: [383, 466, 50, 50] }, config.hot || {});
-  const HOT_NAME = { open: '이모티콘 버튼', search: '검색 버튼', send: '보내기 버튼' };
+  const FG = Object.assign({ open: [0, 0], search: [0, 0], send: [0, 0] }, config.fg || {});
+  let curHot = null;
   const radiusOf = (b) => (b[4] === undefined ? '50%' : typeof b[4] === 'number' ? b[4] + 'px' : b[4]);
   const placeHot = (el) => {
     const b = el._ref;
@@ -3120,21 +3141,28 @@ function initEmotionChatFlow(config) {
   };
   function setHot(name, fn) {
     clearHot();
+    curHot = name;
     hot = document.createElement('button');
     hot.type = 'button';
     hot.className = 'cf-hot';
     const b = HOT[name];
     hot.style.cssText = 'left:' + b[0] + 'px;top:' + b[1] + 'px;width:' + b[2] + 'px;height:' + b[3] + 'px;border-radius:' + radiusOf(b);
-    hot.addEventListener('click', () => { play(clickSound); clearHot(); fn(); });
+    if (EDIT) {
+      BoxEdit.tag(hot, b);
+      hot._hot = name;
+    } else {
+      hot.addEventListener('click', () => { play(clickSound); clearHot(); fn(); });
+    }
     screen.appendChild(hot);
     const mine = hot;
-    setTimeout(() => { if (mine.isConnected) pointFingerAt(mine, { onMain: true }); }, 300);
+    const fg = FG[name] || [0, 0];
+    setTimeout(() => { if (mine.isConnected) pointFingerAt(mine, { onMain: true, dx: fg[0], dy: fg[1] }); }, 300);
   }
   function clearHot() { if (hot) { hot.remove(); hot = null; } clearFingers(); }
 
   /* 1단계: 감정 고르기 */
   function stageEmotion() {
-    guideEl.innerHTML = '친구의 메시지를 읽었을 때<br>어떤 감정이 드나요?';
+    say('친구의 메시지를 읽었을 때<br>어떤 감정이 드나요?', 'emotion');
     emotionsBox.classList.remove('is-off');
     emotionsBox.innerHTML = '';
     DATA.emotions.forEach((label) => {
@@ -3143,6 +3171,7 @@ function initEmotionChatFlow(config) {
       btn.className = 'card-btn';
       btn.textContent = label;
       btn.addEventListener('click', () => {
+        if (EDIT) return;
         if (label !== DATA.correctEmotion) {
           play(wrongSound);
           btn.classList.remove('is-wrong');
@@ -3164,13 +3193,13 @@ function initEmotionChatFlow(config) {
   function stageSent() {
     emotionsBox.classList.add('is-off');
     addLine('나', DATA.myMsg, true, false);
-    guideEl.innerHTML = '친구에게 메시지를 보냈어요.<br>마음을 담은 이모티콘도 함께 보내 볼까요?';
+    say('친구에게 메시지를 보냈어요.<br>마음을 담은 이모티콘도 함께 보내 볼까요?', 'sent');
     showNext(stageOpenPicker);
   }
 
   /* 3단계: 이모티콘 버튼 클릭 */
   function stageOpenPicker() {
-    guideEl.innerHTML = '이모티콘 버튼을 클릭해요.';
+    say('이모티콘 버튼을 클릭해요.', 'open');
     setHot('open', () => {
       panel.style.backgroundImage = 'none';
       panel.innerHTML = cfUI.searchSheet();
@@ -3180,7 +3209,7 @@ function initEmotionChatFlow(config) {
 
   /* 4단계: 검색 버튼 클릭 */
   function stageSearch() {
-    guideEl.innerHTML = '검색 버튼을 클릭해요.';
+    say('검색 버튼을 클릭해요.', 'search');
     setHot('search', () => {
       find.classList.remove('is-off');
       stageKeyword();
@@ -3189,10 +3218,11 @@ function initEmotionChatFlow(config) {
 
   /* 5단계: 감정 키워드 입력 — 이 버튼만은 손가락 안내 없이 바로 노출 */
   function stageKeyword() {
-    guideEl.innerHTML = '어떤 감정을 표현해야 할까요?<br>오른쪽의 버튼을 클릭해 감정 키워드를 입력해요.';
+    say('어떤 감정을 표현해야 할까요?<br>오른쪽의 버튼을 클릭해 감정 키워드를 입력해요.', 'keyword');
     keywordBtn.textContent = '‘' + DATA.keyword + '’ 검색하기';
     keywordBtn.classList.remove('is-off');
     keywordBtn.addEventListener('click', function once() {
+      if (EDIT) return;
       keywordBtn.removeEventListener('click', once);
       keywordBtn.classList.add('is-selected');
       setTimeout(() => {
@@ -3206,7 +3236,7 @@ function initEmotionChatFlow(config) {
 
   /* 6단계: 이모티콘 선택 — '다음' 누를 때까지 변경 가능 */
   function stagePick() {
-    guideEl.innerHTML = DATA.pickGuide;
+    say(DATA.pickGuide, 'pick');
     panel.style.backgroundImage = 'none';
     panel.innerHTML = cfUI.resultSheet() + '<div class="cf-result"></div>';
     const box = panel.querySelector('.cf-result');
@@ -3215,6 +3245,7 @@ function initEmotionChatFlow(config) {
       btn.type = 'button';
       btn.innerHTML = '<img src="' + IMG + name + '.png" alt="">';
       btn.addEventListener('click', () => {
+        if (EDIT) return;
         play(clickSound);
         box.querySelectorAll('button').forEach((b) => b.classList.remove('is-selected'));
         btn.classList.add('is-selected');
@@ -3223,11 +3254,16 @@ function initEmotionChatFlow(config) {
       });
       box.appendChild(btn);
     });
+    if (EDIT) {
+      pickedImg = DATA.stickers[0];
+      box.firstChild.classList.add('is-selected');
+      showNext(null);
+    }
   }
 
   /* 7단계: 보내기 */
   function stageSend() {
-    guideEl.innerHTML = '보내기 버튼을 클릭해 마음을 전송해요.';
+    say('보내기 버튼을 클릭해 마음을 전송해요.', 'send');
     panel.querySelectorAll('.cf-result button').forEach((b) => { b.disabled = true; b.classList.remove('is-selected'); });
     prev.querySelector('img').src = IMG + pickedImg + '.png';
     prev.classList.remove('is-off');
@@ -3245,7 +3281,7 @@ function initEmotionChatFlow(config) {
 
   /* 8단계: 전송 완료 */
   function stageDone() {
-    guideEl.innerHTML = '내 마음을 이모티콘으로<br>표현했어요!';
+    say('내 마음을 이모티콘으로<br>표현했어요!', 'done');
     showNext(() => {
       if (round + 1 < ROUNDS.length) {
         round += 1;
@@ -3265,6 +3301,7 @@ function initEmotionChatFlow(config) {
     nextBtn.__handler = handler;
   }
   nextBtn.addEventListener('click', () => {
+    if (EDIT) return;
     const handler = nextBtn.__handler;
     nextBtn.__handler = null;
     nextBtn.classList.add('is-selected');
@@ -3274,25 +3311,47 @@ function initEmotionChatFlow(config) {
     }, 300);
   });
 
-  startRound();
-  if (window.BoxEdit && BoxEdit.on) {
-    // 좌표 수정 모드: 이모티콘 검색 패널을 띄우고 세 눌림 영역을 한꺼번에 보여줌
-    panel.style.backgroundImage = 'none';
-    panel.innerHTML = cfUI.searchSheet();
-    Object.keys(HOT).forEach((name) => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'cf-hot';
-      b.dataset.name = HOT_NAME[name];
-      b.style.animation = 'none';
-      BoxEdit.tag(b, HOT[name]);
-      placeHot(b);
-      screen.appendChild(b);
+  const STAGE_FN = [stageEmotion, stageSent, stageOpenPicker, stageSearch, stageKeyword, stagePick, stageSend, stageDone];
+  // ?edit 에서 단계 n 을 처음부터 다시 그림: 상황을 새로 시작하고, 그 앞 단계에서 일어나는 화면 변화만 미리 적용
+  function jump(i) {
+    round = Math.floor(i / STAGES.length);
+    const s = i % STAGES.length;
+    startRound();
+    const fx = [null, null,
+      () => { emotionsBox.classList.add('is-off'); addLine('나', DATA.myMsg, true, false); },
+      () => { panel.style.backgroundImage = 'none'; panel.innerHTML = cfUI.searchSheet(); },
+      () => { find.classList.remove('is-off'); },
+      () => { keywordBtn.classList.add('is-off'); find.classList.add('is-off'); },
+      () => { pickedImg = DATA.stickers[0]; },
+      () => { prev.classList.add('is-off'); panel.classList.add('is-off'); input.innerHTML = cfUI.bar(false); input.classList.add('is-bottom'); chatBox.classList.add('is-tall'); addLine('나', pickedImg, true, true); }
+    ];
+    for (let k = 2; k <= s; k++) fx[k]();
+    curHot = null;
+    STAGE_FN[s]();
+  }
+
+  if (EDIT) {
+    let cur = 0;
+    const total = ROUNDS.length * STAGES.length;
+    BoxEdit.stepEdit({
+      key: () => curHot || '?',
+      apply: (el) => {
+        if (el._hot) { placeHot(el); return; }
+        const r = el._ref;
+        if (el._base) { el.style.left = (el._base[0] + r[0]) + 'px'; el.style.top = (el._base[1] + r[1]) + 'px'; }
+      },
+      name: (el) => (el._hot ? '[클릭 영역 → hot.' + el._hot + '] ' : '[손가락 → ' + el._fg + '] '),
+      count: total + 1,
+      get: () => cur + 1,
+      set: (n) => { cur = Math.max(0, Math.min(n, total) - 1); },
+      go: (n) => { if (n < 1) return; cur = n - 1; BoxEdit.syncStep(n); jump(cur); },
+      label: (n) => '상황 ' + (Math.floor((n - 1) / STAGES.length) + 1) + '/' + ROUNDS.length + ' · 단계 ' + (((n - 1) % STAGES.length) + 1) + '/' + STAGES.length + ' (' + STAGES[(n - 1) % STAGES.length] + ')',
+      say: sayRaw, bubble: guideEl, img: charEl
     });
-    BoxEdit.init({ name: (el) => '[' + el.dataset.name + '] ', apply: placeHot });
-    guideEl.textContent = '좌표 수정 모드 — 버튼을 클릭해 방향키로 맞춰요(Shift 10px, Alt+방향키 크기)';
+    jump(cur);
     return;
   }
+  startRound();
   stageEmotion();
 }
 
@@ -3508,6 +3567,33 @@ function labelBox(s, m, edges, x, y) {
   const pad = Math.round(s * 0.06);
   const [t, r, b, l] = edges.map((e) => (e < 0 ? Math.round(s * 0.18) : pad));
   return 'left:' + (x + m + l) + 'px;top:' + (y + m + t) + 'px;width:' + (s - l - r) + 'px;height:' + (s - t - b) + 'px';
+}
+
+
+/* 조각을 판 위에 자유롭게 놓는 퍼즐(sa/06:07 · sa/15:11)의 조각·칸 만들기. 마크업은 조각이 놓이는 층 <div class="jig-layer"> 하나(조각 버튼 .jig-free 의 부모)와
+   칸을 담는 <div class="jig-layer">. 조각 버튼은 누르는 퍼즐 .is-click · 끄는 퍼즐 .is-drag. x·y 는 조각 몸통 왼쪽 위(홈·돌기 여백 m 은 안 포함), s 는 조각 크기, edges 는 jigSvg 의 변 모양 */
+function jigAddSlot(box, x, y, s, m, edges, text, id) {
+  const slot = document.createElement('div');
+  slot.className = 'jig-slot';
+  slot.style.cssText = 'left:' + (x - m) + 'px;top:' + (y - m) + 'px';
+  slot.innerHTML = jigSvg(s, m, edges, null, id) + '<span class="jig-label is-hint" style="' + labelBox(s, m, edges, 0, 0) + '">' + text + '</span>';
+  box.appendChild(slot);
+  return slot;
+}
+
+function jigAddPiece(layer, x, y, s, m, edges, colors, text, id, cls) {
+  const el = document.createElement('button');
+  el.type = 'button';
+  el.className = 'jig-free ' + cls;
+  el.style.cssText = 'left:' + (x - m) + 'px;top:' + (y - m) + 'px;width:' + (s + m * 2) + 'px;height:' + (s + m * 2) + 'px';
+  el.innerHTML = jigSvg(s, m, edges, colors, id) + '<span class="jig-label" style="' + labelBox(s, m, edges, 0, 0) + '">' + text + '</span>';
+  layer.appendChild(el);
+  return el;
+}
+
+function jigFillSlot(slot, s, m, edges, colors, text, id) {
+  slot.classList.add('is-filled');
+  slot.innerHTML = jigSvg(s, m, edges, colors, id) + '<span class="jig-label" style="' + labelBox(s, m, edges, 0, 0) + '">' + text + '</span>';
 }
 
 
