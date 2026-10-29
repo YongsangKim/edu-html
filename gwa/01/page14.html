@@ -6,26 +6,15 @@
     <title>정답을 부탁해!</title>
     <link rel="stylesheet" href="../../css/common.css">
     <style>
-        /* 기획서 44p(game02_02) + 45p(정답) + 46p(오답). 디자인 없음 → 기획서 구조대로 CSS와 샘플 이모지 */
-
-        .p29-mail{position:absolute;left:80px;top:268px;width:860px;height:340px;box-sizing:border-box;background:#fff;border:solid 6px var(--c-ink);border-radius:26px;box-shadow:0 10px 0 var(--c-sky-pale);overflow:hidden}
-        .p29-mail-head{display:flex;align-items:center;gap:16px;height:84px;padding:0 26px;background:#ffd23f;border-bottom:solid 6px var(--c-ink);font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-ink);letter-spacing:-0.06em}
-        .p29-mail-head i{font-style:normal;font-size:56px}
-        .p29-mail-body{display:flex;align-items:center;justify-content:center;height:250px;padding:0 40px;text-align:center;font-family:'Cafe24 Ssurround';font-size:50px;line-height:1.35;letter-spacing:-0.06em;color:var(--c-ink);word-break:keep-all}
-
-        .p29-map{position:absolute;left:980px;top:268px;width:860px;height:340px;box-sizing:border-box;background:linear-gradient(135deg,#d9f1ff,#bfe3f7);border:solid 6px var(--c-ink);border-radius:26px;box-shadow:0 10px 0 var(--c-sky-pale)}
-        .p29-map h4{position:absolute;left:24px;top:14px;margin:0;font-family:'Cafe24 Ssurround';font-size:34px;font-weight:normal;color:var(--c-navy);letter-spacing:-0.06em}
-        .p29-city{position:absolute;display:flex;align-items:center;gap:6px;padding:2px 12px 0 8px;border-radius:14px;background:#fff;border:solid 3px var(--c-sky);font-family:'Cafe24 Ssurround';font-size:25px;line-height:1.1;color:var(--c-ink);letter-spacing:-0.05em;white-space:nowrap}
-        .p29-city i{font-style:normal;font-size:32px}
-        .p29-city b{font-weight:normal;color:#0a57c9}
-
-        .p29-clock{position:absolute;left:1680px;top:62px;font-size:160px}
-
-        .p29-ans{position:absolute;top:670px;width:760px;height:160px;box-sizing:border-box;cursor:pointer;padding:10px 20px 4px;display:flex;align-items:center;justify-content:center;
-          min-width:0;font-size:52px;line-height:1.2;word-break:keep-all}
-        .p29-ans.is-wrong{animation:fix-word-shake .3s ease}
-        .p29-ans-1{left:130px}
-        .p29-ans-2{left:1030px}
+        .ask-pill.p14-pill{left:810px;top:78px;width:966px;min-height:104px;font-size:72px}
+        .p14-mail{left:72px;top:247px;width:1053px;height:490px}
+        .p14-weather{left:1144px;top:247px;width:730px;height:490px}
+        .p14-subject{position:absolute;left:365px;top:327px;height:50px;display:flex;align-items:center;gap:22px;font-family:'Pretendard';font-size:27px;font-weight:700;color:#202124;white-space:nowrap}
+        .p14-subject em{display:inline-flex;align-items:center;gap:8px;height:26px;padding:0 9px;border-radius:5px;background:#e8eaed;font-style:normal;font-size:16px;color:#444}
+        .card-btn.p14-ans{position:absolute;top:765px;width:862px;height:130px;box-sizing:border-box;margin:0;cursor:pointer;padding:12px 20px 6px;display:flex;align-items:center;justify-content:center;min-width:0;font-size:58px;line-height:1.2;word-break:keep-all}
+        .card-btn.p14-ans.is-wrong{animation:fix-word-shake .3s ease}
+        .p14-ans-1{left:80px}
+        .p14-ans-2{left:1010px}
     </style>
 </head>
 <body>
@@ -35,21 +24,18 @@
       <div id="stage" class="stage">
         <main class="bg-default">
 
-          <p class="ask-pill">어떤 답을 알려줘야 할까요?</p>
+          <p class="ask-pill p14-pill">어떤 답을 알려줘야 할까요?</p>
 
-          <div class="p29-mail">
-            <div class="p29-mail-head"><i>✉️</i>의뢰 메일</div>
-            <div class="p29-mail-body"><span id="p29Mail"></span></div>
-          </div>
+          <div class="gm-frame p14-mail"><img src="img/p14_mail.jpg" alt="의뢰 메일"></div>
+          <div class="p14-subject"><span id="p14Subject"></span><em>받은편지함 <span>×</span></em></div>
+          <div class="gm-frame p14-weather"><img src="img/p14_weather.jpg" alt="전국 날씨"></div>
 
-          <div class="p29-map" id="p29Map"><h4>전국 날씨 지도</h4></div>
+          <div class="gm-time" id="p14Clock"><div><span class="gm-ampm">AM</span><b class="gm-digits"><i>09:00</i></b></div></div>
 
-          <div class="gm-clock p29-clock" id="p29Clock">🕘</div>
+          <button class="card-btn p14-ans p14-ans-1" id="p14Ans1"></button>
+          <button class="card-btn p14-ans p14-ans-2" id="p14Ans2"></button>
 
-          <button class="card-btn p29-ans p29-ans-1" id="p29Ans1"></button>
-          <button class="card-btn p29-ans p29-ans-2" id="p29Ans2"></button>
-
-          <div class="avatar-modal is-off" id="p29Wrong">
+          <div class="avatar-modal is-off" id="p14Wrong">
             <div class="avatar-popup-panel">
               <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
               <div class="avatar-popup-body">
@@ -67,22 +53,7 @@
   <script src="../../js/toc-gwa.js"></script>
   <script src="../../js/common.js"></script>
   <script>
-  /* 기획서 44p — 의뢰 메일 5개를 무작위 순서로 풀고, 맞힐 때마다 시계가 2시간씩 진행됨
-     - 답 버튼 위치는 항상 고정(기획서), 메일 등장 순서만 무작위
-     - 정답이면 정답음 + 시계 이동 후 다음 메일, 오답이면 안내가 2초 떴다 닫힘
-     - 5개를 모두 풀면 page30(종료)으로 이동
-     - 날씨 자료는 기획서의 예시 값을 그대로 넣어둠(디자인 나오면 표/지도 이미지로 교체) */
   (function () {
-    const WEATHER = [
-      { city: '부산', sky: '비',   temp: 20 },
-      { city: '대구', sky: '비',   temp: 27 },
-      { city: '인천', sky: '구름', temp: 26 },
-      { city: '대전', sky: '해',   temp: 23 },
-      { city: '울산', sky: '비',   temp: 25 },
-      { city: '서울', sky: '해',   temp: 28 },
-      { city: '제주', sky: '구름', temp: 24 },
-    ];
-
     const MAILS = [
       { q: '부산의 기온은 어떻게 될까요?',
         answers: ['20도입니다.', '27도입니다.'], correct: 0 },
@@ -96,34 +67,17 @@
         answers: ['부산입니다.', '서울입니다.'], correct: 0 },
     ];
 
-    const CLOCK = ['🕘', '🕚', '🕐', '🕒', '🕔', '🕕'];   // 09시 → 11시 → 13시 → 15시 → 17시 → 18시
+    const CLOCK = [['AM', '09:00'], ['AM', '11:00'], ['PM', '01:00'], ['PM', '03:00'], ['PM', '05:00'], ['PM', '06:00']];
 
-    const mailEl = document.getElementById('p29Mail');
-    const mapEl = document.getElementById('p29Map');
-    const clockEl = document.getElementById('p29Clock');
-    const ans1 = document.getElementById('p29Ans1');
-    const ans2 = document.getElementById('p29Ans2');
-    const wrongModal = document.getElementById('p29Wrong');
-
-
+    const subjectEl = document.getElementById('p14Subject');
+    const clockEl = document.getElementById('p14Clock');
+    const ans1 = document.getElementById('p14Ans1');
+    const ans2 = document.getElementById('p14Ans2');
+    const wrongModal = document.getElementById('p14Wrong');
 
     const queue = shuffleArray(MAILS);
     let index = 0;
     let locked = false;
-
-    const ICON = { '비': '🌧️', '구름': '☁️', '해': '☀️' };
-    const SPOT = {
-      '인천': [60, 40], '서울': [290, 10], '대전': [260, 100], '대구': [470, 100],
-      '울산': [600, 150], '부산': [470, 205], '제주': [120, 200],
-    };
-    WEATHER.forEach((w) => {
-      const el = document.createElement('div');
-      el.className = 'p29-city';
-      el.style.left = SPOT[w.city][0] + 'px';
-      el.style.top = (SPOT[w.city][1] + 56) + 'px';
-      el.innerHTML = '<i>' + ICON[w.sky] + '</i>' + w.city + ' <b>' + w.temp + '°</b>';
-      mapEl.appendChild(el);
-    });
 
     function render() {
       ans1.blur();
@@ -131,10 +85,9 @@
       ans1.classList.remove('is-selected');
       ans2.classList.remove('is-selected');
       const m = queue[index];
-      mailEl.textContent = m.q;
+      subjectEl.textContent = m.q;
       ans1.textContent = m.answers[0];
       ans2.textContent = m.answers[1];
-      clockEl.textContent = CLOCK[index];
       locked = false;
     }
 
@@ -148,7 +101,8 @@
           locked = true;
           playCorrect();
           index += 1;
-          clockEl.textContent = CLOCK[Math.min(index, CLOCK.length - 1)];
+          const t = CLOCK[Math.min(index, CLOCK.length - 1)];
+          gmTimeSet(clockEl, t[0], t[1], true);
           setTimeout(() => {
             if (index >= queue.length) {
               navigateTo('page15.html');

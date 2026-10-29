@@ -246,10 +246,10 @@
 
   BoxEdit.posePicker = function (o) {
     if (!ON) return;
-    const POSES = o.poses || ['main', 'main_wave', 'wink_open', 'wink_point', 'wink_point2', 'wink_point3', 'wink_point4', 'wink_present', 'smile_present', 'point_front', 'wink_jump', 'happy_jump'];
     const srcAttr = o.img.getAttribute('src') || '';
     const pm = srcAttr.match(/(?:^|\/)(sa|gwa)_[^/]*$/);
     const pre = (pm ? pm[1] : 'sa') + '_';
+    const POSES = o.poses || (pre === 'gwa_' ? ['main', 'main_point', 'smile_point', 'smile_present', 'wink_point', 'wink_point2', 'wink_point3', 'wink_point4', 'wink_present', 'wink_present2', 'wink_walk'] : ['main', 'main_wave', 'wink_open', 'wink_point', 'wink_point2', 'wink_point3', 'wink_point4', 'wink_present', 'smile_present', 'point_front', 'wink_jump', 'happy_jump']);
     const dir = srcAttr.replace(/(sa|gwa)_[^/]*$/, '');
     const pp = document.createElement('div');
     pp.style.cssText = 'position:fixed;right:8px;bottom:8px;z-index:99999;display:flex;flex-direction:column;gap:4px;max-width:calc(100vw - 16px);padding:8px;border-radius:8px;background:rgba(0,0,0,.82);color:#fff;font:13px sans-serif';
