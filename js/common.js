@@ -2373,6 +2373,7 @@ const ICONS = {
   chevL: '<svg viewBox="0 0 24 24"><path d="M15 4.5L7.5 12l7.5 7.5"/></svg>',
   chevR: '<svg viewBox="0 0 24 24"><path d="M9 4.5l7.5 7.5L9 19.5"/></svg>',
   // 그 밖의 아이콘(지금은 한 곳에서 쓰지만 다른 곳에서도 쓸 수 있음)
+  pdf: '<svg viewBox="0 0 24 24" fill="none"><g stroke="#F04444" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"><path d="M6.25 10.7V6.9c0-1.05.85-1.9 1.9-1.9h5.1l3.65 3.65v2.05"/><path d="M13.25 5.1v3.1c0 .45.35.8.8.8h2.85"/><path d="M5.15 14.25v4.15M5.15 14.25h1.8c.9 0 1.45.52 1.45 1.3s-.55 1.3-1.45 1.3h-1.8"/><path d="M10.1 18.4v-4.15h1.05c1.3 0 2 .75 2 2.08s-.7 2.07-2 2.07H10.1Z"/><path d="M15.05 18.4v-4.15h3.05M15.05 16.25h2.2"/></g></svg>',
   aiv: '<svg viewBox="0 0 24 24"><path d="M5 4h8M4 8v9h6l3 3.5 3-3.5h4V8"/><path d="M9 10v5M12 9v7M15 10v5"/></svg>',
   autosub: '<svg viewBox="0 0 24 24"><path d="M13 4.5H4.5v15h15V11"/><path d="M4.5 14.5h15M8 17.5h6"/><text x="15.5" y="9.5" font-size="8" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle">AI</text></svg>',
   bs: '<svg viewBox="0 0 24 24"><path d="M9 5h10a2 2 0 012 2v10a2 2 0 01-2 2H9l-6-7z"/><path d="M12 9.500l5 5M17 9.500l-5 5"/></svg>',
@@ -2535,8 +2536,8 @@ const ICONS = {
 };
 
 /* 글자를 한 자씩 써 넣는 연출(채팅 답변·프롬프트 입력 등). 멈추는 함수를 돌려줌.
-   typeText(el, '문구', { speed: 60, html, render, clear, onTick, onDone, doneDelay })
-   speed 한 글자 간격(ms, 기본 60) · html true 면 innerHTML 로 넣고 <태그> 는 통째로 넘김 · render (일부문구) => html 로 직접 그림 ·
+   typeText(el, '문구', { speed: 60, duration, html, render, clear, onTick, onDone, doneDelay })
+   speed 한 글자 간격(ms, 기본 60) · duration 전체 걸리는 시간(ms, 주면 문구 길이와 상관없이 그 시간에 끝나도록 speed 를 계산) · html true 면 innerHTML 로 넣고 <태그> 는 통째로 넘김 · render (일부문구) => html 로 직접 그림 ·
    clear true 면 시작할 때 비움 · onTick 글자마다 · onDone 끝나면(doneDelay ms 뒤) */
 function typeText(el, text, o) {
   o = o || {};
@@ -2552,8 +2553,24 @@ function typeText(el, text, o) {
       clearInterval(timer);
       if (o.onDone) { if (o.doneDelay) setTimeout(o.onDone, o.doneDelay); else o.onDone(); }
     }
-  }, o.speed || 60);
+  }, o.duration ? Math.max(1, Math.round(o.duration / text.length)) : (o.speed || 60));
   return () => clearInterval(timer);
+}
+/* 디지털 시계 .gm-time 의 시각 바꾸기: gmTimeSet(el, 'PM', '01:00', true) — 세 번째 true 면 숫자가 위로 밀려 올라가며 바뀜 */
+function gmTimeSet(el, ampm, digits, animate) {
+  const box = el.querySelector('.gm-digits');
+  el.querySelector('.gm-ampm').textContent = ampm;
+  const cur = box.querySelector('i:not(.is-out)');
+  if (!animate || !cur) { box.innerHTML = '<i>' + digits + '</i>'; return; }
+  box.querySelectorAll('i.is-out').forEach((e) => e.remove());
+  const next = document.createElement('i');
+  next.className = 'is-in';
+  next.textContent = digits;
+  box.appendChild(next);
+  void next.offsetWidth;
+  next.classList.remove('is-in');
+  cur.classList.add('is-out');
+  setTimeout(() => cur.remove(), 700);
 }
 /* 요소를 보이고 숨김(.is-hide, 공용 CSS 는 display:none) */
 function showIf(el, on) { el.classList.toggle('is-hide', !on); }
@@ -2583,8 +2600,14 @@ function initGuideSay(opts) {
   const pm = srcAttr.match(/(?:^|\/)(sa|gwa)_[^/]*$/);
   const pre = opts.prefix || (pm ? pm[1] : 'sa') + '_';
   const dir = opts.dir || srcAttr.replace(/(sa|gwa)_[^/]*$/, '');
-  const poses = opts.poses || ['main', 'main_wave', 'wink_open', 'wink_point', 'wink_point2', 'wink_point3', 'wink_point4', 'wink_present', 'smile_present', 'point_front', 'wink_jump', 'happy_jump'];
-  poses.forEach((p) => { new Image().src = dir + pre + p + '.png'; });
+  const poses = opts.poses || (pre === 'gwa_' ? ['main', 'main_point', 'smile_point', 'smile_present', 'wink_point', 'wink_point2', 'wink_point3', 'wink_point4', 'wink_present', 'wink_present2', 'wink_walk'] : ['main', 'main_wave', 'wink_open', 'wink_point', 'wink_point2', 'wink_point3', 'wink_point4', 'wink_present', 'smile_present', 'point_front', 'wink_jump', 'happy_jump']);
+  let preloaded = false;
+  const preload = () => {
+    if (preloaded) return;
+    preloaded = true;
+    poses.forEach((p) => { new Image().src = dir + pre + p + '.png'; });
+  };
+  setTimeout(preload, 1500);
   if (!(opts.poses && !opts.poses.length)) {
     img.style.visibility = 'hidden';
     setTimeout(() => { img.style.visibility = ''; }, 1500);
@@ -2612,6 +2635,7 @@ function initGuideSay(opts) {
     const apply = () => {
       if (my !== seq) return;
       img.src = src;
+      preload();
       if (set) {
         Array.from(set.classList).forEach((c) => { if (/^is-/.test(c)) set.classList.remove(c); });
         set.classList.add('is-' + pose.replace(/_/g, '-'));

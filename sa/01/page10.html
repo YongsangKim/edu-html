@@ -27,9 +27,12 @@
         .p12-g3 .p12-card.is-show{display:flex}
         .p12-actions{position:absolute;left:1370px;top:800px;width:530px}
 
-        .p12-prompt-bubble{position:absolute;right:755px;top:157px;max-width:300px;box-sizing:border-box;padding:16px 18px;border-radius:26px;background:#e6effa;font-family:'Pretendard';font-size:17px;line-height:1.4;font-weight:500;color:#1a2a4a;text-align:left;z-index:3}
+        .p12-prompt-bubble,.p12-gen,.p12-result{display:none}
+        .prompt-builder[data-current-step="6"] .p12-prompt-bubble,.prompt-builder[data-current-step="7"] .p12-prompt-bubble,.prompt-builder[data-current-step="6"] .p12-gen,.prompt-builder[data-current-step="7"] .p12-result{display:block}
+        .phone-screen.has-kb .phone-nav{display:none}
+        .p12-prompt-bubble{position:absolute;right:20px;top:120px;max-width:300px;box-sizing:border-box;padding:16px 18px;border-radius:26px;background:#e6effa;font-family:'Pretendard';font-size:17px;line-height:1.4;font-weight:500;color:#1a2a4a;text-align:left;z-index:3}
         .p12-prompt-bubble .prompt-value{color:inherit}
-        .p12-gen{position:absolute;left:755px;top:355px;width:290px;height:290px;box-sizing:border-box;border-radius:34px;background:#f2f2f2;z-index:3;overflow:hidden;font-family:'Pretendard';font-size:16px;font-weight:600;color:#444}
+        .p12-gen{position:absolute;left:20px;top:315px;width:290px;height:290px;box-sizing:border-box;border-radius:34px;background:#f2f2f2;z-index:3;overflow:hidden;font-family:'Pretendard';font-size:16px;font-weight:600;color:#444}
         .p12-gen b{position:absolute;left:26px;top:26px;font-weight:600;letter-spacing:-0.02em}
         .p12-gen i{position:absolute;left:0;top:0;width:100%;height:100%;
           background:radial-gradient(circle,#b9b9b9 2.4px,transparent 2.8px) 3px 3px/15px 15px;
@@ -39,10 +42,8 @@
           animation:p12-wave 1.6s ease-out infinite}
         @property --w0{syntax:'<length>';inherits:false;initial-value:0px}
         @keyframes p12-wave{from{--w0:0px;opacity:1}to{--w0:120px;opacity:0}}
-        .p12-result{position:absolute;left:755px;top:355px;display:block;width:330px;z-index:3}
+        .p12-result{position:absolute;left:20px;top:315px;width:330px;z-index:3}
         .p12-result img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:24px}
-        .prompt-builder[data-current-step="5"] .gpt-voice i{display:none}
-        .prompt-builder[data-current-step="5"] .gpt-voice{background:#3b82f6 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 19V5M6 11l6-6 6 6'/%3E%3C/svg%3E") center / 20px no-repeat}
         .p12-send{display:none}
     </style>
 </head>
@@ -108,6 +109,12 @@
                 </div>
                 <div class="gpt-bar is-bottom p12-reply is-hide"><div class="gpt-bar-row"><i data-ic="plus" class="gpt-plus"></i><span class="gpt-ph">ChatGPT에게 답장하기</span><span class="gpt-voice"><b></b></span></div></div>
                 <div class="kbd-cj"></div>
+                <div class="p12-prompt-bubble"></div>
+                <div class="p12-gen" id="p12Gen"><b>이미지 생성 중</b><i></i><i></i></div>
+                <a href="page11.html" class="js-nav-effect js-sfx p12-result" data-sound="sound/click.mp3" aria-label="다음">
+                  <img id="p12Result" src="img/p15_result_store_m.png" alt="">
+                </a>
+                <div class="phone-nav"></div>
               </div>
             </div>
 
@@ -219,17 +226,9 @@
                 <a href="javascript:;" class="js-nav-effect js-sfx p12-send" data-sound="sound/click.mp3" aria-label="보내기"></a>
               </div>
 
-              <div class="step-panel" data-step="6">
-                <div class="p12-prompt-bubble"></div>
-                <div class="p12-gen" id="p12Gen"><b>이미지 생성 중</b><i></i><i></i></div>
-              </div>
+              <div class="step-panel" data-step="6"></div>
 
-              <div class="step-panel" data-step="7">
-                <div class="p12-prompt-bubble"></div>
-                <a href="page11.html" class="js-nav-effect js-sfx p12-result" data-sound="sound/click.mp3" aria-label="다음">
-                  <img id="p12Result" src="img/p15_result_store_m.png" alt="">
-                </a>
-              </div>
+              <div class="step-panel" data-step="7"></div>
 
             </div>
           </div>
@@ -254,15 +253,18 @@
   var sendBtn = document.querySelector('.p12-send');
   // 보내기 = 폰 속 파란 버튼(.gpt-voice). 5단계에서만 눌리고, 누르면 아래 숨은 링크(.p12-send)가 다음 단계로 넘김
   var voice = builder.querySelector('.gpt-voice');
+  var BARS_HTML = voice.innerHTML;
+  var replyVoice = builder.querySelector('.p12-reply .gpt-voice');
   voice.addEventListener('click', function () { if (BoxEdit.on || !voice.classList.contains('hit-pulse')) return; sendBtn.click(); });
+  new MutationObserver(function () { voice.classList.toggle('is-send', preview.textContent.trim() !== ''); }).observe(preview, { childList: true, subtree: true, characterData: true });
   // 클릭 영역 보정 [dx, dy, dw, dh] — 버튼 모양은 그대로, 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
-  var HOT = { app: [0, 0, 0, 0], input: [0, 0, 0, 0], send: [-27, -27, 54, 54] };
+  var HOT = { app: [0, 0, 0, 0], input: [0, 0, 0, 0], send: [-2, -2, 4, 4] };
   // 손가락 위치 보정 [dx, dy] — 눌러야 할 곳별. ?edit 로 손가락을 눌러 맞춘 뒤 표시줄 값을 옮겨 적음
   var FG = { app: [15, -37], input: [-150, -30], send: [23, -4] };
   function fgo(key, extra) { return BoxEdit.fgo(FG, key, extra); }
   BoxEdit.padEl(document.getElementById('p10App'), 'app', HOT);
   BoxEdit.padEl(document.getElementById('p11Input'), 'input', HOT);
-  var gen = document.getElementById('p12Gen');
+  var gen = document.querySelector('.step-panel[data-step="6"]');
   // 화면(단계)마다 말풍선 문구·포즈 — 1 홈 · 2 채팅 · 3~9 프롬프트 만들기 1~7단계 (포즈는 ?edit 포즈판에서 골라 옮겨 적음)
   var SAYS = [
     { say: 'ChatGPT를 클릭해요.', pose: 'wink_point' }, // 1
@@ -312,6 +314,7 @@
       builder.querySelectorAll(p[0]).forEach(function (el) { el.classList.toggle('is-hide', p[1]); });
     });
     builder.querySelector('.phone-screen').classList.toggle('has-kb', !late);
+    replyVoice.innerHTML = step === 6 ? '<b></b>' : BARS_HTML;
     if (step < 6) return;
     document.querySelectorAll('.p12-prompt-bubble').forEach(function (el) { el.innerHTML = preview.innerHTML; });
   }).observe(builder, { attributes: true, attributeFilter: ['data-current-step'] });

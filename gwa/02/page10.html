@@ -76,14 +76,13 @@
               <div class="gpt-sugg">
                 <span><svg viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="3"/><circle cx="15.5" cy="9" r="1.6"/><path d="M3.5 17l5-5 4 4 2.5-2.5 5.5 5"/></svg>이미지나 스티커 만들어줘</span>
                 <span><svg viewBox="0 0 24 24"><path d="M4.5 19.5l.9-4L16.2 4.7a2 2 0 012.8 0l.3.3a2 2 0 010 2.8L8.5 18.6z"/><path d="M14.5 6.5l3 3"/></svg>글쓰기</span>
-                <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.4 2.6 14.6 0 17M12 3.5c-2.6 2.4-2.6 14.6 0 17"/></svg>웹 검색</span>
               </div>
-              <div class="gpt-bar is-bottom" id="p10Bar">
+              <div class="gpt-bar is-start" id="p10Bar">
                 <div class="gpt-file"><div class="gpt-thumb" id="p10Thumb"></div></div>
                 <div class="prompt-preview" id="p10Input"></div>
                 <div class="gpt-bar-row">
                   <button type="button" class="gpt-plus" data-hit="plus" aria-label="첨부"><svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
-                  <span class="gpt-ph">ChatGPT에게 묻기</span>
+                  <span class="gpt-ph">ChatGPT에게 물어보세요</span>
                   <svg class="gpt-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg>
                   <button type="button" class="gpt-voice" id="p10Send" data-hit="send" aria-label="전송"><i style="height:6px"></i><i style="height:12px"></i><i style="height:16px"></i><i style="height:10px"></i><i style="height:5px"></i></button>
                 </div>
@@ -104,6 +103,7 @@
                 </div>
               </div>
             </div>
+            <div class="phone-nav"></div>
           </div></div>
 
           <div class="p10-cards is-off" id="p10Cards">
@@ -148,7 +148,7 @@
                 </div>
                 <div class="step-panel">
                   <div class="avatar-card-body is-side"><p class="avatar-card-text">이제 퀴즈를 풀며 배운 내용을 확인해볼까요?</p></div>
-                  <a href="page11.html" class="js-nav-effect avatar-card-btn is-popup js-sfx card-btn" data-sound="sound/click.mp3">확인</a>
+                  <a href="page11.html" class="js-nav-effect avatar-card-btn is-popup next-btn js-sfx card-btn" data-sound="sound/click.mp3">확인</a>
                 </div>
               </div>
             </div>
@@ -171,20 +171,21 @@
       line: { name: '꺾은선 그래프', text: '요청하신 기온 표 이미지를 분석하여 꺾은선그래프로 시각화했습니다. 낮 동안 기온이 올라갔다가 저녁에 내려가는 패턴을 확인할 수 있습니다.' }
     };
     const SAYS = {
-      start: ['기온표 이미지를 ChatGPT에 첨부하고, 원하는 그래프를 만들어 달라고 부탁해 보세요!', 'wink_point3'],
+      start: ['기온표 이미지를 ChatGPT에 첨부하고, 원하는 그래프를 만들어 달라고 부탁해 보세요!', 'smile_present'],
       plus: ['아래의 + 버튼을 클릭해보세요.', 'wink_point4'],
       photo: ['‘사진’ 버튼을 눌러, 하루 기온 표 파일을 선택해주세요.', 'wink_point3'],
       table: ['‘사진’ 버튼을 눌러, 하루 기온 표 파일을 선택해주세요.', 'wink_present'],
-      uploaded: ['기온 표 이미지가 ChatGPT 입력창에 업로드되었어! 이제 표 데이터를 그림으로 시각화해 달라고 명령을 입력해 볼까?', 'main_wave'],
+      uploaded: ['기온 표 이미지가 ChatGPT 입력창에 업로드되었어! 이제 표 데이터를 그림으로 시각화해 달라고 명령을 입력해 볼까?', 'smile_point'],
       cards: ['카드 중 노란색, 빨간색, 파란색 카드를 각각 하나씩 골라 문장을 만들고, 전송 버튼을 눌러봐!', 'wink_present'],
-      download: ['완성된 그래프를 핸드폰에 저장해 볼까요? 그래프를 꾹 눌러 저장을 하거나, 그래프 아래에 있는 다운로드 아이콘을 눌러보세요', 'wink_point2'],
-      saved: ['다운로드 완료!', 'happy_jump']
+      download: ['완성된 그래프를 핸드폰에 저장해 볼까요? 그래프를 꾹 눌러 저장을 하거나, 그래프 아래에 있는 다운로드 아이콘을 눌러보세요', 'wink_present'],
+      analyzing: ['이미지 분석 중 …', ''],
+      saved: ['다운로드 완료!', 'smile_point']
     };
-    const FG = { app: [15, -37], plus: [20, -20], photo: [0, 0], table: [0, 0], send: [20, -20], download: [20, -10], save: [-120, -30] };
-    const HOT = { app: [0, 0, 0, 0], plus: [-10, -10, 20, 20, 30], photo: [0, 0, 0, 0], table: [0, 0, 0, 0], send: [0, 0, 0, 0], download: [-10, -10, 20, 20, 10], save: [0, 0, 0, 0] };
+    const FG = { app: [15, -37], plus: [20, -20], photo: [-60, -30], table: [0, -20], send: [20, -20], download: [20, -10], save: [-120, -30] };
+    const HOT = { app: [0, 0, 0, 0], plus: [-8, -8, 16, 16, 30], photo: [0, 0, 0, 0], table: [0, 0, 0, 0], send: [-2, -2, 4, 4], download: [-10, -10, 20, 20, 10], save: [0, 0, 0, 0] };
     const say = initGuideSay({ bubble: $('p10Bubble'), img: $('p10Char'), set: $('p10Set') });
     const talk = (k, name) => {
-      const s = k === 'result' ? ['숫자로 된 기온표가 ' + name + '로 바뀌었어요! 기온의 변화를 한눈에 볼 수 있네요', 'main_wave'] : SAYS[k];
+      const s = k === 'result' ? ['숫자로 된 기온표가 ' + name + '로 바뀌었어요! 기온의 변화를 한눈에 볼 수 있네요', 'smile_present'] : SAYS[k];
       say(s[0], s[1]);
     };
 
@@ -206,6 +207,7 @@
       const bar = $('p10Bar');
       const input = $('p10Input');
       const send = $('p10Send');
+      const BARS = send.innerHTML;
       const cards = $('p10Cards');
 
       const tableHtml = '<table><tr><th>시간</th><th>기온(℃)</th></tr>' + DATA.map((d) => '<tr><td>' + d.label + '</td><td>' + d.value + '</td></tr>').join('') + '</table>';
@@ -263,6 +265,7 @@
       onHit('table', () => {
         $('p10Gallery').classList.add('is-off');
         bar.classList.add('has-file');
+        send.classList.add('is-send');
         phone.classList.add('is-talk');
         talk('uploaded');
         later(() => {
@@ -294,7 +297,6 @@
         input.innerHTML = picked.map((p) => '<b class="' + (p.color === 'b' ? 'bl' : p.color) + '">' + p.text + '</b>').join(' ');
         syncCards();
         if (picked.length === ORDER.length) {
-          send.classList.add('is-send');
           target('send');
         }
       }));
@@ -304,28 +306,45 @@
       let chartSvgText = '';
       onHit('send', () => {
         send.classList.remove('is-send');
+        send.innerHTML = '<b></b>';
         cards.classList.add('is-off');
         phone.classList.add('is-talk');
         bar.classList.remove('has-file');
         log.insertAdjacentHTML('beforeend', '<div class="gpt-me"><div class="gpt-thumb">' + tableHtml + '</div>' + picked.map((p) => p.text).join(' ') + '</div>');
         input.classList.remove('is-filled');
         input.textContent = '';
-        const wait = document.createElement('div');
-        wait.className = 'gpt-ai gpt-wait';
-        wait.textContent = '이미지 분석 중 …';
+        const wait = document.createElement('span');
+        wait.className = 'gpt-dot';
         log.appendChild(wait);
+        talk('analyzing');
         const r = RESULT[kind];
         chartSvgText = chartSvg(DATA, { type: kind, width: 900, height: 560, title: '하루 기온 변화', color: kind === 'line' ? '#1f77b4' : '#ff7a1a' });
         later(() => {
           wait.remove();
-          log.insertAdjacentHTML('beforeend', '<div class="gpt-ai"><p style="margin:0 0 8px">' + r.text + '</p><div class="p10-chart" id="p10Chart">' + chartSvgText + '</div>' +
+          const ans = document.createElement('div');
+          ans.className = 'gpt-ai';
+          const txt = document.createElement('p');
+          txt.style.margin = '0 0 8px';
+          ans.appendChild(txt);
+          log.appendChild(ans);
+          const rest = '<div class="p10-chart" id="p10Chart">' + chartSvgText + '</div>' +
             '<div class="gpt-tools">' + ['copy', 'speakerWave', 'thumb', 'thumbDown'].map((n) => '<span class="p10-tool">' + ic(n, 'class="ic"') + '</span>').join('') +
-            '<button type="button" class="p10-tool" data-hit="download" aria-label="그래프 저장">' + ic('shareUp', 'class="ic"') + '</button><span class="p10-tool">' + ic('dotsH', 'class="ic"') + '</span></div></div>');
-          log.scrollTop = log.scrollHeight;
-          BoxEdit.padEl(phone.querySelector('[data-hit="download"]'), 'download', HOT);
-          talk('result', r.name);
-          later(download, 5000, my);
-        }, 2000, my);
+            '<button type="button" class="p10-tool" data-hit="download" aria-label="그래프 저장">' + ic('shareUp', 'class="ic"') + '</button><span class="p10-tool">' + ic('dotsH', 'class="ic"') + '</span></div>';
+          const showRest = () => {
+            ans.insertAdjacentHTML('beforeend', rest);
+            send.innerHTML = BARS;
+            log.scrollTop = log.scrollHeight;
+            BoxEdit.padEl(phone.querySelector('[data-hit="download"]'), 'download', HOT);
+            talk('result', r.name);
+            later(download, 5000, my);
+          };
+          if (BoxEdit.on) {
+            txt.textContent = r.text;
+            showRest();
+          } else {
+            typeText(txt, r.text, { speed: 20, onTick: () => { log.scrollTop = log.scrollHeight; }, onDone: () => { if (my === tok) showRest(); } });
+          }
+        }, 2400, my);
       });
 
       // 5) 다운로드: 아래 버튼을 누르거나 그래프를 꾹 누르면 실제 PNG 저장
