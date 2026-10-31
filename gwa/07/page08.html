@@ -8,23 +8,24 @@
     <style>
         /* 디자인 없음 - 기획서 14~36p. 실제 MakeCode 캡처(img/p_mc_NN.png, 위·아래 잘라냄, 왼쪽 시뮬레이터 색은 하늘색으로 통일)를 단계마다 한 장씩 깔고
            눌러야 할 곳(클릭 영역)만 얹음. 그 밖의 영역은 무반응. 블록 끌기는 캡처에서 오려 낸 블록 그림이 마우스를 따라감 */
-        .mc{position:absolute;left:252px;top:18px;width:1523px;height:752px;transform:scale(.93);transform-origin:0 0;background:#fff;box-shadow:0 0 0 4px #fff,0 8px 24px rgba(40,50,120,.25);user-select:none;-webkit-user-select:none;touch-action:none}
+        .mc{position:absolute;left:252px;top:52px;width:1523px;height:752px;transform:scale(.93);transform-origin:0 0;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 0 0 5px #fff;user-select:none;-webkit-user-select:none;touch-action:none}
         .mc>img{position:absolute;left:0;top:0;width:1523px;height:752px;pointer-events:none}
         .mc-over{opacity:0}
         .mc-ov{position:absolute;overflow:hidden;pointer-events:none}
         .mc-ov img{position:absolute;max-width:none}
         .mc-hit{position:absolute;display:block;padding:0;border:0;background:transparent;cursor:pointer;touch-action:none;z-index:5}
-        .p08-talk{position:absolute;left:40px;top:692px;width:1345px;height:236px}
-        .p08-talk-bar{position:absolute;left:135px;top:52px;width:1210px;height:150px;box-sizing:border-box;padding:0 40px 0 130px;display:flex;align-items:center;
-          background:var(--c-white);border:solid 6px var(--c-purple);border-radius:75px;box-shadow:0 12px 0 0 rgba(72,21,156,.18)}
-        .p08-talk-bar p{margin:0;font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.15;color:var(--c-purple);letter-spacing:-0.05em;word-break:keep-all}
-        .p08-talk-avatar{position:absolute;left:0;top:0;width:236px;height:236px;border-radius:50%;overflow:hidden;background:var(--c-purple);box-shadow:0 12px 0 0 rgba(72,21,156,.18);border:solid 6px var(--c-purple);box-sizing:border-box;z-index:1}
-        .p08-talk-avatar img{position:absolute;left:50%;top:-6px;width:330px;max-width:none;transform:translateX(-50%)}
-        .p08-next.card-btn.is-start{position:absolute;left:1440px;top:736px;min-width:0;width:420px}
+        .p08-board{left:215px;top:23px;width:1487px;height:910px}
+        .p08-char{position:absolute;left:193px;top:674px;width:220px;height:auto;z-index:30;pointer-events:none}
+        .p08-cap{position:absolute;left:430px;top:751px;width:940px;height:182px;margin:0;display:flex;align-items:center;font-family:'Cafe24 Ssurround';font-size:40px;line-height:1.25;color:var(--c-white);letter-spacing:-0.08em;word-break:keep-all}
+        .p08-cap span{font-family:'Pretendard'}
+        .p08-next.card-btn.is-start{position:absolute;left:auto;right:244px;top:795px;min-width:305px;width:auto;height:92px;margin:0;padding:6px 30px 0 30px;font-size:60px;white-space:nowrap;z-index:31}
         .p08-hide{display:none!important}
         .p08-next:disabled{opacity:.4;pointer-events:none}
         .mc-ghost{position:absolute;display:none;pointer-events:none;z-index:9;background-repeat:no-repeat;filter:drop-shadow(0 6px 8px rgba(0,0,0,.35))}
 
+.mc-led{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
+.mc-led i{position:absolute;width:14px;height:20px;border-radius:5px;background:#ff3d3d;box-shadow:0 0 8px 3px rgba(255,50,50,.65);opacity:0}
+.mc-led i.on{opacity:1}
 .mc-finger-drag{
   position:absolute;
   width:70px;
@@ -47,19 +48,20 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <div class="p08-talk">
-            <div class="p08-talk-avatar"><img id="p08Char" src="../img/character/gwa_main.png" alt="메인 캐릭터"></div>
-            <div class="p08-talk-bar"><p id="p08Bubble"></p></div>
-          </div>
-          <button type="button" class="card-btn is-start js-sfx p08-next p08-hide" id="p08Btn" data-sound="sound/click.mp3">다음</button>
+          <div class="board-b p08-board"></div>
+          <p class="p08-cap" id="p08Bubble"></p>
+          <button type="button" class="card-btn is-start opts js-sfx p08-next p08-hide" id="p08Btn" data-sound="sound/click.mp3">다음</button>
 
           <div class="mc" id="mc">
             <img id="mcBase" alt="">
             <img id="mcOver" class="mc-over" alt="">
             <div class="mc-ov" id="mcOv"><img id="mcOvImg" alt=""></div>
+            <div class="mc-led" id="mcLed"></div>
             <div class="mc-ghost" id="mcGhost"></div>
             <button type="button" class="mc-hit" id="mcHit" data-hit=""></button>
           </div>
+
+          <img class="p08-char" id="p08Char" src="img/p08_character.png" alt="">
 
           <div class="avatar-modal is-off" id="p08Modal">
             <div class="avatar-card is-left">
@@ -123,7 +125,7 @@
       logic: ['‘논리’에서 ‘만약 참 이라면, 아니면’ 블록을 선택해 판으로 드래그 하세요.', 'wink_point3'],
       cmp: ['[0<0] 블록을 클릭해 ‘참’ 블록 안으로 드래그 하세요.', 'wink_point2'],
       temp2: ['‘입력’에서 [온도]를 클릭해 판으로 드래그 하세요.', 'wink_point3'],
-      ge: ['부호를 ‘≥’로 변경해 주세요.', 'wink_point2'],
+      ge: ['부호를 ‘<span>≥</span>’로 변경해 주세요.', 'wink_point2'],
       num: ['숫자 26을 입력해 볼까요?', 'wink_point3'],
       led: ['‘기본’에서 [LED 출력]을 클릭해 판으로 드래그 하세요.', 'wink_point2'],
       done: ['완성됐어요! 이제 온도에 따라 달라지는 결과를 확인해볼까요?', 'wink_present'],
@@ -135,26 +137,26 @@
       { img: 1, say: 'intro2', btn: '시작하기' },
       { img: 1, say: 'inA', type: 'click', key: 'catInput' },
       { img: 2, say: 'inA', type: 'drag', key: 'blkA', hover: 3, ghost: 3 },
-      { img: 8, say: 'basic', type: 'click', key: 'catBasic' },
-      { img: 9, say: 'basic', type: 'drag', key: 'blkNum', hover: 10, ghost: 10 },
-      { img: 11, say: 'temp', type: 'click', key: 'catInput' },
-      { img: '11_2', say: 'temp', type: 'drag', key: 'blkTemp', hover: 12, ghost: 12 },
-      { img: 14, say: 'btn', type: 'click', key: 'catInput' },
-      { img: '14_2', say: 'btn', type: 'drag', key: 'blkA', hover: 15, ghost: 15, fd: 'blkA2' },
-      { img: 16, say: 'toB', type: 'click', key: 'ddB' },
-      { img: 17, say: 'logic', type: 'click', key: 'catLogic' },
-      { img: 18, say: 'logic', type: 'drag', key: 'blkIf', hover: 19, ghost: 19 },
-      { img: 20, say: 'cmp', type: 'drag', key: 'blkCmp', hover: 21, ghost: 21 },
-      { img: 22, say: 'temp2', type: 'click', key: 'catInput' },
-      { img: '22_2', say: 'temp2', type: 'drag', key: 'blkTemp', hover: 23, ghost: 23, fd: 'blkTemp2' },
-      { img: 24, say: 'ge', type: 'click', key: 'cmpArrow' },
-      { img: 25, say: 'ge', type: 'click', key: 'geOpt' },
-      { img: 27, say: 'num', type: 'num', key: 'numSlot', btn: '숫자 입력하기' },
-      { img: 28, say: 'led', type: 'click', key: 'catBasic' },
-      { img: 29, say: 'led', type: 'drag', key: 'blkLed', hover: 30, ghost: 30 },
-      { img: 31, ov: { img: 29, rect: FLY }, say: 'led', type: 'drag', key: 'blkLed', ghost: 30, ghostSrc: 30, fd: 'blkLed2' },
-      { img: 36, say: 'done', type: 'click', key: 'btnA' },
-      { img: 37, say: 'result', type: 'result', key: 'btnB', btn: '다음' }
+      { img: 4, say: 'basic', type: 'click', key: 'catBasic' },
+      { img: 5, say: 'basic', type: 'drag', key: 'blkNum', hover: 6, ghost: 6 },
+      { img: 7, say: 'temp', type: 'click', key: 'catInput' },
+      { img: 8, say: 'temp', type: 'drag', key: 'blkTemp', hover: 9, ghost: 9 },
+      { img: 10, say: 'btn', type: 'click', key: 'catInput' },
+      { img: 11, say: 'btn', type: 'drag', key: 'blkA', hover: 12, ghost: 12, fd: 'blkA2' },
+      { img: 13, say: 'toB', type: 'click', key: 'ddB' },
+      { img: 14, say: 'logic', type: 'click', key: 'catLogic' },
+      { img: 15, say: 'logic', type: 'drag', key: 'blkIf', hover: 16, ghost: 16 },
+      { img: 17, say: 'cmp', type: 'drag', key: 'blkCmp', hover: 18, ghost: 18 },
+      { img: 19, say: 'temp2', type: 'click', key: 'catInput' },
+      { img: 20, say: 'temp2', type: 'drag', key: 'blkTemp', hover: 21, ghost: 21, fd: 'blkTemp2' },
+      { img: 22, say: 'ge', type: 'click', key: 'cmpArrow' },
+      { img: 23, say: 'ge', type: 'click', key: 'geOpt' },
+      { img: 24, say: 'num', type: 'num', key: 'numSlot', btn: '숫자 입력하기' },
+      { img: 25, say: 'led', type: 'click', key: 'catBasic' },
+      { img: 26, say: 'led', type: 'drag', key: 'blkLed', hover: 27, ghost: 27 },
+      { img: 28, ov: { img: 26, rect: FLY }, say: 'led', type: 'drag', key: 'blkLed', ghost: 27, ghostSrc: 27, fd: 'blkLed2' },
+      { img: 29, ov: { img: 28, rect: [50, 158, 82, 140] }, say: 'done', type: 'click', key: 'btnA' },
+      { img: 29, say: 'result', type: 'anim' }
     ];
     
     const HOT = {};
@@ -162,7 +164,7 @@
 
     const mc = $('mc'), base = $('mcBase'), over = $('mcOver'), ov = $('mcOv'), ovImg = $('mcOvImg'), ghost = $('mcGhost'), hit = $('mcHit');
     const bubble = $('p08Bubble'), modal = $('p08Modal');
-    const say = initGuideSay({ bubble: bubble, img: $('p08Char') });
+    const say = initGuideSay({ bubble: bubble, img: $('p08Char'), poses: [] });
     const btn = $('p08Btn');
     let cur = 0, drag = null, shown = '', lastDrop = 0;
 
@@ -191,9 +193,96 @@
       else if (m === 'click' && f.key) finger(hit, f.key);
     };
 
+    const LED_X = [140, 176, 212, 248, 284], LED_Y = [177, 211, 245, 278, 313];
+    const GLYPH = { '2': ['.###.', '#...#', '...#.', '..#..', '#####'], '1': ['..#..', '.##..', '..#..', '..#..', '.###.'] };
+    const ledBox = $('mcLed');
+    const cells = LED_Y.map((y) => LED_X.map((x) => {
+      const c = document.createElement('i');
+      c.style.left = (x - 7) + 'px';
+      c.style.top = (y - 10) + 'px';
+      ledBox.appendChild(c);
+      return c;
+    }));
+    const textCols = (s) => {
+      const cols = [];
+      s.split('').forEach((ch) => {
+        for (let x = 0; x < 5; x++) cols.push(GLYPH[ch].map((r) => r[x] === '#'));
+        cols.push([false, false, false, false, false]);
+      });
+      return cols;
+    };
+    const drawLed = (cols, s) => {
+      for (let c = 0; c < 5; c++) {
+        const col = cols[s + c - 5];
+        for (let r = 0; r < 5; r++) cells[r][c].classList.toggle('on', !!(col && col[r]));
+      }
+    };
+    let animTok = 0, animTimers = [];
+    const later = (fn, ms, tok) => { animTimers.push(setTimeout(() => { if (tok === animTok) fn(); }, ms)); };
+    const stopAnim = () => {
+      animTok++;
+      animTimers.forEach(clearTimeout);
+      animTimers = [];
+      cells.forEach((row) => row.forEach((c) => c.classList.remove('on')));
+      mc.querySelectorAll('.mc-anim-finger').forEach((v) => v.remove());
+    };
+    const animFinger = (x, y) => {
+      const el = document.createElement('img');
+      el.src = '../../resources/img/common/img_finger01.png';
+      el.className = 'mc-finger-drag mc-anim-finger';
+      el.style.width = '110px';
+      el.style.height = 'auto';
+      el.style.left = (x - 20) + 'px';
+      el.style.top = (y - 10) + 'px';
+      mc.appendChild(el);
+      return el;
+    };
+    const FINGER = ['../../resources/img/common/img_finger01.png', '../../resources/img/common/img_finger02.png'];
+    const setPatch = (imgN, rect) => {
+      ov.style.cssText = 'left:' + rect[0] + 'px;top:' + rect[1] + 'px;width:' + rect[2] + 'px;height:' + rect[3] + 'px';
+      ovImg.src = IMG(imgN);
+      ovImg.style.left = -rect[0] + 'px';
+      ovImg.style.top = -rect[1] + 'px';
+      ovImg.style.width = W + 'px';
+      ovImg.style.height = H + 'px';
+      ov.style.display = '';
+    };
+
+    function runResult() {
+      const tok = animTok;
+      const cols = textCols('21');
+      const steps = cols.length + 6;
+      for (let s = 0; s < steps; s++) later(() => drawLed(cols, s), 300 + s * 130, tok);
+      const pressB = (t0, down, up) => {
+        let fe = null;
+        later(() => { fe = animFinger(R.btnB[0] + R.btnB[2] + 0, R.btnB[1] + R.btnB[3] + 0); }, t0, tok);
+        later(() => { fe.src = FINGER[1]; }, t0 + 300, tok);
+        later(() => { ov.style.display = 'none'; base.src = IMG(down); }, t0 + 350, tok);
+        later(() => { fe.src = FINGER[0]; }, t0 + 700, tok);
+        later(() => { base.src = IMG(up); }, t0 + 800, tok);
+        later(() => { fe.style.opacity = '0'; }, t0 + 1000, tok);
+        later(() => { fe.remove(); }, t0 + 1300, tok);
+      };
+      const t1 = 300 + steps * 130 + 400;
+      pressB(t1, 30, 31);
+      const t2 = t1 + 1700;
+      let fd = null;
+      later(() => { fd = animFinger(118, 238); }, t2, tok);
+      later(() => { fd.src = FINGER[1]; }, t2 + 300, tok);
+      later(() => { fd.classList.add('mc-finger-move'); fd.style.top = (206 - 10) + 'px'; }, t2 + 450, tok);
+      later(() => { base.src = IMG(32); setPatch(31, [330, 210, 72, 72]); }, t2 + 1350, tok);
+      later(() => { fd.src = FINGER[0]; }, t2 + 1500, tok);
+      later(() => { fd.style.opacity = '0'; }, t2 + 1800, tok);
+      later(() => { fd.remove(); }, t2 + 2200, tok);
+      const t3 = t2 + 2300;
+      pressB(t3, 32, 33);
+      later(() => { btn.textContent = '다음'; btn.classList.remove('p08-hide'); }, t3 + 1300, tok);
+    }
+
     function render(i) {
       const f = FR[i];
       stopFingers();
+      stopAnim();
       drag = null;
       ghost.style.display = 'none';
       modal.classList.add('is-off');
@@ -210,7 +299,7 @@
         ovImg.style.height = H + 'px';
       }
       const s = SAY[f.say];
-      say(s[0], s[1]);
+      say(s[0]);
       btn.classList.toggle('p08-hide', !f.btn);
       btn.textContent = f.btn || '';
       btn.disabled = f.type === 'num';
@@ -221,6 +310,7 @@
       setTimeout(() => {
         if (cur !== i) return;
         showFinger(f);
+        if (f.type === 'anim') runResult();
       }, 60);
     }
 
@@ -229,8 +319,9 @@
       BoxEdit.syncStep(i + 1);
       if (i >= FR.length) {
         stopFingers();
+        stopAnim();
         placeHit('');
-        say('', 'wink_present');
+        say('');
         btn.classList.add('p08-hide');
         modal.classList.remove('is-off');
         return;
@@ -287,7 +378,7 @@
         btn.disabled = false;
       } else if (f.type === 'result') {
         playClick();
-        base.src = IMG(40);
+        base.src = IMG(33);
         stopFingers();
       }
     });
@@ -295,8 +386,7 @@
     btn.addEventListener('click', () => {
       const f = FR[cur];
       if (!f) return;
-      playClick();
-      if (f.type === 'result') go(FR.length);
+      if (f.type === 'result' || f.type === 'anim') go(FR.length);
       else go(cur + 1);
     });
 
