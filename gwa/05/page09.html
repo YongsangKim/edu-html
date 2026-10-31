@@ -3,10 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>퀴즈 풀기</title>
-    <link rel="stylesheet" href="../../css/common.css">
+    <title>설리번 플러스로 체험하는 이미지 인식</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 17~23p. Q1·Q5 2지선다, Q2·Q3 음파 그래프 4개(SVG) 중 고르기, Q4 4지선다. 오답은 문항별 힌트(data-wrong) */
+        .p09-bg{left:730px;top:69px;width:1160px;height:854px}
+        .p09-bg{opacity:0;transition:opacity .5s;pointer-events:none}
+        .p09-bg.is-on{opacity:1}
+        .p09-bg img{object-fit:cover}
+        .p09-clip{position:absolute;left:0;top:0;width:1920px;height:960px;overflow:hidden;pointer-events:none}
+        .p09-phone{left:0;top:0;transform-origin:0 0;pointer-events:auto;touch-action:none}
+        .p09-phone.is-drag{cursor:grab}
+        .p09-phone.is-down{cursor:grabbing}
+        .p10-go.card-btn.is-popup.is-arrow{position:absolute;right:20px;top:46%;min-width:0;width:120px;height:60px;font-size:60px;padding:0;line-height:0.5;z-index:3}
+        .p09-hide{display:none}
+
+        .p09-app{background:#f4f8ff;font-family:'Pretendard';color:#222}
+        .p09-app svg{display:block;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+        .p09-top{position:absolute;left:0;top:44px;width:100%;height:56px;box-sizing:border-box;padding:0 20px;display:flex;align-items:center;justify-content:space-between;color:#333}
+        .p09-top svg{width:30px;height:30px}
+        .p09-cam{position:absolute;left:0;top:100px;width:450px;height:560px;overflow:hidden;background:#444}
+        .p09-lens img{position:absolute;display:block;max-width:none}
+        .p09-grid{position:absolute;inset:0;pointer-events:none;
+          background:linear-gradient(90deg,transparent 33.2%,rgba(255,255,255,.4) 33.3% 33.6%,transparent 33.7% 66.4%,rgba(255,255,255,.4) 66.5% 66.8%,transparent 66.9%),
+                     linear-gradient(180deg,transparent 33.2%,rgba(255,255,255,.4) 33.3% 33.6%,transparent 33.7% 66.4%,rgba(255,255,255,.4) 66.5% 66.8%,transparent 66.9%)}
+        .p09-wall{position:absolute;inset:0;display:none;background:url(img/p09_wall.png) center / cover no-repeat}
+        .p09-cam.is-wall .p09-wall{display:block}
+        .p09-cam.is-wall .p09-lens,.p09-cam.is-wall .p09-grid{display:none}
+        .p09-frame{position:absolute;left:105px;top:160px;width:240px;height:240px;box-sizing:border-box;border:solid 4px #fff;border-radius:16px;box-shadow:0 0 0 9999px rgba(0,0,0,.25);pointer-events:none}
+        .p09-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+        .p09-campt{position:absolute;left:225px;top:280px;width:1px;height:1px}
+        .p09-flash.is-on{animation:p09-flash .5s ease-out}
+        @keyframes p09-flash{0%{opacity:1}100%{opacity:0}}
+        .p09-tabs{position:absolute;left:0;top:660px;width:450px;height:90px;box-sizing:border-box;padding-top:8px;display:flex;justify-content:center;gap:12px}
+        .p09-tab{width:128px;height:76px;border:0;border-radius:14px;background:transparent;font-family:inherit;font-size:19px;color:#333;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+        .p09-tab svg{width:30px;height:30px}
+        .p09-tab.is-on{background:#2b66a8;color:#fff}
+        .p09-tab.is-dim{opacity:.35;pointer-events:none}
+        .p09-ctrl{position:absolute;left:0;top:750px;width:450px;height:94px}
+        .p09-logo{position:absolute;left:48px;top:20px;width:52px;height:52px}
+        .p09-logo svg{width:52px;height:52px;fill:none;stroke:none}
+        .p09-shutter{position:absolute;left:172px;top:8px;width:78px;height:78px;box-sizing:border-box;border:solid 4px #2b66a8;border-radius:50%;background:#2b66a8;box-shadow:inset 0 0 0 4px #fff;display:flex;align-items:center;justify-content:center;color:#fff}
+        .p09-shutter svg{width:38px;height:38px;stroke-width:2.2}
+        .p09-mic{position:absolute;left:290px;top:30px;width:34px;height:34px;color:#2b66a8}
+        .p09-mic svg{width:34px;height:34px}
+        .p09-dots{position:absolute;left:352px;top:44px;display:none;gap:7px}
+        .p09-dots i{display:block;width:9px;height:9px;border-radius:50%;background:#444}
+        .p09-ctrl.is-face .p09-dots{display:flex}
+
+        .p09-guide{position:absolute;left:0;top:44px;width:450px;height:800px;display:none;z-index:6;background:rgba(0,0,0,.4)}
+        .p09-guide.is-on{display:block}
+        .p09-gcard{position:absolute;left:20px;top:110px;width:410px;box-sizing:border-box;padding:84px 28px 30px;border-radius:26px;background:#fff;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+        .p09-gtitle{position:absolute;left:50%;top:20px;transform:translateX(-50%);padding:9px 26px;border-radius:14px;font-size:30px;font-weight:700;color:#2b66a8;white-space:nowrap}
+        .p09-gok{position:absolute;right:16px;top:16px;padding:9px 20px;border:0;border-radius:14px;background:#2b66a8;font-family:inherit;font-size:20px;font-weight:600;color:#fff;cursor:pointer}
+        .p09-gtext p{margin:0 0 14px;font-size:26px;line-height:1.35;color:var(--c-ink);word-break:keep-all}
+        .p09-result{position:absolute;left:0;top:44px;width:450px;height:800px;background:#f4f8ff;display:none;z-index:5}
+        .p09-result.is-on{display:block}
+        .p09-rtop{height:56px;display:flex;align-items:center;gap:20px;padding:0 14px;font-size:27px;color:#222}
+        .p09-back{width:44px;height:44px;padding:0;border:0;background:none;color:#222;cursor:pointer;display:flex;align-items:center;justify-content:center}
+        .p09-back svg{width:30px;height:30px}
+        .p09-shot{position:absolute;left:12px;top:62px;width:426px;height:400px;border-radius:24px;overflow:hidden;background:#222}
+        .p09-shot img{display:block;width:100%;height:100%;object-fit:cover}
+        .p09-card{position:absolute;left:12px;top:472px;width:426px;height:208px;box-sizing:border-box;padding:16px 20px;border-radius:24px;background:#eaf1fb}
+        .p09-card h4{display:flex;align-items:center;gap:10px;margin:0 0 10px;font-size:23px;font-weight:600;color:#2b66a8}
+        .p09-card h4 svg{width:30px;height:30px}
+        .p09-card p{margin:0;padding-right:44px;font-size:20px;line-height:1.35;color:#222;white-space:pre-line;word-break:keep-all}
+        .p09-speak{position:absolute;left:376px;top:622px;width:58px;height:58px;border-radius:50%;background:#2b66a8;color:#f0e32a;display:flex;align-items:center;justify-content:center}
+        .p09-speak svg{width:32px;height:32px;stroke-width:2.2}
+        .p09-acts{position:absolute;left:0;bottom:0;width:100%;height:100px;box-sizing:border-box;padding:0 8px;border-radius:24px 24px 0 0;background:#eef3fb;display:flex;justify-content:space-around;align-items:center}
+        .p09-act{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:17px;color:#333}
+        .p09-act svg{width:30px;height:30px}
     </style>
 </head>
 <body>
@@ -14,102 +79,79 @@
   <div id="viewport" class="viewport">
     <div id="stage-spacer">
       <div id="stage" class="stage">
-        <main class="quiz-stage">
-          <div class="step-flow">
-
-            <div class="step-panel p09-opt2">
-              <div class="quiz-ask-box">
-                <div class="quiz-ask-row">
-                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
-                  <span class="quiz-qnum">Q1.</span>
-                  <p class="quiz-ask">컴퓨터나 AI가 사람의 귀처럼 소리 정보를 입력하는 장치는 무엇일까요?</p>
-                </div>
-              </div>
-              <div class="answer-pick-quiz quiz-opts is-row" data-wrong="카메라는 사람의 눈처럼, 시각 정보를 받아들이는 장치이고, 소리를 들어 수집하는 장치는 마이크예요.">
-                <button class="answer-pick card-btn is-quiz" data-correct="true">마이크</button>
-                <button class="answer-pick card-btn is-quiz" data-correct="false">카메라</button>
-              </div>
-            </div>
-
-            <div class="step-panel">
-              <div class="quiz-ask-box">
-                <div class="quiz-ask-row">
-                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
-                  <span class="quiz-qnum">Q2.</span>
-                  <p class="quiz-ask">4가지의 소리 파도(음파) 중 가장 큰 소리를 나타내는 파도는 무엇일까요?</p>
-                </div>
-              </div>
-              <div class="answer-pick-quiz quiz-graphs is-4" data-wrong="파도의 높이가 위 아래로 높을수록 큰 소리가 나요.">
-                <button class="answer-pick quiz-graph" data-correct="false" data-amp="0.12" data-cycles="4"><span></span></button>
-                <button class="answer-pick quiz-graph" data-correct="false" data-amp="0.5" data-cycles="1.5"><span></span></button>
-                <button class="answer-pick quiz-graph" data-correct="false" data-amp="0.5" data-cycles="4"><span></span></button>
-                <button class="answer-pick quiz-graph" data-correct="true" data-amp="0.95" data-cycles="4"><span></span></button>
-              </div>
-            </div>
-
-            <div class="step-panel">
-              <div class="quiz-ask-box">
-                <div class="quiz-ask-row">
-                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
-                  <span class="quiz-qnum">Q3.</span>
-                  <p class="quiz-ask">4가지의 소리 파도(음파) 중 가장 높은 소리를 나타내는 파도는 무엇일까요?</p>
-                </div>
-              </div>
-              <div class="answer-pick-quiz quiz-graphs is-4" data-wrong="파도의 간격이 촘촘하게 가까울수록 높은 소리가 나요.">
-                <button class="answer-pick quiz-graph" data-correct="false" data-amp="0.6" data-cycles="1.5"><span></span></button>
-                <button class="answer-pick quiz-graph" data-correct="true" data-amp="0.6" data-cycles="9"><span></span></button>
-                <button class="answer-pick quiz-graph" data-correct="false" data-amp="0.2" data-cycles="4"><span></span></button>
-                <button class="answer-pick quiz-graph" data-correct="false" data-amp="0.6" data-cycles="4"><span></span></button>
-              </div>
-            </div>
-
-            <div class="step-panel p09-opt4">
-              <div class="quiz-ask-box">
-                <div class="quiz-ask-row">
-                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
-                  <span class="quiz-qnum">Q4.</span>
-                  <p class="quiz-ask">AI비서를 부를 때 사용하는 말을 뭐라고 할까요?</p>
-                </div>
-              </div>
-              <div class="answer-pick-quiz quiz-opts is-grid" data-wrong="AI 비서에게 명령을 전달하기 전, 마이크를 깨우는 구글 어시스턴트의 정확한 호출어는 ‘오케이 구글’ 이에요.">
-                <button class="answer-pick card-btn" data-correct="false">고등어</button>
-                <button class="answer-pick card-btn" data-correct="false">오징어</button>
-                <button class="answer-pick card-btn" data-correct="true">호출어</button>
-                <button class="answer-pick card-btn" data-correct="false">광어</button>
-              </div>
-            </div>
-
-            <div class="step-panel p09-opt5">
-              <div class="quiz-ask-box">
-                <div class="quiz-ask-row">
-                  <div class="quiz-avatar"><img src="../../img/common/avatar_quiz.png" alt=""></div>
-                  <span class="quiz-qnum">Q5.</span>
-                  <p class="quiz-ask">AI 비서에게 음성 명령을 내릴 때, AI가 내 뜻을 정확하게 이해하도록 하려면 어떻게 해야할까요?</p>
-                </div>
-              </div>
-              <div class="answer-pick-quiz quiz-opts is-list is-left" data-next="page10.html" data-wrong="모호하고 짧게 말하면 AI가 알아듣지 못하거나 다른 동작을 할 수 있어요.">
-                <button class="answer-pick card-btn" data-correct="true">원하고자 하는 명령을 구체적이고 정확하게 말한다.</button>
-                <button class="answer-pick card-btn" data-correct="false">작은 목소리로 최대한 간단하게 말한다.</button>
-              </div>
-            </div>
-
+        <main class="bg-default">
+          <div class="guide-set is-main" id="p09Set">
+            <p class="guide-bubble is-center" id="p09Bubble"></p>
+            <div class="guide-character"><img id="p09Char" src="../img/character/gwa_main.png" alt="메인 캐릭터"></div>
           </div>
 
-          <div class="ox-result-correct is-avatar is-off" data-sound="sound/correct.mp3">
-            <div class="avatar-popup-panel">
-              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct_gwa.png" alt=""></div>
-              <div class="avatar-popup-body">
-                <p class="avatar-popup-text">정답이에요!</p>
+          <div class="gm-frame p09-bg" id="p09Bg"><img id="p09BgImg" src="img/p09_bg_ai.webp" alt=""></div>
+
+          <div class="p09-clip">
+            <div class="phone-frame has-cam p09-phone" id="p09Phone">
+              <div class="phone-screen p09-app">
+                <div class="phone-status is-dark" data-time="1:27"></div>
+                <div class="p09-top"><i data-ic="menu"></i><i data-ic="slvInfo"></i></div>
+                <div class="p09-cam" id="p09Cam">
+                  <div class="p09-lens"><img id="p09LensImg" src="img/p09_bg_ai.webp" alt=""></div>
+                  <div class="p09-grid"></div>
+                  <div class="p09-wall"></div>
+                  <div class="p09-frame p09-hide" id="p09Frame"></div>
+                  <div class="p09-flash" id="p09Flash"></div>
+                  <span class="p09-campt" id="p09CamPt"></span>
+                </div>
+                <div class="p09-tabs" id="p09Tabs">
+                  <button class="p09-tab js-sfx" data-sound="sound/click.mp3" data-m="0"><i data-ic="slvAi"></i>AI 모드</button>
+                  <button class="p09-tab js-sfx" data-sound="sound/click.mp3" data-m="1"><i data-ic="slvTt"></i>문자 인식</button>
+                  <button class="p09-tab js-sfx" data-sound="sound/click.mp3" data-m="2"><i data-ic="slvFace"></i>얼굴 인식</button>
+                </div>
+                <div class="p09-ctrl" id="p09Ctrl">
+                  <span class="p09-logo"><i data-ic="slvLogo"></i></span>
+                  <span class="p09-shutter" id="p09Shutter"></span>
+                  <span class="p09-mic"><i data-ic="mic"></i></span>
+                  <span class="p09-dots"><i></i><i></i><i></i></span>
+                </div>
+                <div class="p09-guide" id="p09Guide">
+                  <div class="p09-gcard">
+                    <span class="p09-gtitle" id="p09GTitle"></span>
+                    <button class="p09-gok js-sfx" id="p09Gok" data-sound="sound/click.mp3">확인</button>
+                    <div class="p09-gtext" id="p09GText"></div>
+                  </div>
+                </div>
+                <div class="p09-result" id="p09Result">
+                  <div class="p09-rtop"><button class="p09-back js-sfx" id="p09Back" data-sound="sound/click.mp3" aria-label="뒤로"><i data-ic="back"></i></button>1/1 페이지</div>
+                  <div class="p09-shot"><img id="p09Shot" src="" alt=""></div>
+                  <div class="p09-card"><h4 id="p09Title"></h4><p id="p09Res"></p></div>
+                  <span class="p09-speak"><i data-ic="mic"></i></span>
+                  <div class="p09-acts" id="p09Acts"></div>
+                </div>
+                <div class="phone-nav"></div>
               </div>
-              <div class="avatar-popup-extra"><img src="../../img/common/icon_correct.png" alt=""></div>
             </div>
           </div>
-          <div class="ox-result-wrong is-avatar is-off" data-sound="sound/incorrect.mp3">
-            <div class="avatar-popup-panel">
-              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
-              <div class="avatar-popup-body">
-                <p class="hint-title">힌트</p>
-                <p class="avatar-popup-text is-small">문장을 다시 한 번 잘 읽어봐요.</p>
+
+          <div class="avatar-modal is-off" id="p09Modal">
+            <div class="avatar-card is-left">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <div class="step-flow">
+                  <div class="step-panel is-title">
+                    <p class="avatar-card-text">카메라로 들어온 이미지를 분석하여<br>주변의 사물을 말로 설명하고,<br>책 속 글자를 읽어 줘요.<br>얼굴의 모습과 표정도 분석하여 알려줘요.</p>
+                    <a href="page10.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                  </div>
+                  <div class="step-panel">
+                    <p class="avatar-card-text">이러한 AI 이미지 인식 기술은<br>시각장애인분들의 편리한 삶을 돕고 있어요.</p>
+                    <a href="page10.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                  </div>
+                  <div class="step-panel">
+                    <p class="avatar-card-text">이런 기능은 시각장애인의 삶 뿐만 아니라<br>우리의 삶을 편리하게 하기도 해요.</p>
+                    <a href="page10.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                  </div>
+                  <div class="step-panel">
+                    <p class="avatar-card-text">이제 퀴즈를 풀며 배운 내용을<br>확인해볼까요?</p>
+                    <a href="page10.html" class="js-nav-effect avatar-card-btn card-btn next-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -119,14 +161,265 @@
   </div>
   <div class="zoom-info" id="zoomInfo"></div>
 
-  <script src="../../js/header.js" data-title="퀴즈 풀기" data-next="page10.html"></script>
-  <script src="../../js/toc-gwa.js"></script>
-  <script src="../../js/common.js"></script>
+  <script src="../../resources/js/header.js" data-title="설리번 플러스로 체험하는 이미지 인식" data-next="page10.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script src="../../resources/js/box-edit.js"></script>
   <script>
-    // 음파 그래프 보기(Q2·Q3): 높이 data-amp, 촘촘함 data-cycles
-    document.querySelectorAll('.quiz-graph').forEach(function (btn) {
-      btn.querySelector('span').innerHTML = waveSvg(Number(btn.dataset.amp), Number(btn.dataset.cycles), { width: 380, height: 300, stroke: 7, axis: true });
+  (function () {
+    const S = 0.85;
+    const Z = 1.6;
+    const CAM_W = 450, CAM_H = 560;
+    const CAM_C = { x: 10 + 225, y: 10 + 100 + 280 };
+    const FR = { l: 730, t: 69, w: 1160, h: 854 };
+    const P = { l: FR.l + 14, t: FR.t + 14, w: FR.w - 28, h: FR.h - 28 };
+    const PICK = { x: 725, y: 25, s: 1 };
+
+    const MODES = [
+      { name: 'AI모드', tab: 'AI 모드', ask: 'AI모드가 무엇인지 알아봐요.',
+        info: 'AI 모드는 카메라로 찍은 사진을 살펴봐요. 사진 속 사물과 글자, 얼굴을 인식하여 음성으로 알려줘요. 이를 통해 주변의 정보를 쉽게 확인할 수 있어요.',
+        cam: '핸드폰을 움직여<br>콜라를 프레임안에 담아보세요.',
+        bg: 'img/p09_bg_ai.webp', shot: 'img/p09_shot_ai.png', t: [0.601, 0.733], start: [0.2, 0.34], R: 55,
+        icon: 'slvAi', ticon: 'slvDescribe', title: '이미지 묘사', acts: 4,
+        res: '책상 위에 놓인 빨간색 코카콜라 캔이 보입니다.' },
+      { name: '문자인식', tab: '문자 인식', ask: '문자인식이 무엇인지 알아봐요.',
+        info: '문자 인식 모드는 카메라에 보이는 글자를 찾아 읽어줘요. 읽고 싶은 글자가 화면에 잘 보이도록 맞춰 주세요. 인식한 글자를 화면과 음성으로 알려줘요.',
+        cam: '핸드폰을 움직여<br>인식할 글자를 프레임안에 담아보세요.',
+        bg: 'img/p09_bg_text.webp', shot: 'img/p09_shot_text.webp', t: [0.56, 0.82], start: [0.2, 0.34], R: 65,
+        icon: 'slvTt', ticon: 'slvTt', title: '문자 인식', acts: 4,
+        res: '오늘의 날씨\n오늘의 날씨는 아주 맑음입니다.\n하늘에는 하얀 구름이 둥둥 떠 있고,\n따뜻한 햇살이 비추고 있어요\n바람은 살랑살랑 불어와서\n친구들과 밖에서 놀기에 아주 좋습니다.' },
+      { name: '얼굴인식', tab: '얼굴 인식', ask: '얼굴인식이 무엇인지 알아봐요.',
+        info: '얼굴 인식 모드는 카메라에 보이는 사람의 얼굴을 인식해요. 얼굴의 나이와 성별, 표정을 음성으로 알려줘요. 등록된 얼굴은 이름도 알려줘요.',
+        cam: '핸드폰을 움직여<br>얼굴카드를 프레임안에 담아보세요.',
+        bg: 'img/p09_bg_face.webp', shot: 'img/p09_shot_face.png', t: [0.472, 0.34], start: [0.78, 0.55], R: 60,
+        icon: 'slvFace', ticon: 'slvFace', title: '얼굴 인식', acts: 3,
+        res: '19살 여자가 행복한 표정을 짓고 있습니다.' }
+    ];
+    const ACTS = [['slvCamera', '추가 촬영'], ['slvSave', '이미지 저장'], ['share', '공유'], ['slvNote', '노트저장']];
+
+    const STAGES = ['pick', 'explain', 'cam', 'result'];
+    const STAGE_NAME = { pick: '모드 선택', explain: '방법 창', cam: '촬영', result: '결과' };
+    const STEPS = [
+      { pose: 'wink_point2' }, { pose: 'smile_present' }, { pose: 'wink_point3' }, { pose: 'wink_present' },
+      { pose: 'wink_point2' }, { pose: 'smile_present' }, { pose: 'wink_point3' }, { pose: 'wink_present' },
+      { pose: 'wink_point2' }, { pose: 'smile_present' }, { pose: 'wink_point3' }, { pose: 'wink_present' },
+      { pose: 'smile_present' }, { pose: 'smile_present' }, { pose: 'smile_present' }, { pose: 'smile_present' }
+    ];
+    const FG = { tab: [-1, -45], cam: [20, 10], ok: [0, 0], back: [20, -10], next: [20, -10] };
+    const HOT = { tab: [0, 0, 0, 0], ok: [0, 0, 0, 0], back: [-2, -2, 4, 4, 5], next: [0, 0, 0, 0] };
+
+    const phone = $('p09Phone'), bubble = $('p09Bubble'), modal = $('p09Modal'), bgFrame = $('p09Bg');
+    const bgImg = $('p09BgImg'), lensImg = $('p09LensImg'), guide = $('p09Guide'), gok = $('p09Gok');
+    const tabs = Array.from(document.querySelectorAll('.p09-tab'));
+    const panels = Array.from(modal.querySelectorAll('.step-panel'));
+    const say = initGuideSay({ bubble: bubble, img: $('p09Char'), set: $('p09Set') });
+    let m = 0, step = 'pick', cur = 0, px = 0, py = 0, scale = 1, captured = false, drag = null, booted = false;
+
+    const shutter = makeSfx('sound/camera.mp3');
+    const show = (el, on) => el.classList.toggle('p09-hide', !on);
+    const speak = (t) => { if (BoxEdit.on) return; try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t.replace(/\n/g, ', ')); u.lang = 'ko-KR'; speechSynthesis.speak(u); } catch (e) {} };
+    const poseOf = (s) => STEPS[m * 4 + STAGES.indexOf(s)].pose;
+
+    function disp() {
+      const iw = bgImg.naturalWidth || 1, ih = bgImg.naturalHeight || 1;
+      const s = Math.max(P.w / iw, P.h / ih);
+      return { w: iw * s, h: ih * s, ox: (P.w - iw * s) / 2, oy: (P.h - ih * s) / 2 };
+    }
+    const camCenter = () => ({ x: px + CAM_C.x * S, y: py + CAM_C.y * S });
+    const target = () => { const d = disp(), t = MODES[m].t; return { x: P.l + d.ox + t[0] * d.w, y: P.t + d.oy + t[1] * d.h }; };
+
+    function render() {
+      const d = disp(), c = camCenter(), k = Z / S;
+      const ptx = c.x - P.l - d.ox, pty = c.y - P.t - d.oy;
+      lensImg.style.width = d.w * k + 'px';
+      lensImg.style.height = d.h * k + 'px';
+      lensImg.style.left = (CAM_W / 2 - ptx * k) + 'px';
+      lensImg.style.top = (CAM_H / 2 - pty * k) + 'px';
+      const t = target();
+      const dist = Math.hypot(c.x - t.x, c.y - t.y);
+      lensImg.style.filter = 'blur(' + Math.min(2.2, Math.max(0, (dist - MODES[m].R * 2) / 180)).toFixed(2) + 'px)';
+      phone.style.transform = 'translate(' + px + 'px,' + py + 'px) scale(' + scale + ')';
+    }
+
+    function setPhone(x, y) {
+      const minX = P.l - CAM_C.x * S, maxX = P.l + P.w - CAM_C.x * S;
+      const minY = P.t - CAM_C.y * S, maxY = P.t + P.h - CAM_C.y * S;
+      px = Math.max(minX, Math.min(maxX, x));
+      py = Math.max(minY, Math.min(maxY, y));
+      render();
+    }
+    function toPick() { scale = PICK.s; px = PICK.x; py = PICK.y; render(); }
+    function toStart() {
+      const d = MODES[m];
+      scale = S;
+      setPhone(P.l + d.start[0] * P.w - CAM_C.x * S, P.t + d.start[1] * P.h - CAM_C.y * S);
+    }
+
+    function loadMode(then) {
+      const d = MODES[m];
+      const go = () => { if (then) then(); };
+      bgImg.onload = go;
+      bgImg.src = d.bg;
+      lensImg.src = d.bg;
+      if (bgImg.complete && bgImg.naturalWidth) go();
+      $('p09Shutter').innerHTML = ic(d.icon);
+      $('p09Ctrl').classList.toggle('is-face', m === 2);
+    }
+
+    function afterMove(fn, moving) {
+      if (BoxEdit.on || !moving) { fn(); return; }
+      let fired = false;
+      const once = () => { if (fired) return; fired = true; phone.removeEventListener('transitionend', onEnd); fn(); };
+      const onEnd = (e) => { if (e.propertyName === 'transform') once(); };
+      phone.addEventListener('transitionend', onEnd);
+      setTimeout(once, 900);
+    }
+    function point(el, key, extra, pad) {
+      if (pad) BoxEdit.padEl(el, pad, HOT);
+      pointFingerAt(el, BoxEdit.fgo(FG, key, extra));
+    }
+
+    function setStep(s) {
+      const prev = step;
+      step = s;
+      const d = MODES[m];
+      clearFingers();
+      bubble.style.paddingRight = '';
+      bubble.style.paddingBottom = '';
+      bubble.style.alignItems = '';
+      phone.classList.toggle('is-drag', s === 'cam');
+      phone.classList.remove('is-down');
+      phone.style.transition = BoxEdit.on || !booted ? '' : 'transform .6s ease';
+      tabs.forEach((b, i) => { b.classList.remove('is-on'); b.classList.toggle('is-dim', i !== m); });
+      show($('p09Frame'), s === 'cam');
+      bgFrame.classList.toggle('is-on', s === 'cam' || s === 'result' || s === 'modal');
+      $('p09Cam').classList.toggle('is-wall', s === 'pick' || s === 'explain');
+      guide.classList.toggle('is-on', s === 'explain');
+      $('p09Result').classList.toggle('is-on', s === 'result');
+      if (s === 'pick' || s === 'explain') {
+        const moving = prev !== 'pick' && prev !== 'explain';
+        toPick();
+        say(d.ask, poseOf(s));
+        if (s === 'pick') {
+          afterMove(() => { if (step === 'pick') point(tabs[m], 'tab', { pulse: true }, 'tab'); }, moving);
+        } else {
+          tabs[m].classList.add('is-on');
+          $('p09GTitle').textContent = d.tab;
+          $('p09GText').innerHTML = d.info.split(/(?<=\.)\s+/).map((t) => '<p>' + t + '</p>').join('');
+          afterMove(() => { const go = () => { if (step === 'explain') point(gok, 'ok', { pulse: true }, 'ok'); }; if (BoxEdit.on) go(); else setTimeout(go, 2000); }, moving);
+        }
+      } else if (s === 'cam') {
+        say(d.cam, poseOf(s));
+        tabs[m].classList.add('is-on');
+        captured = false;
+        const before = px + ',' + py + ',' + scale;
+        toStart();
+        afterMove(() => { if (step === 'cam') point($('p09CamPt'), 'cam', {}); }, before !== px + ',' + py + ',' + scale);
+      } else if (s === 'result') {
+        say('인식되었어요.', poseOf(s));
+        scale = S;
+        const moved = py;
+        py = Math.max(16, Math.min(py, 960 - 910 * S - 16));
+        render();
+        const later = (fn) => { if (BoxEdit.on) fn(); else setTimeout(() => { if (step === 'result') fn(); }, 2000); };
+        if (m === MODES.length - 1) {
+          later(() => {
+            bubble.style.paddingBottom = '80px';
+            bubble.style.alignItems = 'flex-start';
+            bubble.insertAdjacentHTML('beforeend', '<button type="button" class="card-btn is-popup is-arrow p10-go" id="p10Go" data-hit="go">→</button>');
+            point($('p10Go'), 'next', { pulse: true }, 'next');
+          });
+        } else {
+          afterMove(() => later(() => point($('p09Back'), 'back', { pulse: true }, 'back')), py !== moved);
+        }
+        tabs[m].classList.add('is-on');
+        $('p09Shot').src = d.shot;
+        $('p09Title').innerHTML = ic(d.ticon) + d.title;
+        $('p09Res').textContent = d.res;
+        $('p09Acts').innerHTML = ACTS.slice(0, d.acts).map((a) => '<span class="p09-act">' + ic(a[0]) + a[1] + '</span>').join('');
+        speak(d.res);
+      }
+    }
+
+    function openModal(k) {
+      step = 'modal';
+      clearFingers();
+      phone.classList.remove('is-drag', 'is-down');
+      say('', STEPS[12 + (k || 0)].pose);
+      panels.forEach((p, i) => p.classList.toggle('is-hidden', i !== (k || 0)));
+      modal.classList.remove('is-off');
+    }
+
+    function enter(i) {
+      cur = i;
+      modal.classList.add('is-off');
+      m = i >= 12 ? 2 : Math.floor(i / 4);
+      const s = i >= 12 ? 'result' : STAGES[i % 4];
+      loadMode(() => {
+        if (s === 'result') { toStart(); const t = target(); setPhone(t.x - CAM_C.x * S, t.y - CAM_C.y * S); }
+        setStep(s);
+        booted = true;
+        if (i >= 12) openModal(i - 12);
+      });
+    }
+
+    tabs.forEach((b, i) => b.addEventListener('click', () => { if (step === 'pick' && i === m) setStep('explain'); }));
+    gok.addEventListener('click', () => { if (step === 'explain') setStep('cam'); });
+    $('p09Back').addEventListener('click', () => {
+      if (m >= MODES.length - 1) return;
+      try { speechSynthesis.cancel(); } catch (e) {}
+      m += 1;
+      loadMode(() => setStep('pick'));
     });
+    bubble.addEventListener('click', (e) => {
+      if (!e.target.closest('#p10Go') || step !== 'result') return;
+      try { speechSynthesis.cancel(); } catch (err) {}
+      playClick();
+      openModal(0);
+    });
+
+    phone.addEventListener('pointerdown', (e) => {
+      if (step !== 'cam') return;
+      drag = { x: e.clientX, y: e.clientY, px, py };
+      phone.setPointerCapture(e.pointerId);
+      phone.classList.add('is-down');
+      phone.style.transition = '';
+      clearFingers();
+    });
+    phone.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      const s = bgFrame.getBoundingClientRect().width / FR.w;
+      setPhone(drag.px + (e.clientX - drag.x) / s, drag.py + (e.clientY - drag.y) / s);
+      const c = camCenter(), t = target(), R = MODES[m].R;
+      if (!captured && Math.abs(c.x - t.x) < R && Math.abs(c.y - t.y) < R) {
+        captured = true;
+        drag = null;
+        phone.classList.remove('is-down');
+        const f = $('p09Flash');
+        f.classList.remove('is-on'); void f.offsetWidth; f.classList.add('is-on');
+        shutter();
+        setTimeout(() => setStep('result'), 700);
+      }
+    });
+    const end = () => { drag = null; phone.classList.remove('is-down'); };
+    phone.addEventListener('pointerup', end);
+    phone.addEventListener('pointercancel', end);
+
+    BoxEdit.stepEdit({
+      count: STEPS.length + 1,
+      get: () => cur + 1,
+      set: (n) => { cur = Math.max(0, Math.min(n, STEPS.length) - 1); },
+      go: (n) => {
+        if (n < 1) return;
+        BoxEdit.syncStep(n);
+        enter(n - 1);
+      },
+      label: (n) => '단계 ' + n + ' / ' + STEPS.length + ' (' + (n > 12 ? '마무리 모달 ' + (n - 12) : MODES[Math.floor((n - 1) / 4)].name + ' ' + STAGE_NAME[STAGES[(n - 1) % 4]]) + ')',
+      say, bubble, img: $('p09Char')
+    });
+    toPick();
+    enter(cur);
+  })();
   </script>
 </body>
 </html>

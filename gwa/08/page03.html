@@ -3,41 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>차례대로 맞추는 몸속 퍼즐 게임</title>
-    <link rel="stylesheet" href="../../css/common.css">
+    <title>삼촌의 이사를 도와라!</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 4~5p. 퍼즐을 다 맞춘 뒤 소화 과정 시뮬레이션: 음식물이 입→위→장으로 이동하며 기관이 차례로 초록빛,
-           끝나면 안내 문구, 2초 뒤 입→위→장 그림이 차례로 나타남. 5p의 완료·순차 설명은 이 화면 위 모달(스텝 3개)로 넣음.
-           실루엣 img/p02_body.png, 음식물 img/p03_food.png, 아로 얼굴 img/p02_aro_face.png */
-        .p03-gauge{left:62px;top:36px;width:757px;z-index:5}
+        /* 디자인 없음 - 기획서 3~10p. 아래 트레이의 스마트 기기를 집 그림의 알맞은 점선 칸으로 끌어 놓기, 2라운드(거실 6개 → 현관·주방·침실·다용도실 4개).
+           기기를 누르면 말풍선에 기기 설명, 맞으면 기기가 칸에 고정되고 정답 팝업(확인), 틀리면 트레이로 돌아가고 오답 팝업(확인).
+           배경 img/p03_bg_round{1|2}.png(.p03-scene 1460×499에 꽉 채움, 칸 좌표 zone [left, top, width, height]는 이 장면 상자 기준 px — 개발자도구에 보이는 left/top/width/height 값 그대로), 기기 img/p03_dev_{key}.png. 캐릭터는 임시로 sa/06 캐릭터 복사본 */
 
-        .p03-panel{position:absolute;left:90px;top:100px;width:1755px;height:598px;box-sizing:border-box;border:solid 5px var(--c-navy);border-radius:24px;background:#bfe0f7 url('img/p02_bg.png') center / cover no-repeat;overflow:hidden}
-        .p03-body{position:absolute;left:565px;top:22px;width:591px;height:540px}
-        .p03-body:before{content:'';position:absolute;left:0;top:0;width:100%;height:100%;background:url('img/p02_body.png') center / contain no-repeat}
-        .p03-zone{position:absolute;box-sizing:border-box;border:dashed 5px var(--c-purple);border-radius:22px;background:rgba(72,21,156,.12);transition:all .4s;
-          display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:36px;color:rgba(72,21,156,.45)}
-        .p03-zone[data-key="mouth"]{left:269px;top:126px;width:104px;height:60px}
-        .p03-zone[data-key="stomach"]{left:306px;top:298px;width:90px;height:90px}
-        .p03-zone[data-key="intestine"]{left:239px;top:391px;width:164px;height:142px}
-        .p03-zone.is-done{border-color:#2fbf71;border-style:solid;background:rgba(47,191,113,.3);color:#1f9d5a;box-shadow:0 0 30px 8px rgba(47,191,113,.65)}
-        .p03-svg{position:absolute;left:0;top:0;width:591px;height:540px;pointer-events:none}
-        .p03-svg path{fill:none;stroke:#2fbf71;stroke-width:12;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 8px rgba(47,191,113,.9));stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.2s ease}
-        .p03-food{position:absolute;left:276px;top:-10px;width:90px;height:90px;display:flex;align-items:center;justify-content:center;font-size:76px;line-height:1;filter:drop-shadow(0 6px 4px rgba(0,0,0,.25));transition:left 1s ease,top 1.2s ease,opacity .5s;z-index:3}
-        .p03-food img{width:100%;height:100%;object-fit:contain}
+        .p03-step{left:80px;top:20px;transform:none;width:1460px;font-size:56px}
+        .p03-step>i{width:300px}
+        .p03-step>span{justify-content:center;padding:8px 20px 0;white-space:nowrap}
+        .p03-count{position:absolute;margin:0;left:1590px;top:20px;width:250px;height:100px;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;
+          background:var(--c-ink);border-radius:50px;font-family:'Cafe24 Ssurround';font-size:56px;color:var(--c-white)}
 
-        .p03-flow{position:absolute;left:1397px;top:17px;width:330px;height:554px;box-sizing:border-box;border-radius:30px;background:rgba(255,255,255,.55);border:solid 4px rgba(255,255,255,.9)}
-        .p03-chip{position:absolute;left:45px;width:240px;height:110px;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;border:solid 5px var(--c-purple);border-radius:26px;background:var(--c-white);
-          font-family:'Cafe24 Ssurround';font-size:54px;color:var(--c-ink);opacity:0;transform:translateY(20px);transition:opacity .5s,transform .5s}
-        .p03-chip.is-on{opacity:1;transform:none}
-        .p03-arrow{position:absolute;left:145px;width:0;height:0;border-style:solid;border-width:30px 20px 0 20px;border-color:var(--c-purple) transparent transparent transparent;opacity:0;transition:opacity .5s}
-        .p03-arrow.is-on{opacity:1}
+        .p03-scene{position:absolute;left:420px;top:145px;width:1460px;height:499px;background: 0 0 / 100% 100% no-repeat}
+        .p03-scene.is-round1{background-image:url('img/p03_bg_round1.png')}
+        .p03-scene.is-round2{background-image:url('img/p03_bg_round2.png')}
+        .p03-zone{position:absolute;box-sizing:border-box;border:dashed 5px var(--c-purple);border-radius:16px;background:rgba(255,255,255,.35)}
+        .p03-zone[data-filled]{border-color:transparent;background:none}
 
+        .p03-character{left:10px;top:330px;width:400px;height:330px}
+        .p03-bubble{position:absolute;margin:0;left:20px;bottom:650px;width:385px;min-height:200px;box-sizing:border-box;padding:26px 28px;display:flex;align-items:center;justify-content:center;text-align:center;
+          background:var(--c-cream);border:solid 5px var(--c-purple);border-radius:30px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';font-size:36px;line-height:1.3;color:var(--c-purple);letter-spacing:-0.05em;word-break:keep-all}
+        .p03-bubble:before{content:'';position:absolute;left:150px;bottom:-58px;width:100px;height:70px;background:url('../../resources/img/common/p_guide_tail.png') 0 0 / contain no-repeat}
+        .p03-bubble.is-off{display:none}
 
-        /* 아래 줄: 과학 3차시 page09의 말풍선(흰 알약 + 왼쪽에 걸친 원형 아바타) 그대로. 아바타 그림 img/p02_aro_face.png */
-        .p03-icon{position:absolute;left:40px;top:710px;width:236px;height:236px;box-sizing:border-box;border-radius:50%;border:solid 6px var(--c-purple);background:var(--c-purple) url('img/p02_aro_face.png') center bottom / contain no-repeat;box-shadow:0 12px 0 0 rgba(72,21,156,.18);z-index:1}
-        .p03-order{position:absolute;left:175px;top:755px;width:1210px;height:156px;box-sizing:border-box;padding:0 40px 0 120px;display:flex;align-items:center;margin:0;
-          background:var(--c-white);border:solid 6px var(--c-purple);border-radius:78px;box-shadow:0 12px 0 0 rgba(72,21,156,.18);
-          font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.15;color:var(--c-purple);letter-spacing:-0.05em;word-break:keep-all;text-align:left}
+        .p03-tray{position:absolute;left:40px;top:690px;width:1840px;height:240px;box-sizing:border-box;padding:20px;background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:36px;
+          display:flex;gap:24px;justify-content:center;align-items:center}
+        .p03-card{position:relative;width:270px;height:190px;box-sizing:border-box;border:solid 5px var(--c-sky);border-radius:24px;background:var(--c-white);display:flex;flex-direction:column;align-items:center;padding:10px 6px 8px;
+          font-family:'Cafe24 Ssurround';font-size:32px;color:var(--c-indigo);letter-spacing:-0.07em;white-space:nowrap;cursor:grab}
+        .p03-card i{flex:1 1 auto;width:100%;background:center / contain no-repeat;pointer-events:none}
+        .p03-card.is-dragging{cursor:grabbing;z-index:60}
+        .p03-zone .p03-card{position:absolute;left:0;top:0;width:100%;height:100%;padding:0;border:0;background:none;font-size:0;cursor:default}
+        .drop-zone .p03-card i{background-size:contain}
+
+        .p03-clear{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:780px;box-sizing:border-box;padding:50px 40px 60px;display:flex;flex-direction:column;align-items:center;gap:20px;
+          background:var(--c-cream);border:solid 8px var(--c-ink);border-radius:40px;box-shadow:0 14px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';text-align:center;z-index:40}
+        .p03-clear.is-off{display:none}
+        .p03-clear-title{margin:0;font-size:80px;color:#02185c;letter-spacing:-0.05em}
+        .p03-clear-text{margin:0 0 20px;font-size:48px;line-height:1.3;color:var(--c-ink);letter-spacing:-0.05em}
+        .p03-clear .card-btn{height:110px;font-size:52px}
+
     </style>
 </head>
 <body>
@@ -46,46 +53,50 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <div class="gauge p03-gauge"><div class="gauge-fill" style="width:100%"></div></div>
+          <p class="ask-pill has-stage p03-step"><i id="p03Round">1라운드</i><span>스마트 기기를 알맞은 위치로 옮겨 주세요</span></p>
+          <p class="p03-count" id="p03Count">0/6</p>
+          <div class="p03-scene is-round1" id="p03Scene"></div>
 
-          <div class="p03-panel">
-            <div class="p03-body">
-              <div class="p03-zone" data-key="mouth" id="p03Mouth"></div>
-              <div class="p03-zone" data-key="stomach" id="p03Stomach"></div>
-              <div class="p03-zone" data-key="intestine" id="p03Intestine"></div>
-              <svg class="p03-svg" viewBox="0 0 591 540"><path id="p03Path" d="M321 156 L351 342 L322 462" pathLength="1"/></svg>
-              <div class="p03-food" id="p03Food"><img src="img/p03_food.png" alt="" onerror="this.replaceWith(document.createTextNode('🍎'))"></div>
-            </div>
-            <div class="p03-flow">
-              <div class="p03-chip" id="p03C1" style="top:30px">입</div><div class="p03-arrow" id="p03A1" style="top:154px"></div>
-              <div class="p03-chip" id="p03C2" style="top:222px">위</div><div class="p03-arrow" id="p03A2" style="top:346px"></div>
-              <div class="p03-chip" id="p03C3" style="top:414px">장</div>
+          <div class="char-box p03-character"><img src="img/p_character_main.png" alt="삼촌과 로운이"></div>
+          <p class="p03-bubble is-off" id="p03Bubble"></p>
+
+          <div class="p03-tray" id="p03Tray"></div>
+
+          <div class="p03-clear is-off" id="p03Clear">
+            <p class="p03-clear-title" id="p03ClearTitle"></p>
+            <p class="p03-clear-text" id="p03ClearText"></p>
+            <button class="card-btn js-sfx" id="p03ClearBtn" data-sound="sound/click.mp3"></button>
+          </div>
+
+          <div class="avatar-modal is-off" id="p03Right">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_correct_gwa.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">잘했어요!</p>
+                <p class="avatar-popup-sub" id="p03RightText"></p>
+                <button class="p03-ok avatar-popup-next card-btn is-popup js-sfx" data-close="p03Right" data-sound="sound/click.mp3">확인</button>
+              </div>
             </div>
           </div>
 
-          <div class="p03-icon"></div>
-          <p class="p03-order" id="p03Ask">음식물은 입, 위, 장의 정해진 순서에 따라 이동하며 소화되는구나!</p>
-
-          <div class="avatar-modal p03-modal is-off" id="p03Modal">
-            <div class="avatar-card is-left">
-              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
-              <div class="avatar-card-body">
-                <div class="step-flow">
-                  <div class="step-panel is-title">
-                    <p class="avatar-card-title">몸속 퍼즐 완료!</p>
-                    <p class="avatar-card-text">음식이 [입] <span style="font-family:Pretendard">→</span> [위] <span style="font-family:Pretendard">→</span> [장] 으로 이동하는<br>소화과정 퍼즐을 완성했어요.</p>
-                    <a href="page04.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
-                  </div>
-                  <div class="step-panel">
-                    <p class="avatar-card-text">음식이 정해진 순서대로 이동하는 것처럼,<br>컴퓨터도 입력된 명령을 차례차례 실행해.</p>
-                    <a href="page04.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
-                  </div>
-                  <div class="step-panel">
-                    <p class="avatar-card-text">이것을 컴퓨터 용어로 ‘순차’라고 해.<br>컴퓨터는 어떻게 순서대로 일하는지<br>조금 더 자세히 알아보자!</p>
-                    <a href="page04.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
-                  </div>
-                </div>
+          <div class="avatar-modal is-wrong is-off" id="p03Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">다시 한번 해볼까요?</p>
+                <p class="avatar-popup-sub">삼촌의 말을 다시 한번 확인해봐!</p>
+                <button class="p03-ok avatar-popup-next card-btn is-popup js-sfx" data-close="p03Wrong" data-sound="sound/click.mp3">확인</button>
               </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p03Video">
+            <div class="avatar-card is-side">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <p class="avatar-card-text">그런데 스마트 기기는<br>어떻게 주변 상황을 알아차릴까요?<br>센서와 AI 허브의 비밀을<br>영상으로 확인해 봐요!</p>
+              </div>
+              <a href="page04.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
             </div>
           </div>
         </main>
@@ -94,26 +105,157 @@
   </div>
   <div class="zoom-info" id="zoomInfo"></div>
 
-  <script src="../../js/header.js" data-title="차례대로 맞추는 몸속 퍼즐 게임" data-next="page04.html"></script>
-  <script src="../../js/toc-gwa.js"></script>
-  <script src="../../js/common.js"></script>
+  <script src="../../resources/js/header.js" data-title="삼촌의 이사를 도와라!" data-next="page04.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
   <script>
   (function () {
-    const food = $('p03Food');
-    const path = $('p03Path');
-    const at = (ms, fn) => setTimeout(fn, ms);
-    const go = (cx, cy) => { food.style.left = (cx - 45) + 'px'; food.style.top = (cy - 45) + 'px'; };
+    const ROUNDS = [
+      {
+        clearTitle: '1라운드 완료!', clearText: '거실의 스마트 기기를<br>모두 배치했어요.', clearBtn: '다음 라운드',
+        devices: [
+          { key: 'tv', name: '스마트 TV', zone: [252.56, 240, 161, 112],
+            desc: '인터넷으로 연결되어 내가 좋아하는 영상을 추천해 주는 TV',
+            right: '스마트 TV는 평소 내가 즐겨 보던 영상을 분석하여, 내가 좋아할 만한 영상을<br>추천해 줘요.' },
+          { key: 'aircon', name: '스마트 에어컨', zone: [872.67, 111, 245.67, 110],
+            desc: '실내 온도를 감지하여 자동으로 시원한 바람을 보내주는 에어컨',
+            right: '스마트 에어컨은 집 안의 온도를 확인하여, 실내가 더울 때 시원한 바람을 내보내요.' },
+          { key: 'sensor', name: '온습도 센서', zone: [1110, 201, 85, 85],
+            desc: '집 안의 온도와 습도를 실시간으로 측정하여 알려주는 센서',
+            right: '온습도 센서는 집 안의 온도와 습도를 실시간으로 측정하여 AI 허브에 전달해요.' },
+          { key: 'light', name: '스마트 전등', zone: [566.12, 10, 230, 80],
+            desc: '원격으로 켜고 끄거나 밝기와 색상을 바꿀 수 있는 전등',
+            right: '스마트 전등은 원격으로 불을 켜고 끌 수 있으며, 밝기와 색상도 알맞게 조절할 수 있어요.' },
+          { key: 'robot', name: '스마트 로봇청소기', zone: [973, 411, 193, 76],
+            desc: '집안 구조를 스스로 파악하며 돌아다니는 청소기',
+            right: '스마트 로봇청소기는 집 안의 구조와 장애물을 파악하며 스스로 이동해 바닥을 청소해요.' },
+          { key: 'hub', name: 'AI 허브', zone: [560, 358, 160, 66.22],
+            desc: '집 안의 모든 센서 정보를 모아 AI가 상황을 판단하는 중심 두뇌',
+            right: 'AI 허브는 여러 센서가 보낸 정보를 모아 상황을 판단하고, 알맞은 스마트 가전이 작동하도록 해요.' }
+        ]
+      },
+      {
+        clearTitle: '2라운드 완료!', clearText: '스마트 기기를<br>모두 배치했어요.', clearBtn: '다음',
+        devices: [
+          { key: 'cctv', name: 'CCTV 카메라', zone: [95, 111, 126, 85],
+            desc: '집 안팎의 움직임을 실시간으로 감지하고 감시하는 시각 센서',
+            right: 'CCTV 카메라는 현관문 위에 설치해요.<br>집 안팎의 움직임을 감지해요.' },
+          { key: 'fridge', name: '스마트 냉장고', zone: [624, 233, 134, 204],
+            desc: '내부 음식의 유통기한을 확인하고 레시피를 추천하는 냉장고',
+            right: '스마트 냉장고는 주방에 놓아요.<br>음식의 유통기한을 확인하고 요리를<br>추천해 줘요.' },
+          { key: 'purifier', name: '스마트 공기청정기', zone: [1052, 293, 89, 162],
+            desc: '공기 오염도를 감지하여 먼지를 깨끗하게 없애주는 공기청정기',
+            right: '스마트 공기청정기는 침실 구석에 놓아요.<br>공기 오염도를 감지해 먼지를 없애 줘요.' },
+          { key: 'washer', name: '스마트 세탁기', zone: [1272, 285, 120, 166],
+            desc: '빨래 양을 감지해 세제를 자동으로 넣어주는 세탁기',
+            right: '스마트 세탁기는 다용도실에 놓아요.<br>빨래 양을 감지해 세제를 자동으로 넣어 줘요.' }
+        ]
+      }
+    ];
 
-    at(600, () => go(321, 156));
-    at(1700, () => $('p03Mouth').classList.add('is-done'));
-    at(2000, () => { path.style.strokeDashoffset = '0.39'; go(351, 342); });
-    at(3400, () => $('p03Stomach').classList.add('is-done'));
-    at(4400, () => { path.style.strokeDashoffset = '0'; go(322, 462); });
-    at(5800, () => { $('p03Intestine').classList.add('is-done'); food.style.opacity = '0'; });
-    at(8300, () => { $('p03C1').classList.add('is-on'); });
-    at(9100, () => { $('p03A1').classList.add('is-on'); $('p03C2').classList.add('is-on'); });
-    at(9900, () => { $('p03A2').classList.add('is-on'); $('p03C3').classList.add('is-on'); });
-    at(11500, () => { $('p03Modal').classList.remove('is-off'); });
+    const scene = $('p03Scene');
+    const tray = $('p03Tray');
+    const bubble = $('p03Bubble');
+    const count = $('p03Count');
+    const clear = $('p03Clear');
+
+    let round = 0;
+    let placed = 0;
+
+    function open(id) { $(id).classList.remove('is-off'); }
+
+    document.querySelectorAll('.p03-ok').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        $(btn.dataset.close).classList.add('is-off');
+        resetImageSwap(btn);
+        if (btn.dataset.close === 'p03Right' && placed === ROUNDS[round].devices.length) setTimeout(showClear, 3000);
+      });
+    });
+
+    function renderRound() {
+      const r = ROUNDS[round];
+      placed = 0;
+      $('p03Round').textContent = (round + 1) + '라운드';
+      count.textContent = '0/' + r.devices.length;
+      scene.className = 'p03-scene is-round' + (round + 1);
+      scene.innerHTML = '';
+      tray.innerHTML = '';
+      bubble.classList.add('is-off');
+
+      const zones = r.devices.map((d) => {
+        const z = document.createElement('div');
+        z.className = 'p03-zone';
+        z.dataset.key = d.key;
+        const k = 1;
+        z.style.cssText = 'left:' + d.zone[0] * k + 'px;top:' + d.zone[1] * k + 'px;width:' + d.zone[2] * k + 'px;height:' + d.zone[3] * k + 'px';
+        scene.appendChild(z);
+        return z;
+      });
+      const cards = r.devices.map((d) => {
+        const c = document.createElement('div');
+        c.className = 'p03-card';
+        c.dataset.key = d.key;
+        c.innerHTML = '<i style="background-image:url(\'img/p03_dev_' + d.key + '.png\')"></i>' + d.name;
+        c.addEventListener('pointerdown', () => {
+          if (c.dataset.placed) return;
+          bubble.textContent = d.desc;
+          bubble.classList.remove('is-off');
+        });
+        tray.appendChild(c);
+        return c;
+      });
+
+      initMatchDrag({
+        cards: cards,
+        zones: zones,
+        slop: 60,
+        onRight: (card) => {
+          placed += 1;
+          count.textContent = placed + '/' + r.devices.length;
+          playCorrect();
+          $('p03RightText').innerHTML = r.devices.find((d) => d.key === card.dataset.key).right;
+          open('p03Right');
+        },
+        onWrong: (card, zone) => {
+          if (!zone) return;
+          playWrong();
+          open('p03Wrong');
+        }
+      });
+    }
+
+    function showClear() {
+      const r = ROUNDS[round];
+      $('p03ClearTitle').textContent = r.clearTitle;
+      $('p03ClearText').innerHTML = r.clearText;
+      $('p03ClearBtn').textContent = r.clearBtn;
+      clear.classList.remove('is-off');
+    }
+
+    $('p03ClearBtn').addEventListener('click', () => {
+      clear.classList.add('is-off');
+      if (round === ROUNDS.length - 1) {
+        open('p03Video');
+        return;
+      }
+      round += 1;
+      renderRound();
+    });
+
+    // ?step=N 으로 단계별 보기: 1 1라운드 · 2 정답 팝업 · 3 오답 팝업 · 4 1라운드 완료 · 5 2라운드 · 6 2라운드 완료 · 7 영상
+    const wantStep = parseInt(new URLSearchParams(location.search).get('step'), 10);
+    if (wantStep >= 5 && wantStep <= 6) round = 1;
+    renderRound();
+    if (wantStep === 2) {
+      $('p03RightText').innerHTML = ROUNDS[0].devices[0].right;
+      open('p03Right');
+    } else if (wantStep === 3) {
+      open('p03Wrong');
+    } else if (wantStep === 4 || wantStep === 6) {
+      showClear();
+    } else if (wantStep === 7) {
+      open('p03Video');
+    }
   })();
   </script>
 </body>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>소리 파도(음파) 그래프 조작하기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 13~14p. 높이(세로)·간격(가로) 손잡이를 옮기면 음파 그래프(SVG)가 바로 바뀜.
+           두 손잡이가 모두 끝(높게/낮게, 촘촘하게/느슨하게)에 있을 때만 소리 듣기 활성 → 그 조합 음성 재생(재생 중엔 비활성).
+           음성 sound/p07_{high|low}_{dense|loose}.wav. 다음 버튼은 항상 활성 → 마무리 안내 3단계 */
+
+        .p07-guide{position:absolute;left:260px;top:30px;width:1400px;height:96px;margin:0;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;
+          background:var(--c-white);border:solid 5px var(--c-ink);border-radius:48px;box-shadow:0 10px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:50px;color:var(--c-ink);letter-spacing:-0.05em}
+
+        .p07-graph{position:absolute;left:300px;top:160px;width:1320px;height:470px;box-sizing:border-box;border:solid 10px var(--c-ink);border-radius:30px;background:var(--c-white);
+          background-image:linear-gradient(var(--c-pale) 2px,transparent 2px),linear-gradient(90deg,var(--c-pale) 2px,transparent 2px);background-size:60px 60px;overflow:hidden}
+        .p07-graph svg{display:block;width:100%;height:100%}
+
+        /* 높이: 세로 손잡이(그래프 왼쪽), 간격: 가로 손잡이(그래프 아래) */
+        .p07-vbox{position:absolute;left:90px;top:160px;width:170px;height:470px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;font-family:'Cafe24 Ssurround'}
+        .p07-hbox{position:absolute;left:300px;top:660px;width:1320px;display:flex;align-items:center;gap:26px;font-family:'Cafe24 Ssurround'}
+        .p07-label{font-size:34px;color:var(--c-purple);white-space:nowrap}
+        .p07-title{font-size:38px;color:var(--c-ink)}
+        .p07-range{-webkit-appearance:none;appearance:none;background:none;cursor:pointer;margin:0}
+        .p07-range::-webkit-slider-runnable-track{height:22px;border-radius:11px;background:var(--c-sky);border:solid 4px var(--c-ink)}
+        .p07-range::-webkit-slider-thumb{-webkit-appearance:none;width:64px;height:64px;margin-top:-25px;border-radius:50%;background:var(--c-yellow);border:solid 6px var(--c-ink);box-shadow:0 4px 0 rgba(0,0,0,.2)}
+        .p07-range::-moz-range-track{height:22px;border-radius:11px;background:var(--c-sky);border:solid 4px var(--c-ink)}
+        .p07-range::-moz-range-thumb{width:52px;height:52px;border-radius:50%;background:var(--c-yellow);border:solid 6px var(--c-ink)}
+        .p07-v{width:300px;transform:rotate(-90deg)}
+        .p07-vwrap{flex:1 1 auto;display:flex;align-items:center;justify-content:center;width:100%}
+        .p07-h{flex:1 1 auto}
+
+        .p07-play.card-btn{position:absolute;left:310px;top:790px;min-width:0;width:400px;height:110px;padding:8px 10px 0;font-size:50px}
+        .p07-play.card-btn:disabled{opacity:.45;cursor:default}
+        .p07-play.is-playing{color:#d168fb}
+        .p07-hint{position:absolute;left:770px;top:805px;width:410px;margin:0;font-family:'Cafe24 Ssurround';font-size:40px;line-height:1.3;color:var(--c-purple);word-break:keep-all}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="p07-guide">높이와 간격을 조절하고, 소리를 들어보세요.</p>
+
+          <div class="p07-vbox">
+            <span class="p07-title">파도 높이</span>
+            <span class="p07-label">높게</span>
+            <div class="p07-vwrap"><input class="p07-range p07-v" id="p07H" type="range" min="0" max="100" value="50" aria-label="파도 높이"></div>
+            <span class="p07-label">낮게</span>
+          </div>
+          <div class="p07-graph" id="p07Graph"></div>
+          <div class="p07-hbox">
+            <span class="p07-title">파도 간격</span>
+            <span class="p07-label">느슨하게</span>
+            <input class="p07-range p07-h" id="p07D" type="range" min="0" max="100" value="50" aria-label="파도 간격">
+            <span class="p07-label">촘촘하게</span>
+          </div>
+
+          <button class="card-btn p07-play" id="p07Play" disabled>🔊 소리 들어보기</button>
+          <p class="p07-hint" id="p07Hint">손잡이를 끝까지 옮기면<br>소리를 들을 수 있어요.</p>
+          <button class="card-btn js-sfx next-btn" id="p07Next" data-sound="sound/click.mp3">다음</button>
+
+          <div class="avatar-modal is-off" id="p07Done">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">음파의 높이와 간격에 따라<br>소리가 어떻게 달라졌는지 알아봤어요.</p>
+                  </div>
+                  <a href="page08.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">컴퓨터는 소리의 크기와 높낮이를 살펴보고,<br>입력된 소리가 어떤 소리인지 확인해요.</p>
+                  </div>
+                  <a href="page08.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">이제 소리로 소통하는<br>AI를 직접 사용해볼까요?</p>
+                  </div>
+                  <a href="page08.html" class="js-nav-effect avatar-card-btn card-btn is-popup next-btn js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="소리 파도(음파) 그래프 조작하기" data-next="page08.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const h = $('p07H');
+    const d = $('p07D');
+    const play = $('p07Play');
+    let playing = false;
+
+    const atEnd = (el) => el.value === '0' || el.value === '100';
+
+    function draw() {
+      const amp = 0.12 + 0.8 * (h.value / 100);
+      const cycles = 2 + 10 * (d.value / 100);
+      $('p07Graph').innerHTML = waveSvg(amp, cycles, { width: 1300, height: 450, color: '#2f6fed', stroke: 8, axis: true });
+      const ready = atEnd(h) && atEnd(d);
+      if (!playing) play.disabled = !ready;
+      $('p07Hint').style.visibility = ready ? 'hidden' : 'visible';
+    }
+    h.addEventListener('input', draw);
+    d.addEventListener('input', draw);
+
+    play.addEventListener('click', () => {
+      const file = 'sound/p07_' + (h.value === '100' ? 'high' : 'low') + '_' + (d.value === '100' ? 'dense' : 'loose') + '.wav';
+      const audio = new Audio(file);
+      const stop = () => {
+        playing = false;
+        play.classList.remove('is-playing');
+        play.textContent = '🔊 소리 들어보기';
+        draw();
+      };
+      playing = true;
+      play.disabled = true;
+      play.classList.add('is-playing');
+      play.textContent = '🔊 재생 중…';
+      audio.addEventListener('ended', stop);
+      audio.addEventListener('error', stop);
+      audio.play().catch(stop);
+    });
+
+    $('p07Next').addEventListener('click', () => $('p07Done').classList.remove('is-off'));
+
+    draw();
+  })();
+  </script>
+</body>
+</html>
