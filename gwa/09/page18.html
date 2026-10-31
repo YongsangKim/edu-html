@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>블록 코딩 순서대로 캐릭터 움직이기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 39p. 왼쪽 명령 블록(★이 지금 실행할 블록)을 보고 화살표 버튼(또는 키보드 방향키)으로 아로를 한 칸씩 이동: 오른쪽 → 위 → 오른쪽.
+           맞으면 걷는 소리와 함께 한 칸 이동하고 별이 다음 블록으로, 틀리면 아로가 고개를 젓듯 흔들리고 현재 블록이 반짝임(문구 변경).
+           도착하면 만세와 컨페티, 문구 두 번 바뀐 뒤 page19로. 이미지 아로 img/p_character_main.png(전신), 선물상자 img/p17_gift.svg(page17과 같음) */
+        .gm-msg{min-width:1124px;padding:12px 60px 6px}
+        .gm-msg.is-hint{color:#d6336c}
+
+        .gm-blocks{position:absolute;left:90px;top:350px;width:640px;--blk-hole:#cddcea}
+        .gm-block{height:130px;display:flex;align-items:center;padding:8px 24px 0 170px;font-size:50px;line-height:1.1;letter-spacing:-0.05em}
+        .gm-block .gm-no{position:absolute;left:44px;top:50%;transform:translateY(-46%);font-size:52px;color:var(--c-violet)}
+        .gm-star{position:absolute;left:182px;top:415px;z-index:20;pointer-events:none;width:56px;height:56px;margin-top:-28px;background:url('../../resources/img/common/icon_star_on.png') center / contain no-repeat;transition:top .5s ease-in-out,opacity .3s}
+        .gm-block.is-now{animation:blk-glow 1s ease-in-out infinite}
+        .gm-block.is-blink{animation:blk-glow .35s ease-in-out 3}
+
+        .gm-floor{position:absolute;left:810px;top:250px;width:600px;height:600px;box-sizing:border-box;padding:16px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:16px;
+          background:#9eadc7;border-radius:28px;box-shadow:0 14px 0 0 #7d8dad}
+        .gm-cell{border-radius:22px;background:#f4f0e4;box-shadow:inset 0 -6px 0 0 #e3dccb}
+        .gm-cell.is-gift{background:#fde8a0;box-shadow:inset 0 -6px 0 0 #f2cf66,0 0 0 6px rgba(255,214,90,.55)}
+        .gm-item{position:absolute;width:164px;height:164px;background:center / contain no-repeat;display:flex;align-items:flex-end;justify-content:center;font-family:'Cafe24 Ssurround';font-size:34px;color:var(--c-ink);transition:left .6s ease,top .6s ease}
+        .gm-aro{background-image:url('img/p_character_main.png');z-index:3}
+        .gm-aro.is-no{animation:fix-word-shake .35s ease}
+        .gm-aro.is-cheer{animation:gm-cheer .5s ease-in-out 4}
+        @keyframes gm-cheer{0%,100%{transform:translateY(0)}50%{transform:translateY(-30px)}}
+        .gm-gift{background-image:url('img/p17_gift.svg');z-index:2;transition:opacity .4s}
+        .gm-gift.is-held{opacity:0}
+
+        .gm-pad{position:absolute;left:1426px;top:350px;width:404px;height:399px}
+        .gm-key{position:absolute;width:124px;height:119px;padding:0;border:0;background:none;cursor:pointer}
+        .gm-key img{display:block;width:100%;height:100%}
+        .gm-key[data-dir="up"]{left:140px;top:0}
+        .gm-key[data-dir="left"]{left:0;top:140px}
+        .gm-key[data-dir="right"]{left:280px;top:140px}
+        .gm-key[data-dir="down"]{left:140px;top:280px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default" id="gmMain">
+          <p class="ask-pill is-fit is-medium gm-msg" id="gmMsg"></p>
+
+          <i class="gm-star" id="gmStar"></i>
+          <div class="gm-blocks blk-col" id="gmBlocks">
+            <div class="gm-block blk" data-dir="right"><span class="gm-no">1</span>오른쪽으로 1칸 가기</div>
+            <div class="gm-block blk" data-dir="up"><span class="gm-no">2</span>위로 1칸 가기</div>
+            <div class="gm-block blk" data-dir="right"><span class="gm-no">3</span>오른쪽으로 1칸 가기</div>
+          </div>
+
+          <div class="gm-floor">
+            <div class="gm-cell"></div><div class="gm-cell"></div><div class="gm-cell"></div>
+            <div class="gm-cell"></div><div class="gm-cell"></div><div class="gm-cell is-gift"></div>
+            <div class="gm-cell"></div><div class="gm-cell"></div><div class="gm-cell"></div>
+          </div>
+          <div class="gm-item gm-gift" id="gmGift"></div>
+          <div class="gm-item gm-aro" id="gmAro"></div>
+
+          <div class="gm-pad" id="gmPad">
+            <button class="gm-key" data-dir="up" aria-label="위"><img class="js-img-swap" src="../../resources/img/common/btn_arrow_up.png" data-src-alt="../../resources/img/common/btn_arrow_up_on.png" data-src-over="../../resources/img/common/btn_arrow_up_over.png" data-swap-reset="200" alt=""></button>
+            <button class="gm-key" data-dir="left" aria-label="왼쪽"><img class="js-img-swap" src="../../resources/img/common/btn_arrow_left.png" data-src-alt="../../resources/img/common/btn_arrow_left_on.png" data-src-over="../../resources/img/common/btn_arrow_left_over.png" data-swap-reset="200" alt=""></button>
+            <button class="gm-key" data-dir="right" aria-label="오른쪽"><img class="js-img-swap" src="../../resources/img/common/btn_arrow_right.png" data-src-alt="../../resources/img/common/btn_arrow_right_on.png" data-src-over="../../resources/img/common/btn_arrow_right_over.png" data-swap-reset="200" alt=""></button>
+            <button class="gm-key" data-dir="down" aria-label="아래"><img class="js-img-swap" src="../../resources/img/common/btn_arrow_down.png" data-src-alt="../../resources/img/common/btn_arrow_down_on.png" data-src-over="../../resources/img/common/btn_arrow_down_over.png" data-swap-reset="200" alt=""></button>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="블록 코딩 순서대로 캐릭터 움직이기" data-next="page19.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const GRID_LEFT = 810 + 16;
+    const GRID_TOP = 250 + 16;
+    const CELL_W = (600 - 32 - 32) / 3;
+    const ITEM = 164;
+    const CELL = CELL_W + 16;
+    const cellPos = (c, r) => [GRID_LEFT + c * CELL + (CELL_W - ITEM) / 2, GRID_TOP + r * CELL + (CELL_W - ITEM) / 2];
+    const DIR = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
+    const aro = $('gmAro');
+    const gift = $('gmGift');
+    const blocks = Array.from(document.querySelectorAll('#gmBlocks .gm-block'));
+    let pos = [0, 2];
+    let step = 0;
+    let busy = false;
+
+    const place = (el, c, r) => { const p = cellPos(c, r); el.style.left = p[0] + 'px'; el.style.top = p[1] + 'px'; };
+    place(aro, 0, 2);
+    place(gift, 2, 1);
+    const msg = (t, hint) => { $('gmMsg').innerHTML = t; $('gmMsg').classList.toggle('is-hint', !!hint); };
+    const star = $('gmStar');
+    const mark = () => {
+      blocks.forEach((b, i) => b.classList.toggle('is-now', i === step));
+      const cur = blocks[step];
+      star.style.opacity = cur ? 1 : 0;
+      if (cur) star.style.top = ($('gmBlocks').offsetTop + cur.offsetTop + cur.offsetHeight / 2) + 'px';
+    };
+    mark();
+    msg('왼쪽에 있는 블록이 아로가 따라야 할 알고리즘이에요.<br>노란 별(★)이 붙은 블록부터 하나씩 차례대로 따라가봐요.');
+
+    function press(dir) {
+      if (busy || step >= blocks.length) return;
+      if (dir !== blocks[step].dataset.dir) {
+        playWrong();
+        aro.classList.remove('is-no'); void aro.offsetWidth; aro.classList.add('is-no');
+        blocks[step].classList.remove('is-blink'); void blocks[step].offsetWidth; blocks[step].classList.add('is-blink');
+        msg('우리는 블록에 적힌 순서대로 가야 해요!<br>별이 있는 블록이 가리키는 방향으로 가 볼까요?', true);
+        return;
+      }
+      playDrag();
+      pos = [pos[0] + DIR[dir][0], pos[1] + DIR[dir][1]];
+      place(aro, pos[0], pos[1]);
+      blocks[step].classList.remove('is-now', 'is-blink');
+      blocks[step].classList.add('is-done');
+      step += 1;
+      if (step < blocks.length) {
+        mark();
+        msg('잘했어요! 노란 별(★)이 붙은 블록부터<br>하나씩 차례대로 따라가봐요.');
+        return;
+      }
+      busy = true;
+      setTimeout(arrive, 700);
+    }
+
+    function arrive() {
+      gift.classList.add('is-held');
+      aro.classList.add('is-cheer');
+      playCorrect();
+      const fx = document.createElement('img');
+      fx.className = 'particle-effect';
+      fx.src = '../../resources/img/common/img_particle01.png';
+      fx.dataset.frame1 = '../../resources/img/common/img_particle01.png';
+      fx.dataset.frame2 = '../../resources/img/common/img_particle02.png';
+      fx.dataset.interval = '200';
+      fx.dataset.duration = '2500';
+      fx.alt = '';
+      $('gmMain').appendChild(fx);
+      initParticleEffect();
+      msg('도착완료! 블록이 정해진 순서대로 움직였더니 잘 도착했어요.');
+      setTimeout(() => msg('이렇게 명령을 위에서 아래로 차례대로 실행하는 것을<br>‘순차’라고 해요.'), 3000);
+      setTimeout(() => navigateTo('page19.html'), 7000);
+    }
+
+    document.querySelectorAll('.gm-key').forEach((k) => k.addEventListener('click', () => press(k.dataset.dir)));
+    document.addEventListener('keydown', (e) => {
+      const m = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' }[e.key];
+      if (m) {
+        e.preventDefault();
+        const im = document.querySelector('.gm-key[data-dir="' + m + '"] img');
+        im.src = im.dataset.srcAlt;
+        setTimeout(() => { im.src = im.dataset.originalSrc; }, 200);
+        press(m);
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

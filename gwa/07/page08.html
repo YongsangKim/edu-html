@@ -3,33 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 허브의 생각상자! 조건문 코딩하기</title>
-    <link rel="stylesheet" href="../../css/common.css">
+    <title>온도 센서로 에어컨 알리미 만들기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 20~27p. 캐릭터 말풍선(요구사항)을 보고 조건문 빈칸에 알맞은 카드를 골라 넣기, 5라운드(5라운드는 빈칸 2개 심화).
-           맞으면 빈칸이 채워지고 정답 그림 팝업(img/p08_illust_r{1~5}.png), 틀리면 흔들림 + 오답 팝업 2초. 끝나면 완료 안내 2단계. 캐릭터는 임시로 sa/06 캐릭터 복사본 */
+        /* 디자인 없음 - 기획서 14~36p. 실제 MakeCode 캡처(img/p_mc_NN.png, 위·아래 잘라냄, 왼쪽 시뮬레이터 색은 하늘색으로 통일)를 단계마다 한 장씩 깔고
+           눌러야 할 곳(클릭 영역)만 얹음. 그 밖의 영역은 무반응. 블록 끌기는 캡처에서 오려 낸 블록 그림이 마우스를 따라감 */
+        .mc{position:absolute;left:252px;top:18px;width:1523px;height:752px;transform:scale(.93);transform-origin:0 0;background:#fff;box-shadow:0 0 0 4px #fff,0 8px 24px rgba(40,50,120,.25);user-select:none;-webkit-user-select:none;touch-action:none}
+        .mc>img{position:absolute;left:0;top:0;width:1523px;height:752px;pointer-events:none}
+        .mc-over{opacity:0}
+        .mc-ov{position:absolute;overflow:hidden;pointer-events:none}
+        .mc-ov img{position:absolute;max-width:none}
+        .mc-hit{position:absolute;display:block;padding:0;border:0;background:transparent;cursor:pointer;touch-action:none;z-index:5}
+        .p08-talk{position:absolute;left:40px;top:692px;width:1345px;height:236px}
+        .p08-talk-bar{position:absolute;left:135px;top:52px;width:1210px;height:150px;box-sizing:border-box;padding:0 40px 0 130px;display:flex;align-items:center;
+          background:var(--c-white);border:solid 6px var(--c-purple);border-radius:75px;box-shadow:0 12px 0 0 rgba(72,21,156,.18)}
+        .p08-talk-bar p{margin:0;font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.15;color:var(--c-purple);letter-spacing:-0.05em;word-break:keep-all}
+        .p08-talk-avatar{position:absolute;left:0;top:0;width:236px;height:236px;border-radius:50%;overflow:hidden;background:var(--c-purple);box-shadow:0 12px 0 0 rgba(72,21,156,.18);border:solid 6px var(--c-purple);box-sizing:border-box;z-index:1}
+        .p08-talk-avatar img{position:absolute;left:50%;top:-6px;width:330px;max-width:none;transform:translateX(-50%)}
+        .p08-next.card-btn.is-start{position:absolute;left:1440px;top:736px;min-width:0;width:420px}
+        .p08-hide{display:none!important}
+        .p08-next:disabled{opacity:.4;pointer-events:none}
+        .mc-ghost{position:absolute;display:none;pointer-events:none;z-index:9;background-repeat:no-repeat;filter:drop-shadow(0 6px 8px rgba(0,0,0,.35))}
 
-        .p08-bubble{position:absolute;margin:0;left:75px;bottom:587px;width:500px;min-height:200px;box-sizing:border-box;padding:30px;display:flex;align-items:center;justify-content:center;text-align:center;
-          background:var(--c-cream);border:solid 5px var(--c-purple);border-radius:30px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
-          font-family:'Cafe24 Ssurround';font-size:40px;line-height:1.3;color:var(--c-purple);letter-spacing:-0.05em;word-break:keep-all;z-index:2}
-        .p08-bubble:before{content:'';position:absolute;left:200px;bottom:-58px;width:100px;height:70px;background:url('../../img/common/p_guide_tail.png') 0 0 / contain no-repeat}
-        .p08-character{left:50px;top:390px;width:480px;height:570px}
+.mc-finger-drag{
+  position:absolute;
+  width:70px;
+  z-index:999;
+  pointer-events:none;
+}
 
-        .p08-sentence{position:absolute;left:630px;top:200px;width:1160px;height:200px;box-sizing:border-box;padding:20px 40px;display:flex;flex-wrap:wrap;align-items:center;align-content:center;justify-content:center;gap:12px 8px;
-          background:var(--c-navy);border-radius:10px;box-shadow:0 14px 0 0 #bbc1e7;font-family:'Cafe24 Ssurround';font-size:48px;line-height:1.3;color:var(--c-white);letter-spacing:-0.05em;word-break:keep-all}
-        .p08-blank{display:inline-flex;align-items:center;justify-content:center;min-width:300px;height:86px;padding:4px 24px 0;box-sizing:border-box;border:dashed 5px var(--c-violet);border-radius:20px;background:transparent;color:#d168fb}
-        .p08-blank.is-filled{border:solid 5px #ffb800;background:#fff3c9;color:var(--c-ink);animation:p08-pop .4s ease}
-        @keyframes p08-pop{0%{transform:scale(.9)}60%{transform:scale(1.06)}100%{transform:scale(1)}}
-
-        .p08-options{position:absolute;left:560px;top:470px;width:1300px;display:flex;flex-direction:column;align-items:center;gap:44px}
-        .p08-options.is-grid{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:40px 40px}
-        .p08-opt.card-btn{width:1100px;height:110px;font-size:48px;line-height:1.1;padding:10px 20px 4px}
-        .p08-options.is-grid .p08-opt.card-btn{width:620px;font-size:45px}
-        .p08-opt.is-wrong{animation:fix-word-shake .3s ease}
-        .p08-opt.is-used{color:#d168fb;box-shadow:0 4px 0 0 #a9a2ff,0 3px 0 10px #035fd3;transform:translateY(10px);pointer-events:none}
-        .p08-options.is-locked{pointer-events:none}
-        .photo-card.is-contain{padding-top:20px}
-        .photo-card.is-contain .photo-card-text{font-size:46px}
+.mc-finger-move{
+  transition:
+    left 0.8s ease-out,
+    top 0.8s ease-out,
+    opacity .4s ease-out;
+}
 
     </style>
 </head>
@@ -39,46 +47,29 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <p class="ask-pill is-fit"><span>알맞은 ~이 ~한다 카드를 빈칸에 연결해 보세요.</span></p>
-          <p class="p08-bubble" id="p08Bubble"></p>
-          <div class="char-box p08-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
-          <div class="p08-sentence" id="p08Sentence"></div>
-          <div class="p08-options" id="p08Options"></div>
+          <div class="p08-talk">
+            <div class="p08-talk-avatar"><img id="p08Char" src="../img/character/gwa_main.png" alt="메인 캐릭터"></div>
+            <div class="p08-talk-bar"><p id="p08Bubble"></p></div>
+          </div>
+          <button type="button" class="card-btn is-start js-sfx p08-next p08-hide" id="p08Btn" data-sound="sound/click.mp3">다음</button>
 
-          <div class="ox-result-wrong is-avatar is-off" id="p08Wrong">
-            <div class="avatar-popup-panel">
-              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
-              <div class="avatar-popup-body">
-                <p class="avatar-popup-text">다시 한번 해볼까요?</p>
-              </div>
-            </div>
+          <div class="mc" id="mc">
+            <img id="mcBase" alt="">
+            <img id="mcOver" class="mc-over" alt="">
+            <div class="mc-ov" id="mcOv"><img id="mcOvImg" alt=""></div>
+            <div class="mc-ghost" id="mcGhost"></div>
+            <button type="button" class="mc-hit" id="mcHit" data-hit=""></button>
           </div>
 
-          <div class="photo-modal is-off" id="p08Right">
-            <div class="photo-card is-contain">
-              <img class="photo-card-img" id="p08RightImg" alt="">
-              <p class="photo-card-title">정답!</p>
-              <p class="photo-card-text" id="p08RightText"></p>
-            </div>
-            <button id="p08RightNext" class="card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</button>
-          </div>
-
-          <div class="avatar-modal is-off" id="p08Done">
-            <div class="avatar-card">
-              <img class="avatar-card-avatar" src="../../img/common/avatar_finish.png" alt="">
-              <div class="step-flow">
-                <div class="step-panel">
-                  <div class="avatar-card-body">
-                    <p class="avatar-card-title">조건문 코딩을 모두 완료했어!</p>
-                    <p class="avatar-card-text">이렇게 센서가 알려주는 [~가 ~하면] 조건에 맞춰, 우리가 [~를 한다]라는 규칙을 AI 허브에 코딩해 두면 AI 허브는 실시간으로 분석받고 판단해!</p>
+          <div class="avatar-modal is-off" id="p08Modal">
+            <div class="avatar-card is-left">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <div class="step-flow">
+                  <div class="step-panel is-title">
+                    <p class="avatar-card-text">센서 데이터와 조건문을 연결해,<br>온도 변화에 따른 LED 알림을 만들었어요!<br>이제 퀴즈를 풀며 배운 내용을<br>확인해볼까요?</p>
+                    <a href="page09.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
                   </div>
-                  <a href="page09.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
-                </div>
-                <div class="step-panel">
-                  <div class="avatar-card-body is-side">
-                    <p class="avatar-card-text">이제 사물인터넷(IOT)의 작동 원리를 완벽하게 익혔으니, 스마트홈 앱을 사용하여 코딩을 직접 해보도록 할까?</p>
-                  </div>
-                  <a href="page09.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
                 </div>
               </div>
             </div>
@@ -89,129 +80,296 @@
   </div>
   <div class="zoom-info" id="zoomInfo"></div>
 
-  <script src="../../js/header.js" data-title="AI 허브의 생각상자! 조건문 코딩하기" data-next="page09.html"></script>
-  <script src="../../js/toc-gwa.js"></script>
-  <script src="../../js/common.js"></script>
+  <script src="../../resources/js/header.js" data-title="온도 센서로 에어컨 알리미 만들기" data-next="page09.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script src="../../resources/js/box-edit.js"></script>
   <script>
   (function () {
-    // parts: 문자열은 그대로, 숫자는 빈칸 번호. options의 slot이 그 빈칸의 정답
-    const ROUNDS = [
-      { ask: '“온도가 30도가 넘으면 에어컨이 자동으로 켜지게 하고 싶어.”',
-        parts: ['온도 센서가 30도 이상을 감지하면,', 0],
-        options: [
-          { text: '스마트 TV가 추천 영상을 틀어준다.' },
-          { text: '스마트 에어컨이 자동으로 켜진다.', slot: 0 },
-          { text: '제습기가 자동으로 켜진다.' }
-        ],
-        right: '온도가 30도 이상으로 올라가면 스마트 에어컨이 자동으로 켜져요.' },
-      { ask: '“음식 냄새가 나면 공기청정기가 강력 모드로 작동하게 하고 싶어.”',
-        parts: ['공기질 측정기가 냄새를 감지하면,', 0],
-        options: [
-          { text: '스마트 에어컨이 자동으로 켜진다.' },
-          { text: '스마트 공기청정기가 강력모드로 작동한다.', slot: 0 },
-          { text: '제습기가 자동으로 켜진다.' }
-        ],
-        right: '음식 냄새가 감지되면 공기청정기가 강력 모드로 작동해요.' },
-      { ask: '“현관에 사람이 들어오면, 현관조명이 켜지게 하고 싶어.”',
-        parts: [0, '에 사람이 인식되면, 현관조명을 켠다.'],
-        options: [
-          { text: '스마트 에어컨이 자동으로 켜진다.' },
-          { text: '스마트 공기청정기가 강력모드로 작동한다.' },
-          { text: '현관에 있는 동작인식 센서', slot: 0 }
-        ],
-        right: '현관 센서에 사람이 감지되면 현관 조명이 자동으로 켜져요.' },
-      { ask: '“습도가 60%이상이 되면, 제습기가 자동으로 켜지면 좋겠어.”',
-        parts: [0, ', 제습기가 자동으로 켜진다.'],
-        options: [
-          { text: '습도 센서가 60%를 느끼면', slot: 0 },
-          { text: '스마트 공기청정기가 강력모드로 작동한다.' },
-          { text: '현관에 있는 동작인식 센서에' }
-        ],
-        right: '습도가 60% 이상으로 올라가면 제습기가 자동으로 켜져요.' },
-      { ask: '“태양이 떠오르면, 커튼이 열리면 좋겠어.”',
-        parts: [0, ',', 1],
-        grid: true,
-        options: [
-          { text: '음식 냄새가 나면' },
-          { text: '에어컨이 강력모드로 작동한다.' },
-          { text: '빛센서에 빛이 인식되면', slot: 0 },
-          { text: '스마트 블라인드가 열린다.', slot: 1 },
-          { text: '동작인식 센서에 움직임이 감지되면' },
-          { text: '경보기가 울린다.' }
-        ],
-        right: '아침 햇빛이 감지되면 스마트 블라인드가 자동으로 열려요.' }
+    const W = 1523, H = 752, DROP_X = 870;
+    const IMG = (n) => 'img/p_mc_' + String(n).padStart(2, '0') + '.png';
+    const R = {
+      catBasic: [432, 105, 200, 40], catInput: [432, 145, 200, 40], catLogic: [432, 345, 200, 40],
+      blkA: [645, 123, 157, 96], blkNum: [645, 123, 129, 53], blkTemp: [645, 678, 94, 38],
+      blkIf: [645, 285, 162, 168], blkCmp: [646, 570, 164, 38], blkLed: [645, 181, 167, 212],
+      ddB: [1123, 199, 96, 26], cmpArrow: [1322, 167, 42, 30], geOpt: [1294, 352, 98, 26],
+      numSlot: [1371, 166, 36, 30], btnA: [36, 218, 46, 46], btnB: [342, 218, 46, 46]
+    };
+    const FLY = [632, 64, 232, 688];
+    const FG = { 
+      catInput: [0, -10], catBasic: [0, -10], catLogic: [20, 10], blkA: [20, 10], blkNum: [20, 10], blkTemp: [20, 10], blkIf: [20, 10], blkCmp: [20, 10], blkLed: [20, 10], ddB: [20, 10], cmpArrow: [20, 10], geOpt: [20, 10], numSlot: [20, 10], btnA: [20, 10], btnB: [20, 10], btn: [20, 10] 
+    };
+    // 드래그 손가락의 시작 오프셋과 이동 거리(delta)를 관리하는 객체
+    const FD = {
+      blkA:   { sx: 0, sy: 0, mx: 200, my: 0 },
+      blkNum: { sx: 0, sy: 0, mx: 200, my: 0 },
+      blkTemp:{ sx: 0, sy: 0, mx: 300, my: -510 },
+      blkIf:  { sx: 0, sy: 0, mx: 180, my: 20 },
+      blkCmp: { sx: 0, sy: 0, mx: 180, my: 20 },
+      blkLed: { sx: 0, sy: 0, mx: 180, my: 20 },
+      blkA2:  { sx: 0, sy: 0, mx: 400, my: 0 },
+      blkTemp2:{ sx: 0, sy: 0, mx: 180, my: 20 },
+      blkLed2:{ sx: 0, sy: 0, mx: 180, my: 20 }
+    };
+
+    const SAY = {
+      intro1: ['MakeCode의 [입력] 블록으로 버튼을 누를 때마다 온도를 확인하고,', 'smile_present'],
+      intro2: ['[논리] 블록의 조건문을 사용해서 온도가 26도 이상일 때, 표정이 변하게 만들어 볼까요?', 'wink_present'],
+      inA: ['‘입력’에서 ‘A 버튼 누를 때’ 블록을 클릭해 판으로 드래그 하세요.', 'wink_point2'],
+      basic: ['‘기본’에서 ‘숫자 출력’ 블록을 클릭해 판으로 드래그 하세요.', 'wink_point3'],
+      temp: ['‘입력’에서 ‘온도’ 블록을 클릭해 판으로 드래그 하세요.', 'wink_point2'],
+      btn: ['‘입력’에서 ‘A 버튼 누를 때’ 블록을 클릭해 판으로 드래그 하세요.', 'wink_point3'],
+      toB: ['버튼을 B로 변경하세요.', 'wink_point2'],
+      logic: ['‘논리’에서 ‘만약 참 이라면, 아니면’ 블록을 선택해 판으로 드래그 하세요.', 'wink_point3'],
+      cmp: ['[0<0] 블록을 클릭해 ‘참’ 블록 안으로 드래그 하세요.', 'wink_point2'],
+      temp2: ['‘입력’에서 [온도]를 클릭해 판으로 드래그 하세요.', 'wink_point3'],
+      ge: ['부호를 ‘≥’로 변경해 주세요.', 'wink_point2'],
+      num: ['숫자 26을 입력해 볼까요?', 'wink_point3'],
+      led: ['‘기본’에서 [LED 출력]을 클릭해 판으로 드래그 하세요.', 'wink_point2'],
+      done: ['완성됐어요! 이제 온도에 따라 달라지는 결과를 확인해볼까요?', 'wink_present'],
+      result: ['완성됐어요! 이제 온도에 따라 달라지는 결과를 확인해볼까요?', 'smile_present']
+    };
+
+    const FR = [
+      { img: 1, say: 'intro1', btn: '다음' },
+      { img: 1, say: 'intro2', btn: '시작하기' },
+      { img: 1, say: 'inA', type: 'click', key: 'catInput' },
+      { img: 2, say: 'inA', type: 'drag', key: 'blkA', hover: 3, ghost: 3 },
+      { img: 8, say: 'basic', type: 'click', key: 'catBasic' },
+      { img: 9, say: 'basic', type: 'drag', key: 'blkNum', hover: 10, ghost: 10 },
+      { img: 11, say: 'temp', type: 'click', key: 'catInput' },
+      { img: '11_2', say: 'temp', type: 'drag', key: 'blkTemp', hover: 12, ghost: 12 },
+      { img: 14, say: 'btn', type: 'click', key: 'catInput' },
+      { img: '14_2', say: 'btn', type: 'drag', key: 'blkA', hover: 15, ghost: 15, fd: 'blkA2' },
+      { img: 16, say: 'toB', type: 'click', key: 'ddB' },
+      { img: 17, say: 'logic', type: 'click', key: 'catLogic' },
+      { img: 18, say: 'logic', type: 'drag', key: 'blkIf', hover: 19, ghost: 19 },
+      { img: 20, say: 'cmp', type: 'drag', key: 'blkCmp', hover: 21, ghost: 21 },
+      { img: 22, say: 'temp2', type: 'click', key: 'catInput' },
+      { img: '22_2', say: 'temp2', type: 'drag', key: 'blkTemp', hover: 23, ghost: 23, fd: 'blkTemp2' },
+      { img: 24, say: 'ge', type: 'click', key: 'cmpArrow' },
+      { img: 25, say: 'ge', type: 'click', key: 'geOpt' },
+      { img: 27, say: 'num', type: 'num', key: 'numSlot', btn: '숫자 입력하기' },
+      { img: 28, say: 'led', type: 'click', key: 'catBasic' },
+      { img: 29, say: 'led', type: 'drag', key: 'blkLed', hover: 30, ghost: 30 },
+      { img: 31, ov: { img: 29, rect: FLY }, say: 'led', type: 'drag', key: 'blkLed', ghost: 30, ghostSrc: 30, fd: 'blkLed2' },
+      { img: 36, say: 'done', type: 'click', key: 'btnA' },
+      { img: 37, say: 'result', type: 'result', key: 'btnB', btn: '다음' }
     ];
+    
+    const HOT = {};
+    Object.keys(R).forEach((k) => { HOT[k] = [0, 0, 0, 0]; });
 
-    const sentence = $('p08Sentence');
-    const optionsBox = $('p08Options');
+    const mc = $('mc'), base = $('mcBase'), over = $('mcOver'), ov = $('mcOv'), ovImg = $('mcOvImg'), ghost = $('mcGhost'), hit = $('mcHit');
+    const bubble = $('p08Bubble'), modal = $('p08Modal');
+    const say = initGuideSay({ bubble: bubble, img: $('p08Char') });
+    const btn = $('p08Btn');
+    let cur = 0, drag = null, shown = '', lastDrop = 0;
 
-    let round = 0;
-    let blanks = [];
-    let left = 0;
+    const scale = () => mc.getBoundingClientRect().width / W;
+    const placeHit = (key) => {
+      hit.querySelectorAll('hit-pad').forEach((p) => p.remove());
+      hit.dataset.hit = key || '';
+      hit.style.display = key ? '' : 'none';
+      if (!key) return;
+      const r = R[key];
+      hit.style.cssText = 'left:' + r[0] + 'px;top:' + r[1] + 'px;width:' + r[2] + 'px;height:' + r[3] + 'px';
+      BoxEdit.padEl(hit, key, HOT);
+    };
+    const finger = (el, key) => { if (el) pointFingerAt(el, BoxEdit.fgo(FG, key, { pulse: true })); };
+    const stopFingers = () => {
+      fingerDemoStop = true;
+      if (fingerDemoTimer) { clearTimeout(fingerDemoTimer); fingerDemoTimer = null; }
+      clearFingers();
+      document.querySelectorAll('.mc-finger-drag').forEach((v) => v.remove());
+    };
+    const fingerMode = (f) => f.finger || (f.type === 'drag' ? 'drag' : 'click');
+    const showFinger = (f) => {
+      stopFingers();
+      const m = fingerMode(f);
+      if (m === 'drag') playFingerDrag(f.key);
+      else if (m === 'click' && f.key) finger(hit, f.key);
+    };
 
-    function renderRound() {
-      const r = ROUNDS[round];
-      $('p08Bubble').textContent = r.ask;
-      sentence.innerHTML = '';
-      blanks = [];
-      r.parts.forEach((p) => {
-        if (typeof p === 'number') {
-          const b = document.createElement('span');
-          b.className = 'p08-blank';
-          blanks[p] = b;
-          sentence.appendChild(b);
-        } else {
-          sentence.appendChild(document.createTextNode(p));
-        }
-      });
-      left = blanks.length;
-
-      optionsBox.innerHTML = '';
-      optionsBox.className = 'p08-options' + (r.grid ? ' is-grid' : '');
-      r.options.forEach((o) => {
-        const btn = document.createElement('button');
-        btn.className = 'card-btn p08-opt';
-        btn.textContent = o.text;
-        btn.addEventListener('click', () => pick(btn, o));
-        optionsBox.appendChild(btn);
-      });
-    }
-
-    function pick(btn, o) {
-      if (o.slot === undefined) {
-        playWrong();
-        btn.classList.remove('is-wrong');
-        void btn.offsetWidth;
-        btn.classList.add('is-wrong');
-        flashLayer($('p08Wrong'));
-        return;
+    function render(i) {
+      const f = FR[i];
+      stopFingers();
+      drag = null;
+      ghost.style.display = 'none';
+      modal.classList.add('is-off');
+      base.src = IMG(f.img);
+      over.style.opacity = 0;
+      if (f.hover) over.src = IMG(f.hover);
+      ov.style.display = f.ov ? '' : 'none';
+      if (f.ov) {
+        ov.style.cssText = 'left:' + f.ov.rect[0] + 'px;top:' + f.ov.rect[1] + 'px;width:' + f.ov.rect[2] + 'px;height:' + f.ov.rect[3] + 'px';
+        ovImg.src = IMG(f.ov.img);
+        ovImg.style.left = -f.ov.rect[0] + 'px';
+        ovImg.style.top = -f.ov.rect[1] + 'px';
+        ovImg.style.width = W + 'px';
+        ovImg.style.height = H + 'px';
       }
-      playCorrect();
-      btn.classList.add('is-used');
-      blanks[o.slot].textContent = o.text;
-      blanks[o.slot].classList.add('is-filled');
-      left -= 1;
-      if (left > 0) return;
-      optionsBox.classList.add('is-locked');
+      const s = SAY[f.say];
+      say(s[0], s[1]);
+      btn.classList.toggle('p08-hide', !f.btn);
+      btn.textContent = f.btn || '';
+      btn.disabled = f.type === 'num';
+      shown = f.type === 'result' ? 'a' : '';
+      if (f.type === 'num') placeHit(f.key);
+      else if (f.type === 'result') placeHit(f.key);
+      else placeHit(f.key || '');
       setTimeout(() => {
-        $('p08RightImg').src = 'img/p08_illust_r' + (round + 1) + '.png';
-        $('p08RightText').textContent = ROUNDS[round].right;
-        $('p08Right').classList.remove('is-off');
-      }, 1000);
+        if (cur !== i) return;
+        showFinger(f);
+      }, 60);
     }
 
-    $('p08RightNext').addEventListener('click', () => {
-      $('p08Right').classList.add('is-off');
-      resetImageSwap($('p08RightNext'));
-      if (round === ROUNDS.length - 1) {
-        $('p08Done').classList.remove('is-off');
+    function go(i) {
+      cur = i;
+      BoxEdit.syncStep(i + 1);
+      if (i >= FR.length) {
+        stopFingers();
+        placeHit('');
+        say('', 'wink_present');
+        btn.classList.add('p08-hide');
+        modal.classList.remove('is-off');
         return;
       }
-      round += 1;
-      renderRound();
+      render(i);
+    }
+
+    hit.addEventListener('pointerenter', () => {
+      const f = FR[cur];
+      if (f && f.hover && !drag) over.style.opacity = 1;
     });
 
-    renderRound();
+    hit.addEventListener('pointerleave', () => { over.style.opacity = 0; });
+    hit.addEventListener('pointerdown', (e) => {
+      const f = FR[cur];
+      if (!f || f.type !== 'drag') return;
+
+      stopFingers();
+
+      e.preventDefault();
+      hit.setPointerCapture(e.pointerId);
+      const r = R[f.key], s = scale();
+      drag = { x: e.clientX, y: e.clientY, l: r[0], t: r[1], s: s };
+      ghost.style.cssText = 'display:block;left:' + r[0] + 'px;top:' + r[1] + 'px;width:' + r[2] + 'px;height:' + r[3] + 'px;background-image:url(' + IMG(f.ghost) + ');background-position:' + (-r[0]) + 'px ' + (-r[1]) + 'px;background-size:' + W + 'px ' + H + 'px';
+      over.style.opacity = 0;
+      // clearFingers();
+    });
+    hit.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      ghost.style.left = drag.l + (e.clientX - drag.x) / drag.s + 'px';
+      ghost.style.top = drag.t + (e.clientY - drag.y) / drag.s + 'px';
+    });
+    const drop = (e) => {
+      if (!drag) return;
+      const rc = mc.getBoundingClientRect();
+      const px = (e.clientX - rc.left) / drag.s, py = (e.clientY - rc.top) / drag.s;
+      drag = null;
+      lastDrop = Date.now();
+      ghost.style.display = 'none';
+      if (px > DROP_X && py > 64 && py < H) { playDrag(); go(cur + 1); }
+      else showFinger(FR[cur]);
+    };
+    hit.addEventListener('pointerup', drop);
+    hit.addEventListener('pointercancel', () => { if (!drag) return; drag = null; ghost.style.display = 'none'; });
+
+    hit.addEventListener('click', () => {
+      const f = FR[cur];
+      if (!f || Date.now() - lastDrop < 400) return;
+      if (f.type === 'click') { playClick(); go(cur + 1); }
+      else if (f.type === 'num') {
+        playClick();
+        stopFingers();
+        placeHit('');
+        btn.disabled = false;
+      } else if (f.type === 'result') {
+        playClick();
+        base.src = IMG(40);
+        stopFingers();
+      }
+    });
+
+    btn.addEventListener('click', () => {
+      const f = FR[cur];
+      if (!f) return;
+      playClick();
+      if (f.type === 'result') go(FR.length);
+      else go(cur + 1);
+    });
+
+    let fingerDemoStop = false;
+    let fingerDemoTimer = null;
+
+    function playFingerDrag(key, width = 110){
+      if (fingerDemoTimer) { clearTimeout(fingerDemoTimer); fingerDemoTimer = null; }
+      fingerDemoStop = false;
+      clearFingers();
+      document.querySelectorAll('.mc-finger-drag').forEach(v => v.remove());
+
+      const r = R[key];
+      
+      // 1. FD 객체에서 현재 key에 해당하는 값을 가져옵니다. (없으면 기본값 사용)
+      const fd = FD[(FR[cur] && FR[cur].fd) || key] || { sx: 0, sy: 0, mx: 180, my: 20 };
+
+      const fingerEl = document.createElement('img');
+      fingerEl.src = '../../resources/img/common/img_finger01.png';
+      fingerEl.className = 'mc-finger-drag';
+      fingerEl.style.width = width + 'px';
+
+      const main = document.querySelector('main');
+      const mcRect = mc.getBoundingClientRect();
+      const mainRect = main.getBoundingClientRect();
+      const sm = mainRect.width / main.offsetWidth;
+      const s = scale() / sm;
+
+      // 손가락은 main(스테이지) 안에 붙으므로 화면 배율(sm)을 나눠 스테이지 좌표로 계산: sx·sy 0 이면 끌 요소 오른쪽 끝(클릭 손가락과 같은 x)의 세로 가운데
+      const startLeft = (mcRect.left - mainRect.left) / sm + (r[0] + r[2] - 20 + fd.sx) * s;
+      const startTop = (mcRect.top - mainRect.top) / sm + (r[1] + r[3] / 2 - 10 + fd.sy) * s;
+
+      fingerEl.style.left = startLeft + 'px';
+      fingerEl.style.top = startTop + 'px';
+      main.appendChild(fingerEl);
+
+      // 클릭 애니메이션 시퀀스 ...
+      setTimeout(() => { fingerEl.src = '../../resources/img/common/img_finger02.png'; }, 250);
+      setTimeout(() => { fingerEl.src = '../../resources/img/common/img_finger01.png'; }, 500);
+      setTimeout(() => { fingerEl.src = '../../resources/img/common/img_finger02.png'; }, 850);
+      setTimeout(() => { fingerEl.src = '../../resources/img/common/img_finger01.png'; }, 1100);
+
+      // 이동 시뮬레이션 (FD 설정의 mx, my만큼 이동)
+      setTimeout(() => {
+        fingerEl.classList.add('mc-finger-move');
+        fingerEl.style.left = (startLeft + fd.mx * s) + 'px';
+        fingerEl.style.top = (startTop + fd.my * s) + 'px';
+      }, 1600);
+
+      // 이동 완료 후 페이드아웃
+      setTimeout(() => { fingerEl.style.opacity = '0'; }, 2900);
+      setTimeout(() => { fingerEl.remove(); }, 3300);
+
+      // 반복 재생
+      fingerDemoTimer = setTimeout(() => {
+        if (fingerDemoStop) return;
+        const f = FR[cur];
+        if (f && f.type === 'drag' && f.key === key) {
+          playFingerDrag(key, width);
+        }
+      }, 3500);
+    }
+
+    BoxEdit.stepEdit({
+      key: () => (FR[cur] && (FR[cur].key || (FR[cur].btn ? 'btn' : ''))) || '',
+      count: FR.length + 1,
+      get: () => cur + 1,
+      set: (n) => { cur = Math.max(0, Math.min(n, FR.length + 1) - 1); },
+      go: (n) => { if (n < 1) return; go(n - 1); },
+      label: (n) => '단계 ' + n + ' / ' + (FR.length + 1) + (n > FR.length ? ' (마무리 모달)' : ' (캡처 ' + FR[n - 1].img + ')'),
+      say, bubble, img: $('p08Char'), noPose: true
+    });
+    go(cur);
   })();
   </script>
 </body>

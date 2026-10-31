@@ -3,40 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>마이크가 듣는 소리파도를 해석하라!</title>
-    <link rel="stylesheet" href="../../css/common.css">
+    <title>카메라와 이미지 인식 퀴즈!</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 25~30p. 5라운드(순서 고정), 문 3개(순서 무작위). 1·2라운드는 문에 음파 그림, 3~5라운드는 위에 음파 그래프 + 문마다 그림·소리 아이콘.
-           맞으면 문이 열리고 문 소리 + 발소리 뒤 3초 후 다음 라운드(마지막은 빛 → 마무리), 틀리면 오답 팝업 2초.
-           문 그림 img/p11_{key}.png, 소리 sound/p11_{key}.wav · p11_door.mp3 · p11_steps.mp3 */
-
-        .p11-step{width:1500px}
-        .p11-step>i{width:340px}
-        .p11-step>span{justify-content:center;padding:8px 20px 0;white-space:nowrap}
-        .p11-graph{position:absolute;left:560px;top:166px;width:800px;height:130px;box-sizing:border-box;border:solid 8px var(--c-ink);border-radius:24px;background:var(--c-white)}
-        .p11-graph svg{width:100%;height:100%;display:block}
-        .p11-graph.is-off{display:none}
-
-        .p11-doors{position:absolute;left:0;top:320px;width:1920px;display:flex;justify-content:center;gap:120px;perspective:1400px}
-        .p11-door{position:relative;width:380px;height:580px;padding:0;border:0;background:#3b2414;border-radius:190px 190px 10px 10px;cursor:pointer;box-shadow:0 0 0 14px #8b5a3c}
-        .p11-door:hover{box-shadow:0 0 0 14px #8b5a3c,0 0 0 24px var(--c-yellow)}
-        .p11-leaf{position:absolute;inset:0;border-radius:190px 190px 10px 10px;background:linear-gradient(90deg,#a86f45,#c98a58 50%,#a86f45);transform-origin:left center;transition:transform 1s ease;
-          display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px}
-        .p11-leaf:after{content:'';position:absolute;right:30px;top:72%;width:30px;height:30px;border-radius:50%;background:var(--c-yellow);box-shadow:0 0 0 5px #7a4a26}
-        .p11-door.is-open .p11-leaf{transform:rotateY(-105deg)}
-        /* 문이 열려 뒷면이 보일 때는 문에 붙인 음파·그림·소리 아이콘이 거울처럼 비치지 않게 숨김 */
-        .p11-leaf > *{backface-visibility:hidden;transition:opacity .3s .35s}
-        .p11-door.is-open .p11-leaf > *{opacity:0}
-        .p11-door.is-open{background:#fff8d6;box-shadow:0 0 0 14px #8b5a3c,0 0 60px 20px rgba(255,236,150,.8)}
-        .p11-plate{width:300px;height:200px;box-sizing:border-box;padding:12px;border:solid 6px var(--c-ink);border-radius:20px;background:var(--c-white)}
-        .p11-plate svg{width:100%;height:100%;display:block}
-        .p11-plate.is-pic{background:var(--c-mist) center / contain no-repeat;background-origin:content-box}
-        .p11-sound{width:110px;height:110px;border:solid 6px var(--c-ink);border-radius:50%;background:var(--c-white);font-size:54px;cursor:pointer;line-height:2}
-        .p11-sound:hover{background:#fff3c9}
-        .p11-sound:disabled{opacity:.5;cursor:default}
-        .p11-doors.is-locked{pointer-events:none}
-        .p11-flash{position:absolute;inset:0;background:radial-gradient(circle,var(--c-white) 0%,rgba(255,255,255,0) 70%);opacity:0;pointer-events:none;transition:opacity 1.5s}
-        .p11-flash.is-on{opacity:1}
+        /* 디자인 없음 - 도입 문구가 길어 글자만 줄임 */
+        .intro-panel .p-how-lead{font-size:44px}
     </style>
 </head>
 <body>
@@ -45,131 +16,32 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <p class="ask-pill has-stage p11-step"><i id="p11Round"></i><span id="p11Q"></span></p>
-          <div class="p11-graph is-off" id="p11Graph"></div>
-          <div class="p11-doors" id="p11Doors"></div>
-          <div class="p11-flash" id="p11Flash"></div>
-
-          <div class="ox-result-wrong is-avatar is-off" id="p11Wrong">
-            <div class="avatar-popup-panel">
-              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
-              <div class="avatar-popup-body">
-                <p class="hint-title">힌트</p>
-                <p class="avatar-popup-text is-small" id="p11HintText">파도의 높이가 높을수록 큰 소리,<br>간격이 촘촘할수록 높은 소리가 나요.</p>
-              </div>
+          <div class="intro-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+          <div class="intro-panel">
+            <p class="intro-tab">카메라와 이미지 인식 퀴즈!</p>
+            <p class="p-how-lead">AI의 사진 분석에 틀린 내용이 숨어 있어요!<br>사진과 설명을 꼼꼼히 비교해 잘못된 분석을 찾아보세요.</p>
+            <div class="p-how">
+              <b>게임 방법</b>
+              <ol class="intro-list is-small is-tight">
+                <li>1. 사진과 객관식 보기 내용을 비교해요.</li>
+                <li>2. 보기 중 잘못된 설명 1개를 찾아요.</li>
+                <li>3. 해당하는 번호가 적힌 캐릭터를 선택해요.</li>
+              </ol>
             </div>
+            <p class="p-how-tip"><b>TIP</b>사진 속 색깔, 모양, 개수를 자세히 살펴보아요.</p>
           </div>
+
+          <a href="page12.html" class="js-nav-effect next-btn-intro">
+            <img src="../../resources/img/common/btn_start.png" class="js-img-swap js-sfx" data-src-alt="../../resources/img/common/btn_start_on.png" data-src-over="../../resources/img/common/btn_start_over.png" data-sound="sound/click.mp3" alt="시작하기">
+          </a>
         </main>
       </div>
     </div>
   </div>
   <div class="zoom-info" id="zoomInfo"></div>
 
-  <script src="../../js/header.js" data-title="마이크가 듣는 소리파도를 해석하라!" data-next="page12.html"></script>
-  <script src="../../js/toc-gwa.js"></script>
-  <script src="../../js/common.js"></script>
-  <script>
-  (function () {
-    // wave: 문에 붙이는 음파([높이, 촘촘함]), pic/sound: 3~5라운드 문 그림·소리. graph: 3~5라운드 위쪽 음파
-    const ROUNDS = [
-      { q: '가장 높은 소리는 무엇일까요?', doors: [
-        { wave: [0.6, 1.5] }, { wave: [0.6, 8], right: true }, { wave: [0.6, 4] }] },
-      { q: '가장 작은 소리는 무엇일까요?', doors: [
-        { wave: [0.5, 4] }, { wave: [0.15, 4], right: true }, { wave: [0.95, 4] }] },
-      { q: '이 음파 그래프는 어떤 소리일까요?', graph: [0.9, 9], doors: [
-        { key: 'bird' }, { key: 'siren', right: true }, { key: 'bell' }] },
-      { q: '이 음파 그래프는 어떤 소리일까요?', graph: [0.18, 2], doors: [
-        { key: 'whisper', right: true }, { key: 'drum' }, { key: 'alarm' }] },
-      { q: '이 음파 그래프는 어떤 소리일까요?', graph: [0.18, 9], doors: [
-        { key: 'question', sound: 'mosquito', right: true }, { key: 'question', sound: 'thunder' }, { key: 'question', sound: 'tiger' }] }
-    ];
-
-    const doorsBox = $('p11Doors');
-    let round = 0;
-    let voice = null;
-    let activeSound = null;
-    // 다른 소리를 켜거나 문을 고르면 재생 중인 소리를 멈추고, 눌려 있던 소리 아이콘도 다시 켜 줌
-    function stopVoice() {
-      if (voice) { voice.pause(); voice = null; }
-      if (activeSound) { delete activeSound.dataset.busy; activeSound.style.opacity = ''; activeSound = null; }
-    }
-
-    function show() {
-      const r = ROUNDS[round];
-      $('p11Round').textContent = (round + 1) + '라운드';
-      $('p11Q').textContent = r.q;
-      $('p11Graph').classList.toggle('is-off', !r.graph);
-      if (r.graph) $('p11Graph').innerHTML = waveSvg(r.graph[0], r.graph[1], { width: 780, height: 150, stroke: 6, axis: true });
-      doorsBox.className = 'p11-doors';
-      doorsBox.innerHTML = '';
-      shuffleArray(r.doors).forEach((d) => {
-        const door = document.createElement('button');
-        door.className = 'p11-door';
-        let inner;
-        if (d.wave) {
-          inner = '<span class="p11-plate">' + waveSvg(d.wave[0], d.wave[1], { width: 276, height: 176, stroke: 5, axis: true }) + '</span>';
-        } else {
-          inner = '<span class="p11-plate is-pic" style="background-image:url(\'img/p11_' + d.key + '.png\')"></span>' +
-            '<span class="p11-sound" role="button" aria-label="소리 듣기">🔊</span>';
-        }
-        door.innerHTML = '<span class="p11-leaf">' + inner + '</span>';
-        const sound = door.querySelector('.p11-sound');
-        if (sound) {
-          sound.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (sound.dataset.busy) return;
-            stopVoice();
-            activeSound = sound;
-            sound.dataset.busy = '1';
-            sound.style.opacity = '.5';
-            voice = new Audio('sound/p11_' + (d.sound || d.key) + '.wav');
-            const done = () => { delete sound.dataset.busy; sound.style.opacity = ''; if (activeSound === sound) activeSound = null; };
-            voice.addEventListener('ended', done);
-            voice.addEventListener('error', done);
-            voice.play().catch(done);
-          });
-        }
-        door.addEventListener('click', () => pick(door, d.right));
-        doorsBox.appendChild(door);
-      });
-    }
-
-    function pick(door, right) {
-      if (!right) {
-        playWrong();
-        flashLayer($('p11Wrong'));
-        return;
-      }
-      stopVoice();
-      doorsBox.classList.add('is-locked');
-      door.classList.add('is-open');
-      new Audio('sound/p11_door.mp3').play().catch(() => {});
-      const last = round === ROUNDS.length - 1;
-      const steps = new Audio('sound/p11_steps.mp3');
-      if (last) {
-        // 마지막: 발소리가 끝난 뒤에 빛이 번쩍하고, 빛이 퍼지면 다음 페이지로(소리가 안 나거나 끝나지 않아도 8초 뒤엔 진행)
-        let finished = false;
-        const finish = () => {
-          if (finished) return;
-          finished = true;
-          $('p11Flash').classList.add('is-on');
-          setTimeout(() => navigateTo('page12.html'), 2000);
-        };
-        steps.addEventListener('ended', finish);
-        steps.addEventListener('error', finish);
-        setTimeout(() => steps.play().catch(finish), 800);
-        setTimeout(finish, 8000);
-        return;
-      }
-      setTimeout(() => steps.play().catch(() => {}), 800);
-      setTimeout(() => {
-        round += 1;
-        show();
-      }, 5000);
-    }
-
-    show();
-  })();
-  </script>
+  <script src="../../resources/js/header.js" data-title="카메라와 이미지 인식 퀴즈!" data-next="page12.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
 </body>
 </html>

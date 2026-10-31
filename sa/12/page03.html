@@ -4,23 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>도전! 표지판과 규칙 찾기</title>
-    <link rel="stylesheet" href="../../css/common.css">
+    <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
         /* 기획서 7~13p. 문제 3~5(표지판 의미 맞히기): 위에 상황 그림(표지판 포함), 아래에 알맞은 뜻 3개 중 고르기. 정답이면 '규칙 발견!' 스티커 + 1초 뒤 다음 문제.
            마지막 문제를 맞히면 '규칙 안내 준비 완료' 배지 팝업 → 안내 팝업 → 다음 페이지. 그림 파일: img/p03_q{3,4,5}_scene.png, 배지 img/p03_badge.png */
         /* .p03-q{font-size:50px} */
-        .p03-scene{position:absolute;left:150px;top:175px;width:1620px;height:550px;box-sizing:border-box;overflow:hidden;background:var(--c-white);border:solid 6px var(--c-ink);border-radius:36px;box-shadow:0 14px 0 0 rgba(86,148,231,.2)}
-        .p03-scene .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:40px;box-sizing:border-box;text-align:center;font-family:'Cafe24 Ssurround';font-size:48px;color:#9aa6c4;letter-spacing:-0.04em}
-        .p03-scene .pic{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;display:block;object-position:center top}
-        .p03-opts{position:absolute;left:150px;top:755px;width:1620px;display:flex;gap:30px}
-        .p03-opt{flex:1 1 0;min-width:0;height:180px;box-sizing:border-box;padding:12px 24px 6px;background:var(--c-white);border:solid 6px var(--c-ink);border-radius:30px;box-shadow:0 10px 0 0 rgba(86,148,231,.2);cursor:pointer;display:flex;align-items:center;justify-content:center;text-align:center;font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.2;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all;transition:transform .12s}
-        .p03-opt:hover{transform:translateY(-4px);border-color:var(--c-pink);box-shadow:0 10px 0 0 rgba(255,14,128,.3)}
-        .p03-opt.is-right{border-color:var(--c-pink);box-shadow:0 0 0 8px rgba(255,14,128,.28);pointer-events:none}
+        .p03-scene{position:absolute;left:65px;top:173px;width:1790px;height:773px;box-sizing:border-box;background:#2a6bd0;border:solid 4px var(--c-ink);border-radius:16px}
+        .p03-photo{position:absolute;left:53px;top:19px;width:1676px;height:536px;box-sizing:border-box;overflow:hidden;background:var(--c-white);border:solid 5px var(--c-white);border-radius:14px}
+        .p03-photo .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:40px;box-sizing:border-box;text-align:center;font-family:'Cafe24 Ssurround';font-size:48px;color:#9aa6c4;letter-spacing:-0.04em}
+        .p03-photo .pic{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;display:block;object-position:center top}
+        .p03-opts{position:absolute;left:76px;top:588px;width:1630px;display:flex;gap:69px}
+        .p03-opt{display:flex;align-items:center;justify-content:center;flex:1 1 0;min-width:0;height:138px;padding:6px 20px 0;font-size:48px;line-height:1.15}
         .p03-opt.is-lock{pointer-events:none}
-        .p03-found{position:absolute;right:50px;bottom:30px;z-index:5;display:none;align-items:center;gap:6px;padding:12px 30px 8px 16px;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:20px;box-shadow:0 8px 0 0 rgba(86,148,231,.3);transform:rotate(-8deg);font-family:'Cafe24 Ssurround';font-size:46px;color:var(--c-pink);letter-spacing:-0.04em}
-        .p03-found img{width:78px;height:78px;object-fit:contain}
-        .p03-found.is-on{display:flex;animation:p03-stamp .35s ease-out}
-        @keyframes p03-stamp{from{transform:rotate(-8deg) scale(2);opacity:0}to{transform:rotate(-8deg) scale(1);opacity:1}}
+        .p03-found{position:absolute;left:1376px;top:200px;width:410px;height:406px;z-index:5;display:none}
+        .p03-found img{width:100%;height:100%;object-fit:contain;display:block}
+        .p03-found.is-on{display:block;animation:p03-stamp .35s ease-out}
+        @keyframes p03-stamp{from{transform:scale(2);opacity:0}to{transform:scale(1);opacity:1}}
         #p03Wrong,#p03Badge,#p03Info{z-index:120}
     </style>
 </head>
@@ -32,15 +31,17 @@
         <main class="bg-default">
           <p class="p03-q ask-pill  is-fit"><span>이 상황 속의 표지판은 무엇을 알려주고 있을까요?</span></p>
           <div class="p03-scene">
-            <div class="ph" id="p03Ph"></div>
-            <img class="pic" id="p03Pic" alt="" onerror="this.style.display='none'">
-            <div class="p03-found" id="p03Found"><img src="img/p02_magnifier.png" alt="">규칙 발견!</div>
+            <div class="p03-photo">
+              <div class="ph" id="p03Ph"></div>
+              <img class="pic" id="p03Pic" alt="" onerror="this.style.display='none'">
+            </div>
+            <div class="p03-opts opts" id="p03Opts"></div>
+            <div class="p03-found" id="p03Found"><img src="img/p02_stamp.png" alt="규칙 발견"></div>
           </div>
-          <div class="p03-opts" id="p03Opts"></div>
 
           <div class="avatar-modal is-wrong is-off" id="p03Wrong">
             <div class="avatar-popup-panel">
-              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
               <div class="avatar-popup-body is-finish is-side">
                 <p class="avatar-popup-sub">이 표지판은 어떤 행동을<br>알려 주고 있을까요?<br>다시 한번 생각해보세요.</p>
                 <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p03WrongOk" data-sound="sound/click.mp3">확인</button>
@@ -49,7 +50,7 @@
           </div>
           <div class="avatar-modal is-off" id="p03Badge">
             <div class="avatar-popup-panel">
-              <div class="avatar-popup-avatar"><img src="img/p03_badge.png" alt="배지" onerror="this.onerror=null;this.src='../../img/common/avatar_correct.png'"></div>
+              <div class="avatar-popup-avatar"><img src="img/p03_badge.png" alt="배지" onerror="this.onerror=null;this.src='../../resources/img/common/avatar_correct.png'"></div>
               <div class="avatar-popup-body is-finish is-side">
                 <p class="avatar-popup-sub">규칙 안내 준비 완료<br>배지를 획득했어요!</p>
                 <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p03BadgeOk" data-sound="sound/click.mp3">다음</button>
@@ -58,7 +59,7 @@
           </div>
           <div class="avatar-modal is-off" id="p03Info">
             <div class="avatar-popup-panel">
-              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_correct.png" alt=""></div>
               <div class="avatar-popup-body is-finish is-side">
                 <p class="avatar-popup-sub">표지판과 포스터로<br>법과 규칙을 안내할 수 있어요.</p>
                 <a href="page04.html" class="js-nav-effect avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
@@ -71,9 +72,9 @@
   </div>
   <div class="zoom-info" id="zoomInfo"></div>
 
-  <script src="../../js/header.js" data-title="도전! 표지판과 규칙 찾기" data-next="page04.html"></script>
-  <script src="../../js/toc.js"></script>
-  <script src="../../js/common.js"></script>
+  <script src="../../resources/js/header.js" data-title="도전! 표지판과 규칙 찾기" data-next="page04.html"></script>
+  <script src="../../resources/js/toc.js"></script>
+  <script src="../../resources/js/common.js"></script>
   <script>
   (function () {
     const ROUNDS = [
@@ -95,7 +96,7 @@
       r.opts.forEach((t, i) => {
         const b = document.createElement('button');
         b.type = 'button';
-        b.className = 'p03-opt';
+        b.className = 'p03-opt card-btn';
         b.textContent = t;
         b.addEventListener('click', () => pick(b, i));
         opts.appendChild(b);
@@ -112,7 +113,7 @@
       }
       busy = true;
       playCorrect();
-      b.classList.add('is-right');
+      b.classList.add('is-selected');
       opts.querySelectorAll('.p03-opt').forEach((x) => x.classList.add('is-lock'));
       $('p03Found').classList.add('is-on');
       setTimeout(() => {

@@ -4,20 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Papago로 한국 문화 안내하기</title>
-    <link rel="stylesheet" href="../../css/common.css">
+    <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
         /* 기획서(실습만) 2~15p. 지하철(임산부 배려석) → 올림픽 공원(잔디밭) 두 장면이 같은 형식: 이야기 → Papago 켜기 → 음성 → 안내문 문장 2개 고르면 번역(한글·영어 TTS) → 이야기.
            이야기 삽화는 img/p11_story_{1..6}.png (없으면 설명 글자). 앱 화면은 js/papago.js(PP), 안내 소리는 sound/sa12_tts_*.mp3 가 있으면 그것, 없으면 브라우저 음성 */
-        .p11-panel{position:absolute;left:1250px;top:100px;width:610px}
-        .p11-sign{box-sizing:border-box;padding:26px 20px 22px;text-align:center;background:var(--c-hotpink);border:solid 6px var(--c-white);border-radius:26px;box-shadow:0 10px 0 0 rgba(86,148,231,.2)}
-        .is-lawn .p11-sign{background:var(--c-navy)}
+        .p11-panel{left:1214px;top:35px;width:692px;height:915px}
+        .p11-panel:before{content:'';position:absolute;left:5px;top:3px;width:683px;height:267px;background:var(--c-white);border-radius:10px}
+        .p11-sign{position:absolute;left:45px;top:50px;width:601px;height:167px;box-sizing:border-box;padding:26px 20px 0;text-align:center;background:#ff86bd;border-radius:14px;box-shadow:0 8px 0 0 #cfe0f7}
+        .is-lawn .p11-sign{background:#568702}
         .p11-sign b{display:block;font-family:'Cafe24 Ssurround';font-weight:normal;font-size:58px;line-height:1.1;color:var(--c-white);letter-spacing:-0.04em}
-        .p11-sign span{display:block;margin-top:12px;font-family:'Cafe24 Ssurround';font-size:36px;color:var(--c-white);opacity:.8;letter-spacing:-0.04em}
-        .p11-opts{margin-top:60px;display:flex;flex-direction:column;gap:40px}
-        .card-btn{font-size:48px;height:150px;line-height:1.2;padding:12px 20px 7px}
-        .p11-opt{box-sizing:border-box;min-height:134px;padding:14px 22px 8px;display:flex;align-items:center;justify-content:center;text-align:center;background:var(--c-white);border:solid 6px var(--c-ink);border-radius:26px;box-shadow:0 8px 0 0 rgba(86,148,231,.2);cursor:pointer;font-family:'Cafe24 Ssurround';font-size:40px;line-height:1.2;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all;transition:transform .12s}
-        .p11-opt:hover{transform:translateY(-3px);border-color:var(--c-pink)}
-        .p11-opt.is-right{border-color:var(--c-pink);box-shadow:0 0 0 8px rgba(255,14,128,.28);background:#fff3fb}
+        .p11-sign span{display:block;margin-top:12px;font-family:'Cafe24 Ssurround';font-size:36px;color:var(--c-white);opacity:.85;letter-spacing:-0.04em}
+        .p11-opts{position:absolute;left:38px;top:322px;width:614px;display:flex;flex-direction:column;gap:47px}
+        .p11-opts .card-btn{height:143px;font-size:48px;line-height:1.15;letter-spacing:-0.075em;padding:10px 12px 6px}
         .card-btn.is-selected{pointer-events:none}
         /* 단계마다 #p11Panel 에 is-subway(지하철)·is-lawn(잔디밭)이 붙음 — 예) .p11-panel.is-lawn{top:80px} */
         .p11-next.is-off,.p11-panel.is-off{display:none}
@@ -30,10 +28,11 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <div class="pp-story" id="p11Story">
+          <div class="pp-story opts" id="p11Story">
             <div class="ph" id="p11Ph"></div>
             <img class="pic" id="p11Pic" alt="" onerror="this.style.display='none'">
             <div class="pp-story-cap"><p id="p11Cap"></p><button type="button" class="card-btn is-popup next-btn js-sfx" id="p11StoryNext" data-sound="sound/click.mp3">다음</button></div>
+            <img class="pp-story-char" src="img/p11_character.png" alt="">
           </div>
 
           <div class="guide-set is-main" id="p11Set">
@@ -41,7 +40,7 @@
             <div class="guide-character"><img id="p11Char" src="../img/character/sa_main.png" alt="메인 캐릭터"></div>
           </div>
           <div class="phone-frame has-cam" id="p11Phone"><div class="phone-screen" id="p11Screen"></div></div>
-          <div class="p11-panel is-off" id="p11Panel">
+          <div class="board-b opts p11-panel is-off" id="p11Panel">
             <div class="p11-sign"><b id="p11SignT"></b><span id="p11SignP"></span></div>
             <div class="p11-opts" id="p11Opts"></div>
           </div>
@@ -49,7 +48,7 @@
 
           <div class="avatar-modal is-wrong is-off" id="p11Wrong">
             <div class="avatar-popup-panel">
-              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
               <div class="avatar-popup-body is-finish is-side">
                 <p class="avatar-popup-sub">안내문을 다시 한번 잘 읽어봐요.</p>
                 <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p11WrongOk" data-sound="sound/click.mp3">확인</button>
@@ -62,11 +61,11 @@
   </div>
   <div class="zoom-info" id="zoomInfo"></div>
 
-  <script src="../../js/header.js" data-title="Papago로 한국 문화 안내하기" data-next="page12.html"></script>
-  <script src="../../js/toc.js"></script>
-  <script src="../../js/common.js"></script>
-  <script src="../../js/papago.js"></script>
-  <script src="../../js/box-edit.js"></script>
+  <script src="../../resources/js/header.js" data-title="Papago로 한국 문화 안내하기" data-next="page12.html"></script>
+  <script src="../../resources/js/toc.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script src="../../resources/js/papago.js"></script>
+  <script src="../../resources/js/box-edit.js"></script>
   <script>
   (function () {
     const SUBWAY = {
@@ -167,7 +166,7 @@
       }
       busy = true;
       playCorrect();
-      b.classList.add('is-right', 'is-selected');
+      b.classList.add('is-selected');
       found += 1;
       show(PP.voice({ to: '영어', state: 'result', src: o[1], out: o[2] }));
       PP.speak(o[1], 'ko-KR', 'sa12_tts_' + q.tts + '_' + n + '_ko.mp3', () => {

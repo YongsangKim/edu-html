@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>컴퓨터도 순서대로, 알고리즘 순차 따라</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 19p. 상황 소개 대화: 화살표 버튼을 누를 때마다 다음 대사로 바뀌고 마지막 확인에서 page12.html로 이동.
+           배경 img/p11_bg.png(방 안 · 책상 위 태블릿 PC · 아로와 루리의 뒷모습) */
+        .tk-banner{position:absolute;left:50%;top:20px;transform:translateX(-50%);min-height:100px;margin:0;box-sizing:border-box;padding:12px 60px 6px;display:flex;align-items:center;justify-content:center;white-space:nowrap;
+          background:var(--c-cream);border:solid 6px var(--c-ink);border-radius:56px;box-shadow:0 14px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:64px;line-height:1.2;color:var(--c-ink);text-align:center;letter-spacing:-0.05em}
+        .tk-scene{position:absolute;left:65px;top:170px;width:1790px;height:770px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:30px;background:var(--c-mist) url('img/p11_bg.png') center / cover no-repeat}
+        .tk-bubble{left:20px;top:auto;bottom:540px;width:630px;padding:26px 40px 16px;display:flex;flex-direction:column;align-items:flex-start;letter-spacing:-0.08em}
+        .tk-bubble::before{left:110px;transform: scaleX(-1)}
+        .tk-text{margin:0;font-family:'Cafe24 Ssurround';font-size:38px;line-height:1.35;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all;text-align:left}
+        .tk-bubble .card-btn{align-self:center;min-width:0;width:200px;padding-left:10px;padding-right:10px;font-size:40px;height:70px;position:absolute;right:25px;bottom:33px}
+        .tk-bubble .card-btn.is-arrow{font-size:50px;padding-bottom:5px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="tk-banner">AI 그림 그리기 과정을 알아봐요.</p>
+          <div class="tk-scene">
+            <div class="guide-bubble tk-bubble">
+              <p class="tk-text" id="tkText"></p>
+              <button class="card-btn is-popup is-arrow js-sfx" id="tkOk" data-sound="sound/click.mp3">→</button>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="컴퓨터도 순서대로, 알고리즘 순차 따라" data-next="page12.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const LINES = ["AI에게 원하는 그림을 그려 달라고 부탁해 본 적 있지? 어떤 그림을 만들고 싶은지 말해 <br>줄래?&nbsp;","나는 모자를 쓴 고양이 그림을 만들고 싶어. “모자를 쓴 고양이 그려줘”라고 입력하면 <br>될 것 같아.","오! 맞아! 우리 이 과정을 블록으로 정리해 볼까?<br>&nbsp;"];
+    let i = 0;
+    function show() {
+      $('tkText').innerHTML = LINES[i];
+      $('tkOk').textContent = i < LINES.length - 1 ? '→' : '확인';
+      $('tkOk').classList.toggle('is-arrow', i < LINES.length - 1);
+    }
+    $('tkOk').addEventListener('click', () => {
+      resetImageSwap($('tkOk'));
+      if (i < LINES.length - 1) { i += 1; show(); return; }
+      navigateTo('page12.html');
+    });
+    show();
+  })();
+  </script>
+</body>
+</html>

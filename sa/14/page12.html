@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>위기 탈출! 보이스피싱 탈출 게임</title>
-    <link rel="stylesheet" href="../../css/common.css">
+    <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
         /* 기획서 52~58p. 두 라운드(① 스팸 문자 ② 보이스피싱 전화). 라운드 시작 때 상황 안내 팝업(폰 틀 없이 화면 내용만) → 닫으면 본 게임, 자물쇠 잠기는 소리 2번.
            카드 6장(순서 무작위) 중 정답 3장을 순서대로 '안전 대처 매뉴얼' 칸 3개에 끌어 넣음(매뉴얼 밖에 놓으면 제자리). 3칸이 차면 [확인] 활성 → 정답이면 경광등 초록 + 자물쇠 열림 + '좋아요! 안전하게 대처했어요.' + [다음],
@@ -104,7 +104,7 @@
 
           <div class="avatar-modal is-wrong is-off" id="p12WrongA">
             <div class="avatar-popup-panel">
-              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
               <div class="avatar-popup-body is-finish is-side">
                 <p class="avatar-popup-sub" style="font-size:44px">수상한 연락을 받으면 어떻게 해야 할까요?<br>안전한 행동과 순서를 다시 생각해 보세요.</p>
                 <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p12WrongAOk" data-sound="sound/click.mp3">다음</button>
@@ -113,7 +113,7 @@
           </div>
           <div class="avatar-modal is-wrong is-off" id="p12WrongB">
             <div class="avatar-popup-panel">
-              <div class="avatar-popup-avatar"><img src="../../img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
               <div class="avatar-popup-body is-finish is-side">
                 <p class="avatar-popup-text is-small">알맞은 행동을 골랐어요!</p>
                 <p class="avatar-popup-sub" style="font-size:44px">어떤 행동을 먼저 해야 할지 다시 생각해 보세요.</p>
@@ -128,13 +128,13 @@
 
   <div class="zoom-info" id="zoomInfo"></div>
 
-  <script src="../../js/header.js" data-title="위기 탈출! 보이스피싱 탈출 게임" data-next="page13.html"></script>
-  <script src="../../js/toc.js"></script>
-  <script src="../../js/common.js"></script>
+  <script src="../../resources/js/header.js" data-title="위기 탈출! 보이스피싱 탈출 게임" data-next="page13.html"></script>
+  <script src="../../resources/js/toc.js"></script>
+  <script src="../../resources/js/common.js"></script>
   <script>
   (function () {
-    const playLock = makeSfx('sound/sa14_lock.mp3');
-    const playUnlock = makeSfx('sound/sa14_unlock.mp3');
+    const playLock = makeSfx('sound/sa14_lock.mp3', true);
+    const playUnlock = makeSfx('sound/sa14_unlock.mp3', true);
     const ROUNDS = [
       { top: '경고! 문자로 수상한 링크가 날아왔어요.',
         shot: '<div class="p12-scr is-sms"><div class="p12-sms-head"><u></u>국제 발신</div><div class="p12-sms-bubble" style="width:340px">다른 사람이 회원님의 계정에 접속했습니다. 아래 링크에서 아이디와 비밀번호를 입력하여 로그인한 뒤 계정을 보호하세요.<br><u>account.help</u></div></div>',
@@ -172,7 +172,7 @@
       $('p12Cards').innerHTML = '';
       slots.forEach((s) => { s.innerHTML = ''; delete s.dataset.full; });
       $('p12Ok').disabled = true;
-      if (ri === 0) { const a = new Audio(ASSET_BASE + 'sound/sa14_lock.mp3'); let n = 0; a.onended = () => { if (++n < 2) a.play().catch(() => {}); }; a.play().catch(() => {}); }
+      if (ri === 0) { const a = new Audio('sound/sa14_lock.mp3'); let n = 0; a.onended = () => { if (++n < 2) a.play().catch(() => {}); }; a.play().catch(() => {}); }
       const cards = shuffleArray(r.cards.map((c) => ({ t: c[0], ico: c[1], ord: c[2] }))).map((c) => {
         const el = document.createElement('div');
         el.className = 'p12-card';

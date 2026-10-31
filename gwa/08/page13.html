@@ -3,83 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>첫 블록 코딩, 엔트리로 배우는 순차</title>
-    <link rel="stylesheet" href="../../css/common.css">
+    <title>내가 바로 스마트홈 AI!</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 23p. 엔트리 기본 화면(개발 기능 없는 그림)을 보여 주고, 안내 창의 [다음]을 누르면 문구가 바뀌고 [시작하기] 버튼이 나옴(블록 3개가 위에서 차례로 쌓이는 연출). 엔트리 화면 그림은 HTML 모형, 이미지 img/p13_*.png, 캐릭터는 gwa/07 캐릭터 임시 복사본 */
-        .en-win{position:absolute;left:40px;top:30px;width:1840px;height:730px;box-sizing:border-box;border:solid 6px var(--c-ink);border-radius:26px;background:#eef2fb}
-        .en-area{position:absolute;box-sizing:border-box;border:solid 4px #b6c4e4;border-radius:14px;background:var(--c-white);overflow:hidden;transition:box-shadow .25s,border-color .25s}
-        .en-tag{position:absolute;left:10px;top:8px;z-index:6;width:44px;height:44px;border-radius:50%;background:var(--c-purple);font-family:'Cafe24 Ssurround';font-size:28px;line-height:44px;text-align:center;color:var(--c-white);opacity:0}
-        .en-stage{left:60px;top:50px;width:500px;height:450px;background:#fff}
-        .en-view{position:absolute;left:0;top:0;width:100%;height:372px;background:url('img/p13_stage_bg.png') center / cover no-repeat}
-        .en-objs{left:60px;top:510px;width:500px;height:230px;background:#f6f8fd}
-        .en-pal{left:580px;top:50px;width:600px;height:690px;background:#f6f8fd;display:flex}
-        .en-ws{left:1200px;top:50px;width:660px;height:690px;background:var(--c-white) radial-gradient(#d9e0f0 2px,transparent 2px) 0 0 / 28px 28px}
+        /* 디자인 없음 - 기획서 54~60p. 미션 5개, 미션마다 15초 타임어택(배경 시계 소리 sound/p13_clock.mp3). 왼쪽 센서 대시보드를 보고 아래 5개 AI 실행 버튼 중 알맞은 것 누르기.
+           맞으면 집 그림이 작동 모습(img/p13_scene_m{n}_on.png)으로 바뀌고 미션 성공 팝업, 틀리거나 시간이 끝나면 오답 팝업 → 확인 시 그 미션 다시.
+           집 그림 img/p13_scene_m{1~5}.png, 버튼 그림 img/p13_btn_{key}.png */
 
-        .en-btns{position:absolute;left:8px;right:8px;top:378px;height:54px;display:flex;gap:10px;z-index:3}
-        .en-btn{flex:1 1 0;height:54px;box-sizing:border-box;padding:6px 0 0;border:solid 3px #3a68e0;border-radius:10px;background:var(--c-white);font-family:'Cafe24 Ssurround';font-size:26px;color:#3a68e0;letter-spacing:-0.05em;cursor:default}
-        .en-btn.is-run{background:#3a68e0;color:var(--c-white)}
-        .en-btn.is-run:before{content:'';display:inline-block;width:0;height:0;margin:-4px 12px 0 0;border:solid transparent;border-width:9px 0 9px 15px;border-left-color:currentColor;vertical-align:middle}
-        .en-star{position:absolute;width:70px;height:70px;margin:-35px 0 0 -35px;background:url('../../img/common/icon_star_on.png') center / contain no-repeat;filter:drop-shadow(0 3px 2px rgba(0,0,0,.2))}
-        .en-bot{position:absolute;width:84px;height:84px;margin:-42px 0 0 -42px;background:url('img/p13_bot.svg') center / contain no-repeat;z-index:2;transition:left 1s ease,top 1s ease}
-        .en-stage.is-intro .en-view{background-image:none}
-        .en-stage.is-intro .en-star{display:none}
-        .en-stage.is-intro .en-bot{left:250px!important;top:190px!important;width:220px;height:220px;margin:-110px 0 0 -110px}
+        .p13-step{left:40px;top:20px;transform:none;width:1440px;font-size:62px}
+        .p13-step>i{width:440px}
+        .p13-step>span{justify-content:center;padding:8px 20px 0;white-space:nowrap}
+        .p13-timer{position:absolute;margin:0;left:1520px;top:20px;width:360px;height:100px;box-sizing:border-box;padding:6px 40px 0;display:flex;align-items:center;justify-content:space-between;
+          background:var(--c-white);border:solid 6px var(--c-ink);border-radius:48px;box-shadow:0 15px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:62px;color:var(--c-ink)}
+        .p13-timer svg{width:62px;height:62px;margin-top:-6px}
+        .p13-timer.is-hurry{border-color:#e5484d;color:#e5484d;animation:p13-beat 1s ease infinite}
+        @keyframes p13-beat{50%{transform:scale(1.08)}}
 
-        .en-objlist{margin:56px 14px 0;display:flex;flex-direction:column;gap:10px}
-        .en-obj{height:64px;box-sizing:border-box;padding:6px 14px 0;border:solid 3px #b6c4e4;border-radius:10px;background:var(--c-white);display:flex;align-items:center;gap:12px;font-family:'Cafe24 Ssurround';font-size:26px;color:var(--c-ink)}
-        .en-obj i{width:44px;height:44px;background:center / contain no-repeat}
+        .p13-dash{position:absolute;left:40px;top:140px;width:560px;height:520px;box-sizing:border-box;border:solid 6px var(--c-ink);border-radius:36px;background:#101a3a;overflow:hidden;
+          display:flex;flex-direction:column;align-items:center;font-family:'Cafe24 Ssurround';color:var(--c-white);text-align:center}
+        .p13-dash-title{width:100%;height:84px;padding-top:6px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:var(--c-blue);font-size:48px}
+        .p13-dash-sensor{margin:40px 0 0;font-size:48px;color:#9fc3ff}
+        .p13-dash-alert{flex:1 1 auto;margin:0;padding:0 30px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;font-size:56px;line-height:1.25;color:#ff6b6b;word-break:keep-all;animation:p13-blink 1s step-end infinite}
+        .p13-dash-alert img{width:120px}
+        .p13-dash.is-safe .p13-dash-alert{color:#6be39a;animation:none}
+        @keyframes p13-blink{50%{opacity:.45}}
 
-        .en-cats{flex:0 0 150px;display:flex;flex-direction:column;border-right:solid 3px #b6c4e4;background:#e7ecf8}
-        .en-cat{flex:1 1 0;max-height:96px;padding:6px 0 0;border:0;border-bottom:solid 3px #d3dbef;background:none;font-family:'Cafe24 Ssurround';font-size:28px;color:var(--c-ink);letter-spacing:-0.05em;cursor:pointer}
-        .en-cat.is-on{background:#a751e8;color:var(--c-white)}
-        .en-list{flex:1 1 auto;position:relative;padding:60px 40px 0;display:flex;flex-direction:column;gap:30px;align-items:flex-start}
-        .en-list .en-blk{width:360px;flex:none}
+        .p13-scene{position:absolute;left:630px;top:140px;width:1250px;height:520px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:36px;background:var(--c-mist) center / cover no-repeat}
 
-        .en-blk{--b:#a751e8;--blk-c:var(--b);--tab:32px;position:relative;box-sizing:border-box;height:74px;padding:4px 22px 0 20px;display:flex;align-items:center;font-family:'Cafe24 Ssurround';font-size:25px;color:var(--c-white);letter-spacing:-0.05em;white-space:nowrap;touch-action:none;user-select:none}
-        .en-blk{background:
-          linear-gradient(rgba(255,255,255,.42),rgba(255,255,255,.42)) left top / calc(50% - var(--tab) / 2) 3px no-repeat,
-          linear-gradient(rgba(255,255,255,.42),rgba(255,255,255,.42)) right top / calc(50% - var(--tab) / 2) 3px no-repeat,
-          linear-gradient(rgba(0,0,0,.12),rgba(0,0,0,.12)) left bottom / 100% 4px no-repeat,
-          radial-gradient(circle at 100% 0,transparent 10px,var(--blk-c) 10.5px) calc(50% - (var(--tab) - 10px) / 2) 4px / 10px 10px no-repeat,
-          radial-gradient(circle at 0 0,transparent 10px,var(--blk-c) 10.5px) calc(50% + (var(--tab) - 10px) / 2) 4px / 10px 10px no-repeat,
-          linear-gradient(var(--blk-c),var(--blk-c)) 50% 100% / var(--tab) calc(100% - 14px) no-repeat,
-          linear-gradient(var(--blk-c),var(--blk-c)) left top / calc(50% - var(--tab) / 2 + 1px) 36% no-repeat,
-          linear-gradient(var(--blk-c),var(--blk-c)) left bottom / calc(50% - var(--tab) / 2 + 1px) 36% no-repeat,
-          linear-gradient(var(--blk-c),var(--blk-c)) left 13px center / calc(50% - var(--tab) / 2 - 13px + 1px) 32% no-repeat,
-          radial-gradient(circle at 0 100%,transparent 12px,var(--blk-c) 12.5px) left 1px top calc(35% + 4.2px) / 12px 12px no-repeat,
-          radial-gradient(circle at 0 0,transparent 12px,var(--blk-c) 12.5px) left 1px top calc(65% - 4.2px) / 12px 12px no-repeat,
-          linear-gradient(var(--blk-c),var(--blk-c)) right top / calc(50% - var(--tab) / 2 + 1px) 36% no-repeat,
-          linear-gradient(var(--blk-c),var(--blk-c)) right bottom / calc(50% - var(--tab) / 2 + 1px) 36% no-repeat,
-          linear-gradient(var(--blk-c),var(--blk-c)) right 13px center / calc(50% - var(--tab) / 2 - 13px + 1px) 32% no-repeat,
-          radial-gradient(circle at 100% 100%,transparent 12px,var(--blk-c) 12.5px) right 1px top calc(35% + 4.2px) / 12px 12px no-repeat,
-          radial-gradient(circle at 100% 0,transparent 12px,var(--blk-c) 12.5px) right 1px top calc(65% - 4.2px) / 12px 12px no-repeat,
-          var(--fill);filter:drop-shadow(0 1px 0 rgba(0,0,0,.2))}
-        .en-blk:after{bottom:-14px;height:21px;border-radius:0 0 12px 12px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.12)}
-        .en-blk{--fill:linear-gradient(var(--blk-c),var(--blk-c)) left top / 14px 100% no-repeat,linear-gradient(var(--blk-c),var(--blk-c)) right top / 14px 100% no-repeat}
-        .en-blk.is-start{--b:#1fa89a;--fill:linear-gradient(rgba(255,255,255,.42),rgba(255,255,255,.42)) left top / 100% 3px no-repeat,linear-gradient(var(--blk-c),var(--blk-c)) 50% 0 / calc(var(--tab) + 2px) 20px no-repeat,linear-gradient(var(--blk-c),var(--blk-c)) left top / 14px 100% no-repeat,linear-gradient(var(--blk-c),var(--blk-c)) right top / 14px 100% no-repeat;z-index:20;border-radius:24px 24px 10px 10px}
-        .en-blk.is-start:before{content:'';flex:none;margin-right:12px;border-left:15px solid var(--c-white);border-top:9px solid transparent;border-bottom:9px solid transparent}
-        .en-num{display:inline-block;flex:none;box-sizing:border-box;width:32px;height:32px;min-width:32px;margin-right:2px;border-radius:50%;background:var(--c-white);color:var(--b);line-height:34px;text-align:center;font-style:normal;letter-spacing:0}
-        .en-blk.is-pick{cursor:grab}
-        .en-blk.is-ghost{position:absolute;z-index:80;opacity:.92;box-shadow:0 8px 16px rgba(0,0,0,.3);pointer-events:none}
-        .en-blk.is-blink{animation:en-blink .4s ease-in-out 4}
-        .en-blk.is-target{box-shadow:0 0 0 6px var(--c-yellow)}
-        .en-blk.is-run{box-shadow:0 0 0 6px #2fbf71}
-        @keyframes en-blink{0%,100%{filter:none}50%{filter:brightness(1.6) saturate(2);box-shadow:0 0 0 8px var(--c-yellow)}}
-        .en-ws .en-blk{position:absolute;left:60px;width:360px}
-        .en-slot{position:absolute;left:60px;width:360px;height:74px;box-sizing:border-box;border:dashed 4px var(--c-yellow);border-radius:10px;background:rgba(255,216,61,.18);display:none}
-        .en-slot.is-on{display:block}
-        .en-trash{position:absolute;right:16px;bottom:16px;width:100px;height:100px;box-sizing:border-box;background:var(--c-white) url('img/p14_trash.png') center / 100% no-repeat;font-size:0;transition:box-shadow .25s}
-        .en-trash.is-glow,.en-pal.is-glow{box-shadow:0 0 0 8px var(--c-yellow)}
+        .p13-btns{position:absolute;left:40px;top:690px;width:1840px;display:flex;gap:24px}
+        .p13-btn{flex:1 1 0;height:240px;box-sizing:border-box;padding:12px 12px 14px;border:solid 5px var(--c-ink);border-radius:28px;background:var(--c-white);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;
+          font-family:'Cafe24 Ssurround';font-size:30px;line-height:1.2;color:var(--c-indigo);letter-spacing:-0.06em;word-break:keep-all;box-shadow:0 10px 0 0 var(--c-sky-pale);transition:transform .15s}
+        .p13-btn:hover{border-color:var(--c-blue)}
+        .p13-btn:active{transform:translateY(6px)}
+        .p13-btn i{flex:1 1 auto;width:100%;border-radius:18px;background:var(--c-pale) center / contain no-repeat}
+        .p13-btns.is-locked{pointer-events:none}
 
-        .en-guide{position:absolute;left:40px;top:790px;width:1840px;height:150px;box-sizing:border-box;padding:0 40px 0 190px;display:flex;align-items:center;gap:30px;
-          background:var(--c-cream);border:solid 5px var(--c-purple);border-radius:36px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
-        .en-char{position:absolute;left:30px;bottom:6px;width:140px;height:170px}
-        .en-char img{width:100%;height:100%;object-fit:contain;object-position:bottom}
-        .en-text{margin:0;flex:1 1 auto;font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.3;color:var(--c-purple);letter-spacing:-0.05em;word-break:keep-all}
-        .en-next{flex:0 0 auto;min-width:0;width:260px;padding-left:10px;padding-right:10px;white-space:nowrap;text-decoration:none;margin-bottom:20px}
-        .en-next.is-off{display:none}
-
+        .p13-ok img{display:block}
     </style>
 </head>
 <body>
@@ -88,33 +47,47 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <div class="en-win"></div>
-          <div class="en-area en-stage is-intro" id="enStage" data-a="1"><span class="en-tag">1</span>
-            <div class="en-view"></div>
-            <div class="en-star" id="enStarMouth" style="left:230px;top:75px"></div>
-            <div class="en-star" id="enStarStomach" style="left:300px;top:175px"></div>
-            <div class="en-star" id="enStarIntestine" style="left:160px;top:310px"></div>
-            <div class="en-bot" id="enBot" style="left:100px;top:75px"></div>
-            <div class="en-btns"><button class="en-btn" type="button">+ 오브젝트 추가하기</button><button class="en-btn is-run" type="button">시작하기</button></div>
+          <p class="ask-pill has-stage p13-step"><i id="p13Mission"></i><span id="p13Title"></span></p>
+          <p class="p13-timer" id="p13TimerBox">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13.5" r="8"/><path d="M12 13.5V9.5M9.5 2.5h5M12 2.5v3M18.5 6l1.5-1.5"/></svg>
+            <span id="p13Timer">15</span>
+          </p>
+
+          <div class="p13-dash" id="p13Dash">
+            <div class="p13-dash-title">AI 센서 대시보드</div>
+            <p class="p13-dash-sensor" id="p13Sensor"></p>
+            <p class="p13-dash-alert"><img src="../../resources/img/common/icon_warning.png" alt=""><span id="p13Alert"></span></p>
           </div>
-          <div class="en-area en-objs" id="enObjs" data-a="2"><span class="en-tag">2</span>
-            <div class="en-objlist"><div class="en-obj"><i style="background-image:url('img/p13_bot.svg')"></i>엔트리봇</div></div>
-          </div>
-          <div class="en-area en-pal" id="enPal" data-a="3"><span class="en-tag">3</span>
-            <div class="en-cats" id="enCats"></div>
-            <div class="en-list" id="enList"></div>
-          </div>
-          <div class="en-area en-ws" id="enWs" data-a="4"><span class="en-tag">4</span>
-            <div class="en-blk blk is-start" id="enStart" style="left:60px;top:70px;width:360px">시작하기 버튼을 클릭했을 때</div>
-            <div class="en-slot" id="enSlot"></div>
-            <div class="en-trash" id="enTrash"></div>
+          <div class="p13-scene" id="p13Scene"></div>
+
+          <div class="p13-btns" id="p13Btns">
+            <button class="p13-btn" data-key="gas"><i style="background-image:url('img/p13_btn_gas.png')"></i>가스 밸브 자동 잠금 및 환기팬 가동</button>
+            <button class="p13-btn" data-key="cool"><i style="background-image:url('img/p13_btn_cool.png')"></i>스마트 에어컨 및 서큘레이터 가동</button>
+            <button class="p13-btn" data-key="alarm"><i style="background-image:url('img/p13_btn_alarm.png')"></i>경보음 울리기 및 스마트폰 알림 발송</button>
+            <button class="p13-btn" data-key="purifier"><i style="background-image:url('img/p13_btn_purifier.png')"></i>스마트 공기청정기 강풍 가동</button>
+            <button class="p13-btn" data-key="sleep"><i style="background-image:url('img/p13_btn_sleep.png')"></i>수면 조명 켜기</button>
           </div>
 
-          <div class="en-guide">
-            <div class="en-char"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
-            <p class="en-text" id="enText">블록 코딩이란? 명령이 적힌 블록을 위에서 아래로 차례대로 연결해서 컴퓨터에게 일을 시키는 방법이에요.</p>
-            <button class="card-btn is-popup js-sfx en-next" id="enNext" data-sound="sound/click.mp3">다음</button>
-            <a href="page14.html" class="js-nav-effect card-btn is-popup js-sfx en-next is-off" id="enGo" data-sound="sound/click.mp3">시작하기</a>
+          <div class="avatar-modal is-off" id="p13Right">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_correct_gwa.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">미션성공!</p>
+                <p class="avatar-popup-sub" id="p13RightText"></p>
+                <button class="p13-ok avatar-popup-next card-btn is-popup js-sfx" id="p13RightNext" data-sound="sound/click.mp3">다음</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p13Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">땡-</p>
+                <p class="avatar-popup-sub">AI 판단 오류! 센서가 보낸 실시간 데이터를 <br>다시 분석해 보세요.</p>
+                <button class="p13-ok avatar-popup-next card-btn is-popup js-sfx" id="p13WrongOk" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
           </div>
         </main>
       </div>
@@ -122,30 +95,105 @@
   </div>
   <div class="zoom-info" id="zoomInfo"></div>
 
-  <script src="../../js/header.js" data-title="첫 블록 코딩, 엔트리로 배우는 순차" data-next="page14.html"></script>
-  <script src="../../js/toc-gwa.js"></script>
-  <script src="../../js/common.js"></script>
+  <script src="../../resources/js/header.js" data-title="내가 바로 스마트홈 AI!" data-next="page14.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
   <script>
   (function () {
-    const CATS = ['시작', '흐름', '움직임', '생김새', '소리', '판단', '계산'];
-    $('enCats').innerHTML = CATS.map((c) => '<button class="en-cat' + (c === '움직임' ? ' is-on' : '') + '">' + c + '</button>').join('');
-    const names = ['<i class="en-num">1</i>초 동안 입 위치로 이동하기', '<i class="en-num">1</i>초 동안 위 위치로 이동하기', '<i class="en-num">1</i>초 동안 장 위치로 이동하기'];
-    $('enList').innerHTML = names.map((n) => '<div class="en-blk blk">' + n + '</div>').join('');
+    const LIMIT = 15;
+    const MISSIONS = [
+      { sensor: '가스 센서', alert: '가스 누출 감지!', key: 'gas',
+        right: '가스 센서가 가스 누출을 감지해서 가스 밸브가 잠기고 환기팬이 켜졌네. 이제 안전해!' },
+      { sensor: '거실 온도 센서', alert: '실내 온도 33도 돌파!', key: 'cool',
+        right: '온도 센서가 높은 온도를 감지해서 에어컨과 서큘레이터가 켜졌네. 거실이 시원해졌어!' },
+      { sensor: '현관 CCTV', alert: '외출 중 낯선 움직임 포착!', key: 'alarm',
+        right: '현관 CCTV가 낯선 움직임을 감지해서 경보음이 울리고 스마트폰 알림이 전송됐네. 이제 안심이야!' },
+      { sensor: '침실 미세먼지 센서', alert: '공기 오염도 ‘최악’!', key: 'purifier',
+        right: '미세먼지 센서가 나쁜 공기를 감지해서 공기청정기가 강하게 작동했네. 공기가 깨끗해졌어!' },
+      { sensor: '조도 센서', alert: '밤 10시, 주변 매우 어두움!', key: 'sleep',
+        right: '조도 센서가 어두운 방을 감지해서 수면 조명이 켜지고 커튼이 닫혔네. 편안한 잠자리가 되었어!' }
+    ];
 
-    $('enNext').addEventListener('click', () => {
-      $('enNext').classList.add('is-off');
-      $('enGo').classList.remove('is-off');
-      $('enText').textContent = '어려운 글자를 쓰지 않아도, 블록을 끼우기만 하면 컴퓨터가 그 순서대로 움직여요. 한번 같이 알아볼까요?';
-      const ws = $('enWs');
-      ['입으로 이동하기', '위로 이동하기', '장으로 이동하기'].forEach((n, i) => {
-        const b = document.createElement('div');
-        b.className = 'en-blk blk';
-        b.textContent = n;
-        b.style.cssText = 'z-index:' + (19 - i) + ';top:' + (144 + i * 74) + 'px;opacity:0;transform:translateY(-40px);transition:opacity .5s,transform .5s';
-        ws.appendChild(b);
-        setTimeout(() => { b.style.opacity = '1'; b.style.transform = 'none'; }, 400 + i * 700);
-      });
+    const timerEl = $('p13Timer');
+    const timerBox = $('p13TimerBox');
+    const btns = $('p13Btns');
+    const scene = $('p13Scene');
+    const clock = new Audio('sound/p13_clock.mp3');
+    clock.loop = true;
+
+    let index = 0;
+    let remain = LIMIT;
+    let tick = null;
+
+    function stopClock() {
+      clearInterval(tick);
+      clock.pause();
+    }
+
+    function start() {
+      const m = MISSIONS[index];
+      $('p13Mission').textContent = 'Mission ' + (index + 1);
+      $('p13Title').textContent = m.alert;
+      $('p13Sensor').textContent = m.sensor;
+      $('p13Alert').textContent = m.alert;
+      $('p13Dash').classList.remove('is-safe');
+      scene.style.backgroundImage = 'url(\'img/p13_scene_m' + (index + 1) + '.png\')';
+      btns.classList.remove('is-locked');
+      remain = LIMIT;
+      timerEl.textContent = remain;
+      timerBox.classList.remove('is-hurry');
+      clock.currentTime = 0;
+      clock.play().catch(() => {});
+      clearInterval(tick);
+      tick = setInterval(() => {
+        remain -= 1;
+        timerEl.textContent = remain;
+        timerBox.classList.toggle('is-hurry', remain <= 5);
+        if (remain <= 0) fail();
+      }, 1000);
+    }
+
+    function fail() {
+      stopClock();
+      btns.classList.add('is-locked');
+      playWrong();
+      $('p13Wrong').classList.remove('is-off');
+    }
+
+    btns.addEventListener('click', (e) => {
+      const btn = e.target.closest('.p13-btn');
+      if (!btn) return;
+      if (btn.dataset.key !== MISSIONS[index].key) {
+        fail();
+        return;
+      }
+      stopClock();
+      btns.classList.add('is-locked');
+      playCorrect();
+      $('p13Dash').classList.add('is-safe');
+      scene.style.backgroundImage = 'url(\'img/p13_scene_m' + (index + 1) + '_on.png\')';
+      $('p13RightText').textContent = MISSIONS[index].right;
+      setTimeout(() => $('p13Right').classList.remove('is-off'), 800);
     });
+
+    $('p13WrongOk').addEventListener('click', () => {
+      $('p13Wrong').classList.add('is-off');
+      resetImageSwap($('p13WrongOk'));
+      start();
+    });
+
+    $('p13RightNext').addEventListener('click', () => {
+      if (index === MISSIONS.length - 1) {
+        navigateTo('page14.html');
+        return;
+      }
+      $('p13Right').classList.add('is-off');
+      resetImageSwap($('p13RightNext'));
+      index += 1;
+      start();
+    });
+
+    start();
   })();
   </script>
 </body>
