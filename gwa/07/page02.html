@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>몽실이의 밤 산책</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 3~5p. 5×5 센서판, 오른쪽 휴대전화에 열 감지 알림이 하나씩 위로 밀리며 등장, 알림 번호를 순서대로 누르기. 3회(알림 1·2·7 → 8·13·18 → 23·24·25).
+           몽실이(🐶)는 임시 이모지, 그림 나오면 교체 */
+        .p02-grid{position:absolute;left:105px;top:60px;width:900px;height:850px;display:grid;grid-template-columns:repeat(5,1fr);gap:20px;background:#2a6bd0;border-radius:14px;padding:30px}
+        .p02-cell{position:relative;box-sizing:border-box;padding:0;border:solid 5px var(--c-ink);border-radius:18px;background:var(--c-white);cursor:pointer;font-family:'Cafe24 Ssurround';font-size:64px;color:var(--c-ink);transition:background .15s}
+        .p02-cell:hover{background:var(--c-pale)}
+        .p02-cell.is-ok{background:#6ee7a6;pointer-events:none}
+        .p02-cell.is-bad{background:#ff7a7a}
+        .p02-dog{position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;display:flex;align-items:center;justify-content:center;font-size:110px;line-height:1;z-index:3;pointer-events:none;animation:p02-pop 1.6s ease-in-out forwards}
+        .p02-dog.is-stay{animation:p02-pop-stay .5s ease-out forwards}
+        @keyframes p02-pop{0%{transform:translateY(60px) scale(.4);opacity:0}25%,70%{transform:none;opacity:1}100%{transform:translateY(60px) scale(.4);opacity:0}}
+        @keyframes p02-pop-stay{from{transform:translateY(60px) scale(.4);opacity:0}to{transform:none;opacity:1}}
+
+        .p02-phone{left:1202px}
+        .p02-screen{position:relative;width:100%;height:100%;box-sizing:border-box;padding:56px 18px 60px;display:flex;flex-direction:column;background:var(--c-pale)}
+        .p02-feed{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-end;gap:16px;overflow:hidden}
+        .p02-noti{flex:none;box-sizing:border-box;padding:16px 20px;background:var(--c-white);border-left:solid 10px #e5484d;border-radius:18px;box-shadow:0 6px 16px rgba(0,0,0,.12);font-family:'Pretendard';font-size:24px;font-weight:700;color:var(--c-ink);animation:p02-in .45s ease-out}
+        .p02-noti b{display:block;font-weight:700}
+        .p02-noti span{display:block;margin-top:4px;font-size:21px;font-weight:600;color:#e5484d}
+        .p02-noti em{font-style:normal;color:var(--c-blue)}
+        @keyframes p02-in{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+
+        .p02-say{position:absolute;left:965px;top:640px;width:300px;box-sizing:border-box;padding:26px 20px;margin:0;text-align:center;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:30px;font-family:'Cafe24 Ssurround';font-size:52px;line-height:1.2;color:var(--c-ink);letter-spacing:-0.05em;z-index:5;animation:p02-in .4s ease-out}
+        .p02-say.is-off{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p02-grid" id="p02Grid"></div>
+          <div class="phone-frame has-cam p02-phone">
+            <div class="phone-screen">
+              <div class="p02-screen"><div class="p02-feed" id="p02Feed"></div></div>
+              <div class="phone-status is-dark"></div><div class="phone-nav"></div>
+            </div>
+          </div>
+          <p class="p02-say is-off" id="p02Say">찾았다!<br>몽실이!</p>
+
+          <div class="avatar-modal is-off" id="p02Done">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-title">정말 잘했어요!</p>
+                    <p class="avatar-card-text">열 감지 센서가 보내준 데이터를 따라<br>몽실이가 지나간 길을 완벽하게 찾아냈어요.</p>
+                  </div>
+                  <a href="page03.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">이렇게 컴퓨터는 차가움, 뜨거움, 냄새,<br>물의 양 같은 주변 환경을 ‘센서’로 감지해요.</p>
+                  </div>
+                  <a href="page03.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">이미지와 소리 뿐만 아니라 차가움, 뜨거움,<br>냄새도 느낄 수 있는 센서에 대해 알아볼까요?</p>
+                  </div>
+                  <a href="page03.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="몽실이의 밤 산책" data-next="page03.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const ROUNDS = [
+      { notis: [['20:10', 1], ['20:11', 2], ['20:12', 7]] },
+      { notis: [['20:13', 8], ['20:14', 13], ['20:15', 18]] },
+      { notis: [['20:16', 23], ['20:17', 24], ['20:18', 25]] }
+    ];
+    const grid = $('p02Grid');
+    const feed = $('p02Feed');
+    const cells = [];
+    for (let n = 1; n <= 25; n++) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'p02-cell';
+      b.textContent = n;
+      b.addEventListener('click', () => pick(n, b));
+      grid.appendChild(b);
+      cells[n] = b;
+    }
+
+    let round = 0, shown = 0, next = 0, locked = true;
+
+    const notiSfx = makeSfx('sound/upload.mp3');
+
+    function addNoti() {
+      const [time, n] = ROUNDS[round].notis[shown];
+      const olds = Array.from(feed.children);
+      const before = olds.map((el) => el.getBoundingClientRect().top);
+      const d = document.createElement('div');
+      d.className = 'p02-noti';
+      d.innerHTML = '<b>열감지</b><span><em>' + time + '</em> ' + n + '번 센서에서 체온 감지됨</span>';
+      feed.appendChild(d);
+      const k = 1920 / document.getElementById('stage').getBoundingClientRect().width;
+      olds.forEach((el, i) => {
+        const shift = (before[i] - el.getBoundingClientRect().top) * k;
+        el.style.transition = 'none';
+        el.style.transform = 'translateY(' + shift + 'px)';
+        void el.offsetWidth;
+        el.style.transition = 'transform .5s ease';
+        el.style.transform = '';
+      });
+      notiSfx();
+      shown += 1;
+    }
+
+    function startRound() {
+      shown = 0; next = 0;
+      locked = false;
+      const total = ROUNDS[round].notis.length;
+      let i = 0;
+      const tick = () => {
+        addNoti();
+        if (++i < total) setTimeout(tick, 1100);
+      };
+      setTimeout(tick, 500);
+    }
+
+    function pick(n, b) {
+      if (locked || next >= shown) return;
+      const want = ROUNDS[round].notis[next][1];
+      if (n !== want) {
+        playWrong();
+        b.classList.add('is-bad');
+        setTimeout(() => b.classList.remove('is-bad'), 500);
+        return;
+      }
+      playCorrect();
+      b.classList.add('is-ok');
+      next += 1;
+      if (next < ROUNDS[round].notis.length) return;
+      locked = true;
+      const last = round === ROUNDS.length - 1;
+      const dog = document.createElement('div');
+      dog.className = 'p02-dog' + (last ? ' is-stay' : '');
+      dog.textContent = '🐶';
+      b.appendChild(dog);
+      if (last) {
+        $('p02Say').classList.remove('is-off');
+        setTimeout(() => $('p02Done').classList.remove('is-off'), 2000);
+        return;
+      }
+      setTimeout(() => {
+        dog.remove();
+        round += 1;
+        feed.innerHTML = '';
+        startRound();
+      }, 1800);
+    }
+    startRound();
+  })();
+  </script>
+</body>
+</html>

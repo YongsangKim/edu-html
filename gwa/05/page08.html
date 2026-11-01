@@ -12,7 +12,6 @@
         .guide-bubble .card-btn{width:150px;min-width:0;height:64px;font-size:40px;padding:6px 0 0;margin:6px 0;align-self:flex-end}
         .p08-screen{position:relative;width:100%;height:100%}
         .p08-app i{background:#4f7cf7;font-size:70px}
-        .p08-app.is-blink i{animation:cv-target 1.2s ease-in-out infinite}
         .p08-cards{position:absolute;left:1260px;top:60px;width:610px;display:flex;flex-direction:column;gap:26px}
         .p08-card{min-height:190px;box-sizing:border-box;padding:30px 30px 20px 140px;display:flex;align-items:center;position:relative;
           background:var(--c-white);border:solid 5px var(--c-purple);border-radius:30px;box-shadow:0 8px 0 0 var(--c-sky-pale);
@@ -37,7 +36,7 @@
           <div class="phone-frame p08-phone">
             <div class="phone-screen p08-screen app-home is-sky">
               <div class="phone-status is-dark"></div>
-              <a href="page09.html" class="js-nav-effect js-sfx app-icon is-dark p08-app" id="p08App" data-sound="sound/click.mp3" style="text-decoration:none"><i><img src="../../resources/img/app/logo_sullivan.png" alt="" onerror="this.replaceWith(document.createTextNode('👁'))"></i>설리번 플러스</a>
+              <a href="page09.html" class="js-nav-effect js-sfx app-icon is-dark p08-app" id="p08App" data-sound="sound/click.mp3" style="text-decoration:none"><i><img src="../../resources/img/app/logo_sullivan.png" alt=""></i>설리번 플러스</a>
               <div class="phone-nav"></div>
             </div>
           </div>
@@ -62,7 +61,7 @@
     const cards = Array.from(document.querySelectorAll('.p08-card'));
     const say = initGuideSay({ bubble: $('p08Bubble'), img: $('p08Char'), set: $('p08Set') });
     say('눈이 되어주는 설리번+를 활용하여 우리 주변의 사물과 글자, 얼굴을 인식해볼까요?<button class="card-btn is-popup js-sfx" id="p08Ok" data-sound="sound/click.mp3">확인</button>', 'smile_present');
-    $('p08App').addEventListener('click', (e) => { if (!$('p08App').classList.contains('is-blink')) e.stopImmediatePropagation(), e.preventDefault(); }, true);
+    $('p08App').addEventListener('click', (e) => { if (!$('p08App').classList.contains('is-ready')) e.stopImmediatePropagation(), e.preventDefault(); }, true);
     $('p08Bubble').addEventListener('click', (e) => {
       if (!e.target.closest('#p08Ok')) return;
       playClick();
@@ -71,8 +70,8 @@
         c.classList.add('is-on');
         playDrag();
         if (i === cards.length - 1) setTimeout(() => {
-          say('주의사항 카드 4개를 모두 확인했어요! 설리번 플러스 앱을 클릭하세요.', 'wink_point3');
-          $('p08App').classList.add('is-blink');
+          say('주의사항 카드 4개를 모두 확인했어요! 설리번 플러스 앱을 클릭하세요.', 'wink_present2');
+          $('p08App').classList.add('is-ready');
           pointFingerAt($('p08App'), { onMain: true, dx: 15, dy: -37 });
         }, 900);
       }, 1200 * (i + 1)));

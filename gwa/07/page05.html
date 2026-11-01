@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>센서의 종류와 역할 알아보기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 8~9p. 왼쪽 센서 이름 5개 ↔ 오른쪽 역할 5개를 점에서 점으로 끌어 이음(공용 initLineMatchQuiz). 센서 그림은 임시 이모지 */
+        .line-quiz{position:absolute;left:0;top:0;width:1920px;height:960px}
+        .line-quiz-svg{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none;z-index:1}
+        .line-quiz-line{stroke:#ffe600;stroke-width:12;stroke-linecap:round}
+        .line-quiz-temp{stroke:#ffe600;stroke-width:12;stroke-linecap:butt;stroke-dasharray:18 14}
+        .p05-item{position:absolute;z-index:2;height:150px;box-sizing:border-box;display:flex;align-items:center;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:20px;font-family:'Cafe24 Ssurround';letter-spacing:-0.05em}
+        .p05-item.left{left:60px;width:620px;padding-left:24px}
+        .p05-item.right{left:1240px;width:620px;padding:0 36px;font-size:52px;line-height:1.2;letter-spacing:-0.06em;word-break:keep-all;text-wrap:balance}
+        .p05-pic{flex:none;width:104px;height:104px;margin-right:36px;display:flex;align-items:center;justify-content:center;font-size:76px;line-height:1}
+        .p05-name{font-size:56px}
+        .line-dot{position:absolute;top:50%;width:36px;height:36px;margin-top:-18px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:50%;background:#a9b4cc;cursor:grab;transition:background .15s}
+        .line-dot.is-on{background:#ffe600}
+        .p05-item.left .line-dot{right:-70px}
+        .p05-item.right .line-dot{left:-76px;cursor:default}
+        .p05-item.is-red{color:#e04a4a}.p05-item.is-blue{color:#3f7fe0}.p05-item.is-purple{color:#7a45c8}.p05-item.is-orange{color:#f08a1c}.p05-item.is-green{color:#2f9e44}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="line-quiz" id="p05Quiz">
+            <div class="p05-item left line-item left is-red" data-id="1" style="top:50px"><span class="p05-pic">🌡️</span><span class="p05-name">온·습도 센서</span><span class="line-dot"></span></div>
+            <div class="p05-item left line-item left is-blue" data-id="2" style="top:222px"><span class="p05-pic">🏃</span><span class="p05-name">동작 센서</span><span class="line-dot"></span></div>
+            <div class="p05-item left line-item left is-purple" data-id="3" style="top:394px"><span class="p05-pic">⚖️</span><span class="p05-name">압력 센서</span><span class="line-dot"></span></div>
+            <div class="p05-item left line-item left is-orange" data-id="4" style="top:566px"><span class="p05-pic">💧</span><span class="p05-name">침수 센서</span><span class="line-dot"></span></div>
+            <div class="p05-item left line-item left is-green" data-id="5" style="top:738px"><span class="p05-pic">☁️</span><span class="p05-name">가스 센서</span><span class="line-dot"></span></div>
+
+            <div class="p05-item right line-item right is-red" data-id="1" style="top:50px"><span class="line-dot"></span>주변의 차가움과 뜨거움을 숫자로 감지해요.</div>
+            <div class="p05-item right line-item right is-purple" data-id="3" style="top:222px"><span class="line-dot"></span>누르는 힘과 무게를 감지해요.</div>
+            <div class="p05-item right line-item right is-green" data-id="5" style="top:394px"><span class="line-dot"></span>연기나 위험가스를 감지해요.</div>
+            <div class="p05-item right line-item right is-blue" data-id="2" style="top:566px"><span class="line-dot"></span>사람이나 물체의 움직임을 감지해요.</div>
+            <div class="p05-item right line-item right is-orange" data-id="4" style="top:738px"><span class="line-dot"></span>물이 새거나 차오르는 것을 감지해요.</div>
+            <svg class="line-quiz-svg" width="1920" height="960"></svg>
+          </div>
+          <div class="line-result-wrong is-off" data-sound="sound/incorrect.mp3"></div>
+
+          <div class="avatar-modal is-off" id="p05Done">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-title">정말 잘했어요!</p>
+                    <p class="avatar-card-text">각 센서의 역할을<br>정확하게 분류했어요.</p>
+                  </div>
+                  <a href="page06.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">이제 이 센서들이 집 안 어디에<br>설치되어 있는지 직접 찾아볼까요?</p>
+                  </div>
+                  <a href="page06.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="센서의 종류와 역할 알아보기" data-next="page06.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const quiz = $('p05Quiz');
+    const left = Array.from(quiz.querySelectorAll('.line-item.left'));
+    const sync = () => quiz.querySelectorAll('.line-item').forEach((el) => el.querySelector('.line-dot').classList.toggle('is-on', el.dataset.matched === 'true'));
+    quiz.addEventListener('pointerdown', (e) => { if (e.target.closest('.line-item.left') && e.target.classList.contains('line-dot')) e.target.classList.add('is-on'); });
+    quiz.addEventListener('pointercancel', sync);
+    quiz.addEventListener('pointerup', () => {
+      sync();
+      setTimeout(() => {
+        if (left.every((el) => el.dataset.matched === 'true')) $('p05Done').classList.remove('is-off');
+      }, 900);
+    });
+  })();
+  </script>
+</body>
+</html>
