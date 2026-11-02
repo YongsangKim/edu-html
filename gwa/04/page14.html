@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마지막 점검! AI의 실수를 찾아라!</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 디자인 없음, 사회 디자인 문법(파란 판 + 흰 카드)으로 만든 러프한 틀 - 기획서 63~73p(Summery 표 반영). 발표자료 5장, 장마다 오류 1개: 잘못된 부분(정답 영역)을 누르면 성공 효과음 → 바른 자료로 수정, 말풍선 문구 변경, [자료 확인하기]가 [다음]으로 바뀜.
+           별 5개가 정답마다 왼쪽부터 컬러, 모두 채우면 page15. 오류 위치(data-err)는 임시: 기획서에서 파란 영역으로만 표시돼 텍스트로는 알 수 없음 */
+
+        .p14-char{left:40px;top:300px;width:420px;height:560px}
+        .p14-bubble{left:40px;bottom:690px;width:440px;padding:24px 14px;font-size:42px;margin:0}
+        .p14-board{position:absolute;left:500px;top:90px;width:1380px;height:780px;border-radius:20px;background:#2a6bd0}
+        .p14-slide{position:absolute;left:520px;top:110px;width:1050px;height:740px;box-sizing:border-box;padding:36px 44px;border:solid 6px var(--c-ink);border-radius:24px;background:var(--c-white);box-shadow:0 8px 0 0 rgba(1,24,92,.35);display:flex;flex-direction:column;gap:22px}
+        .p14-part{position:relative;box-sizing:border-box;border:dashed 4px transparent;border-radius:18px;cursor:pointer;font-family:'Cafe24 Ssurround';letter-spacing:-0.05em;color:var(--c-ink);word-break:keep-all;padding:6px 14px 0}
+        .p14-part:hover{border-color:var(--c-violet)}
+        .p14-part:active{border-color:var(--c-orchid)}
+        .p14-part.is-title{font-size:64px;color:var(--c-purple)}
+        .p14-part.is-text{font-size:42px;line-height:1.3}
+        .p14-part.is-art{flex:1 1 auto;display:flex;align-items:center;justify-content:center;font-size:110px;line-height:1.2;white-space:nowrap}
+        .p14-slide.is-solved .p14-part{pointer-events:none}
+        .p14-slide.is-solved .p14-part.is-err{border-color:#33b560;background:rgba(51,181,96,.1)}
+        .p14-part.is-wrong{animation:fix-word-shake .3s ease}
+        .p14-side{position:absolute;left:1600px;top:260px;width:250px}
+        .p14-side .card-btn{min-width:0;width:100%;height:auto;min-height:120px;padding:10px 12px 6px;font-size:46px;line-height:1.15}
+        .p14-stars{position:absolute;left:1600px;top:130px;width:250px;height:100px;box-sizing:border-box;border-radius:50px;background:var(--c-white);display:flex;align-items:center;justify-content:center;gap:2px;font-size:34px;line-height:1}
+        .p14-stars i{font-style:normal;filter:grayscale(1);opacity:.45}
+        .p14-stars i.is-on{filter:none;opacity:1}
+        .p14-ref{z-index:130}
+        .p14-ref .avatar-card{width:1300px}
+        .p14-ref .avatar-card-text{font-size:50px}
+        .p14-ref .avatar-card-title{margin-bottom:30px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p14-board"></div>
+          <div class="p14-stars" id="p14Stars"><i>⭐</i><i>⭐</i><i>⭐</i><i>⭐</i><i>⭐</i></div>
+          <p class="guide-bubble is-center p14-bubble" id="p14Say"></p>
+          <div class="char-box p14-char"><img src="../img/character/gwa_main.png" alt="캐릭터"></div>
+
+          <div class="p14-slide" id="p14Slide"></div>
+
+          <div class="p14-side">
+            <button type="button" class="card-btn is-popup js-sfx" id="p14Btn" data-sound="sound/click.mp3">자료 확인하기</button>
+          </div>
+
+          <div class="avatar-modal p14-ref is-off" id="p14RefModal">
+            <div class="avatar-card">
+              <p class="avatar-card-title">참고자료</p>
+              <div id="p14RefBody"></div>
+              <button type="button" class="avatar-card-btn card-btn is-popup js-sfx" id="p14RefClose" data-sound="sound/click.mp3">닫기</button>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="마지막 점검! AI의 실수를 찾아라!" data-next="page15.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const ROUNDS = [
+      { ask: '자료와 틀린 부분이<br>있을까?', ok: '날씨 기호 이름이<br>잘못 적혀 있었어!', title: '날씨와 날씨 기호', text: '날씨는 다양한 기호로 나타낼 수 있어요. 날씨에 따라 사용하는 기호를 알아볼까요?', art: '☀️ ☁️ 🌧️ ❄️ 🌀', err: 'art', ref: '<p class="avatar-card-text">🖼️</p>' },
+      { ask: '어디에서 생성 오류가<br>발생했을까?', ok: '이미지의 생성 오류가<br>있었어!', title: '기온과 습도의 측정', text: '기온은 공기의 온도를 나타내고, 습도는 공기가 얼마나 습한지를 나타내요.<br>기온은 온도계로, 습도는 습도계로 측정할 수 있어요.', art: '🌡️', err: 'art', ref: '<p class="avatar-card-text">🌡️ 온도계 &nbsp;&nbsp; 💧 습도계</p>' },
+      { ask: '어디에서 생성 오류가<br>발생했을까?', ok: '이미지에서 글자<br>생성 오류가 있었어!', title: '일기예보 표', text: '일기예보를 통해 각 지역의 날씨와 기온, 습도 정보를 알 수 있어요.', art: '📋', err: 'art', ref: '<p class="avatar-card-text">지역별 날씨 정보<br>서울은 맑고, 기온은 22℃, 습도는 50% 입니다.<br>부산은 흐리고, 기온은 24℃, 습도는 65% 입니다.<br>광주는 비가 오고, 기온은 21℃, 습도는 80% 입니다.</p>' },
+      { ask: '어디에서 AI 환각이<br>발생했을까?', ok: '발생 장소의 내용<br>오류가 있었어!', title: '태풍이란 무엇일까요?', text: '태풍은 강한 바람과 많은 비를 동반할 수 있는 기상 현상이에요.<br>태풍의 특징을 알아볼까요?', art: '🌀', err: 'text', ref: '<p class="avatar-card-text">태풍의 발생과 특징<br>태풍은 따뜻한 바다에서 발생합니다.<br>강한 바람과 많은 비를 동반할 수 있습니다.</p>' },
+      { ask: '자료에 없던<br>부분이 있을까?', ok: '자료에 없던 추가내용<br>부분이 들어있었어!', title: '태풍 ‘루사’가 남긴 피해', text: '2002년 우리나라에 영향을 준 태풍 루사는 강한 바람과 많은 비를 동반하여 큰 피해를 주었어요.', art: '🌪️', err: 'text', ref: '<p class="avatar-card-text">2002년 태풍 ‘루사’<br>태풍 ‘루사’는 2002년 우리나라에 영향을 주었습니다.<br>강한 바람과 많은 비를 동반하였으며,<br>인명 및 재산 피해가 발생하였습니다.</p>' },
+    ];
+    let idx = 0;
+    let solved = false;
+
+    const slide = $('p14Slide');
+    const btn = $('p14Btn');
+
+    function show() {
+      const r = ROUNDS[idx];
+      solved = false;
+      $('p14Say').innerHTML = r.ask;
+      slide.classList.remove('is-solved');
+      slide.innerHTML =
+        '<div class="p14-part is-title' + (r.err === 'title' ? ' is-err' : '') + '" data-part="title">' + r.title + '</div>' +
+        '<div class="p14-part is-text' + (r.err === 'text' ? ' is-err' : '') + '" data-part="text">' + r.text + '</div>' +
+        '<div class="p14-part is-art' + (r.err === 'art' ? ' is-err' : '') + '" data-part="art">' + r.art + '</div>';
+      $('p14RefBody').innerHTML = r.ref;
+      btn.textContent = '자료 확인하기';
+    }
+
+    function stars() {
+      Array.from($('p14Stars').children).forEach((s, i) => s.classList.toggle('is-on', i < idx + (solved ? 1 : 0)));
+    }
+
+    slide.addEventListener('click', (e) => {
+      const part = e.target.closest('.p14-part');
+      if (!part || solved) return;
+      if (part.dataset.part === ROUNDS[idx].err) {
+        solved = true;
+        playCorrect();
+        slide.classList.add('is-solved');
+        $('p14Say').innerHTML = ROUNDS[idx].ok;
+        btn.textContent = '다음';
+        stars();
+      } else {
+        playWrong();
+        part.classList.remove('is-wrong');
+        void part.offsetWidth;
+        part.classList.add('is-wrong');
+      }
+    });
+
+    btn.addEventListener('click', () => {
+      if (!solved) { $('p14RefModal').classList.remove('is-off'); return; }
+      idx++;
+      if (idx >= ROUNDS.length) { navigateTo('page15.html'); return; }
+      show();
+      stars();
+    });
+
+    $('p14RefClose').addEventListener('click', () => $('p14RefModal').classList.add('is-off'));
+
+    show();
+    stars();
+  })();
+  </script>
+</body>
+</html>

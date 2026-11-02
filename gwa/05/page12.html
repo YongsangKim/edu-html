@@ -6,8 +6,6 @@
     <title>카메라와 이미지 인식 퀴즈!</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 29~34p. 5문제: 설리번 플러스 폰 화면 속 사진(img/p13_photo_1~5.png, 없으면 이모지) + AI 분석 설명 3~4개(음성 듣기 버튼) 중 잘못된 1개의 번호 캐릭터를 선택.
-           정답·오답 화면 없이 바로 다음 문제 → 마지막 뒤 채점 모달(1문제 20점, 틀린 문제 다시 풀기 / 끝내기). 캐릭터 그림은 img/p13_char_1~4.png(없으면 이모지) */
         .p13-phone{left:120px;top:175px;width:450px;height:895px;transform:scale(.85);transform-origin:0 0}
         .p09-app{background:#f4f8ff;font-family:'Pretendard';color:#222}
         .p09-app svg{display:block;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
@@ -29,20 +27,22 @@
         .p09-mic svg{width:34px;height:34px}
         .p13-photo{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:240px;line-height:1;overflow:hidden}
         .p13-photo img{display:block;width:100%;height:100%;object-fit:cover}
-        .p13-opts{position:absolute;left:600px;top:185px;width:1240px;height:480px;display:flex;flex-direction:column;justify-content:center;gap:18px;background:#266cc8;border-radius:10px;padding:20px}
+        .p13-bg{background:url('img/p12_bg.jpg') center / cover no-repeat}
+        .p13-opts{position:absolute;left:560px;top:180px;width:1295px;height:420px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;gap:18px;padding:20px 48px;border-radius:20px;background:rgba(255,255,255,.50);box-shadow:0 0 0 5px rgba(5, 60, 133, 0.5)}
         .p13-opt{height:100px;box-sizing:border-box;padding:5px 10px 0 25px;display:flex;align-items:center;gap:20px;background:var(--c-white);border-radius:20px;
           font-family:'Cafe24 Ssurround';font-size:50px;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all}
         .p13-opt span{flex:1 1 auto}
         .p13-opt span em{display:inline-flex;font-style:normal;font-size:46px;width:60px;height:60px;border-radius:50%;background:#023186;color:#ffe15a;align-items:center;justify-content:center;padding-top:5px;box-sizing:border-box}
-        .p13-sound{flex:0 0 auto;width:84px;height:84px;margin-top:-8px;padding:0;border:solid 5px #266cc8;border-radius:50%;background:var(--c-cream);font-size:42px;line-height:1;cursor:pointer}
+        .p13-sound{flex:0 0 auto;width:74px;height:74px;margin-top:-8px;padding:0;border:solid 5px #266cc8;border-radius:50%;background:var(--c-white);color:#266cc8;display:flex;align-items:center;justify-content:center;cursor:pointer}
+        .p13-sound svg{width:48px;height:48px;fill:currentColor;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
         .p13-sound:disabled{opacity:.35;cursor:default}
-        .p13-sound.is-playing{background:var(--c-yellow)}
-        .p13-chars{position:absolute;left:600px;top:680px;width:1240px;display:flex;justify-content:space-around}
-        .p13-char{position:relative;width:240px;height:250px;padding:0;border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
-        .p13-char .face{flex:1 1 auto;display:flex;align-items:center;justify-content:center;font-size:130px;line-height:1;transition:transform .15s}
-        .p13-char .face img{display:block;max-height:170px;max-width:200px}
-        .p13-char:hover .face{transform:scale(1.08)}
-        .p13-char .no{width:150px;height:70px;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:#023186;font-family:'Cafe24 Ssurround';font-size:50px;color:#ffe15a}
+        .p13-sound.is-playing{background:#ffe15a}
+        .p13-chars{position:absolute;left:560px;bottom:20px;width:1295px;display:flex;justify-content:center;align-items:flex-end}
+        .p13-char{position:relative;flex:0 0 291px;height:390px;padding:0;border:0;background:none;cursor:pointer;display:flex;align-items:flex-end;justify-content:center}
+        .p13-char img{display:block;max-width:none}
+        .p13-char .is-over{position:absolute;left:50%;bottom:0;transform:translateX(-50%);opacity:0}
+        .p13-char:hover .is-over{opacity:1}
+        .p13-char:hover .is-base{opacity:0}
         .p13-res-score.avatar-card-text{font-size:110px;line-height:1.1;color:var(--c-violet);margin-top:-50px}
         .p13-res-btns{display:flex;gap:30px;margin-bottom:-90px;justify-content:flex-end}
         .p13-res-btns .avatar-card-btn{position:static;white-space:nowrap;min-width:0;padding-left:20px;padding-right:20px}
@@ -53,7 +53,7 @@
   <div id="viewport" class="viewport">
     <div id="stage-spacer">
       <div id="stage" class="stage">
-        <main class="bg-default">
+        <main class="p13-bg">
           <p class="ask-pill has-stage is-fit"><i id="p13Stage">문제 1</i><span>잘못된 분석 1개를 골라 주세요.</span></p>
           <div class="phone-frame has-cam p13-phone">
             <div class="phone-screen p09-app">
@@ -109,7 +109,6 @@
       { emoji: '😄', opts: ['입을 벌리고 환하게 웃고 있는 얼굴입니다', '화가 나서 눈살을 잔뜩 찌푸리고 있습니다', '단정하게 머리를 빗은 학생 입니다', '10대 학생의 얼굴로 분석 됩니다'], wrong: 2 },
       { emoji: '🚌', opts: ['파란색 버스입니다', '커다란 바퀴가 달린 이동수단 입니다', '아스팔트 도로 위를 지나가는 있습니다', '노란색 꼬마 유치원 버스가 달리고 있습니다'], wrong: 4 }
     ];
-    const CHARS = ['🤖', '🦊', '🐻', '🐰'];
     const picked = [];
     let queue = [0, 1, 2, 3, 4], pos = 0, speaking = false;
 
@@ -135,8 +134,8 @@
       d.opts.forEach((t, k) => {
         const row = document.createElement('div');
         row.className = 'p13-opt';
-        row.innerHTML = '<span><em>' + (k + 1) + '</em> ' + t + '</span><button class="p13-sound" aria-label="음성 듣기">🔊</button>';
-        row.querySelector('button').addEventListener('click', (e) => sp(t, e.currentTarget));
+        row.innerHTML = '<span><em>' + (k + 1) + '</em> ' + t + '</span><button class="p13-sound" aria-label="음성 듣기"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12" fill="none"/></svg></button>';
+        row.querySelector('button').addEventListener('click', (e) => { playClick(); sp(t, e.currentTarget); });
         $('p13Opts').appendChild(row);
       });
       $('p13Chars').innerHTML = '';
@@ -144,7 +143,7 @@
         const c = document.createElement('button');
         c.className = 'p13-char';
         c.setAttribute('aria-label', '캐릭터 ' + (k + 1));
-        c.innerHTML = '<span class="face"><img src="img/p13_char_' + (k + 1) + '.png" alt="" onerror="this.replaceWith(document.createTextNode(\'' + CHARS[k] + '\'))"></span><span class="no">' + (k + 1) + '</span>';
+        c.innerHTML = '<img class="is-base" src="img/p12_char_' + (k + 1) + '.png" alt=""><img class="is-over" src="img/p12_char_' + (k + 1) + '_over.png" alt="">';
         c.addEventListener('click', () => {
           try { speechSynthesis.cancel(); } catch (e) {}
           playClick();

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI의 실수를 직접 확인하고 수정하기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 19p(Summery 표 반영). 안드로이드 기본 배경화면에 Gemini 앱만 있는 화면: Gemini를 누르면 page10(실습) */
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="guide-set is-main" id="p09Set">
+            <p class="guide-bubble is-center" id="p09Bubble"></p>
+            <div class="guide-character"><img id="p09Char" src="../img/character/gwa_main.png" alt="메인 캐릭터"></div>
+          </div>
+
+          <div class="phone-frame has-cam gc-phone" data-screen="home"><div class="phone-screen">
+            <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gstar" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fb4b4b"/><stop offset=".25" stop-color="#f6b40e"/><stop offset=".5" stop-color="#3b82f6"/><stop offset=".8" stop-color="#2f7df6"/><stop offset="1" stop-color="#12b866"/></linearGradient></defs></svg>
+
+            <div class="gc gc-home app-home is-purple">
+              <div class="phone-status is-dark" data-time="17:58"></div>
+              <button type="button" class="app-icon is-dark" id="p09App" aria-label="Gemini 앱"><i><i data-ic="gemini"></i></i>Gemini</button>
+              <div class="phone-nav"></div>
+            </div>
+          </div></div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="AI의 실수를 직접 확인하고 수정하기" data-next="page10.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script src="../../resources/js/box-edit.js"></script>
+  <script>
+  (function () {
+    const say = initGuideSay({ bubble: $('p09Bubble'), img: $('p09Char'), set: $('p09Set') });
+    say('Google Gemini를 활용하여<br>AI 이미지 생성 오류를 수정하고,<br>AI 환각을 확인해볼까요?', 'wink_point2', true);
+    const FG = { app: [15, -37] };
+    const HOT = { app: [0, 0, 0, 0] };
+    const app = $('p09App');
+    app.dataset.hit = 'app';
+    BoxEdit.padEl(app, 'app', HOT);
+    pointFingerAt(app, { onMain: true, pulse: false, dx: FG.app[0], dy: FG.app[1] });
+    app.addEventListener('click', () => { playClick(); clearFingers(); navigateTo('page10.html'); });
+    if (BoxEdit.on) {
+      BoxEdit.stepEdit({ key: () => 'app', count: 1, get: () => 1, set: () => {}, go: () => {}, label: () => '단계 1 / 1 · 홈(앱 아이콘)', say, bubble: $('p09Bubble'), img: $('p09Char') });
+    }
+  })();
+  </script>
+</body>
+</html>

@@ -2542,7 +2542,13 @@ const ICONS = {
   nbFnSlide: '<svg viewBox="0 0 44 44"><rect x="4" y="9" width="36" height="26" rx="2"/><rect x="8" y="13" width="28" height="18"/></svg>',
   nbFnInfo: '<svg viewBox="0 0 44 44"><path d="M10 10v24M10 10h4v24M22 18v16M22 18h4v16M33 24v10M33 24h4v10"/></svg>',
   nbFnReport: '<svg viewBox="0 0 44 44"><path d="M8 14v24h22M14 8h16l4 4v18H14z"/><path d="M34 4l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></svg>',
-  nbFnAudio: '<svg viewBox="0 0 44 44"><path d="M8 20v4M14 14v16M20 8v28M26 16v12M32 12v20"/><path d="M38 6l1.5 3.5L43 11l-3.5 1.5L38 16l-1.5-3.5L33 11l3.5-1.5z"/></svg>'
+  nbFnAudio: '<svg viewBox="0 0 44 44"><path d="M8 20v4M14 14v16M20 8v28M26 16v12M32 12v20"/><path d="M38 6l1.5 3.5L43 11l-3.5 1.5L38 16l-1.5-3.5L33 11l3.5-1.5z"/></svg>',
+  lensG: '<svg viewBox="0 0 44 44"><path d="M8 16v-4a4 4 0 0 1 4-4h4M28 8h4a4 4 0 0 1 4 4v4M36 28v4a4 4 0 0 1-4 4h-4M16 36h-4a4 4 0 0 1-4-4v-4"/><circle cx="22" cy="22" r="6"/></svg>',
+  searchAi: '<svg viewBox="0 0 44 44"><circle cx="18" cy="18" r="10"/><path d="M26 26l10 10"/><path d="M33 8l1.5 3.5L38 13l-3.5 1.5L33 18l-1.5-3.5L28 13l3.5-1.5z"/></svg>',
+  waveG: '<svg viewBox="0 0 44 44"><path d="M8 20v4M15 14v16M22 8v28M29 14v16M36 20v4"/></svg>',
+  imgG: '<svg viewBox="0 0 44 44"><rect x="6" y="8" width="32" height="28" rx="6"/><circle cx="17" cy="19" r="3"/><path d="M8 32l9-8 6 5 5-4 8 7"/></svg>',
+  bellG: '<svg viewBox="0 0 44 44"><path d="M10 31h24l-3-5V19a9 9 0 0 0-18 0v7z"/><path d="M18 35a4 4 0 0 0 8 0"/></svg>',
+  histG: '<svg viewBox="0 0 44 44"><circle cx="24" cy="22" r="12"/><path d="M24 15v8l5 3M8 22l-1 6 6-1"/></svg>'
 };
 
 /* 글자를 한 자씩 써 넣는 연출(채팅 답변·프롬프트 입력 등). 멈추는 함수를 돌려줌.
@@ -3920,4 +3926,76 @@ fillIcons();
 /* JS 문자열에 넣을 아이콘: ic('이름', 'width="46" style="..."') — 속성을 svg에 더해 줌 */
 function ic(name, attrs) {
   return ICONS[name].replace('<svg ', '<svg ' + (attrs ? attrs + ' ' : ''));
+}
+
+/* Gemini 채팅 폰 화면(.gc-*, common.css)을 움직이는 도우미. 마크업은 sa/09/page09 · gwa/04/page10 참고.
+   const gc = initGeminiChat({ phone, screen, chat, input, text })  — phone: .gc-phone, screen: .phone-screen, chat: .gc-msgs, input: .gc-input, text: 입력창 안 .is-gap 글자 칸
+   gc.setInput(v) 입력창 글자(빈 값이면 안내 문구) · gc.kb(on) 키보드+커서 · gc.talk() 대화 시작(인사 숨김) · gc.wait(on) 답변 대기 표시 · gc.clear() 대화 비움
+   gc.addMe(v) 내 말풍선 · gc.addAi(html) 답변 칸(요소를 돌려줌) · gc.think(el) 점 3개 · gc.acts(el, 'text'|'pic') 답변 아래 아이콘줄+안내문
+   gc.addPic({ src, gen }) 이미지 답변(.gc-pic, src 없거나 파일이 없으면 원 자리표시자, gen 이면 생성 중 모양) → { ai, pic }
+   gc.typePrompt(v, done) 입력창에 글자가 한 자씩 써짐(첫 글자부터 보내기 버튼) · gc.typeAnswer(el, v, done, speed) 답변이 한 자씩 써지고 끝나면 아이콘줄 */
+function initGeminiChat(o) {
+  const phone = o.phone, screen = o.screen, chat = o.chat, input = o.input, text = o.text;
+  const scroll = () => { chat.scrollTop = chat.scrollHeight; };
+  const para = (s) => '<p>' + s.split('\n').join('</p><p>') + '</p>';
+  const ACTS = {
+    text: [ICONS.thumb, ICONS.thumbDown, ICONS.reload, ICONS.out, ICONS.copy, ICONS.dotsH, ICONS.speakerWave],
+    pic: [ICONS.thumb, ICONS.thumbDown, ICONS.reload, ICONS.out, ICONS.dotsH]
+  };
+  const api = {
+    setInput(v) {
+      text.textContent = v || 'Gemini에게 물어보세요';
+      text.classList.toggle('is-ph', !v);
+      input.classList.toggle('has-text', !!v);
+    },
+    kb(on) { screen.classList.toggle('has-kb', on); input.classList.toggle('is-focus', on); },
+    talk(on) { phone.classList.toggle('is-talk', on !== false); },
+    wait(on) { phone.classList.toggle('is-wait', on !== false); },
+    clear() { chat.innerHTML = ''; },
+    addMe(v) {
+      const d = document.createElement('div');
+      d.className = 'gc-me';
+      d.textContent = v;
+      chat.appendChild(d);
+      scroll();
+      return d;
+    },
+    addAi(html) {
+      const d = document.createElement('div');
+      d.className = 'gc-ai';
+      d.innerHTML = html || '';
+      chat.appendChild(d);
+      scroll();
+      return d;
+    },
+    think(el) { el.innerHTML = '<span class="gc-think"><i></i><i></i><i></i></span>'; scroll(); },
+    acts(el, kind) {
+      el.insertAdjacentHTML('beforeend', '<div class="gc-acts">' + ACTS[kind || 'text'].join('') + '</div><p class="gc-disc">Gemini는 AI이며 실수를 할 수 있습니다.</p>');
+      scroll();
+    },
+    addPic(p) {
+      const ai = api.addAi('');
+      const pic = document.createElement('div');
+      pic.className = 'gc-pic' + (p && p.gen ? ' is-gen' : '');
+      if (p && p.src) pic.innerHTML = '<img src="' + p.src + '" alt="" onerror="this.remove()">';
+      ai.appendChild(pic);
+      scroll();
+      return { ai: ai, pic: pic };
+    },
+    typePrompt(v, done) {
+      input.classList.add('is-focus');
+      typeText(text, v, {
+        speed: 45, clear: true,
+        onTick: () => { text.classList.remove('is-ph'); input.classList.add('has-text'); },
+        onDone: done
+      });
+    },
+    typeAnswer(el, v, done, speed) {
+      typeText(el, v, {
+        speed: speed || 55, render: para, onTick: scroll,
+        onDone: () => { el.innerHTML = para(v); api.acts(el, 'text'); phone.classList.remove('is-wait'); scroll(); if (done) done(); }
+      });
+    }
+  };
+  return api;
 }

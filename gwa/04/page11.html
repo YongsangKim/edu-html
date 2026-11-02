@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI의 실수를 직접 확인하고 수정하기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 기획서 36~54p(Summery 표 반영), 시안 디자인/과학4차시/시안/p11_*.png. 폰 안 화면 4종: Gemini 채팅(공용 .gc-*) · 크롬 기사 없음(.ch-*) · 최근 앱(.rc-*) · 구글(.gg-*, 홈/검색/결과).
+           흐름: Gemini 질문 → 환각 답변 → 출처 확인(기사 없음) → 최근 앱 → 구글 검색(태풍 갤럭시: 결과 없음 → 가장 피해를 많이 준 태풍: 기사 5개) → 최근 앱 → Gemini 다시 질문 → 수정 답변 → 환각/수정 비교 → 마무리 → page12.
+           환각 답변 문구(A1)는 기획서에 글이 없어 임시. 이미지·로고는 자리표시자 */
+
+        .p11-side{position:absolute;left:1253px;top:0;width:595px;height:960px;display:flex;flex-direction:column;justify-content:center;gap:24px}
+        .p11-side:empty{display:none}
+        .p11-side .card-btn{width:100%;min-width:0;height:auto;min-height:100px;padding:22px 26px 14px;font-size:44px;line-height:1.3;letter-spacing:-0.05em;word-break:keep-all}
+        .p11-side .card-btn.is-short{font-size:64px;min-height:130px;padding:20px 20px 12px}
+        .p11-ref{position:absolute;right:480px;bottom:36px;min-width:0;width:300px;height:90px;padding:6px 10px 0;font-size:44px}
+
+        .p11-v{position:absolute;inset:0;display:none}
+        .p11-phone[data-view="gem"] .v-gem,.p11-phone[data-view="chrome"] .v-chrome,.p11-phone[data-view="rc"] .v-rc,.p11-phone[data-view="gg"] .v-gg{display:block}
+        .v-gem.gc{display:none}
+        .p11-phone[data-view="gem"] .v-gem.gc{display:block}
+        .gc-answer-src{display:inline-flex;align-items:center;gap:8px;margin-top:8px;padding:8px 16px;border:solid 2px #cfd3dc;border-radius:20px;font-size:17px;color:#444;background:#fff;cursor:pointer}
+        .gc-answer-src i{display:block;width:20px;height:20px;border-radius:50%;background:#9fb4d8}
+
+        .ch-bar{position:absolute;left:0;right:0;top:56px;height:84px;border-bottom:solid 1px #dadce0;display:flex;align-items:center;gap:14px;padding:0 18px;font-family:'Pretendard';background:#fff}
+        .ch-bar svg{display:block;width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+        .ch-t{flex:1 1 auto;min-width:0}.ch-t b{display:block;font-size:18px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ch-t small{display:flex;align-items:center;gap:6px;font-size:15px;color:#444}.ch-t small i{display:block;width:14px;height:14px;border-radius:3px;background:#9aa7bd}
+        .ch-body{position:absolute;left:0;right:0;top:260px;text-align:center;font-family:'Pretendard'}
+        .ch-ex{width:98px;height:98px;margin:0 auto 22px;border:solid 4px #202124;border-radius:50%;font-size:60px;line-height:90px;font-weight:700;color:#ff3d00}
+        .ch-body p{margin:0;font-size:30px;font-weight:700;line-height:1.4}
+        .v-chrome{background:#fff}
+
+        .rc{position:absolute;inset:0 0 46px 0;background:linear-gradient(170deg,#8a7bb0,#b78aa8 55%,#7f8fb5);font-family:'Pretendard';color:#fff}
+        .rc-card{position:absolute;top:150px;width:300px;height:520px;border-radius:30px;background:#fafafa;box-shadow:0 10px 30px rgba(0,0,0,.25);cursor:pointer}
+        .rc-card.c1{left:70px}.rc-card.c2{left:400px}
+        .rc-ic{position:absolute;left:50%;top:-26px;width:60px;height:60px;margin-left:-30px;border-radius:50%;background:#fff;border:solid 3px #333;display:flex;align-items:center;justify-content:center}
+        .rc-ic svg{width:34px;height:34px;display:block;stroke:none}
+        .rc-card .ln{position:absolute;left:24px;right:24px;height:14px;border-radius:7px;background:#e6e6ee}
+        .rc-card .ci{position:absolute;left:50%;top:180px;width:150px;height:150px;margin-left:-75px;border-radius:50%;background:#cfd8e8}
+
+        .gg{position:absolute;inset:0 0 46px 0;background:#fff;font-family:'Pretendard';color:#202124}
+        .gg svg{display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+        .gg-top{position:absolute;left:24px;right:24px;top:62px;height:52px;display:flex;align-items:center;justify-content:space-between}
+        .gg-top svg{width:38px;height:38px}
+        .gg-av{width:44px;height:44px;border-radius:50%;background:#c9d3e6}
+        .gg-logo{position:absolute;left:0;right:0;top:150px;text-align:center;font-size:64px;font-weight:600;letter-spacing:-2px}
+        .gg-bar{position:absolute;left:22px;right:22px;top:250px;height:70px;border-radius:35px;background:#f1f3f4;display:flex;align-items:center;padding:0 22px;gap:14px;font-size:22px;white-space:nowrap;color:#5f6368;cursor:pointer}
+        .gg-bar svg{width:30px;height:30px;color:#202124;flex:0 0 auto}
+        .gg-bar b{margin-left:auto;display:flex;gap:14px}
+        .gg-bar b svg{width:32px;height:32px;color:#4285f4}
+        .gg-bar.is-active{background:#fff;border:solid 2px #cfd3dc;color:#202124}
+        .gg-chips{position:absolute;left:22px;top:340px;display:flex;gap:12px;font-size:20px}
+        .gg-chips span{display:flex;align-items:center;gap:8px;padding:12px 20px;border-radius:30px;background:#f1f3f4}
+        .gg-chips svg{width:28px;height:28px;color:#202124}
+        .gg-tabs{position:absolute;left:0;right:0;top:290px;height:48px;border-bottom:solid 1px #dadce0;display:flex;gap:26px;padding:0 24px;font-size:20px;color:#5f6368}
+        .gg-tabs span{padding-top:10px}.gg-tabs span.is-on{color:#202124;border-bottom:solid 3px #202124;font-weight:700}
+        .gg-list{position:absolute;left:0;right:0;top:340px;bottom:96px;overflow:hidden}
+        .gg-item{position:relative;height:150px;padding:14px 150px 0 24px;border-bottom:solid 10px #f1f3f4;box-sizing:border-box}
+        .gg-item small{display:flex;align-items:center;gap:8px;font-size:15px}
+        .gg-item small i{display:block;width:20px;height:20px;border-radius:50%;background:#9aa7bd}
+        .gg-item p{margin:6px 0 0;font-size:18px;line-height:1.3;color:#1a0dab;font-weight:600}
+        .gg-item .th{position:absolute;right:20px;top:20px;width:110px;height:110px;border-radius:16px;background:#cfd8e8}
+        .gg-none{position:absolute;left:0;right:0;top:420px;text-align:center;font-size:22px;color:#5f6368}
+        .gg-nav{position:absolute;left:0;right:0;bottom:0;height:96px;border-top:solid 1px #eee;display:flex;justify-content:space-around;align-items:center;font-size:15px;color:#5f6368;background:#fff}
+        .gg-nav div{text-align:center}
+        .gg-nav b{display:block;width:60px;height:34px;margin:0 auto 4px;border-radius:17px;font-weight:400}
+        .gg-nav b svg{width:28px;height:28px;margin:3px auto}
+        .gg-nav .on b{background:#d3e3fd}.gg-nav .on{color:#1a56db}
+        .gg-go{position:absolute;left:326px;top:665px;width:110px;height:56px;border:0;background:transparent;z-index:7}
+
+        .v-gg [data-g-show]{display:none}
+        .v-gg[data-g="home"] [data-g-show~="home"],.v-gg[data-g="search"] [data-g-show~="search"],.v-gg[data-g="none"] [data-g-show~="none"],.v-gg[data-g="list"] [data-g-show~="list"]{display:block}
+        .v-gg[data-g="home"] .gg-nav,.v-gg[data-g="none"] .gg-nav,.v-gg[data-g="list"] .gg-nav{display:flex}
+        .v-gg[data-g="search"] .gg-nav{display:none}
+        .v-gg[data-g="home"] .gg-chips,.v-gg[data-g="home"] .gg-bar[data-g-show~="home"]{display:flex}
+        .v-gg .gg-bar[data-g-show~="search"],.v-gg .gg-bar[data-g-show~="none"],.v-gg .gg-bar[data-g-show~="list"]{display:none}
+        .v-gg[data-g="search"] .gg-bar[data-g-show~="search"],.v-gg[data-g="none"] .gg-bar[data-g-show~="none"],.v-gg[data-g="list"] .gg-bar[data-g-show~="list"]{display:flex}
+        .gg-tabs[data-g-show]{display:none}
+        .v-gg[data-g="none"] .gg-tabs,.v-gg[data-g="list"] .gg-tabs{display:flex}
+        .v-gg[data-g="list"] .gg-list{display:block}
+        .v-gg:not([data-g="list"]) .gg-list{display:none}
+
+        .p11-cmp{position:absolute;left:700px;top:170px;width:1180px;height:560px;box-sizing:border-box;padding:40px 30px;border-radius:20px;background:#2a6bd0;display:flex;gap:28px}
+        .p11-cmp.is-off{display:none}
+        .p11-cmp>div{flex:1 1 0;height:100%;box-sizing:border-box;padding:22px 26px;border:solid 6px var(--c-ink);border-radius:24px;background:var(--c-white);box-shadow:0 8px 0 0 rgba(1,24,92,.35);font-family:'Pretendard';font-size:26px;line-height:1.5;color:var(--c-ink);overflow:hidden}
+        .p11-cmp h4{margin:0 0 14px;font-family:'Cafe24 Ssurround';font-size:38px;font-weight:400;letter-spacing:-0.05em;color:var(--c-purple);text-align:center}
+        .p11-end{z-index:120}
+        .p11-news{z-index:130}
+        .p11-news .p11-newsimg{width:1100px;height:520px;border-radius:24px;background:#dff2ff;display:flex;align-items:center;justify-content:center;font-size:200px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="guide-set is-main" id="p11Set" style="--gc-left:10px;--gb-bottom:640px">
+            <p class="guide-bubble is-center" id="p11Bubble"></p>
+            <div class="guide-character"><img id="p11Char" src="../img/character/gwa_main.png" alt="메인 캐릭터"></div>
+          </div>
+
+          <div class="phone-frame has-cam gc-phone p11-phone" id="p11Phone" data-view="gem"><div class="phone-screen" id="p11Screen">
+            <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gstar" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fb4b4b"/><stop offset=".25" stop-color="#f6b40e"/><stop offset=".5" stop-color="#3b82f6"/><stop offset=".8" stop-color="#2f7df6"/><stop offset="1" stop-color="#12b866"/></linearGradient></defs></svg>
+            <div class="gc gc-chat v-gem">
+              <div class="phone-status is-dark" data-time="17:58"></div>
+              <div class="gc-top"><span class="gc-menu"><i data-ic="menuHalf"></i></span><span class="gc-model">Gemini <b>자동 모드</b><i data-ic="chev"></i></span><span class="is-gap"></span><span class="t-empty"><i data-ic="tempChat"></i><i data-ic="avatarG" class="gc-avatar"></i></span><span class="t-talk"><i data-ic="compose"></i><i data-ic="dotsH"></i></span></div>
+              <div class="gc-hello"><i data-ic="gemini"></i>무엇이 궁금하세요?</div>
+              <div class="gc-msgs" id="p11Chat"></div>
+              <div class="gc-input" id="p11Input"><i data-ic="plus"></i><span class="is-gap is-ph" id="p11Text">Gemini에게 물어보세요</span><i data-ic="micG" class="gc-mic"></i><span class="gc-wave"><i data-ic="voice"></i></span><span class="gc-stop"><i></i></span><button type="button" class="gc-send" id="p11Send" aria-label="보내기"><i data-ic="sendUp"></i></button></div>
+              <div class="kbd-cj"></div>
+              <div class="phone-nav"></div>
+            </div>
+
+            <div class="p11-v v-chrome">
+              <div class="phone-status is-dark" data-time="17:58"></div>
+              <div class="ch-bar"><span><i data-ic="x"></i></span><span><i data-ic="chev"></i></span><div class="ch-t"><b>기사 정보를 찾을 수 없습니다.</b><small><i></i>news.example.com/error/404</small></div><span><i data-ic="share"></i></span><span><i data-ic="dotsV"></i></span></div>
+              <div class="ch-body"><div class="ch-ex">!</div><p>요청하신 페이지를<br>찾을 수 없습니다.</p></div>
+              <div class="phone-nav" id="p11NavChrome"></div>
+            </div>
+
+            <div class="p11-v v-rc">
+              <div class="rc">
+                <div class="rc-card c1" id="rcGem"><div class="rc-ic"><i data-ic="gemini"></i></div><div class="ln" style="top:70px"></div><div class="ln" style="top:100px;right:90px"></div><div class="ci"></div></div>
+                <div class="rc-card c2" id="rcGoogle"><div class="rc-ic"></div><div class="ln" style="top:70px"></div><div class="ln" style="top:100px;right:90px"></div><div class="ci"></div></div>
+              </div>
+              <div class="phone-nav"></div>
+            </div>
+
+            <div class="p11-v v-gg" data-g="home" id="p11Gg">
+              <div class="gg">
+                <div class="phone-status is-dark" data-time="17:58"></div>
+                <div class="gg-top"><i data-ic="menuEq"></i><div class="gg-av"></div></div>
+                <div class="gg-logo" data-g-show="home"><span style="color:#4285f4">G</span><span style="color:#ea4335">o</span><span style="color:#fbbc05">o</span><span style="color:#4285f4">g</span><span style="color:#34a853">l</span><span style="color:#ea4335">e</span></div>
+                <div class="gg-bar" id="ggBarHome" data-g-show="home"><i data-ic="search"></i><span>검색</span><b><i data-ic="micG"></i><i data-ic="lensG"></i></b></div>
+                <div class="gg-chips" data-g-show="home"><span><i data-ic="searchAi"></i> AI 모드</span><span><i data-ic="waveG"></i></span><span><i data-ic="imgG"></i></span></div>
+                <div class="gg-bar is-active" id="ggBarSearch" data-g-show="search" style="top:130px"><i data-ic="plus"></i><span id="ggTyped">Google에 물어보기</span><b id="ggIcons"><i data-ic="micG"></i><i data-ic="lensG"></i></b></div>
+                <div class="gg-bar is-active" data-g-show="none" style="top:130px"><i data-ic="search"></i><span id="ggQ1">태풍 갤럭시</span><b><i data-ic="micG"></i><i data-ic="lensG"></i></b></div>
+                <div class="gg-bar is-active" data-g-show="list" style="top:130px"><i data-ic="search"></i><span>가장 피해를 많이 준 태풍</span><b><i data-ic="micG"></i><i data-ic="lensG"></i></b></div>
+                <div class="gg-tabs" data-g-show="none list"><span>AI 모드</span><span>전체</span><span>이미지</span><span class="is-on">뉴스</span><span>동영상</span></div>
+                <div class="gg-none" data-g-show="none">검색어와 일치하는 뉴스 검색 결과가 없습니다.</div>
+                <div class="gg-list" data-g-show="list" id="ggList"></div>
+                <div class="gg-nav"><div class="on"><b><i data-ic="home"></i></b>홈</div><div><b><i data-ic="search"></i></b>검색</div><div><b><i data-ic="bellG"></i></b>알림</div><div><b><i data-ic="histG"></i></b>활동</div></div>
+              </div>
+              <div class="kbd-cj"></div>
+              <button type="button" class="gg-go" id="ggGo" aria-label="검색"></button>
+              <div class="phone-nav" id="p11NavGg"></div>
+            </div>
+          </div></div>
+
+          <div class="p11-cmp is-off" id="p11Cmp">
+            <div><h4>환각 답변</h4><span id="cmpA1"></span></div>
+            <div><h4>수정 답변</h4><span id="cmpA2"></span></div>
+          </div>
+
+          <div class="p11-side" id="p11Side"></div>
+          <button type="button" class="card-btn is-popup p11-ref is-hide js-sfx" id="p11Ref" data-sound="sound/click.mp3">자료 확인하기</button>
+          <button type="button" class="card-btn is-start next-btn is-hide js-sfx" id="p11Next" data-sound="sound/click.mp3">다음</button>
+
+          <div class="avatar-modal p11-news is-off" id="p11News">
+            <div class="avatar-card">
+              <div class="p11-newsimg">📰</div>
+              <button type="button" class="avatar-card-btn card-btn is-popup js-sfx" id="p11NewsClose" data-sound="sound/click.mp3" style="min-width:0;width:200px;height:80px;font-size:40px;padding:6px 10px 0">닫기</button>
+            </div>
+          </div>
+
+          <div class="avatar-modal p11-end is-off" id="p11End">
+            <div class="avatar-card is-side">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body"><p class="avatar-card-text">AI가 만든 그림과 글의 실수를 찾아 수정했어요!<br>이제 퀴즈를 풀며 배운 내용을 확인해볼까요?</p></div>
+              <a href="page12.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="AI의 실수를 직접 확인하고 수정하기" data-next="page12.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script src="../../resources/js/box-edit.js"></script>
+  <script>
+  (function () {
+    const Q1 = '우리나라에서 가장 큰 재산 피해를 준 태풍의 이름과 발생 연도를 알려 줘.';
+    const A1 = '우리나라에서 가장 큰 재산 피해를 준 태풍은 2025년에 발생한 태풍 ‘갤럭시’입니다.';
+    const Q2 = '기상청 자료를 확인해 보니 2025년에 태풍 갤럭시는 발생하지 않았어. 기상청의 실제 기록을 바탕으로 우리나라에서 가장 큰 재산 피해를 준 태풍의 이름과 발생 연도를 정확하게 다시 알려 줘.';
+    const A2 = '기상청의 태풍 피해 기록에 따르면 우리나라에서 가장 큰 재산 피해를 기록한 태풍은 2002년의 ‘루사’ 입니다.';
+    const S1 = '태풍 갤럭시', S2 = '가장 피해를 많이 준 태풍';
+    const NEWS = ['OO뉴스|우리나라에 가장 큰 재산 피해를 준 태풍, 2002년 ‘루사’', 'OO신문|2002년 태풍 ‘루사’, 재산 피해 5조원 넘어', 'OO일보|우리나라에 큰 피해를 남긴 2002년 태풍 ‘루사’', 'OO뉴스|기상청 기록으로 살펴보는 2002년 태풍 ‘루사’', 'OO신문|2002년 태풍 ‘루사’는 얼마나 큰 피해를 남겼을까?'];
+    const FINAL = ['이번에는 실제 자료에 맞게<br>답변이 수정되었네요!', 'AI에게 정확한 자료를 알려 주고 구체적으로 질문하면 잘못된 정보를 수정하는 데 도움이 돼요.', '수정된 답변도 실제 자료와 비교하여 확인하는 것을 잊지 마세요!'];
+    const SAYS = {
+      prompt: ['입력창에 입력해보세요.', 'main_point'],
+      send: ['전송 버튼을 눌러,<br>Gemini에게 물어볼까요?', 'main_point'],
+      gen: ['AI가 답변을 생성하고 있어요.', 'main'],
+      done: ['AI가 답변을 생성했어요!', 'smile_point'],
+      src: ['그런데 이 정보가 정말 사실 일까요? AI가 어떤 자료를 참고했는지 확인해 보아요.', 'main_point'],
+      err: ['AI가 알려 준 인터넷 주소로 들어갔는데 자료를 찾을 수 없어요!', 'main_point'],
+      other: ['다른 믿을 만한 자료에서도 확인해 볼까요?', 'wink_point'],
+      web: ['인터넷에 검색해 볼까요?', 'main_point'],
+      none: ['태풍 갤럭시에 대한 자료를 찾을 수 없어요!', 'main_point'],
+      retry: ['‘가장 피해를 많이 준 태풍’으로 다시 검색해 볼까요?', 'wink_point'],
+      found: ['기상청 자료를 확인해 보니 태풍 갤럭시는 실제로 존재하지 않는 태풍이에요.', 'smile_point'],
+      again: ['AI가 잘못된 정보를 만들어 낸 거예요. 정확한 자료를 바탕으로 다시 질문해 볼까요?', 'main_point'],
+      back: ['Google Gemini로 다시 이동해요.', 'main_point']
+    };
+    const phone = $('p11Phone'), screen = $('p11Screen'), chat = $('p11Chat'), input = $('p11Input'), text = $('p11Text'), send = $('p11Send');
+    const side = $('p11Side'), nextBtn = $('p11Next'), refBtn = $('p11Ref'), gg = $('p11Gg'), cmp = $('p11Cmp');
+    const say = initGuideSay({ bubble: $('p11Bubble'), img: $('p11Char'), set: $('p11Set') });
+    const sy = (k) => { const t = SAYS[k]; say(t[0], t[1]); };
+    const gc = initGeminiChat({ phone, screen, chat, input, text });
+    const FG = { send: [22, -5], src: [0, 0], nav: [0, 0], rcGoogle: [0, 0], rcGem: [0, 0], ggBar: [0, 0], go: [0, 0] };
+    const HOT = { send: [0, 0, 0, 0], src: [0, 0, 0, 0], nav: [0, 0, 0, 0], rcGoogle: [0, 0, 0, 0], rcGem: [0, 0, 0, 0], ggBar: [0, 0, 0, 0], go: [0, 0, 0, 0] };
+    let fgKey = '?';
+    const guide = (el, key, o) => {
+      fgKey = key;
+      el.dataset.hit = key;
+      BoxEdit.padEl(el, key, HOT);
+      pointFingerAt(el, Object.assign({ onMain: true, pulse: true, dx: FG[key][0], dy: FG[key][1] }, o));
+    };
+    const setSide = (...els) => { side.innerHTML = ''; els.forEach((e) => side.appendChild(e)); };
+    const hideNext = () => { nextBtn.classList.add('is-hide'); nextBtn.onclick = null; };
+    const showNext = (fn) => { nextBtn.classList.remove('is-hide'); nextBtn.onclick = () => { hideNext(); fn(); }; };
+    const para = (s) => '<p>' + s + '</p>';
+    const view = (v, g) => { phone.dataset.view = v; if (g) gg.dataset.g = g; screen.classList.toggle('has-kb', false); };
+    const sideBtn = (label, fn, cls) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'card-btn js-sfx ' + (cls || '');
+      b.dataset.sound = 'sound/click.mp3';
+      b.textContent = label;
+      b.addEventListener('click', () => { playClick(); setSide(); fn(); });
+      return b;
+    };
+    const SRC = '<span class="gc-answer-src" id="srcChip"><i></i>출처 확인하기</span>';
+    const SRC2 = '<span class="gc-answer-src"><i></i>기상청</span>';
+
+    function reset() {
+      clearFingers();
+      cmp.classList.add('is-off');
+      $('p11News').classList.add('is-off');
+      $('p11End').classList.add('is-off');
+      refBtn.classList.add('is-hide');
+      setSide(); hideNext();
+    }
+    function gem(stage) {
+      reset();
+      view('gem');
+      gc.clear(); gc.wait(false); gc.kb(false); gc.setInput('');
+      if (stage === 'a1' || stage === 'a1p2' || stage === 'a2') {
+        gc.talk();
+        gc.addMe(Q1);
+        const a = gc.addAi(para(A1) + SRC); gc.acts(a, 'text');
+      } else gc.talk(false);
+      if (stage === 'a2') {
+        gc.addMe(Q2);
+        const a = gc.addAi(para(A2) + SRC2); gc.acts(a, 'text');
+      }
+      if (stage === 'a1p2' || stage === 'empty') gc.kb(true);
+    }
+
+    /* Gemini 1회차 */
+    function g1Prompt() { gem('empty'); sy('prompt'); setSide(sideBtn(Q1, () => gc.typePrompt(Q1, () => g1Send()))); }
+    function g1Send(edit) {
+      if (edit) { gem('empty'); gc.setInput(Q1); }
+      sy('send'); guide(send, 'send');
+      send.onclick = () => { send.onclick = null; playClick(); clearFingers(); gc.kb(false); gc.talk(); gc.addMe(Q1); gc.setInput(''); g1Gen(true); };
+    }
+    function g1Gen(live) {
+      if (!live) { gem('empty'); gc.kb(false); gc.talk(); gc.addMe(Q1); }
+      gc.wait(true); const ai = gc.addAi(''); gc.think(ai); sy('gen');
+      if (live) setTimeout(() => g1Done(true), 3000);
+    }
+    function g1Done(live) {
+      if (live) { chat.lastElementChild.remove(); gc.wait(false); const a = gc.addAi(para(A1) + SRC); gc.acts(a, 'text'); }
+      else gem('a1');
+      sy('done');
+      showNext(() => g1Src());
+    }
+    function g1Src(edit) {
+      if (edit) gem('a1');
+      sy('src');
+      const chip = $('srcChip');
+      guide(chip, 'src');
+      chip.onclick = () => { chip.onclick = null; playClick(); clearFingers(); err(); };
+    }
+    function err() {
+      reset(); view('chrome'); sy('err');
+      showNext(() => { sy('other'); setTimeout(() => webHint(), 2200); });
+    }
+    function webHint(edit) {
+      if (edit) { reset(); view('gem'); }
+      sy('web');
+      const target = phone.dataset.view === 'chrome' ? $('p11NavChrome').querySelector('i') : document.querySelector('.v-gem .phone-nav i');
+      guide(target, 'nav');
+      target.onclick = () => { target.onclick = null; playClick(); clearFingers(); recents('google'); };
+    }
+    function recents(to, edit) {
+      reset(); view('rc'); sy(to === 'google' ? 'web' : 'back');
+      const card = to === 'google' ? $('rcGoogle') : $('rcGem');
+      guide(card, to === 'google' ? 'rcGoogle' : 'rcGem');
+      card.onclick = () => { card.onclick = null; playClick(); clearFingers(); if (to === 'google') ggHome(); else g2Prompt(); };
+    }
+    function ggHome() {
+      reset(); view('gg', 'home'); sy('web');
+      const bar = $('ggBarHome');
+      guide(bar, 'ggBar');
+      bar.onclick = () => { bar.onclick = null; playClick(); clearFingers(); ggSearch(1); };
+    }
+    function ggSearch(n, edit) {
+      reset(); view('gg', 'search'); screen.classList.add('has-kb');
+      $('ggTyped').textContent = 'Google에 물어보기';
+      $('ggIcons').style.visibility = '';
+      sy(n === 1 ? 'prompt' : 'retry');
+      const q = n === 1 ? S1 : S2;
+      setSide(sideBtn(q, () => {
+        typeText($('ggTyped'), q, { speed: 90, clear: true, onTick: () => { $('ggIcons').style.visibility = 'hidden'; }, onDone: () => ggGo(n) });
+      }, 'is-short'));
+    }
+    function ggGo(n, edit) {
+      if (edit) { ggSearch(n); $('ggTyped').textContent = n === 1 ? S1 : S2; }
+      sy('prompt');
+      guide($('ggGo'), 'go');
+      $('ggGo').onclick = () => { $('ggGo').onclick = null; playClick(); clearFingers(); ggResult(n); };
+    }
+    function ggResult(n) {
+      reset(); view('gg', n === 1 ? 'none' : 'list');
+      sy(n === 1 ? 'none' : 'found');
+      if (n === 1) showNext(() => { sy('retry'); setTimeout(() => ggSearch(2), 2200); });
+      else showNext(() => { sy('again'); setTimeout(() => backHint(), 2400); });
+    }
+    function backHint(edit) {
+      if (edit) { reset(); view('gg', 'list'); }
+      sy('again');
+      const target = $('p11NavGg').querySelector('i');
+      guide(target, 'nav');
+      target.onclick = () => { target.onclick = null; playClick(); clearFingers(); recents('gem'); };
+    }
+    /* Gemini 2회차 */
+    function g2Prompt() { gem('a1p2'); sy('prompt'); setSide(sideBtn(Q2, () => gc.typePrompt(Q2, () => g2Send()))); }
+    function g2Send(edit) {
+      if (edit) { gem('a1p2'); gc.setInput(Q2); }
+      sy('send'); guide(send, 'send');
+      send.onclick = () => { send.onclick = null; playClick(); clearFingers(); gc.kb(false); gc.addMe(Q2); gc.setInput(''); g2Gen(true); };
+    }
+    function g2Gen(live) {
+      if (!live) { gem('a1'); gc.addMe(Q2); }
+      gc.wait(true); const ai = gc.addAi(''); gc.think(ai); sy('gen');
+      if (live) setTimeout(() => g2Done(true), 3000);
+    }
+    function g2Done(live) {
+      if (live) { chat.lastElementChild.remove(); gc.wait(false); const a = gc.addAi(para(A2) + SRC2); gc.acts(a, 'text'); }
+      else gem('a2');
+      sy('done');
+      showNext(() => compare());
+    }
+    function compare(edit) {
+      if (edit) gem('a2');
+      clearFingers();
+      phone.style.display = 'none';
+      $('cmpA1').textContent = A1;
+      $('cmpA2').textContent = A2;
+      cmp.classList.remove('is-off');
+      let i = 0;
+      say(FINAL[0], 'smile_present');
+      refBtn.classList.remove('is-hide');
+      refBtn.onclick = () => $('p11News').classList.remove('is-off');
+      const adv = () => {
+        i++;
+        say(FINAL[i], i === 1 ? 'main_point' : 'wink_point');
+        if (i >= FINAL.length - 1) showNext(() => { phone.style.display = ''; $('p11End').classList.remove('is-off'); });
+        else showNext(adv);
+      };
+      showNext(adv);
+    }
+    $('p11NewsClose').addEventListener('click', () => $('p11News').classList.add('is-off'));
+
+    const STEPS = [
+      { t: '1회 · 프롬프트 버튼', run: g1Prompt }, { t: '1회 · 보내기 클릭', run: () => g1Send(true) }, { t: '1회 · 생성 중', run: () => g1Gen(false) },
+      { t: '1회 · 환각 답변 + 다음', run: () => g1Done(false) }, { t: '출처 확인하기 누르기', run: () => g1Src(true) }, { t: '기사 없음 화면 + 다음', run: err },
+      { t: '최근 앱 버튼 누르기(Gemini)', run: () => webHint(true) }, { t: '최근 앱 · 구글 카드', run: () => recents('google') }, { t: '구글 홈 · 검색창', run: ggHome },
+      { t: '검색 1 · 프롬프트 버튼', run: () => ggSearch(1) }, { t: '검색 1 · 검색 키', run: () => ggGo(1, true) }, { t: '검색 1 · 결과 없음 + 다음', run: () => ggResult(1) },
+      { t: '검색 2 · 프롬프트 버튼', run: () => ggSearch(2) }, { t: '검색 2 · 검색 키', run: () => ggGo(2, true) }, { t: '검색 2 · 기사 5개 + 다음', run: () => ggResult(2) },
+      { t: '최근 앱 버튼 누르기(구글)', run: () => backHint(true) }, { t: '최근 앱 · Gemini 카드', run: () => recents('gem') },
+      { t: '2회 · 프롬프트 버튼', run: g2Prompt }, { t: '2회 · 보내기 클릭', run: () => g2Send(true) }, { t: '2회 · 생성 중', run: () => g2Gen(false) },
+      { t: '2회 · 수정 답변 + 다음', run: () => g2Done(false) }, { t: '비교 + 자료 확인하기 · 다음', run: () => compare(true) }
+    ];
+
+    $('ggList').innerHTML = NEWS.map((t) => { const [a, b] = t.split('|'); return '<div class="gg-item"><small><i></i>' + a + '</small><p>' + b + '</p><div class="th"></div></div>'; }).join('');
+
+    if (BoxEdit.on) {
+      const m = location.search.match(/[?&]step=([0-9]+)/);
+      let cur = m ? Math.min(Math.max(+m[1], 1), STEPS.length) : 1;
+      BoxEdit.stepEdit({
+        key: () => fgKey, count: STEPS.length + 1, get: () => cur, set: (n) => { cur = n; },
+        go: (n) => { if (n < 1) return; cur = n; BoxEdit.syncStep(n); clearFingers(); STEPS[n - 1].run(); },
+        label: (n) => '단계 ' + n + ' / ' + STEPS.length + ' · ' + (STEPS[n - 1] ? STEPS[n - 1].t : ''),
+        say, bubble: $('p11Bubble'), img: $('p11Char')
+      });
+      STEPS[cur - 1].run();
+      return;
+    }
+    g1Prompt();
+  })();
+  </script>
+</body>
+</html>
