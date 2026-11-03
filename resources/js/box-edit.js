@@ -274,9 +274,20 @@
        count: 단계 수 + 1, get: () => 현재 번호(1부터), set: (n) => 번호만 바꿈, go: (n) => 그 단계로 다시 그림, label: (n) => '문구', setup,   // 단계 이동(BoxEdit.init 의 step 과 같음)
        say, bubble, img                                                                                         // 포즈판용(initGuideSay 가 돌려준 함수, 말풍선, 캐릭터 <img>), noPose: true 면 포즈판을 안 만듦
      });
+     단계를 옮길 때마다 #stage 안 원래 있던 요소의 속성(class·style·data-*)을 처음 상태로 되돌린 뒤 go 를 부름(앞 단계가 숨기거나 켜 둔 것이 남지 않게). 나중에 만들어진 요소(손가락·채팅 말풍선 등)는 각 단계가 정리.
      ?edit 가 아니면 아무 일도 안 함. 단계 데이터가 준비된 뒤, 처음 그리기(render) 전에 부를 것 */
   BoxEdit.stepEdit = function (o) {
     if (!ON) return;
+    const root = document.getElementById('stage');
+    const snap = new Map();
+    if (root) root.querySelectorAll('*').forEach((el) => { snap.set(el, Array.from(el.attributes).map((x) => [x.name, x.value])); });
+    const restore = () => {
+      snap.forEach((attrs, el) => {
+        const keep = new Set(attrs.map((x) => x[0]));
+        Array.from(el.attributes).forEach((x) => { if (!keep.has(x.name)) el.removeAttribute(x.name); });
+        attrs.forEach(([n, v]) => { if (el.getAttribute(n) !== v) el.setAttribute(n, v); });
+      });
+    };
     BoxEdit.fingerTag(o.key);
     BoxEdit.init({
       setup: o.setup,
@@ -287,7 +298,7 @@
         if (el._base) { el.style.left = (el._base[0] + r[0]) + 'px'; el.style.top = (el._base[1] + r[1]) + 'px'; }
       }),
       name: o.name || ((el) => el._hot ? '[클릭 영역 → HOT.' + el._hot + '] ' : '[손가락 → ' + el._fg + '] '),
-      step: { count: o.count, get: o.get, set: (n) => o.set(Math.max(1, n)), go: o.go, label: o.label }
+      step: { count: o.count, get: o.get, set: (n) => o.set(Math.max(1, n)), go: (n) => { restore(); o.go(n); }, label: o.label }
     });
     if (!o.noPose) BoxEdit.posePicker({ say: o.say, bubble: o.bubble, img: o.img, step: o.get });
   };
