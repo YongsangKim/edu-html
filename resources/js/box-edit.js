@@ -274,14 +274,31 @@
        count: 단계 수 + 1, get: () => 현재 번호(1부터), set: (n) => 번호만 바꿈, go: (n) => 그 단계로 다시 그림, label: (n) => '문구', setup,   // 단계 이동(BoxEdit.init 의 step 과 같음)
        say, bubble, img                                                                                         // 포즈판용(initGuideSay 가 돌려준 함수, 말풍선, 캐릭터 <img>), noPose: true 면 포즈판을 안 만듦
      });
-     단계를 옮길 때마다 #stage 안 원래 있던 요소의 속성(class·style·data-*)을 처음 상태로 되돌린 뒤 go 를 부름(앞 단계가 숨기거나 켜 둔 것이 남지 않게). 나중에 만들어진 요소(손가락·채팅 말풍선 등)는 각 단계가 정리.
+     단계를 옮길 때마다 #stage 안을 처음 렌더 상태(속성·자식 요소·글자)로 되돌린 뒤 go 를 부름 = ?step=N 으로 새로 열었을 때와 같은 상태에서 그 단계를 그림(앞 단계가 만든 채팅 말풍선·손가락·숨김/켜 둔 것이 남지 않게).
      ?edit 가 아니면 아무 일도 안 함. 단계 데이터가 준비된 뒤, 처음 그리기(render) 전에 부를 것 */
   BoxEdit.stepEdit = function (o) {
     if (!ON) return;
     const root = document.getElementById('stage');
     const snap = new Map();
-    if (root) root.querySelectorAll('*').forEach((el) => { snap.set(el, Array.from(el.attributes).map((x) => [x.name, x.value])); });
+    const kids = new Map();
+    const texts = new Map();
+    if (root) {
+      const w = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
+      for (let n = w.currentNode; n; n = w.nextNode()) {
+        if (n.nodeType === 1) {
+          snap.set(n, Array.from(n.attributes).map((x) => [x.name, x.value]));
+          kids.set(n, Array.from(n.childNodes));
+        } else texts.set(n, n.data);
+      }
+    }
     const restore = () => {
+      kids.forEach((list, el) => {
+        const cur = el.childNodes;
+        let same = cur.length === list.length;
+        for (let k = 0; same && k < list.length; k++) if (cur[k] !== list[k]) same = false;
+        if (!same) el.replaceChildren(...list);
+      });
+      texts.forEach((d, n) => { if (n.data !== d) n.data = d; });
       snap.forEach((attrs, el) => {
         const keep = new Set(attrs.map((x) => x[0]));
         Array.from(el.attributes).forEach((x) => { if (!keep.has(x.name)) el.removeAttribute(x.name); });
@@ -298,7 +315,7 @@
         if (el._base) { el.style.left = (el._base[0] + r[0]) + 'px'; el.style.top = (el._base[1] + r[1]) + 'px'; }
       }),
       name: o.name || ((el) => el._hot ? '[클릭 영역 → HOT.' + el._hot + '] ' : '[손가락 → ' + el._fg + '] '),
-      step: { count: o.count, get: o.get, set: (n) => o.set(Math.max(1, n)), go: (n) => { restore(); o.go(n); }, label: o.label }
+      step: { count: o.count, get: o.get, set: (n) => o.set(Math.max(1, n)), go: (n) => { if (n >= 1) restore(); o.go(n); }, label: o.label }
     });
     if (!o.noPose) BoxEdit.posePicker({ say: o.say, bubble: o.bubble, img: o.img, step: o.get });
   };

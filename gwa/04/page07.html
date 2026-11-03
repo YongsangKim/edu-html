@@ -8,15 +8,17 @@
     <style>
         /* 디자인 없음, 사회 디자인 문법(파란 판 + 흰 카드)으로 만든 러프한 틀 - 기획서 16p. 1단계 → 2단계 → 3단계 순서대로 눌러 설명을 확인(이미 확인한 버튼은 다시 선택 가능), 설명칸은 처음에 '?', 셋 다 확인하면 [다음] */
 
-        .p07-board{position:absolute;left:100px;top:170px;width:1720px;height:600px;border-radius:20px;background:#2a6bd0}
-        .p07-steps{position:absolute;left:160px;top:200px;width:1600px;display:flex;justify-content:space-between}
-        .p07-steps .card-btn{min-width:0;width:500px;height:100px;padding:6px 10px 0;font-size:56px}
-        .p07-box{position:absolute;left:150px;top:340px;width:1620px;height:380px;box-sizing:border-box;padding:20px 40px;border:solid 6px var(--c-ink);border-radius:24px;background:var(--c-white);box-shadow:0 8px 0 0 rgba(1,24,92,.35);display:flex;flex-direction:column;justify-content:center;gap:10px;overflow:hidden}
-        .p07-box h3{margin:0;font-family:'Cafe24 Ssurround';font-size:62px;line-height:1.1;color:var(--c-purple);letter-spacing:-0.05em;text-align:center}
-        .p07-box p{margin:0;font-family:'Cafe24 Ssurround';font-size:42px;line-height:1.3;color:var(--c-ink);letter-spacing:-0.05em;text-align:center}
-        .p07-box .is-sum{font-size:44px;color:var(--c-purple)}
-        .p07-box.is-empty{align-items:center}
-        .p07-box.is-empty:before{content:'?';font-family:'Cafe24 Ssurround';font-size:160px;color:#adacb2}
+        .p07-tabs{position:absolute;left:100px;top:190px;width:1720px;height:88px;display:flex;z-index:5}
+        .p07-tab{flex:1 1 0;min-width:0;height:94px;box-sizing:border-box;border:solid 6px var(--c-ink);border-radius:30px 30px 0 0;background:var(--c-sky);color:var(--c-white);font-family:'Cafe24 Ssurround';font-size:60px;line-height:94px;text-align:center;cursor:pointer;padding:0}
+        .p07-tab.is-selected{background:var(--c-navy);border-bottom:0}
+        .p07-tab:disabled{background:color-mix(in srgb,var(--c-sky) 55%,transparent);color:rgba(255,255,255,.55);cursor:default}
+        .p07-box{position:absolute;left:100px;top:278px;width:1720px;height:490px;box-sizing:border-box;padding:40px 20px 20px;border:solid 6px var(--c-ink);border-radius:0 0 30px 30px;background:var(--c-white);display:flex;flex-direction:column;gap:10px;overflow:hidden}
+        .p07-box h3{margin:0;font-family:'Cafe24 Ssurround';font-size:70px;line-height:1.1;color:var(--c-purple);letter-spacing:-0.06em;text-align:center}
+        .p07-box p{margin:0;font-family:'Cafe24 Ssurround';font-size:42px;line-height:1.3;color:var(--c-ink);letter-spacing:-0.06em;text-align:center}
+        .p07-box .is-sum{font-size:48px;color:var(--c-purple)}
+        .p07-box .p07-label{align-self:flex-start;margin:0 0 0 40px;padding:6px 26px 0;border-radius:16px;background:var(--c-blue);font-family:'Cafe24 Ssurround';font-size:40px;line-height:1.3;color:var(--c-white)}
+        .p07-box #p07Text{align-self:stretch;text-align:left;padding:0 40px;line-height:1.35}
+        .p07-box.is-empty{align-items:center;background:var(--c-white) url(img/p07_question.png) center / 360px auto no-repeat}
         .p07-box.is-empty>*{display:none}
         .next-btn.card-btn.is-start{bottom:30px;right:100px}
     </style>
@@ -29,16 +31,16 @@
         <main class="bg-default">
           <p class="ask-pill is-fit"><span>차례대로 버튼을 눌러 내용을 확인해 볼까요?</span></p>
 
-          <div class="p07-board"></div>
-          <div class="p07-steps opts">
-            <button type="button" class="card-btn js-sfx" data-step="0" data-sound="sound/click.mp3">1단계</button>
-            <button type="button" class="card-btn js-sfx" data-step="1" data-sound="sound/click.mp3" disabled>2단계</button>
-            <button type="button" class="card-btn js-sfx" data-step="2" data-sound="sound/click.mp3" disabled>3단계</button>
+          <div class="p07-tabs">
+            <button type="button" class="p07-tab js-sfx" data-step="0" data-sound="sound/click.mp3">1단계</button>
+            <button type="button" class="p07-tab js-sfx" data-step="1" data-sound="sound/click.mp3" disabled>2단계</button>
+            <button type="button" class="p07-tab js-sfx" data-step="2" data-sound="sound/click.mp3" disabled>3단계</button>
           </div>
 
           <div class="p07-box is-empty" id="p07Box">
             <h3 id="p07Title"></h3>
             <p class="is-sum" id="p07Sum"></p>
+            <span class="p07-label">설명</span>
             <p id="p07Text"></p>
           </div>
 

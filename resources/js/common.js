@@ -2607,11 +2607,15 @@ function placePct(el, b) { el.style.cssText = 'left:' + b[0] + '%;top:' + b[1] +
 function initGuideSay(opts) {
   const bubble = opts.bubble, img = opts.img, set = opts.set || null;
   const longLines = opts.longLines || 5;
+  const mediumLines = opts.mediumLines || 4;
   const countLines = () => {
     const r = document.createRange();
-    r.selectNodeContents(bubble);
     const tops = new Set();
-    Array.from(r.getClientRects()).forEach((q) => { if (q.width > 1 && q.height > 1) tops.add(Math.round(q.top / 4)); });
+    Array.from(bubble.childNodes).forEach((n) => {
+      if (n.nodeType === 1 && n.matches('.card-btn')) return;
+      r.selectNode(n);
+      Array.from(r.getClientRects()).forEach((q) => { if (q.width > 1 && q.height > 1) tops.add(Math.round(q.top / 4)); });
+    });
     return tops.size;
   };
   const srcAttr = img.getAttribute('src') || '';
@@ -2626,7 +2630,7 @@ function initGuideSay(opts) {
     poses.forEach((p) => { new Image().src = dir + pre + p + '.png'; });
   };
   setTimeout(preload, 1500);
-  if (!(opts.poses && !opts.poses.length)) {
+  if (!opts.keep && !(opts.poses && !opts.poses.length)) {
     img.style.visibility = 'hidden';
     setTimeout(() => { img.style.visibility = ''; }, 1500);
   }
@@ -2635,8 +2639,9 @@ function initGuideSay(opts) {
     bubble.classList.remove('is-large');
     bubble.classList.toggle('is-medium', !!medium);
     bubble.classList.remove('is-long');
-    const isLong = long === undefined ? countLines() >= longLines : !!long;
-    bubble.classList.toggle('is-medium', !!medium || (long === undefined && isLong));
+    const lines = long === undefined ? countLines() : 0;
+    const isLong = long === undefined ? lines >= longLines : !!long;
+    bubble.classList.toggle('is-medium', !!medium || (long === undefined && lines >= mediumLines));
     bubble.classList.toggle('is-long', isLong);
     if (long === undefined && isLong && countLines() >= longLines) bubble.classList.add('is-large');
   };
