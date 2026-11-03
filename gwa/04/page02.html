@@ -11,8 +11,9 @@
 
         .p02-prog{position:absolute;right:60px;top:30px;margin:0;display:flex;align-items:center;min-height:96px;padding:6px 44px 0;border:solid 6px var(--c-blue);border-radius:60px;background:#fff;white-space:nowrap}
         .p02-prog span{display:flex;align-items:center;gap:12px;padding:0}
-        .p02-prog b{font-family:'Cafe24 Ssurround';font-weight:400;font-size:52px;color:var(--c-blue);margin-right:10px;letter-spacing:-0.05em}
-        .p02-prog i{font-style:normal;font-size:56px;line-height:1;filter:grayscale(1);opacity:.45;padding-bottom:20px}
+        .p02-prog b{font-family:'Cafe24 Ssurround';font-weight:400;font-size:52px;color:var(--c-navy);margin-right:10px;letter-spacing:-0.05em}
+        .p02-prog i{font-style:normal;font-size:56px;line-height:1;filter:grayscale(1);opacity:.45;padding-bottom:8px}
+        .p02-prog i img{display:block;height:62px;width:auto}
         .p02-prog i.is-on{filter:none;opacity:1}
 
         .p02-board{position:absolute;left:60px;top:160px;width:1800px;height:760px;border-radius:20px;background:#2a6bd0}
@@ -49,7 +50,6 @@
         .p02-speak.is-on{background:var(--c-sky-pale)}
         .p02-detail.is-speaking .p02-view,.p02-detail.is-speaking .p02-hintbtn{pointer-events:none}
         #p02Fix,#p02End,#p02Hint{z-index:120}
-        #p02HintClose{min-width:0;width:180px;height:76px;padding:6px 10px 0;font-size:40px}
     </style>
 </head>
 <body>
@@ -58,7 +58,7 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <p class="p02-prog" id="p02Prog"><span><b>찾았다!</b><i>🔍</i><i>🔍</i><i>🔍</i><i>🔍</i><i>🔍</i></span></p>
+          <p class="p02-prog" id="p02Prog"><span><b>찾았다!</b><i><img src="img/p02_icon_search.png" alt=""></i><i><img src="img/p02_icon_search.png" alt=""></i><i><img src="img/p02_icon_search.png" alt=""></i><i><img src="img/p02_icon_search.png" alt=""></i><i><img src="img/p02_icon_search.png" alt=""></i></span></p>
           <div class="p02-board"></div>
           <div class="p02-gallery" id="p02Gallery"></div>
 
@@ -74,12 +74,13 @@
             <div class="p02-view" id="p02View"><img id="p02Pic" alt=""><span class="p02-hot" id="p02Hot"></span></div>
           </div>
 
-          <div class="avatar-modal is-off" id="p02Hint">
-            <div class="avatar-card is-small">
-              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_quiz.png" alt="">
-              <p class="avatar-card-title">힌트</p>
-              <p class="avatar-card-text" id="p02HintText"></p>
-              <button type="button" class="avatar-card-btn card-btn is-popup js-sfx" id="p02HintClose" data-sound="sound/click.mp3">닫기</button>
+          <div class="ox-result-wrong is-avatar is-off" id="p02Hint">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="hint-title">힌트</p>
+                <p class="avatar-popup-text is-small" id="p02HintText"></p>
+              </div>
             </div>
           </div>
 
@@ -124,11 +125,11 @@
   <script>
   (function () {
     const ARTS = [
-      { cap: '비 오는 날의 등굣길', pic: 'img/p02_art1.png', title: '비 오는 날의 등굣길', author: 'OO중학교 3학년 1반 이로운', intent: '비가 오는 날에는 우산과 우비, 장화를 입고 등교해요!', hint: '사람의 팔 부분을 잘 살펴볼까요?', hot: [437, 283, 200, 200] },
-      { cap: '맑은 여름날의 공원', pic: 'img/p02_art2.png', title: '햇볕이 쨍쨍한 여름날', author: 'OO중학교 3학년 1반 김루리', intent: '한여름의 햇볕이 쨍쨍한 날, 사람들이 시원한 옷을 입고 공원에서 즐겁게 산책하는 모습을 표현하고 싶었어요!', hint: '여름 풍경에 어울리지 않는 것이 있는지 살펴볼까요?', hot: [443, 194, 340, 480] },
-      { cap: '바람이 부는 날의 운동장', pic: 'img/p02_art3.png', title: '바람이 부는 날', author: 'OO중학교 3학년 1반 최선영', intent: '바람이 부는 날, 운동장에서 친구들이 형형색색의 바람개비를 들고 뛰어노는 모습을 표현하고 싶었어요!', hint: '바람개비의 날개 부분을 잘 살펴볼까요?', hot: [335, 12, 250, 250] },
-      { cap: '눈 오는 날의 하굣길', pic: 'img/p02_art4.png', title: '하얀 눈이 내리는 겨울', author: 'OO중학교 3학년 1반 신훈록', intent: '겨울철 하얀 눈이 내리는 날, 친구들이 두꺼운 외투와 목도리, 장갑을 착용하고 하교하는 모습을 표현하고 싶었어요!', hint: '강아지의 다리 부분을 잘 살펴볼까요?', hot: [380, 440, 260, 240] },
-      { cap: '비 온 뒤의 안전 안내판', pic: 'img/p02_art5.png', title: '비가 그친 뒤에는 조심해요!', author: 'OO중학교 3학년 1반 손민서', intent: '비가 그친 뒤에도 바닥이 미끄러울 수 있으므로 사람들이 조심해서 길을 걸을 수 있도록 ‘미끄럼 주의’라는 문구가 적힌 안전 안내판을 표현하고 싶었어요!', hint: '안내판에 적힌 글자를 잘 살펴볼까요?', hot: [559, 178, 260, 310] },
+      { cap: '비 오는 날의 등굣길', pic: 'img/p02_art1.jpg', title: '비 오는 날의 등굣길', author: 'OO중학교 3학년 1반 이로운', intent: '비가 오는 날에는 우산과 우비, 장화를 입고 등교해요!', hint: '사람의 팔 부분을 잘 살펴볼까요?', hot: [437, 283, 200, 200] },
+      { cap: '맑은 여름날의 공원', pic: 'img/p02_art2.jpg', title: '햇볕이 쨍쨍한 여름날', author: 'OO중학교 3학년 1반 김루리', intent: '한여름의 햇볕이 쨍쨍한 날, 사람들이 시원한 옷을 입고 공원에서 즐겁게 산책하는 모습을 표현하고 싶었어요!', hint: '여름 풍경에 어울리지 않는 것이 있는지 살펴볼까요?', hot: [443, 194, 340, 480] },
+      { cap: '바람이 부는 날의 운동장', pic: 'img/p02_art3.jpg', title: '바람이 부는 날', author: 'OO중학교 3학년 1반 최선영', intent: '바람이 부는 날, 운동장에서 친구들이 형형색색의 바람개비를 들고 뛰어노는 모습을 표현하고 싶었어요!', hint: '바람개비의 날개 부분을 잘 살펴볼까요?', hot: [335, 12, 250, 250] },
+      { cap: '눈 오는 날의 하굣길', pic: 'img/p02_art4.jpg', title: '하얀 눈이 내리는 겨울', author: 'OO중학교 3학년 1반 신훈록', intent: '겨울철 하얀 눈이 내리는 날, 친구들이 두꺼운 외투와 목도리, 장갑을 착용하고 하교하는 모습을 표현하고 싶었어요!', hint: '강아지의 다리 부분을 잘 살펴볼까요?', hot: [380, 440, 260, 240] },
+      { cap: '비 온 뒤의 안전 안내판', pic: 'img/p02_art5.jpg', title: '비가 그친 뒤에는 조심해요!', author: 'OO중학교 3학년 1반 손민서', intent: '비가 그친 뒤에도 바닥이 미끄러울 수 있으므로 사람들이 조심해서 길을 걸을 수 있도록 ‘미끄럼 주의’라는 문구가 적힌 안전 안내판을 표현하고 싶었어요!', hint: '안내판에 적힌 글자를 잘 살펴볼까요?', hot: [559, 178, 260, 310] },
     ];
     const found = ARTS.map(() => false);
     let cur = -1;
@@ -219,9 +220,8 @@
 
     $('p02HintBtn').addEventListener('click', () => {
       $('p02HintText').textContent = ARTS[cur].hint;
-      $('p02Hint').classList.remove('is-off');
+      flashLayer($('p02Hint'), 'is-off', 2000);
     });
-    $('p02HintClose').addEventListener('click', () => $('p02Hint').classList.add('is-off'));
 
     $('p02ToGallery').addEventListener('click', () => {
       $('p02Fix').classList.add('is-off');

@@ -68,12 +68,13 @@ var TOC_HTML = `<div class="toc-layer">
             <div class="toc-accordion">
               <button class="toc-accordion-toggle js-sfx" data-sound="sound/click.mp3">4차시</button>
               <div class="toc-accordion-panel">
-                <a href="javascript:;" class="toc-sub-item">01</a>
-                <a href="javascript:;" class="toc-sub-item">02</a>
-                <a href="javascript:;" class="toc-sub-item">03</a>
-                <a href="javascript:;" class="toc-sub-item">04</a>
-                <a href="javascript:;" class="toc-sub-item">05</a>
-                <a href="javascript:;" class="toc-sub-item">06</a>
+                <a href="${ROOT}gwa/04/page01.html" class="toc-sub-item">1) AI 그림 전시회의 비밀</a>
+                <a href="${ROOT}gwa/04/page03.html" class="toc-sub-item">2) 개념 이해 영상</a>
+                <a href="${ROOT}gwa/04/page04.html" class="toc-sub-item">3) AI의 두 가지 실수</a>
+                <a href="${ROOT}gwa/04/page06.html" class="toc-sub-item">4) AI의 실수, 3단계로 확인하기</a>
+                <a href="${ROOT}gwa/04/page09.html" class="toc-sub-item">5) AI의 실수를 직접 확인하고 수정하기</a>
+                <a href="${ROOT}gwa/04/page12.html" class="toc-sub-item">6) 퀴즈 풀기</a>
+                <a href="${ROOT}gwa/04/page13.html" class="toc-sub-item">7) 마지막 점검! AI의 실수를 찾아라!</a>
               </div>
             </div>
 
