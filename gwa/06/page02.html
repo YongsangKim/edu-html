@@ -6,38 +6,47 @@
     <title>SOS! 파도를 분석하라!</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 3~6p. 파도 4가지(높이 높/낮 × 간격 넓/좁)를 무작위 순서로 4문제. 관측 모니터의 파도(SVG, 흐르는 애니메이션)를 보고
-           높이·간격 버튼을 하나씩 고르면 확성기 활성 → 누르면 삑 소리 뒤 정답/오답. 맞힐 때마다 확성기 아이콘 하나씩 켜짐, 다 맞히면 마무리 안내 3단계.
-           삑 sound/p02_beep.wav, 대피 성공 그림 img/p02_success.png */
+        .ask-pill.p02-pill{left:52px;top:54px;transform:none;width:1152px;min-height:100px;padding:6px 0 0 105px;justify-content:flex-start;text-align:left;white-space:nowrap;background:var(--c-cream);font-size:54.4px}
+        .p02-pill-ic{position:absolute;left:6px;top:5px;width:78px;height:77px}
 
-        /* 배치(기획서 3p): 왼쪽 위 알림 아이콘 + 안내 바, 오른쪽 위 성공 확성기 4개, 왼쪽 관측 모니터, 오른쪽 파도 분석 버튼 2×2, 오른쪽 아래 큰 확성기.
-           확성기와 성공 표시는 이모지 📢(꺼짐은 회색·반투명) */
-        .p02-alert{position:absolute;left:58px;top:35px;width:1062px;height:110px;margin:0;box-sizing:border-box;padding:6px 30px 0 120px;display:flex;align-items:center;
-          background:var(--c-white);border:solid 5px var(--c-ink);border-radius:55px;font-family:'Cafe24 Ssurround';font-size:48px;color:var(--c-ink);letter-spacing:-0.05em}
-        .p02-alert:before{content:'!';position:absolute;left:10px;top:50%;width:84px;height:84px;margin-top:-42px;border-radius:50%;background:#ff5a5a;color:var(--c-white);font-size:60px;line-height:92px;text-align:center}
+        .photo-modal.p02-win{padding-bottom:38px}
+        .p02-win .photo-card{position:relative;width:1350px;height:790px;padding:64px 59px 0;border-radius:135px}
+        .p02-win .photo-card-img{width:1221px;height:512px;box-sizing:border-box;border:solid 5px var(--c-purple);border-radius:55px}
+        .p02-win .photo-card-title{position:absolute;left:645px;top:628px;margin:0;font-size:98px;line-height:1}
+        .p02-win-robot{position:absolute;left:270px;top:499px;width:385px;height:275px;object-fit:contain}
 
-        .p02-lives{position:absolute;left:1396px;top:40px;width:480px;height:105px;display:flex;align-items:center;justify-content:space-around}
-        .p02-lives i{width:100px;height:100px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:50%;background:var(--c-white);display:flex;align-items:center;justify-content:center;font-style:normal;font-size:64px;filter:grayscale(1);opacity:.5;transition:all .3s}
-        .p02-lives i.is-on{background:var(--c-yellow);filter:none;opacity:1;transform:scale(1.1)}
+        .p02-panel{position:absolute;left:1255px;top:103px;width:612px;height:814px;box-sizing:border-box;background:#266cc8;border-radius:20px}
+        .p02-panel-white{position:absolute;left:1260px;top:600px;width:602px;height:312px;background:var(--c-white);border-radius:0 0 15px 15px}
+        .p02-bar{position:absolute;left:1270px;top:41px;width:580px;height:132px;box-sizing:border-box;display:flex;border:solid 7px #266cc8;border-radius:66px;background:var(--c-white);box-shadow:0 8px 0 #2561ab;overflow:hidden}
+        .p02-bar-label{flex:none;width:141px;margin:0;display:flex;align-items:center;justify-content:center;padding-top:4px;background:var(--c-sky);font-family:'Cafe24 Ssurround';font-size:55.5px;color:var(--c-white);letter-spacing:-0.05em}
+        .p02-lives{flex:1 1 auto;display:flex;align-items:center;padding:0 0 0 7px}
+        .p02-lives i{position:relative;flex:none;width:100px;height:97px}
+        .p02-lives i img{position:absolute;left:0;top:-1px;width:104px;height:97px}
+        .p02-lives i .is-lit{display:none}
+        .p02-lives i.is-on .is-lit{display:block}
+        .p02-lives i.is-on .is-dim{display:none}
 
-        .p02-monitor{position:absolute;left:58px;top:192px;width:1142px;height:686px;box-sizing:border-box;border:solid 12px var(--c-ink);border-radius:30px;background:var(--c-white);overflow:hidden}
+        .p02-monitor{position:absolute;left:52px;top:191px;width:1150px;height:691px;box-sizing:border-box;border:solid 12px var(--c-ink);border-radius:30px;background:var(--c-white);overflow:hidden}
         .p02-monitor-title{position:absolute;left:26px;top:20px;margin:0;font-family:'Cafe24 Ssurround';font-size:38px;color:var(--c-ink);z-index:2}
-        .p02-monitor-title:before{content:'';display:inline-block;width:18px;height:18px;margin-right:14px;border-radius:50%;background:#ff5a5a;vertical-align:4px;animation:p02-blink 1s step-end infinite}
+        .p02-monitor-title:before{content:'';display:inline-block;width:18px;height:18px;margin-right:15px;border-radius:50%;background:#ffdede;vertical-align:4px;animation:p02-blink 1s step-end infinite}
         @keyframes p02-blink{50%{opacity:.2}}
-        /* page07 음파 그래프와 같은 모양: 흰 모눈 + 파란 선 + 가운데 점선 기준선 */
-        .p02-sea{position:absolute;left:0;top:80px;width:100%;height:582px;overflow:hidden;
-          background-image:linear-gradient(var(--c-pale) 2px,transparent 2px),linear-gradient(90deg,var(--c-pale) 2px,transparent 2px);background-size:60px 60px}
+        .p02-sea{position:absolute;left:0;top:81px;width:100%;height:586px;overflow:hidden;
+          background-image:linear-gradient(var(--c-pale) 2px,transparent 2px),linear-gradient(90deg,var(--c-pale) 2px,transparent 2px);background-size:60px 60px;background-position:2px 0}
         .p02-sea svg{position:absolute;left:0;top:0;height:100%;animation:p02-flow linear infinite}
-        .p02-axis{position:absolute;left:0;top:371px;width:100%;border-top:dashed 2px #c4c9d4;pointer-events:none}
+        .p02-axis{position:absolute;left:0;top:373px;width:100%;border-top:dashed 2px #c4c9d4;pointer-events:none}
         @keyframes p02-flow{to{transform:translateX(var(--shift))}}
 
-        .p02-btns{position:absolute;left:1240px;top:192px;width:622px;height:400px;box-sizing:border-box;padding:0 0 12px;display:grid;grid-template-columns:1fr 1fr;gap:30px 36px}
-        .p02-opt.card-btn{min-width:0;height:auto;padding:0;font-size:60px}
+        .p02-btns{position:absolute;left:1276px;top:219px;width:571px;display:grid;grid-template-columns:271px 271px;gap:24px 29px}
+        .p02-opt.card-btn{min-width:0;width:271px;height:144px;padding:0;font-size:60px}
 
-        .p02-horn{position:absolute;left:1594px;top:596px;width:268px;height:328px;padding:0;border:0;background:none;cursor:pointer;font-size:200px;line-height:1;transition:transform .15s,filter .15s}
-        .p02-horn:hover{transform:scale(1.06) rotate(-4deg)}
-        .p02-horn:active{transform:scale(.95)}
-        .p02-horn:disabled{filter:grayscale(1) opacity(.5);cursor:default;transform:none}
+        .p02-horn{position:absolute;left:1357px;top:548px;width:490px;height:384px;padding:0;border:0;background:none;cursor:pointer;transition:transform .15s}
+        .p02-horn img{position:absolute;pointer-events:none}
+        .p02-horn .is-lit{left:0;top:0;width:490px;height:384px}
+        .p02-horn .is-dim{left:173px;top:58px;width:304px;height:299px}
+        .p02-horn:not(:disabled) .is-dim,.p02-horn:disabled .is-lit{display:none}
+        .p02-horn:hover:not(:disabled){transform:scale(1.04) rotate(-3deg)}
+        .p02-horn:active:not(:disabled){transform:scale(.96)}
+        .p02-horn:disabled{cursor:default}
 
     </style>
 </head>
@@ -47,8 +56,19 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <p class="p02-alert">파도의 모양과 높이를 시민들에게 알려주세요!</p>
-          <div class="p02-lives" id="p02Lives"><i>📢</i><i>📢</i><i>📢</i><i>📢</i></div>
+          <p class="ask-pill p02-pill"><img class="p02-pill-ic" src="img/p02_icon_alert.png" alt=""><span>파도의 모양과 높이를 시민들에게 알려주세요!</span></p>
+
+          <div class="p02-panel"></div>
+          <div class="p02-panel-white"></div>
+          <div class="p02-bar">
+            <p class="p02-bar-label">알림</p>
+            <div class="p02-lives" id="p02Lives">
+              <i><img class="is-dim" src="img/p02_alarm_off.png" alt=""><img class="is-lit" src="img/p02_alarm_on.png" alt=""></i>
+              <i><img class="is-dim" src="img/p02_alarm_off.png" alt=""><img class="is-lit" src="img/p02_alarm_on.png" alt=""></i>
+              <i><img class="is-dim" src="img/p02_alarm_off.png" alt=""><img class="is-lit" src="img/p02_alarm_on.png" alt=""></i>
+              <i><img class="is-dim" src="img/p02_alarm_off.png" alt=""><img class="is-lit" src="img/p02_alarm_on.png" alt=""></i>
+            </div>
+          </div>
 
           <div class="p02-monitor">
             <p class="p02-monitor-title">AI 파도 관측 모니터</p>
@@ -56,18 +76,19 @@
             <div class="p02-axis"></div>
           </div>
 
-          <div class="p02-btns">
+          <div class="p02-btns opts">
             <button class="card-btn p02-opt js-sfx" data-sound="sound/click.mp3" data-group="height" data-val="high">높아요</button>
             <button class="card-btn p02-opt js-sfx" data-sound="sound/click.mp3" data-group="height" data-val="low">낮아요</button>
             <button class="card-btn p02-opt js-sfx" data-sound="sound/click.mp3" data-group="gap" data-val="wide">넓어요</button>
             <button class="card-btn p02-opt js-sfx" data-sound="sound/click.mp3" data-group="gap" data-val="narrow">좁아요</button>
           </div>
 
-          <button class="p02-horn" id="p02Horn" disabled aria-label="확성기로 안내하기">📢</button>
+          <button class="p02-horn" id="p02Horn" disabled aria-label="확성기로 안내하기"><img class="is-dim" src="img/p02_horn_off.png" alt=""><img class="is-lit" src="img/p02_horn_on.png" alt=""></button>
 
-          <div class="photo-modal is-middle is-off" id="p02Right">
+          <div class="photo-modal is-middle p02-win is-off" id="p02Right">
             <div class="photo-card">
-              <img class="photo-card-img" src="img/p02_success.png" alt="">
+              <img class="photo-card-img" src="img/p02_success.jpg" alt="">
+              <img class="p02-win-robot" src="img/p02_success_robot.png" alt="">
               <p class="photo-card-title">대피 성공!</p>
             </div>
           </div>
@@ -103,7 +124,7 @@
                   <div class="avatar-card-body is-side">
                     <p class="avatar-card-text">컴퓨터와 AI가 소리 파도를<br>어떻게 분석하는지 알아볼까요?</p>
                   </div>
-                  <a href="page03.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+                  <a href="page03.html" class="js-nav-effect avatar-card-btn card-btn next-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
                 </div>
               </div>
             </div>
@@ -126,8 +147,8 @@
       { height: 'low', gap: 'wide', amp: 0.2, cycles: 1.6 },
       { height: 'low', gap: 'narrow', amp: 0.2, cycles: 5.5 }
     ]);
-    const W = 1118;
-    const H = 582;
+    const W = 1126;
+    const H = 586;
     // 가로로 물결 한 개 더 그려 두고 그만큼 흘려서 끊김 없이 반복. 가운데 점선 기준선은 흐르지 않게 따로
     function seaSvg(amp, cycles) {
       const total = W + W / cycles;
@@ -141,12 +162,16 @@
 
     const horn = $('p02Horn');
     const lives = Array.from(document.querySelectorAll('#p02Lives i'));
-    const beep = new Audio('sound/p02_beep.wav');
+    const beep = new Audio('sound/p02_beep.mp3');
+    let waveSound = null;
     let round = 0;
     const picked = {};
 
     function show() {
       const w = WAVES[round];
+      if (waveSound) waveSound.pause();
+      waveSound = new Audio('sound/p02_wave_' + w.height + '_' + w.gap + '.mp3');
+      waveSound.play().catch(() => {});
       // 가로로 물결 한 개 더 그려 두고 그만큼 왼쪽으로 흘려서 끊김 없이 반복
       $('p02Sea').innerHTML = seaSvg(w.amp, w.cycles);
       const el = $('p02Sea').querySelector('svg');
@@ -170,6 +195,7 @@
     });
 
     horn.addEventListener('click', () => {
+      if (waveSound) waveSound.pause();
       horn.disabled = true;
       beep.currentTime = 0;
       beep.play().catch(() => {});

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>퀴즈 풀기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .q1-pic{position:absolute;left:290px;top:430px;width:560px;height:510px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:20px;background:var(--c-white)}
+        .q1-pic img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;border-radius:14px}
+        .q1-opts{left:900px;width:760px}
+        .q3-block{position:absolute;left:780px;top:430px;width:360px;height:102px}
+        .q3-block .cb{position:absolute;left:0;top:0;width:360px;height:88px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.22));--b:#3a9bdc;transform:scale(1.5)}
+        .q3-block .cb svg{display:block;overflow:visible}
+        .q3-block .cb .lb{position:absolute;left:22px;top:0;height:74px;display:flex;align-items:center;gap:6px;padding:4px 16px 0 0;color:#fff;letter-spacing:-0.05em;white-space:nowrap}
+        .q3-block .cb .pl,.q4-left .cb .pl,.q4-right .cb .pl{display:none}
+        .q3-block .cb .lb,.q4-left .cb .lb,.q4-right .cb .lb{position:absolute;left:22px;top:0;height:74px;display:flex;align-items:center;gap:6px;padding:4px 16px 0 0;color:#fff;letter-spacing:-0.05em;white-space:nowrap}
+        .q4-item{position:absolute;box-sizing:border-box;display:flex;align-items:center;font-family:'Cafe24 Ssurround';color:var(--c-ink)}
+        .q4-left{left:300px;width:420px;height:88px}
+        .q4-right{left:1050px;width:660px;height:120px;padding:0 30px;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:20px;font-size:52px;letter-spacing:-0.06em;word-break:keep-all}
+        .q4-left .cb,.q4-right .cb{position:absolute;left:0;top:0;width:420px;height:88px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.22));--b:#3a9bdc;transform:scale(1.2)}
+        .q4-left .cb{transform-origin:right center}
+        .q4-left .cb svg,.q4-right .cb svg{display:block;overflow:visible}
+        .q4-dot{position:absolute;top:50%;width:36px;height:36px;margin-top:-18px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:50%;background:#a9b4cc;cursor:grab;touch-action:none}
+        .q4-left .q4-dot{right:-90px}
+        .q4-left .q4-dot::after{content:"";position:absolute;left:-36px;top:-36px;right:-36px;bottom:-36px;border-radius:50%}
+        #q4Panel{touch-action:none}
+        .q4-right .q4-dot{left:-76px;cursor:default}
+        .q4-dot.is-on{background:#2fbf71}
+        .q4-icon{position:absolute;right:-110px;top:15px;z-index:2;font-size:64px;line-height:1;opacity:0;transition:opacity .4s}
+        .q4-item.is-done .q4-icon{opacity:1}
+        .q4-icon img{display:block;width:90px;height:90px;object-fit:contain;filter:drop-shadow(0 4px 4px rgba(0,0,0,.25))}
+        .q4-svg{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none;z-index:1}
+        .q4-line{stroke:#ffe600;stroke-width:12;stroke-linecap:round}
+        .q4-line.is-temp{stroke-dasharray:18 14;stroke-linecap:butt}
+        .q4-line.is-ok{stroke:#2fbf71;stroke-width:16}
+        .q4-line.is-gone{opacity:0;transition:opacity .4s}
+        .q5-case{position:absolute;left:270px;top:440px;width:448px;margin:0;padding:30px 40px;transform:scale(1.2);transform-origin:left top;background-color:#fff}
+        .q5-code{position:relative;width:360px;height:340px}
+        .q5-opts{left:880px;width:760px}
+        .q5-code .cb{position:absolute;overflow:visible;filter:drop-shadow(0 2px 0 rgba(0,0,0,.22))}
+        .q5-code .lb{position:absolute;left:22px;top:0;height:74px;display:flex;align-items:center;padding:4px 10px 0 0;color:#fff;letter-spacing:-0.05em;white-space:nowrap}
+        .q5-code .pl{width:0;height:0;border-left:15px solid #fff;border-top:9px solid transparent;border-bottom:9px solid transparent;margin-right:8px}
+
+        .q1-opts.quiz-opts.is-col .card-btn{width:400px;height:120px;font-size:64px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="quiz-stage">
+          <div class="step-flow">
+
+            <div class="step-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../resources/img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q1.</span>
+                  <p class="quiz-ask">우리 몸에서 피를 온몸으로 보내기 위해 늘어나고 오그라들기를 되풀이하는 기관을 클릭해 보세요</p>
+                </div>
+              </div>
+              <div class="q1-pic"><img src="img/p09_q1_body.png" alt=""></div>
+              <div class="answer-pick-quiz quiz-opts is-col q1-opts">
+                <button class="answer-pick card-btn is-quiz" data-correct="false">위</button>
+                <button class="answer-pick card-btn is-quiz" data-correct="false">장</button>
+                <button class="answer-pick card-btn is-quiz" data-correct="true">심장</button>
+              </div>
+            </div>
+
+            <div class="step-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../resources/img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q2.</span>
+                  <p class="quiz-ask">똑같은 일을 되풀이하는 과정을 뜻하는 단어는 무엇일까요</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz quiz-opts is-row">
+                <button class="answer-pick card-btn is-quiz" data-correct="false">순차</button>
+                <button class="answer-pick card-btn is-quiz" data-correct="true">반복</button>
+              </div>
+            </div>
+
+            <div class="step-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../resources/img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q3.</span>
+                  <p class="quiz-ask">똑같은 일을 7번 반복하고 싶을 때, 괄호 안에 어떤 숫자를 넣어야 할까요?</p>
+                </div>
+                <div class="quiz-case">
+                  <div class="q3-block" id="q3Block"></div>
+                </div>
+              </div>
+              <div class="answer-pick-quiz has-case quiz-opts is-row is-slim" style="top:580px">
+                <button class="answer-pick card-btn is-quiz" data-correct="false">1</button>
+                <button class="answer-pick card-btn is-quiz" data-correct="false">3</button>
+                <button class="answer-pick card-btn is-quiz" data-correct="true">7</button>
+                <button class="answer-pick card-btn is-quiz" data-correct="false">5</button>
+                <button class="answer-pick card-btn is-quiz" data-correct="false">2</button>
+                <button class="answer-pick card-btn is-quiz" data-correct="false">4</button>
+              </div>
+            </div>
+
+            <div class="step-panel" id="q4Panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../resources/img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q4.</span>
+                  <p class="quiz-ask">블록과 알맞은 설명을 줄로 이어 보세요.</p>
+                </div>
+              </div>
+              <div class="q4-item q4-left" data-id="1" style="top:490px"><div class="q4-block" data-blk="rep"></div><span class="q4-dot"></span></div>
+              <div class="q4-item q4-left" data-id="2" style="top:700px"><div class="q4-block" data-blk="inf"></div><span class="q4-dot"></span></div>
+              <div class="q4-item q4-right" data-id="2" style="top:470px"><span class="q4-dot"></span>멈추지 않고 되풀이한다<span class="q4-icon"><img src="img/p08_heart.png" alt="심장"></span></div>
+              <div class="q4-item q4-right" data-id="1" style="top:680px"><span class="q4-dot"></span>10번 되풀이 하고 멈춘다<span class="q4-icon"><img src="img/p09_printer.png" alt="프린터"></span></div>
+              <svg class="q4-svg" id="q4Svg" width="1920" height="960"></svg>
+            </div>
+
+            <div class="step-panel" id="q5Panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../resources/img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q5.</span>
+                  <p class="quiz-ask">심장이 멈추지 않고 뛰게 하려면 빈칸에 어떤 블록이 들어가야 할까요?</p>
+                </div>
+              </div>
+              <div class="quiz-case q5-case"><div class="q5-code" id="q5Code"></div></div>
+              <div class="answer-pick-quiz quiz-opts is-col q5-opts" data-next="page10.html">
+                <button class="answer-pick card-btn is-quiz" data-correct="true">계속 반복하기</button>
+                <button class="answer-pick card-btn is-quiz" data-correct="false">심장 늘어나기 모양으로 바꾸기</button>
+                <button class="answer-pick card-btn is-quiz" data-correct="false">오른쪽으로 1칸 가기</button>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="ox-result-correct is-avatar is-off" data-sound="sound/correct.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_correct_gwa.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">정답이에요!</p>
+              </div>
+              <div class="avatar-popup-extra"><img src="../../resources/img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div>
+          <div class="ox-result-wrong is-avatar is-off" data-sound="sound/incorrect.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="hint-title" style="display:none">힌트</p>
+                <p class="avatar-popup-text">다시 한번 생각해볼까요?</p>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="퀴즈 풀기" data-next="page10.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const NEXT = 'page10.html';
+    const BL = '#3a9bdc', RD = '#e0566e', GR = '#1fa89a';
+    const STROKE = 'stroke="rgba(20,10,60,.38)" stroke-width="2.5" stroke-linejoin="round"';
+    const DASH = 'stroke="#ffd83d" stroke-width="4" stroke-dasharray="10 7"';
+    const spath = (W, start) => {
+      const nd = 14, nh = 16, cx = W / 2;
+      return 'M0,0 ' + (start ? 'H' + W : 'H' + (cx - nh) + ' L' + (cx - nh + 4) + ',' + nd + ' H' + (cx + nh - 4) + ' L' + (cx + nh) + ',0 H' + W) + ' V74 H' + (cx + nh) + ' L' + (cx + nh - 4) + ',' + (74 + nd) + ' H' + (cx - nh + 4) + ' L' + (cx - nh) + ',74 H0 Z';
+    };
+    const cpath = (W, H) => {
+      const hh = 74, aw = 30, fh = 30, nd = 14, nh = 16, cx = W / 2, ci = aw + (W - aw) / 2, yF = hh + H, yB = yF + fh;
+      const tab = (x, y, dir) => dir > 0 ? ' L' + (x + nh - 4) + ',' + (y + nd) + ' H' + (x - nh + 4) + ' L' + (x - nh) + ',' + y : ' L' + (x - nh + 4) + ',' + (y + nd) + ' H' + (x + nh - 4) + ' L' + (x + nh) + ',' + y;
+      return 'M0,0 H' + (cx - nh) + ' L' + (cx - nh + 4) + ',' + nd + ' H' + (cx + nh - 4) + ' L' + (cx + nh) + ',0 H' + W + ' V' + hh + ' H' + (ci + nh) + tab(ci, hh, 1) + ' H' + aw + ' V' + yF + ' H' + (ci - nh) + tab(ci, yF, -1) + ' H' + W + ' V' + yB + ' H' + (cx + nh) + tab(cx, yB, 1) + ' H0 Z';
+    };
+    const svg = (w, h, d, fill, stroke) => '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" style="display:block;overflow:visible"><path d="' + d + '" fill="' + fill + '" ' + stroke + '/></svg>';
+    const lbl = (text, fs) => '<div class="lb" style="font-size:' + fs + 'px">' + text + '</div>';
+    const num = () => '<i class="en-num" aria-hidden="true"></i>';
+
+    $('q3Block').innerHTML = '<div class="cb" style="position:relative;left:0;top:0;width:360px;height:88px">' +
+      svg(360, 88, spath(360), BL, STROKE) +
+      '<div class="lb" style="font-size:25px"><i class="en-num" aria-hidden="true"></i>번 반복하기</div>' +
+      '</div>';
+
+    document.querySelectorAll('.q4-block').forEach((el) => {
+      el.classList.add('cb');
+      el.style.cssText = 'position:relative;width:420px;height:88px;left:0;top:0;filter:drop-shadow(0 2px 0 rgba(0,0,0,.22))';
+      const text = el.dataset.blk === 'inf' ? '계속 반복하기' : '<i class="en-num" aria-hidden="true">10</i>번 반복하기';
+      el.innerHTML = svg(420, 88, spath(420), BL, STROKE) + '<div class="lb" style="font-size:25px">' + text + '</div>';
+    });
+
+    const add = (h) => $('q5Code').insertAdjacentHTML('beforeend', h);
+    add('<div class="cb" style="left:0;top:0;width:360px;height:88px">' + svg(360, 88, spath(360, true), GR, STROKE) + lbl('<span class="pl"></span>시작하기 버튼을 클릭했을 때', 25) + '</div>');
+    add('<div class="cb" id="q5Hole" style="left:0;top:74px;width:360px;height:266px">' + svg(360, 266, cpath(360, 148), 'rgba(255,216,61,.14)', DASH) + '</div>');
+    add('<div class="cb" style="left:30px;top:148px;width:330px;height:88px">' + svg(330, 88, spath(330), RD, STROKE) + lbl('심장 오그라들기 모양으로 바꾸기', 22) + '</div>');
+    add('<div class="cb" style="left:30px;top:222px;width:330px;height:88px">' + svg(330, 88, spath(330), RD, STROKE) + lbl('심장 늘어나기 모양으로 바꾸기', 22) + '</div>');
+
+    const rightLayer = document.querySelector('.ox-result-correct');
+    const wrongLayer = document.querySelector('.ox-result-wrong');
+    const wrongText = wrongLayer.querySelector('.avatar-popup-text');
+    const WRONG = '다시 한번 생각해볼까요?';
+    const hintBadge = wrongLayer.querySelector('.hint-title');
+    const showWrong = (t) => { hintBadge.style.display = t ? '' : 'none'; wrongText.className = t ? 'avatar-popup-text is-small' : 'avatar-popup-text'; wrongText.textContent = t || WRONG; flashLayer(wrongLayer, 'is-off', 3000); };
+    const showRight = (after) => { flashLayer(rightLayer, 'is-off', 3000); setTimeout(after, 3000); };
+
+    document.querySelector('#q5Panel [data-correct="true"]').addEventListener('click', () => {
+      $('q5Hole').innerHTML = svg(360, 266, cpath(360, 148), BL, STROKE) + lbl('계속 반복하기', 25);
+    });
+
+    const q4 = $('q4Panel'), q4svg = $('q4Svg'), stage = document.querySelector('.quiz-stage');
+    const q4done = new Set();
+    const mp = (e) => { const r = stage.getBoundingClientRect(); const s = r.width / 1920; return [(e.clientX - r.left) / s, (e.clientY - r.top) / s]; };
+    const dotPos = (d) => { const r = stage.getBoundingClientRect(); const s = r.width / 1920; const b = d.getBoundingClientRect(); return [(b.left + b.width / 2 - r.left) / s, (b.top + b.height / 2 - r.top) / s]; };
+    const mkLine = (cls, a, b) => { const l = document.createElementNS('http://www.w3.org/2000/svg', 'line'); l.setAttribute('class', 'q4-line ' + cls); l.setAttribute('x1', a[0]); l.setAttribute('y1', a[1]); l.setAttribute('x2', b[0]); l.setAttribute('y2', b[1]); q4svg.appendChild(l); return l; };
+    q4.querySelectorAll('.q4-left').forEach((item) => {
+      const dot = item.querySelector('.q4-dot');
+      dot.addEventListener('pointerdown', (e) => {
+        if (q4done.has(item.dataset.id)) return;
+        e.preventDefault();
+        const a = dotPos(dot);
+        const tmp = mkLine('is-temp', a, a);
+        const move = (ev) => { const p = mp(ev); tmp.setAttribute('x2', p[0]); tmp.setAttribute('y2', p[1]); };
+        try { dot.setPointerCapture(e.pointerId); } catch (_) {}
+        const cancel = () => {
+          window.removeEventListener('pointermove', move);
+          window.removeEventListener('pointerup', up);
+          window.removeEventListener('pointercancel', cancel);
+          tmp.remove();
+        };
+        const up = (ev) => {
+          window.removeEventListener('pointercancel', cancel);
+          window.removeEventListener('pointermove', move);
+          window.removeEventListener('pointerup', up);
+          tmp.remove();
+          const s = stage.getBoundingClientRect().width / 1920;
+          const hit = Array.from(q4.querySelectorAll('.q4-right')).find((r) => { const b = r.getBoundingClientRect(); return ev.clientX >= b.left - 100 * s && ev.clientX <= b.right && ev.clientY >= b.top && ev.clientY <= b.bottom; });
+          if (!hit) return;
+          const target = hit.querySelector('.q4-dot');
+          const ln = mkLine('', a, dotPos(target));
+          if (hit.dataset.id === item.dataset.id) {
+            playCorrect();
+            ln.classList.add('is-ok');
+            dot.classList.add('is-on'); target.classList.add('is-on');
+            q4done.add(item.dataset.id);
+            if (q4done.size === 2) q4.querySelectorAll('.q4-item').forEach((it) => it.classList.add('is-done'));
+            if (q4done.size === 2) setTimeout(() => showRight(() => advancePanelOrNavigate(q4, NEXT)), 1500);
+          } else {
+            playWrong();
+            ln.classList.add('is-gone');
+            setTimeout(() => ln.remove(), 450);
+            showWrong('블록에 적힌 글자를 소리 내어 읽어 보면 힌트가 있어요!');
+          }
+        };
+        window.addEventListener('pointermove', move);
+        window.addEventListener('pointerup', up);
+        window.addEventListener('pointercancel', cancel);
+      });
+    });
+  })();
+  </script>
+</body>
+</html>

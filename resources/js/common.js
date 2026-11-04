@@ -2205,17 +2205,17 @@ const sfx = {
   click: makeSfx('sound/click.mp3'),
   correct: makeSfx('sound/correct.mp3'),
   wrong: makeSfx('sound/incorrect.mp3'),
-  upload: makeSfx('sound/upload.mp3'),   // 파일이 올라가는 소리(gwa/01 page14)
+  upload: makeSfx('sound/upload.wav'),   // 파일이 올라가는 소리(gwa/01 page14)
 };
 
 const playClick = sfx.click;
 const playCorrect = sfx.correct;
 const playWrong = sfx.wrong;
 
-/* 끌어다 놓아서 맞았을 때 나는 소리(sound/drag.mp3). initMatchDrag는 맞게 놓으면 자동으로 부르고,
+/* 끌어다 놓아서 맞았을 때 나는 소리(sound/drag.wav). initMatchDrag는 맞게 놓으면 자동으로 부르고,
    직접 구현한 드래그는 맞게 놓는 순간 playDrag()를 부른다. 볼륨 0.5 */
 const playDrag = (() => {
-  const audio = new Audio(ASSET_BASE + 'sound/drag.mp3');
+  const audio = new Audio(ASSET_BASE + 'sound/drag.wav');
   audio.preload = 'auto';
   audio.volume = 0.5;
   // 새로고침 직후에도 바로 나도록 미리 내려받아 해독해 둔 소리를 WebAudio로 재생(해독이 안 끝났거나 file:// 처럼 못 받으면 audio 요소로 재생)
@@ -2224,7 +2224,7 @@ const playDrag = (() => {
   try {
     const AC = window.AudioContext || window.webkitAudioContext;
     ctx = new AC();
-    fetch(ASSET_BASE + 'sound/drag.mp3').then((r) => r.arrayBuffer()).then((b) => ctx.decodeAudioData(b)).then((d) => { buf = d; }).catch(() => {});
+    fetch(ASSET_BASE + 'sound/drag.wav').then((r) => r.arrayBuffer()).then((b) => ctx.decodeAudioData(b)).then((d) => { buf = d; }).catch(() => {});
   } catch (e) { ctx = null; }
   return () => {
     if (ctx && buf) {
@@ -2547,6 +2547,19 @@ const ICONS = {
   nbFnAudio: '<svg viewBox="0 0 44 44"><path d="M8 20v4M14 14v16M20 8v28M26 16v12M32 12v20"/><path d="M38 6l1.5 3.5L43 11l-3.5 1.5L38 16l-1.5-3.5L33 11l3.5-1.5z"/></svg>',
   micFill: '<svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12.5" rx="3" fill="currentColor" stroke="none"/><path d="M4.8 11.5c0 4.2 3 7 7.2 7s7.2-2.8 7.2-7M12 18.5v3.2" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
   lensCam: '<svg viewBox="0 0 24 24"><path d="M3 12.5V9a4 4 0 014-4h10a4 4 0 014 4v3.5M3 16.5v.5a4 4 0 004 4h6.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><rect x="9.2" y="2" width="5.6" height="3.4" rx="1" fill="currentColor" stroke="none"/><circle cx="11.5" cy="12.3" r="3.2" fill="currentColor" stroke="none"/><circle cx="19" cy="18.8" r="2.4" fill="currentColor" stroke="none"/></svg>',
+  kbSpark: '<svg viewBox="0 0 24 24"><path d="M12 3l1.5 5 5 1.5-5 1.5L12 16l-1.5-5-5-1.5 5-1.5z"/></svg>',
+  kbEmoji: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M8.6 14.2c1.8 2 5 2 6.8 0"/><path d="M9 9.6h.01M15 9.6h.01" stroke-width="2.2"/></svg>',
+  kbTranslate: '<svg viewBox="0 0 24 24"><path d="M9.5 8.5V6.2a2 2 0 012-2h6.3a2 2 0 012 2v6.3a2 2 0 01-2 2h-2.3"/><rect x="3.7" y="9.5" width="10.8" height="10.3" rx="2.2"/><path d="M6.9 17.2l2.2-5.4 2.2 5.4M7.7 15.4h2.8"/></svg>',
+  kbClip: '<svg viewBox="0 0 24 24"><rect x="5.3" y="4.6" width="13.4" height="16" rx="3.6"/><path d="M9.6 8.6h4.8"/></svg>',
+  kbGear: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" transform="translate(1.5 1.5) scale(.875)"/></svg>',
+  kbDots: '<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.7" fill="currentColor" stroke="none"/></svg>',
+  kbBackspace: '<svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H9a2 2 0 0 1-1.414-.586l-5.414-5.414a2 2 0 0 1 0-2.828L7.586 4.586A2 2 0 0 1 9 4z"/><path d="m16 9-6 6"/><path d="m10 9 6 6"/></svg>',
+  kbEnter: '<svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 5v8a2 2 0 01-2 2H5M9 11l-4 4 4 4"/></svg>',
+  kbFind: '<svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#5b9bff" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>',
+  kbSpace: '<svg viewBox="0 0 44 20" width="46" height="20" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5v9h38V5"/></svg>',
+  searchBold: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>',
+  googleLogo: '<svg aria-label="Google" role="img" viewBox="0 0 272 92"><path d="M31.32 70.33c17.65.17 29.67-11.68 29.67-29.92q.01-2.29-.43-5.08H31.2v8.76h20.6c-1.1 11.47-9.18 17.44-20.27 17.44-12.44 0-21.96-9.35-21.96-22.94 0-13.41 9.1-22.77 21.96-22.77 6.48 0 11.26 2 16.04 6.9l6.14-6.43c-5.38-6.3-13.16-9.31-22.3-9.31C13.7 6.98 0 20.27 0 38.46c0 17.4 13.25 31.7 31.32 31.87" fill="#3186FF"></path><path d="M88.2 70.33c13.2 0 22.77-9.69 22.77-23.15 0-13.2-9.35-22.98-22.77-22.98-12.7 0-22.68 9.02-22.68 22.98 0 13.33 9.43 23.15 22.68 23.15m0-8.04c-8.04 0-13.67-6.6-13.67-15.1s5.93-14.95 13.67-14.95c8.17 0 13.67 6.6 13.67 14.94 0 8.64-5.63 15.11-13.67 15.11" fill="#FC413D"></path><path d="M137.42 70.33c13.29 0 22.77-9.73 22.77-23.15 0-13.2-9.35-22.98-22.77-22.98-12.7 0-22.68 9.02-22.68 22.98 0 13.33 9.43 23.15 22.68 23.15m0-8.04c-8.04 0-13.67-6.6-13.67-15.1s5.93-14.95 13.67-14.95c8.17 0 13.67 6.6 13.67 14.94 0 8.64-5.63 15.11-13.67 15.11" fill="#FFBE00"></path><path d="M185.37 88.57q21.51 0 21.5-24.63V25.77h-8.8v5.37h-.17c-2.75-4.27-7.96-6.68-13.84-6.68-12.7 0-20.44 9.69-20.44 22.6 0 12.86 7.53 22.34 20.78 22.34 6.52 0 11.34-3.72 13.37-6.77h.3v3.94c0 8.67-4.49 13.8-12.82 13.8-5.46 0-9.1-3.01-11.77-8.05l-7.96 3.52c4.2 8.84 10.16 12.73 19.85 12.73m0-27.55c-7.74 0-12.7-5.71-12.7-14.22 0-8.2 4.92-14.13 12.75-14.13s12.65 5.5 12.65 14.09c0 8.68-5.08 14.26-12.7 14.26" fill="#3186FF"></path><path d="M222.91 8.33h-9.22v60.6h9.22z" fill="#00AF57"></path><path d="M250.17 70.25a22.1 22.1 0 0 0 19-10.54l-6.86-4.49c-3 4.2-7.1 6.6-11.72 6.6a13.6 13.6 0 0 1-11.93-7.23l30.93-13.12a20 20 0 0 0-.84-3.22c-3.69-9.48-10.12-13.8-18.8-13.8-13.24 0-22.25 9.66-22.25 23.03 0 13.67 9.47 22.77 22.47 22.77m-13.5-22.81v-.51c0-8.76 5.03-14.64 12.95-14.64 3.76 0 7.15 1.69 9.44 5.67z" fill="#FC413D"></path></svg>',
+  arrowDownFat: '<svg viewBox="0 0 70 46"><path d="M22 3h26v20h14L35 43 8 23h14z" fill="#fff" stroke="#1b1738" stroke-width="4" stroke-linejoin="round"/></svg>',
   searchAi: '<svg viewBox="0 0 24 24"><path d="M12.5 4.5A7 7 0 1 0 14 16.83L18.59 21.41C18.98 21.8 19.61 21.8 20 21.41C20.39 21.02 20.39 20.39 20 20L15.41 15.41A6.98 6.98 0 0 0 16.5 11.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path transform="translate(17.5 6.5) scale(1.45) translate(-17.5 -6.5)" d="M17.5 3.5C17.5 5.5 18.5 6.5 20.5 6.5C18.5 6.5 17.5 7.5 17.5 9.5C17.5 7.5 16.5 6.5 14.5 6.5C16.5 6.5 17.5 5.5 17.5 3.5Z" fill="currentColor" stroke="none"/></svg>',
   waveG: '<svg viewBox="0 0 24 24"><path d="M3 10v4M7.5 6v12M12 3.5v17M16.5 6v12M21 10v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="butt"/></svg>',
   bellG: '<svg viewBox="0 0 24 24"><path d="M6.2 17.4V11a5.8 5.8 0 0 1 11.6 0v6.4M3 17.4h18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><circle cx="12" cy="3.6" r="1.4" fill="currentColor" stroke="none"/><path d="M9.6 19.6h4.8a2.4 2.4 0 0 1-4.8 0z" fill="currentColor" stroke="none"/></svg>',
@@ -2746,6 +2759,7 @@ function playAppLaunch(o) {
 
 /* 버튼 옆에 손가락 안내. opts: dx/dy 보정, w 손가락 폭, onMain(el이 main 안 스케일된 요소일 때 화면 좌표로 환산), x(onMain에서 폭 비율), beside(대상을 가리지 않게 옆에 둠), pulse(눌러야 할 요소를 .hit-pulse 로 깜빡임 — clearFingers 때 같이 꺼짐) */
 function pointFingerAt(el, opts) {
+  if (el.classList && el.classList.contains('card-btn')) { clearFingers(); return; }
   if (opts && opts.onMain) {
     const main = el.closest('main');
     const s = main.getBoundingClientRect().width / main.offsetWidth;
@@ -2758,6 +2772,8 @@ function pointFingerAt(el, opts) {
       if (w > 300) { o.dx = (opts.dx || 0) + w / 2 - w * (opts.x === undefined ? 1 : opts.x) + 20; o.dy = (opts.dy || 0) + 4; }
       else { o.dx = (opts.dx || 0) + 16; o.dy = (opts.dy || 0) - h / 2 + 10; }
     }
+    const over = (r.bottom - m.top) / s - 10 + (o.dy || 0) + (o.w || 110) - main.offsetHeight;
+    if (over > 0) o.dy = (o.dy || 0) - over;
     pointFingerAt({
       offsetLeft: (r.left - m.left) / s, offsetTop: (r.top - m.top) / s,
       offsetWidth: r.width / s * (opts.x === undefined ? 1 : opts.x), offsetHeight: r.height / s, offsetParent: main
@@ -3044,12 +3060,12 @@ function initEmotionPickFlow(config) {
 ========================================================== */
 /* 두벌식 키보드(공용 .kbd-db, 밝은 바탕) 마크업을 돌려줌 — 폰 화면(.phone-screen) 안에 넣어 씀: el.insertAdjacentHTML('beforeend', kbdDbHtml()). 어둡게는 kbdDbHtml(true). 아이콘줄은 .kbd-db-tools.is-around */
 window.kbdDbHtml = function (dark) {
-  const ic = ['<svg viewBox="0 0 24 24"><path d="M12 3l1.5 5 5 1.5-5 1.5L12 16l-1.5-5-5-1.5 5-1.5z"/></svg>',
-    '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M8.6 14.2c1.8 2 5 2 6.8 0"/><path d="M9 9.6h.01M15 9.6h.01" stroke-width="2.2"/></svg>',
-    '<svg viewBox="0 0 24 24"><path d="M9.5 8.5V6.2a2 2 0 012-2h6.3a2 2 0 012 2v6.3a2 2 0 01-2 2h-2.3"/><rect x="3.7" y="9.5" width="10.8" height="10.3" rx="2.2"/><path d="M6.9 17.2l2.2-5.4 2.2 5.4M7.7 15.4h2.8"/></svg>',
-    '<svg viewBox="0 0 24 24"><rect x="5.3" y="4.6" width="13.4" height="16" rx="3.6"/><path d="M9.6 8.6h4.8"/></svg>',
-    '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" transform="translate(1.5 1.5) scale(.875)"/></svg>',
-    '<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/></svg>'];
+  const ic = [ICONS.kbSpark,
+    ICONS.kbEmoji,
+    ICONS.kbTranslate,
+    ICONS.kbClip,
+    ICONS.kbGear,
+    ICONS.dotsH];
   const sp = (s, c) => '<span' + (c ? ' class="' + c + '"' : '') + '>' + s + '</span>';
   const row = (a) => '<div class="kbd-db-row">' + a.join('') + '</div>';
   const ch = (s) => s.split('').map((c) => sp(c));
@@ -3060,7 +3076,7 @@ window.kbdDbHtml = function (dark) {
 };
 
 /* 한글 천지인 키보드(공용 .kbd-cj) 마크업. 페이지에는 비어 있는 <div class="kbd-cj"></div> 만 두면 initKbdCj 가 채움(cfUI.kb() 도 같은 것) */
-const KBD_CJ = '<div class="kbd-cj"><div class="kbd-cj-tools"><i><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M8.6 14.2c1.8 2 5 2 6.8 0"/><path d="M9 9.6h.01M15 9.6h.01" stroke-width="2.2"/></svg></i><i><svg viewBox="0 0 24 24"><path d="M9.5 8.5V6.2a2 2 0 012-2h6.3a2 2 0 012 2v6.3a2 2 0 01-2 2h-2.3"/><rect x="3.7" y="9.5" width="10.8" height="10.3" rx="2.2"/><path d="M6.9 17.2l2.2-5.4 2.2 5.4M7.7 15.4h2.8"/></svg></i><i><svg viewBox="0 0 24 24"><rect x="5.3" y="4.6" width="13.4" height="16" rx="3.6"/><path d="M9.6 8.6h4.8"/></svg></i><i><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" transform="translate(1.5 1.5) scale(.875)"/></svg></i><i class="is-bare"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.7" fill="currentColor" stroke="none"/></svg></i></div><div class="kbd-cj-rows"><div class="kbd-cj-row"><div class="kbd-cj-key"><small>1</small>ㅣ</div><div class="kbd-cj-key"><small>2</small>·</div><div class="kbd-cj-key"><small>3</small>ㅡ</div><div class="kbd-cj-key is-dk"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H9a2 2 0 0 1-1.414-.586l-5.414-5.414a2 2 0 0 1 0-2.828L7.586 4.586A2 2 0 0 1 9 4z"/><path d="m16 9-6 6"/><path d="m10 9 6 6"/></svg></div></div><div class="kbd-cj-row"><div class="kbd-cj-key"><small>4</small>ㄱㅋ</div><div class="kbd-cj-key"><small>5</small>ㄴㄹ</div><div class="kbd-cj-key"><small>6</small>ㄷㅌ</div><div class="kbd-cj-key is-dk kbd-enter"><svg class="ke-ent" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 5v8a2 2 0 01-2 2H5M9 11l-4 4 4 4"/></svg><svg class="ke-find" viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#5b9bff" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg></div></div><div class="kbd-cj-row"><div class="kbd-cj-key"><small>7</small>ㅂㅍ</div><div class="kbd-cj-key"><small>8</small>ㅅㅎ</div><div class="kbd-cj-key"><small>9</small>ㅈㅊ</div><div class="kbd-cj-key is-dk" style="letter-spacing:0;font-size:26px">.,?!</div></div><div class="kbd-cj-row"><div class="kbd-cj-key is-s">!#1</div><div class="kbd-cj-key is-s2"><em>한 &nbsp; &nbsp; &nbsp;<br>&nbsp; &nbsp; &nbsp; <span>영</span></em></div><div class="kbd-cj-key"><small>0</small>ㅇㅁ</div><div class="kbd-cj-key  is-dk"><svg viewBox="0 0 44 20" width="46" height="20" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5v9h38V5"/></svg></div><div class="kbd-cj-key is-dk" style="letter-spacing:0;font-size:18px">한자</div></div></div></div>';
+const KBD_CJ = '<div class="kbd-cj"><div class="kbd-cj-tools"><i>' + ICONS.kbEmoji + '</i><i>' + ICONS.kbTranslate + '</i><i>' + ICONS.kbClip + '</i><i>' + ICONS.kbGear + '</i><i class="is-bare">' + ICONS.kbDots + '</i></div><div class="kbd-cj-rows"><div class="kbd-cj-row"><div class="kbd-cj-key"><small>1</small>ㅣ</div><div class="kbd-cj-key"><small>2</small>·</div><div class="kbd-cj-key"><small>3</small>ㅡ</div><div class="kbd-cj-key is-dk">' + ICONS.kbBackspace + '</div></div><div class="kbd-cj-row"><div class="kbd-cj-key"><small>4</small>ㄱㅋ</div><div class="kbd-cj-key"><small>5</small>ㄴㄹ</div><div class="kbd-cj-key"><small>6</small>ㄷㅌ</div><div class="kbd-cj-key is-dk kbd-enter">' + ICONS.kbEnter.replace('<svg ', '<svg class="ke-ent" ') + '' + ICONS.kbFind.replace('<svg ', '<svg class="ke-find" ') + '</div></div><div class="kbd-cj-row"><div class="kbd-cj-key"><small>7</small>ㅂㅍ</div><div class="kbd-cj-key"><small>8</small>ㅅㅎ</div><div class="kbd-cj-key"><small>9</small>ㅈㅊ</div><div class="kbd-cj-key is-dk" style="letter-spacing:0;font-size:26px">.,?!</div></div><div class="kbd-cj-row"><div class="kbd-cj-key is-s">!#1</div><div class="kbd-cj-key is-s2"><em>한 &nbsp; &nbsp; &nbsp;<br>&nbsp; &nbsp; &nbsp; <span>영</span></em></div><div class="kbd-cj-key"><small>0</small>ㅇㅁ</div><div class="kbd-cj-key  is-dk">' + ICONS.kbSpace + '</div><div class="kbd-cj-key is-dk" style="letter-spacing:0;font-size:18px">한자</div></div></div></div>';
 function initKbdCj() {
   document.querySelectorAll('.kbd-cj:empty').forEach((el) => { el.outerHTML = KBD_CJ; });
 }

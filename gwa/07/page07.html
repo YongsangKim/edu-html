@@ -5,17 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>우리 집 속 숨은 센서 찾기</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
-</head>
+    <style>
+        .p07-house{position:absolute;left:295px;top:170px;display:block;pointer-events:none}
+        .p07-obj{position:absolute;width:208px;height:208px;border-radius:40px;padding:0;border:0;background:none;cursor:pointer}
+        .p07-obj img{display:block;width:100%;height:100%}
+        .p07-obj:hover:not(.is-found) img{filter:drop-shadow(4px 0 0 var(--c-violet)) drop-shadow(-4px 0 0 var(--c-violet)) drop-shadow(0 4px 0 var(--c-violet)) drop-shadow(0 -4px 0 var(--c-violet))}
+        .p07-obj:active:not(.is-found) img{filter:drop-shadow(4px 0 0 var(--c-orchid)) drop-shadow(-4px 0 0 var(--c-orchid)) drop-shadow(0 4px 0 var(--c-orchid)) drop-shadow(0 -4px 0 var(--c-orchid))}
+        .p07-obj.is-found{cursor:default}
+        .p07-obj.is-found:after{content:'';position:absolute;right:0;top:0;width:44px;height:44px;border-radius:50%;background:var(--c-purple) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / 70% no-repeat}
+        .p07-obj[data-key="thermo"]{left:323px;top:170px}
+        .p07-obj[data-key="gas"]{left:803px;top:158px}
+        .p07-obj[data-key="motion"]{left:1100px;top:267px}
+        .p07-obj[data-key="leak"]{left:1020px;top:640px}
+        .p07-modal .avatar-card-title{white-space:nowrap}
+    </style></head>
 <body>
   <div id="page-fade"></div>
   <div id="viewport" class="viewport">
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <a href="page08.html" class="js-nav-effect next-btn-center">
-            <img src="../../resources/img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../resources/img/common/btn_next_content_on.png" data-src-over="../../resources/img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
-          </a>
-        </main>
+          <div class="stage-board"></div>
+          <p class="ask-pill is-fit"><span>센서가 달린 물건을 찾아 클릭해 보세요.</span></p>
+          <img class="p07-house" src="img/p07_house.png" alt="">
+          <button class="p07-obj" data-key="thermo" aria-label="온·습도 센서"><img src="img/p07_obj_thermo.png" alt=""></button>
+          <button class="p07-obj" data-key="gas" aria-label="가스 센서"><img src="img/p07_obj_gas.png" alt=""></button>
+          <button class="p07-obj" data-key="motion" aria-label="동작 센서"><img src="img/p07_obj_motion.png" alt=""></button>
+          <button class="p07-obj" data-key="leak" aria-label="침수 센서"><img src="img/p07_obj_leak.png" alt=""></button>
+
+          <div class="avatar-modal p07-modal is-off" id="p07Info">
+            <div class="avatar-card is-left">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <div>
+                  <p class="avatar-card-title" id="p07Title">맞아요!</p>
+                  <p class="avatar-card-text" id="p07Text"></p>
+                  <a href="javascript:;" class="avatar-card-btn card-btn is-popup next-btn js-sfx" id="p07Next" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p07Done">
+            <div class="avatar-card is-left">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <div class="step-flow">
+                  <div class="step-panel is-title">
+                    <p class="avatar-card-text">집 안 곳곳에서 작동하고 있는<br>센서를 모두 찾았어요.</p>
+                    <a href="page08.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+                  </div>
+                  <div class="step-panel">
+                    <p class="avatar-card-text">MakeCode에서 온도 센서의 값을 활용해<br>스마트 에어컨 알리미 프로그램을<br>만들어볼까요?</p>
+                    <a href="page08.html" class="js-nav-effect avatar-card-btn card-btn is-popup next-btn js-sfx" data-sound="sound/click.mp3">다음</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>        </main>
       </div>
     </div>
   </div>
@@ -24,5 +71,28 @@
   <script src="../../resources/js/header.js" data-title="우리 집 속 숨은 센서 찾기" data-next="page08.html"></script>
   <script src="../../resources/js/toc-gwa.js"></script>
   <script src="../../resources/js/common.js"></script>
-</body>
+  <script>
+  (function () {
+    const INFO = {
+      thermo: '온·습도 센서는 실내 온·습도를 실시간 감지하여 에어컨이나 난방기를 작동 시켜요.',
+      motion: '동작 센서는 사람이 현관에 들어서는 움직임을 감지하여 현관등을 자동으로 켜요.',
+      gas: '가스 센서는 가스 누출이나 연기를 감지하여 경보음을 울리고 가스를 차단해요.',
+      leak: '침수 센서는 바닥에 물이 차오르거나 물이 새는 것을 감지하여 알려줘요.'
+    };
+    const objs = Array.from(document.querySelectorAll('.p07-obj'));
+    let found = 0;
+    objs.forEach((o) => o.addEventListener('click', () => {
+      if (o.classList.contains('is-found')) return;
+      playClick();
+      o.classList.add('is-found');
+      found += 1;
+      $('p07Text').textContent = INFO[o.dataset.key];
+      $('p07Info').classList.remove('is-off');
+    }));
+    $('p07Next').addEventListener('click', () => {
+      $('p07Info').classList.add('is-off');
+      if (found === objs.length) $('p07Done').classList.remove('is-off');
+    });
+  })();
+  </script></body>
 </html>

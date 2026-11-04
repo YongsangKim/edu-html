@@ -10,11 +10,6 @@
            폰 화면은 캡처 없이 배경에 Google Assistant 앱 하나만 가운데 두고, 입력창·결과 카드는 HTML/CSS로 그림.
            마이크 → 구체적으로 질문 안내 → [오케이 구글!] → 명령 4가지를 순서대로(결과 카드 + 설명) → 정리 팝업 2단계 → page09 퀴즈. Assistant 로고 ../../resources/img/app/logo_assistant.png */
 
-        .p08-bubble{font-size:42px;line-height:1.3;padding:30px 24px}
-        .p08-bubble.has-ok{padding-bottom:116px}
-        .p08-ok.card-btn{position:absolute;right:20px;bottom:34px;min-width:0;width:170px;height:68px;padding:6px 0 0;font-size:40px;line-height:1}
-        .p08-ok.is-off{display:none}
-
         .p08-screen{position:relative;width:100%;height:100%;overflow:hidden;font-family:'Pretendard'}
 
         .p08-bar{position:absolute;left:24px;right:24px;bottom:84px;height:92px;box-sizing:border-box;padding:0 18px;display:flex;align-items:center;gap:16px;border-radius:46px;background:#121316;color:var(--c-white);font-size:20px;z-index:2}
@@ -63,8 +58,10 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <p class="guide-bubble is-center p08-bubble" id="p08Bubble"><span id="p08Text"></span><button type="button" class="card-btn js-sfx p08-ok is-off" id="p08Ok" data-sound="sound/click.mp3">확인</button></p>
-          <div class="guide-character"><img src="img/p_character_main.png" alt="메인 캐릭터"></div>
+          <div class="guide-set is-main" id="p08Set" style="--gb-left:60px;--gb-bottom:560px;--gb-w:610px;--gc-left:100px;--gc-bottom:0px;--gc-w:482px">
+            <p class="guide-bubble is-center" id="p08Bubble"></p>
+            <div class="guide-character"><img id="p08Char" src="img/p_character_main.png" alt="메인 캐릭터"></div>
+          </div>
 
           <div class="phone-frame p08-phone">
             <div class="phone-screen p08-screen app-home is-blue">
@@ -78,7 +75,7 @@
 
           <button type="button" class="p08-mic" id="p08Mic" aria-label="마이크">🎤</button>
 
-          <button type="button" class="card-btn js-sfx p08-wake is-off" id="p08Wake" data-sound="sound/click.mp3">오케이 구글!</button>
+          <button type="button" class="card-btn p08-wake is-off" id="p08Wake">오케이 구글!</button>
           <button type="button" class="card-btn js-sfx p08-cmd p08-cmd1 is-off" data-sound="sound/click.mp3" data-i="0">세종대왕에 대해 알려줘</button>
           <button type="button" class="card-btn js-sfx p08-cmd p08-cmd2 is-off" data-sound="sound/click.mp3" data-i="1">내일 아침 7시 알람 맞춰줘</button>
           <button type="button" class="card-btn js-sfx p08-cmd p08-cmd3 is-off" data-sound="sound/click.mp3" data-i="2">유튜브 음악에서 신나는 음악을 재생해줘</button>
@@ -98,7 +95,7 @@
                   <div class="avatar-card-body is-side">
                     <p class="avatar-card-text">이렇게 AI 비서에게는 정확한 호출어와 구체적인 질문을 전달하는 것이 아주 중요해요. 이제 퀴즈를 풀며 배운 내용을 확인해 볼까요?</p>
                   </div>
-                  <a href="page09.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+                  <a href="page09.html" class="js-nav-effect avatar-card-btn card-btn next-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
                 </div>
               </div>
             </div>
@@ -127,8 +124,6 @@
     ];
 
     const bubble = $('p08Bubble');
-    const text = $('p08Text');
-    const ok = $('p08Ok');
     const mic = $('p08Mic');
     const wake = $('p08Wake');
     const bar = $('p08Bar');
@@ -139,14 +134,15 @@
     let done = 0;
     let timer = null;
 
-    // 말풍선은 아래가 고정이라 글이 길면 위로 늘어남 → 위쪽 끝(30px)을 넘으면 글자를 2px씩 줄임
-    const say = (t, withOk) => {
-      bubble.style.fontSize = '';
-      text.textContent = t;
-      bubble.classList.toggle('has-ok', !!withOk);
-      ok.classList.toggle('is-off', !withOk);
-      let size = parseFloat(getComputedStyle(bubble).fontSize);
-      while (bubble.offsetTop < 30 && size > 26) { size -= 2; bubble.style.fontSize = size + 'px'; }
+    const sayRaw = initGuideSay({ bubble: bubble, img: $('p08Char'), set: $('p08Set'), poses: [] });
+    const say = (t, withNext) => {
+      sayRaw(t, undefined, undefined, undefined, withNext ? '다음' : undefined);
+      bubble.onclick = withNext ? (e) => {
+        if (!e.target.closest('.card-btn')) return;
+        playClick();
+        bubble.onclick = null;
+        onNext();
+      } : null;
     };
     const finger = (el) => { clearFingers(); if (el) pointFingerAt(el, { onMain: true }); };
 
@@ -191,9 +187,8 @@
       playClick();
       setBar('idle');
       say('둘째, AI가 헷갈리지 않게 구체적으로 질문해야 원하는 답을 얻을 수 있어요. 한번 명령을 해볼까요?', true);
-      ok.textContent = '다음';
       step = 1;
-      finger(ok);
+      finger(null);
     });
 
     function ready(now) {
@@ -207,16 +202,17 @@
       finger(wake);
     }
 
-    ok.addEventListener('click', () => {
+    function onNext() {
       if (step === 1) { step = 2; ready(0); return; }
       if (step === 3) {
         if (done < CMDS.length - 1) { step = 2; ready(done + 1); return; }
         clearFingers();
         $('p08Done').classList.remove('is-off');
       }
-    });
+    }
 
     wake.addEventListener('click', () => {
+      new Audio('sound/p08_ok_google.mp3').play().catch(() => {});
       wake.disabled = true;
       wake.classList.add('is-selected');
       setBar('listen');
@@ -242,9 +238,8 @@
         step = 3;
         done = i;
         cmds.forEach((x, k) => { x.classList.toggle('is-done', k < i); x.classList.toggle('is-dim', k > i); x.disabled = true; });
-        ok.textContent = '확인';
         say(d.say, true);
-        finger(ok);
+        finger(null);
       };
       if (d.connect) {
         setBar('wait', '▶ ' + d.connect);

@@ -7,95 +7,39 @@
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
         /* 디자인 없음 - 기획서 24~31p. 엔트리 실습창 한 화면에서 단계(phase)가 바뀜: 1. 4구역 살펴보기(마우스를 올리면 밝아지고 누르면 체크, 순서 자유) → 2. 움직임 누르기 → 3. 이동하기 블록을 시작 블록 아래에 끼우기 → 4. 끼운 블록 끌어 보기 → ⑤ 휴지통에 버리기 → ⑥ 입→위→장 안내 → ⑦ 블록 3개를 순서대로 끼우기 → ⑧ 시작하기로 엔트리봇 실행. 블록은 위에서 아래로 착 붙고, 틀리면 놓은 자리에 남아 노랗게 깜빡임. 이미지 img/p13_*.png·p14_*.png */
-        .en-win{position:absolute;left:40px;top:30px;width:1840px;height:730px;box-sizing:border-box;border:solid 6px var(--c-ink);border-radius:26px;background:#eef2fb}
-        .en-area{position:absolute;box-sizing:border-box;border:solid 4px #b6c4e4;border-radius:14px;background:var(--c-white);overflow:hidden;transition:box-shadow .25s,border-color .25s}
         .en-tag{position:absolute;left:10px;top:8px;z-index:6;width:44px;height:44px;border-radius:50%;background:var(--c-purple);font-family:'Cafe24 Ssurround';font-size:28px;line-height:44px;text-align:center;color:var(--c-white);opacity:0}
-        .en-stage{left:60px;top:50px;width:500px;height:450px;background:#fff}
-        .en-view{position:absolute;left:0;top:0;width:100%;height:372px;background:url('img/p13_stage_bg.png') center / contain no-repeat}
-        .en-objs{left:60px;top:510px;width:500px;height:230px;background:#f6f8fd}
-        .en-pal{left:580px;top:50px;width:600px;height:690px;background:#f6f8fd;display:flex}
-        .en-ws{left:1200px;top:50px;width:660px;height:690px;background:var(--c-white) radial-gradient(#d9e0f0 2px,transparent 2px) 0 0 / 28px 28px}
-
-        .en-btns{position:absolute;left:8px;right:8px;top:378px;height:54px;display:flex;gap:10px;z-index:3}
-        .en-btn{flex:1 1 0;height:54px;box-sizing:border-box;padding:6px 0 0;border:solid 3px #3a68e0;border-radius:10px;background:var(--c-white);font-family:'Cafe24 Ssurround';font-size:26px;color:#3a68e0;letter-spacing:-0.05em;cursor:default}
-        .en-btn.is-run{background:#3a68e0;color:var(--c-white);cursor:pointer}
-        .en-btn.is-run:before{content:'';display:inline-block;width:0;height:0;margin:-4px 12px 0 0;border:solid transparent;border-width:9px 0 9px 15px;border-left-color:currentColor;vertical-align:middle}
+        .en-view{background:url('img/p13_stage_bg.png') center / contain no-repeat}
+        
         .en-star{position:absolute;width:30px;height:30px;margin:-35px 0 0 -35px;background:url('../../resources/img/common/icon_star_on.png') center / contain no-repeat;filter:drop-shadow(0 3px 2px rgba(0,0,0,.2))}
         .en-bot{position:absolute;width:84px;height:84px;margin:-42px 0 0 -42px;background:url('img/p13_bot.svg') center / contain no-repeat;z-index:2;transition:left 1s ease,top 1s ease,width .6s ease,height .6s ease,margin .6s ease}
         .en-stage.is-intro .en-view{background-image:none}
         .en-stage.is-intro .en-star{display:none}
         .en-stage.is-intro .en-bot{left:250px!important;top:190px!important;width:220px;height:220px;margin:-110px 0 0 -110px}
 
-        .en-objlist{margin:56px 14px 0;display:flex;flex-direction:column;gap:10px}
-        .en-obj{height:64px;box-sizing:border-box;padding:6px 14px 0;border:solid 3px #b6c4e4;border-radius:10px;background:var(--c-white);display:flex;align-items:center;gap:12px;font-family:'Cafe24 Ssurround';font-size:26px;color:var(--c-ink)}
-        .en-obj i{width:44px;height:44px;background:center / contain no-repeat}
-
-        .en-cats{flex:0 0 150px;display:flex;flex-direction:column;border-right:solid 3px #b6c4e4;background:#e7ecf8}
-        .en-cat{flex:1 1 0;max-height:96px;padding:6px 0 0;border:0;border-bottom:solid 3px #d3dbef;background:none;font-family:'Cafe24 Ssurround';font-size:28px;color:var(--c-ink);letter-spacing:-0.05em;cursor:pointer}
-        .en-cat.is-on{background:#a751e8;color:var(--c-white)}
-        .en-cat.is-on[data-cat="시작"]{background:#1fa89a}
-        .en-list{flex:1 1 auto;position:relative;padding:60px 40px 0;display:flex;flex-direction:column;gap:30px;align-items:flex-start}
         .en-list .en-blk{width:360px;flex:none}
 
-        /* 엔트리 블록 모양(보내 주신 참고 이미지): 왼쪽은 곧은 면, 오른쪽 끝은 완전히 둥글게, 아래 왼쪽에 작은 역삼각 돌기, 같은 색의 어두운 얇은 테두리.
-           시작 블록은 왼쪽에 걸친 큰 재생 버튼 동그라미(.en-play) */
-        .en-blk{--b:#a751e8;--blk-c:var(--b);--tab:32px;position:relative;box-sizing:border-box;height:74px;padding:4px 22px 0 20px;display:flex;align-items:center;font-family:'Cafe24 Ssurround';font-size:25px;color:var(--c-white);letter-spacing:-0.05em;white-space:nowrap;touch-action:none;user-select:none}
-        .en-blk{background:
-          linear-gradient(rgba(255,255,255,.42),rgba(255,255,255,.42)) left top / calc(50% - var(--tab) / 2) 3px no-repeat,
-          linear-gradient(rgba(255,255,255,.42),rgba(255,255,255,.42)) right top / calc(50% - var(--tab) / 2) 3px no-repeat,
-          linear-gradient(rgba(0,0,0,.12),rgba(0,0,0,.12)) left bottom / 100% 4px no-repeat,
-          radial-gradient(circle at 100% 0,transparent 10px,var(--blk-c) 10.5px) calc(50% - (var(--tab) - 10px) / 2) 4px / 10px 10px no-repeat,
-          radial-gradient(circle at 0 0,transparent 10px,var(--blk-c) 10.5px) calc(50% + (var(--tab) - 10px) / 2) 4px / 10px 10px no-repeat,
-          linear-gradient(var(--blk-c),var(--blk-c)) 50% 100% / var(--tab) calc(100% - 14px) no-repeat,
-          linear-gradient(var(--blk-c),var(--blk-c)) left top / calc(50% - var(--tab) / 2 + 1px) 36% no-repeat,
-          linear-gradient(var(--blk-c),var(--blk-c)) left bottom / calc(50% - var(--tab) / 2 + 1px) 36% no-repeat,
-          linear-gradient(var(--blk-c),var(--blk-c)) left 13px center / calc(50% - var(--tab) / 2 - 13px + 1px) 32% no-repeat,
-          radial-gradient(circle at 0 100%,transparent 12px,var(--blk-c) 12.5px) left 1px top calc(35% + 4.2px) / 12px 12px no-repeat,
-          radial-gradient(circle at 0 0,transparent 12px,var(--blk-c) 12.5px) left 1px top calc(65% - 4.2px) / 12px 12px no-repeat,
-          linear-gradient(var(--blk-c),var(--blk-c)) right top / calc(50% - var(--tab) / 2 + 1px) 36% no-repeat,
-          linear-gradient(var(--blk-c),var(--blk-c)) right bottom / calc(50% - var(--tab) / 2 + 1px) 36% no-repeat,
-          linear-gradient(var(--blk-c),var(--blk-c)) right 13px center / calc(50% - var(--tab) / 2 - 13px + 1px) 32% no-repeat,
-          radial-gradient(circle at 100% 100%,transparent 12px,var(--blk-c) 12.5px) right 1px top calc(35% + 4.2px) / 12px 12px no-repeat,
-          radial-gradient(circle at 100% 0,transparent 12px,var(--blk-c) 12.5px) right 1px top calc(65% - 4.2px) / 12px 12px no-repeat,
-          var(--fill);filter:drop-shadow(0 1px 0 rgba(0,0,0,.2))}
-        .en-blk:after{bottom:-14px;height:21px;border-radius:0 0 12px 12px;box-shadow:inset 0 -3px 0 rgba(0,0,0,.12)}
-        .en-blk{--fill:linear-gradient(var(--blk-c),var(--blk-c)) left top / 14px 100% no-repeat,linear-gradient(var(--blk-c),var(--blk-c)) right top / 14px 100% no-repeat}
-        .en-blk.is-start{--b:#1fa89a;--fill:linear-gradient(rgba(255,255,255,.42),rgba(255,255,255,.42)) left top / 100% 3px no-repeat,linear-gradient(var(--blk-c),var(--blk-c)) 50% 0 / calc(var(--tab) + 2px) 20px no-repeat,linear-gradient(var(--blk-c),var(--blk-c)) left top / 14px 100% no-repeat,linear-gradient(var(--blk-c),var(--blk-c)) right top / 14px 100% no-repeat;z-index:3;border-radius:24px 24px 10px 10px}
+        /* 엔트리 블록 모양: 직각 모서리, 위 홈·아래 돌기가 각진 사다리꼴(폭 32·깊이 14)이라 위아래 블록이 딱 맞물림. 시작 블록은 아래 돌기만 있음. 높이 88 = 몸통 74 + 돌기 14 */
+        .en-blk{--b:#a751e8;position:relative;box-sizing:border-box;height:88px;padding:0 22px 14px 20px;display:flex;align-items:center;font-family:Pretendard,sans-serif;font-weight:700;font-size:25px;color:var(--c-white);letter-spacing:-0.05em;white-space:nowrap;touch-action:none;user-select:none;border-radius:0;filter:none;background:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27360%27 height=%2788%27 viewBox=%270 0 360 88%27%3E%3Cpath d=%27M1,0 H164 L168,14 H192 L196,0 H359 V74 H196 L192,88 H168 L164,74 H1 Z%27 fill=%27%23a751e8%27 stroke=%27%23140a3c%27 stroke-opacity=%27.4%27 stroke-width=%272%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E") 0 0 / 360px 88px no-repeat}
+        .en-blk:after{display:none}
+        .en-blk.is-start{--b:#1fa89a;background-image:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27360%27 height=%2788%27 viewBox=%270 0 360 88%27%3E%3Cpath d=%27M1,0 H359 V74 H196 L192,88 H168 L164,74 H1 Z%27 fill=%27%231fa89a%27 stroke=%27%23140a3c%27 stroke-opacity=%27.4%27 stroke-width=%272%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E")}
         .en-blk.is-start:before{content:'';flex:none;margin-right:12px;border-left:15px solid var(--c-white);border-top:9px solid transparent;border-bottom:9px solid transparent}
-        .en-num{display:inline-block;flex:none;box-sizing:border-box;width:32px;height:32px;min-width:32px;margin-right:2px;border-radius:50%;background:var(--c-white);color:var(--b);line-height:34px;text-align:center;font-style:normal;letter-spacing:0}
         .en-blk.is-pick{cursor:grab}
-        .en-blk.is-ghost{position:absolute;z-index:80;opacity:.92;box-shadow:0 8px 16px rgba(0,0,0,.3);pointer-events:none}
+        .en-blk.is-ghost{position:absolute;z-index:80;opacity:.92;filter:drop-shadow(0 8px 12px rgba(0,0,0,.3));pointer-events:none}
         .en-blk.is-blink{animation:en-blink .4s ease-in-out 4}
-        .en-blk.is-target{box-shadow:0 0 0 6px var(--c-yellow)}
-        .en-blk.is-run{box-shadow:0 0 0 6px #2fbf71}
-        @keyframes en-blink{0%,100%{filter:none}50%{filter:brightness(1.6) saturate(2);box-shadow:0 0 0 8px var(--c-yellow)}}
+        .en-blk.is-run{filter:drop-shadow(0 0 5px #2fbf71) drop-shadow(0 0 3px #2fbf71)}
+        @keyframes en-blink{0%,100%{filter:none}50%{filter:brightness(1.4) drop-shadow(0 0 6px #ffd83d) drop-shadow(0 0 4px #ffd83d)}}
         .en-ws .en-blk{position:absolute;left:60px;width:360px}
-        .en-slot{position:absolute;left:60px;width:360px;height:74px;box-sizing:border-box;border:dashed 4px var(--c-yellow);border-radius:10px;background:none;display:none}
+        .en-slot{position:absolute;left:60px;width:360px;height:88px;background:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27360%27 height=%2788%27 viewBox=%270 0 360 88%27%3E%3Cpath d=%27M1,0 H164 L168,14 H192 L196,0 H359 V74 H196 L192,88 H168 L164,74 H1 Z%27 fill=%27%23ffd83d%27 fill-opacity=%27.14%27 stroke=%27%23ffd83d%27 stroke-width=%274%27 stroke-dasharray=%2710 7%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E") 0 0 / 360px 88px no-repeat;display:none}
         .en-slot.is-on{display:block}
-        .en-trash{position:absolute;right:16px;bottom:16px;width:100px;height:100px;box-sizing:border-box;background:var(--c-white) url('img/p14_trash.png') center / 100% no-repeat;font-size:0;transition:box-shadow .25s}
-        .en-trash.is-glow{box-shadow:0 0 0 8px var(--c-yellow)}
-        .en-del{position:absolute;left:150px;top:0;right:0;bottom:0;z-index:4;box-sizing:border-box;border:dashed 3px #ffd84a;background:rgba(255,220,80,.55);display:none;flex-direction:column;align-items:center;padding-top:110px;pointer-events:none}
-        .en-del img{display:block;width:150px;height:150px;object-fit:contain}
-        .en-del p{margin:6px 0 0;font-family:'Cafe24 Ssurround';font-size:30px;color:var(--c-ink);letter-spacing:-0.04em}
-        .en-pal.is-glow .en-del{display:flex}
+        .en-trash{background-image:url('img/p14_trash.png')}
 
-        .en-guide{position:absolute;left:40px;top:790px;width:1840px;height:150px;box-sizing:border-box;padding:0 40px 0 190px;display:flex;align-items:center;gap:30px;
-          background:var(--c-cream);border:solid 5px var(--c-purple);border-radius:36px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
-        .en-char{position:absolute;left:30px;bottom:6px;width:140px;height:170px}
-        .en-char img{width:100%;height:100%;object-fit:contain;object-position:bottom}
-        .en-text{margin:0;flex:1 1 auto;font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.3;color:var(--c-purple);letter-spacing:-0.05em;word-break:keep-all}
-        .en-next{flex:0 0 auto;min-width:0;width:260px;padding-left:10px;padding-right:10px;white-space:nowrap;text-decoration:none;margin-bottom:20px}
-        .en-next.is-off{display:none}
 
         .phase-a .en-area:not(.is-lit):not(.is-done):after{content:'';position:absolute;left:0;top:0;width:100%;height:100%;background:rgba(15,15,60,.62);z-index:5}
         .phase-a .en-area{cursor:pointer}
         .phase-a .en-tag{opacity:1}
         .en-area.is-lit{border-color:var(--c-yellow);box-shadow:0 0 0 8px rgba(255,216,61,.75)}
         .en-area.is-done{border-color:#2fbf71;box-shadow:0 0 0 6px rgba(47,191,113,.6)}
-        .en-area.is-done:before{content:'✓';position:absolute;right:14px;top:10px;z-index:6;width:50px;height:50px;border-radius:50%;background:#2fbf71;font-size:34px;line-height:50px;text-align:center;color:var(--c-white)}
-        .en-area.is-hint{animation:en-hint 1.1s ease-in-out infinite}
-        @keyframes en-hint{0%,100%{box-shadow:0 0 0 0 rgba(255,216,61,0)}50%{box-shadow:0 0 0 12px rgba(255,216,61,.9)}}
-        .en-cat.is-hintcat{animation:en-hint 1.1s ease-in-out infinite}
+        .en-area.is-done:before{content:'✓';position:absolute;right:14px;top:10px;z-index:6;width:50px;height:50px;border-radius:50%;background:#2fbf71;font-family:'Pretendard';font-size:34px;line-height:50px;text-align:center;color:var(--c-white)}
 
     </style>
 </head>
@@ -142,6 +86,7 @@
   <script src="../../resources/js/header.js" data-title="첫 블록 코딩, 엔트리로 배우는 순차" data-next="page15.html"></script>
   <script src="../../resources/js/toc-gwa.js"></script>
   <script src="../../resources/js/common.js"></script>
+  <script src="../../resources/js/entry.js"></script>
   <script>
   (function () {
     const main = document.getElementById('enMain');
@@ -182,18 +127,8 @@
       b.classList.toggle('is-off', !on);
       b.onclick = on ? () => { fn(); } : null;
     };
-    const mainRect = () => main.getBoundingClientRect();
-    const toMain = (e) => { const r = mainRect(); const s = r.width / 1920; return [(e.clientX - r.left) / s, (e.clientY - r.top) / s]; };
-    const touches = (el, blk) => {
-      const a = el.getBoundingClientRect(); const c = blk.getBoundingClientRect();
-      return a.left < c.right && a.right > c.left && a.top < c.bottom && a.bottom > c.top;
-    };
-    const inside = (el, x, y) => {
-      const r = mainRect(); const s = r.width / 1920; const b = el.getBoundingClientRect();
-      const L = (b.left - r.left) / s, T = (b.top - r.top) / s;
-      return x >= L && x <= L + b.width / s && y >= T && y <= T + b.height / s;
-    };
-    const wsOrigin = () => { const r = mainRect(); const s = r.width / 1920; const b = ws.getBoundingClientRect(); return [(b.left - r.left) / s, (b.top - r.top) / s, s]; };
+    const { toMain, inside, rectMain, trackDrag, trashZone, trashHint } = Entry;
+    const wsOrigin = () => { const b = rectMain(ws); return [b.l, b.t]; };
 
     function renderCats(on) {
       $('enCats').innerHTML = CATS.map((c) => '<button class="en-cat' + (c === on ? ' is-on' : '') + '" data-cat="' + c + '">' + c + '</button>').join('');
@@ -239,7 +174,7 @@
       renderCats('시작');
       renderPalette([{ name: '시작하기 버튼을 클릭했을 때', start: true }, { name: 'A 버튼을 눌렀을 때', start: true }, { name: '마우스를 클릭했을 때', start: true }, { name: '오브젝트를 클릭했을 때', start: true }], false);
       hintNext();
-      setTimeout(() => pointFingerAt($('enStage'), { onMain: true, x: 0.5, dy: -120 }), 400);
+      setTimeout(() => pointFingerAt($('enStage'), { onMain: true }), 400);
     }
 
     /* ---------- 2. 움직임 누르기 ---------- */
@@ -250,8 +185,8 @@
       say('‘움직임’을 클릭하세요.');
       renderCats('시작');
       const btn = $('enCats').querySelector('[data-cat="움직임"]');
-      btn.classList.add('is-hintcat');
-      setTimeout(() => pointFingerAt(btn, { onMain: true, x: 0.5 }), 300);
+      btn.classList.add('hit-pulse');
+      setTimeout(() => pointFingerAt(btn, { onMain: true }), 300);
     }
     $('enCats').addEventListener('click', (e) => {
       const b = e.target.closest('.en-cat');
@@ -269,14 +204,30 @@
       slot.style.top = targetTop(0) + 'px';
       slot.classList.add('is-on');
       say('‘이동하기’ 블록을 클릭해 시작 블록 바로 아래에 연결해 보세요.');
-      setTimeout(() => { const first = list.querySelector('.en-blk'); if (first) pointFingerAt(first, { onMain: true, x: 0.6 }); }, 300);
+      fingerNext();
     }
 
     /* ---------- 블록 끌기(팔레트 → 조립소, 조립소 안) ---------- */
+    const stray = () => ws.querySelector('.en-blk:not(.is-start):not([data-locked])');
+    function markPulse() {
+      main.querySelectorAll('.en-blk.hit-pulse').forEach((b) => b.classList.remove('hit-pulse'));
+      const t = phase === 'c' ? stray() || list.querySelector('.en-blk.is-pick')
+        : phase === 'd' || phase === 'e' ? ws.querySelector('.en-blk[data-locked]:not(.is-start)') || ws.querySelector('.en-blk.is-pick:not(.is-start)')
+        : phase === 'g' ? stray() || list.querySelector('.en-blk[data-idx="' + step + '"]') : null;
+      if (t) t.classList.add('hit-pulse');
+      return t;
+    }
+    let fingerT;
+    function fingerNext() {
+      clearTimeout(fingerT);
+      clearFingers();
+      const t = markPulse();
+      if (t && (phase === 'c' || phase === 'd' || phase === 'e' || phase === 'g')) fingerT = setTimeout(() => pointFingerAt(t, { onMain: true }), 300);
+    }
     function ghostAt(el) {
       const g = el.cloneNode(true);
       g.classList.add('is-ghost');
-      g.classList.remove('is-pick', 'is-target', 'is-blink');
+      g.classList.remove('is-pick', 'hit-pulse', 'is-blink');
       g.style.width = '360px';
       main.appendChild(g);
       return g;
@@ -284,21 +235,19 @@
     function startPaletteDrag(e, src) {
       if (phase !== 'c' && phase !== 'g') return;
       if (src.dataset.idx === '-1') return;
+      if ((phase === 'c' || phase === 'g') && stray()) { e.preventDefault(); fingerNext(); return; }
       e.preventDefault();
       clearFingers();
       const ghost = ghostAt(src);
       const idx = Number(src.dataset.idx);
       const move = (ev) => { const [x, y] = toMain(ev); ghost.style.left = (x - 60) + 'px'; ghost.style.top = (y - 37) + 'px'; };
       move(e);
-      const up = (ev) => {
-        window.removeEventListener('pointermove', move);
-        window.removeEventListener('pointerup', up);
+      trackDrag(move, (ev) => {
         const [x, y] = toMain(ev);
         ghost.remove();
         if (inside(ws, x, y)) dropInWs(makeWsBlock(src.textContent, idx), x, y);
-      };
-      window.addEventListener('pointermove', move);
-      window.addEventListener('pointerup', up);
+        fingerNext();
+      }, () => { ghost.remove(); fingerNext(); });
     }
     function makeWsBlock(name, idx) {
       const b = document.createElement('div');
@@ -327,24 +276,32 @@
       const offX = ox + 4, offY = oy + 4;
       let vl = startLeft, vt = startTop;
       const place = () => { b.style.left = (vl + offX) + 'px'; b.style.top = (vt + offY) + 'px'; };
+      b.classList.remove('hit-pulse');
       b.style.position = 'absolute';
       b.style.width = '360px';
       b.style.zIndex = '90';
       main.appendChild(b);
       place();
+      const zone = phase === 'e' ? trashZone(pal, trash, b) : null;
+      if (zone) zone.begin();
       const move = (ev) => {
         const [x, y] = toMain(ev);
         if (Math.hypot(x - sx, y - sy) > 12) moved = true;
         vl = startLeft + x - sx;
         vt = startTop + y - sy;
         place();
-        if (phase === 'e') { trash.classList.toggle('is-glow', touches(trash, b)); pal.classList.toggle('is-glow', inside(pal, x, y)); }
+        if (zone) zone.move();
+      };
+      const back = () => {
+        if (zone) zone.end();
+        ws.appendChild(b);
+        b.style.zIndex = ''; b.style.position = '';
+        b.style.left = startLeft + 'px'; b.style.top = startTop + 'px';
       };
       const up = (ev) => {
-        window.removeEventListener('pointermove', move);
-        window.removeEventListener('pointerup', up);
-        trash.classList.remove('is-glow'); pal.classList.remove('is-glow');
         const [x, y] = toMain(ev);
+        const trashed = zone && zone.hit(x, y);
+        if (zone) zone.end();
         ws.appendChild(b);
         b.style.zIndex = ''; b.style.position = '';
         b.style.left = vl + 'px'; b.style.top = vt + 'px';
@@ -353,21 +310,20 @@
           return;
         }
         if (phase === 'e') {
-          if (touches(trash, b) || inside(pal, x, y)) { playClick(); b.remove(); onTrashed(); }
+          if (trashed) { playClick(); b.remove(); onTrashed(); }
           else { b.style.left = startLeft + 'px'; b.style.top = startTop + 'px'; }
           return;
         }
         if (!inside(ws, x, y)) { if (phase === 'c' || phase === 'g') { snapped = snapped.filter((n) => n !== b); b.remove(); } return; }
-        dropInWs(b, x, y);
+        dropInWs(b, x, y, true);
       };
-      window.addEventListener('pointermove', move);
-      window.addEventListener('pointerup', up);
+      trackDrag(move, (ev) => { up(ev); fingerNext(); }, () => { back(); fingerNext(); });
     }
     function nearTarget(b, n) {
       return Math.abs(parseFloat(b.style.left) - 60) < 70 && Math.abs(parseFloat(b.style.top) - targetTop(n)) < 60;
     }
-    function dropInWs(b, x, y) {
-      placeFree(b, x, y);
+    function dropInWs(b, x, y, keep) {
+      if (!keep) placeFree(b, x, y);
       b.style.width = '360px';
       if (phase === 'c') {
         if (nearTarget(b, 0)) {
@@ -378,6 +334,7 @@
           phase = 'c-done';
           setTimeout(toPhaseD, 1800);
         } else {
+          playWrong();
           say('괜찮아요! 시작 블록 바로 아래로 다시 옮겨 볼까요?');
         }
         return;
@@ -393,7 +350,12 @@
           step += 1;
           if (step >= SEQ.length) { slot.classList.remove('is-on'); setTimeout(toPhaseH, 900); } else { markStep(); }
         } else {
-          b.classList.remove('is-blink'); void b.offsetWidth; b.classList.add('is-blink');
+          let el = b;
+          if (Number(b.dataset.idx) !== step) { b.remove(); el = list.querySelector('.en-blk[data-idx="' + b.dataset.idx + '"]'); }
+          if (el) {
+            el.classList.remove('is-blink'); void el.offsetWidth; el.classList.add('is-blink');
+            el.addEventListener('animationend', () => el.classList.remove('is-blink'), { once: true });
+          }
           playWrong();
         }
       }
@@ -403,8 +365,9 @@
     function toPhaseD() {
       phase = 'd';
       say('조립소에 놓았던 보라색 블록을 움직여 보세요.');
-      const placed = ws.querySelector('.en-blk.is-pick');
-      if (placed) setTimeout(() => pointFingerAt(placed, { onMain: true, x: 0.6 }), 200);
+      markPulse();
+      const placed = ws.querySelector('.en-blk[data-locked]:not(.is-start)') || ws.querySelector('.en-blk.is-pick');
+      if (placed) setTimeout(() => pointFingerAt(placed, { onMain: true }), 200);
     }
 
     /* ---------- ⑤ 휴지통 ---------- */
@@ -412,10 +375,12 @@
       phase = 'e';
       clearFingers();
       say('잘못 가져온 블록은 휴지통에 넣으면 지울 수 있어요.<br>왼쪽 휴지통 또는 오른쪽 아래의 휴지통에 넣어 삭제해보세요.');
-      pal.classList.add('is-hint'); trash.classList.add('is-glow');
+      trashHint(pal, trash, true);
+      fingerNext();
     }
     function onTrashed() {
-      pal.classList.remove('is-hint'); trash.classList.remove('is-glow');
+      trashHint(pal, trash, false);
+      markPulse();
       say('잘했어요! 이제 진짜 엔트리 블록코딩을 하러 가볼까요?');
       phase = 'e-done';
       setNext(true, () => { setNext(false); toPhaseF(); });
@@ -432,12 +397,11 @@
       renderPalette(SEQ.map((s, i) => ({ name: s.name, idx: i })), false);
       say('음식이 입에서 위, 장으로 이동하는 순서대로 엔트리봇을 움직여 볼까요?');
       setNext(true, () => { setNext(false); clearFingers(); toPhaseG(); });
-      setTimeout(() => pointFingerAt($('enNext'), { onMain: true, x: 0.5 }), 300);
     }
 
     /* ---------- ⑦ 블록 3개 순서대로 ---------- */
     function markStep() {
-      list.querySelectorAll('.en-blk').forEach((b) => b.classList.toggle('is-target', Number(b.dataset.idx) === step));
+      fingerNext();
       slot.style.top = targetTop(step) + 'px';
       slot.classList.add('is-on');
       say(SEQ[step].ask);
@@ -447,19 +411,20 @@
       step = 0; snapped = [];
       renderPalette(SEQ.map((s, i) => ({ name: s.name, idx: i })), true);
       markStep();
-      setTimeout(() => { const first = list.querySelector('.en-blk'); if (first) pointFingerAt(first, { onMain: true, x: 0.6 }); }, 300);
     }
 
     /* ---------- ⑧ 실행 ---------- */
     function toPhaseH() {
       phase = 'h';
-      list.querySelectorAll('.en-blk').forEach((b) => b.classList.remove('is-target'));
+      markPulse();
+      $('enRun').classList.add('hit-pulse');
       say('‘시작하기’ 버튼을 클릭하세요.');
-      setTimeout(() => pointFingerAt($('enRun'), { onMain: true, x: 0.5 }), 300);
+      setTimeout(() => pointFingerAt($('enRun'), { onMain: true }), 300);
     }
     $('enRun').addEventListener('click', () => {
       if (phase !== 'h') return;
       phase = 'h-run';
+      $('enRun').classList.remove('hit-pulse');
       clearFingers();
       playClick();
       const move = (key, i) => setTimeout(() => {

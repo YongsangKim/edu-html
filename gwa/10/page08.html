@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>엔트리 반복 블록으로 심장 코딩하기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .en-view{display:flex;align-items:center;justify-content:center;transition:transform .22s ease}
+        .en-view img{width:300px;height:300px;object-fit:contain}
+        .en-view.is-small{transform:scale(.7)}
+        .en-view.is-big{transform:scale(1.15)}
+        .en-objs{background:#d6e9f4}
+        .en-cat.is-on[data-cat="생김새"]{background:#e0566e}
+        .en-cat.is-on[data-cat="흐름"]{background:#3a9bdc}
+        .en-list{gap:18px}
+        .en-trash{background-image:url('img/p08_trash.png')}
+
+        #enBlocks{position:absolute;left:0;top:0;width:100%;height:100%}
+        .en-ws.is-run #enBlocks{animation:p08-run 1s ease-in-out infinite}
+        @keyframes p08-run{0%,100%{filter:drop-shadow(4px 0 0 rgba(255,194,26,0)) drop-shadow(-4px 0 0 rgba(255,194,26,0)) drop-shadow(0 4px 0 rgba(255,194,26,0)) drop-shadow(0 -4px 0 rgba(255,194,26,0))}50%{filter:drop-shadow(4px 0 0 #ffc21a) drop-shadow(-4px 0 0 #ffc21a) drop-shadow(0 4px 0 #ffc21a) drop-shadow(0 -4px 0 #ffc21a)}}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default" id="enMain">
+          <div class="en-win"></div>
+          <div class="en-area en-stage">
+            <div class="en-view" id="enHeart"><img src="img/p08_heart.png" alt="심장"></div>
+            <div class="en-btns"><button class="en-btn" type="button">+ 오브젝트 추가하기</button><button class="en-btn is-run" id="enRun" type="button">시작하기</button></div>
+          </div>
+          <div class="en-area en-objs"><div class="en-objlist"><div class="en-obj"><i style="background-image:url('img/p08_heart.png')"></i>심장</div></div></div>
+          <div class="en-area en-pal" id="enPal">
+            <div class="en-cats" id="enCats"></div>
+            <div class="en-list" id="enList"></div>
+            <div class="en-del"><img src="img/p08_trash.png" alt=""><p>여기로 옮겨 버리기</p></div>
+          </div>
+          <div class="en-area en-ws" id="enWs"><div id="enBlocks"></div><div class="en-trash"></div></div>
+
+          <div class="en-guide">
+            <div class="en-char"><img src="../img/character/gwa_main_point.png" alt="메인 캐릭터"></div>
+            <p class="en-text" id="enText"></p>
+            <button class="card-btn is-popup js-sfx en-next is-off" id="enNext" data-sound="sound/click.mp3">다음</button>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="엔트리 반복 블록으로 심장 코딩하기" data-next="page09.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script src="../../resources/js/entry.js"></script>
+  <script>
+  (function () {
+    const main = $('enMain'), ws = $('enWs'), pal = $('enPal'), list = $('enList'), blocks = $('enBlocks'), trash = ws.querySelector('.en-trash');
+    const text = $('enText'), heart = $('enHeart'), runBtn = $('enRun'), nextBtn = $('enNext'), cats = $('enCats');
+    const CATS = ['시작', '흐름', '움직임', '생김새', '소리', '판단', '계산'];
+    const BL = '#3a9bdc', RD = '#e0566e', GR = '#1fa89a';
+    const OG = '심장 오그라들기 모양으로 바꾸기', NL = '심장 늘어나기 모양으로 바꾸기';
+    const heartBeat = makeSfx('sound/p08_heart_beat.wav', true);
+    const snap = makeSfx('sound/drag.wav');
+    const TXT = {
+      cat1: '‘흐름’을 클릭하세요.',
+      rep: '’10번 반복하기’ 블록을 가져와 초록색 시작 블록 바로 아래에 연결해보세요.',
+      repWrong: '괜찮아요! 시작 블록 바로 아래로 다시 옮겨 볼까요?',
+      cat2: '‘생김새’를 클릭하세요.',
+      og: '‘심장 오그라들기 모양으로 바꾸기’ 블록을 가져와 하늘색 반복 블록의 열린 홈 안에 연결해보세요.',
+      nl: '‘심장 늘어나기 모양으로 바꾸기’ 블록을 가져와 ‘심장 오그라들기’ 블록의 바로 아래에 연결해보세요.',
+      kidWrong: '되풀이할 일은 반복 블록 안쪽 홈에 넣어야 해요. 다시 넣어 볼까요?',
+      run1: '심장 코딩이 완성됐어요!! 시작하기 버튼을 클릭하여 심장 코딩을 관찰해 봐요.',
+      done1: '심장이 열 번 뛰고 멈췄어요. 이번에는 심장이 계속 뛰도록 설정해볼까요?',
+      del: '’10번 반복하기’ 블록을 왼쪽 휴지통에 넣어 삭제해보세요.',
+      inf: '’계속 반복하기’ 블록을 가져와 반복 블록 자리에 넣어보세요.',
+      infWrong: '계속 반복하기 블록을 반짝이는 점선안에 넣어 보세요.',
+      run2: '계속 반복하는 심장 코딩이 완성됐어요!! 시작하기 버튼을 클릭하여 심장 가동을 다시 관찰해 볼까요?',
+      sum1: '블록 하나만 바꾸었는데도, 심장이 멈추지 않고 계속 뛰어요.',
+      sum2: '정해진 횟수만큼 되풀이할 때는 [○번 반복하기]를 쓰고, 멈추지 않고 되풀이할 때는 [계속 반복하기]를 쓰면 돼요.',
+      fin: '이제 퀴즈를 풀며 배운 내용을 확인해볼까요?'
+    };
+    const st = { step: 0, loop: null, kids: [], slot: null, loose: null, frame: false, beat: null, busy: false };
+    const say = (t) => { text.innerHTML = t; };
+    const setNext = (fn) => { nextBtn.classList.toggle('is-off', !fn); nextBtn.onclick = fn ? () => { playClick(); fn(); } : null; hint(); };
+    const { toMain, rectMain, trackDrag, trashZone, trashHint } = Entry;
+    const hint = Entry.hinter(() =>
+      !nextBtn.classList.contains('is-off') ? [nextBtn]
+      : st.busy ? null
+      : st.step === 0 || st.step === 2 ? [cats.querySelector('.hit-pulse')]
+      : [1, 3, 6].includes(st.step) ? [blocks.querySelector('.is-loose') || list.querySelector('.is-pick')]
+      : st.step === 5 ? [blocks.querySelector('.is-del')]
+      : st.step === 4 || st.step === 7 ? [runBtn] : null);
+
+    const cpath = (W, H) => {
+      const hh = 74, aw = 30, fh = 30, nd = 14, nh = 16, cx = W / 2, ci = aw + (W - aw) / 2, yF = hh + H, yB = yF + fh;
+      const tab = (x, y, dir) => dir > 0 ? ` L${x + nh - 4},${y + nd} H${x - nh + 4} L${x - nh},${y}` : ` L${x - nh + 4},${y + nd} H${x + nh - 4} L${x + nh},${y}`;
+      return `M0,0 H${cx - nh} L${cx - nh + 4},${nd} H${cx + nh - 4} L${cx + nh},0 H${W} V${hh} H${ci + nh}` + tab(ci, hh, 1) + ` H${aw} V${yF} H${ci - nh}` + tab(ci, yF, -1) + ` H${W} V${yB} H${cx + nh}` + tab(cx, yB, 1) + ' H0 Z';
+    };
+    const spath = (W, start) => {
+      const nd = 14, nh = 16, cx = W / 2;
+      return 'M0,0 ' + (start ? `H${W}` : `H${cx - nh} L${cx - nh + 4},${nd} H${cx + nh - 4} L${cx + nh},0 H${W}`) + ` V74 H${cx + nh} L${cx + nh - 4},${74 + nd} H${cx - nh + 4} L${cx - nh},74 H0 Z`;
+    };
+    const STROKE = 'stroke="rgba(20,10,60,.38)" stroke-width="2.5" stroke-linejoin="round"';
+    const DASH = 'stroke="#ffd83d" stroke-width="4" stroke-dasharray="10 7"';
+    const label = (t) => t.replace(/^(\d+)/, '<i class="en-num">$1</i>');
+    const mk = (cls, w, h, d, fill, stroke, lb, fs, x, y) =>
+      `<div class="cb ${cls}" style="${x === undefined ? '' : `left:${x}px;top:${y}px;`}width:${w}px;height:${h}px"><svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><path d="${d}" fill="${fill}" ${stroke}/></svg>${lb ? `<div class="lb" style="font-size:${fs}px">${lb}</div>` : ''}</div>`;
+    const loopHtml = (type, H, cls, x, y, dashed) => mk(cls, 360, 74 + H + 44, cpath(360, H), dashed ? 'rgba(255,216,61,.14)' : BL, dashed ? DASH : STROKE, dashed ? '' : (type === 'rep' ? label('10 번 반복하기') : '계속 반복하기'), 25, x, y);
+    const blockHtml = (type, cls, x, y, W, dashed) => {
+      const t = type === 'og' ? OG : NL;
+      return mk(cls, W, 88, spath(W, false), dashed ? 'rgba(255,216,61,.14)' : RD, dashed ? DASH : STROKE, dashed ? '' : t, 22, x, y);
+    };
+
+    function render() {
+      let h = mk('', 360, 88, spath(360, true), GR, STROKE, '<span class="pl"></span>시작하기 버튼을 클릭했을 때', 25, 60, 70);
+      const nIn = st.kids.length + (st.slot && st.slot.startsWith('inside') ? 1 : 0);
+      if (st.loop) h += loopHtml(st.loop, nIn ? 74 * nIn : 44, 'is-del', 60, 144);
+      else if (st.frame) h += loopHtml('rep', 148, '', 60, 144, true);
+      st.kids.forEach((k, i) => { h += blockHtml(k, '', 90, 218 + 74 * i, 330); });
+      if (st.slot === 'under') h += mk('', 360, 88, spath(360), 'rgba(255,216,61,.14)', DASH, '', 22, 60, 144);
+      if (st.slot && st.slot.startsWith('inside')) h += blockHtml('og', '', 90, 218 + 74 * st.kids.length, 330, true);
+      if (st.loose) {
+        const L = st.loose;
+        h += L.type === 'rep' || L.type === 'inf' ? loopHtml(L.type, 44, 'is-loose', L.x, L.y) : blockHtml(L.type, 'is-loose', L.x, L.y, 360);
+      }
+      blocks.innerHTML = h;
+      const lo = blocks.querySelector('.is-loose');
+      if (lo) { lo.classList.add('hit-pulse'); lo.addEventListener('pointerdown', (e) => startDrag(e, lo, st.loose.type, true)); }
+      const pk = list.querySelector('.is-pick');
+      if (pk) pk.classList.toggle('hit-pulse', !st.loose);
+      const lp = blocks.querySelector('.is-del');
+      if (lp) lp.addEventListener('pointerdown', (e) => { if (st.step === 5) startDrag(e, lp, 'delete', false); });
+      if (lp && st.step === 5) lp.classList.add('hit-pulse');
+      hint();
+    }
+
+    function renderCats(on, hint) {
+      cats.innerHTML = CATS.map((c) => `<button class="en-cat${c === on ? ' is-on' : ''}${c === hint ? ' hit-pulse' : ''}" data-cat="${c}" type="button">${c}</button>`).join('');
+    }
+    function renderPalette(cat, allow) {
+      list.innerHTML = '';
+      const items = cat === '흐름' ? [['rep', 360, 162], ['inf', 360, 162]] : cat === '생김새' ? [['og', 360, 88], ['nl', 360, 88]] : [];
+      items.forEach(([type, w, hh]) => {
+        const html = type === 'rep' || type === 'inf' ? loopHtml(type, 44, 'is-flow', undefined, undefined) : blockHtml(type, 'is-flow', undefined, undefined, 360);
+        const wrap = document.createElement('div');
+        wrap.innerHTML = html;
+        const el = wrap.firstElementChild;
+        const ok = allow === type;
+        el.classList.add(ok ? 'is-pick' : 'is-dim');
+        if (ok) { el.classList.add('hit-pulse'); el.addEventListener('pointerdown', (e) => startDrag(e, el, type, false)); }
+        list.appendChild(el);
+      });
+    }
+
+    const wsPos = () => rectMain(ws);
+    const near = (gx, gy, tx, ty) => Math.abs(gx - tx) < 90 && Math.abs(gy - ty) < 80;
+
+    function startDrag(e, src, type, fromLoose) {
+      if (st.busy) return;
+      e.preventDefault();
+      if (st.loose && !fromLoose && type !== 'delete') { hint(); return; }
+      clearFingers();
+      const isDel = type === 'delete';
+      const [px, py] = toMain(e);
+      const sr = rectMain(src);
+      const offX = px - sr.l, offY = py - sr.t;
+      const g = src.cloneNode(true);
+      g.className = g.className.replace(/is-flow|is-pick|is-dim|hit-pulse|is-loose|is-del/g, '') + ' is-ghost';
+      g.style.left = sr.l + 'px'; g.style.top = sr.t + 'px';
+      main.appendChild(g);
+      const zone = isDel ? trashZone(pal, trash, g) : null;
+      if (zone) zone.begin();
+      if (fromLoose || isDel) { src.style.visibility = 'hidden'; }
+      const end = () => { g.remove(); if (zone) zone.end(); };
+      trackDrag((ev) => {
+        const [x, y] = toMain(ev); g.style.left = (x - offX) + 'px'; g.style.top = (y - offY) + 'px';
+        if (zone) zone.move();
+      }, (ev) => {
+        const [x, y] = toMain(ev);
+        const hit = zone && zone.hit(x, y);
+        end();
+        if (isDel) { if (hit) onDelete(); else render(); return; }
+        drop(type, x - offX, y - offY, x, y, fromLoose);
+      }, () => { end(); render(); });
+    }
+
+    function drop(type, gx, gy, x, y, fromLoose) {
+      const w = wsPos();
+      const lx = gx - w.l, ly = gy - w.t;
+      const inWs = x > w.l && x < w.l + w.w && y > w.t && y < w.t + w.h;
+      if (!inWs) { render(); return; }
+      let ok = false;
+      if (st.step === 1 && near(lx, ly, 60, 144)) ok = true;
+      else if (st.step === 3 && near(lx, ly, 90, 218 + 74 * st.kids.length)) ok = true;
+      else if (st.step === 6 && near(lx, ly, 60, 144)) ok = true;
+      if (ok) { st.loose = null; snap(); onSnap(type); return; }
+      playWrong();
+      st.loose = { type, x: Math.max(0, Math.min(w.w - 360, lx)), y: Math.max(10, Math.min(w.h - 170, ly)) };
+      say(st.step === 1 ? TXT.repWrong : st.step === 3 ? TXT.kidWrong : TXT.infWrong);
+      render();
+    }
+
+    function onSnap(type) {
+      if (st.step === 1) { st.loop = 'rep'; st.slot = null; render(); go(2); }
+      else if (st.step === 3) {
+        st.kids.push(type); render();
+        if (st.kids.length === 1) { st.slot = 'inside'; say(TXT.nl); renderPalette('생김새', 'nl'); render(); }
+        else { st.slot = null; render(); go(4); }
+      } else if (st.step === 6) { st.loop = 'inf'; st.frame = false; st.slot = null; render(); go(7); }
+    }
+    function onDelete() {
+      playCorrect();
+      st.loop = null; st.frame = true; render();
+      go(6);
+    }
+
+    function beatOnce(i) {
+      heart.classList.remove('is-small', 'is-big');
+      if (i % 2 === 0) { heart.classList.add('is-small'); } else { heart.classList.add('is-big'); setTimeout(() => heart.classList.remove('is-big'), 220); }
+    }
+    function runHeart(limit, done) {
+      st.busy = true; runBtn.disabled = true; runBtn.classList.remove('hit-pulse'); ws.classList.add('is-run');
+      hint();
+      let n = 0;
+      const cycle = () => {
+        heartBeat();
+        beatOnce(0);
+        st.beatNl = setTimeout(() => beatOnce(1), 250);
+        if (limit && ++n >= limit) { clearInterval(st.beat); st.beatEnd = setTimeout(() => { stopHeart(); done && done(); }, 800); }
+      };
+      cycle();
+      st.beat = setInterval(cycle, 1000);
+    }
+    function stopHeart() {
+      clearInterval(st.beat); clearTimeout(st.beatNl); clearTimeout(st.beatEnd); st.beat = null;
+      heart.classList.remove('is-small', 'is-big'); ws.classList.remove('is-run');
+      st.busy = false; runBtn.disabled = false;
+    }
+    runBtn.addEventListener('click', () => {
+      if (st.busy) return;
+      playClick();
+      if (st.step === 4) {
+        runHeart(10, () => { say(TXT.done1); setTimeout(() => go(5), 1000); });
+      } else if (st.step === 7) {
+        runHeart(0);
+        say(TXT.sum1);
+        setTimeout(() => { if (st.step === 7) { say(TXT.sum2); setNext(() => { stopHeart(); go(8); }); } }, 3200);
+      }
+    });
+    cats.addEventListener('click', (e) => {
+      const b = e.target.closest('.en-cat');
+      if (!b || st.busy) return;
+      playClick();
+      if (st.step === 0 && b.dataset.cat === '흐름') go(1);
+      else if (st.step === 2 && b.dataset.cat === '생김새') go(3);
+    });
+
+    function go(n) {
+      st.step = n; st.loose = null; setNext(null); clearFingers();
+      ws.classList.toggle('is-grab', n === 5);
+      trashHint(pal, trash, n === 5);
+      runBtn.classList.remove('hit-pulse');
+      if (n === 0) { say(TXT.cat1); renderCats('시작', '흐름'); renderPalette('시작'); }
+      else if (n === 1) { say(TXT.rep); renderCats('흐름'); renderPalette('흐름', 'rep'); st.slot = 'under'; render(); }
+      else if (n === 2) { say(TXT.cat2); renderCats('흐름', '생김새'); renderPalette('흐름'); st.slot = null; render(); }
+      else if (n === 3) { say(TXT.og); renderCats('생김새'); renderPalette('생김새', 'og'); st.slot = 'inside'; render(); }
+      else if (n === 4) { say(TXT.run1); renderCats('생김새'); renderPalette('생김새'); st.slot = null; render(); runBtn.classList.add('hit-pulse'); }
+      else if (n === 5) { say(TXT.del); renderCats('생김새'); renderPalette('생김새'); render(); }
+      else if (n === 6) { say(TXT.inf); renderCats('흐름'); renderPalette('흐름', 'inf'); render(); }
+      else if (n === 7) { say(TXT.run2); renderCats('흐름'); renderPalette('흐름'); render(); runBtn.classList.add('hit-pulse'); }
+      else if (n === 8) { say(TXT.fin); setNext(() => { location.href = 'page09.html'; }); }
+    }
+    go(0);
+  })();
+  </script>
+</body>
+</html>

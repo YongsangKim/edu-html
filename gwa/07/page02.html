@@ -6,19 +6,17 @@
     <title>몽실이의 밤 산책</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 3~5p. 5×5 센서판, 오른쪽 휴대전화에 열 감지 알림이 하나씩 위로 밀리며 등장, 알림 번호를 순서대로 누르기. 3회(알림 1·2·7 → 8·13·18 → 23·24·25).
-           몽실이(🐶)는 임시 이모지, 그림 나오면 교체 */
-        .p02-grid{position:absolute;left:105px;top:60px;width:900px;height:850px;display:grid;grid-template-columns:repeat(5,1fr);gap:20px;background:#2a6bd0;border-radius:14px;padding:30px}
-        .p02-cell{position:relative;box-sizing:border-box;padding:0;border:solid 5px var(--c-ink);border-radius:18px;background:var(--c-white);cursor:pointer;font-family:'Cafe24 Ssurround';font-size:64px;color:var(--c-ink);transition:background .15s}
-        .p02-cell:hover{background:var(--c-pale)}
-        .p02-cell.is-ok{background:#6ee7a6;pointer-events:none}
-        .p02-cell.is-bad{background:#ff7a7a}
-        .p02-dog{position:absolute;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;display:flex;align-items:center;justify-content:center;font-size:110px;line-height:1;z-index:3;pointer-events:none;animation:p02-pop 1.6s ease-in-out forwards}
+        .p02-board{position:absolute;left:40px;top:24px;width:1494px;height:914px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:22px;background:#8cc95a url(img/p02_bg.jpg) center/100% 100% no-repeat;overflow:hidden}
+        .p02-grid{position:absolute;left:143px;top:184px;width:933px;height:588px;display:grid;grid-template-columns:repeat(5,141px);grid-template-rows:repeat(5,108px);gap:12px 57px}
+        .p02-cell{position:relative;box-sizing:border-box;padding:0 0 14px;border:0;background:url(img/p02_stone.png) center/100% 100% no-repeat;cursor:pointer;font-family:'Cafe24 Ssurround';font-size:64px;line-height:1;color:var(--c-ink)}
+        .p02-cell.is-ok{background-image:url(img/p02_stone_ok.png);color:var(--c-white);pointer-events:none}
+        .p02-cell.is-bad{background-image:url(img/p02_stone_bad.png)}
+        .p02-dog{position:absolute;left:50%;top:50%;width:264px;height:230px;margin:-130px 0 0 -132px;background:url(img/p02_dog.png) center/contain no-repeat;z-index:3;pointer-events:none;animation:p02-pop 1.6s ease-in-out forwards}
         .p02-dog.is-stay{animation:p02-pop-stay .5s ease-out forwards}
         @keyframes p02-pop{0%{transform:translateY(60px) scale(.4);opacity:0}25%,70%{transform:none;opacity:1}100%{transform:translateY(60px) scale(.4);opacity:0}}
         @keyframes p02-pop-stay{from{transform:translateY(60px) scale(.4);opacity:0}to{transform:none;opacity:1}}
 
-        .p02-phone{left:1202px}
+        .p02-phone{left:1412px;top:25px;width:475px;height:915px}
         .p02-screen{position:relative;width:100%;height:100%;box-sizing:border-box;padding:56px 18px 60px;display:flex;flex-direction:column;background:var(--c-pale)}
         .p02-feed{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:flex-end;gap:16px;overflow:hidden}
         .p02-noti{flex:none;box-sizing:border-box;padding:16px 20px;background:var(--c-white);border-left:solid 10px #e5484d;border-radius:18px;box-shadow:0 6px 16px rgba(0,0,0,.12);font-family:'Pretendard';font-size:24px;font-weight:700;color:var(--c-ink);animation:p02-in .45s ease-out}
@@ -27,7 +25,7 @@
         .p02-noti em{font-style:normal;color:var(--c-blue)}
         @keyframes p02-in{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
 
-        .p02-say{position:absolute;left:965px;top:640px;width:300px;box-sizing:border-box;padding:26px 20px;margin:0;text-align:center;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:30px;font-family:'Cafe24 Ssurround';font-size:52px;line-height:1.2;color:var(--c-ink);letter-spacing:-0.05em;z-index:5;animation:p02-in .4s ease-out}
+        .p02-say{position:absolute;left:1120px;top:520px;width:300px;box-sizing:border-box;padding:26px 20px;margin:0;text-align:center;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:30px;font-family:'Cafe24 Ssurround';font-size:52px;line-height:1.2;color:var(--c-ink);letter-spacing:-0.05em;z-index:5;animation:p02-in .4s ease-out}
         .p02-say.is-off{display:none}
     </style>
 </head>
@@ -37,7 +35,7 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <div class="p02-grid" id="p02Grid"></div>
+          <div class="p02-board"><div class="p02-grid" id="p02Grid"></div></div>
           <div class="phone-frame has-cam p02-phone">
             <div class="phone-screen">
               <div class="p02-screen"><div class="p02-feed" id="p02Feed"></div></div>
@@ -103,7 +101,7 @@
 
     let round = 0, shown = 0, next = 0, locked = true;
 
-    const notiSfx = makeSfx('sound/upload.mp3');
+    const notiSfx = makeSfx('sound/upload.wav');
 
     function addNoti() {
       const [time, n] = ROUNDS[round].notis[shown];
@@ -155,7 +153,6 @@
       const last = round === ROUNDS.length - 1;
       const dog = document.createElement('div');
       dog.className = 'p02-dog' + (last ? ' is-stay' : '');
-      dog.textContent = '🐶';
       b.appendChild(dog);
       if (last) {
         $('p02Say').classList.remove('is-off');
