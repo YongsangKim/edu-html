@@ -181,19 +181,19 @@
         cam: '핸드폰을 움직여<br>콜라를 프레임안에 담아보세요.',
         bg: 'img/p09_bg_ai.webp', shot: 'img/p09_shot_ai.png', t: [0.601, 0.733], start: [0.2, 0.34], R: 55,
         icon: 'slvAi', ticon: 'slvDescribe', title: '이미지 묘사', acts: 4,
-        res: '책상 위에 놓인 빨간색 코카콜라 캔이 보입니다.' },
+        res: '책상 위에 놓인 빨간색 코카콜라 캔이 보입니다.', snd: 'sound/p09_ai.mp3' },
       { name: '문자인식', tab: '문자 인식', ask: '문자인식이 무엇인지 알아봐요.',
         info: '문자 인식 모드는 카메라에 보이는 글자를 찾아 읽어줘요. 읽고 싶은 글자가 화면에 잘 보이도록 맞춰 주세요. 인식한 글자를 화면과 음성으로 알려줘요.',
         cam: '핸드폰을 움직여<br>인식할 글자를 프레임안에 담아보세요.',
         bg: 'img/p09_bg_text.webp', shot: 'img/p09_shot_text.webp', t: [0.56, 0.82], start: [0.2, 0.34], R: 65,
         icon: 'slvTt', ticon: 'slvTt', title: '문자 인식', acts: 4,
-        res: '오늘의 날씨\n오늘의 날씨는 아주 맑음입니다.\n하늘에는 하얀 구름이 둥둥 떠 있고,\n따뜻한 햇살이 비추고 있어요\n바람은 살랑살랑 불어와서\n친구들과 밖에서 놀기에 아주 좋습니다.' },
+        res: '오늘의 날씨\n오늘의 날씨는 아주 맑음입니다.\n하늘에는 하얀 구름이 둥둥 떠 있고,\n따뜻한 햇살이 비추고 있어요\n바람은 살랑살랑 불어와서\n친구들과 밖에서 놀기에 아주 좋습니다.', snd: 'sound/p09_text.mp3' },
       { name: '얼굴인식', tab: '얼굴 인식', ask: '얼굴인식이 무엇인지 알아봐요.',
         info: '얼굴 인식 모드는 카메라에 보이는 사람의 얼굴을 인식해요. 얼굴의 나이와 성별, 표정을 음성으로 알려줘요. 등록된 얼굴은 이름도 알려줘요.',
         cam: '핸드폰을 움직여<br>얼굴카드를 프레임안에 담아보세요.',
         bg: 'img/p09_bg_face.webp', shot: 'img/p09_shot_face.png', t: [0.472, 0.34], start: [0.78, 0.55], R: 60,
         icon: 'slvFace', ticon: 'slvFace', title: '얼굴 인식', acts: 3,
-        res: '19살 여자가 행복한 표정을 짓고 있습니다.' }
+        res: '19살 여자가 행복한 표정을 짓고 있습니다.', snd: 'sound/p09_face.mp3' }
     ];
     const ACTS = [['slvCamera', '추가 촬영'], ['slvSave', '이미지 저장'], ['share', '공유'], ['slvNote', '노트저장']];
 
@@ -217,7 +217,9 @@
 
     const shutter = makeSfx('sound/camera.wav');
     const show = (el, on) => el.classList.toggle('p09-hide', !on);
-    const speak = (t) => { if (BoxEdit.on) return; try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t.replace(/\n/g, ', ')); u.lang = 'ko-KR'; speechSynthesis.speak(u); } catch (e) {} };
+    let nowAudio = null;
+    const stopSpeak = () => { if (nowAudio) { nowAudio.pause(); nowAudio = null; } };
+    const speak = (src) => { if (BoxEdit.on) return; stopSpeak(); try { nowAudio = new Audio(src); nowAudio.play().catch(() => {}); } catch (e) {} };
     const poseOf = (s) => STEPS[m * 4 + STAGES.indexOf(s)].pose;
 
     function disp() {
@@ -337,7 +339,7 @@
         $('p09Title').innerHTML = ic(d.ticon) + d.title;
         $('p09Res').textContent = d.res;
         $('p09Acts').innerHTML = ACTS.slice(0, d.acts).map((a) => '<span class="p09-act">' + ic(a[0]) + a[1] + '</span>').join('');
-        speak(d.res);
+        speak(d.snd);
       }
     }
 
@@ -367,13 +369,13 @@
     gok.addEventListener('click', () => { if (step === 'explain') setStep('cam'); });
     $('p09Back').addEventListener('click', () => {
       if (m >= MODES.length - 1) return;
-      try { speechSynthesis.cancel(); } catch (e) {}
+      stopSpeak();
       m += 1;
       loadMode(() => setStep('pick'));
     });
     bubble.addEventListener('click', (e) => {
       if (!e.target.closest('#p10Go') || step !== 'result') return;
-      try { speechSynthesis.cancel(); } catch (err) {}
+      stopSpeak();
       playClick();
       openModal(0);
     });

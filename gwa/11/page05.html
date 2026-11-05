@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>조건을 바꾸면 결과가 달라져요</title>
+<link rel="stylesheet" href="../../resources/css/common.css">
+<style>
+.p05-code{position:absolute;box-sizing:border-box;border:solid 6px var(--c-navy);border-radius:30px;background:#266cc8;left:60px;top:190px;width:960px;height:440px;padding:0 60px;display:flex;flex-direction:column;justify-content:center}
+.p05-g{position:relative}
+.p05-g svg{position:absolute;overflow:visible}
+.p05-ln{display:flex;align-items:center;height:76px;margin:0 0 6px;font-family:"Cafe24 Ssurround";font-size:64px;color:#fff;letter-spacing:-0.04em;white-space:nowrap}
+.p05-ln.is-in{padding-left:150px}
+.p05-ln.is-hd{height:104px}
+.p05-blank{box-sizing:border-box;width:320px;height:100px;margin:0 20px;border-radius:20px;background:#d6d6d6;border:solid 8px #bdbdbd;display:flex;align-items:center;justify-content:center}
+.p05-blank.is-filled{border:solid 7px var(--c-ink);color:var(--c-ink);font-size:56px;padding-top:4px;box-shadow:0 0 0 6px var(--c-yellow)}
+.p05-blank.is-blue{background:linear-gradient(180deg,#4e97ff,#7272fe)}
+.p05-blank.is-yellow{background:linear-gradient(180deg,#ffc80d,#ffb70e)}
+.p05-blank.is-red{background:linear-gradient(180deg,#ff7a6e,#e8483b)}
+.p05-cards{position:absolute;left:60px;top:660px;width:960px;display:flex;justify-content:space-between}
+.p05-cards .dc-card{width:300px;height:110px;font-size:44px;border-width:7px;border-radius:26px;letter-spacing:-0.04em;touch-action:none}
+.p05-cards .dc-card.is-red{background:linear-gradient(180deg,#ff7a6e,#e8483b)}
+.p05-cards .dc-card.is-used{opacity:.45}
+.p05-res{position:absolute;box-sizing:border-box;border:solid 6px var(--c-navy);border-radius:30px;left:1060px;top:190px;width:800px;height:580px;background:#dff0ff}
+.p05-bk{position:absolute;top:80px;width:300px;height:240px;box-sizing:border-box;border:solid 6px var(--c-ink);border-radius:20px 20px 60px 60px;background:#fff;display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;align-content:center;padding:0 20px}
+.p05-bn{position:absolute;top:-36px;left:50%;margin-left:-34px;width:68px;height:68px;border-radius:50%;background:var(--c-purple);color:#fff;border:solid 5px var(--c-ink);display:flex;align-items:center;justify-content:center;font-family:"Cafe24 Ssurround";font-size:42px;padding-top:4px;box-sizing:border-box}
+.p05-ball{width:78px;height:78px;border-radius:50%;border:solid 5px var(--c-ink);box-sizing:border-box;flex:none}
+.p05-ball.is-b{background:#4e97ff}
+.p05-ball.is-y{background:#ffc80d}
+.p05-ball.is-r{background:#ee4a3c}
+.p05-pool{position:absolute;left:0;right:0;top:350px;height:100px;display:flex;justify-content:center;align-items:center;gap:30px}
+.p05-rt{position:absolute;left:30px;right:30px;top:450px;height:110px;margin:0;display:flex;align-items:center;justify-content:center;text-align:center;font-family:"Cafe24 Ssurround";font-size:40px;line-height:1.25;color:var(--c-ink);letter-spacing:-0.04em;word-break:keep-all}
+.p05-next.is-dim{opacity:.4;filter:grayscale(.6);pointer-events:none}
+.p05-fin{width:305px;height:240px;display:flex;align-items:center;justify-content:center;font-size:170px}
+.p05-hide{display:none!important}
+</style>
+</head>
+<body>
+<div id="page-fade"></div>
+<div id="viewport" class="viewport">
+  <div id="stage-spacer">
+    <div id="stage" class="stage">
+      <main class="bg-default">
+        <p class="ask-pill is-fit"><span>색깔을 골라 조건을 완성해 보세요.</span></p>
+
+        <div class="p05-code">
+          <div class="p05-g">
+            <p class="p05-ln is-hd">만약<span class="p05-blank drop-zone" id="p05Blank"></span>(이)라면</p>
+            <svg style="left:36px;top:98px" width="100" height="60" viewBox="0 0 100 60"><path d="M3 3V40Q3 52 15 52H94" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <p class="p05-ln is-in">1번 바구니로</p>
+          </div>
+          <div class="p05-g">
+            <p class="p05-ln">아니면</p>
+            <svg style="left:36px;top:82px" width="100" height="50" viewBox="0 0 100 50"><path d="M3 3V28Q3 40 15 40H94" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <p class="p05-ln is-in">2번 바구니로</p>
+          </div>
+        </div>
+
+        <div class="p05-cards" id="p05Cards">
+          <div class="dc-card is-blue" data-color="b">파란색</div>
+          <div class="dc-card is-yellow" data-color="y">노란색</div>
+          <div class="dc-card is-red" data-color="r">빨간색</div>
+        </div>
+
+        <div class="p05-res">
+          <div class="p05-bk" style="left:70px"><span class="p05-bn">1</span><span id="p05B1" style="display:contents"></span></div>
+          <div class="p05-bk" style="left:430px"><span class="p05-bn">2</span><span id="p05B2" style="display:contents"></span></div>
+          <div class="p05-pool" id="p05Pool"><i class="p05-ball is-b"></i><i class="p05-ball is-y"></i><i class="p05-ball is-r"></i></div>
+          <p class="p05-rt" id="p05Text"></p>
+        </div>
+
+        <a class="p05-next next-btn card-btn is-start is-dim js-sfx" id="p05Next" data-sound="sound/click.mp3">다음</a>
+
+        <div class="avatar-modal is-off" id="p05Fin">
+          <div class="avatar-card">
+            <div class="avatar-card-avatar p05-fin">🎉</div>
+            <div class="avatar-card-body is-side"><p class="avatar-card-text" id="p05FinText"></p></div>
+            <a class="avatar-card-btn next-btn card-btn is-popup js-sfx" id="p05FinBtn" data-sound="sound/click.mp3">다음</a>
+            <a href="page06.html" class="js-nav-effect avatar-card-btn next-btn card-btn is-popup js-sfx p05-hide" id="p05FinGo" data-sound="sound/click.mp3">다음</a>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+<div class="zoom-info" id="zoomInfo"></div>
+
+<script src="../../resources/js/header.js" data-title="조건을 바꾸면 결과가 달라져요" data-next="page06.html"></script>
+<script src="../../resources/js/toc-gwa.js"></script>
+<script src="../../resources/js/common.js"></script>
+<script>
+(function () {
+  const COLORS = {
+    b: { name: '파란', label: '파란색', cls: 'is-blue' },
+    y: { name: '노란', label: '노란색', cls: 'is-yellow' },
+    r: { name: '빨간', label: '빨간색', cls: 'is-red' },
+  };
+  const FIN = [
+    '조건을 바꾸면서 달라지는<br>결과를 모두 확인했어요.',
+    '우리 생활 속 기계들도 조건에 따라 작동해요.<br>어떤 조건에서 작동하는지 알아볼까요?',
+  ];
+  const blank = $('p05Blank');
+  const cards = Array.from(document.querySelectorAll('#p05Cards .dc-card'));
+  const next = $('p05Next');
+  const seen = new Set();
+  let finStep = 0;
+
+  const balls = (keys) => keys.map((k) => '<i class="p05-ball is-' + k + '"></i>').join('');
+
+  function place(key) {
+    const c = COLORS[key];
+    blank.className = 'p05-blank drop-zone is-filled ' + c.cls;
+    blank.textContent = c.label;
+    cards.forEach((card) => card.classList.toggle('is-used', card.dataset.color === key));
+    $('p05Pool').innerHTML = '';
+    $('p05B1').innerHTML = balls([key]);
+    $('p05B2').innerHTML = balls(['b', 'y', 'r'].filter((k) => k !== key));
+    $('p05Text').innerHTML = c.name + ' 공은 1번 바구니에,<br>나머지 공들은 2번 바구니에 담겼어요.';
+    seen.add(key);
+    if (seen.size === 3) next.classList.remove('is-dim');
+  }
+
+  const scale = () => $('stage').getBoundingClientRect().width / 1920;
+  const over = (x, y) => {
+    const r = blank.getBoundingClientRect();
+    return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+  };
+
+  cards.forEach((card) => {
+    card.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      playClick();
+      const s = scale();
+      const sx = e.clientX;
+      const sy = e.clientY;
+      card.setPointerCapture(e.pointerId);
+      card.classList.add('is-dragging');
+      const move = (ev) => {
+        card.style.transform = 'translate(' + (ev.clientX - sx) / s + 'px,' + (ev.clientY - sy) / s + 'px)';
+        blank.classList.toggle('is-over', over(ev.clientX, ev.clientY));
+      };
+      const up = (ev) => {
+        card.removeEventListener('pointermove', move);
+        card.removeEventListener('pointerup', up);
+        card.removeEventListener('pointercancel', up);
+        card.classList.remove('is-dragging');
+        card.style.transform = '';
+        blank.classList.remove('is-over');
+        if (over(ev.clientX, ev.clientY)) {
+          playDrag();
+          place(card.dataset.color);
+        }
+      };
+      card.addEventListener('pointermove', move);
+      card.addEventListener('pointerup', up);
+      card.addEventListener('pointercancel', up);
+    });
+  });
+
+  next.addEventListener('click', () => {
+    if (next.classList.contains('is-dim')) return;
+    $('p05FinText').innerHTML = FIN[0];
+    $('p05Fin').classList.remove('is-off');
+  });
+  $('p05FinBtn').addEventListener('click', () => {
+    finStep += 1;
+    $('p05FinText').innerHTML = FIN[finStep];
+    if (finStep === FIN.length - 1) {
+      $('p05FinBtn').classList.add('p05-hide');
+      $('p05FinGo').classList.remove('p05-hide');
+    }
+  });
+})();
+</script>
+</body>
+</html>

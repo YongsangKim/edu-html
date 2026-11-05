@@ -6,18 +6,11 @@
     <title>우리 집 속 숨은 마이크 찾기</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        .p05-house{position:absolute;left:292px;top:174px;display:block;pointer-events:none}
-        .p05-obj{position:absolute;padding:0;border:0;background:none;cursor:pointer}
-        .p05-obj img{display:block}
-        .p05-obj:hover:not(.is-found) img{filter:drop-shadow(4px 0 0 var(--c-violet)) drop-shadow(-4px 0 0 var(--c-violet)) drop-shadow(0 4px 0 var(--c-violet)) drop-shadow(0 -4px 0 var(--c-violet))}
-        .p05-obj:active:not(.is-found) img{filter:drop-shadow(4px 0 0 var(--c-orchid)) drop-shadow(-4px 0 0 var(--c-orchid)) drop-shadow(0 4px 0 var(--c-orchid)) drop-shadow(0 -4px 0 var(--c-orchid))}
-        .p05-obj.is-found{cursor:default}
-        .p05-obj.is-found:after{content:'';position:absolute;right:0;top:0;width:44px;height:44px;border-radius:50%;background:var(--c-purple) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / 70% no-repeat}
-        .p05-obj[data-key="remote"]{left:434px;top:192px}
-        .p05-obj[data-key="speaker"]{left:672px;top:145px}
-        .p05-obj[data-key="intercom"]{left:1084px;top:257px}
-        .p05-obj[data-key="phone"]{left:629px;top:506px}
-        .p05-modal .avatar-card-title{white-space:nowrap}
+        .hunt-house{left:292px;top:174px}
+        .hunt-obj[data-key="remote"]{left:434px;top:192px}
+        .hunt-obj[data-key="speaker"]{left:672px;top:145px}
+        .hunt-obj[data-key="intercom"]{left:1084px;top:257px}
+        .hunt-obj[data-key="phone"]{left:629px;top:506px}
     </style></head>
 <body>
   <div id="page-fade"></div>
@@ -27,13 +20,13 @@
         <main class="bg-default">
           <div class="stage-board"></div>
           <p class="ask-pill is-fit"><span>마이크가 있는 물건을 찾아 클릭해 보세요.</span></p>
-          <img class="p05-house" src="img/p05_house.png" alt="">
-          <button class="p05-obj" data-key="remote" aria-label="음성 인식 TV 리모컨"><img src="img/p05_obj_remote.png" alt=""></button>
-          <button class="p05-obj" data-key="speaker" aria-label="AI 스마트 스피커"><img src="img/p05_obj_speaker.png" alt=""></button>
-          <button class="p05-obj" data-key="intercom" aria-label="인터폰"><img src="img/p05_obj_intercom.png" alt=""></button>
-          <button class="p05-obj" data-key="phone" aria-label="스마트폰"><img src="img/p05_obj_phone.png" alt=""></button>
+          <img class="hunt-house" src="img/p05_house.png" alt="">
+          <button class="hunt-obj" data-key="remote" aria-label="음성 인식 TV 리모컨"><img src="img/p05_obj_remote.png" alt=""></button>
+          <button class="hunt-obj" data-key="speaker" aria-label="AI 스마트 스피커"><img src="img/p05_obj_speaker.png" alt=""></button>
+          <button class="hunt-obj" data-key="intercom" aria-label="인터폰"><img src="img/p05_obj_intercom.png" alt=""></button>
+          <button class="hunt-obj" data-key="phone" aria-label="스마트폰"><img src="img/p05_obj_phone.png" alt=""></button>
 
-          <div class="avatar-modal p05-modal is-off" id="p05Info">
+          <div class="avatar-modal hunt-modal is-off" id="p05Info">
             <div class="avatar-card is-left">
               <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
               <div class="avatar-card-body">
@@ -79,7 +72,7 @@
       phone: ['스마트폰', '마이크로 목소리를 입력 받아 전화 통화를 하거나 음성 명령을 실행해요.'],
       intercom: ['인터폰', '방문객의 목소리를 마이크로 전달하거나, 등록된 목소리를 인식해 문을 열어줘요.']
     };
-    const objs = Array.from(document.querySelectorAll('.p05-obj'));
+    const objs = Array.from(document.querySelectorAll('.hunt-obj'));
     let found = 0;
     objs.forEach((o) => o.addEventListener('click', () => {
       if (o.classList.contains('is-found')) return;

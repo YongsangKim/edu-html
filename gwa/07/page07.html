@@ -6,18 +6,11 @@
     <title>우리 집 속 숨은 센서 찾기</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        .p07-house{position:absolute;left:295px;top:170px;display:block;pointer-events:none}
-        .p07-obj{position:absolute;width:208px;height:208px;border-radius:40px;padding:0;border:0;background:none;cursor:pointer}
-        .p07-obj img{display:block;width:100%;height:100%}
-        .p07-obj:hover:not(.is-found) img{filter:drop-shadow(4px 0 0 var(--c-violet)) drop-shadow(-4px 0 0 var(--c-violet)) drop-shadow(0 4px 0 var(--c-violet)) drop-shadow(0 -4px 0 var(--c-violet))}
-        .p07-obj:active:not(.is-found) img{filter:drop-shadow(4px 0 0 var(--c-orchid)) drop-shadow(-4px 0 0 var(--c-orchid)) drop-shadow(0 4px 0 var(--c-orchid)) drop-shadow(0 -4px 0 var(--c-orchid))}
-        .p07-obj.is-found{cursor:default}
-        .p07-obj.is-found:after{content:'';position:absolute;right:0;top:0;width:44px;height:44px;border-radius:50%;background:var(--c-purple) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / 70% no-repeat}
-        .p07-obj[data-key="thermo"]{left:323px;top:170px}
-        .p07-obj[data-key="gas"]{left:803px;top:158px}
-        .p07-obj[data-key="motion"]{left:1100px;top:267px}
-        .p07-obj[data-key="leak"]{left:1020px;top:640px}
-        .p07-modal .avatar-card-title{white-space:nowrap}
+        .hunt-house{left:295px;top:170px}
+        .hunt-obj[data-key="thermo"]{left:323px;top:170px}
+        .hunt-obj[data-key="gas"]{left:803px;top:158px}
+        .hunt-obj[data-key="motion"]{left:1100px;top:267px}
+        .hunt-obj[data-key="leak"]{left:1020px;top:640px}
     </style></head>
 <body>
   <div id="page-fade"></div>
@@ -27,13 +20,13 @@
         <main class="bg-default">
           <div class="stage-board"></div>
           <p class="ask-pill is-fit"><span>센서가 달린 물건을 찾아 클릭해 보세요.</span></p>
-          <img class="p07-house" src="img/p07_house.png" alt="">
-          <button class="p07-obj" data-key="thermo" aria-label="온·습도 센서"><img src="img/p07_obj_thermo.png" alt=""></button>
-          <button class="p07-obj" data-key="gas" aria-label="가스 센서"><img src="img/p07_obj_gas.png" alt=""></button>
-          <button class="p07-obj" data-key="motion" aria-label="동작 센서"><img src="img/p07_obj_motion.png" alt=""></button>
-          <button class="p07-obj" data-key="leak" aria-label="침수 센서"><img src="img/p07_obj_leak.png" alt=""></button>
+          <img class="hunt-house" src="img/p07_house.png" alt="">
+          <button class="hunt-obj is-fill" data-key="thermo" aria-label="온·습도 센서"><img src="img/p07_obj_thermo.png" alt=""></button>
+          <button class="hunt-obj is-fill" data-key="gas" aria-label="가스 센서"><img src="img/p07_obj_gas.png" alt=""></button>
+          <button class="hunt-obj is-fill" data-key="motion" aria-label="동작 센서"><img src="img/p07_obj_motion.png" alt=""></button>
+          <button class="hunt-obj is-fill" data-key="leak" aria-label="침수 센서"><img src="img/p07_obj_leak.png" alt=""></button>
 
-          <div class="avatar-modal p07-modal is-off" id="p07Info">
+          <div class="avatar-modal hunt-modal is-off" id="p07Info">
             <div class="avatar-card is-left">
               <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
               <div class="avatar-card-body">
@@ -79,7 +72,7 @@
       gas: '가스 센서는 가스 누출이나 연기를 감지하여 경보음을 울리고 가스를 차단해요.',
       leak: '침수 센서는 바닥에 물이 차오르거나 물이 새는 것을 감지하여 알려줘요.'
     };
-    const objs = Array.from(document.querySelectorAll('.p07-obj'));
+    const objs = Array.from(document.querySelectorAll('.hunt-obj'));
     let found = 0;
     objs.forEach((o) => o.addEventListener('click', () => {
       if (o.classList.contains('is-found')) return;

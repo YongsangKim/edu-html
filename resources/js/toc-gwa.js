@@ -146,24 +146,26 @@ var TOC_HTML = `<div class="toc-layer">
             <div class="toc-accordion">
               <button class="toc-accordion-toggle js-sfx" data-sound="sound/click.mp3">10차시</button>
               <div class="toc-accordion-panel">
-                <a href="javascript:;" class="toc-sub-item">01</a>
-                <a href="javascript:;" class="toc-sub-item">02</a>
-                <a href="javascript:;" class="toc-sub-item">03</a>
-                <a href="javascript:;" class="toc-sub-item">04</a>
-                <a href="javascript:;" class="toc-sub-item">05</a>
-                <a href="javascript:;" class="toc-sub-item">06</a>
+                <a href="${ROOT}gwa/10/page01.html" class="toc-sub-item">1) 쿵쾅쿵쾅! 힘차게 뛰는 심장 펌프</a>
+                <a href="${ROOT}gwa/10/page03.html" class="toc-sub-item">2) 멈춤없이 계속 반복하는 심장과 컴퓨터</a>
+                <a href="${ROOT}gwa/10/page04.html" class="toc-sub-item">3) 정해진 횟수만큼만 반복하는 프린터</a>
+                <a href="${ROOT}gwa/10/page06.html" class="toc-sub-item">4) 내 몸속 쿵쾅쿵쾅 순환 지도 완성하기</a>
+                <a href="${ROOT}gwa/10/page08.html" class="toc-sub-item">5) 엔트리 반복 블록으로 심장 코딩하기</a>
+                <a href="${ROOT}gwa/10/page09.html" class="toc-sub-item">6) 퀴즈 풀기</a>
+                <a href="${ROOT}gwa/10/page10.html" class="toc-sub-item">7) 도전! 춤추는 로봇 코딩 마스터!</a>
               </div>
             </div>
 
             <div class="toc-accordion">
               <button class="toc-accordion-toggle js-sfx" data-sound="sound/click.mp3">11차시</button>
               <div class="toc-accordion-panel">
-                <a href="javascript:;" class="toc-sub-item">01</a>
-                <a href="javascript:;" class="toc-sub-item">02</a>
-                <a href="javascript:;" class="toc-sub-item">03</a>
-                <a href="javascript:;" class="toc-sub-item">04</a>
-                <a href="javascript:;" class="toc-sub-item">05</a>
-                <a href="javascript:;" class="toc-sub-item">06</a>
+                <a href="${ROOT}gwa/11/page01.html" class="toc-sub-item">1) 콩팥 필터를 부탁해~</a>
+                <a href="${ROOT}gwa/11/page03.html" class="toc-sub-item">2) 개념 이해 영상</a>
+                <a href="${ROOT}gwa/11/page04.html" class="toc-sub-item">3) 조건을 바꾸면 결과가 달라져요</a>
+                <a href="${ROOT}gwa/11/page06.html" class="toc-sub-item">4) 생활 속 조건 찾기</a>
+                <a href="${ROOT}gwa/11/page08.html" class="toc-sub-item">5) 엔트리로 조건블록 분류 공장 코딩</a>
+                <a href="${ROOT}gwa/11/page09.html" class="toc-sub-item">6) 퀴즈 풀기</a>
+                <a href="${ROOT}gwa/11/page10.html" class="toc-sub-item">7) 조건 장바구니 배달 미션</a>
               </div>
             </div>
 

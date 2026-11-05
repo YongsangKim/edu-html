@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>엔트리로 조건블록 분류 공장 코딩</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .kd{overflow:hidden;background:#fff;border-radius:10px}
+        .kd-blood{position:absolute;left:0;top:0;width:100%;height:150px;background:#fbd3d3}
+        .kd-urine{position:absolute;left:0;top:162px;width:100%;height:210px;background:#fff1b0;transition:background 1s}
+        .kd.is-red .kd-urine{background:#ff8d8d}
+        .kd-tag{position:absolute;font-family:'Cafe24 Ssurround';font-size:26px;color:#7a4b4b;letter-spacing:-0.05em}
+        .kd-tag.is-blood{left:12px;top:8px}
+        .kd-tag.is-urine{left:12px;bottom:8px;color:#8a7220}
+        .kd.is-red .kd-tag.is-urine{color:#7a2020}
+        .kd-seg{position:absolute;top:150px;width:40px;height:12px;border-radius:4px;background:#5a4a8a}
+        .kd-wall{position:absolute;top:150px;height:12px;background:#5a4a8a}
+        .kd-pt{position:absolute;left:0;top:0;border-radius:50%;will-change:transform}
+        .kd-pt.is-wbc{background:#fff;border:solid 3px #b9c4d8;box-sizing:border-box}
+        .kd-warn{position:absolute;right:14px;top:14px;width:44px;height:44px;border-radius:50%;background:#ff2d2d;display:none;box-shadow:0 0 0 0 rgba(255,45,45,.7);animation:kd-warn .7s ease-in-out infinite;z-index:2}
+        .kd.is-red .kd-warn{display:block}
+        @keyframes kd-warn{0%,100%{box-shadow:0 0 0 0 rgba(255,45,45,.8);opacity:1}50%{box-shadow:0 0 0 14px rgba(255,45,45,0);opacity:.5}}
+        .en-obj i.is-kd{background:#fbd3d3;border-radius:50%}
+        .en-trash{background-image:url('img/p08_trash.png')}
+        .cb.lit{filter:drop-shadow(4px 0 0 #ffc21a) drop-shadow(-4px 0 0 #ffc21a) drop-shadow(0 4px 0 #ffc21a) drop-shadow(0 -4px 0 #ffc21a)}
+        .cb .lb.is-c{left:0;width:100%;justify-content:center;padding:4px 0 0;height:100%}
+        #enBlocks{position:absolute;left:0;top:0;width:100%;height:100%}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default" id="enMain">
+          <div class="en-win"></div>
+          <div class="en-area en-stage">
+            <div class="en-view kd" id="enKid"><div class="kd-blood"></div><div class="kd-urine"></div><span class="kd-tag is-blood">피</span><span class="kd-tag is-urine">오줌</span><div class="kd-warn"></div></div>
+            <div class="en-btns"><button class="en-btn" type="button">+ 오브젝트 추가하기</button><button class="en-btn is-run" id="enRun" type="button">시작하기</button></div>
+          </div>
+          <div class="en-area en-objs"><div class="en-objlist"><div class="en-obj"><i class="is-kd"></i>콩팥 필터</div></div></div>
+          <div class="en-area en-pal" id="enPal">
+            <div class="en-cats" id="enCats"></div>
+            <div class="en-list" id="enList"></div>
+            <div class="en-del"><img src="img/p08_trash.png" alt=""><p>여기로 옮겨 버리기</p></div>
+          </div>
+          <div class="en-area en-ws" id="enWs"><div id="enBlocks"></div><div class="en-trash"></div></div>
+
+          <div class="en-guide">
+            <div class="en-char"><img src="../img/character/gwa_main_point.png" alt="메인 캐릭터"></div>
+            <p class="en-text" id="enText"></p>
+            <button class="card-btn is-popup js-sfx en-next is-off" id="enNext" data-sound="sound/click.mp3">다음</button>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="엔트리로 조건블록 분류 공장 코딩" data-next="page09.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script src="../../resources/js/entry.js"></script>
+  <script>
+  (function () {
+    const main = $('enMain'), ws = $('enWs'), pal = $('enPal'), list = $('enList'), blocks = $('enBlocks'), trash = ws.querySelector('.en-trash');
+    const text = $('enText'), kid = $('enKid'), runBtn = $('enRun'), nextBtn = $('enNext'), cats = $('enCats');
+    const CATS = ['시작', '흐름', '움직임', '생김새', '소리', '판단', '계산'];
+    const BL = enColor('flow'), RD = enColor('look'), GR = enColor('start'), HX = enColor('judge');
+    const snap = makeSfx('sound/drag.wav');
+    const TXT = {
+      intro: '아무 판단도 못 하고 멈춰 있는 콩팥 필터를 엔트리로 코딩해서 작동하게 해볼 거예요. 조건 블록을 완성해서 콩팥이 하는 일을 코딩해볼까요?',
+      ife: '첫번째로 ‘만약 &lt;&gt;라면 아니면’ 블록을 가져와 초록색 시작 블록 바로 아래에 연결해보세요.',
+      ifeWrong: '괜찮아요! 시작 블록 바로 아래로 다시 옮겨 볼까요?',
+      cat: '‘판단’ 을 클릭하세요.',
+      mv: '‘생김새’ 를 클릭하세요.',
+      cond: '‘구멍보다 작다’ 블록을 가져와 하늘색 블록의 조건 빈칸에 끼워 보세요.',
+      condWrong: '판단 블록을 ‘만약’ 옆의 빈칸에 끼워 보세요.',
+      out: '‘내보내기’ 블록을 가져와 [만약~라면] 아래 안쪽 홈에 연결해보세요.',
+      keep: '‘그대로 두기’ 블록을 가져와 [아니면] 아래 안쪽 홈에 연결해보세요.',
+      actWrong: '다시 해볼까요?',
+      run1: '완성했어요! 시작하기 버튼을 클릭하세요.',
+      r1: '조건을 코딩해주니 콩팥필터가 규칙에 맞춰 알아서 판단해요. 이게 조건 블록의 힘이에요.',
+      r2: '조건블록 없이 실행하면, 어떻게 되는지 확인해볼까요?',
+      r3: '조건 블록이 없으니 콩팥의 모든 알갱이가 아래로 내려갔어요. 알갱이를 나눌 조건을 코딩하지 않으면 모든 알갱이가 오줌으로 나가버려서 병이나요.',
+      loop: '’계속 반복하기’ 블록을 가져와 시작블록과 조건블록 사이에 끼워보세요.',
+      loopWrong: '[계속 반복하기] 블록을 반짝이는 점선안에 넣어 보세요.',
+      s1: '반복 블록까지 넣어 코딩하니까 진짜 콩팥처럼 쉬지 않고 일하죠?',
+      s2: '대단해요! 지금 우리 몸의 콩팥이 이 순간에도 하고 있는 일을 코딩으로 완성했어요.',
+      fin: '이제 퀴즈를 풀며 배운 내용을 확인해볼까요?'
+    };
+    const st = { step: 0, ife: false, cond: false, out: false, keep: false, loop: false, frame: false, hideIf: false, slot: null, mv: false, loose: null, busy: false, sp: null, tm: [] };
+    const say = (t) => { text.innerHTML = t; const n = t.length; text.style.fontSize = n > 96 ? '34px' : n > 56 ? '38px' : ''; };
+    const after = (ms, fn) => { st.tm.push(setTimeout(fn, ms)); };
+    const setNext = (fn, label) => { nextBtn.textContent = label || '다음'; nextBtn.style.fontSize = label ? '38px' : ''; nextBtn.classList.toggle('is-off', !fn); nextBtn.onclick = fn ? () => { playClick(); fn(); } : null; hint(); };
+    const { toMain, rectMain, trackDrag, trashHint } = Entry;
+    const hint = Entry.hinter(() =>
+      !nextBtn.classList.contains('is-off') ? [nextBtn]
+      : st.busy ? null
+      : st.step === 2 || (st.step === 4 && !st.mv) ? [cats.querySelector('.hit-pulse')]
+      : [1, 3, 4, 7].includes(st.step) ? [blocks.querySelector('.is-loose') || list.querySelector('.is-pick')]
+      : st.step === 5 || st.step === 8 ? [runBtn] : null);
+
+    const { cpath, ipath, spath, hexPts } = Entry.path;
+    const STROKE = 'stroke="rgba(20,10,60,.38)" stroke-width="2.5" stroke-linejoin="round"';
+    const DASH = 'stroke="#ffd83d" stroke-width="4" stroke-dasharray="10 7"';
+    const mk = (cls, role, w, h, d, fill, stroke, lb, fs, x, y, extra) =>
+      `<div class="cb ${cls}" data-role="${role}" style="${x === undefined ? '' : `left:${x}px;top:${y}px;`}width:${w}px;height:${h}px"><svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><path d="${d}" fill="${fill}" ${stroke}/>${extra || ''}</svg>${lb ? `<div class="lb" style="font-size:${fs}px">${lb}</div>` : ''}</div>`;
+    const HXL = 76, HXW = 170, HXE = 86;
+    const loopHtml = (W, H, cls, x, y, dashed) => mk(cls, 'loop', W, 74 + H + 44, cpath(W, H), dashed ? 'rgba(255,216,61,.14)' : BL, dashed ? DASH : STROKE, dashed ? '' : '계속 반복하기', 25, x, y);
+    const ifeHtml = (W, H1, H2, cls, x, y, o) => {
+      o = o || {};
+      const hw = o.cond ? HXW : HXE;
+      const slot = o.cond ? '' : `<polygon points="${hexPts(HXE, 44)}" transform="translate(${HXL},15)" fill="${o.slotCond ? 'rgba(255,216,61,.18)' : '#2a78b0'}" ${o.slotCond ? DASH : 'stroke="rgba(20,10,60,.3)" stroke-width="2"'}/>`;
+      const lb = `<div class="lb" style="font-size:25px;left:18px">만약</div><div class="lb" style="font-size:25px;left:${HXL + hw + 8}px">라면</div><div class="lb" style="font-size:25px;left:22px;top:${74 + H1}px;height:56px">아니면</div>`;
+      return mk(cls, 'if', W, 74 + H1 + 56 + H2 + 44, ipath(W, H1, H2), BL, STROKE, '', 25, x, y, slot).replace('</div>', lb + '</div>');
+    };
+    const hexHtml = (cls, x, y) =>
+      `<div class="cb ${cls}" data-role="cond" style="${x === undefined ? '' : `left:${x}px;top:${y}px;`}width:${HXW}px;height:44px"><svg width="${HXW}" height="44" viewBox="0 0 ${HXW} 44"><polygon points="${hexPts(HXW, 44)}" fill="${HX}" ${STROKE}/></svg><div class="lb is-c" style="font-size:20px">구멍보다 작다</div></div>`;
+    const blockHtml = (type, cls, x, y, W, dashed) =>
+      mk(cls, type, W, 88, spath(W, false), dashed ? 'rgba(255,216,61,.14)' : RD, dashed ? DASH : STROKE, dashed ? '' : (type === 'out' ? '내보내기' : '그대로 두기'), 22, x, y);
+    const anyHtml = (type, cls, x, y) =>
+      type === 'ife' ? ifeHtml(360, 44, 44, cls, x, y)
+      : type === 'loop' ? loopHtml(360, 44, cls, x, y)
+      : type === 'cond' ? hexHtml(cls, x, y)
+      : blockHtml(type, cls, x, y, 360);
+
+    function geom() {
+      const wrap = st.loop || st.frame;
+      const H1 = st.out || st.slot === 'out' ? 74 : 44, H2 = st.keep || st.slot === 'keep' ? 74 : 44;
+      return { wrap, ix: wrap ? 90 : 60, iy: wrap ? 218 : 144, W: wrap ? 330 : 360, H1, H2, hIf: 74 + H1 + 56 + H2 + 30 };
+    }
+    function render() {
+      const g = geom();
+      let h = mk('', 'start', 360, 88, spath(360, true), GR, STROKE, '<span class="pl"></span>시작하기 버튼을 클릭했을 때', 25, 60, 70);
+      if (!st.hideIf) {
+        if (st.loop) h += loopHtml(360, g.hIf, '', 60, 144);
+        else if (st.frame) h += loopHtml(360, g.hIf, '', 60, 144, true);
+        if (st.ife) {
+          h += ifeHtml(g.W, g.H1, g.H2, '', g.ix, g.iy, { cond: st.cond, slotCond: st.slot === 'cond' });
+          if (st.cond) h += hexHtml('', g.ix + HXL, g.iy + 15);
+          const bw = g.W - 30, bx = g.ix + 30;
+          if (st.out) h += blockHtml('out', '', bx, g.iy + 74, bw);
+          else if (st.slot === 'out') h += blockHtml('out', '', bx, g.iy + 74, bw, true);
+          if (st.keep) h += blockHtml('keep', '', bx, g.iy + 74 + g.H1 + 56, bw);
+          else if (st.slot === 'keep') h += blockHtml('keep', '', bx, g.iy + 74 + g.H1 + 56, bw, true);
+        } else if (st.slot === 'under') h += mk('', 'slot', 360, 88, spath(360), 'rgba(255,216,61,.14)', DASH, '', 22, 60, 144);
+      }
+      if (st.loose) h += anyHtml(st.loose.type, 'is-loose', st.loose.x, st.loose.y);
+      blocks.innerHTML = h;
+      const lo = blocks.querySelector('.is-loose');
+      if (lo) { lo.classList.add('hit-pulse'); lo.addEventListener('pointerdown', (e) => startDrag(e, lo, st.loose.type, true)); }
+      const pk = list.querySelector('.is-pick');
+      if (pk) pk.classList.toggle('hit-pulse', !st.loose);
+      hint();
+    }
+
+    function renderCats(on, hl) {
+      cats.innerHTML = CATS.map((c) => `<button class="en-cat${c === on ? ' is-on' : ''}${c === hl ? ' hit-pulse' : ''}" data-cat="${c}" type="button">${c}</button>`).join('');
+    }
+    function renderPalette(cat, allow) {
+      list.innerHTML = '';
+      const items = cat === '흐름' ? ['ife', 'loop'] : cat === '판단' ? ['cond'] : cat === '생김새' ? ['out', 'keep'] : [];
+      items.forEach((type) => {
+        const wrap = document.createElement('div');
+        wrap.innerHTML = anyHtml(type, 'is-flow');
+        const el = wrap.firstElementChild;
+        const ok = allow === type;
+        el.classList.add(ok ? 'is-pick' : 'is-dim');
+        if (ok) { el.classList.add('hit-pulse'); el.addEventListener('pointerdown', (e) => startDrag(e, el, type, false)); }
+        list.appendChild(el);
+      });
+    }
+
+    const near = (gx, gy, tx, ty, rx) => Math.abs(gx - tx) < (rx || 90) && Math.abs(gy - ty) < 80;
+
+    function startDrag(e, src, type, fromLoose) {
+      if (st.busy) return;
+      e.preventDefault();
+      if (st.loose && !fromLoose) { hint(); return; }
+      clearFingers();
+      const [px, py] = toMain(e);
+      const sr = rectMain(src);
+      const offX = px - sr.l, offY = py - sr.t;
+      const g = src.cloneNode(true);
+      g.className = g.className.replace(/is-flow|is-pick|is-dim|hit-pulse|is-loose/g, '') + ' is-ghost';
+      g.style.left = sr.l + 'px'; g.style.top = sr.t + 'px';
+      main.appendChild(g);
+      if (fromLoose) src.style.visibility = 'hidden';
+      const end = () => g.remove();
+      trackDrag((ev) => {
+        const [x, y] = toMain(ev); g.style.left = (x - offX) + 'px'; g.style.top = (y - offY) + 'px';
+      }, (ev) => {
+        const [x, y] = toMain(ev);
+        end();
+        drop(type, x - offX, y - offY, x, y);
+      }, () => { end(); render(); });
+    }
+
+    function drop(type, gx, gy, x, y) {
+      const w = rectMain(ws);
+      const lx = gx - w.l, ly = gy - w.t;
+      const inWs = x > w.l && x < w.l + w.w && y > w.t && y < w.t + w.h;
+      if (!inWs) { render(); return; }
+      const g = geom();
+      let ok = false;
+      if (st.step === 1 || st.step === 7) ok = near(lx, ly, 60, 144);
+      else if (st.step === 3) ok = near(lx, ly, g.ix + HXL, g.iy + 15, 120);
+      else if (st.step === 4) ok = st.out ? near(lx, ly, g.ix + 30, g.iy + 74 + g.H1 + 56) : near(lx, ly, g.ix + 30, g.iy + 74);
+      if (ok) { st.loose = null; snap(); onSnap(type); return; }
+      playWrong();
+      st.loose = { type, x: Math.max(0, Math.min(w.w - 360, lx)), y: Math.max(10, Math.min(w.h - 170, ly)) };
+      say(st.step === 1 ? TXT.ifeWrong : st.step === 3 ? TXT.condWrong : st.step === 4 ? TXT.actWrong : TXT.loopWrong);
+      render();
+    }
+
+    function onSnap(type) {
+      if (st.step === 1) { st.ife = true; st.slot = null; render(); go(2); }
+      else if (st.step === 3) { st.cond = true; st.slot = null; render(); go(4); }
+      else if (st.step === 4) {
+        if (type === 'out') { st.out = true; st.slot = null; render(); go(4); }
+        else { st.keep = true; st.slot = null; render(); go(5); }
+      } else if (st.step === 7) { st.loop = true; st.frame = false; st.slot = null; render(); go(8); }
+    }
+
+    const HOLES = [50, 150, 250, 350, 450], SEGS = [100, 200, 300, 400];
+    const KINDS = {
+      water: { c: '#6ec6ff', s: 16, small: true }, waste: { c: '#b9812c', s: 16, small: true },
+      rbc: { c: '#d63b3b', s: 34 }, wbc: { c: '#ffffff', s: 38, cls: 'is-wbc' }, prot: { c: '#8b5cf6', s: 26 }
+    };
+    const SEQ = ['water', 'rbc', 'waste', 'prot', 'water', 'wbc', 'waste', 'rbc'];
+    (function buildFilter() {
+      const w = (l, wd) => { const d = document.createElement('div'); d.className = 'kd-wall'; d.style.cssText = `left:${l}px;width:${wd}px`; kid.appendChild(d); };
+      SEGS.forEach((c) => { const d = document.createElement('div'); d.className = 'kd-seg'; d.style.left = (c - 20) + 'px'; kid.appendChild(d); });
+      w(0, 30); w(470, 30);
+    })();
+    const idleParts = () => {
+      [['rbc', 100, 60], ['wbc', 200, 90], ['prot', 300, 50], ['rbc', 400, 100], ['water', 50, 40], ['waste', 150, 80], ['water', 350, 70], ['waste', 450, 110]].forEach(([k, x, y]) => {
+        const K = KINDS[k], d = document.createElement('div');
+        d.className = 'kd-pt is-idle ' + (K.cls || '');
+        d.style.cssText = `background:${K.c};width:${K.s}px;height:${K.s}px;transform:translate(${x - K.s / 2}px,${y - K.s / 2}px)`;
+        kid.appendChild(d);
+      });
+    };
+    const clearParts = () => kid.querySelectorAll('.kd-pt').forEach((d) => d.remove());
+    const lit = (role) => {
+      blocks.querySelectorAll('.cb.lit').forEach((b) => b.classList.remove('lit'));
+      if (role) { const b = blocks.querySelector(`.cb[data-role="${role}"]`); if (b) b.classList.add('lit'); }
+    };
+
+    function spawn(kind, passAll, cond) {
+      const K = KINDS[kind], pass = K.small || passAll;
+      const x = pass ? HOLES[Math.floor(Math.random() * 5)] : SEGS[Math.floor(Math.random() * 4)];
+      const d = document.createElement('div');
+      d.className = 'kd-pt ' + (K.cls || '');
+      d.style.cssText = `background:${K.c};width:${K.s}px;height:${K.s}px`;
+      kid.appendChild(d);
+      const X = x - K.s / 2, y = (v) => v - K.s / 2;
+      const frames = pass
+        ? [{ transform: `translate(${X}px,${y(14)}px)`, opacity: 1 }, { offset: .45, transform: `translate(${X}px,${y(156)}px)`, opacity: 1 }, { offset: .9, transform: `translate(${X}px,${y(330)}px)`, opacity: 1 }, { transform: `translate(${X}px,${y(340)}px)`, opacity: 0 }]
+        : [{ transform: `translate(${X}px,${y(14)}px)`, opacity: 1 }, { offset: .4, transform: `translate(${X}px,${y(128)}px)`, opacity: 1 }, { offset: .85, transform: `translate(${470 - K.s / 2}px,${y(128)}px)`, opacity: 1 }, { transform: `translate(${490 - K.s / 2}px,${y(128)}px)`, opacity: 0 }];
+      const a = d.animate(frames, { duration: 3000, fill: 'forwards' });
+      a.onfinish = () => d.remove();
+      if (cond) after(1150, () => { lit('cond'); after(300, () => lit(K.small ? 'out' : 'keep')); after(1100, () => lit(null)); });
+      else if (!K.small) after(1200, () => { kid.classList.add('is-red'); });
+    }
+    function stopRun(keepView) {
+      clearInterval(st.sp); st.sp = null;
+      st.tm.forEach(clearTimeout); st.tm = [];
+      st.busy = false; runBtn.disabled = false;
+      lit(null);
+      if (!keepView) { kid.classList.remove('is-red'); clearParts(); idleParts(); }
+    }
+    function run(opt) {
+      st.busy = true; runBtn.disabled = true; runBtn.classList.remove('hit-pulse'); hint();
+      clearParts(); kid.classList.remove('is-red');
+      let n = 0;
+      const tick = () => {
+        spawn(SEQ[n % SEQ.length], !opt.cond, opt.cond);
+        n++;
+        if (opt.count && n >= opt.count) {
+          clearInterval(st.sp);
+          after(3200, () => { opt.keep ? stopRun(true) : stopRun(); opt.done && opt.done(); });
+        }
+      };
+      const start = () => { tick(); st.sp = setInterval(tick, 520); };
+      if (!opt.cond) { lit('start'); start(); return; }
+      const order = ['start'];
+      if (st.loop) order.push('loop');
+      order.push('if');
+      order.forEach((r, i) => after(i * 380, () => lit(r)));
+      after(order.length * 380, () => { lit(null); start(); });
+    }
+
+    runBtn.addEventListener('click', () => {
+      if (st.busy) return;
+      playClick();
+      if (st.step === 5) {
+        run({ cond: true, count: 12, done: () => { say(TXT.r1); setNext(() => { say(TXT.r2); setNext(() => go(6)); }); } });
+      } else if (st.step === 8) {
+        run({ cond: true });
+        after(3200, () => {
+          say(TXT.s1);
+          setNext(() => { say(TXT.s2); setNext(() => { stopRun(); say(TXT.fin); setNext(() => { location.href = 'page09.html'; }); }); });
+        });
+      }
+    });
+    cats.addEventListener('click', (e) => {
+      const b = e.target.closest('.en-cat');
+      if (!b || st.busy) return;
+      playClick();
+      if (st.step === 2 && b.dataset.cat === '판단') go(3);
+      else if (st.step === 4 && !st.mv && b.dataset.cat === '생김새') { st.mv = true; go(4); }
+    });
+
+    function go(n) {
+      st.step = n; st.loose = null; setNext(null); clearFingers();
+      trashHint(pal, trash, false);
+      runBtn.classList.remove('hit-pulse');
+      if (n === 0) { say(TXT.intro); renderCats('흐름'); renderPalette('흐름'); st.slot = null; render(); setNext(() => go(1)); }
+      else if (n === 1) { say(TXT.ife); renderCats('흐름'); renderPalette('흐름', 'ife'); st.slot = 'under'; render(); }
+      else if (n === 2) { say(TXT.cat); renderCats('흐름', '판단'); renderPalette('흐름'); st.slot = null; render(); }
+      else if (n === 3) { say(TXT.cond); renderCats('판단'); renderPalette('판단', 'cond'); st.slot = 'cond'; render(); }
+      else if (n === 4 && !st.mv) { say(TXT.mv); renderCats('판단', '생김새'); renderPalette('판단'); st.slot = null; render(); }
+      else if (n === 4) {
+        renderCats('생김새'); st.slot = st.out ? 'keep' : 'out';
+        say(st.out ? TXT.keep : TXT.out); renderPalette('생김새', st.out ? 'keep' : 'out'); render();
+      }
+      else if (n === 5) { say(TXT.run1); renderCats('생김새'); renderPalette('생김새'); st.slot = null; render(); runBtn.classList.add('hit-pulse'); }
+      else if (n === 6) {
+        st.hideIf = true; render(); renderPalette('생김새');
+        run({ cond: false, count: 10, keep: true, done: () => { say(TXT.r3); setNext(() => go(7), '다시 조립하기'); } });
+      }
+      else if (n === 7) {
+        stopRun(); st.hideIf = false; st.frame = true;
+        say(TXT.loop); renderCats('흐름'); renderPalette('흐름', 'loop'); st.slot = null; render();
+      }
+      else if (n === 8) { say(TXT.run1); renderCats('흐름'); renderPalette('흐름'); render(); runBtn.classList.add('hit-pulse'); }
+    }
+
+    idleParts();
+    const q = new URLSearchParams(location.search), s0 = +q.get('step') || 0;
+    st.ife = s0 >= 2; st.cond = s0 >= 4; st.out = s0 >= 5 || q.get('sub') === 'keep'; st.keep = s0 >= 5; st.mv = s0 >= 5 || q.get('sub') === 'keep'; st.loop = s0 >= 8; st.hideIf = s0 === 6;
+    if (s0 === 7) { st.frame = true; st.loop = false; }
+    go(s0);
+  })();
+  </script>
+</body>
+</html>

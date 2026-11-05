@@ -1921,9 +1921,13 @@ function initAnswerPickQuiz() {
           foundCount += 1;
 
           if (foundCount >= totalCorrect) {
-            setRightText(quiz.dataset.right);
-            showLayer(correctLayer, correctSound);
-            setTimeout(() => advancePanelOrNavigate(opt, quiz.dataset.next), 2000);
+            const delay = Number(quiz.dataset.delay) || 0;
+            if (delay) quiz.style.pointerEvents = 'none';
+            setTimeout(() => {
+              setRightText(quiz.dataset.right);
+              showLayer(correctLayer, correctSound);
+              setTimeout(() => advancePanelOrNavigate(opt, quiz.dataset.next), 2000);
+            }, delay);
           } else {
             clickSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
           }
@@ -2218,14 +2222,22 @@ const playDrag = (() => {
   const audio = new Audio(ASSET_BASE + 'sound/drag.wav');
   audio.preload = 'auto';
   audio.volume = 0.5;
-  // 새로고침 직후에도 바로 나도록 미리 내려받아 해독해 둔 소리를 WebAudio로 재생(해독이 안 끝났거나 file:// 처럼 못 받으면 audio 요소로 재생)
+  // 새로고침 직후에도 바로 나도록 미리 해독해 둔 소리를 WebAudio로 재생(해독 전이거나 file:// 처럼 못 받으면 audio 요소로 재생).
+  // AudioContext 생성은 오디오 장치를 여느라(특히 블루투스) 수 초씩 화면을 멈출 수 있어, 누른 채 움직이는 첫 끌기 때만 함(누르기만 하는 페이지는 열지 않음)
   let ctx = null;
   let buf = null;
-  try {
-    const AC = window.AudioContext || window.webkitAudioContext;
-    ctx = new AC();
-    fetch(ASSET_BASE + 'sound/drag.wav').then((r) => r.arrayBuffer()).then((b) => ctx.decodeAudioData(b)).then((d) => { buf = d; }).catch(() => {});
-  } catch (e) { ctx = null; }
+  const prepare = (e) => {
+    if (e.type === 'pointermove' && !e.buttons) return;
+    window.removeEventListener('pointermove', prepare, true);
+    window.removeEventListener('dragstart', prepare, true);
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      ctx = new AC();
+      fetch(ASSET_BASE + 'sound/drag.wav').then((r) => r.arrayBuffer()).then((b) => ctx.decodeAudioData(b)).then((d) => { buf = d; }).catch(() => {});
+    } catch (e) { ctx = null; }
+  };
+  window.addEventListener('pointermove', prepare, true);
+  window.addEventListener('dragstart', prepare, true);
   return () => {
     if (ctx && buf) {
       try {
@@ -2314,6 +2326,10 @@ function chartSvg(data, opts) {
   }
   if (o.xTitle) s += '<text x="' + (pad.l + w) + '" y="' + (pad.t + h + 62) + '" text-anchor="end" font-size="' + o.fsUnit + '" fill="#5b5e6e">' + o.xTitle + '</text>';
   return s + '</svg>';
+}
+
+function enColor(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue('--en-' + name).trim();
 }
 
 function shuffleArray(arr) {

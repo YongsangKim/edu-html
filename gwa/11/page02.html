@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>콩팥 필터를 부탁해~</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .p02-zone{position:absolute;box-sizing:border-box;left:230px;width:1660px;border-left:solid 5px var(--c-navy);border-right:solid 5px var(--c-navy)}
+        .p02-blood{top:20px;height:470px;background:linear-gradient(180deg,#f7b1b1,#ef8a8a);border-top:solid 5px var(--c-navy);border-radius:28px 28px 0 0}
+        .p02-urine{top:550px;height:390px;background:linear-gradient(180deg,#fff3b0,#ffe273);border-bottom:solid 5px var(--c-navy);border-radius:0 0 28px 28px}
+        .p02-strip{top:490px;height:60px;background:#fbe3dc}
+        .p02-uh{position:absolute;left:290px;top:800px;margin:0;font-family:"Cafe24 Ssurround";font-size:60px;line-height:1;color:#a8741b}
+        .p02-mem{position:absolute;top:490px;height:60px;box-sizing:border-box;background:#8a63d2;border:solid 5px var(--c-navy);z-index:3}
+        .p02-mem.is-l{left:230px;border-radius:30px 0 0 30px;border-right:0}
+        .p02-mem.is-r{border-radius:0 30px 30px 0;border-left:0}
+        .p02-gauge{left:90px;top:90px}
+        .p02-field{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:4;touch-action:none;cursor:ew-resize}
+        .p02-it{position:absolute;transform:translateX(-50%);pointer-events:none}
+        .p02-it i{display:flex;align-items:center;justify-content:center;border-radius:50%;box-sizing:border-box;border:solid 4px var(--c-navy);font-family:"Cafe24 Ssurround";font-style:normal;font-weight:400;font-size:26px;line-height:1;color:var(--c-ink);white-space:nowrap}
+        .p02-it i.is-dark{color:#fff}
+        .p02-it.is-gone{opacity:0;transition:opacity .5s ease}
+        .p02-it.is-quick{opacity:0;transition:opacity .15s ease}
+        .p02-wrong{z-index:30}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p02-zone p02-blood"></div>
+          <div class="p02-zone p02-urine"></div>
+          <div class="p02-zone p02-strip"></div>
+          <p class="p02-uh">오줌</p>
+          <div class="p02-mem is-l" id="p02MemL"></div>
+          <div class="p02-mem is-r" id="p02MemR"></div>
+          <div class="gauge is-thin is-vertical p02-gauge" style="height:760px"><div class="gauge-fill" id="p02GaugeFill" style="height:0%"></div></div>
+          <div class="p02-field" id="p02Field"></div>
+
+          <div class="ox-result-wrong is-avatar is-off p02-wrong" id="p02Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body"><p class="avatar-popup-text is-small">이 알갱이는 구멍보다 커서<br>통과할 수 없어요.</p></div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p02Done" style="z-index:30">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <span style="position:absolute;right:90px;top:50px;font-size:150px;line-height:1">🏆</span>
+                    <p class="avatar-card-title is-left" style="padding:0;margin-bottom:40px">정말 잘했어요!</p>
+                    <p class="avatar-card-text">필터 구멍보다 작으면 통과하고 크면 남겨서<br>위쪽 피는 깨끗해지고<br>아래에는 오줌이 모이게 됐어요!</p>
+                  </div>
+                  <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">‘만약 구멍보다 작다면 통과’처럼<br>조건에 따라 행동을 달리했어요.</p>
+                  </div>
+                  <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">컴퓨터도 조건에 따라<br>어떻게 작동되는지 알아볼까요?</p>
+                  </div>
+                  <a href="page03.html" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="콩팥 필터를 부탁해~" data-next="page03.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const SUBS = {
+      water:  { name: '물',     size: 76,  color: '#8fd3ff', ok: true },
+      waste:  { name: '노폐물', size: 108, color: '#8d8d8d', ok: true, dark: true },
+      rbc:    { name: '적혈구', size: 170, color: '#c0392b', ok: false, dark: true },
+      protein:{ name: '단백질', size: 216, color: '#c9a8ff', ok: false },
+      wbc:    { name: '백혈구', size: 259, color: '#ffffff', ok: false },
+    };
+    const KEYS = Object.keys(SUBS);
+    const LANES = [620, 1060, 1500];
+    const HOLE_W = 125, HOLE_MIN = 300, HOLE_MAX = 1820, HOLE_SPEED = 900;
+    const MEM_TOP = 490, START_Y = 25, SPEED = 85, FIRST_MS = 300, GAP_MS = 800, TARGET = 10, FALL_END = 760;
+
+    const field = $('p02Field');
+    const memL = $('p02MemL');
+    const memR = $('p02MemR');
+    const fill = $('p02GaugeFill');
+    const wrongLayer = $('p02Wrong');
+    const mainEl = document.querySelector('main');
+
+    let holeX = 1060;
+    let items = [];
+    let waitMs = FIRST_MS;
+    let judging = false;
+    let lastKey = '';
+    let lastLane = -1;
+    let correct = 0;
+    let paused = false;
+    let ended = false;
+    let last = 0;
+    const keys = { left: false, right: false };
+    let dragging = false;
+
+    const drawHole = () => {
+      const l = holeX - HOLE_W / 2;
+      const r = holeX + HOLE_W / 2;
+      memL.style.width = (l - 230) + 'px';
+      memR.style.left = r + 'px';
+      memR.style.width = (1890 - r) + 'px';
+    };
+
+    const spawn = () => {
+      let key;
+      do { key = KEYS[Math.floor(Math.random() * KEYS.length)]; } while (key === lastKey);
+      lastKey = key;
+      const s = SUBS[key];
+      const el = document.createElement('div');
+      el.className = 'p02-it';
+      el.innerHTML = '<i' + (s.dark ? ' class="is-dark"' : '') + ' style="width:' + s.size + 'px;height:' + s.size + 'px;background:' + s.color + '">' + s.name + '</i>';
+      let lane;
+      do { lane = Math.floor(Math.random() * LANES.length); } while (lane === lastLane);
+      lastLane = lane;
+      const x = LANES[lane];
+      judging = true;
+      el.style.left = x + 'px';
+      el.style.top = START_Y + 'px';
+      field.appendChild(el);
+      items.push({ el, s, x, y: START_Y, state: 'fall' });
+    };
+
+    const setGauge = () => { fill.style.height = Math.min(100, correct * 10) + '%'; };
+
+    const finish = () => {
+      ended = true;
+      setTimeout(() => $('p02Done').classList.remove('is-off'), 900);
+    };
+
+    const reach = (it) => {
+      judging = false;
+      waitMs = GAP_MS;
+      const half = it.s.size / 2;
+      const hl = holeX - HOLE_W / 2, hr = holeX + HOLE_W / 2;
+      const ov = Math.min(it.x + half, hr) - Math.max(it.x - half, hl);
+      if (it.s.ok) {
+        if (Math.abs(it.x - holeX) <= HOLE_W / 2) {
+          it.state = 'through';
+          playCorrect();
+          correct++;
+          setGauge();
+          if (correct >= TARGET) finish();
+        } else {
+          it.state = 'done';
+          it.y = MEM_TOP - it.s.size;
+          it.el.style.top = it.y + 'px';
+          it.el.classList.add('is-quick');
+          setTimeout(() => it.el.remove(), 200);
+        }
+        return;
+      }
+      it.state = 'done';
+      it.y = MEM_TOP - it.s.size;
+      it.el.style.top = it.y + 'px';
+      if (ov >= HOLE_W * 0.4) {
+        playWrong();
+        paused = true;
+        flashLayer(wrongLayer, 'is-off', 2000);
+        setTimeout(() => { paused = false; }, 2000);
+      }
+      setTimeout(() => it.el.classList.add('is-gone'), 800);
+      setTimeout(() => it.el.remove(), 1400);
+    };
+
+    const tick = (t) => {
+      const dt = Math.min(0.05, (t - (last || t)) / 1000);
+      last = t;
+      if (!paused) {
+        const dir = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+        if (dir) holeX = Math.max(HOLE_MIN, Math.min(HOLE_MAX, holeX + dir * HOLE_SPEED * dt));
+        drawHole();
+        if (!ended) {
+          if (!judging) {
+            waitMs -= dt * 1000;
+            if (waitMs <= 0) spawn();
+          }
+        }
+        items.forEach((it) => {
+          if (it.state === 'done') return;
+          it.y += SPEED * dt;
+          if (it.state === 'fall' && it.y + it.s.size >= MEM_TOP) reach(it);
+          if (it.state === 'through') {
+            if (it.y > FALL_END) { it.state = 'done'; it.el.remove(); return; }
+            it.el.style.opacity = Math.max(0, Math.min(1, (FALL_END - it.y) / 160));
+          }
+          if (it.state !== 'done') it.el.style.top = it.y + 'px';
+        });
+        items = items.filter((it) => it.state !== 'done' || it.el.isConnected);
+      }
+      requestAnimationFrame(tick);
+    };
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') { keys.left = true; e.preventDefault(); }
+      else if (e.key === 'ArrowRight') { keys.right = true; e.preventDefault(); }
+    });
+    document.addEventListener('keyup', (e) => {
+      if (e.key === 'ArrowLeft') keys.left = false;
+      else if (e.key === 'ArrowRight') keys.right = false;
+    });
+    window.addEventListener('blur', () => { keys.left = keys.right = false; });
+
+    const moveTo = (e) => {
+      if (paused) return;
+      const r = mainEl.getBoundingClientRect();
+      holeX = Math.max(HOLE_MIN, Math.min(HOLE_MAX, (e.clientX - r.left) / currentScale));
+    };
+    field.addEventListener('pointerdown', (e) => { dragging = true; field.setPointerCapture(e.pointerId); moveTo(e); });
+    field.addEventListener('pointermove', (e) => { if (dragging) moveTo(e); });
+    const endDrag = () => { dragging = false; };
+    field.addEventListener('pointerup', endDrag);
+    field.addEventListener('pointercancel', endDrag);
+
+    drawHole();
+    requestAnimationFrame(tick);
+  })();
+  </script>
+</body>
+</html>

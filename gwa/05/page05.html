@@ -6,19 +6,11 @@
     <title>우리 집 속 숨은 카메라 찾기</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        .p05-house{position:absolute;left:284px;top:119px;display:block;pointer-events:none}
-        .p05-obj{position:absolute;padding:0;border:0;background:none;cursor:pointer}
-        .p05-obj img{display:block}
-        .p05-obj:hover:not(.is-found) img{filter:drop-shadow(4px 0 0 var(--c-violet)) drop-shadow(-4px 0 0 var(--c-violet)) drop-shadow(0 4px 0 var(--c-violet)) drop-shadow(0 -4px 0 var(--c-violet))}
-        .p05-obj:active:not(.is-found) img{filter:drop-shadow(4px 0 0 var(--c-orchid)) drop-shadow(-4px 0 0 var(--c-orchid)) drop-shadow(0 4px 0 var(--c-orchid)) drop-shadow(0 -4px 0 var(--c-orchid))}
-        .p05-obj.is-found{cursor:default}
-        /* .p05-obj.is-found img{opacity:.55} */
-        .p05-obj.is-found:after{content:'';position:absolute;right:0;top:0;width:44px;height:44px;border-radius:50%;background:var(--c-purple) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='white' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/></svg>") center / 70% no-repeat}
-        .p05-obj[data-key="phone"]{left:507px;top:279px}
-        .p05-obj[data-key="cctv"]{left:1145px;top:319px}
-        .p05-obj[data-key="laptop"]{left:538px;top:530px}
-        .p05-obj[data-key="game"]{left:1140px;top:566px}
-        .p05-modal .avatar-card-title{white-space:nowrap}
+        .hunt-house{left:284px;top:119px}
+        .hunt-obj[data-key="phone"]{left:507px;top:279px}
+        .hunt-obj[data-key="cctv"]{left:1145px;top:319px}
+        .hunt-obj[data-key="laptop"]{left:538px;top:530px}
+        .hunt-obj[data-key="game"]{left:1140px;top:566px}
     </style>
 </head>
 <body>
@@ -29,20 +21,20 @@
         <main class="bg-default">
           <div class="stage-board"></div>
           <p class="ask-pill is-fit"><span>카메라가 있는 물건을 찾아 클릭해 보세요.</span></p>
-          <img class="p05-house" src="img/p05_house.png" alt="">
-          <button class="p05-obj" data-key="phone" aria-label="스마트폰"><img src="img/p05_obj_phone.png" alt=""></button>
-          <button class="p05-obj" data-key="cctv" aria-label="가정용 CCTV"><img src="img/p05_obj_cctv.png" alt=""></button>
-          <button class="p05-obj" data-key="laptop" aria-label="노트북"><img src="img/p05_obj_laptop.png" alt=""></button>
-          <button class="p05-obj" data-key="game" aria-label="동작인식 게임기"><img src="img/p05_obj_game.png" alt=""></button>
+          <img class="hunt-house" src="img/p05_house.png" alt="">
+          <button class="hunt-obj" data-key="phone" aria-label="스마트폰"><img src="img/p05_obj_phone.png" alt=""></button>
+          <button class="hunt-obj" data-key="cctv" aria-label="가정용 CCTV"><img src="img/p05_obj_cctv.png" alt=""></button>
+          <button class="hunt-obj" data-key="laptop" aria-label="노트북"><img src="img/p05_obj_laptop.png" alt=""></button>
+          <button class="hunt-obj" data-key="game" aria-label="동작인식 게임기"><img src="img/p05_obj_game.png" alt=""></button>
 
-          <div class="avatar-modal p05-modal is-off" id="p05Info">
+          <div class="avatar-modal hunt-modal is-off" id="p05Info">
             <div class="avatar-card is-left">
               <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
               <div class="avatar-card-body">
                 <div>
                   <p class="avatar-card-title" id="p05Title"></p>
                   <p class="avatar-card-text" id="p05Text"></p>
-                  <a href="javascript:;" class="avatar-card-btn card-btn is-popup js-sfx" id="p05Next" data-sound="sound/click.mp3">다음</a>
+                  <a href="javascript:;" class="avatar-card-btn card-btn is-popup next-btn js-sfx" id="p05Next" data-sound="sound/click.mp3">다음</a>
                 </div>
               </div>
             </div>
@@ -59,7 +51,7 @@
                   </div>
                   <div class="step-panel">
                     <p class="avatar-card-text">카메라는 컴퓨터에 사람이나 주변 모습의 이미지를 전달해요. AI는 이 이미지를 어떤 순서로 분석하는지 알아볼까요?</p>
-                    <a href="page06.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+                    <a href="page06.html" class="js-nav-effect avatar-card-btn card-btn is-popup next-btn js-sfx" data-sound="sound/click.mp3">다음</a>
                   </div>
                 </div>
               </div>
@@ -82,7 +74,7 @@
       phone: ['스마트폰', '카메라가 내 얼굴을 알아보면 잠금이 풀리도록 설정할 수 있어요.'],
       laptop: ['노트북', '카메라로 내 모습을 실시간으로 보여주며 멀리있는 친구와도 얼굴을 보며 영상 통화를 할 수 있어요.']
     };
-    const objs = Array.from(document.querySelectorAll('.p05-obj'));
+    const objs = Array.from(document.querySelectorAll('.hunt-obj'));
     let found = 0;
     objs.forEach((o) => o.addEventListener('click', () => {
       if (o.classList.contains('is-found')) return;

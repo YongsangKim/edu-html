@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>조건 장바구니 배달 미션</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        main{overflow:hidden}
+        .p11-pn{position:absolute;top:60px;box-sizing:border-box;border:solid 5px var(--c-navy);border-radius:24px}
+        .p11-rule{left:40px;width:800px;height:850px;background:#eef3fb}
+        .p11-game{left:880px;width:1000px;height:850px;background:#dff0ff;overflow:hidden;touch-action:none;cursor:grab}
+        .p11-lab{position:absolute;left:30px;top:-32px;width:260px;height:70px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:50px;background:#fff;display:flex;align-items:center;justify-content:center;font-family:"Cafe24 Ssurround";font-size:40px;color:var(--c-ink);box-shadow:0 8px 0 0 rgba(1,24,92,.25)}
+        .p11-code{position:absolute;left:45px;width:560px;transform:scale(1.25);transform-origin:0 0}
+        .p11-code .lb.is-c{left:0;width:100%;justify-content:center;padding:4px 0 0;height:100%}
+        .p11-chute{position:absolute;left:50%;top:-5px;width:200px;height:150px;margin-left:-100px;box-sizing:border-box;border:solid 5px var(--c-navy);border-top:0;border-radius:0 0 40px 40px;background:linear-gradient(#9fb4d6,#c4d3ea)}
+        .p11-chute:after{content:'';position:absolute;left:30px;right:30px;bottom:14px;height:26px;border-radius:13px;background:#4a5f8a}
+        .p11-fall{position:absolute;left:0;top:0;width:160px;text-align:center;font-size:130px;line-height:1;will-change:transform;pointer-events:none}
+        .p11-bk{position:absolute;bottom:30px;height:200px;box-sizing:border-box}
+        .p11-bd{position:absolute;left:0;right:0;bottom:0;height:150px;box-sizing:border-box;border:solid 5px var(--c-navy);border-radius:10px 10px 36px 36px;background:repeating-linear-gradient(90deg,#f0b667 0 24px,#e3a04f 24px 48px)}
+        .p11-rim{position:absolute;left:-14px;right:-14px;top:30px;height:36px;box-sizing:border-box;border:solid 5px var(--c-navy);border-radius:18px;background:#d98f3b}
+        .p11-nm{position:absolute;left:50%;top:84px;width:84px;height:84px;margin-left:-42px;border-radius:50%;box-sizing:border-box;border:solid 5px var(--c-navy);background:#fff;display:flex;align-items:center;justify-content:center;font-family:"Cafe24 Ssurround";font-size:54px;color:var(--c-ink);padding-top:6px;z-index:2}
+        .p11-banner.is-off{display:none}
+        .p11-banner{position:absolute;left:880px;top:400px;width:1000px;margin:0;text-align:center;z-index:20}
+        .p11-banner span{display:inline-block;min-width:560px;box-sizing:border-box;padding:18px 60px 10px;border:solid 9px #e4f4ff;border-radius:80px;background:#043f9b;font-family:'Cafe24 Ssurround';font-size:76px;color:var(--c-white);letter-spacing:-0.03em}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p11-pn p11-rule">
+            <div class="p11-lab" id="p11Lab"></div>
+            <div class="p11-code" id="p11Code"></div>
+          </div>
+          <div class="p11-pn p11-game" id="p11Game">
+            <div class="p11-chute"></div>
+            <div id="p11Baskets"></div>
+            <div class="p11-fall" id="p11Fall"></div>
+          </div>
+
+          <p class="p11-banner is-off" id="p11Banner"><span id="p11BannerText"></span></p>
+
+          <div class="ox-result-wrong is-avatar is-off" id="p11Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">다시 한번 생각해볼까요?</p>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="조건 장바구니 배달 미션" data-next="page12.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script src="../../resources/js/entry.js"></script>
+  <script>
+  (function () {
+    const NEXT = 'page12.html';
+    const NEED = 7;
+    const FALL_SPEED = 90;
+    const MOVE_SPEED = 700;
+    const START_Y = 110;
+    const LAND_Y = 565;
+    const W = 1000;
+    const LEVELS = [
+      { centers: [250, 750], bw: 300, rule: { c: '빨간색', a: '1번 바구니로', e: '2번 바구니로' },
+        items: [['🍎', 0], ['🍓', 0], ['🍇', 1], ['🍌', 1]] },
+      { centers: [250, 750], bw: 300, rule: { c: '빨간색 또는 노란색', a: '1번 바구니로', e: '2번 바구니로' },
+        items: [['🍎', 0], ['🍓', 0], ['🍌', 0], ['🍇', 1], ['🥝', 1], ['🥒', 1]] },
+      { centers: [167, 500, 833], bw: 250, rule: { c: '빨간색 그리고 동그란 모양', a: '1번 바구니로', e: { c: '노란색 그리고 길쭉한 모양', a: '2번 바구니로', e: '3번 바구니로' } },
+        items: [['🍎', 0], ['🍅', 0], ['🍌', 1], ['🌽', 1], ['🌶️', 2], ['🍋', 2], ['🍇', 2]] }
+    ];
+
+    const fall = $('p11Fall');
+    const game = $('p11Game');
+    let level = Math.min(2, Math.max(0, (+new URLSearchParams(location.search).get('lv') || 1) - 1));
+    let count = 0;
+    let x = W / 2;
+    let y = START_Y;
+    let cur = null;
+    let state = 'idle';
+    let lastT = 0;
+    const keys = { left: false, right: false };
+
+    function place() {
+      fall.style.transform = 'translate(' + (x - 80) + 'px,' + y + 'px)';
+    }
+
+    function renderLevel() {
+      const L = LEVELS[level];
+      $('p11Lab').textContent = 'Level ' + (level + 1);
+      const r = Entry.ifBlock(L.rule, { w: 560 });
+      const code = $('p11Code');
+      code.innerHTML = r.html;
+      code.style.height = r.h + 'px';
+      code.style.top = (70 + (760 - r.h * 1.25) / 2) + 'px';
+      $('p11Baskets').innerHTML = L.centers.map((c, i) =>
+        '<div class="p11-bk" style="left:' + (c - L.bw / 2) + 'px;width:' + L.bw + 'px"><div class="p11-bd"></div><div class="p11-rim"></div><div class="p11-nm">' + (i + 1) + '</div></div>').join('');
+      count = 0;
+    }
+
+    function banner(text, ms, then) {
+      $('p11BannerText').textContent = text;
+      $('p11Banner').classList.remove('is-off');
+      setTimeout(() => { $('p11Banner').classList.add('is-off'); if (then) then(); }, ms);
+    }
+
+    function startLevel() {
+      state = 'idle';
+      fall.style.opacity = 0;
+      renderLevel();
+      banner('Level ' + (level + 1) + ' 시작!', 5000, nextItem);
+    }
+
+    function nextItem() {
+      const L = LEVELS[level];
+      cur = L.items[Math.floor(Math.random() * L.items.length)];
+      fall.textContent = cur[0];
+      fall.style.opacity = 1;
+      x = W / 2;
+      y = START_Y;
+      place();
+      state = 'fall';
+      lastT = performance.now();
+    }
+
+    function land() {
+      state = 'resolve';
+      const L = LEVELS[level];
+      const best = L.centers.findIndex((c) => Math.abs(c - x) <= L.bw / 2 + 14);
+      if (best >= 0) x = L.centers[best];
+      y = LAND_Y;
+      place();
+      fall.style.opacity = 0;
+      if (best === cur[1]) {
+        playCorrect();
+        count += 1;
+        if (count >= NEED) {
+          setTimeout(() => banner('Level ' + (level + 1) + ' 종료!', 1500, () => {
+            if (level < 2) { level += 1; startLevel(); }
+            else navigateTo(NEXT);
+          }), 400);
+        } else setTimeout(nextItem, 500);
+      } else {
+        playWrong();
+        flashLayer($('p11Wrong'), 'is-off', 2000);
+        setTimeout(nextItem, 2000);
+      }
+    }
+
+    function tick(now) {
+      const dt = Math.min((now - lastT) / 1000, 0.05);
+      lastT = now;
+      if (state === 'fall') {
+        if (keys.left) x -= MOVE_SPEED * dt;
+        if (keys.right) x += MOVE_SPEED * dt;
+        x = Math.max(80, Math.min(W - 80, x));
+        y += FALL_SPEED * dt;
+        if (y >= LAND_Y) land();
+        else place();
+      }
+      requestAnimationFrame(tick);
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') { keys.left = true; e.preventDefault(); }
+      if (e.key === 'ArrowRight') { keys.right = true; e.preventDefault(); }
+    });
+    window.addEventListener('keyup', (e) => {
+      if (e.key === 'ArrowLeft') keys.left = false;
+      if (e.key === 'ArrowRight') keys.right = false;
+    });
+    game.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      const s = $('stage').getBoundingClientRect().width / 1920;
+      const sx = e.clientX;
+      const bx = x;
+      game.setPointerCapture(e.pointerId);
+      const move = (ev) => { if (state === 'fall') { x = Math.max(80, Math.min(W - 80, bx + (ev.clientX - sx) / s)); place(); } };
+      const up = () => { game.removeEventListener('pointermove', move); game.removeEventListener('pointerup', up); game.removeEventListener('pointercancel', up); };
+      game.addEventListener('pointermove', move);
+      game.addEventListener('pointerup', up);
+      game.addEventListener('pointercancel', up);
+    });
+
+    startLevel();
+    requestAnimationFrame(tick);
+  })();
+  </script>
+</body>
+</html>
