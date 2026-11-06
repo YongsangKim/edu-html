@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>들이마신 공기 흐름 순서도 익히기</title>
+<link rel="stylesheet" href="../../resources/css/common.css">
+<style>
+.p05-fc{position:absolute;left:660px;top:185px;width:600px;display:flex;flex-direction:column;align-items:center}
+.p05-nd{width:440px;height:66px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;padding-top:4px;font-family:'Cafe24 Ssurround';font-size:38px;color:var(--c-ink);letter-spacing:-0.04em;white-space:nowrap}
+.p05-nd.is-slot{border:dashed 5px #9aa3b5;border-radius:16px;background:rgba(255,255,255,.7)}
+.p05-nd.is-slot.is-end{border-radius:33px}
+.p05-nd.is-slot.is-dim{opacity:.35}
+.p05-nd.is-ov{background:#6dd36f;border:solid 5px var(--c-ink);border-radius:33px}
+.p05-nd.is-rc{background:#4a83c6;border:solid 5px var(--c-ink);border-radius:12px;color:#fff}
+.p05-ar{width:6px;height:30px;background:var(--c-ink);position:relative}
+.p05-ar:after{content:'';position:absolute;left:-9px;bottom:-4px;border:12px solid transparent;border-top:14px solid var(--c-ink);border-bottom:0}
+.jig-tray.p05-tray{top:770px;height:170px;justify-content:center;gap:120px}
+.jig-tray-label.p05-tab{top:712px;min-width:0;height:74px;padding:6px 34px 4px;font-size:40px;border-radius:22px 22px 0 0}
+.p05-sh{width:300px;height:110px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;padding-top:4px;font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-ink);cursor:grab;touch-action:none;user-select:none}
+.p05-sh.is-ov{background:#6dd36f;border:solid 6px var(--c-ink);border-radius:55px}
+.p05-sh.is-rc{background:#4a83c6;border:solid 6px var(--c-ink);border-radius:14px;color:#fff}
+.p05-sh.is-clone{position:absolute;z-index:20;pointer-events:none;cursor:grabbing}
+.p05-hide{display:none!important}
+</style>
+</head>
+<body>
+<div id="page-fade"></div>
+<div id="viewport" class="viewport">
+  <div id="stage-spacer">
+    <div id="stage" class="stage">
+      <main class="bg-default">
+        <p class="ask-pill is-fit"><span id="p05Pill">‘시작’과 ‘끝’에 알맞은 모양을 씌워 주세요.</span></p>
+
+        <div class="p05-fc" id="p05Flow">
+          <div class="p05-nd is-slot is-end drop-zone" data-slot="a">시작</div>
+          <div class="p05-ar"></div>
+          <div class="p05-nd is-slot is-dim drop-zone" data-slot="b">코로 공기 들어오기</div>
+          <div class="p05-ar"></div>
+          <div class="p05-nd is-slot is-dim drop-zone" data-slot="b">기관 지나가기</div>
+          <div class="p05-ar"></div>
+          <div class="p05-nd is-slot is-dim drop-zone" data-slot="b">기관지 지나가기</div>
+          <div class="p05-ar"></div>
+          <div class="p05-nd is-slot is-dim drop-zone" data-slot="b">폐에 도착하기</div>
+          <div class="p05-ar"></div>
+          <div class="p05-nd is-slot is-end drop-zone" data-slot="a">끝</div>
+        </div>
+
+        <div class="jig-tray-label p05-tab">보관함</div>
+        <div class="jig-tray p05-tray">
+          <div class="p05-sh is-ov" id="p05Ov" data-shape="ov">타원</div>
+          <div class="p05-sh is-rc" id="p05Rc" data-shape="rc">사각형</div>
+        </div>
+
+        <div class="avatar-modal is-off" id="p05Mid" style="z-index:30">
+          <div class="avatar-card">
+            <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+            <div class="avatar-card-body is-side"><p class="avatar-card-text">순서도의 시작과 끝을 타원으로 완성했어요.<br>이제 공기가 이동하는 일을 적은 칸에<br>알맞은 모양을 씌워 볼까요?</p></div>
+            <a class="avatar-card-btn next-btn card-btn is-popup js-sfx" id="p05MidBtn" data-sound="sound/click.mp3">다음</a>
+          </div>
+        </div>
+
+        <div class="avatar-modal is-off" id="p05Fin" style="z-index:30">
+          <div class="avatar-card">
+            <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+            <div class="avatar-card-body is-side"><p class="avatar-card-text" id="p05FinText"></p></div>
+            <a class="avatar-card-btn next-btn card-btn is-popup js-sfx" id="p05FinBtn" data-sound="sound/click.mp3">다음</a>
+            <a href="page06.html" class="js-nav-effect avatar-card-btn next-btn card-btn is-popup js-sfx p05-hide" id="p05FinGo" data-sound="sound/click.mp3">다음</a>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+<div class="zoom-info" id="zoomInfo"></div>
+
+<script src="../../resources/js/header.js" data-title="들이마신 공기 흐름 순서도 익히기" data-next="page06.html"></script>
+<script src="../../resources/js/toc-gwa.js"></script>
+<script src="../../resources/js/common.js"></script>
+<script>
+(function () {
+  const FIN = [
+    '위에서 아래로 차례대로 내려가는<br>순차 순서도를 완성했어요.',
+    '이번에는 순서도의 화살표를 따라가면서<br>인공지능 로봇청소기가 해야 할 일을 알아볼까요?',
+  ];
+  const main = document.querySelector('main');
+  const slots = Array.from(document.querySelectorAll('#p05Flow .p05-nd'));
+  const shapes = [$('p05Ov'), $('p05Rc')];
+  let stage = 1;
+  let finStep = 0;
+  let dragging = false;
+
+  const activeKey = () => (stage === 1 ? 'a' : 'b');
+  const isActive = (s) => s.dataset.slot === activeKey() && s.classList.contains('is-slot');
+  const target = () => $(stage === 1 ? 'p05Ov' : 'p05Rc');
+  const guide = () => { if (!dragging) pointFingerAt(target()); };
+
+  function refresh() {
+    slots.forEach((s) => {
+      if (s.classList.contains('is-slot')) s.classList.toggle('is-dim', s.dataset.slot !== activeKey());
+    });
+  }
+
+  function fill(slot, shape) {
+    slot.classList.remove('is-slot', 'is-dim', 'is-end', 'drop-zone', 'is-over');
+    slot.classList.add('is-' + shape);
+  }
+
+  function afterFill() {
+    const left = slots.filter((s) => isActive(s));
+    if (left.length) return;
+    if (stage === 1) {
+      $('p05Mid').classList.remove('is-off');
+    } else {
+      $('p05FinText').innerHTML = FIN[0];
+      $('p05Fin').classList.remove('is-off');
+    }
+  }
+
+  const scale = () => $('stage').getBoundingClientRect().width / 1920;
+  const hit = (s, x, y) => {
+    const r = s.getBoundingClientRect();
+    return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+  };
+
+  shapes.forEach((orig) => {
+    orig.addEventListener('pointerdown', (e) => {
+      if (dragging || !$('p05Mid').classList.contains('is-off') || !$('p05Fin').classList.contains('is-off')) return;
+      e.preventDefault();
+      dragging = true;
+      clearFingers();
+      playClick();
+      const s = scale();
+      const mr = main.getBoundingClientRect();
+      const or = orig.getBoundingClientRect();
+      const clone = orig.cloneNode(true);
+      clone.removeAttribute('id');
+      clone.classList.add('is-clone');
+      clone.style.left = (or.left - mr.left) / s + 'px';
+      clone.style.top = (or.top - mr.top) / s + 'px';
+      main.appendChild(clone);
+      const sx = e.clientX;
+      const sy = e.clientY;
+      orig.setPointerCapture(e.pointerId);
+      const move = (ev) => {
+        clone.style.transform = 'translate(' + (ev.clientX - sx) / s + 'px,' + (ev.clientY - sy) / s + 'px)';
+        slots.forEach((z) => z.classList.toggle('is-over', isActive(z) && hit(z, ev.clientX, ev.clientY)));
+      };
+      const up = (ev) => {
+        orig.removeEventListener('pointermove', move);
+        orig.removeEventListener('pointerup', up);
+        orig.removeEventListener('pointercancel', up);
+        slots.forEach((z) => z.classList.remove('is-over'));
+        clone.remove();
+        dragging = false;
+        const z = slots.find((t) => isActive(t) && hit(t, ev.clientX, ev.clientY));
+        if (z && ev.type === 'pointerup') {
+          if (orig.dataset.shape === (stage === 1 ? 'ov' : 'rc')) {
+            playCorrect();
+            fill(z, orig.dataset.shape);
+            afterFill();
+          } else {
+            playWrong();
+          }
+        }
+        guide();
+      };
+      orig.addEventListener('pointermove', move);
+      orig.addEventListener('pointerup', up);
+      orig.addEventListener('pointercancel', up);
+    });
+  });
+
+  $('p05MidBtn').addEventListener('click', () => {
+    $('p05Mid').classList.add('is-off');
+    stage = 2;
+    $('p05Pill').textContent = '하는 일이 적힌 칸에 알맞은 모양을 씌워 주세요.';
+    refresh();
+    guide();
+  });
+
+  $('p05FinBtn').addEventListener('click', () => {
+    finStep += 1;
+    $('p05FinText').innerHTML = FIN[finStep];
+    if (finStep === FIN.length - 1) {
+      $('p05FinBtn').classList.add('p05-hide');
+      $('p05FinGo').classList.remove('p05-hide');
+    }
+  });
+
+  refresh();
+  guide();
+})();
+</script>
+</body>
+</html>

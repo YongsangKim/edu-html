@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>액체를 나누는 특징 질문 만들기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+      .p07-lbox{position:absolute;left:60px;top:175px;width:580px;height:515px;box-sizing:border-box;border-radius:28px;background:#266cc8;padding:24px}
+      .p07-lbox-in{width:100%;height:100%;border-radius:20px;background:#fff;box-sizing:border-box;padding:18px 24px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:14px 24px;place-items:center}
+      .p07-cup{width:210px;height:206px;border-radius:20px;background:#f4f7fc;border:solid 4px #d0dbea;display:flex;flex-direction:column;align-items:center;justify-content:center;box-sizing:border-box;transition:all .3s ease}
+      .p07-cup.is-hl{background:#fff9db;border-color:var(--c-yellow);box-shadow:0 0 0 4px rgba(255,200,0,.35)}
+      .p07-cup.is-dim{opacity:.35}
+      .p07-cup svg{width:96px;height:122px;overflow:visible}
+      .p07-cup b{margin-top:8px;font-family:'Cafe24 Ssurround';font-weight:400;font-size:32px;color:var(--c-ink);letter-spacing:-0.04em}
+      .p07-rbox{position:absolute;left:670px;top:175px;width:1190px;height:515px;box-sizing:border-box;border-radius:28px;background:#266cc8;padding:24px}
+      .p07-rbox-in{position:relative;width:100%;height:100%;border-radius:20px;background:#fff}
+      .p07-rbox-svg{position:absolute;left:0;top:0;width:1142px;height:467px;display:block}
+      .p07-qslot{position:absolute;width:370px;height:86px;box-sizing:border-box;border-radius:20px;border:dashed 5px var(--c-violet);background:#f8f6ff;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:40px;color:var(--c-violet);letter-spacing:-0.04em;transition:all .3s ease}
+      .p07-qslot.is-now{background:#fff8cc;border:solid 6px var(--c-yellow);box-shadow:0 0 18px rgba(255,200,0,.7);color:var(--c-ink)}
+      .p07-qslot.is-done{background:#e8e4f8;border:solid 5px #7c6fc4;color:#1b1640;font-size:30px}
+      .p07-qslot.is-dim{opacity:.45}
+      .p07-leaf{position:absolute;top:336px;width:210px;height:108px;box-sizing:border-box;border-radius:22px;background:#f3f5fa;border:dashed 4px #9aa3b5;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:44px;color:#7b86a8;transition:all .3s ease}
+      .p07-leaf.is-done{background:#dcf0ea;border:solid 5px #5c9486;color:var(--c-ink);font-size:36px}
+      .p07-tab{top:704px;min-width:0;height:74px;padding:6px 38px 4px;font-size:40px;border-radius:22px 22px 0 0}
+      .p07-tray{top:762px;height:178px;justify-content:center;gap:40px}
+      .p07-qcard{width:460px;height:112px;box-sizing:border-box;border-radius:24px;border:solid 6px var(--c-ink);background:linear-gradient(180deg,#fff,#eef3fb);box-shadow:0 8px 0 rgba(0,0,0,.22);display:flex;align-items:center;justify-content:center;padding-top:6px;font-family:'Cafe24 Ssurround';font-size:42px;color:var(--c-purple);letter-spacing:-0.04em;cursor:pointer;user-select:none;transition:transform .15s ease}
+      .p07-qcard:hover{transform:translateY(-4px)}
+      .p07-fg{position:absolute;left:470px;top:855px;width:110px;z-index:10;pointer-events:none}
+      .p07-complete-btn{min-width:280px;height:100px;font-size:48px;padding-top:6px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="ask-pill is-fit"><span>질문 카드를 선택해 의사결정 나무를 완성해보세요.</span></p>
+
+          <div class="p07-lbox">
+            <div class="p07-lbox-in">
+              <div class="p07-cup is-hl" id="cupWater">
+                <svg viewBox="0 0 100 130">
+                  <path d="M14,10 L86,10 L78,120 Q77,126 70,126 L30,126 Q23,126 22,120 Z" fill="rgba(255,255,255,.85)" stroke="#5b6b82" stroke-width="4.5"/>
+                  <path d="M17,42 L83,42 L76,118 Q75,122 70,122 L30,122 Q25,122 24,118 Z" fill="#eaf6ff"/>
+                </svg>
+                <b>물</b>
+              </div>
+              <div class="p07-cup is-hl" id="cupCider">
+                <svg viewBox="0 0 100 130">
+                  <path d="M14,10 L86,10 L78,120 Q77,126 70,126 L30,126 Q23,126 22,120 Z" fill="rgba(255,255,255,.85)" stroke="#5b6b82" stroke-width="4.5"/>
+                  <path d="M17,42 L83,42 L76,118 Q75,122 70,122 L30,122 Q25,122 24,118 Z" fill="#e3f4ff"/>
+                  <circle cx="38" cy="95" r="5" fill="#fff" stroke="#4a90e2" stroke-width="2.5"/>
+                  <circle cx="60" cy="80" r="6" fill="#fff" stroke="#4a90e2" stroke-width="2.5"/>
+                  <circle cx="46" cy="64" r="4.5" fill="#fff" stroke="#4a90e2" stroke-width="2.5"/>
+                </svg>
+                <b>사이다</b>
+              </div>
+              <div class="p07-cup is-hl" id="cupMilk">
+                <svg viewBox="0 0 100 130">
+                  <path d="M14,10 L86,10 L78,120 Q77,126 70,126 L30,126 Q23,126 22,120 Z" fill="rgba(255,255,255,.85)" stroke="#5b6b82" stroke-width="4.5"/>
+                  <path d="M17,42 L83,42 L76,118 Q75,122 70,122 L30,122 Q25,122 24,118 Z" fill="#ffffff" stroke="#e2e6ef" stroke-width="2"/>
+                </svg>
+                <b>우유</b>
+              </div>
+              <div class="p07-cup is-hl" id="cupGrape">
+                <svg viewBox="0 0 100 130">
+                  <path d="M14,10 L86,10 L78,120 Q77,126 70,126 L30,126 Q23,126 22,120 Z" fill="rgba(255,255,255,.85)" stroke="#5b6b82" stroke-width="4.5"/>
+                  <path d="M17,42 L83,42 L76,118 Q75,122 70,122 L30,122 Q25,122 24,118 Z" fill="#5e43b8"/>
+                </svg>
+                <b>포도 주스</b>
+              </div>
+            </div>
+          </div>
+
+          <div class="p07-rbox">
+            <div class="p07-rbox-in">
+              <svg class="p07-rbox-svg" viewBox="0 0 1142 467">
+                <line x1="571" y1="104" x2="295" y2="178" stroke="#7c6fc4" stroke-width="6"/>
+                <line x1="571" y1="104" x2="847" y2="178" stroke="#7c6fc4" stroke-width="6"/>
+                <rect x="385" y="118" width="60" height="36" rx="18" fill="#fff"/>
+                <text x="415" y="138" text-anchor="middle" dominant-baseline="middle" style="font-family:'Cafe24 Ssurround';font-size:26px;fill:#266cc8">네</text>
+                <rect x="685" y="118" width="90" height="36" rx="18" fill="#fff"/>
+                <text x="730" y="138" text-anchor="middle" dominant-baseline="middle" style="font-family:'Cafe24 Ssurround';font-size:26px;fill:#e0314b">아니오</text>
+
+                <line x1="295" y1="264" x2="165" y2="336" stroke="#8a94a6" stroke-width="5"/>
+                <line x1="295" y1="264" x2="425" y2="336" stroke="#8a94a6" stroke-width="5"/>
+                <text x="200" y="298" text-anchor="middle" dominant-baseline="middle" style="font-family:'Cafe24 Ssurround';font-size:24px;fill:#266cc8">네</text>
+                <text x="395" y="298" text-anchor="middle" dominant-baseline="middle" style="font-family:'Cafe24 Ssurround';font-size:24px;fill:#e0314b">아니오</text>
+
+                <line x1="847" y1="264" x2="717" y2="336" stroke="#8a94a6" stroke-width="5"/>
+                <line x1="847" y1="264" x2="977" y2="336" stroke="#8a94a6" stroke-width="5"/>
+                <text x="752" y="298" text-anchor="middle" dominant-baseline="middle" style="font-family:'Cafe24 Ssurround';font-size:24px;fill:#266cc8">네</text>
+                <text x="947" y="298" text-anchor="middle" dominant-baseline="middle" style="font-family:'Cafe24 Ssurround';font-size:24px;fill:#e0314b">아니오</text>
+              </svg>
+              <div class="p07-qslot is-now" id="slot1" style="left:386px;top:18px">?</div>
+              <div class="p07-qslot is-dim" id="slot2" style="left:110px;top:178px">?</div>
+              <div class="p07-qslot is-dim" id="slot3" style="left:662px;top:178px">?</div>
+              <div class="p07-leaf" id="leaf1" style="left:60px">?</div>
+              <div class="p07-leaf" id="leaf2" style="left:320px">?</div>
+              <div class="p07-leaf" id="leaf3" style="left:612px">?</div>
+              <div class="p07-leaf" id="leaf4" style="left:872px">?</div>
+            </div>
+          </div>
+
+          <div class="jig-tray-label p07-tab">질문 카드</div>
+          <div class="jig-tray p07-tray" id="cardTray"></div>
+          <img class="p07-fg" id="p07FingerGuide" src="../../resources/img/common/img_finger01.png" alt="">
+          <div class="ox-result-wrong is-avatar is-off" id="wrongModal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar">
+                <img src="../../resources/img/common/avatar_incorrect.png" alt="">
+              </div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text" id="wrongModalMsg">다시 한번 생각해볼까요?</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="doneModal">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">의사결정 나무가 완성되었어요!<br>누가 봐도 답이 같은 특징으로 질문을 만들면 액체를 잘 나눌 수 있어요.</p>
+                  </div>
+                  <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">이번에는 Canva를 이용해<br>직접 의사결정 나무를 그려볼까요?</p>
+                  </div>
+                  <a href="page08.html" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="액체를 나누는 특징 질문 만들기" data-prev="page06.html" data-next="page08.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+    (function () {
+      var stepData = [
+        {
+          targetSlot: 'slot1',
+          highlightCups: ['cupWater', 'cupCider', 'cupMilk', 'cupGrape'],
+          cards: [
+            { text: '투명한가요?', correct: true },
+            { text: '맛있나요?', correct: false, msg: '이 질문은 사람마다 답이 다른 질문이라 나눌 수 없어요.<br>누가 봐도 답이 같은 특징을 묻는 질문으로 골라볼까요?' },
+            { text: '보라색인가요?', correct: false, msg: '모두 보라색이 아닌 액체라 나누지 못했어요.' }
+          ]
+        },
+        {
+          targetSlot: 'slot2',
+          highlightCups: ['cupWater', 'cupCider'],
+          cards: [
+            { text: '예쁜가요?', correct: false, msg: '이 질문은 사람마다 답이 다른 질문이라 나눌 수 없어요.<br>누가 봐도 답이 같은 특징을 묻는 질문으로 골라볼까요?' },
+            { text: '투명한가요?', correct: false, msg: '물과 사이다 둘 다 투명해서 나뉘지 않았어요.' },
+            { text: '공기 방울이 있나요?', correct: true }
+          ]
+        },
+        {
+          targetSlot: 'slot3',
+          highlightCups: ['cupMilk', 'cupGrape'],
+          cards: [
+            { text: '맛있나요?', correct: false, msg: '이 질문은 사람마다 답이 다른 질문이라 나눌 수 없어요.<br>누가 봐도 답이 같은 특징을 묻는 질문으로 골라볼까요?' },
+            { text: '하얀색인가요?', correct: true },
+            { text: '투명한가요?', correct: false, msg: '우유와 포도 주스 둘 다 투명하지 않아서 나뉘지 않았어요.' }
+          ]
+        }
+      ];
+
+      var curStep = 0;
+      var cardTray = document.getElementById('cardTray');
+      var wrongModalMsg = document.getElementById('wrongModalMsg');
+      var fg = document.getElementById('p07FingerGuide');
+
+      var allCupIds = ['cupWater', 'cupCider', 'cupMilk', 'cupGrape'];
+
+      function renderStep() {
+        if (curStep >= stepData.length) {
+          cardTray.innerHTML = '';
+          var nextBtn = document.createElement('button');
+          nextBtn.type = 'button';
+          nextBtn.className = 'card-btn is-popup p07-complete-btn';
+          nextBtn.textContent = '완성 확인하기';
+          nextBtn.addEventListener('click', function () {
+            document.getElementById('doneModal').classList.remove('is-off');
+          });
+          cardTray.appendChild(nextBtn);
+          return;
+        }
+
+        var cur = stepData[curStep];
+
+        allCupIds.forEach(function (id) {
+          var el = document.getElementById(id);
+          if (cur.highlightCups.indexOf(id) !== -1) {
+            el.classList.add('is-hl');
+            el.classList.remove('is-dim');
+          } else {
+            el.classList.remove('is-hl');
+            el.classList.add('is-dim');
+          }
+        });
+
+        ['slot1', 'slot2', 'slot3'].forEach(function (sid) {
+          var el = document.getElementById(sid);
+          if (sid === cur.targetSlot) {
+            el.classList.add('is-now');
+            el.classList.remove('is-dim');
+          } else if (!el.classList.contains('is-done')) {
+            el.classList.remove('is-now');
+            el.classList.add('is-dim');
+          }
+        });
+
+        cardTray.innerHTML = '';
+        cur.cards.forEach(function (c, idx) {
+          var cardEl = document.createElement('div');
+          cardEl.className = 'p07-qcard';
+          cardEl.textContent = c.text;
+          cardEl.addEventListener('click', function () {
+            onCardClick(c);
+          });
+          cardTray.appendChild(cardEl);
+        });
+
+        if (curStep === 0) {
+          fg.style.display = 'block';
+        } else {
+          fg.style.display = 'none';
+        }
+      }
+
+      function onCardClick(c) {
+        if (c.correct) {
+          SFX.play('correct');
+          var slot = document.getElementById(stepData[curStep].targetSlot);
+          slot.textContent = c.text;
+          slot.classList.remove('is-now');
+          slot.classList.add('is-done');
+
+          if (curStep === 1) {
+            var l1 = document.getElementById('leaf1');
+            var l2 = document.getElementById('leaf2');
+            l1.textContent = '사이다';
+            l1.classList.add('is-done');
+            l2.textContent = '물';
+            l2.classList.add('is-done');
+          } else if (curStep === 2) {
+            var l3 = document.getElementById('leaf3');
+            var l4 = document.getElementById('leaf4');
+            l3.textContent = '우유';
+            l3.classList.add('is-done');
+            l4.textContent = '포도 주스';
+            l4.classList.add('is-done');
+          }
+
+          curStep++;
+          renderStep();
+        } else {
+          SFX.play('wrong');
+          wrongModalMsg.innerHTML = c.msg;
+          flashLayer(document.getElementById('wrongModal'));
+        }
+      }
+
+      renderStep();
+    })();
+  </script>
+</body>
+</html>

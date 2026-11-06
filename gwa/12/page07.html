@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>순서도대로 일하는 AI</title>
+<link rel="stylesheet" href="../../resources/css/common.css">
+<style>
+.p07-panel{position:absolute;left:60px;top:180px;width:1800px;height:760px;box-sizing:border-box;border-radius:30px;background:#266cc8}
+.p07-fcard{position:absolute;left:40px;top:40px;width:600px;height:680px;box-sizing:border-box;border-radius:24px;background:var(--c-white);display:flex;align-items:center;justify-content:center}
+.p07-ill{position:absolute;left:680px;top:40px;width:1080px;height:400px;box-sizing:border-box;border-radius:24px;background:var(--c-white);overflow:hidden}
+.p07-ill i{position:absolute;font-style:normal;line-height:1}
+.p07-ring{position:absolute;width:110px;height:110px;box-sizing:border-box;border:dashed 6px #ff3b6b;border-radius:50%}
+.p07-opts{position:absolute;left:680px;top:470px;width:1080px;height:250px;display:flex;gap:30px}
+.p07-opts .quiz-graph{flex:1;height:250px;font-size:40px;align-items:center;justify-content:center;gap:10px;padding-top:14px}
+.p07-opts .quiz-graph i{font-style:normal;font-size:100px;line-height:1}
+.p07-opts .quiz-graph b{font-weight:400;letter-spacing:-0.04em;white-space:nowrap}
+.p07-hide{display:none!important}
+</style>
+</head>
+<body>
+<div id="page-fade"></div>
+<div id="viewport" class="viewport">
+  <div id="stage-spacer">
+    <div id="stage" class="stage">
+      <main class="bg-default">
+        <p class="ask-pill is-fit"><span id="p07Ask"></span></p>
+
+        <div class="p07-panel">
+          <div class="p07-fcard" id="p07Chart"></div>
+          <div class="p07-ill" id="p07Ill"></div>
+          <div class="p07-opts" id="p07Opts"></div>
+        </div>
+
+        <div class="ox-result-wrong is-avatar is-off" id="p07Wrong">
+          <div class="avatar-popup-panel">
+            <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+            <div class="avatar-popup-body">
+              <p class="avatar-popup-text">순서도를 다시 한번<br>살펴볼까요?</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="avatar-modal is-off" id="p07Fin">
+          <div class="avatar-card">
+            <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+            <div class="avatar-card-body is-side"><p class="avatar-card-text" id="p07FinText"></p></div>
+            <a class="avatar-card-btn next-btn card-btn is-popup js-sfx" id="p07FinBtn" data-sound="sound/click.mp3">다음</a>
+            <a href="page08.html" class="js-nav-effect avatar-card-btn next-btn card-btn is-popup js-sfx p07-hide" id="p07FinGo" data-sound="sound/click.mp3">다음</a>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+<div class="zoom-info" id="zoomInfo"></div>
+
+<script src="../../resources/js/header.js" data-title="순서도대로 일하는 AI" data-next="page08.html"></script>
+<script src="../../resources/js/toc-gwa.js"></script>
+<script src="../../resources/js/common.js"></script>
+<script>
+(function () {
+  const F = "font-family:'Cafe24 Ssurround'";
+  const INK = '#1b1640';
+  const T = (x, y, s, fs, c) => '<text x="' + x + '" y="' + y + '" text-anchor="middle" dominant-baseline="middle" style="' + F + ';font-size:' + (fs || 34) + 'px;fill:' + (c || INK) + ';letter-spacing:-1px">' + s + '</text>';
+  const glow = (svg) => '<g filter="url(#gl)">' + svg + '</g>';
+  const stroke = (hl) => 'stroke="' + (hl ? '#ffcc00' : INK) + '" stroke-width="' + (hl ? 10 : 5) + '"';
+  const oval = (cx, y, w, s) => '<rect x="' + (cx - w / 2) + '" y="' + y + '" width="' + w + '" height="64" rx="32" fill="#6dd36f" ' + stroke(0) + '/>' + T(cx, y + 35, s);
+  const rect = (cx, y, w, s, hl) => '<rect x="' + (cx - w / 2) + '" y="' + y + '" width="' + w + '" height="64" rx="10" fill="#4a83c6" ' + stroke(hl) + '/>' + T(cx, y + 35, s, 34, '#fff');
+  const dia = (cx, y, w, h, l1, l2, hl) => '<polygon points="' + cx + ',' + y + ' ' + (cx + w / 2) + ',' + (y + h / 2) + ' ' + cx + ',' + (y + h) + ' ' + (cx - w / 2) + ',' + (y + h / 2) + '" fill="#ffd34d" ' + stroke(hl) + ' stroke-linejoin="round"/>' + T(cx, y + h / 2 - 18, l1, 30) + T(cx, y + h / 2 + 20, l2, 30);
+  const arrow = (x, y1, y2) => '<line x1="' + x + '" y1="' + y1 + '" x2="' + x + '" y2="' + (y2 - 12) + '" stroke="' + INK + '" stroke-width="6"/><polygon points="' + (x - 12) + ',' + (y2 - 14) + ' ' + (x + 12) + ',' + (y2 - 14) + ' ' + x + ',' + y2 + '" fill="' + INK + '"/>';
+
+  function chart(hl) {
+    const cx = 250, w = 340;
+    const pick = (n, svg) => (hl.includes(n) ? glow(svg(1)) : svg(0));
+    let s = '<svg width="560" height="640" viewBox="0 0 560 640"><defs><filter id="gl" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#ffd400" flood-opacity="1"/></filter></defs>';
+    s += oval(cx, 20, 200, '시작') + arrow(cx, 84, 112);
+    s += pick(1, (h) => rect(cx, 112, w, '이동하며 청소하기', h)) + arrow(cx, 176, 204);
+    s += pick(2, (h) => rect(cx, 204, w, '바닥 살펴보기', h)) + arrow(cx, 268, 296);
+    s += pick(3, (h) => dia(cx, 296, 320, 130, '바닥이', '깨끗한가요?', h)) + arrow(cx, 426, 456) + T(cx + 30, 441, '예', 28);
+    s += pick(4, (h) => rect(cx, 456, w, '충전소로 돌아가기', h)) + arrow(cx, 520, 548);
+    s += oval(cx, 548, 200, '끝');
+    s += '<polyline points="' + (cx + 160) + ',361 ' + (cx + 260) + ',361 ' + (cx + 260) + ',144 ' + (cx + 184) + ',144" fill="none" stroke="' + INK + '" stroke-width="6"/><polygon points="' + (cx + 184) + ',132 ' + (cx + 184) + ',156 ' + (cx + 170) + ',144" fill="' + INK + '"/>' + T(cx + 215, 335, '아니오', 26);
+    return s + '</svg>';
+  }
+
+  const em = (ch, x, y, fs) => '<i style="left:' + x + 'px;top:' + y + 'px;font-size:' + fs + 'px">' + ch + '</i>';
+  const dust = (list) => list.map((p) => em('🟤', p[0], p[1], 46)).join('');
+  const room = (extra) => em('🛋️', 60, 150, 200) + em('🔋', 820, 170, 160) + em('🤖', 460, 250, 120) + extra;
+  const MANY = dust([[330, 320], [600, 330], [700, 250], [380, 250], [540, 180], [760, 340]]);
+  const SOME = dust([[600, 330], [700, 250], [540, 180]]);
+  const ONE = dust([[720, 300]]) + '<span class="p07-ring" style="left:690px;top:270px"></span>';
+
+  const ACTS = ['이동하며 청소하기', '바닥 살펴보기', '충전소로 돌아가기'];
+  const ICON = ['🧹', '🔍', '🔌'];
+  const ASK1 = '순서도를 보고 로봇청소기가 해야 할 일을 골라 보세요.';
+  const QUIZ = [
+    { ask: ASK1, hl: [1], ill: room(MANY), ok: 0 },
+    { ask: ASK1, hl: [2], ill: room(SOME), ok: 1 },
+    { ask: '먼지가 남아있어요. 로봇청소기가 어떤 일을 해야 할까요?', hl: [3, 1], ill: room(ONE), ok: 0 },
+    { ask: ASK1, hl: [2], ill: room(''), ok: 1 },
+    { ask: '먼지가 없어 깨끗해요. 로봇청소기가 어떤 일을 해야 할까요?', hl: [3], ill: room(''), ok: 2 },
+  ];
+  const FIN = [
+    '순서도의 화살표를 따라<br>로봇청소기가 할 일을 골랐어요.',
+    'Canva를 통해 달리기 순서도를 완성해볼까요?',
+  ];
+  let qi = 0;
+  let finStep = 0;
+  let locked = false;
+
+  function render() {
+    const q = QUIZ[qi];
+    locked = false;
+    $('p07Ask').textContent = q.ask;
+    $('p07Chart').innerHTML = chart(q.hl);
+    $('p07Ill').innerHTML = q.ill;
+    const wrap = $('p07Opts');
+    wrap.innerHTML = '';
+    ACTS.forEach((t, i) => {
+      const b = document.createElement('button');
+      b.className = 'quiz-graph';
+      b.innerHTML = '<i>' + ICON[i] + '</i><b>' + t + '</b>';
+      b.addEventListener('click', () => {
+        if (locked) return;
+        if (i === q.ok) {
+          locked = true;
+          playCorrect();
+          setTimeout(next, 600);
+        } else {
+          playWrong();
+          flashLayer($('p07Wrong'), 'is-off', 2000);
+        }
+      });
+      wrap.appendChild(b);
+    });
+  }
+
+  function next() {
+    if (qi < QUIZ.length - 1) {
+      qi += 1;
+      render();
+    } else {
+      $('p07FinText').innerHTML = FIN[0];
+      $('p07Fin').classList.remove('is-off');
+    }
+  }
+
+  $('p07FinBtn').addEventListener('click', () => {
+    finStep += 1;
+    $('p07FinText').innerHTML = FIN[finStep];
+    if (finStep === FIN.length - 1) {
+      $('p07FinBtn').classList.add('p07-hide');
+      $('p07FinGo').classList.remove('p07-hide');
+    }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>식품공장 라벨 로봇</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .p12-fac{position:absolute;left:0;top:0;width:1920px;height:690px;background:linear-gradient(180deg,#e9f1fb 0 70%,#cfdcef 70%)}
+        .p12-ph{position:absolute;left:40px;top:150px;font-family:'Cafe24 Ssurround';font-size:28px;color:#6a7aa6}
+        .p12-lv{position:absolute;left:50px;top:40px;height:84px;margin:0;padding:6px 36px 0;box-sizing:border-box;display:flex;align-items:center;border-radius:42px;background:var(--c-navy);font-family:'Cafe24 Ssurround';font-size:50px;color:#fff}
+        .p12-gauge{left:400px;top:50px;width:1200px}
+        .p12-mg{position:absolute;right:50px;top:30px;width:110px;height:110px;padding:0;border-radius:50%;border:solid 6px var(--c-ink);background:#fff;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:60px;line-height:1;cursor:pointer}
+        .p12-mg.is-off{opacity:.35;filter:grayscale(1);cursor:default}
+        .p12-belt{position:absolute;left:0;top:560px;width:1240px;height:70px;border-radius:0 35px 35px 0;background:repeating-linear-gradient(90deg,#5d6578 0 40px,#4b5264 40px 80px);border:solid 6px var(--c-ink);border-left:0;box-sizing:border-box}
+        .p12-belt:after{content:'';position:absolute;left:0;right:20px;top:70px;height:40px;background:radial-gradient(circle at 30px 20px,#9aa3b8 14px,transparent 15px) 0 0/80px 40px repeat-x}
+        .p12-bt{--h:300px;position:absolute;top:260px;width:calc(var(--h) * .667);height:var(--h);display:flex;align-items:flex-end;justify-content:center;transform-origin:bottom center;transition:left .9s ease,top .9s ease,transform .9s ease,opacity .9s ease;z-index:2}
+        .p12-bt.is-view{position:relative;top:0;left:0;transition:none}
+        .p12-bt.is-wait{transform:scale(.8);opacity:.6}
+        .p12-bt.is-drop{z-index:1;transform:scale(.45);opacity:0;transition:left .5s ease-in,top .6s ease-in .35s,transform .6s ease-in .35s,opacity .3s ease-in .65s}
+        .p12-paper{position:absolute;left:-17%;right:-17%;top:23%;height:50%;background:#fff;border:solid 3px #cfd6e2;display:flex;align-items:center;justify-content:center;font-size:calc(var(--h) * .3);color:#e2a72e;line-height:1}
+        .p12-body{position:relative;height:var(--h);display:flex;align-items:flex-end;justify-content:center}
+        .p12-body img{height:var(--h);display:block}
+        .p12-bt.is-over .p12-body{filter:drop-shadow(0 0 0 var(--c-yellow)) drop-shadow(0 0 10px var(--c-yellow)) drop-shadow(0 0 4px var(--c-yellow))}
+        .p12-cb{position:relative;width:calc(var(--h) * .42);height:var(--h)}
+        .p12-cb:before{content:'';position:absolute;left:30%;width:40%;top:0;height:20%;background:var(--liq);border:solid 4px var(--c-ink);border-bottom:0;border-radius:8px 8px 0 0;box-sizing:border-box}
+        .p12-cb:after{content:'';position:absolute;left:0;right:0;bottom:0;height:84%;background:var(--liq);border:solid 4px var(--c-ink);border-radius:26% 26% 10% 10%;box-sizing:border-box}
+        .p12-bt.has-air:after{content:'';position:absolute;left:50%;bottom:12%;width:calc(var(--h) * .3);height:calc(var(--h) * .5);transform:translateX(-50%);pointer-events:none;background:radial-gradient(circle,#fff 0 28%,rgba(255,255,255,.4) 32%,transparent 36%) 15% 10%/22% 14% no-repeat,radial-gradient(circle,#fff 0 28%,rgba(255,255,255,.4) 32%,transparent 36%) 70% 30%/18% 12% no-repeat,radial-gradient(circle,#fff 0 28%,rgba(255,255,255,.4) 32%,transparent 36%) 30% 60%/20% 13% no-repeat,radial-gradient(circle,#fff 0 28%,rgba(255,255,255,.4) 32%,transparent 36%) 78% 80%/16% 10% no-repeat,radial-gradient(circle,#fff 0 28%,rgba(255,255,255,.4) 32%,transparent 36%) 45% 40%/14% 9% no-repeat}
+        .p12-stick{position:absolute;left:50%;top:58%;transform:translateX(-50%);padding:6px 14px 0;box-sizing:border-box;border-radius:10px;border:solid 3px var(--c-ink);background:#fff;font-family:'Cafe24 Ssurround';font-size:24px;line-height:1.1;color:var(--c-purple);white-space:nowrap;z-index:3;animation:p12Stick .3s ease-out}
+        @keyframes p12Stick{0%{opacity:0;transform:translateX(-50%) translateY(-40px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}
+        .p12-arm{position:absolute;left:900px;top:130px;width:300px;height:150px;border-radius:24px;border:dashed 4px #8fa0c4;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:30px;color:#6a7aa6;transition:transform .5s ease;z-index:3}
+        .p12-arm.is-down{transform:translateY(130px)}
+        .p12-box{position:absolute;left:1340px;top:380px;width:420px;height:250px;border-radius:16px 16px 24px 24px;border:solid 6px var(--c-ink);background:linear-gradient(180deg,#d9a86a,#c38a48);box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:40px;color:#5a3a12;z-index:3}
+        .p12-tray{position:absolute;left:0;top:690px;width:1920px;height:270px;background:#266cc8;display:flex;justify-content:center;align-items:center;gap:50px;z-index:4}
+        .p12-st{width:520px;height:220px;box-sizing:border-box;border-radius:26px;border:solid 6px var(--c-ink);background:#fff;padding:14px 26px 0;font-family:'Cafe24 Ssurround';color:var(--c-ink);letter-spacing:-0.04em;box-shadow:0 8px 0 rgba(0,0,0,.18);touch-action:none;cursor:grab;user-select:none}
+        .p12-st b{display:block;font-weight:400;font-size:46px;color:var(--c-purple);margin-bottom:8px}
+        .p12-st p{margin:0;font-size:32px;line-height:1.3;color:#3d4766}
+        .p12-st.is-home{opacity:.35}
+        .p12-st.is-lift{position:absolute;margin:0;transform:rotate(-4deg) scale(.9);z-index:20;box-shadow:0 18px 30px rgba(0,0,0,.3);cursor:grabbing;pointer-events:none}
+        .p12-lock .p12-st{pointer-events:none}
+        .p12-hm{width:1400px;padding:50px 60px}
+        .p12-hm .hint-title{width:max-content;margin:0 auto 20px}
+        .p12-hm-t{font-size:52px}
+        .p12-hm-x{position:absolute;right:30px;top:30px;width:90px;cursor:pointer}
+        .p12-hm-b{display:flex;align-items:center;justify-content:center;gap:80px;margin-top:30px}
+        .p12-hm-big{position:relative;width:420px;height:460px;border-radius:50%;background:#eef3fb;display:flex;align-items:center;justify-content:center;overflow:hidden;border:solid 8px var(--c-sky)}
+        .p12-hm-big .p12-bt{--h:420px;transition:none;z-index:auto}
+        .p12-hm-big .p12-paper{left:-40%;right:-40%}
+        .p12-hm-big i{position:absolute;right:20px;bottom:20px;font-style:normal;font-size:70px}
+        .p12-hm-l{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:24px;counter-reset:n}
+        .p12-hm-l li{counter-increment:n;display:flex;align-items:center;gap:20px;font-family:"Cafe24 Ssurround";font-size:44px;color:var(--c-purple);letter-spacing:-0.04em}
+        .p12-hm-l li:before{content:counter(n);width:64px;height:64px;border-radius:50%;background:var(--c-violet);color:#fff;display:flex;align-items:center;justify-content:center;padding-top:4px;box-sizing:border-box;font-size:38px}
+        .p12-hm-l b{font-weight:400;min-width:200px;height:70px;padding:6px 20px 0;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border-radius:35px;background:var(--c-navy);color:#fff;font-size:38px}
+        .p12-modal{z-index:30}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default" id="p12Main">
+          <div class="p12-fac"><span class="p12-ph">식품 공장 배경</span></div>
+          <p class="p12-lv" id="p12Lv">Level 1</p>
+          <div class="gauge is-thin p12-gauge"><div class="gauge-fill" id="p12Fill" style="width:0%"></div></div>
+          <button type="button" class="p12-mg is-off" id="p12Mg">🔍</button>
+          <div class="p12-belt"></div>
+          <div id="p12Bottles"></div>
+          <div class="p12-arm" id="p12Arm">로봇 팔 일러스트</div>
+          <div class="p12-box">완성품 상자</div>
+          <div class="p12-tray" id="p12Tray"></div>
+
+          <div class="avatar-modal is-off p12-modal" id="p12Hint">
+            <div class="avatar-card p12-hm">
+              <img class="p12-hm-x js-sfx" id="p12HintX" data-sound="sound/click.mp3" src="../../resources/img/common/pop_btn_close.png" alt="">
+              <p class="hint-title">힌트</p>
+              <p class="avatar-card-text is-small p12-hm-t">액체를 가까이에서 자세히 살펴 보세요.</p>
+              <div class="p12-hm-b">
+                <div class="p12-hm-big" id="p12Zoom"></div>
+                <ol class="p12-hm-l"><li><b>색깔</b>어떤 색인가요?</li><li><b>투명</b>별이 보이나요?</li><li><b>공기 방울</b>공기 방울이 있나요?</li></ol>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off p12-modal" id="p12End1">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body is-side">
+                <p class="avatar-card-text">좋아요! 색만 봐도 금방 구별이 가능했어요.<br>이제 색이 똑같은 음료가 나오니, 잘 살펴볼까요?</p>
+              </div>
+              <a href="javascript:;" class="js-sfx avatar-card-btn next-btn card-btn is-popup p12-go" data-sound="sound/click.mp3">시작하기</a>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off p12-modal" id="p12End2">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">잘했어요! 간장과 콜라는 물과 사이다처럼<br>색이 비슷해서 공기 방울로 구별이 가능했어요.</p>
+                  </div>
+                  <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">이제 모두 섞여 나와요.<br>특징 2개를 확인하세요!</p>
+                  </div>
+                  <a href="javascript:;" class="js-sfx avatar-card-btn next-btn card-btn is-popup p12-go" data-sound="sound/click.mp3">시작하기</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off p12-modal" id="p12End3">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body is-side">
+                <p class="avatar-card-text">잘했어요! 액체들의 색이 같을 때에는 투명한지,<br>공기 방울이 있는지 여러 특징을 함께 봐야 해요.</p>
+              </div>
+              <a href="page13.html" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="식품공장 라벨 로봇" data-next="page13.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const DRINKS = {
+      soy:   { name: '간장',        liq: '#4a2a14',                clear: false, air: false, lines: ['진한 갈색', '투명하지 않아요', '공기 방울이 없어요'] },
+      oj:    { name: '오렌지 주스', liq: '#f39c1f',                clear: false, air: false, lines: ['주황색', '투명하지 않아요', '공기 방울이 없어요'], img: 'img/p12_oj.png' },
+      cider: { name: '사이다',      liq: 'rgba(220,240,255,.35)',  clear: true,  air: true,  lines: ['색이 없어요', '투명해요', '공기 방울이 있어요'], img: 'img/p12_cider.png' },
+      cola:  { name: '콜라',        liq: '#3a1d10',                clear: false, air: true,  lines: ['진한 갈색', '투명하지 않아요', '공기 방울이 있어요'], img: 'img/p12_cola.png' },
+      osoda: { name: '오렌지 탄산음료', liq: 'rgba(255,170,40,.45)', clear: true,  air: true,  lines: ['주황색', '투명해요', '공기 방울이 있어요'] },
+      water: { name: '물',          liq: 'rgba(220,240,255,.3)',   clear: true,  air: false, lines: ['색이 없어요', '투명해요', '공기 방울이 없어요'] },
+    };
+
+    const LEVELS = [
+      { bottles: [['oj', ['soy', 'oj', 'cider']], ['cider', ['soy', 'oj', 'cider']], ['soy', ['soy', 'oj', 'cider']]] },
+      { bottles: [['cola', ['cola', 'soy']], ['soy', ['cola', 'soy']]] },
+      { bottles: [
+        ['cider', ['soy', 'water', 'cider']],
+        ['soy',   ['oj', 'cola', 'soy']],
+        ['osoda', ['oj', 'osoda', 'cola']],
+        ['water', ['water', 'cider', 'cola']],
+        ['cola',  ['soy', 'cola', 'cider']],
+        ['oj',    ['water', 'osoda', 'oj']],
+      ] },
+    ];
+
+    const HINT_AT = 2;
+    const STOP_X = 960, WAIT_X = 250, START_X = -260, BOX_X = 1450;
+
+    const main = $('p12Main');
+    const bottlesEl = $('p12Bottles');
+    const tray = $('p12Tray');
+    const fill = $('p12Fill');
+    const mg = $('p12Mg');
+    const arm = $('p12Arm');
+
+    let level = 0;
+    let idx = 0;
+    let cur = null;
+    let next = null;
+    let wrongs = 0;
+    let busy = true;
+
+    const makeBottle = (key) => {
+      const d = DRINKS[key];
+      const el = document.createElement('div');
+      el.className = 'p12-bt' + (d.air ? ' has-air' : '');
+      const body = d.img
+        ? '<img src="' + d.img + '" alt="">'
+        : '<div class="p12-cb" style="--liq:' + d.liq + '"></div>';
+      el.innerHTML = '<span class="p12-paper">★</span><div class="p12-body">' + body + '</div>';
+      return el;
+    };
+
+    const spawn = (i, x, wait) => {
+      const L = LEVELS[level];
+      if (i >= L.bottles.length) return null;
+      const el = makeBottle(L.bottles[i][0]);
+      el.style.transition = 'none';
+      el.style.left = START_X + 'px';
+      bottlesEl.appendChild(el);
+      void el.offsetWidth;
+      el.style.transition = '';
+      el.style.left = x + 'px';
+      if (wait) el.classList.add('is-wait');
+      return el;
+    };
+
+    const renderTray = () => {
+      const labels = LEVELS[level].bottles[idx][1];
+      tray.innerHTML = '';
+      labels.forEach((k) => {
+        const d = DRINKS[k];
+        const st = document.createElement('div');
+        st.className = 'p12-st';
+        st.dataset.key = k;
+        st.innerHTML = '<b>' + d.name + '</b><p>' + d.lines.join('<br>') + '</p>';
+        tray.appendChild(st);
+      });
+    };
+
+    const setMg = () => {
+      mg.classList.toggle('is-off', wrongs < HINT_AT);
+    };
+
+    const setFill = () => {
+      const n = LEVELS[level].bottles.length;
+      fill.style.width = (idx / n * 100) + '%';
+    };
+
+    const startBottle = () => {
+      wrongs = 0;
+      setMg();
+      renderTray();
+      busy = false;
+      tray.classList.remove('p12-lock');
+    };
+
+    const startLevel = (n) => {
+      level = n;
+      idx = 0;
+      bottlesEl.innerHTML = '';
+      $('p12Lv').textContent = 'Level ' + (n + 1);
+      fill.style.transition = 'none';
+      fill.style.width = '0%';
+      void fill.offsetWidth;
+      fill.style.transition = '';
+      cur = spawn(0, STOP_X, false);
+      next = spawn(1, WAIT_X, true);
+      setTimeout(startBottle, 950);
+      busy = true;
+      tray.classList.add('p12-lock');
+    };
+
+    const endLevel = () => {
+      playCorrect();
+      setTimeout(() => {
+        $('p12End' + (level + 1)).classList.remove('is-off');
+      }, 1200);
+    };
+
+    const advance = () => {
+      idx++;
+      setFill();
+      if (idx >= LEVELS[level].bottles.length) {
+        endLevel();
+        return;
+      }
+      cur = next;
+      cur.classList.remove('is-wait');
+      cur.style.left = STOP_X + 'px';
+      next = spawn(idx + 1, WAIT_X, true);
+      setTimeout(startBottle, 950);
+    };
+
+    const stickAndDrop = () => {
+      busy = true;
+      tray.classList.add('p12-lock');
+      mg.classList.add('is-off');
+      const name = DRINKS[LEVELS[level].bottles[idx][0]].name;
+      arm.classList.add('is-down');
+      setTimeout(() => {
+        const s = document.createElement('span');
+        s.className = 'p12-stick';
+        s.textContent = name;
+        cur.appendChild(s);
+      }, 450);
+      setTimeout(() => arm.classList.remove('is-down'), 900);
+      setTimeout(() => {
+        const old = cur;
+        old.classList.add('is-drop');
+        old.style.left = BOX_X + 'px';
+        old.style.top = '430px';
+        setTimeout(() => old.remove(), 1400);
+        setTimeout(advance, 700);
+      }, 1500);
+    };
+
+    const onCorrect = () => {
+      playCorrect();
+      stickAndDrop();
+    };
+
+    const onWrong = () => {
+      playWrong();
+      wrongs++;
+      setMg();
+    };
+
+    const rectIn = (r) => {
+      const m = main.getBoundingClientRect();
+      const s = m.width / 1920;
+      return { x: (r.left - m.left) / s, y: (r.top - m.top) / s, s, m };
+    };
+
+    tray.addEventListener('pointerdown', (e) => {
+      if (busy) return;
+      const st = e.target.closest('.p12-st');
+      if (!st) return;
+      e.preventDefault();
+      playClick();
+      const m = main.getBoundingClientRect();
+      const s = m.width / 1920;
+      const clone = st.cloneNode(true);
+      clone.classList.add('is-lift');
+      main.appendChild(clone);
+      st.classList.add('is-home');
+      const w = st.offsetWidth, h = st.offsetHeight;
+      const move = (ev) => {
+        clone.style.left = ((ev.clientX - m.left) / s - w / 2) + 'px';
+        clone.style.top = ((ev.clientY - m.top) / s - h / 2) + 'px';
+        const r = cur.getBoundingClientRect();
+        const over = ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom;
+        cur.classList.toggle('is-over', over);
+        return over;
+      };
+      move(e);
+      const done = (ev) => {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', done);
+        window.removeEventListener('pointercancel', done);
+        const over = ev.type === 'pointercancel' ? false : move(ev);
+        cur.classList.remove('is-over');
+        clone.remove();
+        st.classList.remove('is-home');
+        if (!over) return;
+        if (st.dataset.key === LEVELS[level].bottles[idx][0]) onCorrect();
+        else onWrong();
+      };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', done);
+      window.addEventListener('pointercancel', done);
+    });
+
+    mg.addEventListener('click', () => {
+      if (mg.classList.contains('is-off') || busy) return;
+      playClick();
+      const key = LEVELS[level].bottles[idx][0];
+      const z = $('p12Zoom');
+      z.innerHTML = '<i>🔍</i>';
+      const b = makeBottle(key);
+      b.classList.add('is-view');
+      z.insertBefore(b, z.firstChild);
+      $('p12Hint').classList.remove('is-off');
+    });
+
+    $('p12HintX').addEventListener('click', () => {
+      $('p12Hint').classList.add('is-off');
+    });
+
+    document.querySelectorAll('.p12-go').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        btn.closest('.avatar-modal').classList.add('is-off');
+        startLevel(level + 1);
+      });
+    });
+
+    const q = parseInt(new URLSearchParams(location.search).get('level'), 10);
+    startLevel(q >= 1 && q <= 3 ? q - 1 : 0);
+  })();
+  </script>
+</body>
+</html>

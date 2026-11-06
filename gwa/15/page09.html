@@ -1,0 +1,1825 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>15차시 - 티처블 머신 사진으로 학습 시키기</title>
+  <link rel="stylesheet" href="../../resources/css/common.css">
+  <style>
+    .p09-tm {
+      position: absolute;
+      left: 40px;
+      top: 20px;
+      width: 1840px;
+      height: 720px;
+      border: solid 6px var(--c-navy);
+      border-radius: 24px;
+      background: #f1f3f4;
+      overflow: hidden;
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tm-topbar {
+      height: 64px;
+      background: #ffffff;
+      border-bottom: solid 2px #dadce0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      flex-shrink: 0;
+    }
+    .tm-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 26px;
+      color: #1967d2;
+    }
+    .tm-brand-sub {
+      font-family: 'NanumSquareRound', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: #5f6368;
+      padding-left: 12px;
+      border-left: solid 2px #dadce0;
+    }
+
+    .tm-stage {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .tm-screen {
+      position: absolute;
+      inset: 0;
+      display: none;
+    }
+    .tm-screen.is-active {
+      display: flex;
+    }
+
+    .tm-landing {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, #ffffff 0%, #e8f0fe 100%);
+      padding: 40px;
+      text-align: center;
+      gap: 24px;
+    }
+    .tm-landing-badge {
+      background: #d2e3fc;
+      color: #174ea6;
+      font-size: 22px;
+      font-weight: 800;
+      padding: 8px 24px;
+      border-radius: 999px;
+    }
+    .tm-landing-title {
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 56px;
+      color: #1967d2;
+      letter-spacing: -0.02em;
+    }
+    .tm-landing-desc {
+      font-size: 30px;
+      font-weight: 800;
+      color: #3c4043;
+      line-height: 1.45;
+      max-width: 1100px;
+    }
+    .tm-start-btn {
+      margin-top: 12px;
+      padding: 20px 56px;
+      background: #1a73e8;
+      color: #ffffff;
+      border: solid 4px var(--c-navy);
+      border-radius: 999px;
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 34px;
+      cursor: pointer;
+      box-shadow: 0 6px 0 var(--c-navy);
+      transition: transform 0.12s;
+    }
+    .tm-start-btn:active {
+      transform: translateY(4px);
+    }
+
+    .tm-projects {
+      flex-direction: column;
+      padding: 36px 80px;
+      background: #f8f9fa;
+      gap: 28px;
+    }
+    .tm-projects-hd {
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 38px;
+      color: #202124;
+    }
+    .tm-proj-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 36px;
+      flex: 1;
+      align-items: stretch;
+    }
+    .tm-proj-card {
+      background: #ffffff;
+      border: solid 4px #dadce0;
+      border-radius: 24px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+    .tm-proj-card:hover {
+      border-color: #1a73e8;
+      box-shadow: 0 8px 20px rgba(26, 115, 232, 0.15);
+    }
+    .tm-proj-card.is-flash {
+      border-color: #1a73e8;
+      box-shadow: 0 0 0 6px rgba(26, 115, 232, 0.35);
+    }
+    .tm-proj-illus {
+      width: 200px;
+      height: 170px;
+      background: #e8f0fe;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 76px;
+    }
+    .tm-proj-title {
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 32px;
+      color: #202124;
+    }
+    .tm-proj-desc {
+      font-size: 22px;
+      font-weight: 700;
+      color: #5f6368;
+      text-align: center;
+      line-height: 1.35;
+    }
+
+    .tm-model-modal {
+      position: absolute;
+      inset: 0;
+      background: rgba(32, 33, 36, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 15;
+    }
+    .tm-model-modal.is-open {
+      display: flex;
+    }
+    .tm-model-box {
+      width: 1020px;
+      background: #ffffff;
+      border: solid 5px var(--c-navy);
+      border-radius: 28px;
+      padding: 36px 44px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.28);
+    }
+    .tm-model-hd {
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 32px;
+      color: #202124;
+      text-align: center;
+    }
+    .tm-model-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+    }
+    .tm-model-card {
+      background: #f8f9fa;
+      border: solid 4px #dadce0;
+      border-radius: 20px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      text-align: center;
+    }
+    .tm-model-card:hover {
+      border-color: #1a73e8;
+      background: #e8f0fe;
+    }
+    .tm-model-icon {
+      width: 120px;
+      height: 120px;
+      border-radius: 18px;
+      background: #d2e3fc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 56px;
+    }
+    .tm-model-name {
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 28px;
+      color: #1967d2;
+    }
+    .tm-model-sub {
+      font-size: 20px;
+      font-weight: 700;
+      color: #5f6368;
+      line-height: 1.35;
+    }
+
+    .tm-workspace {
+      display: grid;
+      grid-template-columns: 680px 380px 1fr;
+      gap: 32px;
+      padding: 20px 32px;
+      background: #e8eaed;
+      align-items: start;
+      width: 100%;
+      height: 100%;
+    }
+
+    .tm-col-classes {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .tm-class-card {
+      position: relative;
+      background: #ffffff;
+      border: solid 3px #dadce0;
+      border-radius: 16px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+      overflow: visible;
+    }
+    .tm-class-hd {
+      height: 52px;
+      padding: 0 18px;
+      border-bottom: solid 2px #f1f3f4;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .tm-class-title-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .tm-class-name {
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 24px;
+      color: #202124;
+      padding: 3px 10px;
+      border-radius: 6px;
+    }
+    .tm-class-name.is-editing {
+      background: #1a73e8;
+      color: #ffffff;
+    }
+    .tm-edit-btn {
+      width: 38px;
+      height: 38px;
+      border: solid 2px #dadce0;
+      border-radius: 8px;
+      background: #f8f9fa;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #5f6368;
+    }
+    .tm-name-chip {
+      position: absolute;
+      left: 0;
+      top: 46px;
+      background: #ffffff;
+      border: solid 4px #1a73e8;
+      border-radius: 12px;
+      padding: 8px 22px;
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 24px;
+      color: #1a73e8;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(26,115,232,0.28);
+      z-index: 12;
+      display: none;
+      white-space: nowrap;
+    }
+    .tm-name-chip.is-open {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tm-class-body {
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 112px;
+    }
+    .tm-class-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .tm-act-btn {
+      width: 88px;
+      height: 82px;
+      border: solid 2px #d2e3fc;
+      border-radius: 12px;
+      background: #e8f0fe;
+      color: #1967d2;
+      font-size: 18px;
+      font-weight: 800;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+    .tm-act-btn-icon {
+      font-size: 26px;
+      line-height: 1;
+    }
+    .tm-sample-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .tm-sample-cnt {
+      font-size: 16px;
+      font-weight: 800;
+      color: #5f6368;
+    }
+    .tm-sample-strip {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      min-height: 62px;
+    }
+    .tm-sample-thumb {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      border: solid 2px #dadce0;
+      object-fit: cover;
+      background: #fff8f0;
+    }
+
+    .tm-add-class-btn {
+      height: 74px;
+      border: dashed 3px #80868b;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.65);
+      color: #3c4043;
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .tm-col-train {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100%;
+    }
+    .tm-train-card {
+      background: #ffffff;
+      border: solid 3px #dadce0;
+      border-radius: 18px;
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .tm-train-title {
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 26px;
+      color: #202124;
+    }
+    .tm-train-btn {
+      width: 100%;
+      height: 68px;
+      background: #1a73e8;
+      color: #ffffff;
+      border: solid 3px var(--c-navy);
+      border-radius: 14px;
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .tm-train-btn:disabled {
+      background: #dadce0;
+      color: #5f6368;
+      border-color: #bdc1c6;
+      cursor: default;
+    }
+    .tm-train-prog-wrap {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .tm-train-prog-wrap.is-active {
+      display: flex;
+    }
+    .tm-train-prog-label {
+      font-size: 20px;
+      font-weight: 800;
+      color: #1967d2;
+      display: flex;
+      justify-content: space-between;
+    }
+    .tm-train-prog-bar {
+      width: 100%;
+      height: 22px;
+      background: #e8eaed;
+      border-radius: 999px;
+      overflow: hidden;
+      border: solid 2px #1967d2;
+    }
+    .tm-train-prog-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #1a73e8, #4285f4);
+      transition: width 0.1s linear;
+    }
+
+    .tm-col-preview {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100%;
+    }
+    .tm-preview-card {
+      background: #ffffff;
+      border: solid 3px #dadce0;
+      border-radius: 18px;
+      padding: 22px 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      min-height: 560px;
+    }
+    .tm-preview-hd {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: solid 2px #f1f3f4;
+      padding-bottom: 12px;
+    }
+    .tm-preview-title {
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 26px;
+      color: #202124;
+    }
+    .tm-preview-empty {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #80868b;
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.45;
+      padding: 20px;
+    }
+    .tm-preview-content {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
+    }
+    .tm-preview-content.is-ready {
+      display: flex;
+    }
+    .tm-upload-zone {
+      height: 210px;
+      border: dashed 3px #1a73e8;
+      border-radius: 16px;
+      background: #f8fbff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      padding: 12px;
+      position: relative;
+    }
+    .tm-upload-zone-btn {
+      padding: 10px 24px;
+      background: #e8f0fe;
+      border: solid 2px #1a73e8;
+      border-radius: 10px;
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 22px;
+      color: #1967d2;
+    }
+    .tm-upload-zone-img {
+      max-height: 140px;
+      border-radius: 12px;
+      border: solid 3px var(--c-navy);
+      display: none;
+      object-fit: contain;
+      background: #ffffff;
+    }
+    .tm-upload-zone-img.is-shown {
+      display: block;
+    }
+
+    .tm-output-sec {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: auto;
+    }
+    .tm-output-hd {
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 22px;
+      color: #3c4043;
+    }
+    .tm-bar-row {
+      display: grid;
+      grid-template-columns: 76px 1fr 78px;
+      align-items: center;
+      gap: 12px;
+    }
+    .tm-bar-label {
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 22px;
+      color: #202124;
+    }
+    .tm-bar-track {
+      height: 30px;
+      background: #f1f3f4;
+      border-radius: 8px;
+      overflow: hidden;
+      border: solid 2px #dadce0;
+    }
+    .tm-bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 6px;
+      transition: width 0.35s ease;
+    }
+    .tm-bar-fill.c1 { background: #f29900; }
+    .tm-bar-fill.c2 { background: #e52592; }
+    .tm-bar-fill.c3 { background: #1a73e8; }
+    .tm-bar-pct {
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 22px;
+      text-align: right;
+      color: #202124;
+    }
+
+    .tm-overlay-modal {
+      position: absolute;
+      inset: 0;
+      background: rgba(27, 23, 56, 0.48);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 16;
+    }
+    .tm-overlay-modal.is-open {
+      display: flex;
+    }
+
+    .tm-folder-dialog {
+      width: 980px;
+      height: 520px;
+      background: #ffffff;
+      border: solid 5px var(--c-navy);
+      border-radius: 24px;
+      padding: 26px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: 0 14px 36px rgba(0,0,0,0.28);
+    }
+    .tm-dialog-hd {
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 28px;
+      color: var(--c-navy);
+      padding-bottom: 12px;
+      border-bottom: solid 3px #e8eaed;
+    }
+    .tm-folder-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 24px;
+      overflow: hidden;
+    }
+    .tm-folder-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      background: #f8f9fa;
+      border: solid 3px #dadce0;
+      border-radius: 16px;
+      padding: 18px;
+    }
+    .tm-folder-item {
+      height: 78px;
+      background: #ffffff;
+      border: solid 3px #dadce0;
+      border-radius: 14px;
+      padding: 0 22px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 26px;
+      color: #202124;
+      cursor: pointer;
+    }
+    .tm-folder-item.is-selected,
+    .tm-folder-item.is-flash {
+      border-color: #1a73e8;
+      background: #e8f0fe;
+      color: #1967d2;
+    }
+    .tm-folder-right {
+      background: #f8f9fa;
+      border: solid 3px #dadce0;
+      border-radius: 16px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .tm-folder-thumbs {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+    .tm-folder-thumb {
+      width: 100%;
+      height: 88px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: solid 2px #bdc1c6;
+      background: #ffffff;
+    }
+    .tm-folder-upload-btn {
+      align-self: flex-end;
+      padding: 14px 36px;
+      background: #1a73e8;
+      color: #ffffff;
+      border: solid 3px var(--c-navy);
+      border-radius: 999px;
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 24px;
+      cursor: pointer;
+      display: none;
+    }
+    .tm-folder-upload-btn.is-shown {
+      display: inline-block;
+    }
+
+    .tm-file-dialog {
+      width: 960px;
+      height: 510px;
+      background: #ffffff;
+      border: solid 5px var(--c-navy);
+      border-radius: 24px;
+      padding: 26px 34px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 14px 36px rgba(0,0,0,0.28);
+    }
+    .tm-file-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin: 14px 0;
+    }
+    .tm-file-item {
+      background: #f8f9fa;
+      border: solid 4px #dadce0;
+      border-radius: 18px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+    .tm-file-item.is-selected {
+      border-color: #1a73e8;
+      background: #e8f0fe;
+    }
+    .tm-file-item.is-disabled {
+      opacity: 0.45;
+      pointer-events: none;
+    }
+    .tm-file-item img {
+      width: 180px;
+      height: 170px;
+      object-fit: contain;
+      border-radius: 12px;
+      background: #ffffff;
+      border: solid 2px #dadce0;
+    }
+    .tm-file-item-label {
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 24px;
+      color: #202124;
+    }
+    .tm-file-open-btn {
+      align-self: flex-end;
+      padding: 12px 44px;
+      background: #1a73e8;
+      color: #ffffff;
+      border: solid 3px var(--c-navy);
+      border-radius: 999px;
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .tm-file-open-btn:disabled {
+      background: #dadce0;
+      color: #80868b;
+      border-color: #bdc1c6;
+      cursor: default;
+    }
+
+    .tm-inspect-dialog {
+      width: 1240px;
+      height: 600px;
+      background: #ffffff;
+      border: solid 5px var(--c-navy);
+      border-radius: 24px;
+      padding: 22px 28px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+      position: relative;
+      box-shadow: 0 14px 36px rgba(0,0,0,0.3);
+    }
+    .tm-inspect-col {
+      background: #f8f9fa;
+      border: solid 3px #dadce0;
+      border-radius: 18px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .tm-inspect-col-title {
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 24px;
+      color: var(--c-navy);
+      text-align: center;
+      padding-bottom: 8px;
+      border-bottom: solid 2px #dadce0;
+    }
+    .tm-inspect-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      flex: 1;
+    }
+    .tm-inspect-cell {
+      position: relative;
+      height: 82px;
+      border-radius: 10px;
+      border: solid 3px #dadce0;
+      background: #ffffff;
+      overflow: hidden;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .tm-inspect-cell img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .tm-inspect-cell.is-bad {
+      border: solid 4px #ff3b6b;
+      box-shadow: 0 0 0 4px rgba(255, 59, 107, 0.28);
+    }
+    .tm-inspect-cell.is-deleted {
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .tm-bad-tag {
+      position: absolute;
+      left: 4px;
+      right: 4px;
+      bottom: 4px;
+      background: rgba(27, 23, 56, 0.84);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 800;
+      text-align: center;
+      padding: 2px 4px;
+      border-radius: 6px;
+      line-height: 1.15;
+    }
+
+    .tm-zoom-popup {
+      position: absolute;
+      inset: 0;
+      background: rgba(27, 23, 56, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 25;
+    }
+    .tm-zoom-popup.is-open {
+      display: flex;
+    }
+    .tm-zoom-wrap {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    .tm-zoom-card {
+      position: relative;
+      width: 340px;
+      height: 440px;
+      background: #ffffff;
+      border: solid 5px var(--c-navy);
+      border-radius: 24px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.32);
+    }
+    .tm-zoom-card img {
+      width: 260px;
+      height: 260px;
+      object-fit: contain;
+      border-radius: 16px;
+      border: solid 3px #dadce0;
+    }
+    .tm-zoom-caption {
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 24px;
+      color: var(--c-navy);
+      text-align: center;
+    }
+    .tm-trash-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 72px;
+      height: 72px;
+      border-radius: 18px;
+      border: solid 4px var(--c-navy);
+      background: #ff4d79;
+      color: #ffffff;
+      font-size: 36px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 5px 0 var(--c-navy);
+    }
+    .tm-aro-feedback {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: #ffffff;
+      border: solid 5px var(--c-navy);
+      border-radius: 24px;
+      padding: 18px 28px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+    }
+    .tm-aro-feedback img {
+      width: 84px;
+      height: 84px;
+      object-fit: contain;
+    }
+    .tm-aro-reason {
+      font-family: 'SBAggroB', sans-serif;
+      font-size: 30px;
+      color: #d93025;
+    }
+
+    .p09-gd {
+      position: absolute;
+      left: 40px;
+      right: 40px;
+      bottom: 20px;
+      height: 185px;
+      background: rgba(27, 23, 56, 0.9);
+      border: solid 5px var(--c-navy);
+      border-radius: 24px;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      padding: 0 36px;
+      gap: 28px;
+    }
+    .p09-ch {
+      width: 150px;
+      height: 155px;
+      object-fit: contain;
+      flex-shrink: 0;
+      align-self: flex-end;
+    }
+    .p09-tx {
+      flex: 1;
+      font-family: 'NanumSquareRound', sans-serif;
+      font-size: 34px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.38;
+      word-break: keep-all;
+    }
+    .p09-next-arrow {
+      display: none;
+      flex-shrink: 0;
+    }
+    .p09-next-arrow.is-shown {
+      display: inline-flex;
+    }
+  </style>
+</head>
+<body data-title="티처블 머신 사진으로 학습 시키기" data-next="page10.html">
+  <div id="container">
+    <main class="bg-default">
+      <div class="p09-tm" id="tmFrame">
+        <div class="tm-topbar">
+          <div class="tm-brand">
+            <span>Teachable Machine</span>
+            <span class="tm-brand-sub">커피 진하기 AI 학습 실습</span>
+          </div>
+        </div>
+
+        <div class="tm-stage">
+          <div class="tm-screen tm-landing is-active" id="scrLanding">
+            <span class="tm-landing-badge">AI 지도학습 체험</span>
+            <h2 class="tm-landing-title">Teachable Machine</h2>
+            <p class="tm-landing-desc">나만의 AI를 만들어 보세요! 이미지·소리·포즈를 학습시켜 AI가 구분하게 할 수 있어요.</p>
+            <button type="button" class="tm-start-btn" id="btnStartTm">시작하기</button>
+          </div>
+
+          <div class="tm-screen tm-projects" id="scrProjects">
+            <h3 class="tm-projects-hd">새 프로젝트</h3>
+            <div class="tm-proj-grid">
+              <div class="tm-proj-card" id="cardImgProj">
+                <div class="tm-proj-illus">📷</div>
+                <div class="tm-proj-title">사진 프로젝트</div>
+                <div class="tm-proj-desc">파일 또는 웹캠 이미지를 기반으로<br>분류하도록 가르칩니다.</div>
+              </div>
+              <div class="tm-proj-card" id="cardAudioProj">
+                <div class="tm-proj-illus">🎙️</div>
+                <div class="tm-proj-title">오디오 프로젝트</div>
+                <div class="tm-proj-desc">파일 또는 마이크의 짧은 사운드를<br>분류하도록 가르칩니다.</div>
+              </div>
+              <div class="tm-proj-card" id="cardPoseProj">
+                <div class="tm-proj-illus">🕺</div>
+                <div class="tm-proj-title">포즈 프로젝트</div>
+                <div class="tm-proj-desc">파일 또는 웹캠의 자세를 기반으로<br>분류하도록 가르칩니다.</div>
+              </div>
+            </div>
+
+            <div class="tm-model-modal" id="modalModelType">
+              <div class="tm-model-box">
+                <div class="tm-model-hd">이미지 프로젝트 모델 선택</div>
+                <div class="tm-model-grid">
+                  <div class="tm-model-card" id="cardStdModel">
+                    <div class="tm-model-icon">🖼️</div>
+                    <div class="tm-model-name">표준 이미지 모델</div>
+                    <div class="tm-model-sub">대부분의 용도에 가장 적합합니다.<br>컬러 이미지 분류 학습</div>
+                  </div>
+                  <div class="tm-model-card" id="cardEmbModel">
+                    <div class="tm-model-icon">📟</div>
+                    <div class="tm-model-name">내장 이미지 모델</div>
+                    <div class="tm-model-sub">마이크로컨트롤러 기기용<br>소형 모델</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tm-screen tm-workspace" id="scrWorkspace">
+            <div class="tm-col-classes">
+              <div class="tm-class-card" id="classCard1">
+                <div class="tm-class-hd">
+                  <div class="tm-class-title-wrap">
+                    <span class="tm-class-name" id="className1">Class 1</span>
+                    <button type="button" class="tm-edit-btn" id="btnEdit1">✎</button>
+                    <button type="button" class="tm-name-chip" id="chipName1">1샷</button>
+                  </div>
+                </div>
+                <div class="tm-class-body">
+                  <div class="tm-class-actions">
+                    <button type="button" class="tm-act-btn" disabled><span class="tm-act-btn-icon">📹</span><span>웹캠</span></button>
+                    <button type="button" class="tm-act-btn" id="btnUpload1"><span class="tm-act-btn-icon">⬆️</span><span>업로드</span></button>
+                  </div>
+                  <div class="tm-sample-area">
+                    <span class="tm-sample-cnt" id="sampleCnt1">이미지 샘플 추가</span>
+                    <div class="tm-sample-strip" id="sampleStrip1"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="tm-class-card" id="classCard2">
+                <div class="tm-class-hd">
+                  <div class="tm-class-title-wrap">
+                    <span class="tm-class-name" id="className2">Class 2</span>
+                    <button type="button" class="tm-edit-btn" id="btnEdit2">✎</button>
+                    <button type="button" class="tm-name-chip" id="chipName2">2샷</button>
+                  </div>
+                </div>
+                <div class="tm-class-body">
+                  <div class="tm-class-actions">
+                    <button type="button" class="tm-act-btn" disabled><span class="tm-act-btn-icon">📹</span><span>웹캠</span></button>
+                    <button type="button" class="tm-act-btn" id="btnUpload2"><span class="tm-act-btn-icon">⬆️</span><span>업로드</span></button>
+                  </div>
+                  <div class="tm-sample-area">
+                    <span class="tm-sample-cnt" id="sampleCnt2">이미지 샘플 추가</span>
+                    <div class="tm-sample-strip" id="sampleStrip2"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="tm-class-card" id="classCard3" style="display:none;">
+                <div class="tm-class-hd">
+                  <div class="tm-class-title-wrap">
+                    <span class="tm-class-name" id="className3">Class 3</span>
+                    <button type="button" class="tm-edit-btn" id="btnEdit3">✎</button>
+                    <button type="button" class="tm-name-chip" id="chipName3">3샷</button>
+                  </div>
+                </div>
+                <div class="tm-class-body">
+                  <div class="tm-class-actions">
+                    <button type="button" class="tm-act-btn" disabled><span class="tm-act-btn-icon">📹</span><span>웹캠</span></button>
+                    <button type="button" class="tm-act-btn" id="btnUpload3"><span class="tm-act-btn-icon">⬆️</span><span>업로드</span></button>
+                  </div>
+                  <div class="tm-sample-area">
+                    <span class="tm-sample-cnt" id="sampleCnt3">이미지 샘플 추가</span>
+                    <div class="tm-sample-strip" id="sampleStrip3"></div>
+                  </div>
+                </div>
+              </div>
+
+              <button type="button" class="tm-add-class-btn" id="btnAddClass">+ 클래스 추가</button>
+            </div>
+
+            <div class="tm-col-train">
+              <div class="tm-train-card">
+                <div class="tm-train-title">학습</div>
+                <button type="button" class="tm-train-btn" id="btnTrainModel">모델 학습시키기</button>
+                <div class="tm-train-prog-wrap" id="trainProgWrap">
+                  <div class="tm-train-prog-label">
+                    <span>학습 중...</span>
+                    <span id="trainProgPct">0%</span>
+                  </div>
+                  <div class="tm-train-prog-bar">
+                    <div class="tm-train-prog-fill" id="trainProgFill"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tm-col-preview">
+              <div class="tm-preview-card">
+                <div class="tm-preview-hd">
+                  <span class="tm-preview-title">미리보기</span>
+                </div>
+                <div class="tm-preview-empty" id="previewEmpty">
+                  왼쪽에서 모델을 학습시킨 후<br>여기서 미리 확인해 보세요.
+                </div>
+                <div class="tm-preview-content" id="previewContent">
+                  <div class="tm-upload-zone" id="btnTestUploadZone">
+                    <span class="tm-upload-zone-btn">파일 업로드</span>
+                    <img class="tm-upload-zone-img" id="testPreviewImg" alt="테스트 커피 이미지">
+                  </div>
+                  <div class="tm-output-sec">
+                    <div class="tm-output-hd">출력</div>
+                    <div class="tm-bar-row">
+                      <span class="tm-bar-label">1샷</span>
+                      <div class="tm-bar-track"><div class="tm-bar-fill c1" id="outBar1"></div></div>
+                      <span class="tm-bar-pct" id="outPct1">0%</span>
+                    </div>
+                    <div class="tm-bar-row">
+                      <span class="tm-bar-label">2샷</span>
+                      <div class="tm-bar-track"><div class="tm-bar-fill c2" id="outBar2"></div></div>
+                      <span class="tm-bar-pct" id="outPct2">0%</span>
+                    </div>
+                    <div class="tm-bar-row">
+                      <span class="tm-bar-label">3샷</span>
+                      <div class="tm-bar-track"><div class="tm-bar-fill c3" id="outBar3"></div></div>
+                      <span class="tm-bar-pct" id="outPct3">0%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tm-overlay-modal" id="modalFolderUpload">
+              <div class="tm-folder-dialog">
+                <div class="tm-dialog-hd">폴더 선택 - 사진 업로드</div>
+                <div class="tm-folder-body">
+                  <div class="tm-folder-list" id="folderList">
+                    <div class="tm-folder-item" id="folderItem1" data-shot="1">📁 1샷</div>
+                    <div class="tm-folder-item" id="folderItem2" data-shot="2">📁 2샷</div>
+                    <div class="tm-folder-item" id="folderItem3" data-shot="3">📁 3샷</div>
+                  </div>
+                  <div class="tm-folder-right">
+                    <div class="tm-folder-thumbs" id="folderThumbs"></div>
+                    <button type="button" class="tm-folder-upload-btn" id="btnUploadAll">모두 업로드</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tm-overlay-modal" id="modalFileOpen">
+              <div class="tm-file-dialog">
+                <div class="tm-dialog-hd">확인할 커피 사진 선택</div>
+                <div class="tm-file-grid">
+                  <div class="tm-file-item" id="fileOpt1" data-shot="1">
+                    <img id="fileImg1" src="img/p09_shot1.png" alt="1샷 사진">
+                    <span class="tm-file-item-label">1샷의 사진 이미지</span>
+                  </div>
+                  <div class="tm-file-item" id="fileOpt2" data-shot="2">
+                    <img id="fileImg2" src="img/p09_shot2.png" alt="2샷 사진">
+                    <span class="tm-file-item-label">2샷의 사진 이미지</span>
+                  </div>
+                  <div class="tm-file-item" id="fileOpt3" data-shot="3">
+                    <img id="fileImg3" src="img/p09_shot3.png" alt="3샷 사진">
+                    <span class="tm-file-item-label">3샷의 사진 이미지</span>
+                  </div>
+                </div>
+                <button type="button" class="tm-file-open-btn" id="btnConfirmFileOpen" disabled>열기</button>
+              </div>
+            </div>
+
+            <div class="tm-overlay-modal" id="modalInspect">
+              <div class="tm-inspect-dialog">
+                <div class="tm-inspect-col">
+                  <div class="tm-inspect-col-title">1샷 폴더 (10개 이미지)</div>
+                  <div class="tm-inspect-grid" id="inspectGrid1"></div>
+                </div>
+                <div class="tm-inspect-col">
+                  <div class="tm-inspect-col-title">2샷 폴더 (10개 이미지)</div>
+                  <div class="tm-inspect-grid" id="inspectGrid2"></div>
+                </div>
+                <div class="tm-inspect-col">
+                  <div class="tm-inspect-col-title">3샷 폴더 (10개 이미지)</div>
+                  <div class="tm-inspect-grid" id="inspectGrid3"></div>
+                </div>
+
+                <div class="tm-zoom-popup" id="zoomBadPopup">
+                  <div class="tm-zoom-wrap">
+                    <div class="tm-zoom-card">
+                      <button type="button" class="tm-trash-btn" id="btnDeleteBad" title="삭제">🗑️</button>
+                      <img id="zoomBadImg" alt="잘못된 커피 사진">
+                      <div class="tm-zoom-caption" id="zoomBadCap"></div>
+                    </div>
+                    <div class="tm-aro-feedback">
+                      <img src="../../resources/img/common/avatar_incorrect.png" alt="아로">
+                      <span class="tm-aro-reason" id="zoomBadReason"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="p09-gd">
+        <img class="p09-ch" src="../img/character/gwa_main_point.png" alt="캐릭터">
+        <p class="p09-tx" id="guideText">‘시작하기’ 를 클릭하세요.</p>
+        <button type="button" class="card-btn is-popup is-arrow p09-next-arrow js-sfx" id="btnGuideArrow" data-sound="sound/click.mp3" aria-label="다음">→</button>
+      </div>
+
+      <div class="avatar-modal" id="finishModal" role="dialog" aria-modal="true" style="display:none;">
+        <div class="avatar-card">
+          <img class="avatar-face" src="../../resources/img/common/avatar_correct.png" alt="아바타">
+          <div class="step-flow" data-done-action="next-page">
+            <div class="step is-active">
+              <div class="avatar-card__body">
+                <p class="avatar-card__text">커피 진하기 색의 특징이 잘 보이고 정답 이름표가 맞는 사진이<br>정확한 사진이에요.</p>
+              </div>
+              <button type="button" class="card-btn is-popup is-arrow step-next js-sfx" data-sound="sound/click.mp3" aria-label="다음">→</button>
+            </div>
+            <div class="step">
+              <div class="avatar-card__body">
+                <p class="avatar-card__text">이제 퀴즈를 풀며 배운 내용을 확인해볼까요?</p>
+              </div>
+              <button type="button" class="card-btn is-popup step-next js-sfx" data-sound="sound/click.mp3">다음</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../../resources/js/header.js"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+    (function () {
+      var SVG_SHOT1 = "data:image/svg+xml;utf8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="14" fill="#fffdf9"/><path d="M32 26 h56 l-7 74 a8 8 0 0 1 -8 7 h-26 a8 8 0 0 1 -8 -7 z" fill="#d7a974" stroke="#1b1738" stroke-width="4"/><rect x="40" y="38" width="14" height="14" rx="3" fill="#ffffff" opacity="0.75"/><rect x="62" y="42" width="14" height="14" rx="3" fill="#ffffff" opacity="0.75"/></svg>');
+      var SVG_SHOT2 = "data:image/svg+xml;utf8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="14" fill="#fffdf9"/><path d="M32 26 h56 l-7 74 a8 8 0 0 1 -8 7 h-26 a8 8 0 0 1 -8 -7 z" fill="#8d5524" stroke="#1b1738" stroke-width="4"/><rect x="40" y="38" width="14" height="14" rx="3" fill="#ffffff" opacity="0.65"/><rect x="62" y="42" width="14" height="14" rx="3" fill="#ffffff" opacity="0.65"/></svg>');
+      var SVG_SHOT3 = "data:image/svg+xml;utf8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="14" fill="#fffdf9"/><path d="M32 26 h56 l-7 74 a8 8 0 0 1 -8 7 h-26 a8 8 0 0 1 -8 -7 z" fill="#3b1f0e" stroke="#1b1738" stroke-width="4"/><rect x="40" y="38" width="14" height="14" rx="3" fill="#ffffff" opacity="0.5"/><rect x="62" y="42" width="14" height="14" rx="3" fill="#ffffff" opacity="0.5"/></svg>');
+      var SVG_BAD_LABEL = SVG_SHOT3;
+      var SVG_BAD_FINGER = "data:image/svg+xml;utf8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="14" fill="#fffdf9"/><path d="M32 26 h56 l-7 74 a8 8 0 0 1 -8 7 h-26 a8 8 0 0 1 -8 -7 z" fill="#8d5524" stroke="#1b1738" stroke-width="4"/><rect x="18" y="38" width="76" height="32" rx="16" fill="#f6c29f" stroke="#1b1738" stroke-width="4"/><rect x="24" y="66" width="68" height="28" rx="14" fill="#f6c29f" stroke="#1b1738" stroke-width="4"/></svg>');
+      var SVG_BAD_LID = "data:image/svg+xml;utf8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="14" fill="#fffdf9"/><path d="M34 34 h52 l-6 68 a6 6 0 0 1 -6 6 h-28 a6 6 0 0 1 -6 -6 z" fill="#e8eaed" stroke="#1b1738" stroke-width="4"/><rect x="26" y="20" width="68" height="16" rx="6" fill="#3c4043" stroke="#1b1738" stroke-width="4"/></svg>');
+
+      var IMG_MAP = {
+        shot1: { src: 'img/p09_shot1.png', fallback: SVG_SHOT1 },
+        shot2: { src: 'img/p09_shot2.png', fallback: SVG_SHOT2 },
+        shot3: { src: 'img/p09_shot3.png', fallback: SVG_SHOT3 },
+        bad1: { src: 'img/p09_bad_wrong_label.png', fallback: SVG_BAD_LABEL, cap: '3샷 커피 (이름표는 1샷)', reason: '이름표가 틀려요.' },
+        bad2: { src: 'img/p09_bad_finger.png', fallback: SVG_BAD_FINGER, cap: '커피 (손가락이 잔을 가림)', reason: '커피색이 가려졌어요.' },
+        bad3: { src: 'img/p09_bad_lid.png', fallback: SVG_BAD_LID, cap: '뚜껑까지 덮인 종이컵 (색 안 보임)', reason: '뚜껑 때문에 안보여요.' }
+      };
+
+      function applyImgWithFallback(imgEl, info) {
+        imgEl.onerror = function () {
+          this.onerror = null;
+          this.src = info.fallback;
+        };
+        imgEl.src = info.src;
+      }
+
+      applyImgWithFallback(document.getElementById('fileImg1'), IMG_MAP.shot1);
+      applyImgWithFallback(document.getElementById('fileImg2'), IMG_MAP.shot2);
+      applyImgWithFallback(document.getElementById('fileImg3'), IMG_MAP.shot3);
+
+      var guideText = document.getElementById('guideText');
+      var step = 's20';
+      var activeUploadShot = 1;
+      var activeTestShot = 1;
+      var isRetrainPhase = false;
+      var deletedBadMap = { 1: false, 2: false, 3: false };
+      var activeBadShot = null;
+
+      function setGuide(html) {
+        guideText.innerHTML = html;
+      }
+
+      function focusTarget(el) {
+        clearFingers();
+        document.querySelectorAll('.hit-pulse').forEach(function (n) {
+          n.classList.remove('hit-pulse');
+        });
+        if (el) {
+          el.classList.add('hit-pulse');
+          pointFingerAt(el, { onMain: true, pulse: true });
+        }
+      }
+
+      function shakeEl(el) {
+        if (!el) return;
+        el.classList.remove('is-shaking');
+        void el.offsetWidth;
+        el.classList.add('is-shaking');
+        setTimeout(function () {
+          el.classList.remove('is-shaking');
+        }, 450);
+      }
+
+      setTimeout(function () {
+        focusTarget(document.getElementById('btnStartTm'));
+      }, 150);
+
+      document.getElementById('btnStartTm').addEventListener('click', function () {
+        if (step !== 's20') return;
+        playClick();
+        step = 's21';
+        document.getElementById('scrLanding').classList.remove('is-active');
+        document.getElementById('scrProjects').classList.add('is-active');
+        setGuide('여기가 AI 를 가르치는 곳이에요. 우리는 커피의 진하기를 사진으로 가르칠 거예요. ‘사진 프로젝트’ 를 클릭하세요.');
+        focusTarget(document.getElementById('cardImgProj'));
+      });
+
+      function onWrongProjectClick(cardEl) {
+        if (step !== 's21') return;
+        playWrong();
+        shakeEl(cardEl);
+        var imgCard = document.getElementById('cardImgProj');
+        imgCard.classList.add('is-flash');
+        setTimeout(function () {
+          imgCard.classList.remove('is-flash');
+        }, 700);
+      }
+
+      document.getElementById('cardAudioProj').addEventListener('click', function () {
+        onWrongProjectClick(this);
+      });
+      document.getElementById('cardPoseProj').addEventListener('click', function () {
+        onWrongProjectClick(this);
+      });
+
+      document.getElementById('cardImgProj').addEventListener('click', function () {
+        if (step !== 's21') return;
+        playClick();
+        step = 's22';
+        document.getElementById('modalModelType').classList.add('is-open');
+        setGuide('‘표준 이미지 모델’ 을 클릭하세요.');
+        focusTarget(document.getElementById('cardStdModel'));
+      });
+
+      document.getElementById('cardEmbModel').addEventListener('click', function () {
+        if (step !== 's22') return;
+        playWrong();
+        shakeEl(this);
+      });
+
+      document.getElementById('cardStdModel').addEventListener('click', function () {
+        if (step !== 's22') return;
+        playClick();
+        step = 's23';
+        document.getElementById('modalModelType').classList.remove('is-open');
+        document.getElementById('scrProjects').classList.remove('is-active');
+        document.getElementById('scrWorkspace').classList.add('is-active');
+        setGuide('클래스는 이름표를 붙이는 칸이에요. 우리는 1샷, 2샷, 3샷으로 세 칸이 필요해요. ‘클래스 추가’ 를 클릭하세요.');
+        focusTarget(document.getElementById('btnAddClass'));
+      });
+
+      document.getElementById('btnAddClass').addEventListener('click', function () {
+        if (step !== 's23') return;
+        playClick();
+        step = 's24';
+        this.style.display = 'none';
+        document.getElementById('classCard3').style.display = 'block';
+        setGuide('클래스에 이름표를 붙여볼까요? ‘연필 그림’ 를 클릭하세요.');
+        focusTarget(document.getElementById('btnEdit1'));
+      });
+
+      document.getElementById('btnEdit1').addEventListener('click', function () {
+        if (step !== 's24') return;
+        playClick();
+        step = 's25';
+        document.getElementById('className1').classList.add('is-editing');
+        var chip1 = document.getElementById('chipName1');
+        chip1.classList.add('is-open');
+        setGuide('[1샷] 글자를 눌러 이름을 바꿔보세요.');
+        focusTarget(chip1);
+      });
+
+      document.getElementById('chipName1').addEventListener('click', function () {
+        if (step !== 's25') return;
+        playClick();
+        step = 's26';
+        this.classList.remove('is-open');
+        var name1 = document.getElementById('className1');
+        name1.classList.remove('is-editing');
+        name1.textContent = '1샷';
+        setGuide('동일한 방식으로, 클래스2 의 이름도 바꿔보세요.<br>‘연필 그림’ 를 클릭하세요.');
+        focusTarget(document.getElementById('btnEdit2'));
+      });
+
+      document.getElementById('btnEdit2').addEventListener('click', function () {
+        if (step !== 's26') return;
+        playClick();
+        step = 's27';
+        document.getElementById('className2').classList.add('is-editing');
+        var chip2 = document.getElementById('chipName2');
+        chip2.classList.add('is-open');
+        setGuide('[2샷] 글자를 눌러 이름을 바꿔보세요.');
+        focusTarget(chip2);
+      });
+
+      document.getElementById('chipName2').addEventListener('click', function () {
+        if (step !== 's27') return;
+        playClick();
+        step = 's28';
+        this.classList.remove('is-open');
+        var name2 = document.getElementById('className2');
+        name2.classList.remove('is-editing');
+        name2.textContent = '2샷';
+        setGuide('동일한 방식으로, 클래스3 의 이름도 바꿔보세요.<br>‘연필 그림’ 를 클릭하세요.');
+        focusTarget(document.getElementById('btnEdit3'));
+      });
+
+      document.getElementById('btnEdit3').addEventListener('click', function () {
+        if (step !== 's28') return;
+        playClick();
+        step = 's29';
+        document.getElementById('className3').classList.add('is-editing');
+        var chip3 = document.getElementById('chipName3');
+        chip3.classList.add('is-open');
+        setGuide('[3샷] 글자를 눌러 이름을 바꿔보세요.');
+        focusTarget(chip3);
+      });
+
+      document.getElementById('chipName3').addEventListener('click', function () {
+        if (step !== 's29') return;
+        playClick();
+        step = 's30_1';
+        this.classList.remove('is-open');
+        var name3 = document.getElementById('className3');
+        name3.classList.remove('is-editing');
+        name3.textContent = '3샷';
+        setGuide('이름을 모두 수정했어요. 우리가 가르칠 사진들을 넣을 상자를 만든 것과 같아요.<br>‘업로드’ 를 클릭하세요.');
+        focusTarget(document.getElementById('btnUpload1'));
+      });
+
+      function openFolderUploadModal(shotNum) {
+        activeUploadShot = shotNum;
+        step = 's31_' + shotNum + '_folder';
+        document.getElementById('folderThumbs').innerHTML = '';
+        document.getElementById('btnUploadAll').classList.remove('is-shown');
+        document.querySelectorAll('.tm-folder-item').forEach(function (it) {
+          it.classList.remove('is-selected');
+        });
+        document.getElementById('modalFolderUpload').classList.add('is-open');
+        setGuide('칸 이름에 맞는 폴더를 클릭해 사진을 업로드 하세요.');
+        focusTarget(document.getElementById('folderItem' + shotNum));
+      }
+
+      document.getElementById('btnUpload1').addEventListener('click', function () {
+        if (step !== 's30_1') return;
+        playClick();
+        openFolderUploadModal(1);
+      });
+      document.getElementById('btnUpload2').addEventListener('click', function () {
+        if (step !== 's30_2') return;
+        playClick();
+        openFolderUploadModal(2);
+      });
+      document.getElementById('btnUpload3').addEventListener('click', function () {
+        if (step !== 's30_3') return;
+        playClick();
+        openFolderUploadModal(3);
+      });
+
+      document.querySelectorAll('.tm-folder-item').forEach(function (folderEl) {
+        folderEl.addEventListener('click', function () {
+          var expectedStep = 's31_' + activeUploadShot + '_folder';
+          if (step !== expectedStep) return;
+          var clickedShot = Number(this.getAttribute('data-shot'));
+          if (clickedShot !== activeUploadShot) {
+            playWrong();
+            shakeEl(this);
+            var rightFolder = document.getElementById('folderItem' + activeUploadShot);
+            rightFolder.classList.add('is-flash');
+            setTimeout(function () {
+              rightFolder.classList.remove('is-flash');
+            }, 700);
+            setGuide('이름과 맞는 폴더를 다시 선택해볼까요?');
+            return;
+          }
+          playClick();
+          step = 's31_' + activeUploadShot + '_all';
+          this.classList.add('is-selected');
+          var thumbsWrap = document.getElementById('folderThumbs');
+          thumbsWrap.innerHTML = '';
+          var info = IMG_MAP['shot' + activeUploadShot];
+          for (var i = 0; i < 10; i++) {
+            var im = document.createElement('img');
+            im.className = 'tm-folder-thumb';
+            im.alt = activeUploadShot + '샷 커피 사진';
+            if (i === 7) {
+              applyImgWithFallback(im, IMG_MAP['bad' + activeUploadShot]);
+            } else {
+              applyImgWithFallback(im, info);
+            }
+            thumbsWrap.appendChild(im);
+          }
+          var btnAll = document.getElementById('btnUploadAll');
+          btnAll.classList.add('is-shown');
+          focusTarget(btnAll);
+        });
+      });
+
+      function renderClassSamples(shotNum, count) {
+        var cntEl = document.getElementById('sampleCnt' + shotNum);
+        var stripEl = document.getElementById('sampleStrip' + shotNum);
+        cntEl.textContent = count + '개 이미지 샘플';
+        stripEl.innerHTML = '';
+        var info = IMG_MAP['shot' + shotNum];
+        for (var i = 0; i < 5; i++) {
+          var im = document.createElement('img');
+          im.className = 'tm-sample-thumb';
+          im.alt = shotNum + '샷 샘플';
+          applyImgWithFallback(im, info);
+          stripEl.appendChild(im);
+        }
+      }
+
+      document.getElementById('btnUploadAll').addEventListener('click', function () {
+        var expectedStep = 's31_' + activeUploadShot + '_all';
+        if (step !== expectedStep) return;
+        playClick();
+        document.getElementById('modalFolderUpload').classList.remove('is-open');
+        var doneFolder = document.getElementById('folderItem' + activeUploadShot);
+        if (doneFolder) doneFolder.style.display = 'none';
+        renderClassSamples(activeUploadShot, 10);
+
+        if (activeUploadShot === 1) {
+          step = 's30_2';
+          setGuide('‘업로드’ 를 클릭하세요.');
+          focusTarget(document.getElementById('btnUpload2'));
+        } else if (activeUploadShot === 2) {
+          step = 's30_3';
+          setGuide('‘업로드’ 를 클릭하세요.');
+          focusTarget(document.getElementById('btnUpload3'));
+        } else {
+          step = 's32';
+          setGuide('‘모델 학습시키기’ 를 클릭하세요.');
+          focusTarget(document.getElementById('btnTrainModel'));
+        }
+      });
+
+      function runTrainingAnimation(doneCallback) {
+        clearFingers();
+        var btnTrain = document.getElementById('btnTrainModel');
+        btnTrain.disabled = true;
+        var wrap = document.getElementById('trainProgWrap');
+        var fill = document.getElementById('trainProgFill');
+        var pctText = document.getElementById('trainProgPct');
+        wrap.classList.add('is-active');
+        fill.style.width = '0%';
+        pctText.textContent = '0%';
+        setGuide('학습 중 이예요. 조금만 기다려봐요.');
+
+        var pct = 0;
+        var timer = setInterval(function () {
+          pct += 10;
+          if (pct > 100) pct = 100;
+          fill.style.width = pct + '%';
+          pctText.textContent = pct + '%';
+          if (pct >= 100) {
+            clearInterval(timer);
+            setTimeout(function () {
+              wrap.classList.remove('is-active');
+              btnTrain.disabled = false;
+              doneCallback();
+            }, 350);
+          }
+        }, 160);
+      }
+
+      document.getElementById('btnTrainModel').addEventListener('click', function () {
+        if (step === 's32') {
+          playClick();
+          step = 's33';
+          runTrainingAnimation(function () {
+            step = 's34';
+            document.getElementById('previewEmpty').style.display = 'none';
+            document.getElementById('previewContent').classList.add('is-ready');
+            setGuide('모델 학습이 완료되었어요.<br>사진을 업로드 해서 출력 결과를 확인해볼까요?');
+            focusTarget(document.getElementById('btnTestUploadZone'));
+          });
+        } else if (step === 's43') {
+          playClick();
+          step = 's44';
+          runTrainingAnimation(function () {
+            step = 's45';
+            setGuide('모델 학습이 완료되었어요.<br>3샷의 출력 결과를 다시 확인해볼까요?');
+            focusTarget(document.getElementById('btnTestUploadZone'));
+          });
+        }
+      });
+
+      function openTestFileModal(targetShot, lockOthers) {
+        activeTestShot = targetShot;
+        document.getElementById('btnConfirmFileOpen').disabled = true;
+        [1, 2, 3].forEach(function (n) {
+          var el = document.getElementById('fileOpt' + n);
+          el.classList.remove('is-selected');
+          if (lockOthers && n !== targetShot) {
+            el.classList.add('is-disabled');
+          } else {
+            el.classList.remove('is-disabled');
+          }
+        });
+        document.getElementById('modalFileOpen').classList.add('is-open');
+        setGuide(targetShot + '샷 사진을 업로드 해서 출력 결과를 확인해보세요.');
+        focusTarget(document.getElementById('fileOpt' + targetShot));
+      }
+
+      document.getElementById('btnTestUploadZone').addEventListener('click', function () {
+        if (step === 's34') {
+          playClick();
+          step = 's35_select';
+          openTestFileModal(1, false);
+        } else if (step === 's36') {
+          playClick();
+          step = 's37_select';
+          openTestFileModal(2, false);
+        } else if (step === 's38') {
+          playClick();
+          step = 's39_select';
+          openTestFileModal(3, false);
+        } else if (step === 's45') {
+          playClick();
+          isRetrainPhase = true;
+          step = 's46_select';
+          openTestFileModal(3, true);
+        }
+      });
+
+      [1, 2, 3].forEach(function (n) {
+        document.getElementById('fileOpt' + n).addEventListener('click', function () {
+          var validSelectStep = (step === 's35_select' || step === 's37_select' || step === 's39_select' || step === 's46_select');
+          if (!validSelectStep) return;
+          if (n !== activeTestShot) {
+            playWrong();
+            shakeEl(this);
+            return;
+          }
+          playClick();
+          this.classList.add('is-selected');
+          var openBtn = document.getElementById('btnConfirmFileOpen');
+          openBtn.disabled = false;
+          step = step.replace('_select', '_open');
+          focusTarget(openBtn);
+        });
+      });
+
+      function setOutputBars(p1, p2, p3) {
+        document.getElementById('outBar1').style.width = p1 + '%';
+        document.getElementById('outPct1').textContent = p1 + '%';
+        document.getElementById('outBar2').style.width = p2 + '%';
+        document.getElementById('outPct2').textContent = p2 + '%';
+        document.getElementById('outBar3').style.width = p3 + '%';
+        document.getElementById('outPct3').textContent = p3 + '%';
+      }
+
+      document.getElementById('btnConfirmFileOpen').addEventListener('click', function () {
+        if (this.disabled) return;
+        playClick();
+        document.getElementById('modalFileOpen').classList.remove('is-open');
+        var testImg = document.getElementById('testPreviewImg');
+        testImg.classList.add('is-shown');
+        applyImgWithFallback(testImg, IMG_MAP['shot' + activeTestShot]);
+
+        if (step === 's35_open') {
+          step = 's36';
+          setOutputBars(100, 0, 0);
+          setGuide('출력 결과를 확인해보세요.<br>이번에는 2샷 사진으로 확인해볼까요?');
+          focusTarget(document.getElementById('btnTestUploadZone'));
+        } else if (step === 's37_open') {
+          step = 's38';
+          setOutputBars(5, 92, 3);
+          setGuide('출력 결과를 확인해보세요.<br>마지막으로 3샷 사진을 확인해볼까요?');
+          focusTarget(document.getElementById('btnTestUploadZone'));
+        } else if (step === 's39_open') {
+          step = 's40';
+          clearFingers();
+          setOutputBars(78, 10, 12);
+          setGuide('3샷 인데, 1샷의 퍼센트가 가장 높게 나왔어요.<br>티처블 머신에게 학습하기 위해 준 사진에 문제가 있는 것 같아요. 학습 사진을 다시 살펴볼까요?');
+          setTimeout(function () {
+            openInspectModal();
+          }, 3000);
+        } else if (step === 's46_open') {
+          step = 's47';
+          setOutputBars(0, 0, 100);
+          setGuide('이번에는 3샷이라고 정확하게 출력 결과가 나왔어요.');
+          var arrowBtn = document.getElementById('btnGuideArrow');
+          arrowBtn.classList.add('is-shown');
+          focusTarget(arrowBtn);
+        }
+      });
+
+      function buildInspectGrid() {
+        var badIndices = { 1: 7, 2: 5, 3: 7 };
+        var badLabels = {
+          1: '3샷커피<br>(이름표는 1샷)',
+          2: '커피<br>(손가락이 잔을 가림)',
+          3: '뚜껑까지 덮인 종이컵<br>(색 안보임)'
+        };
+        [1, 2, 3].forEach(function (shot) {
+          var grid = document.getElementById('inspectGrid' + shot);
+          grid.innerHTML = '';
+          for (var i = 0; i < 10; i++) {
+            var cell = document.createElement('div');
+            cell.className = 'tm-inspect-cell';
+            var im = document.createElement('img');
+            if (i === badIndices[shot]) {
+              cell.classList.add('is-bad');
+              cell.id = 'badCell' + shot;
+              cell.setAttribute('data-bad-shot', String(shot));
+              applyImgWithFallback(im, IMG_MAP['bad' + shot]);
+              cell.appendChild(im);
+              var tag = document.createElement('div');
+              tag.className = 'tm-bad-tag';
+              tag.innerHTML = badLabels[shot];
+              cell.appendChild(tag);
+            } else {
+              applyImgWithFallback(im, IMG_MAP['shot' + shot]);
+              cell.appendChild(im);
+            }
+            cell.addEventListener('click', onInspectCellClick);
+            grid.appendChild(cell);
+          }
+        });
+      }
+
+      function pointNextBadCell() {
+        var nextShot = [1, 2, 3].find(function (s) { return !deletedBadMap[s]; });
+        if (nextShot) {
+          focusTarget(document.getElementById('badCell' + nextShot));
+        }
+      }
+
+      function openInspectModal() {
+        step = 's41';
+        buildInspectGrid();
+        document.getElementById('modalInspect').classList.add('is-open');
+        setGuide('각 폴더에서 정확하지 않은 사진을 찾아 클릭하세요.');
+        pointNextBadCell();
+      }
+
+      function onInspectCellClick() {
+        if (step !== 's41') return;
+        var badShot = this.getAttribute('data-bad-shot');
+        if (!badShot) {
+          playWrong();
+          shakeEl(this);
+          setGuide('이 사진은 색이 잘 보이고 이름표도 맞아요.');
+          return;
+        }
+        playClick();
+        step = 's42';
+        activeBadShot = Number(badShot);
+        var badInfo = IMG_MAP['bad' + activeBadShot];
+        applyImgWithFallback(document.getElementById('zoomBadImg'), badInfo);
+        document.getElementById('zoomBadCap').textContent = badInfo.cap;
+        document.getElementById('zoomBadReason').textContent = badInfo.reason;
+        document.getElementById('zoomBadPopup').classList.add('is-open');
+        setGuide('휴지통 그림을 클릭해 삭제하세요.');
+        focusTarget(document.getElementById('btnDeleteBad'));
+      }
+
+      document.getElementById('btnDeleteBad').addEventListener('click', function () {
+        if (step !== 's42' || !activeBadShot) return;
+        playClick();
+        deletedBadMap[activeBadShot] = true;
+        var badCell = document.getElementById('badCell' + activeBadShot);
+        if (badCell) {
+          badCell.classList.add('is-deleted');
+        }
+        renderClassSamples(activeBadShot, 9);
+        document.getElementById('zoomBadPopup').classList.remove('is-open');
+        activeBadShot = null;
+
+        var allDeleted = deletedBadMap[1] && deletedBadMap[2] && deletedBadMap[3];
+        if (!allDeleted) {
+          step = 's41';
+          setGuide('각 폴더에서 정확하지 않은 사진을 찾아 클릭하세요.');
+          pointNextBadCell();
+        } else {
+          step = 's43';
+          document.getElementById('modalInspect').classList.remove('is-open');
+          setGuide('‘모델 학습시키기’ 를 클릭하세요.');
+          focusTarget(document.getElementById('btnTrainModel'));
+        }
+      });
+
+      document.getElementById('btnGuideArrow').addEventListener('click', function () {
+        if (step !== 's47') return;
+        step = 's47_done';
+        clearFingers();
+        this.classList.remove('is-shown');
+        setGuide('정확한 사진으로 가르쳐야 AI도 정확하게 알려줘요.');
+        setTimeout(function () {
+          step = 's48';
+          playCorrect();
+          document.getElementById('finishModal').style.display = 'flex';
+        }, 3000);
+      });
+    })();
+  </script>
+</body>
+</html>

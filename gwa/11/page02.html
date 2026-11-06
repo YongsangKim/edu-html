@@ -17,8 +17,8 @@
         .p02-gauge{left:90px;top:90px}
         .p02-field{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:4;touch-action:none;cursor:ew-resize}
         .p02-it{position:absolute;transform:translateX(-50%);pointer-events:none}
-        .p02-it i{display:flex;align-items:center;justify-content:center;border-radius:50%;box-sizing:border-box;border:solid 4px var(--c-navy);font-family:"Cafe24 Ssurround";font-style:normal;font-weight:400;font-size:26px;line-height:1;color:var(--c-ink);white-space:nowrap}
-        .p02-it i.is-dark{color:#fff}
+        .p02-it img{display:block;width:100%;height:100%;filter:drop-shadow(0 3px 6px rgba(0,0,0,.18))}
+        .p02-it span{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font-family:"Cafe24 Ssurround";font-size:26px;line-height:1;color:#fff;white-space:nowrap;-webkit-text-stroke:7px var(--c-navy);paint-order:stroke fill}
         .p02-it.is-gone{opacity:0;transition:opacity .5s ease}
         .p02-it.is-quick{opacity:0;transition:opacity .15s ease}
         .p02-wrong{z-index:30}
@@ -85,11 +85,11 @@
   <script>
   (function () {
     const SUBS = {
-      water:  { name: '물',     size: 76,  color: '#8fd3ff', ok: true },
-      waste:  { name: '노폐물', size: 108, color: '#8d8d8d', ok: true, dark: true },
-      rbc:    { name: '적혈구', size: 170, color: '#c0392b', ok: false, dark: true },
-      protein:{ name: '단백질', size: 216, color: '#c9a8ff', ok: false },
-      wbc:    { name: '백혈구', size: 259, color: '#ffffff', ok: false },
+      water:  { name: '물',     size: 76,  ok: true },
+      waste:  { name: '노폐물', size: 108, ok: true },
+      rbc:    { name: '적혈구', size: 170, ok: false },
+      protein:{ name: '단백질', size: 216, ok: false },
+      wbc:    { name: '백혈구', size: 259, ok: false },
     };
     const KEYS = Object.keys(SUBS);
     const LANES = [620, 1060, 1500];
@@ -131,7 +131,9 @@
       const s = SUBS[key];
       const el = document.createElement('div');
       el.className = 'p02-it';
-      el.innerHTML = '<i' + (s.dark ? ' class="is-dark"' : '') + ' style="width:' + s.size + 'px;height:' + s.size + 'px;background:' + s.color + '">' + s.name + '</i>';
+      el.style.width = s.size + 'px';
+      el.style.height = s.size + 'px';
+      el.innerHTML = '<img src="img/p02_' + key + '.png" alt=""><span>' + s.name + '</span>';
       let lane;
       do { lane = Math.floor(Math.random() * LANES.length); } while (lane === lastLane);
       lastLane = lane;

@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주문 확인 로봇을 학습시켜라!</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .p12-view{position:absolute;inset:0;width:1920px;height:960px}
+        .p12-view.is-off{display:none}
+
+        .p12-kiosk{position:absolute;left:20px;top:40px;width:1880px;height:900px;box-sizing:border-box;border:solid 5px #2264c5;border-radius:100px 100px 24px 24px;background:linear-gradient(180deg,#fdf6f0 0%,#f0ded2 50%,#e2cab9 100%) url('img/p12_bg_play.png') center / cover no-repeat;overflow:hidden;box-shadow:inset 0 8px 0 #fff,0 10px 24px rgba(0,0,0,.18)}
+        .p12-win{position:absolute;left:55px;top:90px;width:1760px;height:550px;box-sizing:border-box;border:solid 14px #2a2421;border-radius:90px;background:radial-gradient(ellipse at 30% 30%,#4e485c 0%,#2b2735 55%,#191620 100%);box-shadow:inset 0 0 30px rgba(0,0,0,.7),0 4px 0 #fff;overflow:hidden}
+        .p12-win:before{content:'';position:absolute;left:120px;top:24px;width:440px;height:14px;border-radius:7px;background:rgba(255,210,150,.35);box-shadow:0 0 24px rgba(255,190,110,.6)}
+
+        .p12-rbot-bg{position:absolute;left:110px;top:110px;width:540px;height:440px;pointer-events:none}
+        .p12-screen-bg{position:absolute;right:210px;top:60px;width:520px;height:330px;border:solid 10px #3c3f4a;border-radius:26px;background:#1e2638;box-sizing:border-box;padding:24px 32px;font-family:'Pretendard';color:#c8d4ea;pointer-events:none;box-shadow:0 12px 24px rgba(0,0,0,.4)}
+        .p12-screen-bg h4{margin:0 0 18px;font-size:32px;color:#8fa4c8;border-bottom:solid 2px #323f58;padding-bottom:12px}
+        .p12-screen-bg .ord{display:flex;align-items:center;gap:14px;font-size:24px;margin-bottom:14px}
+        .p12-screen-bg .ord b{padding:4px 18px;border-radius:14px;background:#9c8468;color:#1e2638;font-size:26px}
+        .p12-screen-bg .item{font-size:32px;font-weight:700;color:#dce6f7;margin-bottom:26px}
+        .p12-screen-bg .prog{display:flex;align-items:center;gap:16px}
+        .p12-screen-bg .line{flex:1;height:6px;background:#4fd165;border-radius:3px}
+        .p12-screen-bg .step-c{width:66px;height:66px;border-radius:50%;border:solid 4px #e09145;background:#2c3852;display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 0 14px rgba(224,145,69,.6)}
+
+        .p12-sign{position:absolute;left:502px;top:8px;width:916px;height:152px;box-sizing:border-box;border:solid 6px #ffd494;border-radius:76px;background:linear-gradient(180deg,#6e482b 0%,#4d311c 100%);box-shadow:0 0 18px rgba(255,180,90,.8),inset 0 0 16px rgba(255,200,120,.45);display:flex;align-items:center;justify-content:center;gap:34px;z-index:6}
+        .p12-sign svg{width:110px;height:96px;flex:0 0 auto;filter:drop-shadow(0 0 8px rgba(255,210,140,.6))}
+        .p12-sign-tx{text-align:center;color:#fff}
+        .p12-sign-tx b{display:block;font-family:'Cafe24 Ssurround';font-size:66px;line-height:1.05;letter-spacing:-0.04em;text-shadow:0 3px 8px rgba(0,0,0,.4)}
+        .p12-sign-tx span{display:block;margin-top:4px;font-family:'Cafe24 Ssurround';font-size:32px;color:#ffe6c2;letter-spacing:0.01em}
+
+        .p12-timer{position:absolute;left:1442px;top:24px;width:408px;height:186px;box-sizing:border-box;border:solid 5px #1e4b94;border-radius:28px;background:linear-gradient(180deg,#f5f7fa 0%,#dce2ec 100%);box-shadow:0 8px 18px rgba(0,0,0,.25);padding:16px;z-index:6;display:flex;align-items:center;justify-content:center}
+        .p12-timer-in{width:100%;height:100%;border-radius:18px;background:#14121d;display:flex;align-items:center;justify-content:center;gap:16px;padding:0 20px;box-sizing:border-box;box-shadow:inset 0 0 20px rgba(0,0,0,.8)}
+        .p12-timer-in svg{width:58px;height:78px;flex:0 0 auto;filter:drop-shadow(0 0 10px #4dc3ff)}
+        .p12-time-tx{font-family:'Cafe24 Ssurround';font-size:86px;color:#fff;letter-spacing:0.02em;text-shadow:0 0 18px #38b6ff,0 0 32px #38b6ff;padding-top:8px}
+        .p12-timer.is-warn .p12-time-tx{color:#fff3e0;text-shadow:0 0 18px #ff9100,0 0 34px #ff6d00;animation:p12Pulse .7s ease-in-out infinite}
+        .p12-timer.is-danger .p12-timer-in{background:radial-gradient(circle,#4a1228 0%,#180d16 100%)}
+        .p12-timer.is-danger .p12-time-tx{color:#fff;text-shadow:0 0 18px #ff2a85,0 0 36px #ff0055;animation:p12Pulse .45s ease-in-out infinite}
+        @keyframes p12Pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+
+        .p12-card-stage{position:absolute;left:752px;top:192px;width:416px;height:466px;box-sizing:border-box;border-radius:16px;background:#fff;box-shadow:0 14px 32px rgba(0,0,0,.45);padding:18px 18px 74px;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:space-between;transition:transform .18s ease}
+        .p12-card-stage.is-pop{animation:p12CardIn .22s ease-out}
+        @keyframes p12CardIn{0%{transform:scale(.88);opacity:.5}100%{transform:scale(1);opacity:1}}
+        .p12-card-Photo{width:380px;height:374px;border-radius:10px;overflow:hidden;background:#e8dccb;position:relative}
+        .p12-card-Photo img{width:100%;height:100%;object-fit:cover;display:block}
+        .p12-card-Photo svg{width:100%;height:100%;display:block}
+        .p12-card-cnt{position:absolute;left:0;right:0;bottom:14px;text-align:center;font-family:'Cafe24 Ssurround';font-size:34px;color:#5a657d;letter-spacing:0.04em}
+
+        .p12-tray{position:absolute;left:0;bottom:0;width:1870px;height:230px;background:linear-gradient(180deg,#3b78ce 0%,#285eb0 100%);border-top:solid 5px #1e4b94;display:flex;align-items:center;justify-content:center;gap:34px;padding:0 40px;box-sizing:border-box;z-index:6}
+        .p12-btn{width:414px;height:184px;box-sizing:border-box;border:solid 6px #18499e;border-radius:26px;background:linear-gradient(180deg,#f9f2ff 0%,#efe3ff 100%);box-shadow:0 8px 0 #12387a,inset 0 4px 0 #fff;display:flex;align-items:center;justify-content:center;gap:24px;padding:0 24px;cursor:pointer;font-family:'Cafe24 Ssurround';font-size:74px;color:#d655ff;letter-spacing:-0.04em;transition:transform .1s,border-color .15s}
+        .p12-btn:hover{border-color:var(--c-violet);transform:translateY(-4px)}
+        .p12-btn:active{transform:translateY(4px);box-shadow:0 3px 0 #12387a}
+        .p12-btn img{height:142px;width:auto;flex:0 0 auto;display:block;object-fit:contain}
+        .p12-btn svg{width:105px;height:142px;flex:0 0 auto;display:block}
+        .p12-btn.is-bad{font-size:66px;gap:14px}
+        .p12-btn.is-bad img{height:130px}
+        .p12-btn.is-bad svg{width:130px;height:130px}
+        .p12-btn span{padding-top:8px}
+
+        .p12-res-left{position:absolute;left:20px;top:16px;width:1322px;height:928px;box-sizing:border-box;border:solid 5px #2264c5;border-radius:26px;background:linear-gradient(180deg,#f5e4d6 0%,#e5cbb8 100%) url('img/p12_bg_result.png') center / cover no-repeat;overflow:hidden;box-shadow:0 8px 20px rgba(0,0,0,.15)}
+        .p12-res-screen{position:absolute;left:18px;top:18px;width:1276px;height:780px;box-sizing:border-box;border:solid 10px #3a2e28;border-radius:36px;background:radial-gradient(ellipse at 50% 40%,#3d354b 0%,#231e2d 70%,#17141f 100%);padding:18px 80px;display:grid;grid-template-columns:repeat(5,160px);grid-template-rows:repeat(4,170px);justify-content:space-between;align-content:space-between}
+        .p12-res-bot{position:absolute;left:0;right:0;bottom:0;height:112px;background:linear-gradient(180deg,#edd6c4 0%,#d9bca6 100%);border-top:solid 4px #c4a38c;display:flex;align-items:center;justify-content:center;gap:60px}
+        .p12-res-touch{width:170px;height:86px;border-radius:12px;border:solid 4px #4a3c34;background:linear-gradient(180deg,#1a8cff,#005ce6);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-family:'Cafe24 Ssurround';font-size:20px;gap:4px}
+        .p12-res-slot{width:180px;height:86px;border-radius:14px 14px 0 0;border:solid 4px #4a3c34;border-bottom:0;background:#2b211b;align-self:flex-end;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:8px;color:#fff;font-family:'Pretendard';font-size:15px;font-weight:700}
+        .p12-res-slot:after{content:'';width:140px;height:44px;margin-top:6px;border-radius:6px;background:linear-gradient(180deg,#ffbd59,#a6631b)}
+
+        .p12-mini{position:relative;width:160px;height:170px;box-sizing:border-box;border-radius:6px;background:#fff;padding:7px 7px 24px;box-shadow:0 4px 12px rgba(0,0,0,.45)}
+        .p12-mini-ph{position:relative;width:146px;height:139px;border-radius:4px;overflow:hidden;background:#e8dccb}
+        .p12-mini-ph img{width:100%;height:100%;object-fit:cover;display:block}
+        .p12-mini-ph svg{width:100%;height:100%;display:block}
+        .p12-mini-tag{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:52px;color:#fff;-webkit-text-stroke:10px #2b2684;paint-order:stroke fill;letter-spacing:-0.04em;padding-top:6px}
+        .p12-mini-tag.is-q{font-size:66px;-webkit-text-stroke:10px #7a2684}
+        .p12-mini-tag svg{width:116px;height:116px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))}
+        .p12-mini-err{position:absolute;right:-36px;top:-16px;width:74px;height:74px;border-radius:50%;background:#ff4ff9;border:solid 4px #fff;box-shadow:0 4px 10px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:52px;color:#fff;z-index:5;animation:p12Pulse .8s ease-in-out infinite}
+        .p12-mini-err:after{content:'';position:absolute;left:-6px;bottom:4px;border:10px solid transparent;border-right-color:#ff4ff9;border-bottom-color:#ff4ff9;transform:rotate(-15deg)}
+
+        .p12-res-right{position:absolute;left:1356px;top:16px;width:544px;height:928px;box-sizing:border-box;border:solid 5px #2264c5;border-radius:26px;background:#fff;overflow:hidden;box-shadow:0 8px 20px rgba(0,0,0,.15);display:flex;flex-direction:column;align-items:center}
+        .p12-rbot-fig{width:500px;height:410px;margin-top:10px;display:flex;align-items:center;justify-content:center}
+        .p12-rbot-fig img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+        .p12-rbot-fig svg{width:100%;height:100%;display:block}
+
+        .p12-res-msg{position:relative;width:496px;min-height:220px;box-sizing:border-box;border:solid 5px var(--c-purple);border-radius:24px;background:#fff;padding:28px 24px 22px;display:flex;align-items:center;justify-content:center;text-align:center;font-family:'Cafe24 Ssurround';font-size:42px;line-height:1.3;color:var(--c-purple);letter-spacing:-0.05em;box-shadow:0 8px 0 rgba(72,21,156,.15);z-index:2;transition:opacity .35s ease}
+        .p12-res-msg.is-ok{font-size:54px;min-height:260px;margin-top:20px}
+        .p12-res-aro{position:absolute;right:14px;bottom:-10px;width:240px;height:260px;object-fit:contain;z-index:3;transition:opacity .35s ease,transform .35s ease}
+        .p12-res-aro.is-hide{opacity:0;transform:translateY(30px);pointer-events:none}
+
+        .p12-res-acts{position:absolute;left:0;right:0;bottom:34px;display:flex;flex-direction:column;align-items:center;gap:20px;z-index:5;transition:opacity .35s ease}
+        .p12-res-acts.is-off{opacity:0;pointer-events:none}
+        .p12-act-btn{width:406px;height:122px;box-sizing:border-box;border:solid 6px #18499e;border-radius:24px;background:linear-gradient(180deg,#f6edff 0%,#eadbff 100%);box-shadow:0 8px 0 #12387a,inset 0 4px 0 #fff;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:62px;color:#d655ff;letter-spacing:0.04em;cursor:pointer;padding-top:8px}
+        .p12-act-btn:hover{border-color:var(--c-violet);transform:translateY(-3px)}
+        .p12-act-btn:active{transform:translateY(4px);box-shadow:0 3px 0 #12387a}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default" id="p12Main">
+
+          <div class="p12-view" id="p12PlayView">
+            <div class="p12-sign">
+              <svg viewBox="0 0 120 100" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M38 14c0 8-6 8-6 16M54 12c0 8-6 8-6 16M70 14c0 8-6 8-6 16"/>
+                <path d="M20 38h68v22a28 28 0 0 1-28 28H48a28 28 0 0 1-28-28Z"/>
+                <path d="M88 44h10a10 10 0 0 1 0 20H88"/>
+                <line x1="16" y1="88" x2="92" y2="88"/>
+              </svg>
+              <div class="p12-sign-tx">
+                <b>커피 주문 확인 로봇</b>
+                <span>Coffee Order Robot</span>
+              </div>
+            </div>
+
+            <div class="p12-timer" id="p12TimerBox">
+              <div class="p12-timer-in">
+                <svg viewBox="0 0 60 80" fill="none">
+                  <path d="M10 8h40M10 72h40M14 8c0 20 16 24 16 32s-16 12-16 32M46 8c0 20-16 24-16 32s16 12 16 32" stroke="#7ce0ff" stroke-width="5" stroke-linecap="round"/>
+                  <path d="M20 58h20l-4-10h-12Z" fill="#7ce0ff"/>
+                </svg>
+                <span class="p12-time-tx" id="p12TimeTx">01:00</span>
+              </div>
+            </div>
+
+            <div class="p12-kiosk">
+              <div class="p12-win">
+                <svg class="p12-rbot-bg" viewBox="0 0 540 440">
+                  <defs>
+                    <linearGradient id="rbMetal" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stop-color="#e8ecf5"/>
+                      <stop offset="100%" stop-color="#8c96ab"/>
+                    </linearGradient>
+                  </defs>
+                  <path d="M480 280 L340 120 L210 190" fill="none" stroke="url(#rbMetal)" stroke-width="56" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle cx="340" cy="120" r="42" fill="#b8c2d6" stroke="#596275" stroke-width="6"/>
+                  <circle cx="340" cy="120" r="24" fill="#d8e0ef"/>
+                  <rect x="66" y="128" width="180" height="110" rx="36" fill="url(#rbMetal)" stroke="#596275" stroke-width="6"/>
+                  <rect x="82" y="146" width="124" height="74" rx="22" fill="#182030"/>
+                  <circle cx="116" cy="183" r="14" fill="#7ae2ff"/>
+                  <circle cx="172" cy="183" r="14" fill="#7ae2ff"/>
+                  <path d="M58 290h72l-8 104H66Z" fill="#d8cbb8"/>
+                  <path d="M56 326h76l-3 42H59Z" fill="#8c5832"/>
+                  <rect x="52" y="278" width="84" height="16" rx="6" fill="#f0f2f7"/>
+                  <path d="M134 268c24 0 38 16 38 36s-14 36-38 36" fill="none" stroke="url(#rbMetal)" stroke-width="22" stroke-linecap="round"/>
+                </svg>
+
+                <div class="p12-screen-bg">
+                  <h4>주문 확인</h4>
+                  <div class="ord"><span>주문번호</span><b>A-023</b></div>
+                  <div class="item">아이스 아메리카노 &nbsp;1잔</div>
+                  <div class="prog">
+                    <div class="line"></div>
+                    <div class="step-c">☕</div>
+                    <div class="line" style="background:#4b5b78"></div>
+                    <div class="step-c" style="border-color:#5d6f8f;box-shadow:none;font-size:22px">🏁</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="p12-card-stage" id="p12CardStage">
+                <div class="p12-card-Photo" id="p12CurPhoto"></div>
+                <div class="p12-card-cnt" id="p12CardCnt">1 / 20</div>
+              </div>
+
+              <div class="p12-tray">
+                <button type="button" class="p12-btn" data-ans="1샷">
+                  <img src="img/p12_btn_shot1.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                  <svg viewBox="0 0 100 140" style="display:none">
+                    <path d="M16 14h68l-8 112a10 10 0 0 1-10 9H34a10 10 0 0 1-10-9Z" fill="rgba(255,255,255,.85)" stroke="#7b879c" stroke-width="4"/>
+                    <path d="M19 30h62l-7 92a7 7 0 0 1-7 6H33a7 7 0 0 1-7-6Z" fill="#dc8a35"/>
+                    <ellipse cx="50" cy="30" rx="31" ry="6" fill="#eea352"/>
+                    <rect x="28" y="36" width="16" height="14" rx="3" fill="rgba(255,255,255,.55)" transform="rotate(-8 28 36)"/>
+                    <rect x="52" y="34" width="18" height="14" rx="3" fill="rgba(255,255,255,.5)" transform="rotate(10 52 34)"/>
+                  </svg>
+                  <span>1샷</span>
+                </button>
+                <button type="button" class="p12-btn" data-ans="2샷">
+                  <img src="img/p12_btn_shot2.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                  <svg viewBox="0 0 100 140" style="display:none">
+                    <path d="M16 14h68l-8 112a10 10 0 0 1-10 9H34a10 10 0 0 1-10-9Z" fill="rgba(255,255,255,.85)" stroke="#7b879c" stroke-width="4"/>
+                    <path d="M19 30h62l-7 92a7 7 0 0 1-7 6H33a7 7 0 0 1-7-6Z" fill="#8b3e16"/>
+                    <ellipse cx="50" cy="30" rx="31" ry="6" fill="#a85325"/>
+                    <rect x="28" y="36" width="16" height="14" rx="3" fill="rgba(255,255,255,.45)" transform="rotate(-8 28 36)"/>
+                    <rect x="52" y="34" width="18" height="14" rx="3" fill="rgba(255,255,255,.4)" transform="rotate(10 52 34)"/>
+                  </svg>
+                  <span>2샷</span>
+                </button>
+                <button type="button" class="p12-btn" data-ans="3샷">
+                  <img src="img/p12_btn_shot3.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                  <svg viewBox="0 0 100 140" style="display:none">
+                    <path d="M16 14h68l-8 112a10 10 0 0 1-10 9H34a10 10 0 0 1-10-9Z" fill="rgba(255,255,255,.85)" stroke="#7b879c" stroke-width="4"/>
+                    <path d="M19 30h62l-7 92a7 7 0 0 1-7 6H33a7 7 0 0 1-7-6Z" fill="#321307"/>
+                    <ellipse cx="50" cy="30" rx="31" ry="6" fill="#4f2210"/>
+                    <rect x="28" y="36" width="16" height="14" rx="3" fill="rgba(255,255,255,.35)" transform="rotate(-8 28 36)"/>
+                    <rect x="52" y="34" width="18" height="14" rx="3" fill="rgba(255,255,255,.3)" transform="rotate(10 52 34)"/>
+                  </svg>
+                  <span>3샷</span>
+                </button>
+                <button type="button" class="p12-btn is-bad" data-ans="못 써요">
+                  <img src="img/p12_btn_bad.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                  <svg viewBox="0 0 120 120" style="display:none">
+                    <g transform="rotate(-18 60 60)">
+                      <rect x="28" y="22" width="64" height="76" rx="6" fill="#fff" stroke="#ccc" stroke-width="3"/>
+                      <rect x="34" y="28" width="52" height="54" rx="3" fill="#dc8a35"/>
+                    </g>
+                    <circle cx="60" cy="60" r="46" fill="none" stroke="#ff409a" stroke-width="12"/>
+                    <line x1="28" y1="28" x2="92" y2="92" stroke="#ff409a" stroke-width="12"/>
+                  </svg>
+                  <span>못 써요</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="p12-view is-off" id="p12ResView">
+            <div class="p12-res-left">
+              <div class="p12-res-screen" id="p12ResGrid"></div>
+              <div class="p12-res-bot">
+                <div class="p12-res-touch">☕<span>주문하기</span></div>
+                <div style="font-size:48px;color:#fff;text-shadow:0 0 12px #ff9900">☕</div>
+                <div class="p12-res-slot">픽업 (PICK UP) ▼</div>
+              </div>
+            </div>
+
+            <div class="p12-res-right">
+              <div class="p12-rbot-fig" id="p12ResRobot"></div>
+              <div class="p12-res-msg" id="p12ResMsg"></div>
+              <img class="p12-res-aro is-hide" id="p12ResAro" src="img/p12_aro_sad.png" onerror="this.onerror=null;this.src='../../resources/img/common/avatar_incorrect.png'" alt="">
+              <div class="p12-res-acts is-off" id="p12ResActs">
+                <button type="button" class="p12-act-btn" id="p12RetryBtn">다시하기</button>
+                <button type="button" class="p12-act-btn" id="p12FinishBtn">끝내기</button>
+              </div>
+            </div>
+          </div>
+
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="주문 확인 로봇을 학습시켜라!" data-next="page13.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const BGS = [
+      { sky: '#f4ebe1', tbl: '#d9c2a6', check: true },
+      { sky: '#cce6f4', tbl: '#c69363', park: true },
+      { sky: '#b5dff5', tbl: '#d4a373', sea: true },
+      { sky: '#e8d8c8', tbl: '#b8824c', cafe: true },
+      { sky: '#d4ecd4', tbl: '#c28d58', garden: true }
+    ];
+
+    const SHOT_COLORS = {
+      '1샷': { body: '#dc8a35', top: '#eea352', ice: 'rgba(255,255,255,.55)' },
+      '2샷': { body: '#8b3e16', top: '#a85325', ice: 'rgba(255,255,255,.45)' },
+      '3샷': { body: '#301106', top: '#4a1f0e', ice: 'rgba(255,255,255,.32)' }
+    };
+
+    function cupSvg(shot, bgIdx, badKind) {
+      const bg = BGS[bgIdx % BGS.length];
+      const sc = SHOT_COLORS[shot] || SHOT_COLORS['1샷'];
+      let filterDef = '';
+      let filterAttr = '';
+      if (badKind === 'blur') {
+        filterDef = '<defs><filter id="fBlur"><feGaussianBlur stdDeviation="8"/></filter></defs>';
+        filterAttr = ' filter="url(#fBlur)"';
+      } else if (badKind === 'shake') {
+        filterDef = '<defs><filter id="fShake"><feGaussianBlur stdDeviation="12 2"/></filter></defs>';
+        filterAttr = ' filter="url(#fShake)"';
+      }
+
+      let scene = '<rect width="200" height="125" fill="' + bg.sky + '"/>';
+      if (bg.park || bg.garden) {
+        scene += '<circle cx="40" cy="40" r="35" fill="#7ec850" opacity=".6"/><circle cx="165" cy="35" r="40" fill="#6ab840" opacity=".6"/>';
+      } else if (bg.sea) {
+        scene += '<rect y="75" width="200" height="50" fill="#5aa9e6"/>';
+      } else if (bg.cafe) {
+        scene += '<circle cx="45" cy="30" r="10" fill="#fff3b0"/><circle cx="155" cy="30" r="10" fill="#fff3b0"/>';
+      }
+      scene += '<rect y="120" width="200" height="80" fill="' + bg.tbl + '"/>';
+      if (bg.check) {
+        scene += '<path d="M0 135h200M0 155h200M0 175h200M40 120v80M80 120v80M120 120v80M160 120v80" stroke="rgba(255,255,255,.35)" stroke-width="6"/>';
+      }
+
+      if (badKind === 'far') {
+        return '<svg viewBox="0 0 200 200">' + scene +
+          '<ellipse cx="100" cy="155" rx="55" ry="18" fill="#8d633a"/><rect x="96" y="155" width="8" height="32" fill="#444"/>' +
+          '<path d="M94 136h12l-1.5 16h-9Z" fill="#8b3e16" stroke="#fff" stroke-width="1.5"/>' +
+          '</svg>';
+      }
+
+      const cupGroup = '<g' + (badKind === 'shake' ? ' transform="rotate(-10 100 105)"' : '') + '>' +
+        '<ellipse cx="100" cy="176" rx="38" ry="8" fill="rgba(0,0,0,.18)"/>' +
+        '<path d="M62 34h76l-9 136a10 10 0 0 1-10 9H81a10 10 0 0 1-10-9Z" fill="rgba(255,255,255,.78)" stroke="#7b879c" stroke-width="3.5"/>' +
+        '<path d="M65 50h70l-8 116a7 7 0 0 1-7 6H80a7 7 0 0 1-7-6Z" fill="' + sc.body + '"/>' +
+        '<ellipse cx="100" cy="50" rx="35" ry="7" fill="' + sc.top + '"/>' +
+        '<rect x="74" y="56" width="18" height="15" rx="3" fill="' + sc.ice + '" transform="rotate(-8 74 56)"/>' +
+        '<rect x="104" y="54" width="20" height="15" rx="3" fill="' + sc.ice + '" transform="rotate(10 104 54)"/>' +
+        '<rect x="88" y="72" width="18" height="14" rx="3" fill="' + sc.ice + '"/>' +
+        '</g>';
+
+      let over = '';
+      if (badKind === 'bag') {
+        over = '<g><path d="M38 58c0-24 38-24 38 0" fill="none" stroke="#b58d67" stroke-width="8"/>' +
+          '<rect x="18" y="56" width="96" height="122" rx="14" fill="#d5b28a" stroke="#9e7852" stroke-width="4"/></g>';
+      } else if (badKind === 'hand') {
+        over = '<g fill="#e3a87c" stroke="#b57c52" stroke-width="3">' +
+          '<rect x="54" y="68" width="92" height="22" rx="11"/>' +
+          '<rect x="52" y="90" width="96" height="22" rx="11"/>' +
+          '<rect x="54" y="112" width="92" height="22" rx="11"/>' +
+          '<rect x="60" y="134" width="84" height="20" rx="10"/>' +
+          '<path d="M136 78 L195 110 L195 168 L134 152 Z" stroke="none"/></g>';
+      }
+
+      return '<svg viewBox="0 0 200 200">' + filterDef + '<g' + filterAttr + '>' + scene + cupGroup + over + '</g></svg>';
+    }
+
+    function mediaHtml(src, svgStr) {
+      return '<img src="' + src + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'">' +
+        svgStr.replace('<svg ', '<svg style="display:none" ');
+    }
+
+    function buildDeck() {
+      const list = [];
+      ['1샷', '2샷', '3샷'].forEach((shot, sIdx) => {
+        for (let i = 0; i < 5; i++) {
+          const src = 'img/p12_shot' + (sIdx + 1) + '_' + (i + 1) + '.png';
+          list.push({ ans: shot, html: mediaHtml(src, cupSvg(shot, i, null)) });
+        }
+      });
+      const bads = [
+        { shot: '1샷', kind: 'blur', src: 'img/p12_bad_1.png' },
+        { shot: '2샷', kind: 'bag', src: 'img/p12_bad_2.png' },
+        { shot: '2샷', kind: 'far', src: 'img/p12_bad_3.png' },
+        { shot: '3샷', kind: 'shake', src: 'img/p12_bad_4.png' },
+        { shot: '2샷', kind: 'hand', src: 'img/p12_bad_5.png' }
+      ];
+      bads.forEach((b, i) => {
+        list.push({ ans: '못 써요', html: mediaHtml(b.src, cupSvg(b.shot, i, b.kind)) });
+      });
+      return shuffleArray(list);
+    }
+
+    const ROBOT_HAPPY = mediaHtml('img/p12_robot_happy.png', '<svg viewBox="0 0 360 320">' +
+      '<circle cx="180" cy="165" r="120" fill="#eef4ff"/>' +
+      '<rect x="85" y="65" width="190" height="120" rx="40" fill="#f2eae4" stroke="#596275" stroke-width="6"/>' +
+      '<rect x="105" y="84" width="150" height="82" rx="24" fill="#182030"/>' +
+      '<path d="M128 128c8-14 24-14 32 0M200 128c8-14 24-14 32 0" fill="none" stroke="#7ae2ff" stroke-width="7" stroke-linecap="round"/>' +
+      '<path d="M164 146q16 14 32 0" fill="none" stroke="#7ae2ff" stroke-width="6" stroke-linecap="round"/>' +
+      '<path d="M138 196h84l-10 98h-64Z" fill="#fff" stroke="#596275" stroke-width="5"/>' +
+      '<path d="M133 226h94l-4 44h-86Z" fill="#9c6239"/>' +
+      '<rect x="130" y="186" width="100" height="16" rx="6" fill="#e2e6f0" stroke="#596275" stroke-width="4"/>' +
+      '<path d="M65 80l15 15M295 80l-15 15M180 28v20" stroke="#ffbd2e" stroke-width="8" stroke-linecap="round"/>' +
+      '</svg>');
+
+    const ROBOT_SAD = mediaHtml('img/p12_robot_sad.png', '<svg viewBox="0 0 360 320">' +
+      '<path d="M25 110 Q90 35 160 85" fill="none" stroke="#e5dcd5" stroke-width="44" stroke-linecap="round"/>' +
+      '<circle cx="95" cy="70" r="32" fill="#d5cbc4" stroke="#7d746d" stroke-width="4"/>' +
+      '<g transform="rotate(-8 175 145)">' +
+      '<rect x="85" y="75" width="180" height="114" rx="38" fill="#f2eae4" stroke="#7d746d" stroke-width="5"/>' +
+      '<rect x="103" y="93" width="144" height="78" rx="22" fill="#182030"/>' +
+      '<path d="M126 132q16 12 32 0M192 132q16 12 32 0" fill="none" stroke="#7ae2ff" stroke-width="6" stroke-linecap="round"/>' +
+      '<path d="M222 144c6 10 6 20 0 24s-10-4 0-24Z" fill="#5ce1ff"/>' +
+      '</g>' +
+      '<path d="M136 196h78l-9 96h-60Z" fill="#fff" stroke="#7d746d" stroke-width="4"/>' +
+      '<path d="M132 226h86l-4 42h-78Z" fill="#9c6239"/>' +
+      '<rect x="128" y="186" width="94" height="14" rx="5" fill="#e2e6f0" stroke="#7d746d" stroke-width="4"/>' +
+      '<path d="M90 120v26M105 114v26M120 122v22" stroke="#7eb6ff" stroke-width="5" stroke-linecap="round"/>' +
+      '</svg>');
+
+    const BAD_ICON_SVG = '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="#d92b5a" stroke-width="12"/><line x1="22" y1="22" x2="78" y2="78" stroke="#d92b5a" stroke-width="12"/></svg>';
+
+    const playView = $('p12PlayView');
+    const resView = $('p12ResView');
+    const timerBox = $('p12TimerBox');
+    const timeTx = $('p12TimeTx');
+    const curPhoto = $('p12CurPhoto');
+    const cardCnt = $('p12CardCnt');
+    const cardStage = $('p12CardStage');
+    const resGrid = $('p12ResGrid');
+    const resRobot = $('p12ResRobot');
+    const resMsg = $('p12ResMsg');
+    const resAro = $('p12ResAro');
+    const resActs = $('p12ResActs');
+
+    let deck = [];
+    let picks = [];
+    let idx = 0;
+    let remain = 60;
+    let tickTimer = null;
+    let navTimer = null;
+    let aroTimer = null;
+    let active = false;
+
+    function clearAllTimers() {
+      if (tickTimer) { clearInterval(tickTimer); tickTimer = null; }
+      if (navTimer) { clearTimeout(navTimer); navTimer = null; }
+      if (aroTimer) { clearTimeout(aroTimer); aroTimer = null; }
+    }
+
+    function fmtTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+    }
+
+    function updateTimerUi() {
+      timeTx.textContent = fmtTime(remain);
+      timerBox.classList.toggle('is-warn', remain <= 30 && remain > 10);
+      timerBox.classList.toggle('is-danger', remain <= 10);
+    }
+
+    function showCurrentCard() {
+      curPhoto.innerHTML = deck[idx].html;
+      cardCnt.textContent = (idx + 1) + ' / 20';
+      cardStage.classList.remove('is-pop');
+      void cardStage.offsetWidth;
+      cardStage.classList.add('is-pop');
+    }
+
+    function finishGame() {
+      active = false;
+      clearAllTimers();
+      playView.classList.add('is-off');
+      resView.classList.remove('is-off');
+
+      resGrid.innerHTML = '';
+      let allCorrect = true;
+      for (let i = 0; i < 20; i++) {
+        const item = deck[i];
+        const userAns = picks[i];
+        const ok = userAns === item.ans;
+        if (!ok) allCorrect = false;
+
+        const mini = document.createElement('div');
+        mini.className = 'p12-mini';
+        let tagHtml = '';
+        if (!userAns) {
+          tagHtml = '<div class="p12-mini-tag is-q">?</div>';
+        } else if (userAns === '못 써요') {
+          tagHtml = '<div class="p12-mini-tag">' + BAD_ICON_SVG + '</div>';
+        } else {
+          tagHtml = '<div class="p12-mini-tag">' + userAns + '</div>';
+        }
+        mini.innerHTML = '<div class="p12-mini-ph">' + item.html + tagHtml + '</div>' +
+          (ok ? '' : '<span class="p12-mini-err">!</span>');
+        resGrid.appendChild(mini);
+      }
+
+      if (allCorrect) {
+        playCorrect();
+        resRobot.innerHTML = ROBOT_HAPPY;
+        resMsg.className = 'p12-res-msg is-ok';
+        resMsg.style.opacity = '1';
+        resMsg.innerHTML = '우와~<br>정확하게<br>학습 시켰어요!';
+        resAro.classList.add('is-hide');
+        resActs.classList.add('is-off');
+        navTimer = setTimeout(() => navigateTo('page13.html'), 3000);
+      } else {
+        playWrong();
+        resRobot.innerHTML = ROBOT_SAD;
+        resMsg.className = 'p12-res-msg';
+        resMsg.style.opacity = '1';
+        resMsg.innerHTML = '저런~<br>이름표가 잘못 붙은<br>사진이 있어서 로봇을 정확하게<br>학습 시키지 못했어요.';
+        resAro.classList.remove('is-hide');
+        resActs.classList.add('is-off');
+        aroTimer = setTimeout(() => {
+          resAro.classList.add('is-hide');
+          resMsg.style.opacity = '0';
+          resActs.classList.remove('is-off');
+        }, 2200);
+      }
+    }
+
+    function startGame() {
+      clearAllTimers();
+      deck = buildDeck();
+      picks = new Array(20).fill(null);
+      idx = 0;
+      remain = 60;
+      active = true;
+      resView.classList.add('is-off');
+      playView.classList.remove('is-off');
+      updateTimerUi();
+      showCurrentCard();
+
+      tickTimer = setInterval(() => {
+        if (!active) return;
+        remain--;
+        if (remain <= 0) {
+          remain = 0;
+          updateTimerUi();
+          finishGame();
+        } else {
+          updateTimerUi();
+        }
+      }, 1000);
+    }
+
+    document.querySelectorAll('.p12-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (!active) return;
+        playClick();
+        picks[idx] = btn.dataset.ans;
+        idx++;
+        if (idx >= 20) {
+          finishGame();
+        } else {
+          showCurrentCard();
+        }
+      });
+    });
+
+    $('p12RetryBtn').addEventListener('click', () => {
+      playClick();
+      startGame();
+    });
+
+    $('p12FinishBtn').addEventListener('click', () => {
+      playClick();
+      navigateTo('page13.html');
+    });
+
+    startGame();
+  })();
+  </script>
+</body>
+</html>

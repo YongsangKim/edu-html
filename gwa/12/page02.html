@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>생일 축하해! 케이크 촛불 끄기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .p02-lv{position:absolute;left:50px;top:40px;height:84px;margin:0;padding:6px 36px 0;box-sizing:border-box;display:flex;align-items:center;border-radius:42px;background:var(--c-navy);font-family:'Cafe24 Ssurround';font-size:50px;color:#fff}
+        .p02-cnt{position:absolute;right:50px;top:30px;height:110px;margin:0;padding:6px 40px 0 30px;box-sizing:border-box;display:flex;align-items:center;gap:18px;border:solid 5px var(--c-ink);border-radius:55px;background:#fff;font-family:'Cafe24 Ssurround';font-size:56px;color:var(--c-ink)}
+        .p02-cnt i{font-style:normal;font-size:70px;line-height:1}
+        .p02-cnt small{font-size:40px;color:var(--c-purple)}
+        .p02-cake{position:absolute;left:110px;top:640px;width:500px;height:250px;box-sizing:border-box;border:solid 6px var(--c-navy);border-radius:40px 40px 24px 24px;background:linear-gradient(180deg,#fff6e8 0 34%,#f4a7c0 34% 46%,#f7c58a 46%)}
+        .p02-plate{position:absolute;left:70px;top:870px;width:580px;height:50px;border-radius:50%;background:#bfe3ff;border:solid 5px var(--c-navy);box-sizing:border-box}
+        .p02-candle{position:absolute;pointer-events:none}
+        .p02-stick{position:absolute;left:0;bottom:0;border:solid 3px var(--c-navy);box-sizing:border-box;border-radius:6px;background:repeating-linear-gradient(135deg,#ff8fb1 0 10px,#fff 10px 20px)}
+        .p02-flame{position:absolute;left:50%;transform:translateX(-50%);line-height:1;transition:opacity .2s}
+        .p02-candle.is-out .p02-flame{opacity:0}
+        .p02-smoke{position:absolute;font-size:60px;line-height:1;pointer-events:none;animation:p02Smoke 1.2s ease-out forwards}
+        @keyframes p02Smoke{0%{opacity:.9;transform:translateY(0) scale(.7)}100%{opacity:0;transform:translateY(-90px) scale(1.3)}}
+        .p02-girl{position:absolute;left:640px;top:250px;width:340px;height:660px;display:flex;align-items:flex-end;justify-content:center;font-size:420px;line-height:1}
+        .p02-wind{position:absolute;left:560px;top:520px;font-size:120px;line-height:1;opacity:0;pointer-events:none}
+        .p02-wind.is-on{animation:p02Wind .5s linear infinite}
+        @keyframes p02Wind{0%{opacity:0;transform:translateX(70px) scale(.8)}30%{opacity:.85}100%{opacity:0;transform:translateX(-130px) scale(1.25)}}
+        .p02-bub{position:absolute;left:1010px;top:200px;width:400px;height:400px;box-sizing:border-box;border:solid 6px var(--c-navy);border-radius:40px;background:#fff;display:flex;align-items:center;justify-content:center}
+        .p02-bub:before{content:'';position:absolute;left:-64px;top:200px;border:24px solid transparent;border-right:40px solid var(--c-navy)}
+        .p02-lung{font-size:250px;line-height:1;transform-origin:center;transition:transform .25s ease}
+        .p02-pull{position:absolute;left:1090px;top:600px;width:240px;height:200px;transition:transform .25s ease;touch-action:none;cursor:grab}
+        .p02-pull.is-drag{transition:none;cursor:grabbing}
+        .p02-mem{position:absolute;left:0;top:0;width:240px;height:40px;border-radius:0 0 50% 50%;background:#ff8fb1;border:solid 6px var(--c-navy);border-top:0;box-sizing:border-box}
+        .p02-knob{position:absolute;left:75px;top:40px;width:90px;display:flex;flex-direction:column;align-items:center}
+        .p02-knob:before{content:'';width:12px;height:60px;background:var(--c-navy)}
+        .p02-knob:after{content:'';width:90px;height:52px;border-radius:26px;background:var(--c-yellow);border:solid 6px var(--c-navy);box-sizing:border-box}
+        .p02-hit{position:absolute;left:-20px;top:30px;width:280px;height:170px}
+        .p02-fg{position:absolute;left:1220px;top:700px;width:120px;pointer-events:none;animation:p02Fg 1.4s ease-in-out infinite}
+        @keyframes p02Fg{0%,15%{transform:translateY(0)}75%,100%{transform:translateY(170px)}}
+        .gauge.is-thin.is-vertical.p02-gauge{left:1560px;top:220px;height:640px}
+        .p02-gauge .gauge-fill{transition:none}
+        .p02-max{position:absolute;left:1500px;width:184px;top:165px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:40px;line-height:1;color:var(--c-ink)}
+        .p02-mark{position:absolute;left:1530px;width:120px;top:860px;height:0;border-top:dashed 5px var(--c-ink)}
+        .p02-mark b{position:absolute;left:140px;top:-26px;font-family:'Cafe24 Ssurround';font-weight:400;font-size:40px;color:var(--c-ink);white-space:nowrap}
+        .p02-wrong{z-index:30}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default" id="p02Main">
+          <p class="p02-lv" id="p02Lv">Level 1</p>
+          <p class="p02-cnt"><small>남은 초</small><i>🕯️</i>X<span id="p02Cnt">5</span></p>
+          <div class="p02-plate"></div>
+          <div class="p02-cake"></div>
+          <div id="p02Candles"></div>
+          <div class="p02-wind" id="p02Wind">💨</div>
+          <div class="p02-girl"><span id="p02Girl">🧍‍♀️</span></div>
+          <div class="p02-bub"><span class="p02-lung" id="p02Lung">🫁</span></div>
+          <div class="p02-pull" id="p02Pull">
+            <div class="p02-mem"></div>
+            <div class="p02-knob"></div>
+            <div class="p02-hit" id="p02Hit"></div>
+          </div>
+          <div class="gauge is-thin is-vertical p02-gauge"><div class="gauge-fill" id="p02Fill" style="height:0%"></div></div>
+          <p class="p02-max" id="p02Max" hidden>최대</p>
+          <div class="p02-mark" id="p02Mark" hidden><b>여기까지</b></div>
+          <img class="p02-fg" id="p02Fg" src="../../resources/img/common/img_finger01.png" alt="">
+
+          <div class="ox-result-wrong is-avatar is-off p02-wrong" id="p02Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body"><p class="avatar-popup-text">초가 아직 남아있어요!</p><span class="avatar-popup-sub">더 오래, 더 쎈 바람을 내보내려면<br>어떻게 해야 할까요?</span></div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p02Done" style="z-index:30">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <span style="position:absolute;right:90px;top:50px;font-size:150px;line-height:1">🏆</span>
+                    <p class="avatar-card-title is-left" style="padding:0;margin-bottom:40px">정말 잘했어요!</p>
+                    <p class="avatar-card-text">모든 촛불을 끄는데 성공했어요!</p>
+                  </div>
+                  <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">손잡이를 깊게 당길수록 폐가 크게 부풀고,<br>공기가 더 많이 들어왔어요.<br>공기를 많이 들이마시면 더 길게 내쉴 수 있어요.</p>
+                  </div>
+                  <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">숨쉬기는 공기를 들이마시고 내쉬는 순서가<br>계속 반복되는 활동이에요.<br>이 과정을 ‘순서도‘로 나타내 볼까요?</p>
+                  </div>
+                  <a href="page03.html" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="생일 축하해! 케이크 촛불 끄기" data-next="page03.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const HINT_AT = 2;
+    const HINT_ONCE = true;
+
+    const XS = [150, 240, 330, 420, 510];
+    const ROUNDS = [
+      { n: 5,  scale: 1,   base: [[650, 690]] },
+      { n: 10, scale: 0.8, base: [[660, 690], [750, 780]] },
+      { n: 15, scale: 0.7, base: [[655, 685], [715, 745], [775, 805]] },
+    ];
+    const PULL_PX = 300, MIN_PULL = 0.08, BLOW_MIN = 500, BLOW_MAX = 2200;
+    const GAUGE_H = 640, GAUGE_BOTTOM = 860;
+
+    const candlesEl = $('p02Candles');
+    const pull = $('p02Pull');
+    const fill = $('p02Fill');
+    const lung = $('p02Lung');
+    const wind = $('p02Wind');
+    const mark = $('p02Mark');
+    const fg = $('p02Fg');
+
+    let level = 0;
+    let candles = [];
+    let remain = 0;
+    let attempts = 0;
+    let hintShown = false;
+    let best = 0;
+    let busy = false;
+    let dragging = false;
+    let startY = 0;
+    let p = 0;
+
+    const draw = () => {
+      const r = ROUNDS[level];
+      candlesEl.innerHTML = '';
+      candles = [];
+      const list = [];
+      r.base.forEach((row) => {
+        XS.forEach((x, i) => list.push({ x, y: row[i % 2] }));
+      });
+      list.sort((a, b) => (b.x - a.x) || (b.y - a.y));
+      list.forEach((pt) => {
+        const w = 22 * r.scale, h = 80 * r.scale;
+        const el = document.createElement('div');
+        el.className = 'p02-candle';
+        el.style.left = (pt.x - w / 2) + 'px';
+        el.style.top = (pt.y - h) + 'px';
+        el.style.width = w + 'px';
+        el.style.height = h + 'px';
+        el.innerHTML = '<div class="p02-stick" style="width:' + w + 'px;height:' + h + 'px"></div><span class="p02-flame" style="font-size:' + (50 * r.scale) + 'px;top:' + (-50 * r.scale) + 'px">🔥</span>';
+        candlesEl.appendChild(el);
+        candles.push({ el, pt, h, out: false });
+      });
+      remain = r.n;
+      attempts = 0;
+      hintShown = false;
+      best = 0;
+      $('p02Lv').textContent = 'Level ' + (level + 1);
+      $('p02Cnt').textContent = remain;
+      $('p02Max').hidden = level !== 2;
+      mark.hidden = true;
+      $('p02Girl').textContent = '🧍‍♀️';
+      fill.style.height = '0%';
+    };
+
+    const snuff = () => {
+      const c = candles.find((x) => !x.out);
+      if (!c) return;
+      c.out = true;
+      c.el.classList.add('is-out');
+      const s = document.createElement('span');
+      s.className = 'p02-smoke';
+      s.textContent = '💨';
+      s.style.left = (c.pt.x - 30) + 'px';
+      s.style.top = (c.pt.y - c.h - 70) + 'px';
+      candlesEl.appendChild(s);
+      setTimeout(() => s.remove(), 1300);
+      remain--;
+      $('p02Cnt').textContent = remain;
+    };
+
+    const setPull = (v) => {
+      p = v;
+      pull.style.transform = 'translateY(' + (v * PULL_PX) + 'px)';
+      lung.style.transform = 'scale(' + (1 + v * 0.4) + ')';
+      fill.style.height = (v * 100) + '%';
+    };
+
+    const afterBlow = () => {
+      wind.classList.remove('is-on');
+      if (remain <= 0) {
+        playCorrect();
+        $('p02Girl').textContent = '🙆‍♀️';
+        setTimeout(() => {
+          if (level >= ROUNDS.length - 1) {
+            $('p02Done').classList.remove('is-off');
+          } else {
+            level++;
+            draw();
+            busy = false;
+          }
+        }, 1800);
+        return;
+      }
+      const hint = HINT_ONCE ? (attempts === HINT_AT && !hintShown) : attempts >= HINT_AT;
+      if (hint) {
+        hintShown = true;
+        playWrong();
+        flashLayer($('p02Wrong'), 'is-off', 2000);
+        setTimeout(() => { busy = false; }, 2000);
+        return;
+      }
+      busy = false;
+    };
+
+    const release = () => {
+      if (!dragging) return;
+      dragging = false;
+      pull.classList.remove('is-drag');
+      const depth = p;
+      if (depth < MIN_PULL) {
+        setPull(0);
+        return;
+      }
+      busy = true;
+      attempts++;
+      const r = ROUNDS[level];
+      const k = Math.min(remain, Math.max(1, Math.ceil(depth * r.n)));
+      const blowMs = BLOW_MIN + depth * (BLOW_MAX - BLOW_MIN);
+      if (depth > best) {
+        best = depth;
+        mark.style.top = (GAUGE_BOTTOM - depth * GAUGE_H) + 'px';
+        mark.hidden = false;
+      }
+      pull.style.transform = 'translateY(0)';
+      lung.style.transition = 'transform ' + blowMs + 'ms linear';
+      fill.style.transition = 'height ' + blowMs + 'ms linear';
+      lung.style.transform = 'scale(1)';
+      fill.style.height = '0%';
+      p = 0;
+      wind.classList.add('is-on');
+      for (let i = 0; i < k; i++) {
+        setTimeout(snuff, 200 + (blowMs * 0.8) * (i / k));
+      }
+      setTimeout(() => {
+        lung.style.transition = '';
+        fill.style.transition = 'none';
+        afterBlow();
+      }, blowMs + 300);
+    };
+
+    pull.addEventListener('pointerdown', (e) => {
+      if (busy) return;
+      dragging = true;
+      startY = e.clientY;
+      pull.classList.add('is-drag');
+      lung.style.transition = 'none';
+      fill.style.transition = 'none';
+      fg.style.display = 'none';
+      pull.setPointerCapture(e.pointerId);
+      playClick();
+      e.preventDefault();
+    });
+    pull.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      const dy = (e.clientY - startY) / currentScale;
+      setPull(Math.max(0, Math.min(1, dy / PULL_PX)));
+    });
+    pull.addEventListener('pointerup', release);
+    pull.addEventListener('pointercancel', release);
+
+    draw();
+  })();
+  </script>
+</body>
+</html>

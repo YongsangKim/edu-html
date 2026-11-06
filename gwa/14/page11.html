@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>슝슝! 의사결정 나무 레이스!</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+      .p11-race-bg{position:absolute;left:0;top:0;width:1920px;height:960px;background:url('img/race_bg.png') no-repeat center/cover;overflow:hidden}
+      .p11-lv{position:absolute;left:50px;top:36px;height:84px;margin:0;padding:6px 38px 0;box-sizing:border-box;display:flex;align-items:center;border-radius:42px;background:var(--c-navy);border:solid 5px var(--c-sky);font-family:'Cafe24 Ssurround';font-size:48px;color:#fff;z-index:4}
+      .p11-flags{position:absolute;right:50px;top:30px;height:80px;padding:0 24px;border-radius:40px;background:rgba(255,255,255,.92);border:solid 4px var(--c-navy);display:flex;align-items:center;gap:16px;z-index:4}
+      .p11-flags img{width:54px;height:54px;object-fit:contain}
+      .p11-flags img.is-off{filter:grayscale(1);opacity:.35}
+      .p11-mmap{position:absolute;right:50px;top:124px;width:340px;height:220px;border-radius:22px;background:rgba(255,255,255,.94);border:solid 5px var(--c-navy);box-shadow:0 8px 0 rgba(0,0,0,.15);padding:10px 14px;box-sizing:border-box;z-index:4}
+      .p11-mmap-hd{margin:0 0 6px;font-family:'Cafe24 Ssurround';font-size:22px;color:var(--c-navy);text-align:center}
+      .p11-mmap svg{width:100%;height:155px;display:block}
+      .p11-qsign{position:absolute;left:50%;top:38px;transform:translateX(-50%);min-width:860px;height:130px;padding:8px 50px 0;box-sizing:border-box;border-radius:28px;border:solid 8px #5c3a18;background:linear-gradient(180deg,#fff9e6,#ffe8a3);box-shadow:0 12px 0 rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:56px;color:var(--c-ink);letter-spacing:-0.04em;z-index:4;transition:all .3s ease}
+      .p11-qsign.is-warn{border-color:#e0314b;background:#fff0f2;color:#e0314b}
+      .p11-cart{position:absolute;left:50%;top:500px;transform:translateX(-50%);width:340px;height:320px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;z-index:5;transition:all .7s cubic-bezier(.25,1,.5,1)}
+      .p11-cart.go-left{left:28%;top:410px;transform:translateX(-50%) scale(.8)}
+      .p11-cart.go-right{left:72%;top:410px;transform:translateX(-50%) scale(.8)}
+      .p11-cart-item{width:160px;height:180px;object-fit:contain;margin-bottom:-26px;z-index:2;filter:drop-shadow(0 8px 10px rgba(0,0,0,.25))}
+      .p11-cart-body{width:280px;height:124px;border-radius:28px 28px 20px 20px;background:linear-gradient(180deg,#38b6ff,#1664d8);border:solid 6px var(--c-ink);position:relative;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:32px;color:#fff;box-shadow:0 14px 20px rgba(0,0,0,.28)}
+      .p11-cart-body:before,.p11-cart-body:after{content:'';position:absolute;bottom:-18px;width:44px;height:44px;border-radius:50%;background:#222;border:solid 5px #ddd}
+      .p11-cart-body:before{left:24px}.p11-cart-body:after{right:24px}
+      .p11-yn-btn{position:absolute;bottom:48px;width:380px;height:116px;font-size:64px;z-index:6;margin:0;display:flex;align-items:center;justify-content:center;padding-top:8px}
+      .p11-yn-btn.is-yes{left:140px}
+      .p11-yn-btn.is-no{right:140px}
+      .p11-pick-bar{position:absolute;left:60px;right:60px;bottom:34px;height:240px;border-radius:30px;background:rgba(27,22,64,.92);border:solid 6px var(--c-yellow);display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;z-index:7}
+      .p11-pick-bar p{margin:0;font-family:'Cafe24 Ssurround';font-size:36px;color:var(--c-yellow)}
+      .p11-pick-row{display:flex;gap:32px}
+      .p11-pick-row .card-btn{margin:0;min-width:0;width:520px;height:108px;font-size:42px;display:flex;align-items:center;justify-content:center;padding:8px 20px 0}
+      .p11-sink-panel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:900px;height:620px;background:#fff;border:solid 8px var(--c-navy);border-radius:32px;box-shadow:0 16px 40px rgba(0,0,0,.3);display:none;flex-direction:column;align-items:center;justify-content:center;gap:24px;z-index:8}
+      .p11-sink-lead{margin:0;font-family:'Cafe24 Ssurround';font-size:42px;color:var(--c-navy)}
+      .p11-bottle-box{width:240px;height:280px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .4s ease}
+      .p11-bottle-box.is-poured{transform:rotate(70deg) translate(20px,-30px)}
+      .p11-bottle-box img{width:180px;height:240px;object-fit:contain}
+      .p11-sink-bowl{width:560px;height:120px;background:linear-gradient(180deg,#dbe5f2,#b8cadf);border:solid 6px #7c8ea3;border-radius:0 0 60px 60px;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:30px;color:#5a6c82}
+      .p11-fg{position:absolute;left:340px;top:840px;width:110px;z-index:10;pointer-events:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p11-race-bg"></div>
+
+          <p class="p11-lv" id="p11RoundBadge">1라운드</p>
+          <div class="p11-qsign" id="p11Qsign">음료를 다 비웠나요?</div>
+
+          <div class="p11-flags">
+            <img src="img/image27.png" alt="1R" id="flag1" class="is-off">
+            <img src="img/image27.png" alt="2R" id="flag2" class="is-off">
+            <img src="img/image27.png" alt="3R" id="flag3" class="is-off">
+          </div>
+
+          <div class="p11-mmap">
+            <p class="p11-mmap-hd">의사결정 나무 Map</p>
+            <svg viewBox="0 0 320 155" id="p11MapSvg">
+              <line x1="160" y1="30" x2="90" y2="75" stroke="#8a94a6" stroke-width="4"/>
+              <line x1="160" y1="30" x2="230" y2="75" stroke="#8a94a6" stroke-width="4"/>
+              <polygon points="160,10 205,28 160,46 115,28" fill="#fff4b8" stroke="#1b1640" stroke-width="3"/>
+              <circle cx="160" cy="28" r="9" fill="#ff2e4c" stroke="#fff" stroke-width="2.5" id="mapPin"/>
+              <polygon points="90,58 130,75 90,92 50,75" fill="#ebe8f9" stroke="#7c6fc4" stroke-width="3"/>
+              <rect x="210" y="60" width="52" height="32" rx="8" fill="#dff2ec" stroke="#5c9486" stroke-width="3"/>
+              <line x1="90" y1="75" x2="50" y2="125" stroke="#8a94a6" stroke-width="4"/>
+              <line x1="90" y1="75" x2="130" y2="125" stroke="#8a94a6" stroke-width="4"/>
+              <rect x="24" y="115" width="52" height="32" rx="8" fill="#dff2ec" stroke="#5c9486" stroke-width="3"/>
+              <polygon points="130,110 165,126 130,142 95,126" fill="#ebe8f9" stroke="#7c6fc4" stroke-width="3"/>
+            </svg>
+          </div>
+
+          <div class="p11-cart" id="p11Cart">
+            <img class="p11-cart-item" id="p11CartItem" src="img/image28.png" alt="빈 물 페트병">
+            <div class="p11-cart-body">분리배출 카트</div>
+          </div>
+
+          <button type="button" class="card-btn p11-yn-btn is-yes" id="btnYes">예</button>
+          <button type="button" class="card-btn p11-yn-btn is-no" id="btnNo">아니오</button>
+
+          <div class="p11-pick-bar" id="p11PickBar">
+            <p>우유갑을 알맞은 분리배출함으로 보내려면 새 질문이 필요해요!</p>
+            <div class="p11-pick-row">
+              <button type="button" class="card-btn" data-pick="yes">종이로 만들어졌나요?</button>
+              <button type="button" class="card-btn" data-pick="no1">예쁜가요?</button>
+              <button type="button" class="card-btn" data-pick="no2">둥근 모양인가요?</button>
+            </div>
+          </div>
+
+          <div class="p11-sink-panel" id="p11SinkPanel">
+            <p class="p11-sink-lead">남은 음료를 개수대에 비워주세요!</p>
+            <div class="p11-bottle-box" id="p11SinkBottle">
+              <img id="p11SinkBottleImg" src="img/image30.png" alt="주스가 남은 병">
+            </div>
+            <div class="p11-sink-bowl">개수대</div>
+            <button type="button" class="card-btn is-popup" id="btnSinkResume" style="display:none;min-width:260px;height:84px;font-size:38px">다시 출발하기</button>
+          </div>
+
+          <img class="p11-fg" id="p11Finger" src="../../resources/img/common/img_finger01.png" alt="">
+
+          <div class="ox-result-wrong is-avatar is-off" id="p11WrongModal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar">
+                <img src="../../resources/img/common/avatar_incorrect.png" alt="">
+              </div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text" id="p11WrongMsg">다시 한번 생각해볼까요?</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="r1ClearModal">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body is-side">
+                <p class="avatar-card-text">1라운드 성공!<br>투명한 물 페트병이 플라스틱 분리배출함에 알맞게 들어갔어요!<br>다음 라운드로 출발해 볼까요?</p>
+              </div>
+              <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" id="btnToR2" data-sound="sound/click.mp3">다음 라운드</a>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="r2ClearModal">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body is-side">
+                <p class="avatar-card-text">2라운드 성공!<br>남은 음료를 깨끗이 비운 유리병을 유리 분리배출함에 넣었어요!<br>마지막 라운드로 출발해 볼까요?</p>
+              </div>
+              <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" id="btnToR3" data-sound="sound/click.mp3">다음 라운드</a>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="r3WarnModal">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_incorrect.png" alt="">
+              <div class="avatar-card-body is-side">
+                <p class="avatar-card-text">앗! 우유갑이 갈 곳이 없어요!<br>종이팩과 캔을 나눌 수 있도록 의사결정 나무에 새로운 질문을 추가해 볼까요?</p>
+              </div>
+              <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" id="btnOpenPick" data-sound="sound/click.mp3">질문 추가하기</a>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="r3ClearModal">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">3라운드까지 모두 성공했어요!<br>의사결정 나무에 새로운 질문을 추가해서 우유갑도 알맞게 분리배출했어요.</p>
+                  </div>
+                  <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">오늘 배운 의사결정 나무를 활용하면<br>여러 가지 물건을 기준에 따라 쉽고 정확하게 나눌 수 있답니다!</p>
+                  </div>
+                  <a href="page12.html" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="슝슝! 의사결정 나무 레이스!" data-prev="page10.html" data-next="page12.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+    (function () {
+      var curRound = 1;
+      var curStep = 0;
+
+      var qsign = document.getElementById('p11Qsign');
+      var cart = document.getElementById('p11Cart');
+      var cartItem = document.getElementById('p11CartItem');
+      var roundBadge = document.getElementById('p11RoundBadge');
+      var flag1 = document.getElementById('flag1');
+      var flag2 = document.getElementById('flag2');
+      var flag3 = document.getElementById('flag3');
+      var btnYes = document.getElementById('btnYes');
+      var btnNo = document.getElementById('btnNo');
+      var pickBar = document.getElementById('p11PickBar');
+      var sinkPanel = document.getElementById('p11SinkPanel');
+      var sinkBottle = document.getElementById('p11SinkBottle');
+      var sinkBottleImg = document.getElementById('p11SinkBottleImg');
+      var btnSinkResume = document.getElementById('btnSinkResume');
+      var mapPin = document.getElementById('mapPin');
+      var finger = document.getElementById('p11Finger');
+
+      var wrongModal = document.getElementById('p11WrongModal');
+      var wrongMsg = document.getElementById('p11WrongMsg');
+      var r1ClearModal = document.getElementById('r1ClearModal');
+      var r2ClearModal = document.getElementById('r2ClearModal');
+      var r3WarnModal = document.getElementById('r3WarnModal');
+      var r3ClearModal = document.getElementById('r3ClearModal');
+
+      function updateMapPin(x, y) {
+        if (mapPin) {
+          mapPin.setAttribute('cx', x);
+          mapPin.setAttribute('cy', y);
+        }
+      }
+
+      function setupRound1() {
+        curRound = 1;
+        curStep = 0;
+        roundBadge.textContent = '1라운드';
+        cartItem.src = 'img/image28.png';
+        cart.className = 'p11-cart';
+        qsign.className = 'p11-qsign';
+        qsign.textContent = '음료를 다 비웠나요?';
+        updateMapPin(160, 28);
+      }
+
+      function setupRound2() {
+        curRound = 2;
+        curStep = 0;
+        roundBadge.textContent = '2라운드';
+        cartItem.src = 'img/image30.png';
+        cart.className = 'p11-cart';
+        qsign.className = 'p11-qsign';
+        qsign.textContent = '음료를 다 비웠나요?';
+        updateMapPin(160, 28);
+        flag1.classList.remove('is-off');
+      }
+
+      function setupRound3() {
+        curRound = 3;
+        curStep = 0;
+        roundBadge.textContent = '3라운드';
+        cartItem.src = 'img/image32.png';
+        cart.className = 'p11-cart';
+        qsign.className = 'p11-qsign';
+        qsign.textContent = '음료를 다 비웠나요?';
+        updateMapPin(160, 28);
+        flag2.classList.remove('is-off');
+      }
+
+      function handleAnswer(ans) {
+        finger.style.display = 'none';
+
+        if (curRound === 1) {
+          if (curStep === 0) {
+            if (ans === 'yes') {
+              SFX.play('correct');
+              cart.classList.add('go-left');
+              setTimeout(function () {
+                cart.className = 'p11-cart';
+                curStep = 1;
+                qsign.textContent = '몸체가 투명한 플라스틱인가요?';
+                updateMapPin(90, 75);
+              }, 700);
+            } else {
+              SFX.play('wrong');
+              wrongMsg.innerHTML = '페트병 속을 다시 살펴볼까요?<br>음료가 모두 비워져 있어요!';
+              flashLayer(wrongModal);
+            }
+          } else if (curStep === 1) {
+            if (ans === 'yes') {
+              SFX.play('correct');
+              cart.classList.add('go-left');
+              setTimeout(function () {
+                flag1.classList.remove('is-off');
+                r1ClearModal.classList.remove('is-off');
+              }, 700);
+            } else {
+              SFX.play('wrong');
+              wrongMsg.innerHTML = '투명한 플라스틱 페트병이에요!<br>다시 선택해 볼까요?';
+              flashLayer(wrongModal);
+            }
+          }
+        } else if (curRound === 2) {
+          if (curStep === 0) {
+            if (ans === 'no') {
+              SFX.play('correct');
+              cart.classList.add('go-right');
+              setTimeout(function () {
+                sinkPanel.style.display = 'flex';
+                sinkBottle.classList.remove('is-poured');
+                sinkBottleImg.src = 'img/image30.png';
+                btnSinkResume.style.display = 'none';
+              }, 700);
+            } else {
+              SFX.play('wrong');
+              wrongMsg.innerHTML = '병 안에 아직 오렌지 주스가 남아 있어요!';
+              flashLayer(wrongModal);
+            }
+          } else if (curStep === 1) {
+            if (ans === 'yes') {
+              SFX.play('correct');
+              cart.classList.add('go-left');
+              setTimeout(function () {
+                cart.className = 'p11-cart';
+                curStep = 2;
+                qsign.textContent = '몸체가 투명한 플라스틱인가요?';
+                updateMapPin(90, 75);
+              }, 700);
+            } else {
+              SFX.play('wrong');
+              wrongMsg.innerHTML = '음료를 깨끗하게 비웠어요!<br>‘예’를 선택해 볼까요?';
+              flashLayer(wrongModal);
+            }
+          } else if (curStep === 2) {
+            if (ans === 'no') {
+              SFX.play('correct');
+              cart.classList.add('go-right');
+              setTimeout(function () {
+                cart.className = 'p11-cart';
+                curStep = 3;
+                qsign.textContent = '유리로 만들어졌나요?';
+                updateMapPin(130, 125);
+              }, 700);
+            } else {
+              SFX.play('wrong');
+              wrongMsg.innerHTML = '플라스틱이 아니라 유리병이에요!<br>다시 선택해 볼까요?';
+              flashLayer(wrongModal);
+            }
+          } else if (curStep === 3) {
+            if (ans === 'yes') {
+              SFX.play('correct');
+              cart.classList.add('go-left');
+              setTimeout(function () {
+                flag2.classList.remove('is-off');
+                r2ClearModal.classList.remove('is-off');
+              }, 700);
+            } else {
+              SFX.play('wrong');
+              wrongMsg.innerHTML = '유리로 만든 병이 맞아요!<br>다시 선택해 볼까요?';
+              flashLayer(wrongModal);
+            }
+          }
+        } else if (curRound === 3) {
+          if (curStep === 0) {
+            if (ans === 'yes') {
+              SFX.play('correct');
+              cart.classList.add('go-left');
+              setTimeout(function () {
+                cart.className = 'p11-cart';
+                curStep = 1;
+                qsign.textContent = '몸체가 투명한 플라스틱인가요?';
+                updateMapPin(90, 75);
+              }, 700);
+            } else {
+              SFX.play('wrong');
+              wrongMsg.innerHTML = '우유갑이 비워져 있어요!<br>‘예’를 선택해 볼까요?';
+              flashLayer(wrongModal);
+            }
+          } else if (curStep === 1) {
+            if (ans === 'no') {
+              SFX.play('correct');
+              cart.classList.add('go-right');
+              setTimeout(function () {
+                cart.className = 'p11-cart';
+                curStep = 2;
+                qsign.textContent = '유리로 만들어졌나요?';
+                updateMapPin(130, 125);
+              }, 700);
+            } else {
+              SFX.play('wrong');
+              wrongMsg.innerHTML = '우유갑은 플라스틱이 아니에요!<br>다시 선택해 볼까요?';
+              flashLayer(wrongModal);
+            }
+          } else if (curStep === 2) {
+            if (ans === 'no') {
+              SFX.play('correct');
+              r3WarnModal.classList.remove('is-off');
+            } else {
+              SFX.play('wrong');
+              wrongMsg.innerHTML = '우유갑은 유리가 아니에요!<br>‘아니오’를 선택해 볼까요?';
+              flashLayer(wrongModal);
+            }
+          } else if (curStep === 3) {
+            if (ans === 'yes') {
+              SFX.play('correct');
+              cart.classList.add('go-left');
+              setTimeout(function () {
+                flag3.classList.remove('is-off');
+                r3ClearModal.classList.remove('is-off');
+              }, 700);
+            } else {
+              SFX.play('wrong');
+              wrongMsg.innerHTML = '우유갑은 종이로 만들어졌어요!<br>‘예’를 선택해 볼까요?';
+              flashLayer(wrongModal);
+            }
+          }
+        }
+      }
+
+      btnYes.addEventListener('click', function () { handleAnswer('yes'); });
+      btnNo.addEventListener('click', function () { handleAnswer('no'); });
+
+      sinkBottle.addEventListener('click', function () {
+        if (!sinkBottle.classList.contains('is-poured')) {
+          SFX.play('correct');
+          sinkBottle.classList.add('is-poured');
+          setTimeout(function () {
+            sinkBottleImg.src = 'img/image31.png';
+            btnSinkResume.style.display = 'block';
+          }, 500);
+        }
+      });
+
+      btnSinkResume.addEventListener('click', function () {
+        sinkPanel.style.display = 'none';
+        cartItem.src = 'img/image31.png';
+        cart.className = 'p11-cart';
+        curStep = 1;
+        qsign.textContent = '음료를 다 비웠나요?';
+        updateMapPin(160, 28);
+      });
+
+      document.getElementById('btnToR2').addEventListener('click', function () {
+        r1ClearModal.classList.add('is-off');
+        setupRound2();
+      });
+
+      document.getElementById('btnToR3').addEventListener('click', function () {
+        r2ClearModal.classList.add('is-off');
+        setupRound3();
+      });
+
+      document.getElementById('btnOpenPick').addEventListener('click', function () {
+        r3WarnModal.classList.add('is-off');
+        qsign.classList.add('is-warn');
+        qsign.textContent = '⚠️ 어떤 질문이 들어가야 할까요?';
+        btnYes.style.display = 'none';
+        btnNo.style.display = 'none';
+        pickBar.style.display = 'flex';
+      });
+
+      var pickBtns = pickBar.querySelectorAll('button');
+      pickBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var pickVal = btn.getAttribute('data-pick');
+          if (pickVal === 'yes') {
+            SFX.play('correct');
+            pickBar.style.display = 'none';
+            qsign.classList.remove('is-warn');
+            qsign.textContent = '종이로 만들어졌나요?';
+            btnYes.style.display = 'flex';
+            btnNo.style.display = 'flex';
+            curStep = 3;
+          } else {
+            SFX.play('wrong');
+            if (pickVal === 'no1') {
+              wrongMsg.innerHTML = '사람마다 생각이 다른 질문으로는 나눌 수 없어요!';
+            } else {
+              wrongMsg.innerHTML = '종이팩과 캔의 재질을 구분할 수 있는 질문을 골라보세요!';
+            }
+            flashLayer(wrongModal);
+          }
+        });
+      });
+
+      setupRound1();
+    })();
+  </script>
+</body>
+</html>

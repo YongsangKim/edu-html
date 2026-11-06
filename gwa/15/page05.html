@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>색의 진하기 따라 커피 사진 나누기</title>
+  <link rel="stylesheet" href="../../resources/css/common.css">
+  <style>
+    .p05-left-tray {
+      position: absolute;
+      left: 48px;
+      top: 155px;
+      width: 750px;
+      height: 760px;
+      border-radius: 56px;
+      background: linear-gradient(145deg, #d79557 0%, #b87336 55%, #965720 100%);
+      box-shadow:
+        0 14px 28px rgba(45, 22, 6, 0.28),
+        inset 0 4px 8px rgba(255, 232, 204, 0.55),
+        inset 0 -8px 14px rgba(70, 34, 8, 0.55);
+      padding: 28px;
+      box-sizing: border-box;
+      z-index: 2;
+    }
+    .p05-left-tray-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 38px;
+      background:
+        repeating-linear-gradient(90deg, rgba(120, 62, 18, 0.08) 0 28px, rgba(255, 215, 175, 0.06) 28px 56px),
+        linear-gradient(180deg, #c68246 0%, #d89658 50%, #be7a3d 100%);
+      box-shadow:
+        inset 0 8px 18px rgba(58, 28, 6, 0.48),
+        inset 0 -4px 10px rgba(255, 225, 190, 0.35);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 16px;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .p05-cell {
+      position: relative;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 8px rgba(48, 22, 4, 0.22);
+      border: 4px dashed rgba(255, 255, 255, 0.78);
+    }
+    .p05-cell.mat-blue {
+      background:
+        repeating-linear-gradient(0deg, rgba(74, 158, 212, 0.45) 0 14px, transparent 14px 28px),
+        repeating-linear-gradient(90deg, rgba(74, 158, 212, 0.45) 0 14px, transparent 14px 28px),
+        #b8dff5;
+    }
+    .p05-cell.mat-purple {
+      background:
+        repeating-linear-gradient(0deg, rgba(132, 114, 230, 0.42) 0 14px, transparent 14px 28px),
+        repeating-linear-gradient(90deg, rgba(132, 114, 230, 0.42) 0 14px, transparent 14px 28px),
+        #cfc8fa;
+    }
+    .p05-cell.mat-green {
+      background:
+        repeating-linear-gradient(0deg, rgba(82, 178, 92, 0.42) 0 14px, transparent 14px 28px),
+        repeating-linear-gradient(90deg, rgba(82, 178, 92, 0.42) 0 14px, transparent 14px 28px),
+        #bee8c2;
+    }
+    .p05-cup-item {
+      position: relative;
+      width: 156px;
+      height: 190px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+      transition: transform 0.14s ease, filter 0.14s ease;
+      z-index: 5;
+    }
+    .p05-cup-item:hover {
+      transform: scale(1.06);
+      filter: drop-shadow(0 0 8px #ff4fd8) drop-shadow(0 0 4px #ff4fd8);
+    }
+    .p05-cup-item.is-dragging {
+      cursor: grabbing;
+      z-index: 60;
+      transform: scale(1.08);
+      filter: drop-shadow(0 0 10px #ff4fd8) drop-shadow(0 12px 18px rgba(0, 0, 0, 0.32));
+      transition: none;
+    }
+    .p05-cup-item.is-done {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .p05-cup-item img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .p05-cup-svg {
+      width: 146px;
+      height: 182px;
+      pointer-events: none;
+      filter: drop-shadow(0 6px 8px rgba(25, 12, 4, 0.25));
+    }
+
+    .p05-right-board {
+      position: absolute;
+      left: 848px;
+      top: 155px;
+      width: 1024px;
+      height: 760px;
+      border-radius: 20px;
+      background: #266cc8;
+      box-shadow: 0 12px 24px rgba(17, 45, 92, 0.24);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+      padding: 20px 26px;
+      box-sizing: border-box;
+      z-index: 2;
+    }
+    .p05-box-tray {
+      position: relative;
+      border-radius: 42px;
+      background:
+        repeating-linear-gradient(90deg, rgba(120, 62, 18, 0.08) 0 24px, rgba(255, 215, 175, 0.05) 24px 48px),
+        linear-gradient(180deg, #d79658 0%, #c17d3f 50%, #a86428 100%);
+      border: 8px solid #b56f32;
+      box-shadow:
+        0 10px 18px rgba(10, 28, 62, 0.35),
+        inset 0 4px 8px rgba(255, 232, 204, 0.45),
+        inset 0 -6px 12px rgba(68, 32, 6, 0.45);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 26px 18px 22px;
+      box-sizing: border-box;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .p05-box-tray::before,
+    .p05-box-tray::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 96px;
+      height: 14px;
+      border-radius: 10px;
+      background: #266cc8;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35);
+    }
+    .p05-box-tray::before { top: 6px; }
+    .p05-box-tray::after { bottom: 6px; }
+    .p05-box-tray.is-over {
+      transform: translateY(-4px);
+      box-shadow:
+        0 0 0 5px #ffeb6b,
+        0 14px 24px rgba(10, 28, 62, 0.42);
+    }
+    .p05-ref-card {
+      width: 264px;
+      height: 292px;
+      border-radius: 26px;
+      border: 4px solid #7fb2f0;
+      background: #fff;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 6px 12px rgba(55, 26, 6, 0.25);
+    }
+    .p05-ref-head {
+      height: 74px;
+      background: #87b5f7;
+      color: #fff;
+      font-family: 'Cafe24 Ssurround';
+      font-size: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-shadow: 0 2px 4px rgba(24, 64, 128, 0.25);
+      border-bottom: 3px solid #7fb2f0;
+    }
+    .p05-ref-body {
+      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+      background: #fff;
+    }
+    .p05-ref-body img,
+    .p05-placed-cup img {
+      position: absolute;
+      inset: 6px;
+      width: calc(100% - 12px);
+      height: calc(100% - 12px);
+      object-fit: contain;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .p05-ref-body .p05-cup-svg {
+      width: 142px;
+      height: 176px;
+    }
+    .p05-emblem {
+      margin: 14px 0 12px;
+      color: #5b3210;
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: 6px;
+      opacity: 0.78;
+      user-select: none;
+    }
+    .p05-drop-mat {
+      position: relative;
+      width: 264px;
+      height: 306px;
+      border-radius: 18px;
+      border: 4px dashed rgba(255, 255, 255, 0.85);
+      box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.14), 0 4px 8px rgba(52, 24, 4, 0.24);
+    }
+    .p05-drop-mat.mat-1 {
+      background:
+        repeating-linear-gradient(0deg, rgba(124, 104, 228, 0.48) 0 16px, transparent 16px 32px),
+        repeating-linear-gradient(90deg, rgba(124, 104, 228, 0.48) 0 16px, transparent 16px 32px),
+        #cec6fc;
+    }
+    .p05-drop-mat.mat-2 {
+      background:
+        repeating-linear-gradient(0deg, rgba(68, 152, 208, 0.48) 0 16px, transparent 16px 32px),
+        repeating-linear-gradient(90deg, rgba(68, 152, 208, 0.48) 0 16px, transparent 16px 32px),
+        #b6def5;
+    }
+    .p05-drop-mat.mat-3 {
+      background:
+        repeating-linear-gradient(0deg, rgba(78, 174, 88, 0.48) 0 16px, transparent 16px 32px),
+        repeating-linear-gradient(90deg, rgba(78, 174, 88, 0.48) 0 16px, transparent 16px 32px),
+        #bce7c0;
+    }
+    .p05-placed-cup {
+      position: absolute;
+      width: 132px;
+      height: 164px;
+      pointer-events: none;
+      animation: p05PopIn 0.24s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    }
+    .p05-placed-cup .p05-cup-svg {
+      width: 132px;
+      height: 164px;
+    }
+    .p05-placed-cup.slot-0 {
+      left: 8px;
+      top: 6px;
+      z-index: 2;
+    }
+    .p05-placed-cup.slot-1 {
+      right: 8px;
+      top: 6px;
+      z-index: 2;
+    }
+    .p05-placed-cup.slot-2 {
+      left: 66px;
+      top: 124px;
+      z-index: 3;
+    }
+    @keyframes p05PopIn {
+      from { transform: scale(0.6); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="ask-pill is-fit"><span>진하기 지도학습을 위한 사진을 알맞은 쟁반에 놓아 주세요.</span></p>
+
+          <div class="p05-left-tray">
+            <div class="p05-left-tray-inner" id="p05Grid"></div>
+          </div>
+
+          <div class="p05-right-board">
+            <div class="p05-box-tray" data-target-shot="1">
+              <div class="p05-ref-card">
+                <div class="p05-ref-head">1샷</div>
+                <div class="p05-ref-body" id="p05Ref1"></div>
+              </div>
+              <div class="p05-emblem">― ☕ ―</div>
+              <div class="p05-drop-mat mat-1" id="p05Drop1"></div>
+            </div>
+
+            <div class="p05-box-tray" data-target-shot="2">
+              <div class="p05-ref-card">
+                <div class="p05-ref-head">2샷</div>
+                <div class="p05-ref-body" id="p05Ref2"></div>
+              </div>
+              <div class="p05-emblem">― ☕ ―</div>
+              <div class="p05-drop-mat mat-2" id="p05Drop2"></div>
+            </div>
+
+            <div class="p05-box-tray" data-target-shot="3">
+              <div class="p05-ref-card">
+                <div class="p05-ref-head">3샷</div>
+                <div class="p05-ref-body" id="p05Ref3"></div>
+              </div>
+              <div class="p05-emblem">― ☕ ―</div>
+              <div class="p05-drop-mat mat-3" id="p05Drop3"></div>
+            </div>
+          </div>
+
+          <div class="ox-result-wrong is-avatar is-off" id="p05WrongModal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body"><p class="avatar-popup-text">커피 색을 다시 한 번 살펴볼까요?</p></div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p05FinishModal">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">커피 사진을 진하기 색깔에 따라 나누고,<br>정답 이름표를 붙였어요.</p>
+                  </div>
+                  <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">AI는 이 활동을 통해서 샷 수에 따라<br>색의 진하기가 다르다는 정보를 입력했어요.</p>
+                  </div>
+                  <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">정보를 입력한 AI가 새로운<br>커피 사진도 알아볼 수 있을까요?</p>
+                  </div>
+                  <a href="page06.html" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="색의 진하기 따라 커피 사진 나누기" data-next="page06.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+    (function () {
+      const SHOT_COLORS = {
+        1: { top: '#e2a85c', mid: '#c98438', bot: '#df9e4e', rim: '#ebbc78' },
+        2: { top: '#b86828', mid: '#844012', bot: '#9e521e', rim: '#c77c3c' },
+        3: { top: '#612d11', mid: '#2f1205', bot: '#3e1a08', rim: '#783c1a' }
+      };
+
+      function makeCupSvg(shot, uid) {
+        const c = SHOT_COLORS[shot];
+        return `
+          <svg class="p05-cup-svg" viewBox="0 0 150 186" aria-hidden="true">
+            <defs>
+              <linearGradient id="liq_${uid}" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="${c.top}"/>
+                <stop offset="55%" stop-color="${c.mid}"/>
+                <stop offset="100%" stop-color="${c.bot}"/>
+              </linearGradient>
+              <clipPath id="clip_${uid}">
+                <path d="M26 30 L124 30 L110 154 Q108 168 92 168 L58 168 Q42 168 40 154 Z"/>
+              </clipPath>
+            </defs>
+            <ellipse cx="75" cy="172" rx="38" ry="8" fill="rgba(0,0,0,0.16)"/>
+            <path d="M22 24 L128 24 L113 158 Q110 174 93 174 L57 174 Q40 174 37 158 Z" fill="rgba(255,255,255,0.78)" stroke="#d7e6f5" stroke-width="4"/>
+            <g clip-path="url(#clip_${uid})">
+              <rect x="20" y="42" width="110" height="130" fill="url(#liq_${uid})"/>
+              <ellipse cx="75" cy="44" rx="49" ry="10" fill="${c.rim}"/>
+              <rect x="38" y="46" width="22" height="18" rx="5" transform="rotate(-12 49 55)" fill="rgba(255,255,255,0.72)" stroke="rgba(255,255,255,0.9)" stroke-width="1.5"/>
+              <rect x="66" y="42" width="24" height="19" rx="5" transform="rotate(8 78 51)" fill="rgba(255,255,255,0.76)" stroke="rgba(255,255,255,0.9)" stroke-width="1.5"/>
+              <rect x="88" y="52" width="20" height="17" rx="5" transform="rotate(-6 98 60)" fill="rgba(255,255,255,0.68)" stroke="rgba(255,255,255,0.88)" stroke-width="1.5"/>
+              <rect x="52" y="60" width="22" height="18" rx="5" transform="rotate(14 63 69)" fill="rgba(255,255,255,0.62)" stroke="rgba(255,255,255,0.85)" stroke-width="1.5"/>
+              <path d="M34 36 L44 160" stroke="rgba(255,255,255,0.38)" stroke-width="6" stroke-linecap="round"/>
+            </g>
+            <ellipse cx="75" cy="24" rx="53" ry="11" fill="rgba(255,255,255,0.65)" stroke="#cfe0f2" stroke-width="3.5"/>
+          </svg>
+        `;
+      }
+
+      $('p05Ref1').innerHTML = `<img src="img/p05_cup_1.png" alt="1샷 기준 커피" onerror="this.style.display='none'">` + makeCupSvg(1, 'ref1');
+      $('p05Ref2').innerHTML = `<img src="img/p05_cup_2.png" alt="2샷 기준 커피" onerror="this.style.display='none'">` + makeCupSvg(2, 'ref2');
+      $('p05Ref3').innerHTML = `<img src="img/p05_cup_3.png" alt="3샷 기준 커피" onerror="this.style.display='none'">` + makeCupSvg(3, 'ref3');
+
+      const matClasses = [
+        'mat-blue', 'mat-purple', 'mat-blue',
+        'mat-purple', 'mat-green', 'mat-purple',
+        'mat-blue', 'mat-purple', 'mat-blue'
+      ];
+      const shots = shuffleArray([1, 1, 1, 2, 2, 2, 3, 3, 3]);
+      const grid = $('p05Grid');
+
+      shots.forEach((shot, idx) => {
+        const cell = document.createElement('div');
+        cell.className = 'p05-cell ' + matClasses[idx];
+        const item = document.createElement('div');
+        item.className = 'p05-cup-item';
+        item.dataset.shot = String(shot);
+        item.dataset.idx = String(idx);
+        item.innerHTML = `<img src="img/p05_cup_${shot}.png" alt="${shot}샷 커피" onerror="this.style.display='none'">` + makeCupSvg(shot, 'item_' + idx);
+        cell.appendChild(item);
+        grid.appendChild(cell);
+      });
+
+      const firstItem = grid.querySelector('.p05-cup-item');
+      if (firstItem) {
+        setTimeout(() => pointFingerAt(firstItem, { pulse: true }), 120);
+      }
+
+      const trayCounts = { 1: 0, 2: 0, 3: 0 };
+      let totalPlaced = 0;
+      const trays = Array.from(document.querySelectorAll('.p05-box-tray'));
+
+      grid.querySelectorAll('.p05-cup-item').forEach((item) => {
+        let startX = 0;
+        let startY = 0;
+        let dragging = false;
+
+        item.addEventListener('pointerdown', (e) => {
+          if (item.classList.contains('is-done')) return;
+          e.preventDefault();
+          clearFingers();
+          playClick();
+          dragging = true;
+          startX = e.clientX;
+          startY = e.clientY;
+          item.classList.add('is-dragging');
+          item.setPointerCapture(e.pointerId);
+        });
+
+        item.addEventListener('pointermove', (e) => {
+          if (!dragging) return;
+          const scale = currentScale || 1;
+          const dx = (e.clientX - startX) / scale;
+          const dy = (e.clientY - startY) / scale;
+          item.style.transform = `translate(${dx}px, ${dy}px) scale(1.08)`;
+
+          trays.forEach((t) => {
+            const r = t.getBoundingClientRect();
+            const over = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+            t.classList.toggle('is-over', over);
+          });
+        });
+
+        const finishDrag = (e) => {
+          if (!dragging) return;
+          dragging = false;
+          item.classList.remove('is-dragging');
+          trays.forEach((t) => t.classList.remove('is-over'));
+
+          const hitTray = trays.find((t) => {
+            const r = t.getBoundingClientRect();
+            return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+          });
+
+          if (!hitTray) {
+            item.style.transform = '';
+            return;
+          }
+
+          const targetShot = Number(hitTray.dataset.targetShot);
+          const itemShot = Number(item.dataset.shot);
+
+          if (targetShot === itemShot) {
+            playCorrect();
+            item.classList.add('is-done');
+            item.style.transform = '';
+            const slotIdx = trayCounts[targetShot];
+            trayCounts[targetShot] += 1;
+            totalPlaced += 1;
+
+            const dropMat = $('p05Drop' + targetShot);
+            const placed = document.createElement('div');
+            placed.className = 'p05-placed-cup slot-' + slotIdx;
+            placed.innerHTML = `<img src="img/p05_cup_${targetShot}.png" alt="" onerror="this.style.display='none'">` + makeCupSvg(targetShot, 'placed_' + targetShot + '_' + slotIdx);
+            dropMat.appendChild(placed);
+
+            if (totalPlaced === 9) {
+              setTimeout(() => {
+                $('p05FinishModal').classList.remove('is-off');
+              }, 600);
+            }
+          } else {
+            item.style.transform = '';
+            playWrong();
+            flashLayer($('p05WrongModal'), 'is-off', 2000);
+          }
+        };
+
+        item.addEventListener('pointerup', finishDrag);
+        item.addEventListener('pointercancel', finishDrag);
+      });
+    })();
+  </script>
+</body>
+</html>

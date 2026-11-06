@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>커피주문 확인 AI가 틀리는 이유</title>
+  <link rel="stylesheet" href="../../resources/css/common.css">
+  <style>
+    .p07-board-bg {
+      position: absolute;
+      left: 18px;
+      top: 88px;
+      width: 1884px;
+      height: 856px;
+      background: #266cc8;
+      border-radius: 24px;
+      box-shadow: inset 0 4px 12px rgba(8, 28, 68, 0.25);
+      z-index: 1;
+    }
+    .p07-wood-panel {
+      position: absolute;
+      left: 40px;
+      top: 155px;
+      width: 1145px;
+      height: 770px;
+      border-radius: 14px;
+      border: 4px solid #fff;
+      background:
+        repeating-linear-gradient(90deg,
+          #be7438 0px, #c98042 54px, #b2692e 54px, #b2692e 57px,
+          #cc8446 57px, #d58f50 112px, #ad642a 112px, #ad642a 115px),
+        linear-gradient(180deg, #cb8244 0%, #b76e31 100%);
+      box-shadow: 0 10px 24px rgba(10, 28, 66, 0.35), inset 0 0 24px rgba(68, 32, 6, 0.35);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 26px 34px;
+      padding: 34px 48px;
+      box-sizing: border-box;
+      z-index: 2;
+    }
+    .p07-slot {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .p07-polaroid {
+      position: relative;
+      width: 284px;
+      height: 318px;
+      background: #fff;
+      border-radius: 4px;
+      padding: 18px 18px 46px;
+      box-sizing: border-box;
+      box-shadow: 0 10px 18px rgba(32, 14, 4, 0.38);
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      z-index: 5;
+    }
+    .p07-polaroid:hover:not(.is-checked) {
+      transform: translateY(-4px) scale(1.03);
+      box-shadow: 0 0 0 5px #ff4fd8, 0 14px 24px rgba(32, 14, 4, 0.45);
+    }
+    .p07-polaroid.is-dragging {
+      cursor: grabbing;
+      z-index: 80;
+      transform: scale(1.06) rotate(-2deg);
+      box-shadow: 0 0 0 5px #ff4fd8, 0 20px 32px rgba(0, 0, 0, 0.45);
+      transition: none;
+    }
+    .p07-polaroid.is-checked {
+      cursor: default;
+    }
+    .p07-photo-box {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(180deg, #b8e1ff 0%, #dcf0ff 68%, #c79158 68%, #b37b42 100%);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .p07-photo-box > img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+      z-index: 3;
+    }
+    .p07-photo-svg {
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .p07-photo-box.is-blur .p07-photo-svg {
+      filter: blur(5px);
+      transform: scale(1.06);
+    }
+    .p07-stamp {
+      position: absolute;
+      right: 12px;
+      bottom: 8px;
+      width: 126px;
+      height: 126px;
+      pointer-events: none;
+      z-index: 10;
+      animation: p07StampPop 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.3);
+    }
+    .p07-stamp img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      z-index: 2;
+    }
+    @keyframes p07StampPop {
+      0% { transform: scale(1.9) rotate(-18deg); opacity: 0; }
+      100% { transform: scale(1) rotate(-8deg); opacity: 1; }
+    }
+
+    .p07-machine {
+      position: absolute;
+      left: 1210px;
+      top: 142px;
+      width: 670px;
+      height: 790px;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .p07-machine-cam {
+      width: 196px;
+      height: 54px;
+      border-radius: 26px 26px 8px 8px;
+      background: linear-gradient(180deg, #f3f1ff 0%, #cfc8f4 100%);
+      border: 4px solid #8c7cd6;
+      border-bottom: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      box-shadow: 0 -4px 10px rgba(15, 30, 70, 0.25);
+      z-index: 3;
+    }
+    .p07-cam-led {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #fff89a 0%, #ffcc00 70%, #d48800 100%);
+      box-shadow: 0 0 10px #ffee55;
+    }
+    .p07-cam-lens {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #65d6ff 0%, #1c3568 55%, #09132b 100%);
+      border: 5px solid #574a98;
+      box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.6);
+    }
+    .p07-machine-body {
+      position: relative;
+      width: 650px;
+      height: 734px;
+      border-radius: 44px;
+      background: linear-gradient(180deg, #f4f2ff 0%, #dfdaf8 65%, #c5bceb 100%);
+      border: 6px solid #8e7fd8;
+      box-shadow:
+        0 16px 30px rgba(10, 24, 62, 0.42),
+        inset 0 6px 12px rgba(255, 255, 255, 0.85),
+        inset 0 -10px 18px rgba(96, 78, 172, 0.45);
+      padding: 26px 34px 24px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: box-shadow 0.15s ease, transform 0.15s ease;
+    }
+    .p07-machine.is-over .p07-machine-body {
+      box-shadow:
+        0 0 0 6px #ffeb6b,
+        0 18px 34px rgba(10, 24, 62, 0.5);
+      transform: scale(1.01);
+    }
+    .p07-screen-bezel {
+      width: 100%;
+      height: 500px;
+      border-radius: 28px;
+      background: #1a0933;
+      border: 8px solid #6b58b8;
+      box-shadow: inset 0 8px 20px rgba(0, 0, 0, 0.75);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .p07-screen-banner {
+      height: 112px;
+      background: linear-gradient(90deg, #4f8df5 0%, #6ba4ff 100%);
+      padding: 12px 18px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 4px solid #3567c4;
+      color: #fff;
+    }
+    .p07-banner-txt {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .p07-banner-title {
+      font-size: 27px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      text-shadow: 0 2px 4px rgba(14, 44, 104, 0.35);
+    }
+    .p07-banner-sub {
+      font-size: 16px;
+      font-weight: 700;
+      color: #eef5ff;
+      line-height: 1.25;
+    }
+    .p07-banner-aro {
+      width: 82px;
+      height: 82px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.22);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .p07-banner-aro img {
+      width: 76px;
+      height: 76px;
+      object-fit: contain;
+    }
+    .p07-screen-main {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(124, 58, 237, 0.24) 0%, rgba(20, 7, 42, 0.95) 75%);
+    }
+    .p07-screen-text {
+      font-family: 'Cafe24 Ssurround';
+      font-size: 62px;
+      color: #fff;
+      line-height: 1.25;
+      text-shadow:
+        0 0 12px #d946ef,
+        0 0 24px #a855f7,
+        0 0 42px #7e22ce;
+    }
+    .p07-screen-text.is-q {
+      font-size: 150px;
+    }
+    .p07-feeder-bay {
+      position: relative;
+      margin-top: 22px;
+      width: 100%;
+      height: 146px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, #58439e 0%, #3d2c75 100%);
+      border: 5px solid #7c68c9;
+      box-shadow: inset 0 6px 14px rgba(12, 6, 30, 0.65);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+    .p07-ai-chip {
+      width: 76px;
+      height: 76px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #b89cff 0%, #7c5ce6 100%);
+      border: 3px solid #e2d6ff;
+      color: #fff;
+      font-size: 32px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+    }
+    .p07-slot-mouth {
+      position: relative;
+      width: 310px;
+      height: 36px;
+      border-radius: 18px;
+      background: #140826;
+      border: 4px solid #9682e0;
+      box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.9), 0 0 12px rgba(168, 85, 247, 0.55);
+    }
+    .p07-feed-card {
+      position: absolute;
+      left: 50%;
+      top: 18px;
+      width: 170px;
+      height: 190px;
+      background: #fff;
+      border-radius: 4px;
+      padding: 10px 10px 26px;
+      box-sizing: border-box;
+      transform: translate(-50%, 0) scale(0.9);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 6;
+    }
+    .p07-feed-card.is-feeding {
+      animation: p07FeedIn 0.7s cubic-bezier(0.3, 0.1, 0.3, 1) forwards;
+    }
+    @keyframes p07FeedIn {
+      0% { transform: translate(-50%, 60px) scale(0.95); opacity: 1; }
+      65% { transform: translate(-50%, -45px) scale(0.82); opacity: 1; }
+      100% { transform: translate(-50%, -110px) scale(0.55); opacity: 0; }
+    }
+    .p07-gears {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #352366 0%, #1f1342 100%);
+      border: 3px solid #8a75d6;
+      color: #c4b5fd;
+      font-size: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .p07-swipe-guide {
+      position: absolute;
+      left: 220px;
+      top: 320px;
+      width: 96px;
+      height: 96px;
+      pointer-events: none;
+      z-index: 90;
+      animation: p07SwipeMove 2.1s ease-in-out infinite;
+      filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.38));
+    }
+    @keyframes p07SwipeMove {
+      0% { transform: translate(0, 0) scale(1); opacity: 0; }
+      15% { transform: translate(0, 0) scale(0.94); opacity: 1; }
+      75% { transform: translate(1180px, 140px) scale(0.94); opacity: 1; }
+      100% { transform: translate(1180px, 140px) scale(1); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="ask-pill is-fit"><span>커피 사진을 AI 확인 창에 올려서 결과를 볼까요?</span></p>
+
+          <div class="p07-board-bg"></div>
+
+          <div class="p07-wood-panel" id="p07Grid"></div>
+
+          <div class="p07-machine" id="p07Machine">
+            <img src="img/p07_machine.png" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none;z-index:1" onerror="this.remove()">
+            <div class="p07-machine-cam">
+              <span class="p07-cam-led"></span>
+              <span class="p07-cam-lens"></span>
+              <span class="p07-cam-led"></span>
+            </div>
+            <div class="p07-machine-body">
+              <div class="p07-screen-bezel">
+                <div class="p07-screen-banner">
+                  <div class="p07-banner-txt">
+                    <strong class="p07-banner-title">나만의 AI를 만들어 보세요!</strong>
+                    <span class="p07-banner-sub">이미지·소리·포즈를 학습시켜<br>AI가 구분하게 할 수 있어요.</span>
+                  </div>
+                  <div class="p07-banner-aro">
+                    <img src="../../resources/img/common/avatar_correct_gwa.png" alt="">
+                  </div>
+                </div>
+                <div class="p07-screen-main">
+                  <div class="p07-screen-text is-q" id="p07ScreenText">?</div>
+                </div>
+              </div>
+              <div class="p07-feeder-bay">
+                <div class="p07-ai-chip">AI</div>
+                <div class="p07-slot-mouth">
+                  <div class="p07-feed-card" id="p07FeedCard"></div>
+                </div>
+                <div class="p07-gears">⚙️</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="p07-swipe-guide" id="p07SwipeGuide">
+            <svg viewBox="0 0 90 90" width="90" height="90" aria-hidden="true">
+              <circle cx="42" cy="24" r="18" fill="rgba(255, 230, 80, 0.55)" stroke="#fff" stroke-width="3"/>
+              <text x="20" y="72" font-size="56">👆</text>
+            </svg>
+          </div>
+
+          <div class="avatar-modal is-off" id="p07FinishModal">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body is-side">
+                <p class="avatar-card-text">흐리거나 가려진 사진은<br>AI가 확인하기 어려워요.<br>어떻게 해야 할까요?</p>
+              </div>
+              <a href="page08.html" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup is-arrow" data-sound="sound/click.mp3" aria-label="다음">→</a>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="커피주문 확인 AI가 틀리는 이유" data-next="page08.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+    (function () {
+      const PHOTOS = [
+        { id: 1, shot: 2, mode: 'normal', ok: true, res: '2샷이에요.', label: '선명하게 찍힌 2샷 아이스 커피' },
+        { id: 2, shot: 1, mode: 'blur', ok: false, res: '몇 샷인지<br>잘 모르겠어요...', label: '흐리게 찍힌 1샷 아이스 커피' },
+        { id: 3, shot: 2, mode: 'finger', ok: false, res: '몇 샷인지<br>잘 모르겠어요...', label: '손가락이 같이 찍힌 2샷 아이스 커피' },
+        { id: 4, shot: 1, mode: 'zoom', ok: false, res: '몇 샷인지<br>잘 모르겠어요...', label: '확대해서 일부만 찍힌 1샷 아이스 커피' },
+        { id: 5, shot: 3, mode: 'normal', ok: true, res: '3샷이에요.', label: '선명하게 찍힌 3샷 아이스 커피' },
+        { id: 6, shot: 1, mode: 'normal', ok: true, res: '1샷이에요.', label: '선명하게 찍힌 1샷 아이스 커피' }
+      ];
+
+      const SHOT_COLORS = {
+        1: { top: '#e2a85c', mid: '#c98438', bot: '#df9e4e', rim: '#ebbc78' },
+        2: { top: '#b86828', mid: '#844012', bot: '#9e521e', rim: '#c77c3c' },
+        3: { top: '#612d11', mid: '#2f1205', bot: '#3e1a08', rim: '#783c1a' }
+      };
+
+      function makePhotoSvg(item, uid) {
+        const c = SHOT_COLORS[item.shot];
+        const groupTransform = item.mode === 'zoom'
+          ? 'transform="translate(-105, -18) scale(1.85)"'
+          : '';
+        const fingerOverlay = item.mode === 'finger'
+          ? `<g>
+               <path d="M95 -10 C105 90, 118 165, 148 228 C168 265, 225 255, 222 205 C218 140, 215 65, 235 -10 Z" fill="#f7c19b" stroke="#d99568" stroke-width="4"/>
+               <ellipse cx="168" cy="212" rx="28" ry="34" fill="#ffe0c8" opacity="0.75"/>
+             </g>`
+          : '';
+        return `
+          <svg class="p07-photo-svg" viewBox="0 0 248 254" aria-hidden="true">
+            <defs>
+              <linearGradient id="p07_liq_${uid}" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="${c.top}"/>
+                <stop offset="55%" stop-color="${c.mid}"/>
+                <stop offset="100%" stop-color="${c.bot}"/>
+              </linearGradient>
+              <clipPath id="p07_clip_${uid}">
+                <path d="M58 46 L190 46 L172 214 Q169 232 148 232 L100 232 Q79 232 76 214 Z"/>
+              </clipPath>
+            </defs>
+            <g ${groupTransform}>
+              <ellipse cx="124" cy="234" rx="52" ry="11" fill="rgba(0,0,0,0.18)"/>
+              <path d="M52 38 L196 38 L176 218 Q172 238 149 238 L99 238 Q76 238 72 218 Z" fill="rgba(255,255,255,0.82)" stroke="#d7e6f5" stroke-width="5"/>
+              <g clip-path="url(#p07_clip_${uid})">
+                <rect x="48" y="62" width="152" height="176" fill="url(#p07_liq_${uid})"/>
+                <ellipse cx="124" cy="64" rx="66" ry="13" fill="${c.rim}"/>
+                <rect x="74" y="68" width="28" height="22" rx="6" transform="rotate(-12 88 79)" fill="rgba(255,255,255,0.75)"/>
+                <rect x="112" y="62" width="30" height="24" rx="6" transform="rotate(8 127 74)" fill="rgba(255,255,255,0.78)"/>
+                <rect x="144" y="74" width="26" height="22" rx="6" transform="rotate(-6 157 85)" fill="rgba(255,255,255,0.7)"/>
+                <path d="M68 54 L82 220" stroke="rgba(255,255,255,0.4)" stroke-width="8" stroke-linecap="round"/>
+              </g>
+              <ellipse cx="124" cy="38" rx="72" ry="14" fill="rgba(255,255,255,0.68)" stroke="#cfe0f2" stroke-width="4"/>
+            </g>
+            ${fingerOverlay}
+          </svg>
+        `;
+      }
+
+      function makeStampHtml(ok) {
+        const imgFile = ok ? 'img/p07_stamp_ok.png' : 'img/p07_stamp_fail.png';
+        const color = ok ? '#2563eb' : '#dc2626';
+        const label = ok ? '확인완료' : '확인실패';
+        const face = ok ? '😊' : '😵';
+        return `
+          <div class="p07-stamp">
+            <img src="${imgFile}" alt="${label}" onerror="this.style.display='none'">
+            <svg viewBox="0 0 120 120" width="126" height="126" aria-hidden="true">
+              <circle cx="60" cy="60" r="54" fill="rgba(255,255,255,0.92)" stroke="${color}" stroke-width="6" stroke-dasharray="10 4"/>
+              <circle cx="60" cy="60" r="44" fill="none" stroke="${color}" stroke-width="2.5"/>
+              <text x="60" y="54" text-anchor="middle" font-size="34">${face}</text>
+              <rect x="14" y="68" width="92" height="28" rx="14" fill="${color}"/>
+              <text x="60" y="88" text-anchor="middle" fill="#fff" font-size="18" font-weight="900" font-family="Malgun Gothic, sans-serif">${label}</text>
+            </svg>
+          </div>
+        `;
+      }
+
+      const grid = $('p07Grid');
+      const machine = $('p07Machine');
+      const screenText = $('p07ScreenText');
+      const feedCard = $('p07FeedCard');
+      const swipeGuide = $('p07SwipeGuide');
+
+      let busy = false;
+      let checkedCount = 0;
+
+      PHOTOS.forEach((item) => {
+        const slot = document.createElement('div');
+        slot.className = 'p07-slot';
+
+        const card = document.createElement('div');
+        card.className = 'p07-polaroid';
+        card.dataset.id = String(item.id);
+        card.innerHTML = `
+          <div class="p07-photo-box ${item.mode === 'blur' ? 'is-blur' : ''}">
+            <img src="img/p07_photo_${item.id}.png" alt="${item.label}" onerror="this.style.display='none'">
+            ${makePhotoSvg(item, 'card_' + item.id)}
+          </div>
+        `;
+        slot.appendChild(card);
+        grid.appendChild(slot);
+
+        let startX = 0;
+        let startY = 0;
+        let dragging = false;
+
+        card.addEventListener('pointerdown', (e) => {
+          if (busy || card.classList.contains('is-checked')) return;
+          e.preventDefault();
+          if (swipeGuide) swipeGuide.classList.add('is-off');
+          playClick();
+          dragging = true;
+          startX = e.clientX;
+          startY = e.clientY;
+          card.classList.add('is-dragging');
+          card.setPointerCapture(e.pointerId);
+        });
+
+        card.addEventListener('pointermove', (e) => {
+          if (!dragging) return;
+          const scale = currentScale || 1;
+          const dx = (e.clientX - startX) / scale;
+          const dy = (e.clientY - startY) / scale;
+          card.style.transform = `translate(${dx}px, ${dy}px) scale(1.06) rotate(-2deg)`;
+
+          const mr = machine.getBoundingClientRect();
+          const over = e.clientX >= mr.left && e.clientX <= mr.right && e.clientY >= mr.top && e.clientY <= mr.bottom;
+          machine.classList.toggle('is-over', over);
+        });
+
+        const endDrag = (e) => {
+          if (!dragging) return;
+          dragging = false;
+          card.classList.remove('is-dragging');
+          machine.classList.remove('is-over');
+
+          const mr = machine.getBoundingClientRect();
+          const over = e.clientX >= mr.left && e.clientX <= mr.right && e.clientY >= mr.top && e.clientY <= mr.bottom;
+
+          card.style.transform = '';
+          if (!over) return;
+
+          busy = true;
+          card.classList.add('is-checked');
+
+          feedCard.innerHTML = `<div class="p07-photo-box ${item.mode === 'blur' ? 'is-blur' : ''}">${makePhotoSvg(item, 'feed_' + item.id)}</div>`;
+          feedCard.classList.remove('is-feeding');
+          void feedCard.offsetWidth;
+          feedCard.classList.add('is-feeding');
+
+          screenText.classList.remove('is-q');
+          screenText.innerHTML = '확인 중...';
+
+          setTimeout(() => {
+            if (item.ok) {
+              playCorrect();
+            } else {
+              playWrong();
+            }
+            screenText.innerHTML = item.res;
+            card.insertAdjacentHTML('beforeend', makeStampHtml(item.ok));
+            checkedCount += 1;
+            busy = false;
+
+            if (checkedCount === PHOTOS.length) {
+              setTimeout(() => {
+                $('p07FinishModal').classList.remove('is-off');
+              }, 1100);
+            }
+          }, 900);
+        };
+
+        card.addEventListener('pointerup', endDrag);
+        card.addEventListener('pointercancel', endDrag);
+      });
+    })();
+  </script>
+</body>
+</html>

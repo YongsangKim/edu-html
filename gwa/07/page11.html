@@ -5,6 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>센서로 지키는 우리 마을!</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .p11-board{position:absolute;left:36px;top:90px;width:1224px;height:838px;border-radius:20px;background:#8cc95a url(img/p11_bg.jpg) center/100% 100% no-repeat;overflow:hidden;z-index:1}
+        .p11-board:after{content:'';position:absolute;inset:0;box-sizing:border-box;border:solid 4px var(--c-navy);border-radius:20px;pointer-events:none;z-index:5}
+        .p11-board,.p11-board *{cursor:none}
+        .p11-house{position:absolute;width:250px;height:155px;padding:0;border:0;background:transparent}
+        .p11-label{position:absolute;box-sizing:border-box;width:250px;height:75px;padding-top:4px;border:solid 5px var(--c-navy);border-radius:40px;background:var(--c-white);font-family:'Cafe24 Ssurround';font-size:56px;line-height:62px;color:var(--c-navy);text-align:center;pointer-events:none}
+        .p11-lens{position:absolute;left:0;top:0;width:275px;height:325px;background:url(img/p11_magnifier.png) 0 0/100% 100% no-repeat;pointer-events:none;z-index:4}
+        .p11-lens.is-hide{display:none}
+        .p11-chance{position:absolute;left:35px;top:28px;width:577px;height:127px;box-sizing:border-box;display:flex;border:solid 6px var(--c-navy);border-radius:64px;overflow:hidden;background:var(--c-white);z-index:3}
+        .p11-chance-label{flex:none;width:148px;background:#2a62bd;font-family:'Cafe24 Ssurround';font-size:60px;line-height:112px;color:var(--c-white);text-align:center}
+        .p11-hearts{flex:1;display:flex;align-items:center;gap:40px;padding-left:22px}
+        .p11-heart{width:96px;height:86px;background:url(img/p11_heart.png) center/contain no-repeat}
+        .p11-heart.is-lost{background-image:url(img/p11_heart_off.png)}
+        .p11-info{position:absolute;display:grid;grid-template-columns:auto auto;box-sizing:border-box;border:solid 4px var(--c-navy);border-radius:20px;background:var(--c-white);font-family:'Cafe24 Ssurround';font-size:40px;line-height:44px;color:var(--c-ink);white-space:nowrap;z-index:6;pointer-events:none}
+        .p11-info.is-hide{display:none}
+        .p11-info span{padding:0 14px}
+        .p11-info span:nth-child(odd){background:var(--c-navy);color:var(--c-white);padding:0 10px 0 18px}
+        .p11-info span:nth-child(1){padding-top:14px;border-top-left-radius:14px}
+        .p11-info span:nth-child(7){padding-bottom:14px;border-bottom-left-radius:14px}
+        .p11-info span:nth-child(2){padding-top:14px}
+        .p11-info span:nth-child(8){padding-bottom:14px}
+        .p11-info span.is-bad{color:var(--c-hotpink)}
+        .p11-info:before{content:'';position:absolute;top:50%;margin-top:-22px;border:22px solid transparent}
+        .p11-info.is-right:before{left:-48px;border-right-color:var(--c-navy)}
+        .p11-info.is-left:before{right:-48px;border-left-color:var(--c-navy)}
+        .p11-panel{left:1282px;top:88px;width:608px;height:840px;--board-floor:327px}
+        .p11-phone{position:absolute;left:1305px;top:18px;width:490px;height:390px;padding:0;border:0;background:url(img/p11_phone.png) center/contain no-repeat;z-index:2}
+        .p11-phone.is-ring{background-image:url(img/p11_phone_on.png);animation:p11-ring .15s ease-in-out 8 alternate;transform-origin:50% 80%}
+        .p11-phone:disabled{cursor:default}
+        @keyframes p11-ring{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
+        .p11-bubble{position:absolute;left:1300px;top:108px;box-sizing:border-box;margin:0;padding:14px 28px 8px;border:solid 5px var(--c-navy);border-radius:30px;background:var(--c-white);font-family:'Cafe24 Ssurround';font-size:42px;line-height:1.2;color:var(--c-navy);z-index:3}
+        .p11-bubble.is-hide{display:none}
+        .p11-sel{position:absolute;box-sizing:border-box;margin:0;padding:0 70px 0 24px;border:solid 4px var(--c-navy);border-radius:12px;background:var(--c-white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='42' viewBox='0 0 50 42'%3E%3Cpath d='M2 2h46L25 40z' fill='%2331248a' stroke='%2331248a' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E") right 24px center/46px 38px no-repeat;-webkit-appearance:none;appearance:none;font-family:'Cafe24 Ssurround';font-size:48px;color:var(--c-ink);z-index:2}
+        .p11-sel:disabled{opacity:1;cursor:default}
+        #p11House{left:1305px;top:466px;width:375px;height:90px}
+        #p11Case{left:1305px;top:588px;width:560px;height:88px}
+        .p11-txt{position:absolute;margin:0;font-family:'Cafe24 Ssurround';font-size:70px;line-height:1;color:var(--c-white);z-index:2}
+        .p11-submit{position:absolute;left:1580px;top:820px;min-width:0;width:300px;height:90px;padding:6px 10px 0;font-size:50px;z-index:2}
+        .p11-btns{display:flex;justify-content:center;gap:50px;margin-top:50px}
+    </style>
 </head>
 <body>
   <div id="page-fade"></div>
@@ -12,9 +52,68 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <a href="page12.html" class="js-nav-effect next-btn-center">
-            <img src="../../resources/img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../resources/img/common/btn_next_content_on.png" data-src-over="../../resources/img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
-          </a>
+          <div class="p11-board" id="p11Board">
+            <div class="p11-lens is-hide" id="p11Lens"></div>
+          </div>
+          <div class="p11-chance">
+            <div class="p11-chance-label">기회</div>
+            <div class="p11-hearts"><span class="p11-heart"></span><span class="p11-heart"></span><span class="p11-heart"></span></div>
+          </div>
+          <div class="p11-info is-hide" id="p11Info"></div>
+
+          <div class="stage-board has-floor p11-panel"></div>
+          <button type="button" class="p11-phone hit-pulse js-sfx" id="p11Phone" data-sound="sound/click.mp3" aria-label="전화기"></button>
+          <p class="p11-bubble is-hide" id="p11Bubble">관리실 입니다. 무엇을 도와드릴까요?</p>
+          <select class="p11-sel" id="p11House" disabled aria-label="집">
+            <option value=""></option>
+            <option value="1">1번 집</option><option value="2">2번 집</option><option value="3">3번 집</option>
+            <option value="4">4번 집</option><option value="5">5번 집</option><option value="6">6번 집</option>
+            <option value="7">7번 집</option><option value="8">8번 집</option><option value="9">9번 집</option>
+          </select>
+          <p class="p11-txt" style="left:1702px;top:490px">에</p>
+          <select class="p11-sel" id="p11Case" disabled aria-label="상황">
+            <option value=""></option>
+            <option value="gas">가스가 새는 것 같아요.</option>
+            <option value="motion">도둑이 든 것 같아요.</option>
+            <option value="temp">불이 난 것 같아요.</option>
+            <option value="flood">물이 새는 것 같아요.</option>
+          </select>
+          <p class="p11-txt" style="left:1322px;top:712px">도와주세요.</p>
+          <button type="button" class="card-btn is-popup p11-submit is-disabled" id="p11Submit" disabled>신고하기</button>
+
+          <div class="ox-result-correct is-avatar is-off" id="p11Right">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_correct_gwa.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">덕분에 큰일이 날 뻔한 걸 막을 수 있었네요!</p>
+              </div>
+              <div class="avatar-popup-extra"><img src="../../resources/img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div>
+          <div class="ox-result-wrong is-avatar is-off" id="p11Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">가보니까 괜찮던데요?</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p11Over">
+            <div class="avatar-card is-left">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_incorrect.png" alt="">
+              <div class="avatar-card-body">
+                <div>
+                  <p class="avatar-card-title">장난 전화는 안 돼요!</p>
+                  <p class="avatar-card-text">신고 기회를 모두 잃었어요.</p>
+                  <div class="p11-btns">
+                    <a href="page11.html" class="js-nav-effect card-btn is-popup js-sfx" data-sound="sound/click.mp3">다시 하기</a>
+                    <a href="page12.html" class="js-nav-effect card-btn is-popup js-sfx" data-sound="sound/click.mp3">끝내기</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </main>
       </div>
     </div>
@@ -24,5 +123,151 @@
   <script src="../../resources/js/header.js" data-title="센서로 지키는 우리 마을!" data-next="page12.html"></script>
   <script src="../../resources/js/toc-gwa.js"></script>
   <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const COLS = [97, 510, 937];
+    const ROWS = [367, 598, 837];
+    const KINDS = ['temp', 'gas', 'motion', 'flood'];
+    const NAMES = { temp: '온도 센서', gas: '가스 센서', motion: '동작 센서', flood: '침수 센서' };
+    const BAD = { temp: '43 ℃', gas: '농도 높음', motion: '움직임 감지', flood: '물 감지됨' };
+    const OK = { gas: '가스 감지 없음', motion: '움직임 없음', flood: '물 감지 없음' };
+    const TEMPS = [18, 20, 22, 24, 25];
+    const board = $('p11Board'), lens = $('p11Lens'), info = $('p11Info');
+    const phone = $('p11Phone'), bubble = $('p11Bubble');
+    const selHouse = $('p11House'), selCase = $('p11Case'), submit = $('p11Submit');
+    const hearts = Array.from(document.querySelectorAll('.p11-heart'));
+    const queue = shuffleArray(KINDS).slice(0, 3);
+    let round = 0, lives = 3, target = 0, kind = '', phoneOn = false, locked = false, houses = [];
+
+    function newProblem() {
+      kind = queue[round];
+      target = 1 + Math.floor(Math.random() * 9);
+      houses = [];
+      for (let i = 1; i <= 9; i++) {
+        houses.push(KINDS.map((k) => {
+          const bad = i === target && k === kind;
+          const val = bad ? BAD[k] : (k === 'temp' ? TEMPS[Math.floor(Math.random() * TEMPS.length)] + ' ℃' : OK[k]);
+          return { name: NAMES[k], val, bad };
+        }));
+      }
+    }
+
+    function checkReady() {
+      const ok = phoneOn && !locked && selHouse.value !== '' && selCase.value !== '';
+      submit.disabled = !ok;
+      submit.classList.toggle('is-disabled', !ok);
+    }
+
+    function resetPhone() {
+      phoneOn = false;
+      phone.disabled = false;
+      phone.classList.remove('is-ring');
+      phone.classList.add('hit-pulse');
+      bubble.classList.add('is-hide');
+      selHouse.value = '';
+      selCase.value = '';
+      selHouse.disabled = true;
+      selCase.disabled = true;
+      checkReady();
+    }
+
+    function showInfo(n) {
+      const idx = n - 1, c = idx % 3, r = Math.floor(idx / 3);
+      const left = COLS[c];
+      info.innerHTML = houses[idx].map((x) => '<span>' + x.name + '</span><span' + (x.bad ? ' class="is-bad"' : '') + '>' + x.val + '</span>').join('');
+      info.classList.toggle('is-right', c < 2);
+      info.classList.toggle('is-left', c === 2);
+      info.style.top = (ROWS[r] - 155 - 70) + 'px';
+      if (c < 2) { info.style.left = (left + 341) + 'px'; info.style.right = 'auto'; }
+      else { info.style.left = 'auto'; info.style.right = (1920 - (left - 91)) + 'px'; }
+      info.classList.remove('is-hide');
+    }
+    function hideInfo() { info.classList.add('is-hide'); }
+
+    for (let i = 1; i <= 9; i++) {
+      const c = (i - 1) % 3, r = Math.floor((i - 1) / 3);
+      const x = COLS[c] - 36, y = ROWS[r] - 90;
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'p11-house';
+      b.setAttribute('aria-label', i + '번 집');
+      b.style.left = x + 'px';
+      b.style.top = (y - 155) + 'px';
+      b.addEventListener('mouseenter', () => showInfo(i));
+      b.addEventListener('mouseleave', hideInfo);
+      b.addEventListener('click', () => showInfo(i));
+      board.appendChild(b);
+      const l = document.createElement('div');
+      l.className = 'p11-label';
+      l.style.left = x + 'px';
+      l.style.top = y + 'px';
+      l.textContent = i + '번 집';
+      board.appendChild(l);
+    }
+
+    function moveLens(e) {
+      if (e.pointerType !== 'mouse') return;
+      const rect = board.getBoundingClientRect();
+      const s = rect.width / board.offsetWidth;
+      lens.style.left = ((e.clientX - rect.left) / s - 113) + 'px';
+      lens.style.top = ((e.clientY - rect.top) / s - 113) + 'px';
+      lens.classList.remove('is-hide');
+    }
+    board.addEventListener('pointermove', moveLens);
+    board.addEventListener('pointerenter', moveLens);
+    board.addEventListener('pointerleave', () => lens.classList.add('is-hide'));
+    board.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse' && !e.target.closest('.p11-house')) hideInfo(); });
+
+    function renderHearts() {
+      hearts.forEach((h, i) => h.classList.toggle('is-lost', i >= lives));
+    }
+
+    phone.addEventListener('click', () => {
+      if (phoneOn) return;
+      phoneOn = true;
+      phone.disabled = true;
+      phone.classList.remove('hit-pulse');
+      phone.classList.add('is-ring');
+      bubble.classList.remove('is-hide');
+      selHouse.disabled = false;
+      selCase.disabled = false;
+      checkReady();
+    });
+    selHouse.addEventListener('change', checkReady);
+    selCase.addEventListener('change', checkReady);
+
+    submit.addEventListener('click', () => {
+      if (submit.disabled) return;
+      const right = Number(selHouse.value) === target && selCase.value === kind;
+      locked = true;
+      checkReady();
+      if (right) {
+        playCorrect();
+        flashLayer($('p11Right'), 'is-off', 2000);
+        setTimeout(() => {
+          locked = false;
+          round += 1;
+          if (round >= 3) { navigateTo('page12.html'); return; }
+          newProblem();
+          hideInfo();
+          resetPhone();
+        }, 2000);
+      } else {
+        playWrong();
+        lives -= 1;
+        renderHearts();
+        flashLayer($('p11Wrong'), 'is-off', 2000);
+        setTimeout(() => {
+          locked = false;
+          if (lives <= 0) $('p11Over').classList.remove('is-off');
+          checkReady();
+        }, 2000);
+      }
+    });
+
+    newProblem();
+    renderHearts();
+  })();
+  </script>
 </body>
 </html>

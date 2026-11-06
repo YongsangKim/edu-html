@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>퀴즈 풀기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+      .p09-qflow{position:absolute;left:220px;top:435px;width:1480px;height:200px;padding:0 50px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:24px;background:#f3f5fa;border-radius:28px;border:solid 5px #b8c7e0}
+      .p09-qslot{width:190px;height:140px;box-sizing:border-box;border-radius:22px;border:dashed 5px var(--c-violet);background:#fff;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:66px;color:var(--c-violet);cursor:pointer;user-select:none;transition:all .2s ease}
+      .p09-qslot.is-filled{background:#e8e4f8;border:solid 5px #7c6fc4;color:#1b1640}
+      .p09-qcards{position:absolute;left:50%;top:695px;transform:translateX(-50%);display:flex;gap:22px}
+      .p09-qcard{width:154px;height:144px;box-sizing:border-box;border-radius:24px;border:solid 6px var(--c-ink);background:linear-gradient(180deg,#fff,#eef3fb);box-shadow:0 8px 0 rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:60px;color:var(--c-purple);cursor:pointer;user-select:none;transition:transform .15s ease}
+      .p09-qcard:hover{transform:translateY(-4px)}
+      .p09-qcard.is-used{opacity:.25;pointer-events:none}
+      .p09-hint-btn{position:absolute;right:60px;bottom:40px;margin:0;min-width:0;width:180px;height:82px;font-size:42px;padding-top:6px}
+      .p09-box-left{position:absolute;left:100px;top:425px;width:960px;height:500px;box-sizing:border-box;border-radius:28px;border:solid 5px var(--c-purple);background:#fff;padding:14px;display:flex;align-items:center;justify-content:center}
+      .p09-box-left svg{width:100%;height:100%;display:block}
+      .p09-opts-col{position:absolute;left:1100px;top:435px;width:720px;display:flex;flex-direction:column;gap:28px;align-items:center}
+      .p09-opts-col .card-btn{width:700px;min-width:0;height:130px;font-size:46px;display:flex;align-items:center;justify-content:center;padding-top:6px}
+      .p09-opts-grid{position:absolute;left:1100px;top:435px;width:720px;display:grid;grid-template-columns:repeat(2,330px);gap:24px 36px;justify-content:center}
+      .p09-opts-grid .card-btn{width:330px;min-width:0;height:130px;font-size:56px;display:flex;align-items:center;justify-content:center;padding-top:6px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="quiz-stage">
+          <div class="step-flow" id="quizStepFlow">
+            <div class="step-panel" data-step="1">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../resources/img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q1.</span>
+                  <p class="quiz-ask is-tight">예, 아니오 질문을 이어 붙여서 무엇인지 정하는 나무 모양의 생각 방법은 무엇일까요?</p>
+                </div>
+              </div>
+              <div class="p09-qflow">
+                <div class="p09-qslot" data-slot="0" data-init="ㅇ">ㅇ</div>
+                <div class="p09-qslot" data-slot="1" data-init="ㅅ">ㅅ</div>
+                <div class="p09-qslot" data-slot="2" data-init="ㄱ">ㄱ</div>
+                <div class="p09-qslot" data-slot="3" data-init="ㅈ">ㅈ</div>
+                <div class="p09-qslot" data-slot="4" data-init="ㄴ">ㄴ</div>
+                <div class="p09-qslot" data-slot="5" data-init="ㅁ">ㅁ</div>
+              </div>
+              <div class="p09-qcards" id="q1Cards">
+                <div class="p09-qcard" data-ch="결">결</div>
+                <div class="p09-qcard" data-ch="순">순</div>
+                <div class="p09-qcard" data-ch="나">나</div>
+                <div class="p09-qcard" data-ch="의">의</div>
+                <div class="p09-qcard" data-ch="무">무</div>
+                <div class="p09-qcard" data-ch="서">서</div>
+                <div class="p09-qcard" data-ch="정">정</div>
+                <div class="p09-qcard" data-ch="사">사</div>
+                <div class="p09-qcard" data-ch="모">모</div>
+              </div>
+              <button type="button" class="card-btn is-popup p09-hint-btn" id="btnQ1Hint">힌트</button>
+            </div>
+
+            <div class="step-panel" data-step="2">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../resources/img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q2.</span>
+                  <p class="quiz-ask is-tight">그림처럼 액체를 두 무리로 나누었어요.<br>네모 칸에 들어갈 질문으로 알맞은 것은 무엇일까요?</p>
+                </div>
+              </div>
+              <div class="p09-box-left">
+                <svg viewBox="0 0 920 460">
+                  <line x1="460" y1="120" x2="230" y2="220" stroke="#8a94a6" stroke-width="5"/>
+                  <line x1="460" y1="120" x2="690" y2="220" stroke="#8a94a6" stroke-width="5"/>
+                  <rect x="300" y="145" width="84" height="40" rx="20" fill="#fff"/>
+                  <text x="342" y="167" text-anchor="middle" dominant-baseline="middle" style="font-family:'Cafe24 Ssurround';font-size:26px;fill:#666">아니오</text>
+                  <rect x="540" y="145" width="60" height="40" rx="20" fill="#fff"/>
+                  <text x="570" y="167" text-anchor="middle" dominant-baseline="middle" style="font-family:'Cafe24 Ssurround';font-size:26px;fill:#666">예</text>
+                  <polygon points="460,30 660,75 460,120 260,75" fill="#fff8cc" stroke="#ffcc00" stroke-width="6" stroke-linejoin="round"/>
+                  <text x="460" y="78" text-anchor="middle" dominant-baseline="middle" style="font-family:'Cafe24 Ssurround';font-size:36px;fill:#1b1640">?</text>
+                  <rect x="80" y="220" width="300" height="180" rx="24" fill="#f4f7fc" stroke="#7c6fc4" stroke-width="5"/>
+                  <text x="230" y="315" text-anchor="middle" dominant-baseline="middle" style="font-family:'Cafe24 Ssurround';font-size:34px;fill:#1b1640">사이다, 물</text>
+                  <rect x="540" y="220" width="300" height="180" rx="24" fill="#f4f7fc" stroke="#7c6fc4" stroke-width="5"/>
+                  <text x="690" y="315" text-anchor="middle" dominant-baseline="middle" style="font-family:'Cafe24 Ssurround';font-size:34px;fill:#1b1640">포도 주스, 꿀, 식용유</text>
+                </svg>
+              </div>
+              <div class="p09-opts-col">
+                <button type="button" class="card-btn is-quiz" data-q="2" data-ans="true">색이 있나요?</button>
+                <button type="button" class="card-btn is-quiz" data-q="2" data-ans="false">공기 방울이 있나요?</button>
+                <button type="button" class="card-btn is-quiz" data-q="2" data-ans="false">보라색인가요?</button>
+              </div>
+            </div>
+
+            <div class="step-panel" data-step="3">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../resources/img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q3.</span>
+                  <p class="quiz-ask is-tight">물과 사이다를 둘로 나누려고 해요.<br>어떤 질문이 가장 좋을까요?</p>
+                </div>
+              </div>
+              <div class="p09-box-left">
+                <svg viewBox="0 0 920 460">
+                  <rect x="180" y="90" width="240" height="280" rx="24" fill="#f4f7fc" stroke="#b8c7e0" stroke-width="5"/>
+                  <image href="img/image22.png" x="240" y="120" width="120" height="150"/>
+                  <text x="300" y="325" text-anchor="middle" style="font-family:'Cafe24 Ssurround';font-size:36px;fill:#1b1640">물</text>
+                  <rect x="500" y="90" width="240" height="280" rx="24" fill="#f4f7fc" stroke="#b8c7e0" stroke-width="5"/>
+                  <image href="img/image21.png" x="560" y="120" width="120" height="150"/>
+                  <text x="620" y="325" text-anchor="middle" style="font-family:'Cafe24 Ssurround';font-size:36px;fill:#1b1640">사이다</text>
+                </svg>
+              </div>
+              <div class="p09-opts-col">
+                <button type="button" class="card-btn is-quiz" data-q="3" data-idx="0" data-ans="false">색이 있나요?</button>
+                <button type="button" class="card-btn is-quiz" data-q="3" data-idx="1" data-ans="true">공기 방울이 있나요?</button>
+                <button type="button" class="card-btn is-quiz" data-q="3" data-idx="2" data-ans="false">맛있나요?</button>
+              </div>
+            </div>
+
+            <div class="step-panel" data-step="4">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../resources/img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q4.</span>
+                  <p class="quiz-ask">의사결정 나무를 따라가면 사이다는 몇 번에 도착할까요?</p>
+                </div>
+              </div>
+              <div class="p09-box-left" id="q4TreeBox"></div>
+              <div class="p09-opts-grid">
+                <button type="button" class="card-btn is-quiz" data-q="4" data-ans="true">1번</button>
+                <button type="button" class="card-btn is-quiz" data-q="4" data-ans="false">2번</button>
+                <button type="button" class="card-btn is-quiz" data-q="4" data-ans="false">3번</button>
+                <button type="button" class="card-btn is-quiz" data-q="4" data-ans="false">4번</button>
+                <button type="button" class="card-btn is-quiz" data-q="4" data-ans="false">5번</button>
+              </div>
+            </div>
+
+            <div class="step-panel" data-step="5">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../resources/img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q5.</span>
+                  <p class="quiz-ask">의사결정 나무를 따라가면 꿀은 몇 번에 도착할까요?</p>
+                </div>
+              </div>
+              <div class="p09-box-left" id="q5TreeBox"></div>
+              <div class="p09-opts-grid">
+                <button type="button" class="card-btn is-quiz" data-q="5" data-ans="false">1번</button>
+                <button type="button" class="card-btn is-quiz" data-q="5" data-ans="false">2번</button>
+                <button type="button" class="card-btn is-quiz" data-q="5" data-ans="false">3번</button>
+                <button type="button" class="card-btn is-quiz" data-q="5" data-ans="true">4번</button>
+                <button type="button" class="card-btn is-quiz" data-q="5" data-ans="false">5번</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="ox-result-wrong is-avatar is-off" id="qWrongModal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar">
+                <img src="../../resources/img/common/avatar_incorrect.png" alt="">
+              </div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text" id="qWrongMsg">다시 한번 생각해볼까요?</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="qOkModal">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body is-side">
+                <p class="avatar-card-text" id="qOkMsg">정답입니다!</p>
+              </div>
+              <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" id="btnNextQuiz" data-sound="sound/click.mp3">다음 문제</a>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="q1HintModal">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body is-side">
+                <p class="avatar-card-text">질문을 따라가며 결정하는<br>나무 모양의 방법이에요!<br>‘ㅇㅅㄱㅈㄴㅁ’를 떠올려 보세요.</p>
+              </div>
+              <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" id="btnCloseQ1Hint" data-sound="sound/click.mp3">돌아가기</a>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="quizFinishModal">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body is-side">
+                <p class="avatar-card-text">정답입니다!<br>꿀은 색이 있고, 보라색이 아니며, 아주 천천히 흐르므로<br>4번에 도착해요!</p>
+              </div>
+              <a href="page10.html" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="퀴즈 풀기" data-prev="page08.html" data-next="page10.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+    (function () {
+      var quizFlow = document.getElementById('quizStepFlow');
+      initStepFlow(quizFlow);
+
+      var qWrongModal = document.getElementById('qWrongModal');
+      var qWrongMsg = document.getElementById('qWrongMsg');
+      var qOkModal = document.getElementById('qOkModal');
+      var qOkMsg = document.getElementById('qOkMsg');
+      var btnNextQuiz = document.getElementById('btnNextQuiz');
+      var btnQ1Hint = document.getElementById('btnQ1Hint');
+      var q1HintModal = document.getElementById('q1HintModal');
+
+      var treeSvgHtml = '<svg viewBox="0 0 920 460"><line x1="460" y1="88" x2="230" y2="165" stroke="#8a94a6" stroke-width="4.5"/><line x1="460" y1="88" x2="680" y2="165" stroke="#8a94a6" stroke-width="4.5"/><text x="315" y="122" text-anchor="middle" style="font-family:Cafe24 Ssurround;font-size:22px;fill:#555">아니오</text><text x="595" y="122" text-anchor="middle" style="font-family:Cafe24 Ssurround;font-size:22px;fill:#555">예</text><polygon points="460,12 630,50 460,88 290,50" fill="#ebe8f9" stroke="#7c6fc4" stroke-width="4.5"/><text x="460" y="53" text-anchor="middle" dominant-baseline="middle" style="font-family:Cafe24 Ssurround;font-size:26px;fill:#1b1640">색이 있나요?</text><line x1="230" y1="240" x2="115" y2="335" stroke="#8a94a6" stroke-width="4.5"/><line x1="230" y1="240" x2="310" y2="335" stroke="#8a94a6" stroke-width="4.5"/><text x="148" y="286" text-anchor="middle" style="font-family:Cafe24 Ssurround;font-size:20px;fill:#555">예</text><text x="292" y="286" text-anchor="middle" style="font-family:Cafe24 Ssurround;font-size:20px;fill:#555">아니오</text><polygon points="230,165 400,202 230,240 60,202" fill="#ebe8f9" stroke="#7c6fc4" stroke-width="4.5"/><text x="230" y="205" text-anchor="middle" dominant-baseline="middle" style="font-family:Cafe24 Ssurround;font-size:23px;fill:#1b1640">공기 방울이 있나요?</text><line x1="680" y1="240" x2="495" y2="335" stroke="#8a94a6" stroke-width="4.5"/><line x1="680" y1="240" x2="755" y2="265" stroke="#8a94a6" stroke-width="4.5"/><text x="565" y="286" text-anchor="middle" style="font-family:Cafe24 Ssurround;font-size:20px;fill:#555">예</text><text x="742" y="250" text-anchor="middle" style="font-family:Cafe24 Ssurround;font-size:20px;fill:#555">아니오</text><polygon points="680,165 840,202 680,240 520,202" fill="#ebe8f9" stroke="#7c6fc4" stroke-width="4.5"/><text x="680" y="205" text-anchor="middle" dominant-baseline="middle" style="font-family:Cafe24 Ssurround;font-size:23px;fill:#1b1640">보라색인가요?</text><line x1="755" y1="335" x2="675" y2="365" stroke="#8a94a6" stroke-width="4.5"/><line x1="755" y1="335" x2="840" y2="365" stroke="#8a94a6" stroke-width="4.5"/><text x="695" y="352" text-anchor="middle" style="font-family:Cafe24 Ssurround;font-size:19px;fill:#555">예</text><text x="820" y="352" text-anchor="middle" style="font-family:Cafe24 Ssurround;font-size:19px;fill:#555">아니오</text><polygon points="755,265 910,300 755,335 600,300" fill="#ebe8f9" stroke="#7c6fc4" stroke-width="4.5"/><text x="755" y="303" text-anchor="middle" dominant-baseline="middle" style="font-family:Cafe24 Ssurround;font-size:21px;fill:#1b1640">아주 천천히 흐르나요?</text><rect x="40" y="335" width="150" height="105" rx="20" fill="#dff2ec" stroke="#5c9486" stroke-width="4.5"/><text x="115" y="392" text-anchor="middle" dominant-baseline="middle" style="font-family:Cafe24 Ssurround;font-size:38px;fill:#1b1640">1번</text><rect x="235" y="335" width="150" height="105" rx="20" fill="#dff2ec" stroke="#5c9486" stroke-width="4.5"/><text x="310" y="392" text-anchor="middle" dominant-baseline="middle" style="font-family:Cafe24 Ssurround;font-size:38px;fill:#1b1640">2번</text><rect x="420" y="335" width="150" height="105" rx="20" fill="#dff2ec" stroke="#5c9486" stroke-width="4.5"/><text x="495" y="392" text-anchor="middle" dominant-baseline="middle" style="font-family:Cafe24 Ssurround;font-size:38px;fill:#1b1640">3번</text><rect x="605" y="365" width="140" height="82" rx="18" fill="#dff2ec" stroke="#5c9486" stroke-width="4.5"/><text x="675" y="409" text-anchor="middle" dominant-baseline="middle" style="font-family:Cafe24 Ssurround;font-size:34px;fill:#1b1640">4번</text><rect x="770" y="365" width="140" height="82" rx="18" fill="#dff2ec" stroke="#5c9486" stroke-width="4.5"/><text x="840" y="409" text-anchor="middle" dominant-baseline="middle" style="font-family:Cafe24 Ssurround;font-size:34px;fill:#1b1640">5번</text></svg>';
+
+      document.getElementById('q4TreeBox').innerHTML = treeSvgHtml;
+      document.getElementById('q5TreeBox').innerHTML = treeSvgHtml;
+
+      btnQ1Hint.addEventListener('click', function () {
+        q1HintModal.classList.remove('is-off');
+      });
+      var btnCloseQ1Hint = document.getElementById('btnCloseQ1Hint');
+      if (btnCloseQ1Hint) {
+        btnCloseQ1Hint.addEventListener('click', function () {
+          q1HintModal.classList.add('is-off');
+        });
+      }
+
+      var q1Slots = document.querySelectorAll('.p09-qslot');
+      var q1Cards = document.querySelectorAll('.p09-qcard');
+      var q1Answer = ['의', '사', '결', '정', '나', '무'];
+      var q1Current = ['', '', '', '', '', ''];
+
+      q1Cards.forEach(function (card) {
+        card.addEventListener('click', function () {
+          var ch = card.getAttribute('data-ch');
+          var emptyIdx = -1;
+          for (var i = 0; i < q1Current.length; i++) {
+            if (q1Current[i] === '') {
+              emptyIdx = i;
+              break;
+            }
+          }
+          if (emptyIdx === -1) return;
+          q1Current[emptyIdx] = ch;
+          var slot = q1Slots[emptyIdx];
+          slot.textContent = ch;
+          slot.classList.add('is-filled');
+          card.classList.add('is-used');
+
+          if (q1Current.indexOf('') === -1) {
+            checkQ1Answer();
+          }
+        });
+      });
+
+      q1Slots.forEach(function (slot) {
+        slot.addEventListener('click', function () {
+          var idx = parseInt(slot.getAttribute('data-slot'), 10);
+          var ch = q1Current[idx];
+          if (!ch) return;
+          q1Current[idx] = '';
+          slot.textContent = slot.getAttribute('data-init');
+          slot.classList.remove('is-filled');
+          q1Cards.forEach(function (card) {
+            if (card.getAttribute('data-ch') === ch && card.classList.contains('is-used')) {
+              card.classList.remove('is-used');
+            }
+          });
+        });
+      });
+
+      function checkQ1Answer() {
+        var isCorrect = true;
+        for (var i = 0; i < q1Answer.length; i++) {
+          if (q1Current[i] !== q1Answer[i]) {
+            isCorrect = false;
+            break;
+          }
+        }
+        if (isCorrect) {
+          SFX.play('correct');
+          qOkMsg.innerHTML = '정답입니다!<br>질문을 나무 가지처럼 이어 붙여 무엇인지 찾아내는 방법을<br>‘의사결정 나무’라고 해요.';
+          qOkModal.classList.remove('is-off');
+        } else {
+          SFX.play('wrong');
+          qWrongMsg.innerHTML = '다시 한번 생각해볼까요?';
+          flashLayer(qWrongModal);
+          for (var j = 0; j < q1Slots.length; j++) {
+            q1Slots[j].textContent = q1Slots[j].getAttribute('data-init');
+            q1Slots[j].classList.remove('is-filled');
+            q1Current[j] = '';
+          }
+          q1Cards.forEach(function (card) {
+            card.classList.remove('is-used');
+          });
+        }
+      }
+
+      var currentQuizStep = 1;
+
+      btnNextQuiz.addEventListener('click', function () {
+        qOkModal.classList.add('is-off');
+        var panels = quizFlow.querySelectorAll('.step-panel');
+        if (panels[currentQuizStep - 1]) {
+          panels[currentQuizStep - 1].classList.add('is-hidden');
+        }
+        currentQuizStep++;
+        if (panels[currentQuizStep - 1]) {
+          panels[currentQuizStep - 1].classList.remove('is-hidden');
+        }
+      });
+
+      var quizBtns = document.querySelectorAll('.card-btn.is-quiz');
+      quizBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var qNum = parseInt(btn.getAttribute('data-q'), 10);
+          var isAns = btn.getAttribute('data-ans') === 'true';
+
+          if (isAns) {
+            SFX.play('correct');
+            if (qNum === 2) {
+              qOkMsg.innerHTML = '정답입니다!<br>사이다와 물은 색이 없고,<br>포도 주스, 꿀, 식용유는 색이 있어요.';
+              qOkModal.classList.remove('is-off');
+            } else if (qNum === 3) {
+              qOkMsg.innerHTML = '정답입니다!<br>사이다에는 공기 방울이 있고 물에는 공기 방울이 없어서<br>두 액체를 정확하게 나눌 수 있어요.';
+              qOkModal.classList.remove('is-off');
+            } else if (qNum === 4) {
+              qOkMsg.innerHTML = '정답입니다!<br>사이다는 색이 없고 공기 방울이 있으므로<br>1번에 도착해요.';
+              qOkModal.classList.remove('is-off');
+            } else if (qNum === 5) {
+              document.getElementById('quizFinishModal').classList.remove('is-off');
+            }
+          } else {
+            SFX.play('wrong');
+            if (qNum === 3) {
+              var idx = btn.getAttribute('data-idx');
+              if (idx === '0') {
+                qWrongMsg.innerHTML = '물과 사이다는 둘 다 색이 없어서 나눌 수 없어요.<br>다시 한번 생각해볼까요?';
+              } else {
+                qWrongMsg.innerHTML = '사람마다 생각이 다른 질문으로는 나눌 수 없어요.<br>누가 봐도 답이 같은 특징을 찾아볼까요?';
+              }
+            } else if (qNum === 4) {
+              qWrongMsg.innerHTML = '사이다의 특징을 생각하며<br>질문을 다시 따라가 볼까요?';
+            } else if (qNum === 5) {
+              qWrongMsg.innerHTML = '꿀의 특징을 생각하며<br>질문을 다시 따라가 볼까요?';
+            } else {
+              qWrongMsg.innerHTML = '다시 한번 생각해볼까요?';
+            }
+            flashLayer(qWrongModal);
+          }
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

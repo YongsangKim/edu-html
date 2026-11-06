@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>예/아니오로 체육관 공 정리하기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+      .p02-gym{position:absolute;left:0;top:0;width:1920px;height:960px;background:url('img/gym_bg.png') no-repeat center/cover;overflow:hidden}
+      .p02-lv{position:absolute;left:50px;top:40px;height:84px;margin:0;padding:6px 38px 0;box-sizing:border-box;display:flex;align-items:center;border-radius:42px;background:var(--c-navy);border:solid 5px var(--c-sky);font-family:'Cafe24 Ssurround';font-size:48px;color:#fff;z-index:3}
+      .p02-qboard{position:absolute;left:50%;top:36px;transform:translateX(-50%);min-width:980px;height:124px;padding:10px 60px 0;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border-radius:62px;border:solid 6px var(--c-ink);background:var(--c-white);box-shadow:0 14px 0 rgba(86,148,231,.25);font-family:'Cafe24 Ssurround';font-size:64px;color:var(--c-ink);letter-spacing:-0.05em;z-index:3}
+      .p02-qboard b{color:var(--c-purple);font-weight:400;margin:0 8px}
+      .p02-bsk{position:absolute;top:320px;width:470px;height:530px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;box-sizing:border-box;cursor:pointer}
+      .p02-bsk.is-yes{left:90px}
+      .p02-bsk.is-no{right:90px}
+      .p02-bsk.is-drag-over .p02-bsk-rim{transform:scale(1.05);filter:brightness(1.1)}
+      .p02-bsk-rim{width:450px;height:46px;border-radius:23px;border:solid 6px var(--c-ink);box-sizing:border-box;z-index:3;transition:transform .2s ease}
+      .p02-bsk.is-yes .p02-bsk-rim{background:#4e97ff}
+      .p02-bsk.is-no .p02-bsk-rim{background:#ff7a8a}
+      .p02-bsk-body{position:relative;width:410px;height:380px;margin-top:-10px;border-radius:0 0 46px 46px;border:solid 6px var(--c-ink);box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 14px 0 rgba(0,0,0,.14)}
+      .p02-bsk.is-yes .p02-bsk-body{background:linear-gradient(180deg,#d8ebff,#b8daff)}
+      .p02-bsk.is-no .p02-bsk-body{background:linear-gradient(180deg,#ffe0e5,#ffc2cc)}
+      .p02-bsk-body:before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.35) 0 10px,transparent 10px 36px),repeating-linear-gradient(-45deg,rgba(255,255,255,.35) 0 10px,transparent 10px 36px);pointer-events:none}
+      .p02-bsk-tag{position:relative;z-index:2;min-width:260px;height:96px;padding:8px 34px 0;box-sizing:border-box;border-radius:48px;border:solid 5px var(--c-ink);background:var(--c-white);display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:56px;color:var(--c-ink);letter-spacing:-0.04em;box-shadow:0 6px 0 rgba(0,0,0,.12)}
+      .p02-bsk.is-yes .p02-bsk-tag b{color:#1664d8;font-weight:400;margin-right:8px}
+      .p02-bsk.is-no .p02-bsk-tag b{color:#e0314b;font-weight:400;margin-right:8px}
+      .p02-bsk-items{position:absolute;left:20px;right:20px;top:-60px;height:120px;display:flex;align-items:center;justify-content:center;gap:10px;z-index:2;pointer-events:none}
+      .p02-bsk-items img{width:90px;height:90px;object-fit:contain;filter:drop-shadow(0 6px 8px rgba(0,0,0,.25));animation:p02PopIn .3s ease}
+      @keyframes p02PopIn{0%{transform:scale(0) translateY(-30px);opacity:0}100%{transform:scale(1) translateY(0);opacity:1}}
+      .p02-ball-stage{position:absolute;left:50%;top:280px;transform:translateX(-50%);width:420px;height:420px;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:5}
+      .p02-ball-pad{width:330px;height:330px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.95) 0 55%,rgba(255,216,61,.4) 100%);border:dashed 6px var(--c-purple);display:flex;align-items:center;justify-content:center;box-shadow:0 16px 30px rgba(27,22,64,.18);cursor:grab;user-select:none;touch-action:none}
+      .p02-ball-pad.is-dragging{cursor:grabbing;opacity:.9;transform:scale(1.05)}
+      .p02-ball-pad img{width:240px;height:240px;object-fit:contain;filter:drop-shadow(0 10px 14px rgba(0,0,0,.25));pointer-events:none}
+      .p02-ball-nm{margin:16px 0 0;padding:8px 36px 2px;border-radius:30px;background:var(--c-navy);font-family:'Cafe24 Ssurround';font-size:38px;color:#fff;letter-spacing:-0.03em}
+      .p02-queue{position:absolute;left:50%;bottom:36px;transform:translateX(-50%);display:flex;align-items:center;gap:20px;padding:12px 34px;border-radius:40px;background:rgba(255,255,255,.88);border:solid 4px #b8c7e0;box-shadow:0 6px 0 rgba(0,0,0,.08);z-index:3}
+      .p02-queue span{font-family:'Cafe24 Ssurround';font-size:30px;color:var(--c-navy);margin-right:6px}
+      .p02-queue-items{display:flex;align-items:center;gap:14px}
+      .p02-queue-items img{width:64px;height:64px;object-fit:contain;opacity:.85}
+      .p02-fg{position:absolute;left:1010px;top:480px;width:120px;z-index:10;pointer-events:none}
+      .p02-shaking{animation:p02Shake .4s ease}
+      @keyframes p02Shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-14px)}40%,80%{transform:translateX(14px)}}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p02-gym"></div>
+          <p class="p02-lv" id="p02RoundBadge">1라운드</p>
+          <div class="p02-qboard" id="p02Qboard"><span>공이 <b>동그란 모양</b>인가요?</span></div>
+
+          <div class="p02-bsk is-yes" id="bskYes" data-target="yes">
+            <div class="p02-bsk-items" id="yesItems">
+              <img src="img/image6.png" alt="축구공">
+            </div>
+            <div class="p02-bsk-rim"></div>
+            <div class="p02-bsk-body"><div class="p02-bsk-tag"><b>예</b>바구니</div></div>
+          </div>
+
+          <div class="p02-bsk is-no" id="bskNo" data-target="no">
+            <div class="p02-bsk-items" id="noItems"></div>
+            <div class="p02-bsk-rim"></div>
+            <div class="p02-bsk-body"><div class="p02-bsk-tag"><b>아니오</b>바구니</div></div>
+          </div>
+
+          <div class="p02-ball-stage" id="ballStage">
+            <div class="p02-ball-pad" id="ballPad">
+              <img id="currentBallImg" src="img/image7.png" alt="럭비공">
+            </div>
+            <p class="p02-ball-nm" id="currentBallName">럭비공</p>
+          </div>
+
+          <div class="p02-queue">
+            <span>남은 공</span>
+            <div class="p02-queue-items" id="queueItems"></div>
+          </div>
+
+          <img class="p02-fg" id="fingerGuide" src="../../resources/img/common/img_finger01.png" alt="">
+
+          <div class="ox-result-wrong is-avatar is-off" id="wrongModal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body"><p class="avatar-popup-text">다시 한번 생각해볼까요?</p></div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="r1DoneModal">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body is-side">
+                <p class="avatar-card-text">공 나누기 완료!<br>다음 레벨로 이동해볼까요?</p>
+              </div>
+              <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" id="btnStartR2" data-sound="sound/click.mp3">시작하기</a>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="r2DoneModal">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">정말 잘했어요!<br>질문이 바뀌면 같은 공도 다른 바구니로 갈 수 있어요.</p>
+                  </div>
+                  <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">인공지능도 이렇게 ‘예’, ‘아니오’ 질문으로<br>나누면서 무엇인지 알아낼 수 있어요.</p>
+                  </div>
+                  <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">여러가지 액체도 질문으로<br>나눌 수 있는지 함께 알아볼까요?</p>
+                  </div>
+                  <a href="page03.html" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="예/아니오로 체육관 공 정리하기" data-prev="page01.html" data-next="page03.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+    (function () {
+      var r1Data = [
+        { name: '럭비공', img: 'img/image7.png', ans: 'no' },
+        { name: '야구공', img: 'img/image9.png', ans: 'yes' },
+        { name: '농구공', img: 'img/image8.png', ans: 'yes' },
+        { name: '탁구공', img: 'img/image12.png', ans: 'yes' }
+      ];
+
+      var r2Data = [
+        { name: '탁구공과 탁구채', img: 'img/image12.png', ans: 'yes' },
+        { name: '농구공', img: 'img/image8.png', ans: 'no' },
+        { name: '볼링공', img: 'img/image10.png', ans: 'no' },
+        { name: '야구공', img: 'img/image9.png', ans: 'yes' },
+        { name: '축구공', img: 'img/image6.png', ans: 'no' },
+        { name: '럭비공', img: 'img/image7.png', ans: 'no' }
+      ];
+
+      var curRound = 1;
+      var curList = r1Data;
+      var curIdx = 0;
+
+      var roundBadge = document.getElementById('p02RoundBadge');
+      var qboard = document.getElementById('p02Qboard');
+      var ballPad = document.getElementById('ballPad');
+      var ballImg = document.getElementById('currentBallImg');
+      var ballNm = document.getElementById('currentBallName');
+      var queueBox = document.getElementById('queueItems');
+      var yesItems = document.getElementById('yesItems');
+      var noItems = document.getElementById('noItems');
+      var bskYes = document.getElementById('bskYes');
+      var bskNo = document.getElementById('bskNo');
+      var fg = document.getElementById('fingerGuide');
+      var btnStartR2 = document.getElementById('btnStartR2');
+      var wrongModal = document.getElementById('wrongModal');
+      var r1DoneModal = document.getElementById('r1DoneModal');
+      var r2DoneModal = document.getElementById('r2DoneModal');
+
+      function updateQueue() {
+        queueBox.innerHTML = '';
+        for (var i = curIdx + 1; i < curList.length; i++) {
+          var item = document.createElement('img');
+          item.src = curList[i].img;
+          item.alt = curList[i].name;
+          queueBox.appendChild(item);
+        }
+      }
+
+      function showBall() {
+        if (curIdx >= curList.length) {
+          if (curRound === 1) {
+            r1DoneModal.classList.remove('is-off');
+          } else {
+            r2DoneModal.classList.remove('is-off');
+          }
+          return;
+        }
+        var cur = curList[curIdx];
+        ballImg.src = cur.img;
+        ballImg.alt = cur.name;
+        ballNm.textContent = cur.name;
+        updateQueue();
+        if (curIdx === 0 && curRound === 1) {
+          fg.style.display = 'block';
+        } else {
+          fg.style.display = 'none';
+        }
+      }
+
+      function handleAnswer(choice) {
+        if (curIdx >= curList.length) return;
+        var cur = curList[curIdx];
+        if (choice === cur.ans) {
+          SFX.play('correct');
+          var ballMini = document.createElement('img');
+          ballMini.src = cur.img;
+          ballMini.alt = cur.name;
+          if (choice === 'yes') {
+            yesItems.appendChild(ballMini);
+          } else {
+            noItems.appendChild(ballMini);
+          }
+          curIdx++;
+          showBall();
+        } else {
+          SFX.play('wrong');
+          ballPad.classList.add('p02-shaking');
+          setTimeout(function () {
+            ballPad.classList.remove('p02-shaking');
+          }, 450);
+          flashLayer(wrongModal);
+        }
+      }
+
+      bskYes.addEventListener('click', function () { handleAnswer('yes'); });
+      bskNo.addEventListener('click', function () { handleAnswer('no'); });
+
+      var startX = 0;
+      var startY = 0;
+      var padX = 0;
+      var padY = 0;
+      var isDragging = false;
+
+      function onPointerDown(e) {
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        padX = 0;
+        padY = 0;
+        ballPad.classList.add('is-dragging');
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
+      }
+
+      function onPointerMove(e) {
+        if (!isDragging) return;
+        padX = e.clientX - startX;
+        padY = e.clientY - startY;
+        ballPad.style.transform = 'translate(' + padX + 'px, ' + padY + 'px)';
+        var padRect = ballPad.getBoundingClientRect();
+        var yesRect = bskYes.getBoundingClientRect();
+        var noRect = bskNo.getBoundingClientRect();
+        if (padRect.left < yesRect.right && padRect.right > yesRect.left && padRect.top < yesRect.bottom && padRect.bottom > yesRect.top) {
+          bskYes.classList.add('is-drag-over');
+          bskNo.classList.remove('is-drag-over');
+        } else if (padRect.left < noRect.right && padRect.right > noRect.left && padRect.top < noRect.bottom && padRect.bottom > noRect.top) {
+          bskNo.classList.add('is-drag-over');
+          bskYes.classList.remove('is-drag-over');
+        } else {
+          bskYes.classList.remove('is-drag-over');
+          bskNo.classList.remove('is-drag-over');
+        }
+      }
+
+      function onPointerUp(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        ballPad.classList.remove('is-dragging');
+        ballPad.style.transform = '';
+        bskYes.classList.remove('is-drag-over');
+        bskNo.classList.remove('is-drag-over');
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+
+        var dropX = e.clientX;
+        var yesRect = bskYes.getBoundingClientRect();
+        var noRect = bskNo.getBoundingClientRect();
+
+        if (dropX >= yesRect.left && dropX <= yesRect.right) {
+          handleAnswer('yes');
+        } else if (dropX >= noRect.left && dropX <= noRect.right) {
+          handleAnswer('no');
+        }
+      }
+
+      ballPad.addEventListener('pointerdown', onPointerDown);
+
+      btnStartR2.addEventListener('click', function () {
+        r1DoneModal.classList.add('is-off');
+        curRound = 2;
+        curList = r2Data;
+        curIdx = 0;
+        roundBadge.textContent = '2라운드';
+        qboard.innerHTML = '<span>공을 <b>방망이나 라켓</b>으로 치나요?</span>';
+        yesItems.innerHTML = '';
+        noItems.innerHTML = '';
+        showBall();
+      });
+
+      showBall();
+    })();
+  </script>
+</body>
+</html>

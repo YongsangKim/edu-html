@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>퀵 드로우로 AI와 그림 대결</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .p09-qd{position:absolute;left:40px;top:20px;width:1840px;height:920px;box-sizing:border-box;border:solid 6px var(--c-navy);border-radius:24px;background:#fff;overflow:hidden;font-family:'Pretendard',sans-serif}
+        .p09-bar{position:absolute;left:0;top:0;right:0;height:96px;background:#fdd13a;border-bottom:solid 6px #e2e2e2;z-index:1}
+        .p09-bar .t{position:absolute;left:30px;top:50%;transform:translateY(-50%);font-size:34px;color:#a07a1a}
+        .p09-bar .tm{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:140px;height:60px;background:#fff;display:flex;align-items:center;justify-content:center;font-family:Consolas,monospace;font-size:30px;color:#222}
+        .p09-bar .ic{position:absolute;top:14px;width:64px;height:62px;border-radius:6px;background:#efe6cf;box-shadow:inset 0 -12px 0 #d9cba6;display:flex;align-items:center;justify-content:center;padding-bottom:10px;box-sizing:border-box;font-size:30px;color:#fff}
+        .p09-cv{position:absolute;left:0;top:102px;width:1828px;height:608px;z-index:1;touch-action:none}
+        .p09-cv.is-free{cursor:crosshair}
+        .p09-cv path,.p09-cv polyline{fill:none;stroke:#111;stroke-width:12;stroke-linecap:round;stroke-linejoin:round}
+        .p09-cv path{stroke-dasharray:1;stroke-dashoffset:1;transition:none}
+        .p09-cv path.is-on{stroke-dashoffset:0}
+        .p09-ai{position:absolute;left:50%;top:620px;transform:translateX(-50%);min-width:120px;height:66px;padding:0 30px;box-sizing:border-box;border-radius:8px;background:#f2f2f2;display:flex;align-items:center;justify-content:center;font-size:34px;color:#333;white-space:nowrap;z-index:1}
+        .p09-ai:after{content:'';position:absolute;left:50%;bottom:-20px;margin-left:-14px;border:14px solid transparent;border-top:20px solid #f2f2f2;border-bottom:0}
+        .p09-fc{position:absolute;top:330px;height:110px;padding:0 50px 8px;box-sizing:border-box;display:flex;align-items:center;border:solid 5px var(--c-purple);border-radius:20px;background:#fff;font-family:'Cafe24 Ssurround';font-size:46px;color:var(--c-purple);z-index:1;opacity:0;animation:p09Pop .5s ease-out forwards}
+        @keyframes p09Pop{0%{opacity:0;transform:scale(.7)}100%{opacity:1;transform:scale(1)}}
+        .p09-start{position:absolute;left:0;top:0;right:0;bottom:0;background:#fdd13a;z-index:2;text-align:center;color:#111}
+        .p09-start[hidden]{display:none}
+        .p09-start .n{position:absolute;left:0;right:0;top:60px;margin:0;font-size:34px;color:#a07a1a}
+        .p09-start .m{position:absolute;left:0;right:0;top:180px;margin:0;font-size:44px}
+        .p09-start .it{position:absolute;left:0;right:0;top:260px;margin:0;font-size:96px;line-height:1.1}
+        .p09-start .s{position:absolute;left:0;right:0;top:410px;margin:0;font-size:44px}
+        .p09-ok{position:absolute;left:50%;top:500px;transform:translateX(-50%);width:300px;height:76px;box-sizing:content-box;display:flex;align-items:center;justify-content:center;background:#2fa84f;border-bottom:solid 10px #1d7a37;box-shadow:10px 10px 0 #e2b92c;font-size:40px;color:#fff;text-decoration:none;cursor:pointer}
+        .p09-gd{position:absolute;left:0;right:0;bottom:0;height:200px;background:var(--c-pale);border-top:solid 5px var(--c-navy);z-index:5}
+        .p09-ch{position:absolute;left:40px;bottom:0;height:430px;z-index:6}
+        .p09-tx{position:absolute;left:340px;right:420px;top:0;bottom:0;margin:0;display:flex;align-items:center;font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.25;color:var(--c-purple);letter-spacing:-0.04em;word-break:keep-all}
+        .p09-tx.is-small{font-size:40px}
+        .p09-btn{position:absolute;right:40px;top:50%;transform:translateY(-50%);margin:0}
+        .p09-btn[hidden]{display:none}
+        .p09-ai[hidden]{display:none}
+        .p09-pk{width:1700px;max-width:1700px;padding:60px 50px 60px}
+        .p09-pk .avatar-card-title{margin-bottom:30px}
+        .p09-pk .avatar-card-text{font-size:50px}
+        .p09-row{display:flex;flex-wrap:wrap;justify-content:center;gap:24px;margin-top:50px}
+        .p09-row .card-btn{margin:0;min-width:0;width:500px;height:110px;font-size:46px;display:flex;align-items:center;justify-content:center;padding:0 0 10px}
+        .p09-wrong{z-index:120}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default" id="p09Main">
+          <div class="p09-qd">
+            <div class="p09-bar"><span class="t" id="p09Title"></span><span class="tm">00:20</span><span class="ic" style="right:162px">✎</span><span class="ic" style="right:90px">»</span><span class="ic" style="right:18px">✕</span></div>
+            <svg class="p09-cv" id="p09Cv" viewBox="0 0 1828 608">
+              <path id="p09Circle" pathLength="1" d="M914 52 C1010 42 1075 117 1068 207 C1062 297 990 354 905 352 C815 350 755 287 760 200 C765 117 825 62 920 54 C940 53 950 58 960 64"/>
+              <path id="p09Stem" pathLength="1" d="M905 50 C912 25 922 5 936 -8"/>
+              <path id="p09Banana" pathLength="1" d="M760 110 C790 235 920 325 1100 140 C1112 127 1096 110 1082 117 C940 235 840 195 800 95 C792 77 764 90 760 110"/>
+              <g id="p09Free"></g>
+            </svg>
+            <div class="p09-ai" id="p09Ai" hidden></div>
+            <div id="p09Cards"></div>
+            <div class="p09-start" id="p09Start" hidden>
+              <p class="n" id="p09StartN"></p>
+              <p class="m">다음을 그리세요</p>
+              <p class="it" id="p09Item"></p>
+              <p class="s">20초 이내</p>
+              <a href="javascript:;" class="p09-ok js-sfx" id="p09Ok" data-sound="sound/click.mp3">알겠어요!</a>
+            </div>
+            <div class="p09-gd"><p class="p09-tx" id="p09Tx"></p><a href="javascript:;" class="card-btn is-popup p09-btn js-sfx" id="p09Btn" data-sound="sound/click.mp3" hidden></a></div>
+            <img class="p09-ch" src="../img/character/gwa_main_point.png" alt="">
+          </div>
+
+          <div class="avatar-modal is-off" id="p09Pick" style="z-index:30">
+            <div class="avatar-card p09-pk"><p class="avatar-card-title" id="p09PkTitle"></p><p class="avatar-card-text is-small" id="p09PkText"></p><div class="p09-row" id="p09PkRow"></div></div>
+          </div>
+
+          <div class="ox-result-wrong is-avatar is-off p09-wrong" id="p09Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body"><p class="avatar-popup-text" id="p09WrongTx"></p></div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p09Done">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">오늘 배운 두 가지를 기억해요!<br>첫 번째, 퀵 드로우는 많은 그림을 공부해서<br>그림 속의 특징을 보고 정답을 찾아요.</p>
+                  </div>
+                  <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">두 번째, AI는 특징을 보고 정답을 찾기 때문에<br>특징이 보이지 않으면 알아 보지 못해요.</p>
+                  </div>
+                  <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">이제 퀴즈를 풀며 배운 내용을 확인해볼까요?</p>
+                  </div>
+                  <a href="page10.html" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="퀵 드로우로 AI와 그림 대결" data-next="page10.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const INTRO = [
+      '퀵 드로우는 그림을 보고 무엇인지 알아맞히는 AI예요. 전 세계 사람들이 그린 그림을 아주 많이 공부 했다고 해요.',
+      '문제가 나오면 특징이 무엇인지 잘 생각해보세요.',
+      '그림을 잘 그리지 못해도, 물건의 특징이 잘 드러나면 AI가 알아볼 수 있어요!'
+    ];
+    const INTRO_BTN = ['다음', '다음', '시작하기'];
+    const PICKS = {
+      apple: {
+        title: '사과',
+        text: 'AI가 사과인 걸 알아보려면 어떤 특징을 그려야 할까요?<br>알맞은 특징 카드를 2장 골라보세요.',
+        cards: [['동그란 모양', 1], ['줄무늬', 0], ['위에 짧은 꼭지', 1], ['길쭉한 모양', 0], ['콕콕 박힌 씨앗', 0]],
+        wrong: '다시 한번 생각해볼까요?', next: 3
+      },
+      banana: {
+        title: '바나나',
+        text: 'AI가 바나나인 걸 알아보려면 어떤 특징을 그려야 할까요?<br>알맞은 특징 카드를 2장 골라보세요.',
+        cards: [['길쭉한 모양', 1], ['똑바로 된 모양', 0], ['휘어진 모양', 1], ['점박이', 0], ['별 모양', 0]],
+        wrong: '다시 한번 생각해 볼까요?', next: 9
+      }
+    };
+    const STEPS = {
+      1: { screen: 'start', n: '그림 1/6', item: '사과', text: '먼저, 사과를 그려볼까요? ‘알겠어요!’ 버튼을 클릭하세요.', to: 2 },
+      2: { pick: 'apple' },
+      3: { title: '사과 그리기', ai: '...', draws: [], text: '화이트보드에 사과를 그려보세요. 먼저 동그라미를 그려볼까요?', btn: '동그라미 그리기', act: () => drawCircle() },
+      4: { title: '사과 그리기', ai: '동그라미? 공? 시계?', draws: ['p09Circle'], text: '이제 동그라미 위에 짧은 꼭지를 그려보세요.', btn: '짧은 꼭지 그리기', act: () => drawStem() },
+      5: { title: '사과 그리기', ai: '아, 사과예요! 맞았어요.', draws: ['p09Circle', 'p09Stem'], text: '두 가지 특징을 그리니까 바로 맞혔어요!', btn: '다음', act: () => go(6) },
+      6: { title: '사과 그리기', ai: '아, 사과예요! 맞았어요.', draws: ['p09Circle', 'p09Stem'], cards: true, text: '동그란 모양과 꼭지가 함께 보이면, 미리 공부한 사과의 특징과 같아서 정답을 찾을 수 있어요.', btn: '다음', act: () => go(7) },
+      7: { screen: 'start', n: '그림 2/6', item: '바나나', text: '이번에는 특징을 생각하며 바나나를 그려볼까요?', to: 8 },
+      8: { pick: 'banana' },
+      9: { title: '바나나 그리기', ai: '...', draws: [], text: '화이트보드에 바나나를 그려보세요.', btn: '바나나 그리기', act: () => drawBanana() },
+      10: { title: '바나나 그리기', ai: '아, 바나나예요!', draws: ['p09Banana'], text: '두 가지 특징을 그리니까 바로 맞혔어요!', btn: '다음', act: () => go(11) },
+      11: { screen: 'start', n: '그림 3/6', item: '아무 선이나 마구 그려 보세요', text: '만약 특징이 없는 그림을 그리면 퀵 드로우는 알아 맞힐 수 있을까요?', to: 12 },
+      12: { title: '아무 선이나 마구 그려 보세요', ai: '...', draws: [], free: true, text: '아무 선이나 마구 그려 보세요.' },
+      13: { done: true }
+    };
+    const FEATURES = [['동그란 모양', 250], ['위에 짧은 꼭지', 1240]];
+    const FREE_WORDS = ['구름? 실?', '잘 모르겠어요…', '?'];
+
+    const cv = $('p09Cv');
+    const tx = $('p09Tx');
+    const btn = $('p09Btn');
+    const ai = $('p09Ai');
+    const freeG = $('p09Free');
+    const timers = [];
+    let cur = 0;
+    let sub = 0;
+    let act = null;
+    let locked = false;
+    let picked = {};
+    let free = null;
+
+    const later = (fn, ms) => { timers.push(setTimeout(fn, ms)); };
+    const clearTimers = () => { while (timers.length) clearTimeout(timers.pop()); };
+    const setText = (t) => {
+      tx.textContent = t;
+      tx.classList.toggle('is-small', t.length > 45);
+    };
+    const setBtn = (label, fn) => {
+      act = fn || null;
+      btn.hidden = !label;
+      btn.textContent = label || '';
+    };
+    const setAi = (t) => {
+      ai.hidden = !t;
+      ai.textContent = t || '';
+    };
+    const resetDraws = () => {
+      ['p09Circle', 'p09Stem', 'p09Banana'].forEach((id) => {
+        const p = $(id);
+        p.style.transition = 'none';
+        p.classList.remove('is-on');
+      });
+      freeG.innerHTML = '';
+      $('p09Cards').innerHTML = '';
+      cv.classList.remove('is-free');
+    };
+    const showDraws = (ids) => ids.forEach((id) => {
+      const p = $(id);
+      p.style.transition = 'none';
+      p.classList.add('is-on');
+    });
+    const strokeIn = (id, ms) => {
+      const p = $(id);
+      p.getBoundingClientRect();
+      p.style.transition = 'stroke-dashoffset ' + ms + 'ms ease-in-out';
+      p.classList.add('is-on');
+    };
+
+    const drawCircle = () => {
+      setBtn(null);
+      strokeIn('p09Circle', 2000);
+      later(() => setAi('동그라미?'), 300);
+      later(() => setAi('동그라미? 공?'), 1000);
+      later(() => setAi('동그라미? 공? 시계?'), 1700);
+      later(() => go(4, true), 2300);
+    };
+    const drawStem = () => {
+      setBtn(null);
+      strokeIn('p09Stem', 900);
+      later(() => go(5, true), 1100);
+    };
+    const drawBanana = () => {
+      setBtn(null);
+      strokeIn('p09Banana', 2000);
+      later(() => setAi('막대기?'), 400);
+      later(() => setAi('자?'), 1200);
+      later(() => go(10, true), 2200);
+    };
+
+    const showCards = () => {
+      const box = $('p09Cards');
+      FEATURES.forEach((f, i) => {
+        const d = document.createElement('div');
+        d.className = 'p09-fc';
+        d.textContent = f[0];
+        d.style.left = f[1] + 'px';
+        d.style.animationDelay = (i * 0.5) + 's';
+        box.appendChild(d);
+      });
+    };
+
+    const openPick = (key) => {
+      const d = PICKS[key];
+      picked = {};
+      locked = false;
+      $('p09PkTitle').textContent = d.title;
+      $('p09PkText').innerHTML = d.text;
+      const row = $('p09PkRow');
+      row.innerHTML = '';
+      d.cards.forEach((c, i) => {
+        const a = document.createElement('a');
+        a.href = 'javascript:;';
+        a.className = 'card-btn';
+        a.textContent = c[0];
+        a.addEventListener('click', () => {
+          if (locked || picked[i]) return;
+          if (c[1]) {
+            picked[i] = true;
+            a.classList.add('is-selected');
+            playCorrect();
+            if (Object.keys(picked).length === 2) {
+              locked = true;
+              later(() => go(d.next), 800);
+            }
+          } else {
+            locked = true;
+            playWrong();
+            $('p09WrongTx').textContent = d.wrong;
+            flashLayer($('p09Wrong'), 'is-off', 2000);
+            later(() => { locked = false; }, 2000);
+          }
+        });
+        row.appendChild(a);
+      });
+      $('p09Pick').classList.remove('is-off');
+    };
+
+    const startFree = () => {
+      free = { stage: 0, ms: 0, last: 0, line: null, down: false, done: false };
+      cv.classList.add('is-free');
+    };
+    const pt = (e) => {
+      const r = cv.getBoundingClientRect();
+      return ((e.clientX - r.left) * 1828 / r.width).toFixed(1) + ',' + ((e.clientY - r.top) * 608 / r.height).toFixed(1);
+    };
+    const freeWord = (i) => {
+      free.stage = i + 1;
+      setAi(FREE_WORDS[i]);
+      if (i === 2) {
+        free.done = true;
+        free.down = false;
+        setText('특징이 없으면 AI도 정답을 찾을 수 없어요.');
+        setBtn('다음', () => go(13));
+      }
+    };
+    cv.addEventListener('pointerdown', (e) => {
+      if (!free || free.done) return;
+      free.down = true;
+      free.last = performance.now();
+      free.line = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+      free.line.setAttribute('points', pt(e));
+      freeG.appendChild(free.line);
+      cv.setPointerCapture(e.pointerId);
+      if (free.stage === 0) freeWord(0);
+      e.preventDefault();
+    });
+    cv.addEventListener('pointermove', (e) => {
+      if (!free || !free.down || free.done) return;
+      const now = performance.now();
+      free.ms += Math.min(now - free.last, 100);
+      free.last = now;
+      free.line.setAttribute('points', free.line.getAttribute('points') + ' ' + pt(e));
+      if (free.stage === 1 && free.ms > 1500) freeWord(1);
+      else if (free.stage === 2 && free.ms > 3000) freeWord(2);
+    });
+    const endFree = () => { if (free) free.down = false; };
+    cv.addEventListener('pointerup', endFree);
+    cv.addEventListener('pointercancel', endFree);
+
+    const introNext = () => {
+      sub++;
+      setText(INTRO[sub]);
+      setBtn(INTRO_BTN[sub], sub < 2 ? introNext : () => go(1));
+    };
+
+    const go = (n, keep) => {
+      clearTimers();
+      clearFingers();
+      cur = n;
+      sub = 0;
+      free = null;
+      locked = false;
+      $('p09Pick').classList.add('is-off');
+      $('p09Wrong').classList.add('is-off');
+      $('p09Done').classList.add('is-off');
+      if (!keep) resetDraws();
+      if (n === 0) {
+        $('p09Start').hidden = true;
+        $('p09Title').textContent = '';
+        setAi(null);
+        setText(INTRO[0]);
+        setBtn(INTRO_BTN[0], introNext);
+        return;
+      }
+      const s = STEPS[n];
+      if (s.pick) {
+        $('p09Start').hidden = true;
+        setBtn(null);
+        openPick(s.pick);
+        return;
+      }
+      if (s.done) {
+        $('p09Start').hidden = true;
+        setBtn(null);
+        $('p09Done').classList.remove('is-off');
+        return;
+      }
+      if (s.screen === 'start') {
+        $('p09StartN').textContent = s.n;
+        $('p09Item').textContent = s.item;
+        $('p09Start').hidden = false;
+        setText(s.text);
+        setBtn(null);
+        $('p09Title').textContent = '';
+        setAi(null);
+        pointFingerAt($('p09Ok'), { onMain: true, pulse: true });
+        return;
+      }
+      $('p09Start').hidden = true;
+      $('p09Title').textContent = s.title;
+      if (!keep) showDraws(s.draws);
+      setAi(s.ai);
+      if (s.cards) showCards();
+      setText(s.text);
+      setBtn(s.btn, s.act);
+      if (s.free) startFree();
+      if (keep && (n === 5 || n === 10)) playCorrect();
+    };
+
+    btn.addEventListener('click', () => { if (act) act(); });
+    $('p09Ok').addEventListener('click', () => {
+      const s = STEPS[cur];
+      if (s && s.screen === 'start') go(s.to);
+    });
+
+    const q = parseInt(new URLSearchParams(location.search).get('step'), 10);
+    go(q === 0 || STEPS[q] ? q : 0);
+  })();
+  </script>
+</body>
+</html>
