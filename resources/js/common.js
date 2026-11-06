@@ -2216,6 +2216,15 @@ const playClick = sfx.click;
 const playCorrect = sfx.correct;
 const playWrong = sfx.wrong;
 
+const SFX = {
+  play: (name) => {
+    if (name === 'correct') playCorrect();
+    else if (name === 'wrong') playWrong();
+    else if (name === 'click') playClick();
+  }
+};
+window.SFX = SFX;
+
 /* 끌어다 놓아서 맞았을 때 나는 소리(sound/drag.wav). initMatchDrag는 맞게 놓으면 자동으로 부르고,
    직접 구현한 드래그는 맞게 놓는 순간 playDrag()를 부른다. 볼륨 0.5 */
 const playDrag = (() => {

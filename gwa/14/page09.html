@@ -9,11 +9,11 @@
       .p09-qflow{position:absolute;left:220px;top:435px;width:1480px;height:200px;padding:0 50px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:24px;background:#f3f5fa;border-radius:28px;border:solid 5px #b8c7e0}
       .p09-qslot{width:190px;height:140px;box-sizing:border-box;border-radius:22px;border:dashed 5px var(--c-violet);background:#fff;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:66px;color:var(--c-violet);cursor:pointer;user-select:none;transition:all .2s ease}
       .p09-qslot.is-filled{background:#e8e4f8;border:solid 5px #7c6fc4;color:#1b1640}
-      .p09-qcards{position:absolute;left:50%;top:695px;transform:translateX(-50%);display:flex;gap:22px}
+      .p09-qcards{position:absolute;left:50%;top:662px;transform:translateX(-50%);display:flex;gap:22px}
       .p09-qcard{width:154px;height:144px;box-sizing:border-box;border-radius:24px;border:solid 6px var(--c-ink);background:linear-gradient(180deg,#fff,#eef3fb);box-shadow:0 8px 0 rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:60px;color:var(--c-purple);cursor:pointer;user-select:none;transition:transform .15s ease}
       .p09-qcard:hover{transform:translateY(-4px)}
       .p09-qcard.is-used{opacity:.25;pointer-events:none}
-      .p09-hint-btn{position:absolute;right:60px;bottom:40px;margin:0;min-width:0;width:180px;height:82px;font-size:42px;padding-top:6px}
+      .p09-hint-btn{position:absolute;right:60px;bottom:40px;margin:0;min-width:0;height:82px;font-size:42px;padding-top:6px}
       .p09-box-left{position:absolute;left:100px;top:425px;width:960px;height:500px;box-sizing:border-box;border-radius:28px;border:solid 5px var(--c-purple);background:#fff;padding:14px;display:flex;align-items:center;justify-content:center}
       .p09-box-left svg{width:100%;height:100%;display:block}
       .p09-opts-col{position:absolute;left:1100px;top:435px;width:720px;display:flex;flex-direction:column;gap:28px;align-items:center}
@@ -169,7 +169,7 @@
               <div class="avatar-card-body is-side">
                 <p class="avatar-card-text" id="qOkMsg">정답입니다!</p>
               </div>
-              <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" id="btnNextQuiz" data-sound="sound/click.mp3">다음 문제</a>
+              <a href="javascript:;" class="js-sfx avatar-card-btn next-btn card-btn is-popup" id="btnNextQuiz" data-sound="sound/click.mp3">다음 문제</a>
             </div>
           </div>
 
@@ -284,6 +284,7 @@
         if (isCorrect) {
           SFX.play('correct');
           qOkMsg.innerHTML = '정답입니다!<br>질문을 나무 가지처럼 이어 붙여 무엇인지 찾아내는 방법을<br>‘의사결정 나무’라고 해요.';
+          btnNextQuiz.classList.remove('is-pressed');
           qOkModal.classList.remove('is-off');
         } else {
           SFX.play('wrong');
@@ -303,6 +304,7 @@
       var currentQuizStep = 1;
 
       btnNextQuiz.addEventListener('click', function () {
+        btnNextQuiz.classList.remove('is-pressed');
         qOkModal.classList.add('is-off');
         var panels = quizFlow.querySelectorAll('.step-panel');
         if (panels[currentQuizStep - 1]) {
@@ -324,12 +326,15 @@
             SFX.play('correct');
             if (qNum === 2) {
               qOkMsg.innerHTML = '정답입니다!<br>사이다와 물은 색이 없고,<br>포도 주스, 꿀, 식용유는 색이 있어요.';
+              btnNextQuiz.classList.remove('is-pressed');
               qOkModal.classList.remove('is-off');
             } else if (qNum === 3) {
               qOkMsg.innerHTML = '정답입니다!<br>사이다에는 공기 방울이 있고 물에는 공기 방울이 없어서<br>두 액체를 정확하게 나눌 수 있어요.';
+              btnNextQuiz.classList.remove('is-pressed');
               qOkModal.classList.remove('is-off');
             } else if (qNum === 4) {
               qOkMsg.innerHTML = '정답입니다!<br>사이다는 색이 없고 공기 방울이 있으므로<br>1번에 도착해요.';
+              btnNextQuiz.classList.remove('is-pressed');
               qOkModal.classList.remove('is-off');
             } else if (qNum === 5) {
               document.getElementById('quizFinishModal').classList.remove('is-off');

@@ -67,7 +67,7 @@
 
           <div class="p02-ball-stage" id="ballStage">
             <div class="p02-ball-pad" id="ballPad">
-              <img id="currentBallImg" src="img/image7.png" alt="럭비공">
+              <img id="currentBallImg" src="img/image7.png" alt="럭비공" draggable="false">
             </div>
             <p class="p02-ball-nm" id="currentBallName">럭비공</p>
           </div>
@@ -92,7 +92,7 @@
               <div class="avatar-card-body is-side">
                 <p class="avatar-card-text">공 나누기 완료!<br>다음 레벨로 이동해볼까요?</p>
               </div>
-              <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" id="btnStartR2" data-sound="sound/click.mp3">시작하기</a>
+              <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup" id="btnStartR2" data-sound="sound/click.mp3">시작하기</a>
             </div>
           </div>
 
@@ -199,8 +199,21 @@
         }
       }
 
+      var SFX = window.SFX || {
+        play: function (name) {
+          if (name === 'correct' && typeof playCorrect === 'function') playCorrect();
+          else if (name === 'wrong' && typeof playWrong === 'function') playWrong();
+          else if (name === 'click' && typeof playClick === 'function') playClick();
+        }
+      };
+
+      var lastAnswerTime = 0;
       function handleAnswer(choice) {
         if (curIdx >= curList.length) return;
+        var now = Date.now();
+        if (now - lastAnswerTime < 350) return;
+        lastAnswerTime = now;
+
         var cur = curList[curIdx];
         if (choice === cur.ans) {
           SFX.play('correct');
@@ -234,28 +247,41 @@
       var isDragging = false;
 
       function onPointerDown(e) {
+        if (curIdx >= curList.length) return;
         isDragging = true;
         startX = e.clientX;
         startY = e.clientY;
         padX = 0;
         padY = 0;
         ballPad.classList.add('is-dragging');
+        try {
+          ballPad.setPointerCapture(e.pointerId);
+        } catch (err) {}
         window.addEventListener('pointermove', onPointerMove);
         window.addEventListener('pointerup', onPointerUp);
+        window.addEventListener('pointercancel', onPointerUp);
       }
 
       function onPointerMove(e) {
         if (!isDragging) return;
-        padX = e.clientX - startX;
-        padY = e.clientY - startY;
+        var scale = (typeof currentScale !== 'undefined' && currentScale > 0) ? currentScale : 1;
+        padX = (e.clientX - startX) / scale;
+        padY = (e.clientY - startY) / scale;
         ballPad.style.transform = 'translate(' + padX + 'px, ' + padY + 'px)';
+
         var padRect = ballPad.getBoundingClientRect();
         var yesRect = bskYes.getBoundingClientRect();
         var noRect = bskNo.getBoundingClientRect();
-        if (padRect.left < yesRect.right && padRect.right > yesRect.left && padRect.top < yesRect.bottom && padRect.bottom > yesRect.top) {
+
+        var overYes = (padRect.left < yesRect.right && padRect.right > yesRect.left && padRect.top < yesRect.bottom && padRect.bottom > yesRect.top) ||
+                      (e.clientX >= yesRect.left && e.clientX <= yesRect.right && e.clientY >= yesRect.top && e.clientY <= yesRect.bottom);
+        var overNo = (padRect.left < noRect.right && padRect.right > noRect.left && padRect.top < noRect.bottom && padRect.bottom > noRect.top) ||
+                     (e.clientX >= noRect.left && e.clientX <= noRect.right && e.clientY >= noRect.top && e.clientY <= noRect.bottom);
+
+        if (overYes) {
           bskYes.classList.add('is-drag-over');
           bskNo.classList.remove('is-drag-over');
-        } else if (padRect.left < noRect.right && padRect.right > noRect.left && padRect.top < noRect.bottom && padRect.bottom > noRect.top) {
+        } else if (overNo) {
           bskNo.classList.add('is-drag-over');
           bskYes.classList.remove('is-drag-over');
         } else {
@@ -267,20 +293,33 @@
       function onPointerUp(e) {
         if (!isDragging) return;
         isDragging = false;
+        try {
+          ballPad.releasePointerCapture(e.pointerId);
+        } catch (err) {}
         ballPad.classList.remove('is-dragging');
         ballPad.style.transform = '';
-        bskYes.classList.remove('is-drag-over');
-        bskNo.classList.remove('is-drag-over');
         window.removeEventListener('pointermove', onPointerMove);
         window.removeEventListener('pointerup', onPointerUp);
+        window.removeEventListener('pointercancel', onPointerUp);
 
-        var dropX = e.clientX;
+        var padRect = ballPad.getBoundingClientRect();
         var yesRect = bskYes.getBoundingClientRect();
         var noRect = bskNo.getBoundingClientRect();
 
-        if (dropX >= yesRect.left && dropX <= yesRect.right) {
+        var overYes = bskYes.classList.contains('is-drag-over') ||
+          (padRect.left < yesRect.right && padRect.right > yesRect.left && padRect.top < yesRect.bottom && padRect.bottom > yesRect.top) ||
+          (e.clientX >= yesRect.left && e.clientX <= yesRect.right && e.clientY >= yesRect.top && e.clientY <= yesRect.bottom);
+
+        var overNo = bskNo.classList.contains('is-drag-over') ||
+          (padRect.left < noRect.right && padRect.right > noRect.left && padRect.top < noRect.bottom && padRect.bottom > noRect.top) ||
+          (e.clientX >= noRect.left && e.clientX <= noRect.right && e.clientY >= noRect.top && e.clientY <= noRect.bottom);
+
+        bskYes.classList.remove('is-drag-over');
+        bskNo.classList.remove('is-drag-over');
+
+        if (overYes) {
           handleAnswer('yes');
-        } else if (dropX >= noRect.left && dropX <= noRect.right) {
+        } else if (overNo) {
           handleAnswer('no');
         }
       }

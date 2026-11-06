@@ -11,18 +11,22 @@
       .p11-flags{position:absolute;right:50px;top:30px;height:80px;padding:0 24px;border-radius:40px;background:rgba(255,255,255,.92);border:solid 4px var(--c-navy);display:flex;align-items:center;gap:16px;z-index:4}
       .p11-flags img{width:54px;height:54px;object-fit:contain}
       .p11-flags img.is-off{filter:grayscale(1);opacity:.35}
-      .p11-mmap{position:absolute;right:50px;top:124px;width:340px;height:220px;border-radius:22px;background:rgba(255,255,255,.94);border:solid 5px var(--c-navy);box-shadow:0 8px 0 rgba(0,0,0,.15);padding:10px 14px;box-sizing:border-box;z-index:4}
-      .p11-mmap-hd{margin:0 0 6px;font-family:'Cafe24 Ssurround';font-size:22px;color:var(--c-navy);text-align:center}
-      .p11-mmap svg{width:100%;height:155px;display:block}
+      .p11-mmap{position:absolute;right:50px;top:124px;width:360px;height:256px;border-radius:22px;background:rgba(255,255,255,.94);border:solid 5px var(--c-navy);box-shadow:0 8px 0 rgba(0,0,0,.15);padding:8px 10px 10px;box-sizing:border-box;z-index:4}
+      .p11-mmap-hd{margin:0 0 2px;font-family:'Cafe24 Ssurround';font-size:20px;color:var(--c-navy);text-align:center}
+      .p11-mmap svg{width:100%;height:204px;display:block}
+      #mapPin{pointer-events:none;filter:drop-shadow(0 2px 4px rgba(255,46,76,.6))}
       .p11-qsign{position:absolute;left:50%;top:38px;transform:translateX(-50%);min-width:860px;height:130px;padding:8px 50px 0;box-sizing:border-box;border-radius:28px;border:solid 8px #5c3a18;background:linear-gradient(180deg,#fff9e6,#ffe8a3);box-shadow:0 12px 0 rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:56px;color:var(--c-ink);letter-spacing:-0.04em;z-index:4;transition:all .3s ease}
       .p11-qsign.is-warn{border-color:#e0314b;background:#fff0f2;color:#e0314b}
-      .p11-cart{position:absolute;left:50%;top:500px;transform:translateX(-50%);width:340px;height:320px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;z-index:5;transition:all .7s cubic-bezier(.25,1,.5,1)}
-      .p11-cart.go-left{left:28%;top:410px;transform:translateX(-50%) scale(.8)}
-      .p11-cart.go-right{left:72%;top:410px;transform:translateX(-50%) scale(.8)}
-      .p11-cart-item{width:160px;height:180px;object-fit:contain;margin-bottom:-26px;z-index:2;filter:drop-shadow(0 8px 10px rgba(0,0,0,.25))}
-      .p11-cart-body{width:280px;height:124px;border-radius:28px 28px 20px 20px;background:linear-gradient(180deg,#38b6ff,#1664d8);border:solid 6px var(--c-ink);position:relative;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:32px;color:#fff;box-shadow:0 14px 20px rgba(0,0,0,.28)}
-      .p11-cart-body:before,.p11-cart-body:after{content:'';position:absolute;bottom:-18px;width:44px;height:44px;border-radius:50%;background:#222;border:solid 5px #ddd}
-      .p11-cart-body:before{left:24px}.p11-cart-body:after{right:24px}
+      @keyframes p11KartVibe{
+        0%,100%{transform:translateY(0)}
+        50%{transform:translateY(-3px)}
+      }
+      .p11-cart{position:absolute;left:50%;top:470px;transform:translateX(-50%);width:380px;height:380px;z-index:5;transition:all .7s cubic-bezier(.25,1,.5,1);pointer-events:none}
+      .p11-cart.go-left{left:28%;top:385px;transform:translateX(-50%) scale(.78)}
+      .p11-cart.go-right{left:72%;top:385px;transform:translateX(-50%) scale(.78)}
+      .p11-cart-inner{position:relative;width:100%;height:100%;animation:p11KartVibe .32s ease-in-out infinite}
+      .p11-cart-vehicle{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;display:block;z-index:1}
+      .p11-cart-item{position:absolute;left:50%;top:242px;transform:translateX(-50%);width:78px;height:88px;object-fit:contain;z-index:2;filter:drop-shadow(0 4px 6px rgba(0,0,0,.35))}
       .p11-yn-btn{position:absolute;bottom:48px;width:380px;height:116px;font-size:64px;z-index:6;margin:0;display:flex;align-items:center;justify-content:center;padding-top:8px}
       .p11-yn-btn.is-yes{left:140px}
       .p11-yn-btn.is-no{right:140px}
@@ -57,24 +61,40 @@
           </div>
 
           <div class="p11-mmap">
-            <p class="p11-mmap-hd">의사결정 나무 Map</p>
-            <svg viewBox="0 0 320 155" id="p11MapSvg">
-              <line x1="160" y1="30" x2="90" y2="75" stroke="#8a94a6" stroke-width="4"/>
-              <line x1="160" y1="30" x2="230" y2="75" stroke="#8a94a6" stroke-width="4"/>
-              <polygon points="160,10 205,28 160,46 115,28" fill="#fff4b8" stroke="#1b1640" stroke-width="3"/>
-              <circle cx="160" cy="28" r="9" fill="#ff2e4c" stroke="#fff" stroke-width="2.5" id="mapPin"/>
-              <polygon points="90,58 130,75 90,92 50,75" fill="#ebe8f9" stroke="#7c6fc4" stroke-width="3"/>
-              <rect x="210" y="60" width="52" height="32" rx="8" fill="#dff2ec" stroke="#5c9486" stroke-width="3"/>
-              <line x1="90" y1="75" x2="50" y2="125" stroke="#8a94a6" stroke-width="4"/>
-              <line x1="90" y1="75" x2="130" y2="125" stroke="#8a94a6" stroke-width="4"/>
-              <rect x="24" y="115" width="52" height="32" rx="8" fill="#dff2ec" stroke="#5c9486" stroke-width="3"/>
-              <polygon points="130,110 165,126 130,142 95,126" fill="#ebe8f9" stroke="#7c6fc4" stroke-width="3"/>
+            <p class="p11-mmap-hd">레이스 트랙 Map</p>
+            <svg viewBox="0 0 326 195" id="p11MapSvg">
+              <rect x="10" y="10" width="306" height="175" rx="35" fill="#f0f7ea" stroke="#d5e8ca" stroke-width="2"/>
+              <path id="raceTrackPath" d="M 50,35 L 246,35 A 45,45 0 0,1 291,80 L 291,115 A 45,45 0 0,1 246,160 L 80,160 A 45,45 0 0,1 35,115 L 35,80 A 45,45 0 0,1 80,35 L 50,35 Z" fill="none" stroke="#cfd8dc" stroke-width="32" stroke-linejoin="round"/>
+              <path d="M 50,35 L 246,35 A 45,45 0 0,1 291,80 L 291,115 A 45,45 0 0,1 246,160 L 80,160 A 45,45 0 0,1 35,115 L 35,80 A 45,45 0 0,1 80,35 L 50,35 Z" fill="none" stroke="#ffffff" stroke-width="3" stroke-dasharray="8,6" stroke-linejoin="round"/>
+              <path id="raceSinkPath" d="M 120,35 Q 163,12 206,35" fill="none" stroke="#80deea" stroke-width="8" stroke-dasharray="4,4"/>
+              <rect x="145" y="6" width="36" height="16" rx="5" fill="#e0f7fa" stroke="#00acc1" stroke-width="1.5"/>
+              <text x="163" y="15" text-anchor="middle" dominant-baseline="central" font-size="9" fill="#00838f" font-family="'Cafe24 Ssurround', sans-serif" font-weight="bold">개수대</text>
+              <line x1="50" y1="20" x2="50" y2="50" stroke="#1b1640" stroke-width="4" stroke-dasharray="3,3"/>
+              <text x="50" y="14" text-anchor="middle" font-size="12">🏁</text>
+              <text x="50" y="62" text-anchor="middle" font-size="10" fill="#2465a5" font-weight="bold" font-family="'Cafe24 Ssurround', sans-serif">START</text>
+              <polygon points="105,32 113,35 105,38" fill="#90a4ae"/>
+              <polygon points="288,60 291,68 294,60" fill="#90a4ae"/>
+              <polygon points="220,157 212,160 220,163" fill="#90a4ae"/>
+              <circle cx="163" cy="35" r="10" fill="#fff9c4" stroke="#fbc02d" stroke-width="2"/>
+              <text x="163" y="36" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="bold" fill="#8a6200" font-family="'Cafe24 Ssurround', sans-serif">Q1</text>
+              <circle cx="291" cy="98" r="10" fill="#ede7f6" stroke="#7e57c2" stroke-width="2"/>
+              <text x="291" y="99" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="bold" fill="#5e35b1" font-family="'Cafe24 Ssurround', sans-serif">Q2</text>
+              <circle cx="163" cy="160" r="10" fill="#ede7f6" stroke="#7e57c2" stroke-width="2"/>
+              <text x="163" y="161" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="bold" fill="#5e35b1" font-family="'Cafe24 Ssurround', sans-serif">Q3</text>
+              <circle cx="95" cy="160" r="10" fill="#ede7f6" stroke="#7e57c2" stroke-width="2"/>
+              <text x="95" y="161" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="bold" fill="#5e35b1" font-family="'Cafe24 Ssurround', sans-serif">Q4</text>
+              <circle cx="35" cy="98" r="14" fill="#e8f5e9" stroke="#43a047" stroke-width="2"/>
+              <text x="35" y="99" text-anchor="middle" dominant-baseline="central" font-size="13">📦</text>
+              <text x="35" y="122" text-anchor="middle" font-size="9" fill="#2e7d32" font-weight="bold" font-family="'Cafe24 Ssurround', sans-serif">배출함</text>
+              <circle cx="50" cy="35" r="8" fill="#ff2e4c" stroke="#ffffff" stroke-width="2.5" id="mapPin"/>
             </svg>
           </div>
 
           <div class="p11-cart" id="p11Cart">
-            <img class="p11-cart-item" id="p11CartItem" src="img/image28.png" alt="빈 물 페트병">
-            <div class="p11-cart-body">분리배출 카트</div>
+            <div class="p11-cart-inner">
+              <img class="p11-cart-item" id="p11CartItem" src="img/image28.png" alt="빈 물 페트병">
+              <img class="p11-cart-vehicle" src="img/robot_kart_rear.png" alt="분리배출 로봇 카트">
+            </div>
           </div>
 
           <button type="button" class="card-btn p11-yn-btn is-yes" id="btnYes">예</button>
@@ -117,7 +137,7 @@
               <div class="avatar-card-body is-side">
                 <p class="avatar-card-text">1라운드 성공!<br>투명한 물 페트병이 플라스틱 분리배출함에 알맞게 들어갔어요!<br>다음 라운드로 출발해 볼까요?</p>
               </div>
-              <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" id="btnToR2" data-sound="sound/click.mp3">다음 라운드</a>
+              <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup" id="btnToR2" data-sound="sound/click.mp3">다음 라운드</a>
             </div>
           </div>
 
@@ -127,7 +147,7 @@
               <div class="avatar-card-body is-side">
                 <p class="avatar-card-text">2라운드 성공!<br>남은 음료를 깨끗이 비운 유리병을 유리 분리배출함에 넣었어요!<br>마지막 라운드로 출발해 볼까요?</p>
               </div>
-              <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" id="btnToR3" data-sound="sound/click.mp3">다음 라운드</a>
+              <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup" id="btnToR3" data-sound="sound/click.mp3">다음 라운드</a>
             </div>
           </div>
 
@@ -137,7 +157,7 @@
               <div class="avatar-card-body is-side">
                 <p class="avatar-card-text">앗! 우유갑이 갈 곳이 없어요!<br>종이팩과 캔을 나눌 수 있도록 의사결정 나무에 새로운 질문을 추가해 볼까요?</p>
               </div>
-              <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn next-btn card-btn is-popup" id="btnOpenPick" data-sound="sound/click.mp3">질문 추가하기</a>
+              <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup" id="btnOpenPick" data-sound="sound/click.mp3">질문 추가하기</a>
             </div>
           </div>
 
@@ -190,6 +210,7 @@
       var btnSinkResume = document.getElementById('btnSinkResume');
       var mapPin = document.getElementById('mapPin');
       var finger = document.getElementById('p11Finger');
+      var raceTrackPath = document.getElementById('raceTrackPath');
 
       var wrongModal = document.getElementById('p11WrongModal');
       var wrongMsg = document.getElementById('p11WrongMsg');
@@ -198,11 +219,80 @@
       var r3WarnModal = document.getElementById('r3WarnModal');
       var r3ClearModal = document.getElementById('r3ClearModal');
 
-      function updateMapPin(x, y) {
+      var PIN_CHECKPOINTS = {
+        START: 0,
+        Q1: 113,
+        Q2: 284.7,
+        Q3: 455.4,
+        Q4: 523.4,
+        FINISH: 626.1
+      };
+      var curPinLength = 0;
+      var pinAnimId = null;
+
+      function setPinCoords(x, y) {
         if (mapPin) {
           mapPin.setAttribute('cx', x);
           mapPin.setAttribute('cy', y);
         }
+      }
+
+      function animatePinAlongTrack(targetLength, duration, callback) {
+        if (pinAnimId) {
+          cancelAnimationFrame(pinAnimId);
+          pinAnimId = null;
+        }
+        var startLen = curPinLength;
+        var startTime = null;
+        var dur = duration || 600;
+
+        function step(timestamp) {
+          if (!startTime) startTime = timestamp;
+          var elapsed = timestamp - startTime;
+          var p = Math.min(elapsed / dur, 1);
+          var ease = p < 0.5 ? 2 * p * p : -1 + (4 - 2 * p) * p;
+          var curLen = startLen + (targetLength - startLen) * ease;
+          if (raceTrackPath && raceTrackPath.getPointAtLength) {
+            var pt = raceTrackPath.getPointAtLength(curLen);
+            setPinCoords(pt.x, pt.y);
+          }
+          if (p < 1) {
+            pinAnimId = requestAnimationFrame(step);
+          } else {
+            curPinLength = targetLength;
+            pinAnimId = null;
+            if (typeof callback === 'function') callback();
+          }
+        }
+        pinAnimId = requestAnimationFrame(step);
+      }
+
+      function animatePinToPoint(targetX, targetY, duration, callback) {
+        if (pinAnimId) {
+          cancelAnimationFrame(pinAnimId);
+          pinAnimId = null;
+        }
+        var startX = parseFloat(mapPin.getAttribute('cx')) || 163;
+        var startY = parseFloat(mapPin.getAttribute('cy')) || 35;
+        var startTime = null;
+        var dur = duration || 500;
+
+        function step(timestamp) {
+          if (!startTime) startTime = timestamp;
+          var elapsed = timestamp - startTime;
+          var p = Math.min(elapsed / dur, 1);
+          var ease = p < 0.5 ? 2 * p * p : -1 + (4 - 2 * p) * p;
+          var curX = startX + (targetX - startX) * ease;
+          var curY = startY + (targetY - startY) * ease;
+          setPinCoords(curX, curY);
+          if (p < 1) {
+            pinAnimId = requestAnimationFrame(step);
+          } else {
+            pinAnimId = null;
+            if (typeof callback === 'function') callback();
+          }
+        }
+        pinAnimId = requestAnimationFrame(step);
       }
 
       function setupRound1() {
@@ -213,7 +303,11 @@
         cart.className = 'p11-cart';
         qsign.className = 'p11-qsign';
         qsign.textContent = '음료를 다 비웠나요?';
-        updateMapPin(160, 28);
+        curPinLength = PIN_CHECKPOINTS.START;
+        setPinCoords(50, 35);
+        setTimeout(function () {
+          animatePinAlongTrack(PIN_CHECKPOINTS.Q1, 600);
+        }, 300);
       }
 
       function setupRound2() {
@@ -224,7 +318,11 @@
         cart.className = 'p11-cart';
         qsign.className = 'p11-qsign';
         qsign.textContent = '음료를 다 비웠나요?';
-        updateMapPin(160, 28);
+        curPinLength = PIN_CHECKPOINTS.START;
+        setPinCoords(50, 35);
+        setTimeout(function () {
+          animatePinAlongTrack(PIN_CHECKPOINTS.Q1, 600);
+        }, 300);
         flag1.classList.remove('is-off');
       }
 
@@ -236,7 +334,11 @@
         cart.className = 'p11-cart';
         qsign.className = 'p11-qsign';
         qsign.textContent = '음료를 다 비웠나요?';
-        updateMapPin(160, 28);
+        curPinLength = PIN_CHECKPOINTS.START;
+        setPinCoords(50, 35);
+        setTimeout(function () {
+          animatePinAlongTrack(PIN_CHECKPOINTS.Q1, 600);
+        }, 300);
         flag2.classList.remove('is-off');
       }
 
@@ -248,11 +350,11 @@
             if (ans === 'yes') {
               SFX.play('correct');
               cart.classList.add('go-left');
+              animatePinAlongTrack(PIN_CHECKPOINTS.Q2, 700);
               setTimeout(function () {
                 cart.className = 'p11-cart';
                 curStep = 1;
                 qsign.textContent = '몸체가 투명한 플라스틱인가요?';
-                updateMapPin(90, 75);
               }, 700);
             } else {
               SFX.play('wrong');
@@ -263,10 +365,10 @@
             if (ans === 'yes') {
               SFX.play('correct');
               cart.classList.add('go-left');
-              setTimeout(function () {
+              animatePinAlongTrack(PIN_CHECKPOINTS.FINISH, 750, function () {
                 flag1.classList.remove('is-off');
                 r1ClearModal.classList.remove('is-off');
-              }, 700);
+              });
             } else {
               SFX.play('wrong');
               wrongMsg.innerHTML = '투명한 플라스틱 페트병이에요!<br>다시 선택해 볼까요?';
@@ -278,6 +380,7 @@
             if (ans === 'no') {
               SFX.play('correct');
               cart.classList.add('go-right');
+              animatePinToPoint(163, 14, 600);
               setTimeout(function () {
                 sinkPanel.style.display = 'flex';
                 sinkBottle.classList.remove('is-poured');
@@ -293,11 +396,11 @@
             if (ans === 'yes') {
               SFX.play('correct');
               cart.classList.add('go-left');
+              animatePinAlongTrack(PIN_CHECKPOINTS.Q2, 700);
               setTimeout(function () {
                 cart.className = 'p11-cart';
                 curStep = 2;
                 qsign.textContent = '몸체가 투명한 플라스틱인가요?';
-                updateMapPin(90, 75);
               }, 700);
             } else {
               SFX.play('wrong');
@@ -308,11 +411,11 @@
             if (ans === 'no') {
               SFX.play('correct');
               cart.classList.add('go-right');
+              animatePinAlongTrack(PIN_CHECKPOINTS.Q3, 700);
               setTimeout(function () {
                 cart.className = 'p11-cart';
                 curStep = 3;
                 qsign.textContent = '유리로 만들어졌나요?';
-                updateMapPin(130, 125);
               }, 700);
             } else {
               SFX.play('wrong');
@@ -323,10 +426,10 @@
             if (ans === 'yes') {
               SFX.play('correct');
               cart.classList.add('go-left');
-              setTimeout(function () {
+              animatePinAlongTrack(PIN_CHECKPOINTS.FINISH, 750, function () {
                 flag2.classList.remove('is-off');
                 r2ClearModal.classList.remove('is-off');
-              }, 700);
+              });
             } else {
               SFX.play('wrong');
               wrongMsg.innerHTML = '유리로 만든 병이 맞아요!<br>다시 선택해 볼까요?';
@@ -338,11 +441,11 @@
             if (ans === 'yes') {
               SFX.play('correct');
               cart.classList.add('go-left');
+              animatePinAlongTrack(PIN_CHECKPOINTS.Q2, 700);
               setTimeout(function () {
                 cart.className = 'p11-cart';
                 curStep = 1;
                 qsign.textContent = '몸체가 투명한 플라스틱인가요?';
-                updateMapPin(90, 75);
               }, 700);
             } else {
               SFX.play('wrong');
@@ -353,11 +456,11 @@
             if (ans === 'no') {
               SFX.play('correct');
               cart.classList.add('go-right');
+              animatePinAlongTrack(PIN_CHECKPOINTS.Q3, 700);
               setTimeout(function () {
                 cart.className = 'p11-cart';
                 curStep = 2;
                 qsign.textContent = '유리로 만들어졌나요?';
-                updateMapPin(130, 125);
               }, 700);
             } else {
               SFX.play('wrong');
@@ -377,10 +480,10 @@
             if (ans === 'yes') {
               SFX.play('correct');
               cart.classList.add('go-left');
-              setTimeout(function () {
+              animatePinAlongTrack(PIN_CHECKPOINTS.FINISH, 750, function () {
                 flag3.classList.remove('is-off');
                 r3ClearModal.classList.remove('is-off');
-              }, 700);
+              });
             } else {
               SFX.play('wrong');
               wrongMsg.innerHTML = '우유갑은 종이로 만들어졌어요!<br>‘예’를 선택해 볼까요?';
@@ -410,7 +513,9 @@
         cart.className = 'p11-cart';
         curStep = 1;
         qsign.textContent = '음료를 다 비웠나요?';
-        updateMapPin(160, 28);
+        animatePinToPoint(163, 35, 450, function () {
+          curPinLength = PIN_CHECKPOINTS.Q1;
+        });
       });
 
       document.getElementById('btnToR2').addEventListener('click', function () {
@@ -444,6 +549,7 @@
             btnYes.style.display = 'flex';
             btnNo.style.display = 'flex';
             curStep = 3;
+            animatePinAlongTrack(PIN_CHECKPOINTS.Q4, 600);
           } else {
             SFX.play('wrong');
             if (pickVal === 'no1') {
