@@ -1,54 +1,596 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Canva로 그리는 의사결정 나무</title>
-    <link rel="stylesheet" href="../../resources/css/common.css">
-    <style>
-      .p08-pc{position:absolute;left:40px;top:20px;width:1840px;height:920px;box-sizing:border-box;border:solid 6px var(--c-navy);border-radius:24px;background:#fff;overflow:hidden;font-family:'Pretendard',sans-serif}
-      .p08-view{position:absolute;left:0;top:0;right:0;bottom:200px;background:#fff;overflow:hidden}
-      .p08-screen-img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;object-position:top left;cursor:pointer}
-      .p08-hotspot{position:absolute;border-radius:16px;cursor:pointer;z-index:5}
-      .p08-hotspot.is-pulse{outline:5px solid var(--c-yellow);box-shadow:0 0 20px rgba(255,200,0,.8);animation:p08Pulse 1.2s infinite}
-      @keyframes p08Pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
-      .p08-cv-top{position:absolute;left:0;top:0;right:0;height:62px;background:linear-gradient(90deg,#00c4cc 0%,#5a68d8 52%,#7d2ae8 100%);display:flex;align-items:center;padding:0 22px;gap:22px;color:#fff;font-size:20px;font-weight:600;z-index:3}
-      .p08-cv-top .sep{width:1px;height:24px;background:rgba(255,255,255,.35)}
-      .p08-cv-top .ttl{margin-left:auto;font-weight:500;opacity:.92}
-      .p08-cv-top .pro{padding:6px 18px;border-radius:8px;background:rgba(255,255,255,.18);font-size:18px}
-      .p08-cv-top .shr{padding:7px 20px;border-radius:8px;background:#fff;color:#111;font-weight:700;font-size:18px}
-      .p08-cv-rail{position:absolute;left:0;top:62px;width:86px;height:658px;background:#f8f9fb;border-right:solid 1px #e2e4ea;display:flex;flex-direction:column;align-items:center;padding-top:14px;gap:16px;z-index:4}
-      .p08-cv-rail-it{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:13px;color:#4a4d57;font-weight:600;cursor:pointer}
-      .p08-cv-rail-it i{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:22px;background:#fff;border:solid 1px #e1e3ea}
-      .p08-cv-rail-it.is-on i{background:#ece6ff;border-color:#7d2ae8;color:#7d2ae8}
-      .p08-cv-drawer{position:absolute;left:86px;top:62px;width:400px;height:658px;background:#fff;border-right:solid 2px #e2e4ea;box-shadow:6px 0 18px rgba(0,0,0,.06);z-index:4;padding:20px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px}
-      .p08-cv-sbox{height:54px;border-radius:14px;border:solid 2px #7d2ae8;padding:0 16px;display:flex;align-items:center;justify-content:space-between;font-size:22px;font-weight:600;color:#111;background:#faf9ff;cursor:pointer}
-      .p08-cv-sbox i{width:28px;height:28px;border-radius:50%;background:#555;color:#fff;font-style:normal;font-size:16px;display:flex;align-items:center;justify-content:center}
-      .p08-cv-stabs{display:flex;gap:18px;border-bottom:solid 2px #eee;padding-bottom:10px;font-size:18px;font-weight:700;color:#666}
-      .p08-cv-stabs span.on{color:#7d2ae8;border-bottom:solid 3px #7d2ae8;padding-bottom:8px;margin-bottom:-12px}
-      .p08-cv-sec-hd{display:flex;justify-content:space-between;align-items:center;font-size:19px;font-weight:700;color:#111;margin:4px 0 0}
-      .p08-cv-sec-hd small{font-size:15px;color:#666;font-weight:500}
-      .p08-cv-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
-      .p08-cv-gitem{height:140px;border-radius:16px;border:solid 2px #e6e8f0;background:#f9fafc;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:transform .15s ease}
-      .p08-cv-gitem:hover{transform:scale(1.04)}
-      .p08-cv-gitem.is-hl{border:solid 4px var(--c-yellow);background:#fffdf0;box-shadow:0 0 14px rgba(255,200,0,.55)}
-      .p08-cv-gitem svg{width:88px;height:88px}
-      .p08-wb{position:absolute;left:86px;top:62px;right:0;height:658px;background:radial-gradient(#d5d8e2 1.5px,transparent 1.5px) 0 0/22px 22px #fafbfd;overflow:hidden}
-      .p08-wb.has-drawer{left:486px}
-      .p08-wb-tree{position:absolute;left:60px;top:10px;width:1240px;height:630px}
-      .p08-rpanel{position:absolute;right:24px;top:18px;width:400px;height:610px;border-radius:24px;background:#266cc8;padding:18px;box-sizing:border-box;z-index:4}
-      .p08-rpanel-in{width:100%;height:100%;border-radius:18px;background:#fff;padding:20px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:18px}
-      .p08-rpanel-hd{margin:0;font-family:'Cafe24 Ssurround';font-size:30px;color:var(--c-navy)}
-      .p08-tcard{width:330px;height:82px;border-radius:18px;border:solid 4px var(--c-ink);background:#f8f6ff;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:32px;color:var(--c-purple);box-shadow:0 6px 0 rgba(0,0,0,.14);cursor:pointer;transition:all .15s ease}
-      .p08-tcard.is-now{background:#fff8cc;border-color:var(--c-yellow);box-shadow:0 0 0 5px rgba(255,200,0,.45)}
-      .p08-tcard.is-used{opacity:.35;pointer-events:none}
-      .p08-tnote{margin-top:auto;padding:12px 20px;border-radius:18px;background:#eef3fb;border:solid 2px #c5d4ec;font-family:'Cafe24 Ssurround';font-size:22px;color:var(--c-navy);text-align:center;line-height:1.35}
-      .p08-gd{position:absolute;left:0;right:0;bottom:0;height:200px;background:var(--c-pale);border-top:solid 5px var(--c-navy);z-index:6}
-      .p08-gd-ch{position:absolute;left:40px;bottom:-90px;height:300px;z-index:7}
-      .p08-gd-tx{position:absolute;left:340px;right:360px;top:0;bottom:0;margin:0;display:flex;align-items:center;font-family:'Cafe24 Ssurround';font-size:44px;line-height:1.25;color:var(--c-purple);letter-spacing:-0.04em;word-break:keep-all}
-      .p08-gd-btn{position:absolute;right:40px;top:50%;transform:translateY(-50%);margin:0;min-width:180px;height:96px;font-size:46px;display:flex;align-items:center;justify-content:center;padding-top:6px}
-      .p08-fg{position:absolute;width:100px;z-index:10;pointer-events:none}
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canva로 그리는 의사결정 나무</title>
+  <link rel="stylesheet" href="../../resources/css/common.css">
+  <style>
+    :root {
+      --cv-cyan: #00c4cc;
+      --cv-blue: #5a68d8;
+      --cv-purple: #7d2ae8;
+      --cv-purple-soft: #ece6ff;
+      --cv-navy: #1b1640;
+      --cv-border: #e2e4ea;
+      --cv-bg-dot: #d5d8e2;
+      --cv-mint-bg: #e6f4ee;
+      --cv-mint-border: #569480;
+      --cv-mint-text: #0c614b;
+    }
+    .p08-pc {
+      position: absolute;
+      left: 40px;
+      top: 20px;
+      width: 1840px;
+      height: 920px;
+      box-sizing: border-box;
+      border: solid 6px var(--c-navy);
+      border-radius: 24px;
+      background: #fff;
+      overflow: hidden;
+      font-family: 'Pretendard', sans-serif;
+    }
+    .p08-view {
+      position: absolute;
+      left: 0;
+      top: 0;
+      right: 0;
+      bottom: 200px;
+      background: #fff;
+      overflow: hidden;
+    }
+    .desktop-view {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(160deg, #9fd8f0, #b9a8f5 55%, #f3b6d8);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+    .desktop-bg-shapes {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .desktop-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.25;
+    }
+    .desktop-blob.b1 {
+      width: 500px;
+      height: 500px;
+      left: 10%;
+      top: -100px;
+      background: #ffffff;
+    }
+    .desktop-blob.b2 {
+      width: 600px;
+      height: 600px;
+      right: 15%;
+      top: 20%;
+      background: #c2a8f8;
+    }
+    .desktop-center-stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+    }
+    .desktop-app-card {
+      position: relative;
+      width: 130px;
+      padding: 16px 10px;
+      border-radius: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.4, 1);
+      user-select: none;
+    }
+    .desktop-app-card:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-4px);
+    }
+    .desktop-app-icon {
+      width: 110px;
+      height: 110px;
+      border-radius: 28px;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+    }
+    .desktop-app-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .desktop-app-name {
+      font-size: 20px;
+      font-weight: 800;
+      color: #1b1640;
+      letter-spacing: -0.02em;
+      text-shadow: 0 2px 6px rgba(255, 255, 255, 0.8);
+    }
+    .desktop-taskbar {
+      height: 54px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(255, 255, 255, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+      z-index: 10;
+    }
+    .taskbar-left, .taskbar-center, .taskbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .taskbar-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .taskbar-btn:hover {
+      background: rgba(0, 0, 0, 0.06);
+    }
+    .taskbar-right {
+      font-size: 13px;
+      color: #333;
+      font-weight: 600;
+      gap: 16px;
+    }
+    .cv-topbar {
+      height: 52px;
+      background: #fff;
+      border-bottom: 1px solid var(--cv-border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 12px;
+      font-size: 13px;
+      color: #4b5262;
+      flex-shrink: 0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+    .cv-topbar .home-ico {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      background: #f1f3f8;
+      border: none;
+      color: var(--cv-purple);
+    }
+    .cv-topbar .home-ico svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+    .cv-topbar .sep {
+      width: 1px;
+      height: 18px;
+      background: var(--cv-border);
+      margin: 0 4px;
+    }
+    .cv-topbar .doc-title {
+      font-weight: 700;
+      color: var(--cv-navy);
+      font-size: 14px;
+    }
+    .cv-tb-btn-icon {
+      width: 30px;
+      height: 30px;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #555d6e;
+    }
+    .cv-tb-btn-icon:hover {
+      background: #f1f3f8;
+    }
+    .cv-tb-btn-icon svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+    .cv-tb-btn-icon.is-dim {
+      opacity: 0.35;
+      cursor: default;
+    }
+    .top-cloud-status {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #10b981;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 4px;
+    }
+    .top-cloud-status svg {
+      width: 15px;
+      height: 15px;
+    }
+    .topbar-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .share-btn {
+      background: var(--cv-purple);
+      color: #fff;
+      border: none;
+      padding: 7px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 8px rgba(125, 42, 232, 0.25);
+    }
+    .share-btn svg {
+      width: 15px;
+      height: 15px;
+      fill: currentColor;
+    }
+    .cv-editor-layout {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+    .cv-rail {
+      width: 72px;
+      background: #fff;
+      border-right: 1px solid var(--cv-border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 10px;
+      gap: 4px;
+      flex-shrink: 0;
+      z-index: 5;
+    }
+    .cv-rail-item {
+      width: 60px;
+      height: 56px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #636b78;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .cv-rail-item:hover {
+      background: #f4f6fa;
+      color: var(--cv-purple);
+    }
+    .cv-rail-item.is-active {
+      background: var(--cv-purple-soft);
+      color: var(--cv-purple);
+    }
+    .cv-rail-item i svg {
+      width: 22px;
+      height: 22px;
+    }
+    .cv-canvas-wrap {
+      flex: 1;
+      position: relative;
+      background-color: #fafbfc;
+      background-image: radial-gradient(var(--cv-bg-dot) 1.2px, transparent 1.2px);
+      background-size: 22px 22px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+    }
+    .p08-wb, #p08TreeSvg, #p08DragBranch, .p08-drag-branch {
+      touch-action: none !important;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+    .cv-rpanel {
+      width: 220px;
+      background: #fff;
+      border-left: 1px solid var(--cv-border);
+      padding: 18px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex-shrink: 0;
+      box-shadow: -4px 0 16px rgba(0, 0, 0, 0.03);
+      z-index: 5;
+    }
+    .cv-rpanel-hd {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--cv-navy);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .cv-tcard {
+      border: 2px solid #e2e4ea;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #333;
+      background: #f8fafc;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+    }
+    .cv-tcard:hover, .cv-tcard.is-now {
+      border-color: var(--cv-purple);
+      background: #f5f0ff;
+      color: var(--cv-purple);
+      box-shadow: 0 4px 12px rgba(125, 42, 232, 0.15);
+    }
+    .cv-tcard.is-done {
+      border-color: #10b981;
+      background: #ecfdf5;
+      color: #065f46;
+      cursor: default;
+    }
+    .cv-tcard.is-pending {
+      opacity: 0.45;
+      cursor: not-allowed;
+      border-style: dashed;
+    }
+    .cv-tcard-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 800;
+      margin-left: 6px;
+    }
+    .cv-tcard.is-now .cv-tcard-badge {
+      background: #7d2ae8;
+      color: #fff;
+    }
+    .cv-tcard.is-done .cv-tcard-badge {
+      background: #10b981;
+      color: #fff;
+    }
+    .cv-tnote {
+      margin-top: auto;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 12px;
+      color: #1e40af;
+      line-height: 1.5;
+    }
+    .p08-gd {
+      position: absolute;
+      left: 160px;
+      bottom: 20px;
+      width: 1520px;
+      height: 160px;
+      box-sizing: border-box;
+      border: solid 4px #000;
+      border-radius: 20px;
+      background: #f7f3ee;
+      padding: 24px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      z-index: 20;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+    .p08-gd-tx {
+      font-family: 'Cafe24 Ssurround', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #222;
+      margin: 0;
+      line-height: 1.4;
+      flex: 1;
+    }
+    .p08-gd-ch {
+      position: absolute;
+      left: 20px;
+      bottom: 12px;
+      width: 140px;
+      height: auto;
+      z-index: 25;
+      filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.15));
+      pointer-events: none;
+    }
+    .p08-fg {
+      position: absolute;
+      width: 96px;
+      height: 96px;
+      z-index: 30;
+      pointer-events: none;
+      filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.3));
+      transition: transform 0.12s ease-out;
+    }
+    .p08-fg.is-tap {
+      transform: scale(0.92) translate(-3px, -3px);
+    }
+    .p08-gd-btn {
+      margin: 0;
+      min-width: 140px;
+      padding: 14px 32px;
+      font-family: 'Cafe24 Ssurround', sans-serif;
+      font-size: 24px;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    @keyframes cvGlowPulse {
+      0%, 100% {
+        opacity: 0.9;
+        filter: drop-shadow(0 0 8px rgba(255, 204, 0, 0.65));
+      }
+      50% {
+        opacity: 1;
+        filter: drop-shadow(0 0 20px rgba(255, 204, 0, 0.95));
+      }
+    }
+    .pulse-glow {
+      animation: cvGlowPulse 1.6s infinite ease-in-out;
+    }
+    .is-drag-over {
+      stroke: #00c4cc !important;
+      fill: rgba(0, 196, 204, 0.16) !important;
+      stroke-width: 4 !important;
+      filter: drop-shadow(0 0 22px rgba(0, 196, 204, 0.85)) !important;
+    }
+    @keyframes blinkCursor {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .blink-cursor {
+      animation: blinkCursor 0.8s infinite;
+    }
+    @keyframes treeGlowShimmer {
+      0%, 100% {
+        filter: drop-shadow(0 0 8px rgba(0, 196, 204, 0.35)) drop-shadow(0 0 16px rgba(245, 158, 11, 0.2));
+      }
+      50% {
+        filter: drop-shadow(0 0 18px rgba(0, 196, 204, 0.6)) drop-shadow(0 0 28px rgba(245, 158, 11, 0.4));
+      }
+    }
+    .tree-glow-finished {
+      animation: treeGlowShimmer 2.8s infinite ease-in-out;
+    }
+    @keyframes cvSparkleTwinkle {
+      0%, 100% {
+        transform: scale(0.75) rotate(0deg);
+        opacity: 0.65;
+      }
+      50% {
+        transform: scale(1.18) rotate(15deg);
+        opacity: 1;
+      }
+    }
+    .cv-sparkle-node {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: cvSparkleTwinkle 2.4s infinite ease-in-out;
+    }
+    .cv-complete-badge {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.96);
+      border: 1.5px solid #00c4cc;
+      padding: 6px 18px 6px 10px;
+      border-radius: 40px;
+      box-shadow: 0 8px 24px rgba(0, 196, 204, 0.22), 0 2px 8px rgba(125, 42, 232, 0.12);
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      backdrop-filter: blur(8px);
+      animation: badgeShimmer 3s infinite ease-in-out;
+    }
+    @keyframes badgeShimmer {
+      0%, 100% {
+        box-shadow: 0 8px 24px rgba(0, 196, 204, 0.22), 0 2px 8px rgba(125, 42, 232, 0.12);
+        border-color: #00c4cc;
+      }
+      50% {
+        box-shadow: 0 10px 28px rgba(125, 42, 232, 0.28), 0 2px 12px rgba(245, 158, 11, 0.25);
+        border-color: #7d2ae8;
+      }
+    }
+    .cv-badge-pill {
+      background: linear-gradient(135deg, #7d2ae8, #00c4cc);
+      color: #fff;
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-family: 'Cafe24 Ssurround', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .cv-badge-title {
+      font-family: 'Cafe24 Ssurround', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #1b1640;
+      letter-spacing: -0.02em;
+    }
+    .cv-badge-divider {
+      width: 1px;
+      height: 16px;
+      background: #d5d8e2;
+    }
+    .cv-badge-sub {
+      font-family: 'Pretendard', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: #5a68d8;
+    }
+    .cv-badge-check {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #e6f4ee;
+      color: #0c614b;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
 </head>
 <body>
   <div id="page-fade"></div>
@@ -60,13 +602,12 @@
             <div class="p08-view" id="p08View"></div>
 
             <div class="p08-gd">
-              <p class="p08-gd-tx" id="p08GuideText">Canva에서 [화이트보드]를 눌러 시작해 보세요.</p>
-              <button type="button" class="card-btn is-popup p08-gd-btn" id="p08NextBtn" style="display:none">다음</button>
+              <p class="p08-gd-tx" id="p08GuideText">‘캔바’를 클릭하세요.</p>
+              <button type="button" class="card-btn is-popup p08-gd-btn" id="p08NextBtn" onclick="nextStep()">다음</button>
             </div>
-            <img class="p08-gd-ch" src="../img/character/gwa_main_point.png" alt="">
+            <img class="p08-gd-ch" src="../img/character/gwa_main_point.png" alt="캐릭터">
+            <img class="p08-fg" id="p08Finger" src="../../resources/img/common/img_finger01.png" alt="손가락">
           </div>
-
-          <img class="p08-fg" id="p08Finger" src="../../resources/img/common/img_finger01.png" alt="">
 
           <div class="avatar-modal is-off" id="p08DoneModal">
             <div class="avatar-card">
@@ -88,483 +629,786 @@
   <script src="../../resources/js/common.js"></script>
   <script>
     (function () {
-      var view = document.getElementById('p08View');
-      var guideText = document.getElementById('p08GuideText');
-      var nextBtn = document.getElementById('p08NextBtn');
-      var finger = document.getElementById('p08Finger');
+      var urlParams = new URLSearchParams(window.location.search);
+      var paramStep = parseInt(urlParams.get('step'), 10);
+      var currentStep = (!isNaN(paramStep) && paramStep >= 0 && paramStep <= 6) ? paramStep : 0;
+      var paramSub = parseInt(urlParams.get('sub'), 10);
+      var step5Sub = (!isNaN(paramSub) && paramSub >= 1 && paramSub <= 3) ? paramSub : 1;
+      var stageEl = document.getElementById('p08View');
+      var gdTextEl = document.getElementById('p08GuideText');
+      var nextBtnEl = document.getElementById('p08NextBtn');
+      var fingerEl = document.getElementById('p08Finger');
+      var fingerTimer = null;
+      var fingerFrame = 1;
 
-      var curStep = 0;
-
-      function setFinger(x, y) {
-        if (x !== undefined && y !== undefined) {
-          finger.style.display = 'block';
-          finger.style.left = x + 'px';
-          finger.style.top = y + 'px';
-        } else {
-          finger.style.display = 'none';
+      function updateFingerTap() {
+        if (fingerTimer) {
+          clearInterval(fingerTimer);
+          fingerTimer = null;
         }
+        if (!fingerEl || fingerEl.style.display === 'none') return;
+        fingerFrame = 1;
+        fingerEl.src = '../../resources/img/common/img_finger01.png';
+        fingerEl.classList.remove('is-tap');
+        fingerTimer = setInterval(function () {
+          if (!fingerEl || fingerEl.style.display === 'none') return;
+          if (fingerFrame === 1) {
+            fingerFrame = 2;
+            fingerEl.src = '../../resources/img/common/img_finger02.png';
+            fingerEl.classList.add('is-tap');
+          } else {
+            fingerFrame = 1;
+            fingerEl.src = '../../resources/img/common/img_finger01.png';
+            fingerEl.classList.remove('is-tap');
+          }
+        }, 400);
+      }
+
+      var stepsData = [
+        {
+          step: 0,
+          guide: '‘캔바’를 클릭하세요.',
+          finger: { left: 960, top: 405 }
+        },
+        {
+          step: 1,
+          guide: '의사결정 나무의 맨 아래 한 가지가 비었어요. 왼쪽 가지 묶음을 클릭하세요.',
+          finger: { left: 590, top: 610 }
+        },
+        {
+          step: 2,
+          guide: '플로팅 툴바의 ‘복제’ 버튼을 클릭하세요.',
+          finger: { left: 490, top: 210 }
+        },
+        {
+          step: 3,
+          guide: '복제된 가지를 오른쪽 점선 자리로 끌어 놓아요.',
+          finger: { left: 990, top: 560 }
+        },
+        {
+          step: 4,
+          guide: '오른쪽 자리에 딱 맞게 붙었어요! 이제 내용을 수정해 볼까요?',
+          finger: { left: 1560, top: 600 }
+        },
+        {
+          step: 5,
+          guide: '새 질문 카드로 교체해 보세요.',
+          finger: { left: 1730, top: 155 }
+        },
+        {
+          step: 6,
+          guide: '캔바로 의사결정 나무를 완성했어요! AI도 이런 나무를 따라가며 정답을 정해요.',
+          finger: null
+        }
+      ];
+
+      function getCupSvg(type) {
+        if (type === 'cider') {
+          return '<svg viewBox="0 0 100 130" width="64" height="78">' +
+            '<path d="M16,12 L84,12 L76,118 Q75,124 68,124 L32,124 Q25,124 24,118 Z" fill="rgba(255,255,255,0.95)" stroke="#5b6b82" stroke-width="4.5"/>' +
+            '<path d="M19,42 L81,42 L75,116 Q74,120 68,120 L32,120 Q26,120 25,116 Z" fill="#e0f2fe"/>' +
+            '<circle cx="38" cy="95" r="5" fill="#fff" stroke="#38bdf8" stroke-width="2.5"/>' +
+            '<circle cx="62" cy="78" r="6" fill="#fff" stroke="#38bdf8" stroke-width="2.5"/>' +
+            '<circle cx="45" cy="62" r="4" fill="#fff" stroke="#38bdf8" stroke-width="2.5"/>' +
+            '<circle cx="58" cy="102" r="3.5" fill="#fff" stroke="#38bdf8" stroke-width="2"/>' +
+          '</svg>';
+        } else if (type === 'water') {
+          return '<svg viewBox="0 0 100 130" width="64" height="78">' +
+            '<path d="M16,12 L84,12 L76,118 Q75,124 68,124 L32,124 Q25,124 24,118 Z" fill="rgba(255,255,255,0.95)" stroke="#5b6b82" stroke-width="4.5"/>' +
+            '<path d="M19,42 L81,42 L75,116 Q74,120 68,120 L32,120 Q26,120 25,116 Z" fill="#f0f7ff"/>' +
+            '<path d="M22,54 Q50,62 78,54" fill="none" stroke="#bae6fd" stroke-width="2.4"/>' +
+          '</svg>';
+        } else if (type === 'grape') {
+          return '<svg viewBox="0 0 100 130" width="64" height="78">' +
+            '<path d="M16,12 L84,12 L76,118 Q75,124 68,124 L32,124 Q25,124 24,118 Z" fill="rgba(255,255,255,0.95)" stroke="#5b6b82" stroke-width="4.5"/>' +
+            '<path d="M19,42 L81,42 L75,116 Q74,120 68,120 L32,120 Q26,120 25,116 Z" fill="#4c2882"/>' +
+            '<ellipse cx="50" cy="42" rx="30" ry="4" fill="#693ea8"/>' +
+          '</svg>';
+        } else if (type === 'honey') {
+          return '<svg viewBox="0 0 100 130" width="64" height="78">' +
+            '<path d="M25,28 L75,28 L72,36 L84,52 C90,68 88,96 82,112 C78,122 72,124 50,124 C28,124 22,122 18,112 C12,96 10,68 16,52 L28,36 Z" fill="#f59e0b" stroke="#78350f" stroke-width="4"/>' +
+            '<path d="M22,34 L78,34 L82,50 C86,64 84,94 80,108 C76,118 70,120 50,120 C30,120 24,118 20,108 C16,94 14,64 18,50 Z" fill="#fbbf24"/>' +
+            '<path d="M24,20 L76,20 Q80,20 80,26 L76,32 L24,32 L20,26 Q20,20 24,20 Z" fill="#d97706" stroke="#78350f" stroke-width="3"/>' +
+            '<rect x="22" y="14" width="56" height="8" rx="3" fill="#b45309"/>' +
+            '<circle cx="50" cy="74" r="18" fill="#fff" stroke="#d97706" stroke-width="3"/>' +
+            '<text x="50" y="79" text-anchor="middle" dominant-baseline="middle" style="font-family:Cafe24 Ssurround,sans-serif;font-size:16px;font-weight:700;fill:#92400e;">꿀</text>' +
+          '</svg>';
+        } else if (type === 'oil') {
+          return '<svg viewBox="0 0 100 130" width="64" height="78">' +
+            '<rect x="42" y="10" width="16" height="12" rx="2" fill="#15803d" stroke="#166534" stroke-width="2"/>' +
+            '<path d="M38,24 L62,24 L62,38 L78,54 C82,64 82,106 78,118 Q76,124 68,124 L32,124 Q24,124 22,118 C18,106 18,64 22,54 L38,38 Z" fill="#fef08a" stroke="#4d7c0f" stroke-width="4"/>' +
+            '<path d="M40,32 L60,32 L60,40 L74,54 C78,64 78,102 75,116 Q73,120 68,120 L32,120 Q27,120 25,116 C22,102 22,64 26,54 L40,40 Z" fill="#facc15"/>' +
+            '<rect x="30" y="72" width="40" height="26" rx="4" fill="#ffffff" stroke="#eab308" stroke-width="1.5"/>' +
+            '<path d="M42,80 Q50,74 58,80 Q50,86 42,80 Z" fill="#15803d"/>' +
+          '</svg>';
+        }
+        return '';
+      }
+
+      function getCardSvg(x, y, label, type, isHighlight, isDashed) {
+        var strokeColor = isHighlight ? '#f59e0b' : (isDashed ? '#94a3b8' : '#569480');
+        var strokeDash = isDashed ? 'stroke-dasharray="7 5"' : '';
+        var fillColor = isHighlight ? '#fffbe6' : (isDashed ? '#f8fafc' : '#e6f4ee');
+        var textColor = isHighlight ? '#9a6300' : (isDashed ? '#8c95a6' : '#0c614b');
+        var cupHtml = '';
+        if (type) {
+          cupHtml = '<g transform="translate(' + (x + 30) + ',' + (y + 12) + ')">' + getCupSvg(type) + '</g>';
+        }
+        return '<rect x="' + x + '" y="' + y + '" width="124" height="132" rx="18" fill="' + fillColor + '" stroke="' + strokeColor + '" stroke-width="3" ' + strokeDash + ' filter="drop-shadow(0 4px 10px rgba(0,0,0,0.06))"/>' +
+          cupHtml +
+          '<text x="' + (x + 62) + '" y="' + (y + 112) + '" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-weight:700;font-size:18px;fill:' + textColor + ';letter-spacing:-0.03em;">' + label + '</text>';
+      }
+
+      function getDiamondSvg(cx, cy, text, isHighlight, isDashed, isSelected, rx, ry) {
+        rx = rx || 105;
+        ry = ry || 44;
+        var strokeColor = isSelected ? '#7d2ae8' : (isHighlight ? '#f59e0b' : (isDashed ? '#94a3b8' : '#7b68ee'));
+        var strokeDash = isDashed ? 'stroke-dasharray="7 5"' : '';
+        var fillColor = isHighlight ? '#fffbe6' : (isDashed ? '#f8fafc' : (isSelected ? '#f3e8ff' : '#ede9fe'));
+        var textColor = isDashed ? '#8c95a6' : '#1e1b4b';
+        var pts = (cx) + ',' + (cy - ry) + ' ' + (cx + rx) + ',' + (cy) + ' ' + (cx) + ',' + (cy + ry) + ' ' + (cx - rx) + ',' + (cy);
+        return '<polygon points="' + pts + '" fill="' + fillColor + '" stroke="' + strokeColor + '" stroke-width="2.8" stroke-linejoin="round" ' + strokeDash + ' filter="drop-shadow(0 4px 10px rgba(0,0,0,0.05))"/>' +
+          '<text x="' + cx + '" y="' + cy + '" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-weight:700;font-size:18px;fill:' + textColor + ';letter-spacing:-0.02em;">' + text + '</text>';
+      }
+
+      function getLineLabel(x, y, text) {
+        return '<text x="' + x + '" y="' + y + '" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-weight:700;font-size:16px;fill:#4b5563;">' + text + '</text>';
+      }
+
+      function getSparkleStar(cx, cy, size, color, delay, is8point) {
+        var s = size;
+        var s2 = Math.round(s * 0.52);
+        var mainPath = 'M 0,-' + s + ' Q 0,0 ' + s + ',0 Q 0,0 0,' + s + ' Q 0,0 -' + s + ',0 Q 0,0 0,-' + s + ' Z';
+        var secPath = is8point ? ('<path d="M 0,-' + s2 + ' Q 0,0 ' + s2 + ',0 Q 0,0 0,' + s2 + ' Q 0,0 -' + s2 + ',0 Q 0,0 0,-' + s2 + ' Z" fill="' + color + '" transform="rotate(45)" opacity="0.85"/>') : '';
+        var glowDrop = 'filter="drop-shadow(0 0 ' + Math.max(3, Math.round(s * 0.45)) + 'px ' + color + ')"';
+        return '<g class="cv-sparkle-node" transform="translate(' + cx + ',' + cy + ')" style="animation-delay:' + delay + 's;" ' + glowDrop + '>' +
+          '<path d="' + mainPath + '" fill="' + color + '"/>' +
+          secPath +
+          '<circle cx="0" cy="0" r="' + Math.max(1, Math.round(s * 0.18)) + '" fill="#ffffff"/>' +
+        '</g>';
+      }
+
+      function getTreeSvgForStep(stepIdx) {
+        var rootDia = getDiamondSvg(556, 60, '색이 있나요?', false, false, false, 110, 42);
+
+        var rootLines = '<line x1="556" y1="102" x2="252" y2="156" stroke="#888c99" stroke-width="2.5"/>' +
+          getLineLabel(388, 120, '아니오') +
+          '<line x1="556" y1="102" x2="860" y2="156" stroke="#888c99" stroke-width="2.5"/>' +
+          getLineLabel(722, 120, '예');
+
+        var leftDia = getDiamondSvg(252, 200, '공기 방울이 있나요?', false, false, false, 105, 44);
+        var leftSubLines = '<line x1="252" y1="244" x2="172" y2="345" stroke="#888c99" stroke-width="2.5"/>' +
+          getLineLabel(198, 285, '예') +
+          '<line x1="252" y1="244" x2="332" y2="345" stroke="#888c99" stroke-width="2.5"/>' +
+          getLineLabel(312, 285, '아니오');
+        var leftCardCider = getCardSvg(110, 345, '사이다', 'cider', false, false);
+        var leftCardWater = getCardSvg(270, 345, '물', 'water', false, false);
+
+        var leftOverlay = '';
+        if (stepIdx === 1) {
+          leftOverlay = '<g class="pulse-glow" style="cursor:pointer;" onclick="handleStepAction(2)">' +
+            '<rect x="95" y="145" width="314" height="344" rx="20" fill="rgba(255,204,0,0.08)" stroke="#ffcc00" stroke-width="4.5" filter="drop-shadow(0 0 16px rgba(255,204,0,0.85))"/>' +
+            '<g transform="translate(105, 155)" pointer-events="none">' +
+              '<rect width="112" height="28" rx="14" fill="#ffcc00"/>' +
+              '<text x="56" y="18" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-size:13px;font-weight:800;fill:#111;">가지 묶음 선택</text>' +
+            '</g>' +
+          '</g>';
+        } else if (stepIdx === 2) {
+          leftOverlay = '<g>' +
+            '<rect x="95" y="145" width="314" height="344" rx="8" fill="rgba(139,61,255,0.03)" stroke="#8b3dff" stroke-width="2.2"/>' +
+            '<circle cx="95" cy="145" r="5.5" fill="#fff" stroke="#8b3dff" stroke-width="2"/>' +
+            '<circle cx="409" cy="145" r="5.5" fill="#fff" stroke="#8b3dff" stroke-width="2"/>' +
+            '<circle cx="409" cy="489" r="5.5" fill="#fff" stroke="#8b3dff" stroke-width="2"/>' +
+            '<circle cx="95" cy="489" r="5.5" fill="#fff" stroke="#8b3dff" stroke-width="2"/>' +
+            '<rect x="242" y="141" width="20" height="8" rx="4" fill="#fff" stroke="#8b3dff" stroke-width="1.6"/>' +
+            '<rect x="242" y="485" width="20" height="8" rx="4" fill="#fff" stroke="#8b3dff" stroke-width="1.6"/>' +
+            '<rect x="91" y="313" width="8" height="20" rx="4" fill="#fff" stroke="#8b3dff" stroke-width="1.6"/>' +
+            '<rect x="405" y="313" width="8" height="20" rx="4" fill="#fff" stroke="#8b3dff" stroke-width="1.6"/>' +
+            '<g transform="translate(197, 86)" style="cursor:pointer;" onclick="handleStepAction(3)">' +
+              '<rect width="110" height="44" rx="12" fill="#fff" stroke="#ffcc00" stroke-width="2.5" filter="drop-shadow(0 6px 18px rgba(0,0,0,0.18))"/>' +
+              '<g transform="translate(14, 11)">' +
+                '<rect x="0" y="4" width="13" height="15" rx="2" fill="none" stroke="#7d2ae8" stroke-width="1.8"/>' +
+                '<path d="M4 4 v-2 a2 2 0 0 1 2 -2 h7 a2 2 0 0 1 2 2 v11 a2 2 0 0 1 -2 2 h-2" fill="none" stroke="#7d2ae8" stroke-width="1.8"/>' +
+                '<line x1="6.5" y1="9.5" x2="6.5" y2="13.5" stroke="#7d2ae8" stroke-width="1.6"/>' +
+                '<line x1="4.5" y1="11.5" x2="8.5" y2="11.5" stroke="#7d2ae8" stroke-width="1.6"/>' +
+              '</g>' +
+              '<text x="58" y="23" text-anchor="start" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-size:15px;font-weight:800;fill:#7d2ae8;">복제</text>' +
+              '<g transform="translate(41, 46)" pointer-events="none">' +
+                '<polygon points="14,0 10,4 18,4" fill="#1e1e24"/>' +
+                '<rect y="4" width="28" height="18" rx="4" fill="#1e1e24"/>' +
+                '<text x="14" y="15" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-size:11px;font-weight:700;fill:#fff;">복제</text>' +
+              '</g>' +
+            '</g>' +
+          '</g>';
+        }
+
+        var rightDia = getDiamondSvg(860, 200, '보라색인가요?', false, false, false, 105, 44);
+        var rightGrapeLine = '<line x1="860" y1="244" x2="660" y2="345" stroke="#888c99" stroke-width="2.5"/>' +
+          getLineLabel(746, 285, '예');
+        var rightCardGrape = getCardSvg(598, 345, '포도 주스', 'grape', false, false);
+        var right4thLineEnd = (stepIdx >= 4) ? 254 : 246;
+        var right4thLine = '<line x1="860" y1="244" x2="1077" y2="' + right4thLineEnd + '" stroke="#888c99" stroke-width="2.5"/>' +
+          getLineLabel(985, 235, '아니오');
+
+        var fourthSlotHtml = '';
+        if (stepIdx <= 3) {
+          var slotStroke = (stepIdx === 3) ? '#f59e0b' : '#94a3b8';
+          var slotWidth = (stepIdx === 3) ? '3.5' : '2.5';
+          var slotFill = (stepIdx === 3) ? 'rgba(245,158,11,0.08)' : 'rgba(241,245,249,0.45)';
+          var slotFilter = (stepIdx === 3) ? 'filter="drop-shadow(0 0 16px rgba(245,158,11,0.6))" class="pulse-glow"' : '';
+
+          var targetBadge = (stepIdx === 3) ?
+            '<g transform="translate(1012, 220)" pointer-events="none">' +
+              '<rect width="130" height="28" rx="14" fill="#f59e0b"/>' +
+              '<text x="65" y="18" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-size:13px;font-weight:800;fill:#fff;">가지 놓을 자리</text>' +
+            '</g>' : '';
+
+          fourthSlotHtml = '<g id="p08TargetSlot">' +
+            '<rect id="p08SlotRect" x="905" y="246" width="345" height="244" rx="18" fill="' + slotFill + '" stroke="' + slotStroke + '" stroke-width="' + slotWidth + '" stroke-dasharray="8 6" ' + slotFilter + '/>' +
+            '<text x="1077" y="348" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-size:22px;font-weight:700;fill:#64748b;">한 가지 자리</text>' +
+            '<text x="1077" y="384" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-size:18px;font-weight:600;fill:#94a3b8;">꿀, 식용유</text>' +
+            targetBadge +
+          '</g>';
+        } else if (stepIdx === 4) {
+          var snapDia = getDiamondSvg(1077, 288, '공기 방울이 있나요?', false, false, false, 95, 34);
+          var snapSubLines = '<line x1="1077" y1="322" x2="1002" y2="345" stroke="#888c99" stroke-width="2.5"/>' +
+            getLineLabel(1028, 332, '예') +
+            '<line x1="1077" y1="322" x2="1158" y2="345" stroke="#888c99" stroke-width="2.5"/>' +
+            getLineLabel(1128, 332, '아니오');
+          var snapCard1 = getCardSvg(940, 345, '사이다', 'cider', true, false);
+          var snapCard2 = getCardSvg(1096, 345, '물', 'water', true, false);
+
+          fourthSlotHtml = '<g style="cursor:pointer;" onclick="handleStepAction(5)">' +
+            '<rect x="905" y="246" width="345" height="244" rx="18" fill="rgba(0,196,204,0.04)" stroke="#00c4cc" stroke-width="3.5" filter="drop-shadow(0 0 18px rgba(0,196,204,0.5))"/>' +
+            snapDia +
+            snapSubLines +
+            snapCard1 +
+            snapCard2 +
+            '<g transform="translate(1007, 220)" pointer-events="none">' +
+              '<rect width="140" height="30" rx="15" fill="#00c4cc" filter="drop-shadow(0 4px 10px rgba(0,196,204,0.4))"/>' +
+              '<path d="M 24,15 Q 28,15 28,11 Q 28,15 32,15 Q 28,15 28,19 Q 28,15 24,15 Z" fill="#fff"/>' +
+              '<text x="76" y="19" text-anchor="middle" dominant-baseline="middle" style="font-family:Cafe24 Ssurround,sans-serif;font-size:14px;fill:#fff;">딱 맞게 결합!</text>' +
+            '</g>' +
+          '</g>';
+        } else if (stepIdx === 5) {
+          var diaHtml = '';
+          var card1Html = '';
+          var card2Html = '';
+
+          if (step5Sub === 1) {
+            diaHtml = '<g style="cursor:pointer;" onclick="handleStep5Sub(1)">' +
+              '<polygon points="1077,254 1172,288 1077,322 982,288" fill="#fffbe6" stroke="#f59e0b" stroke-width="3.2" stroke-dasharray="6 4" filter="drop-shadow(0 0 14px rgba(245,158,11,0.6))"/>' +
+              '<text x="1077" y="288" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-weight:700;font-size:16px;fill:#b45309;">공기 방울이 있나요?</text>' +
+              '<g transform="translate(1022, 230)" pointer-events="none">' +
+                '<rect width="110" height="22" rx="11" fill="#f59e0b"/>' +
+                '<text x="55" y="14" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-size:11px;font-weight:800;fill:#fff;">질문 교체 대상</text>' +
+              '</g>' +
+            '</g>';
+            card1Html = getCardSvg(940, 345, '사이다', 'cider', false, true);
+            card2Html = getCardSvg(1096, 345, '물', 'water', false, true);
+          } else if (step5Sub === 2) {
+            diaHtml = getDiamondSvg(1077, 288, '아주 천천히 흐르나요?', false, false, false, 95, 34);
+            card1Html = '<g style="cursor:pointer;" onclick="handleStep5Sub(2)">' +
+              getCardSvg(940, 345, '꿀 자리', null, true, true) +
+              '<g transform="translate(942, 320)" pointer-events="none">' +
+                '<rect width="120" height="22" rx="11" fill="#f59e0b"/>' +
+                '<text x="60" y="14" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-size:11px;font-weight:800;fill:#fff;">꿀 카드로 교체</text>' +
+              '</g>' +
+            '</g>';
+            card2Html = getCardSvg(1096, 345, '물', 'water', false, true);
+          } else if (step5Sub === 3) {
+            diaHtml = getDiamondSvg(1077, 288, '아주 천천히 흐르나요?', false, false, false, 95, 34);
+            card1Html = getCardSvg(940, 345, '꿀', 'honey', false, false);
+            card2Html = '<g style="cursor:pointer;" onclick="handleStep5Sub(3)">' +
+              getCardSvg(1096, 345, '식용유 자리', null, true, true) +
+              '<g transform="translate(1098, 320)" pointer-events="none">' +
+                '<rect width="120" height="22" rx="11" fill="#f59e0b"/>' +
+                '<text x="60" y="14" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-size:11px;font-weight:800;fill:#fff;">식용유로 교체</text>' +
+              '</g>' +
+            '</g>';
+          }
+
+          var editSubLines = '<line x1="1077" y1="322" x2="1002" y2="345" stroke="#888c99" stroke-width="2.5"/>' +
+            getLineLabel(1028, 332, '예') +
+            '<line x1="1077" y1="322" x2="1158" y2="345" stroke="#888c99" stroke-width="2.5"/>' +
+            getLineLabel(1128, 332, '아니오');
+
+          var subBadgeText = (step5Sub === 1) ? '질문 문구 수정' : ((step5Sub === 2) ? '꿀 카드 수정' : '식용유 카드 수정');
+
+          fourthSlotHtml = '<g>' +
+            '<rect x="905" y="246" width="345" height="244" rx="18" fill="rgba(125,42,232,0.03)" stroke="#7d2ae8" stroke-width="2.5"/>' +
+            diaHtml +
+            editSubLines +
+            card1Html +
+            card2Html +
+            '<g transform="translate(1012, 220)" pointer-events="none">' +
+              '<rect width="130" height="28" rx="14" fill="#7d2ae8"/>' +
+              '<text x="65" y="18" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-size:13px;font-weight:800;fill:#fff;">' + subBadgeText + '</text>' +
+            '</g>' +
+          '</g>';
+        } else if (stepIdx === 6) {
+          var finalDia = getDiamondSvg(1077, 288, '아주 천천히 흐르나요?', false, false, false, 95, 34);
+          var finalSubLines = '<line x1="1077" y1="322" x2="1002" y2="345" stroke="#888c99" stroke-width="2.5"/>' +
+            getLineLabel(1028, 332, '예') +
+            '<line x1="1077" y1="322" x2="1158" y2="345" stroke="#888c99" stroke-width="2.5"/>' +
+            getLineLabel(1128, 332, '아니오');
+          var finalCard1 = getCardSvg(940, 345, '꿀', 'honey', false, false);
+          var finalCard2 = getCardSvg(1096, 345, '식용유', 'oil', false, false);
+
+          fourthSlotHtml = '<g>' +
+            finalDia +
+            finalSubLines +
+            finalCard1 +
+            finalCard2 +
+          '</g>';
+        }
+
+        var duplicateDragItem = '';
+        if (stepIdx === 3) {
+          duplicateDragItem = '<g>' +
+            '<defs>' +
+              '<marker id="arrowDrag" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">' +
+                '<path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#f59e0b"/>' +
+              '</marker>' +
+            '</defs>' +
+            '<path d="M 690,260 Q 820,180 970,250" fill="none" stroke="#f59e0b" stroke-width="4.5" stroke-dasharray="8 6" marker-end="url(#arrowDrag)"/>' +
+            '<g transform="translate(760, 185)" pointer-events="none">' +
+              '<rect width="144" height="28" rx="14" fill="#fff" stroke="#f59e0b" stroke-width="2"/>' +
+              '<text x="72" y="18" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-size:12px;font-weight:800;fill:#b45309;">오른쪽 점선 자리로 이동</text>' +
+            '</g>' +
+            '<g id="p08DragBranch" class="p08-drag-branch" transform="translate(480, 160) scale(0.85)" style="cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;">' +
+              '<rect x="0" y="0" width="314" height="344" rx="8" fill="#ffffff" stroke="#8b3dff" stroke-width="2.4" filter="drop-shadow(0 14px 32px rgba(125,42,232,0.28))"/>' +
+              '<circle cx="0" cy="0" r="5.5" fill="#fff" stroke="#8b3dff" stroke-width="2"/>' +
+              '<circle cx="314" cy="0" r="5.5" fill="#fff" stroke="#8b3dff" stroke-width="2"/>' +
+              '<circle cx="314" cy="344" r="5.5" fill="#fff" stroke="#8b3dff" stroke-width="2"/>' +
+              '<circle cx="0" cy="344" r="5.5" fill="#fff" stroke="#8b3dff" stroke-width="2"/>' +
+              '<rect x="147" y="-4" width="20" height="8" rx="4" fill="#fff" stroke="#8b3dff" stroke-width="1.6"/>' +
+              '<rect x="147" y="340" width="20" height="8" rx="4" fill="#fff" stroke="#8b3dff" stroke-width="1.6"/>' +
+              '<rect x="-4" y="162" width="8" height="20" rx="4" fill="#fff" stroke="#8b3dff" stroke-width="1.6"/>' +
+              '<rect x="310" y="162" width="8" height="20" rx="4" fill="#fff" stroke="#8b3dff" stroke-width="1.6"/>' +
+              '<g transform="translate(-95, -145)">' +
+                leftDia +
+                leftSubLines +
+                leftCardCider +
+                leftCardWater +
+              '</g>' +
+              '<g transform="translate(14, 14)">' +
+                '<rect width="84" height="24" rx="12" fill="#7d2ae8"/>' +
+                '<text x="42" y="15" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-size:12px;font-weight:800;fill:#fff;">복제된 가지</text>' +
+              '</g>' +
+            '</g>' +
+          '</g>';
+        }
+
+        var celebrateSvg = '';
+        if (stepIdx === 6) {
+          var goldColor = '#f59e0b';
+          var cyanColor = '#00c4cc';
+          var goldLight = '#fbbf24';
+          celebrateSvg = '<g>' +
+            getSparkleStar(410, 42, 16, goldColor, 0.1, true) +
+            getSparkleStar(700, 46, 13, cyanColor, 0.8, false) +
+            getSparkleStar(556, 14, 10, goldLight, 1.4, false) +
+            getSparkleStar(115, 180, 16, cyanColor, 0.3, true) +
+            getSparkleStar(385, 190, 12, goldColor, 1.1, false) +
+            getSparkleStar(252, 138, 10, cyanColor, 1.7, false) +
+            getSparkleStar(730, 185, 15, goldColor, 0.5, true) +
+            getSparkleStar(985, 180, 13, cyanColor, 1.3, false) +
+            getSparkleStar(955, 265, 16, goldColor, 0.7, true) +
+            getSparkleStar(1195, 260, 14, cyanColor, 1.5, false) +
+            getSparkleStar(1077, 232, 11, goldLight, 0.2, false) +
+            getSparkleStar(85, 385, 12, goldColor, 0.4, false) +
+            getSparkleStar(245, 475, 14, cyanColor, 1.2, true) +
+            getSparkleStar(410, 380, 15, goldColor, 0.9, true) +
+            getSparkleStar(340, 490, 10, cyanColor, 1.6, false) +
+            getSparkleStar(570, 375, 16, goldColor, 0.2, true) +
+            getSparkleStar(735, 465, 13, cyanColor, 1.0, false) +
+            getSparkleStar(660, 495, 11, goldLight, 1.8, false) +
+            getSparkleStar(915, 385, 17, goldColor, 0.6, true) +
+            getSparkleStar(1068, 475, 12, cyanColor, 1.4, false) +
+            getSparkleStar(1235, 385, 16, cyanColor, 0.8, true) +
+            getSparkleStar(1230, 480, 14, goldColor, 1.5, true) +
+            getSparkleStar(1160, 495, 10, cyanColor, 0.3, false) +
+            getSparkleStar(500, 180, 10, goldColor, 1.3, false) +
+            getSparkleStar(480, 310, 11, cyanColor, 0.7, false) +
+            getSparkleStar(840, 460, 10, goldColor, 1.9, false) +
+            getSparkleStar(50, 260, 12, cyanColor, 0.5, false) +
+            getSparkleStar(1310, 190, 15, goldColor, 1.1, true) +
+            getSparkleStar(1300, 420, 11, cyanColor, 1.7, false) +
+          '</g>';
+        }
+
+        var treeInner = rootLines +
+          rootDia +
+          leftSubLines +
+          leftDia +
+          leftCardCider +
+          leftCardWater +
+          leftOverlay +
+          rightGrapeLine +
+          right4thLine +
+          rightDia +
+          rightCardGrape +
+          fourthSlotHtml +
+          duplicateDragItem;
+
+        if (stepIdx === 6) {
+          treeInner = '<g class="tree-glow-finished">' + treeInner + '</g>' + celebrateSvg;
+        } else {
+          treeInner = treeInner + celebrateSvg;
+        }
+
+        return '<svg id="p08TreeSvg" viewBox="0 0 1380 540" style="width:100%;height:100%;display:block;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;">' +
+          treeInner +
+        '</svg>';
+      }
+
+      function getStepHtml(stepIdx) {
+        if (stepIdx === 0) {
+          return '<div class="desktop-view">' +
+            '<div class="desktop-bg-shapes">' +
+              '<div class="desktop-blob b1"></div>' +
+              '<div class="desktop-blob b2"></div>' +
+            '</div>' +
+            '<div class="desktop-center-stage">' +
+              '<div class="desktop-app-card" onclick="handleStepAction(1)">' +
+                '<div class="desktop-app-icon">' +
+                  '<img src="../../resources/img/app/logo_canva.png" alt="Canva">' +
+                '</div>' +
+                '<div class="desktop-app-name">Canva</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="desktop-taskbar">' +
+              '<div class="taskbar-left"><svg viewBox="0 0 24 24" width="26" height="26" fill="#0284c7"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg></div>' +
+              '<div class="taskbar-center">' +
+                '<button type="button" class="taskbar-btn"><svg viewBox="0 0 24 24" width="22" height="22" stroke="#333" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>' +
+                '<button type="button" class="taskbar-btn"><svg viewBox="0 0 24 24" width="22" height="22" stroke="#333" fill="none" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/></svg></button>' +
+              '</div>' +
+              '<div class="taskbar-right"><span>오후 2:30</span><span>2026-11-07</span></div>' +
+            '</div>' +
+          '</div>';
+        }
+
+        var topBar = '<div class="cv-topbar">' +
+          '<button type="button" class="cv-tb-btn-icon home-ico" onclick="handleStepAction(0)" title="홈">' +
+            '<svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-5h4v5"/></svg>' +
+          '</button>' +
+          '<span>파일</span>' +
+          '<span>크기 조정</span>' +
+          '<span class="sep"></span>' +
+          '<button type="button" class="cv-tb-btn-icon" title="실행취소">' +
+            '<svg viewBox="0 0 24 24"><path d="M9 13L4 8l5-5"/><path d="M4 8h10a6 6 0 010 12h-3"/></svg>' +
+          '</button>' +
+          '<button type="button" class="cv-tb-btn-icon is-dim" title="다시실행">' +
+            '<svg viewBox="0 0 24 24"><path d="M15 13l5-5-5-5"/><path d="M20 8H10a6 6 0 000 12h3"/></svg>' +
+          '</button>' +
+          '<span class="top-cloud-status" title="클라우드에 저장됨">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 16.9A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"/><polyline points="8 15 11 18 16 13"/></svg>' +
+            '<span>저장됨</span>' +
+          '</span>' +
+          '<span class="sep"></span>' +
+          '<span class="doc-title">의사결정 나무 - 화이트보드</span>' +
+          '<div class="topbar-right">' +
+            '<button type="button" class="share-btn">' +
+              '<svg viewBox="0 0 24 24"><path d="M5 15v4.5h14V15M12 4v11M7.5 8.5L12 4l4.5 4.5"/></svg>' +
+              '공유' +
+            '</button>' +
+          '</div>' +
+        '</div>';
+
+        var rail = '<div class="cv-rail">' +
+          '<button type="button" class="cv-tab cv-rail-item"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></i>디자인</button>' +
+          '<button type="button" class="cv-tab cv-rail-item is-active"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="3"/><path d="M14 10l3.5-6 3.5 6z"/><rect x="4" y="14" width="6" height="6" rx="1"/><circle cx="17.5" cy="17" r="3"/></svg></i>요소</button>' +
+          '<button type="button" class="cv-tab cv-rail-item"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg></i>텍스트</button>' +
+          '<button type="button" class="cv-tab cv-rail-item"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4.5 2 7-6.5-4.5-6.5 4.5 2-7L2 9h7z"/></svg></i>브랜드</button>' +
+          '<button type="button" class="cv-tab cv-rail-item"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v13m0-13l-4 4m4-4l4 4M4 17v4h16v-4"/></svg></i>업로드</button>' +
+          '<button type="button" class="cv-tab cv-rail-item"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></i>그리기</button>' +
+        '</div>';
+
+        var rightPanel = '';
+        if (stepIdx === 5) {
+          var card1Class = (step5Sub === 1) ? 'cv-tcard is-now' : 'cv-tcard is-done';
+          var card1Badge = (step5Sub === 1) ? '<span class="cv-tcard-badge">교체</span>' : '<span class="cv-tcard-badge">✓</span>';
+          var card1Click = (step5Sub === 1) ? 'onclick="handleStep5Sub(1)"' : '';
+
+          var card2Class = (step5Sub === 2) ? 'cv-tcard is-now' : ((step5Sub > 2) ? 'cv-tcard is-done' : 'cv-tcard is-pending');
+          var card2Badge = (step5Sub === 2) ? '<span class="cv-tcard-badge">교체</span>' : ((step5Sub > 2) ? '<span class="cv-tcard-badge">✓</span>' : '');
+          var card2Click = (step5Sub === 2) ? 'onclick="handleStep5Sub(2)"' : '';
+
+          var card3Class = (step5Sub === 3) ? 'cv-tcard is-now' : 'cv-tcard is-pending';
+          var card3Badge = (step5Sub === 3) ? '<span class="cv-tcard-badge">교체</span>' : '';
+          var card3Click = (step5Sub === 3) ? 'onclick="handleStep5Sub(3)"' : '';
+
+          rightPanel = '<div class="cv-rpanel">' +
+            '<p class="cv-rpanel-hd">내용 수정</p>' +
+            '<div class="' + card1Class + '" ' + card1Click + '><span>아주 천천히 흐르나요?</span>' + card1Badge + '</div>' +
+            '<div class="' + card2Class + '" ' + card2Click + '><span>꿀</span>' + card2Badge + '</div>' +
+            '<div class="' + card3Class + '" ' + card3Click + '><span>식용유</span>' + card3Badge + '</div>' +
+            '<div class="cv-tnote"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="vertical-align:-2px;margin-right:4px;"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7zm-4 17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-1H8v1z"/></svg>카드를 차례대로 눌러<br>나무의 내용을 바꿔요!</div>' +
+          '</div>';
+        }
+
+        var congratsBanner = '';
+        if (stepIdx === 6) {
+          congratsBanner = '<div class="cv-complete-badge">' +
+            '<span class="cv-badge-pill">' +
+              '<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor">' +
+                '<path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z"/>' +
+              '</svg>' +
+              '<span>완성</span>' +
+            '</span>' +
+            '<span class="cv-badge-title">캔바로 의사결정 나무 완성</span>' +
+            '<span class="cv-badge-divider"></span>' +
+            '<span class="cv-badge-sub">AI 분류 모델 구축 완료</span>' +
+            '<span class="cv-badge-check">' +
+              '<svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">' +
+                '<polyline points="4 10.5 8 14.5 16 5.5"/>' +
+              '</svg>' +
+            '</span>' +
+          '</div>';
+        }
+
+        return '<div style="width:100%;height:100%;display:flex;flex-direction:column;">' +
+          topBar +
+          '<div class="cv-editor-layout">' +
+            rail +
+            '<div class="cv-canvas-wrap p08-wb">' +
+              getTreeSvgForStep(stepIdx) +
+              congratsBanner +
+            '</div>' +
+            rightPanel +
+          '</div>' +
+        '</div>';
       }
 
       function renderStep() {
-        view.innerHTML = '';
-        nextBtn.style.display = 'none';
+        var d = stepsData[currentStep];
+        stageEl.innerHTML = getStepHtml(currentStep);
 
-        if (curStep === 0) {
-          guideText.textContent = 'Canva에서 [화이트보드]를 눌러 시작해 보세요.';
-          var img = document.createElement('img');
-          img.className = 'p08-screen-img';
-          img.src = 'img/canva_pc_01_home.png';
-          view.appendChild(img);
+        var guideText = d.guide;
+        var fingerPos = d.finger;
 
-          var hs = document.createElement('div');
-          hs.className = 'p08-hotspot is-pulse';
-          hs.style.left = '780px';
-          hs.style.top = '224px';
-          hs.style.width = '80px';
-          hs.style.height = '80px';
-          hs.addEventListener('click', function () {
-            SFX.play('correct');
-            curStep = 1;
-            renderStep();
-          });
-          view.appendChild(hs);
-          setFinger(820, 284);
-        } else if (curStep === 1) {
-          guideText.textContent = '왼쪽 메뉴에서 [요소]를 눌러보세요.';
-          var img1 = document.createElement('img');
-          img1.className = 'p08-screen-img';
-          img1.src = 'img/canva_pc_02_editor.png';
-          view.appendChild(img1);
-
-          var hs1 = document.createElement('div');
-          hs1.className = 'p08-hotspot is-pulse';
-          hs1.style.left = '10px';
-          hs1.style.top = '114px';
-          hs1.style.width = '64px';
-          hs1.style.height = '64px';
-          hs1.addEventListener('click', function () {
-            SFX.play('correct');
-            curStep = 2;
-            renderStep();
-          });
-          view.appendChild(hs1);
-          setFinger(60, 154);
-        } else if (curStep === 2) {
-          guideText.textContent = '[도형]을 눌러 여러 가지 모양을 살펴봐요.';
-          var img2 = document.createElement('img');
-          img2.className = 'p08-screen-img';
-          img2.src = 'img/canva_pc_03_elem.png';
-          view.appendChild(img2);
-
-          var hs2 = document.createElement('div');
-          hs2.className = 'p08-hotspot is-pulse';
-          hs2.style.left = '190px';
-          hs2.style.top = '434px';
-          hs2.style.width = '70px';
-          hs2.style.height = '70px';
-          hs2.addEventListener('click', function () {
-            SFX.play('correct');
-            curStep = 3;
-            renderStep();
-          });
-          view.appendChild(hs2);
-          setFinger(230, 484);
-        } else if (curStep === 3) {
-          guideText.textContent = '질문을 넣을 마름모 도형을 선택해 보세요.';
-          var img3 = document.createElement('img');
-          img3.className = 'p08-screen-img';
-          img3.src = 'img/canva_pc_04_shape.png';
-          view.appendChild(img3);
-
-          var hs3 = document.createElement('div');
-          hs3.className = 'p08-hotspot is-pulse';
-          hs3.style.left = '80px';
-          hs3.style.top = '199px';
-          hs3.style.width = '70px';
-          hs3.style.height = '70px';
-          hs3.addEventListener('click', function () {
-            SFX.play('correct');
-            curStep = 4;
-            renderStep();
-          });
-          view.appendChild(hs3);
-          setFinger(120, 249);
-        } else if (curStep === 4) {
-          guideText.textContent = '선택한 도형은 [복제] 버튼을 눌러 똑같이 하나 더 만들 수 있어요.';
-          renderWhiteboardBase();
-          var floatBar = document.createElement('div');
-          floatBar.style.position = 'absolute';
-          floatBar.style.left = '820px';
-          floatBar.style.top = '170px';
-          floatBar.style.background = '#fff';
-          floatBar.style.border = 'solid 2px #7c6fc4';
-          floatBar.style.borderRadius = '12px';
-          floatBar.style.padding = '8px 18px';
-          floatBar.style.boxShadow = '0 6px 16px rgba(0,0,0,.2)';
-          floatBar.style.display = 'flex';
-          floatBar.style.alignItems = 'center';
-          floatBar.style.gap = '14px';
-          floatBar.style.zIndex = '6';
-
-          var btnDup = document.createElement('button');
-          btnDup.type = 'button';
-          btnDup.className = 'card-btn is-popup is-pulse';
-          btnDup.style.minWidth = '0';
-          btnDup.style.height = '50px';
-          btnDup.style.fontSize = '24px';
-          btnDup.style.padding = '0 16px';
-          btnDup.textContent = '📋 복제';
-          btnDup.addEventListener('click', function () {
-            SFX.play('correct');
-            curStep = 5;
-            renderStep();
-          });
-          floatBar.appendChild(btnDup);
-          view.appendChild(floatBar);
-          setFinger(900, 210);
-        } else if (curStep === 5) {
-          guideText.textContent = '이미 만든 가지를 선택하고 [복사] 버튼을 눌러보세요.';
-          renderWhiteboardTree(false);
-
-          var selBox = document.createElement('div');
-          selBox.style.position = 'absolute';
-          selBox.style.left = '160px';
-          selBox.style.top = '260px';
-          selBox.style.width = '480px';
-          selBox.style.height = '370px';
-          selBox.style.border = 'dashed 4px #7d2ae8';
-          selBox.style.borderRadius = '20px';
-          selBox.style.background = 'rgba(125,42,232,.06)';
-          selBox.style.zIndex = '5';
-          selBox.className = 'is-pulse';
-          view.appendChild(selBox);
-
-          var floatBarCopy = document.createElement('div');
-          floatBarCopy.style.position = 'absolute';
-          floatBarCopy.style.left = '320px';
-          floatBarCopy.style.top = '200px';
-          floatBarCopy.style.background = '#fff';
-          floatBarCopy.style.border = 'solid 2px #7c6fc4';
-          floatBarCopy.style.borderRadius = '12px';
-          floatBarCopy.style.padding = '8px 18px';
-          floatBarCopy.style.boxShadow = '0 6px 16px rgba(0,0,0,.2)';
-          floatBarCopy.style.zIndex = '6';
-
-          var btnCopy = document.createElement('button');
-          btnCopy.type = 'button';
-          btnCopy.className = 'card-btn is-popup';
-          btnCopy.style.minWidth = '0';
-          btnCopy.style.height = '50px';
-          btnCopy.style.fontSize = '24px';
-          btnCopy.style.padding = '0 16px';
-          btnCopy.textContent = '✂ 가지 복사하기';
-          btnCopy.addEventListener('click', function () {
-            SFX.play('correct');
-            curStep = 6;
-            renderStep();
-          });
-          floatBarCopy.appendChild(btnCopy);
-          view.appendChild(floatBarCopy);
-          setFinger(420, 240);
-        } else if (curStep === 6) {
-          guideText.textContent = '빈 자리에 복사한 가지를 [붙여넣기] 해보세요.';
-          renderWhiteboardTree(false);
-
-          var pasteZone = document.createElement('div');
-          pasteZone.className = 'is-pulse';
-          pasteZone.style.position = 'absolute';
-          pasteZone.style.left = '870px';
-          pasteZone.style.top = '380px';
-          pasteZone.style.width = '420px';
-          pasteZone.style.height = '260px';
-          pasteZone.style.border = 'dashed 4px #ffcc00';
-          pasteZone.style.borderRadius = '20px';
-          pasteZone.style.background = 'rgba(255,204,0,.15)';
-          pasteZone.style.display = 'flex';
-          pasteZone.style.alignItems = 'center';
-          pasteZone.style.justifyContent = 'center';
-          pasteZone.style.fontFamily = 'Cafe24 Ssurround';
-          pasteZone.style.fontSize = '32px';
-          pasteZone.style.color = 'var(--c-ink)';
-          pasteZone.style.cursor = 'pointer';
-          pasteZone.style.zIndex = '5';
-          pasteZone.textContent = '📋 여기에 붙여넣기';
-          pasteZone.addEventListener('click', function () {
-            SFX.play('correct');
-            curStep = 7;
-            renderStep();
-          });
-          view.appendChild(pasteZone);
-          setFinger(1080, 480);
-        } else if (curStep === 7) {
-          guideText.textContent = '붙인 가지의 글자를 알맞은 글자 카드로 바꿔봐요.';
-          renderWhiteboardTree(true, false, false);
-          renderRightPanel();
-          setFinger(1560, 240);
-        } else if (curStep === 8) {
-          guideText.textContent = '이제 꿀과 식용유 그림을 넣어볼까요? 왼쪽에서 [요소]를 눌러보세요.';
-          renderWhiteboardTree(true, false, false);
-
-          var hsElem = document.createElement('div');
-          hsElem.className = 'p08-hotspot is-pulse';
-          hsElem.style.left = '10px';
-          hsElem.style.top = '190px';
-          hsElem.style.width = '64px';
-          hsElem.style.height = '64px';
-          hsElem.addEventListener('click', function () {
-            SFX.play('correct');
-            curStep = 9;
-            renderStep();
-          });
-          view.appendChild(hsElem);
-          setFinger(60, 230);
-        } else if (curStep === 9) {
-          guideText.textContent = '검색창을 눌러 ‘꿀’을 검색해 보세요.';
-          renderWhiteboardTree(true, false, false);
-          renderElemDrawer('꿀', false);
-          setFinger(280, 150);
-        } else if (curStep === 10) {
-          guideText.textContent = '원하는 그림을 선택해 알맞은 자리에 끌어 넣으세요.';
-          renderWhiteboardTree(true, false, false);
-          renderElemDrawer('꿀', true);
-          setFinger(200, 360);
-        } else if (curStep === 11) {
-          guideText.textContent = '‘식용유’를 검색하고 원하는 그림을 선택해 알맞은 자리에 끌어 넣으세요.';
-          renderWhiteboardTree(true, true, false);
-          renderElemDrawer('식용유', true);
-          setFinger(200, 360);
-        } else if (curStep === 12) {
-          guideText.textContent = '짜잔! Canva로 나만의 의사결정 나무를 완성했어요!';
-          renderWhiteboardTree(true, true, true);
-          nextBtn.style.display = 'flex';
-          nextBtn.textContent = '다음';
-          nextBtn.onclick = function () {
-            document.getElementById('p08DoneModal').classList.remove('is-off');
-          };
-          setFinger(1720, 860);
-        }
-      }
-
-      function renderWhiteboardBase() {
-        var top = document.createElement('div');
-        top.className = 'p08-cv-top';
-        top.innerHTML = '<span>⌂</span><span>파일</span><span>크기 조정</span><span>✎ 편집 중 ⌄</span><span class="sep"></span><span>↶</span><span>↷</span><span class="ttl">의사결정 나무 - 화이트보드</span><span class="pro">👑 업그레이드하기</span><span class="shr">공유</span>';
-        view.appendChild(top);
-
-        var rail = document.createElement('div');
-        rail.className = 'p08-cv-rail';
-        rail.innerHTML = '<div class="p08-cv-rail-it"><i>⊞</i>추천</div><div class="p08-cv-rail-it is-on"><i>❖</i>요소</div><div class="p08-cv-rail-it"><i>T</i>텍스트</div><div class="p08-cv-rail-it"><i>✎</i>도구</div>';
-        view.appendChild(rail);
-
-        var wb = document.createElement('div');
-        wb.className = 'p08-wb';
-        wb.innerHTML = '<svg style="width:100%;height:100%" viewBox="0 0 1740 658"><polygon points="870,220 1010,265 870,310 730,265" fill="#ebe8f9" stroke="#7c6fc4" stroke-width="4"/><text x="870" y="272" text-anchor="middle" dominant-baseline="middle" style="font-family:Cafe24 Ssurround;font-size:26px;fill:#1b1640">질문 입력</text></svg>';
-        view.appendChild(wb);
-      }
-
-      function renderWhiteboardTree(hasPasted, hasHoney, hasOil) {
-        var top = document.createElement('div');
-        top.className = 'p08-cv-top';
-        top.innerHTML = '<span>⌂</span><span>파일</span><span>크기 조정</span><span>✎ 편집 중 ⌄</span><span class="sep"></span><span>↶</span><span>↷</span><span class="ttl">의사결정 나무 - 화이트보드</span><span class="pro">👑 업그레이드하기</span><span class="shr">공유</span>';
-        view.appendChild(top);
-
-        var rail = document.createElement('div');
-        rail.className = 'p08-cv-rail';
-        rail.innerHTML = '<div class="p08-cv-rail-it"><i>⊞</i>추천</div><div class="p08-cv-rail-it is-on"><i>❖</i>요소</div><div class="p08-cv-rail-it"><i>T</i>텍스트</div><div class="p08-cv-rail-it"><i>✎</i>도구</div>';
-        view.appendChild(rail);
-
-        var wb = document.createElement('div');
-        wb.className = 'p08-wb' + (curStep >= 9 && curStep <= 11 ? ' has-drawer' : '');
-
-        var svgHtml = '<svg class="p08-wb-tree" viewBox="0 0 1240 610">';
-        svgHtml += '<line x1="600" y1="114" x2="310" y2="210" stroke="#9aa0b0" stroke-width="4"/>';
-        svgHtml += '<line x1="600" y1="114" x2="880" y2="210" stroke="#9aa0b0" stroke-width="4"/>';
-        svgHtml += '<text x="443" y="154" text-anchor="middle" style="font-size:22px;fill:#666;font-weight:600">아니오</text>';
-        svgHtml += '<text x="739" y="154" text-anchor="middle" style="font-size:22px;fill:#666;font-weight:600">예</text>';
-
-        svgHtml += '<polygon points="600,20 790,67 600,114 410,67" fill="#ebe8f9" stroke="#8578c8" stroke-width="4"/>';
-        svgHtml += '<text x="600" y="70" text-anchor="middle" dominant-baseline="middle" style="font-family:Cafe24 Ssurround;font-size:28px;fill:#2b2358">색이 있나요?</text>';
-
-        svgHtml += '<line x1="310" y1="298" x2="185" y2="395" stroke="#9aa0b0" stroke-width="4"/>';
-        svgHtml += '<line x1="310" y1="298" x2="425" y2="395" stroke="#9aa0b0" stroke-width="4"/>';
-        svgHtml += '<text x="215" y="346" text-anchor="middle" style="font-size:21px;fill:#666;font-weight:600">예</text>';
-        svgHtml += '<text x="395" y="346" text-anchor="middle" style="font-size:21px;fill:#666;font-weight:600">아니오</text>';
-        svgHtml += '<polygon points="310,210 510,254 310,298 110,254" fill="#ebe8f9" stroke="#8578c8" stroke-width="4"/>';
-        svgHtml += '<text x="310" y="258" text-anchor="middle" dominant-baseline="middle" style="font-family:Cafe24 Ssurround;font-size:24px;fill:#2b2358">공기 방울이 있나요?</text>';
-
-        svgHtml += '<rect x="95" y="395" width="180" height="165" rx="22" fill="#dff2ec" stroke="#6f9e92" stroke-width="4"/>';
-        svgHtml += '<image href="img/image21.png" x="145" y="410" width="80" height="96"/>';
-        svgHtml += '<text x="185" y="532" text-anchor="middle" style="font-family:Cafe24 Ssurround;font-size:26px;fill:#1f3a33">사이다</text>';
-
-        svgHtml += '<rect x="335" y="395" width="180" height="165" rx="22" fill="#dff2ec" stroke="#6f9e92" stroke-width="4"/>';
-        svgHtml += '<image href="img/image22.png" x="385" y="410" width="80" height="96"/>';
-        svgHtml += '<text x="425" y="532" text-anchor="middle" style="font-family:Cafe24 Ssurround;font-size:26px;fill:#1f3a33">물</text>';
-
-        svgHtml += '<line x1="880" y1="298" x2="680" y2="395" stroke="#9aa0b0" stroke-width="4"/>';
-        svgHtml += '<line x1="880" y1="298" x2="995" y2="335" stroke="#9aa0b0" stroke-width="4"/>';
-        svgHtml += '<text x="750" y="346" text-anchor="middle" style="font-size:21px;fill:#666;font-weight:600">예</text>';
-        svgHtml += '<text x="965" y="314" text-anchor="middle" style="font-size:21px;fill:#666;font-weight:600">아니오</text>';
-        svgHtml += '<polygon points="880,210 1070,254 880,298 690,254" fill="#ebe8f9" stroke="#8578c8" stroke-width="4"/>';
-        svgHtml += '<text x="880" y="258" text-anchor="middle" dominant-baseline="middle" style="font-family:Cafe24 Ssurround;font-size:24px;fill:#2b2358">보라색인가요?</text>';
-
-        svgHtml += '<rect x="590" y="395" width="180" height="165" rx="22" fill="#dff2ec" stroke="#6f9e92" stroke-width="4"/>';
-        svgHtml += '<path d="M656,418 L704,418 L698,498 L662,498 Z" fill="#fff" stroke="#777" stroke-width="3"/>';
-        svgHtml += '<path d="M658,438 L702,438 L697,496 L663,496 Z" fill="#5842b5"/>';
-        svgHtml += '<text x="680" y="532" text-anchor="middle" style="font-family:Cafe24 Ssurround;font-size:26px;fill:#1f3a33">포도 주스</text>';
-
-        if (hasPasted) {
-          svgHtml += '<line x1="995" y1="415" x2="895" y2="465" stroke="#9aa0b0" stroke-width="4"/>';
-          svgHtml += '<line x1="995" y1="415" x2="1105" y2="465" stroke="#9aa0b0" stroke-width="4"/>';
-          svgHtml += '<text x="920" y="444" text-anchor="middle" style="font-size:20px;fill:#666;font-weight:600">예</text>';
-          svgHtml += '<text x="1080" y="444" text-anchor="middle" style="font-size:20px;fill:#666;font-weight:600">아니오</text>';
-
-          var qTxt = (curStep >= 8) ? '아주 천천히 흐르나요?' : '공기 방울이 있나요?';
-          svgHtml += '<polygon id="wbTargetQ" points="995,335 1175,375 995,415 815,375" fill="' + (curStep >= 8 ? '#ebe8f9' : '#fff8cc') + '" stroke="' + (curStep >= 8 ? '#8578c8' : '#ffcc00') + '" stroke-width="5"/>';
-          svgHtml += '<text id="wbTxtQ" x="995" y="377" text-anchor="middle" dominant-baseline="middle" style="font-family:Cafe24 Ssurround;font-size:22px;fill:#2b2358">' + qTxt + '</text>';
-
-          var lTxt1 = (curStep >= 8) ? '꿀' : '사이다';
-          svgHtml += '<rect id="wbTargetL1" x="810" y="465" width="165" height="125" rx="20" fill="#dff2ec" stroke="' + (curStep === 10 ? '#ffcc00' : '#6f9e92') + '" stroke-width="' + (curStep === 10 ? '6' : '4') + '"/>';
-          if (hasHoney) {
-            svgHtml += '<image href="img/image23.png" x="862" y="475" width="60" height="60"/>';
-          }
-          svgHtml += '<text id="wbTxtL1" x="892" y="555" text-anchor="middle" style="font-family:Cafe24 Ssurround;font-size:24px;fill:#1f3a33">' + lTxt1 + '</text>';
-
-          var lTxt2 = (curStep >= 8) ? '식용유' : '물';
-          svgHtml += '<rect id="wbTargetL2" x="1020" y="465" width="165" height="125" rx="20" fill="#dff2ec" stroke="' + (curStep === 11 ? '#ffcc00' : '#6f9e92') + '" stroke-width="' + (curStep === 11 ? '6' : '4') + '"/>';
-          if (hasOil) {
-            svgHtml += '<image href="img/image26.png" x="1072" y="475" width="60" height="60"/>';
-          }
-          svgHtml += '<text id="wbTxtL2" x="1102" y="555" text-anchor="middle" style="font-family:Cafe24 Ssurround;font-size:24px;fill:#1f3a33">' + lTxt2 + '</text>';
-        }
-
-        svgHtml += '</svg>';
-        wb.innerHTML = svgHtml;
-        view.appendChild(wb);
-      }
-
-      function renderRightPanel() {
-        var rpanel = document.createElement('div');
-        rpanel.className = 'p08-rpanel';
-        rpanel.innerHTML = '<div class="p08-rpanel-in"><p class="p08-rpanel-hd">글자 카드</p><div class="p08-tcard is-now" id="cardQ">아주 천천히 흐르나요?</div><div class="p08-tcard" id="cardHoney">꿀</div><div class="p08-tcard" id="cardOil">식용유</div><div class="p08-tnote">💡 글자를 도형에<br>직접 쓸 수도 있어요!</div></div>';
-        view.appendChild(rpanel);
-
-        var cardQ = document.getElementById('cardQ');
-        var cardHoney = document.getElementById('cardHoney');
-        var cardOil = document.getElementById('cardOil');
-
-        var replacedCount = 0;
-
-        cardQ.addEventListener('click', function () {
-          if (cardQ.classList.contains('is-used')) return;
-          SFX.play('correct');
-          cardQ.classList.add('is-used');
-          cardQ.classList.remove('is-now');
-          document.getElementById('wbTxtQ').textContent = '아주 천천히 흐르나요?';
-          cardHoney.classList.add('is-now');
-          replacedCount++;
-          checkComplete();
-        });
-
-        cardHoney.addEventListener('click', function () {
-          if (cardHoney.classList.contains('is-used')) return;
-          SFX.play('correct');
-          cardHoney.classList.add('is-used');
-          cardHoney.classList.remove('is-now');
-          document.getElementById('wbTxtL1').textContent = '꿀';
-          cardOil.classList.add('is-now');
-          replacedCount++;
-          checkComplete();
-        });
-
-        cardOil.addEventListener('click', function () {
-          if (cardOil.classList.contains('is-used')) return;
-          SFX.play('correct');
-          cardOil.classList.add('is-used');
-          cardOil.classList.remove('is-now');
-          document.getElementById('wbTxtL2').textContent = '식용유';
-          replacedCount++;
-          checkComplete();
-        });
-
-        function checkComplete() {
-          if (replacedCount === 3) {
-            setTimeout(function () {
-              curStep = 8;
-              renderStep();
-            }, 600);
+        if (currentStep === 5) {
+          if (step5Sub === 1) {
+            guideText = '새 질문 카드로 교체해 보세요.';
+            fingerPos = { left: 1730, top: 155 };
+          } else if (step5Sub === 2) {
+            guideText = '‘꿀’ 카드를 알맞은 자리에 넣어 보세요.';
+            fingerPos = { left: 1730, top: 215 };
+          } else if (step5Sub === 3) {
+            guideText = '‘식용유’ 카드를 알맞은 자리에 넣어 보세요.';
+            fingerPos = { left: 1730, top: 275 };
           }
         }
-      }
 
-      function renderElemDrawer(query, isSearched) {
-        var drawer = document.createElement('div');
-        drawer.className = 'p08-cv-drawer';
+        gdTextEl.textContent = guideText;
 
-        var sbox = document.createElement('div');
-        sbox.className = 'p08-cv-sbox';
-        sbox.innerHTML = '<span>' + (isSearched ? query : '요소를 검색하세요') + '</span><i>' + (isSearched ? '✕' : '🔍') + '</i>';
-
-        if (!isSearched) {
-          sbox.addEventListener('click', function () {
-            SFX.play('correct');
-            curStep = 10;
-            renderStep();
-          });
+        if (fingerPos) {
+          fingerEl.style.display = 'block';
+          fingerEl.style.left = fingerPos.left + 'px';
+          fingerEl.style.top = fingerPos.top + 'px';
+          updateFingerTap();
         } else {
-          sbox.querySelector('i').addEventListener('click', function (e) {
-            e.stopPropagation();
-            SFX.play('click');
-            if (query === '꿀') {
-              curStep = 11;
-              renderStep();
-            }
-          });
-        }
-        drawer.appendChild(sbox);
-
-        if (isSearched) {
-          var tabs = document.createElement('div');
-          tabs.className = 'p08-cv-stabs';
-          tabs.innerHTML = '<span class="on">그래픽</span><span>사진</span>';
-          drawer.appendChild(tabs);
-
-          var grid = document.createElement('div');
-          grid.className = 'p08-cv-grid';
-
-          var imgSrc = (query === '꿀') ? 'img/image23.png' : 'img/image26.png';
-          var item1 = document.createElement('div');
-          item1.className = 'p08-cv-gitem is-hl';
-          item1.innerHTML = '<img src="' + imgSrc + '" style="width:76px;height:76px;object-fit:contain">';
-          item1.addEventListener('click', function () {
-            SFX.play('correct');
-            if (query === '꿀') {
-              curStep = 11;
-            } else {
-              curStep = 12;
-            }
-            renderStep();
-          });
-          grid.appendChild(item1);
-
-          for (var i = 2; i <= 4; i++) {
-            var itemOther = document.createElement('div');
-            itemOther.className = 'p08-cv-gitem';
-            itemOther.innerHTML = '<img src="' + imgSrc + '" style="width:70px;height:70px;object-fit:contain;opacity:.7">';
-            itemOther.addEventListener('click', function () {
-              SFX.play('correct');
-              if (query === '꿀') curStep = 11;
-              else curStep = 12;
-              renderStep();
-            });
-            grid.appendChild(itemOther);
+          fingerEl.style.display = 'none';
+          if (fingerTimer) {
+            clearInterval(fingerTimer);
+            fingerTimer = null;
           }
-          drawer.appendChild(grid);
         }
 
-        view.appendChild(drawer);
+        if (currentStep === 6) {
+          nextBtnEl.textContent = '완료';
+        } else {
+          nextBtnEl.textContent = '다음';
+        }
+
+        if (currentStep === 3) {
+          var dragBranch = document.getElementById('p08DragBranch');
+          var svgEl = document.getElementById('p08TreeSvg');
+          var slotRect = document.getElementById('p08SlotRect');
+          var targetSlot = document.getElementById('p08TargetSlot');
+          if (dragBranch && svgEl) {
+            var isDragging = false;
+            var isCompleted = false;
+            var startPos = { x: 0, y: 0 };
+            var initialPosX = 480;
+            var initialPosY = 160;
+            var currentPos = { x: 480, y: 160 };
+            var scale = 1;
+
+            function getPos(e) {
+              if (e.touches && e.touches[0]) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+              if (e.changedTouches && e.changedTouches[0]) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+              return { x: e.clientX, y: e.clientY };
+            }
+
+            function detachEvents() {
+              window.removeEventListener('pointermove', onMove);
+              window.removeEventListener('pointerup', onEnd);
+              window.removeEventListener('pointercancel', onEnd);
+              window.removeEventListener('touchmove', onMove, { passive: false });
+              window.removeEventListener('touchend', onEnd);
+              window.removeEventListener('touchcancel', onEnd);
+            }
+
+            function snapToTarget() {
+              if (isCompleted) return;
+              isCompleted = true;
+              isDragging = false;
+              detachEvents();
+              if (slotRect) slotRect.classList.remove('is-drag-over');
+              if (window.SFX) window.SFX.play('correct');
+              dragBranch.style.transition = 'transform 0.22s ease-out';
+              dragBranch.setAttribute('transform', 'translate(905, 246) scale(0.85)');
+              setTimeout(function () {
+                currentStep = 4;
+                renderStep();
+              }, 240);
+            }
+
+            function onMove(e) {
+              if (!isDragging || isCompleted) return;
+              if (e.cancelable) e.preventDefault();
+              var cur = getPos(e);
+              var dx = (cur.x - startPos.x) / scale;
+              var dy = (cur.y - startPos.y) / scale;
+              currentPos.x = initialPosX + dx;
+              currentPos.y = initialPosY + dy;
+              dragBranch.setAttribute('transform', 'translate(' + currentPos.x + ', ' + currentPos.y + ') scale(0.85)');
+
+              var isNear = (currentPos.x > 750 && currentPos.y > 150);
+              if (slotRect) {
+                if (isNear) {
+                  slotRect.classList.add('is-drag-over');
+                } else {
+                  slotRect.classList.remove('is-drag-over');
+                }
+              }
+            }
+
+            function onEnd(e) {
+              if (!isDragging || isCompleted) return;
+              isDragging = false;
+              detachEvents();
+              dragBranch.style.cursor = 'grab';
+
+              var endPos = getPos(e);
+              var moveDist = Math.hypot(endPos.x - startPos.x, endPos.y - startPos.y);
+              var isNear = (currentPos.x > 750 && currentPos.y > 150);
+
+              if (isNear || moveDist < 10) {
+                snapToTarget();
+              } else {
+                if (slotRect) slotRect.classList.remove('is-drag-over');
+                dragBranch.style.transition = 'transform 0.25s ease-out';
+                currentPos.x = 480;
+                currentPos.y = 160;
+                dragBranch.setAttribute('transform', 'translate(480, 160) scale(0.85)');
+                setTimeout(function () {
+                  if (dragBranch) dragBranch.style.transition = '';
+                  if (fingerEl) fingerEl.style.display = 'block';
+                }, 260);
+              }
+            }
+
+            function onStart(e) {
+              if (isDragging || isCompleted) return;
+              if (e.cancelable) e.preventDefault();
+              isDragging = true;
+              startPos = getPos(e);
+              initialPosX = currentPos.x;
+              initialPosY = currentPos.y;
+              var svgRect = svgEl.getBoundingClientRect();
+              scale = (svgRect.width / 1380) || 1;
+              dragBranch.style.cursor = 'grabbing';
+              dragBranch.style.transition = '';
+              if (fingerEl) fingerEl.style.display = 'none';
+              if (window.SFX) window.SFX.play('click');
+
+              window.addEventListener('pointermove', onMove);
+              window.addEventListener('pointerup', onEnd);
+              window.addEventListener('pointercancel', onEnd);
+              window.addEventListener('touchmove', onMove, { passive: false });
+              window.addEventListener('touchend', onEnd);
+              window.addEventListener('touchcancel', onEnd);
+            }
+
+            dragBranch.addEventListener('pointerdown', onStart);
+            dragBranch.addEventListener('touchstart', onStart, { passive: false });
+
+            if (targetSlot) {
+              targetSlot.style.cursor = 'pointer';
+              targetSlot.addEventListener('click', snapToTarget);
+            }
+          }
+        }
       }
+
+      window.handleStep5Sub = function (subIdx) {
+        if (currentStep !== 5) return;
+        if (subIdx !== step5Sub) return;
+        if (window.SFX) window.SFX.play('correct');
+
+        if (step5Sub === 1) {
+          step5Sub = 2;
+          renderStep();
+        } else if (step5Sub === 2) {
+          step5Sub = 3;
+          renderStep();
+        } else if (step5Sub === 3) {
+          currentStep = 6;
+          renderStep();
+        }
+      };
+
+      window.handleStepAction = function (stepIdx) {
+        if (window.SFX) {
+          if (stepIdx === 0) {
+            window.SFX.play('click');
+          } else {
+            window.SFX.play('correct');
+          }
+        }
+        currentStep = stepIdx;
+        if (currentStep === 5) {
+          step5Sub = 1;
+        }
+        renderStep();
+      };
+
+      window.nextStep = function () {
+        if (currentStep === 5) {
+          if (step5Sub < 3) {
+            if (window.SFX) window.SFX.play('correct');
+            step5Sub = step5Sub + 1;
+            renderStep();
+            return;
+          }
+        }
+        if (currentStep < 6) {
+          if (window.SFX) {
+            window.SFX.play('correct');
+          }
+          currentStep = currentStep + 1;
+          renderStep();
+        } else {
+          if (window.SFX) {
+            window.SFX.play('correct');
+          }
+          var doneModal = document.getElementById('p08DoneModal');
+          if (doneModal) {
+            doneModal.classList.remove('is-off');
+          }
+        }
+      };
 
       renderStep();
+      if (urlParams.get('modal') === '1') {
+        var doneModal = document.getElementById('p08DoneModal');
+        if (doneModal) {
+          doneModal.classList.remove('is-off');
+        }
+      }
     })();
   </script>
 </body>

@@ -59,9 +59,9 @@
         .p08-tag.p08-pop{animation:p08-tp .4s ease-out}
         @keyframes p08-tp{0%{transform:scale(.7)}60%{transform:scale(1.1)}100%{transform:scale(1)}}
 
-        .p08-note{display:block;margin-top:14px;padding:8px 18px 4px;border:solid 3px #cfd6e2;border-radius:30px;background:#f4f5fb;font-family:'Pretendard';font-size:34px;letter-spacing:-0.04em;color:var(--c-ink)}
         .p08-trophy{display:flex;align-items:center;justify-content:center;width:305px;height:305px;font-size:210px;line-height:1}
         .p08-hide{display:none!important}
+        .guide-set#p08Set{top:40px}
     </style>
 </head>
 <body>
@@ -135,7 +135,7 @@
 
           <div class="avatar-modal is-off" id="p08Fin">
             <div class="avatar-card">
-              <span class="avatar-card-avatar p08-trophy">🏆</span>
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
               <div class="avatar-card-body is-side"><p class="avatar-card-text">이제 퀴즈를 풀며 배운 내용을<br>확인해볼까요?</p></div>
               <a href="page09.html" class="js-nav-effect avatar-card-btn next-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
             </div>
@@ -153,23 +153,24 @@
   <script>
   (function () {
     const INK = '#1b1640';
+    const GRAY = '#ccc';
     const FONT = "font-family:'Cafe24 Ssurround'";
     const WRONG_DIA = '모양이 달라요. 흐리게 보이는 그림이랑 같은 걸 골라 봐요.';
     const WRONG_LOOP = '숨이 안 차면 달리기를 계속 할 수 있어요. 위로 되돌아가는 화살표로 반복할 수 있게 해주세요.';
 
     const STEPS = [
-      { pose: 'smile_present', bubble: '달리기를 열심히 하다 숨이 차고 힘들어서 다시 걸어 본 적이 있죠? 오늘은 그 경험을 생각하며 캔바를 이용해서 달리기 순서도를 완성해 볼 거예요.', next: true, screen: 'home' },
+      { pose: 'smile_present', bubble: '달리기를 열심히 하다 숨이 차고 힘들어서 다시 걸어 본 적이 있죠?', next: true, screen: 'home' },
+      { pose: 'smile_present', bubble: '오늘은 그 경험을 생각하며 캔바를 이용해서 달리기 순서도를 완성해 <br>볼 거예요.', next: true, screen: 'home' },
       { pose: 'wink_point2', bubble: 'Canva를 클릭하세요.', screen: 'home', hit: 'canva' },
-      { pose: 'wink_present', bubble: '달리기를 할 때 숨이 안 차면 계속 달릴 수 있고, 숨이 차면 힘들어서 걷는 순서도예요.', next: true, screen: 'edit' },
-      { pose: 'smile_present', bubble: '거의 다 그려져 있는데 가운데가 비었어요. 함께 완성해볼까요?', next: true, screen: 'edit' },
+      { pose: 'wink_present', bubble: '달리기를 할 때 숨이 안 차면 계속 달릴 수 있고, 숨이 차면 힘들어서 걷는<br>순서도예요.', next: true, screen: 'edit' },
+      { pose: 'smile_present', bubble: '거의 다 그려져 있는데 가운데가 비었어요. 함께<br>완성해볼까요?', next: true, screen: 'edit' },
       { pose: 'wink_point3', bubble: '아래의 [요소] 버튼을 클릭하세요.', screen: 'edit', hit: 'elements' },
       { pose: 'wink_point4', bubble: '[도형] 을 클릭하세요.', screen: 'elements', hit: 'shape' },
       { pose: 'wink_point2', bubble: '[마름모] 를 달리기와 걷기 사이에 끌어 놓아요.', screen: 'edit', panel: 'shapes', hit: 'dia', slot: 'dia', wrong: WRONG_DIA },
-      { pose: 'wink_point3', bubble: '새로 놓은 모양에 글자를 끌어 놓아요.<span class="p08-note">글자를 도형에 직접 쓸 수 도 있어요!</span>', screen: 'edit', panel: 'text', hit: 'text', slot: 'text' },
+      { pose: 'wink_point3', bubble: '새로 놓은 모양에 글자를 끌어 놓아요. 글자를 도형에 직접 쓸 수 도 있어요!', screen: 'edit', panel: 'text', hit: 'text', slot: 'text' },
       { pose: 'wink_point4', bubble: '회색 점선에 되돌아가는 화살표를 끌어 놓아 길을 이어요.', screen: 'edit', panel: 'shapes', hit: 'loop', slot: 'loop', wrong: WRONG_LOOP },
       { pose: 'wink_present', bubble: '완성한 순서도 대로 실행 한 모습을 확인해보세요.', screen: 'edit', panel: 'run', next: 'late' },
-      { pose: 'smile_present', bubble: '순서도 한 장에 지금까지 배운 내용이 모두 들어있죠? 따로 배웠지만 코딩을 하다 보면 순차, 반복, 조건을 자주 볼 수 있답니다.', screen: 'edit', panel: 'tags', next: 'late' },
-      { pose: 'smile_present', bubble: '순서도 한 장에 지금까지 배운 내용이 모두 들어있죠? 따로 배웠지만 코딩을 하다 보면 순차, 반복, 조건을 자주 볼 수 있답니다.', screen: 'edit', panel: 'tags', fin: true }
+      { pose: 'smile_present', bubble: '순서도 한 장에 지금까지 배운 내용이 모두 들어있죠? 따로 배웠지만 코딩을 하다 보면 순차, 반복, 조건을 자주 볼 수<br>있답니다.', screen: 'edit', panel: 'tags', next: 'late' }
     ];
     const FG = { canva: [0, 0], elements: [0, 0], shape: [0, 0], dia: [0, 0], text: [0, 0], loop: [0, 0] };
     const HOT = { canva: [0, 0, 0, 0], elements: [0, 0, 0, 0], shape: [0, 0, 0, 0], dia: [0, 0, 0, 0], text: [0, 0, 0, 0], loop: [0, 0, 0, 0] };
@@ -187,7 +188,7 @@
     const later = (fn, ms, my) => setTimeout(() => { if (my === tok) fn(); }, ms);
 
     function flow(st, pop) {
-      const T = (x, y, s, fs, c) => '<text x="' + x + '" y="' + y + '" text-anchor="middle" dominant-baseline="middle" style="' + FONT + ';font-size:' + (fs || 34) + 'px;fill:' + (c || INK) + ';letter-spacing:-1px">' + s + '</text>';
+      const T = (x, y, s, fs, c) => '<text x="' + x + '" y="' + y + '" text-anchor="middle" dominant-baseline="middle" style="' + FONT + ';font-size:' + (fs || 34) + 'px;fill:' + (c || INK) + ';letter-spacing:-1px;stroke:none">' + s + '</text>';
       const g = (id, inner, extra) => '<g class="p08-n' + (extra ? ' ' + extra : '') + (pop === id ? ' p08-pop' : '') + '" data-id="' + id + '">' + inner + '</g>';
       const oval = (y, s) => '<rect class="sh" x="160" y="' + y + '" width="180" height="64" rx="32" fill="#6dd36f" stroke="' + INK + '" stroke-width="5"/>' + T(250, y + 35, s);
       const box = (y, s) => '<rect class="sh" x="130" y="' + y + '" width="240" height="64" rx="10" fill="#4a83c6" stroke="' + INK + '" stroke-width="5"/>' + T(250, y + 35, s, 34, '#fff');
@@ -196,12 +197,12 @@
       let s = '<svg class="p08-svg" width="538" height="700" viewBox="0 0 538 700"><defs><filter id="p08gl" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#ffd400" flood-opacity="1"/></filter></defs>';
       s += g('start', oval(24, '시작')) + g('a1', arrow(88, 126));
       s += g('run', box(126, '달리기'), st.slot === 'loop' ? 'p08-blink' : '') + g('a2', arrow(190, 246));
-      if (st.slot === 'dia') s += '<polygon points="' + DIA + '" fill="#ffd34d" fill-opacity=".28" stroke="' + INK + '" stroke-width="4" stroke-dasharray="12 8" stroke-linejoin="round"/>';
+      if (st.slot === 'dia') s += '<polygon points="' + DIA + '" fill="#ffd34d" fill-opacity=".28" stroke="' + GRAY + '" stroke-width="4" stroke-dasharray="12 8" stroke-linejoin="round"/>';
       if (st.dia) s += g('dia', '<polygon class="sh" points="' + DIA + '" fill="#ffd34d" stroke="' + INK + '" stroke-width="5" stroke-linejoin="round"/>' + (st.text ? T(250, 305, '숨이', 30) + T(250, 345, '차나요?', 30) : ''));
       s += g('a3', arrow(404, 460) + T(278, 432, '예', 28));
       s += g('walk', box(460, '걷기')) + g('a4', arrow(524, 580)) + g('end', oval(580, '끝'));
       if (st.slot === 'loop') s += '<g class="p08-blinkg"><polyline points="390,325 465,325 465,158 384,158" fill="none" stroke="#9aa0b3" stroke-width="6" stroke-dasharray="12 8"/><polygon points="384,146 384,170 370,158" fill="#9aa0b3"/></g>';
-      if (st.loop) s += g('loop', '<polyline class="ln" points="390,325 465,325 465,158 384,158" fill="none" stroke="' + INK + '" stroke-width="6"/><polygon points="384,146 384,170 370,158" fill="' + INK + '"/>' + T(430, 300, '아니오', 24));
+      if (st.loop) s += g('loop', '<polyline class="ln" points="390,325 465,325 465,158 384,158" fill="none" stroke="' + INK + '" stroke-width="6"/><polygon points="384,146 384,170 370,158" fill="' + INK + '"/>' + T(430, 350, '아니오', 24));
       s += '</svg>';
       const Z = { dia: 'left:100px;top:244px;width:300px;height:166px', text: 'left:100px;top:244px;width:300px;height:166px', loop: 'left:365px;top:140px;width:115px;height:195px' };
       if (st.slot) s += '<div class="p08-zone drop-zone" style="' + Z[st.slot] + '"></div>';
@@ -310,6 +311,15 @@
       });
     }
 
+    function showNextBtn() {
+      const btn = bubble.querySelector('.card-btn');
+      if (btn) {
+        btn.style.opacity = '';
+        btn.style.visibility = '';
+        btn.style.pointerEvents = '';
+      }
+    }
+
     function runSeq(my) {
       const SEQ = ['start', 'a1', 'run', 'a2', 'dia', 'loop', 'run', 'a2', 'dia', 'loop', 'run', 'a2', 'dia', 'a3', 'walk', 'a4', 'end'];
       const runner = $('p08Runner');
@@ -343,7 +353,7 @@
       }, 500 + i * 800, my));
       later(() => {
         setHl([]);
-        say(STEPS[index].bubble, undefined, undefined, undefined, '다음');
+        showNextBtn();
       }, 500 + SEQ.length * 800 + 500, my);
     }
 
@@ -356,7 +366,7 @@
       });
       later(() => {
         setHl([]);
-        say(STEPS[index].bubble, undefined, undefined, undefined, '다음');
+        showNextBtn();
       }, 700 + PARTS.length * 2000, my);
     }
 
@@ -368,11 +378,25 @@
       cancelAppLaunch();
       cancelDrag();
       clearFingers();
-      const withNext = s.next === true || (s.next === 'late' && BoxEdit.on);
+      const withNext = !!s.next;
       say(s.bubble, s.pose, undefined, undefined, withNext ? '다음' : undefined);
+      const nextBtn = bubble.querySelector('.card-btn');
+      if (nextBtn) {
+        if (s.next === 'late' && !BoxEdit.on) {
+          nextBtn.style.opacity = '0';
+          nextBtn.style.visibility = 'hidden';
+          nextBtn.style.pointerEvents = 'none';
+          nextBtn.style.transition = 'none';
+        } else {
+          nextBtn.style.opacity = '';
+          nextBtn.style.visibility = '';
+          nextBtn.style.pointerEvents = '';
+          nextBtn.style.transition = '';
+        }
+      }
       phone.dataset.screen = s.screen;
       $('p08Tab').classList.toggle('is-on', s.screen === 'elements');
-      page.innerHTML = flow({ dia: index >= 7, text: index >= 8, loop: index >= 9, slot: s.slot }, popNow);
+      page.innerHTML = flow({ dia: index >= 8, text: index >= 9, loop: index >= 10, slot: s.slot }, popNow);
       panel.innerHTML = panelHtml(s);
       $('p08Fin').classList.toggle('is-off', !s.fin);
       panel.querySelectorAll('.p08-it').forEach(bindDrag);
@@ -403,7 +427,11 @@
     bubble.addEventListener('click', (e) => {
       if (!e.target.closest('.card-btn') || BoxEdit.on) return;
       playClick();
-      go();
+      if (index >= STEPS.length - 1) {
+        $('p08Fin').classList.remove('is-off');
+      } else {
+        go();
+      }
     });
 
     BoxEdit.hitPad(Array.from(phone.querySelectorAll('[data-hit]')), HOT);

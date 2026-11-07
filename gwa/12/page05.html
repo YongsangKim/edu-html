@@ -1,28 +1,278 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>들이마신 공기 흐름 순서도 익히기</title>
-<link rel="stylesheet" href="../../resources/css/common.css">
-<style>
-.p05-fc{position:absolute;left:660px;top:185px;width:600px;display:flex;flex-direction:column;align-items:center}
-.p05-nd{width:440px;height:66px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;padding-top:4px;font-family:'Cafe24 Ssurround';font-size:38px;color:var(--c-ink);letter-spacing:-0.04em;white-space:nowrap}
-.p05-nd.is-slot{border:dashed 5px #9aa3b5;border-radius:16px;background:rgba(255,255,255,.7)}
-.p05-nd.is-slot.is-end{border-radius:33px}
-.p05-nd.is-slot.is-dim{opacity:.35}
-.p05-nd.is-ov{background:#6dd36f;border:solid 5px var(--c-ink);border-radius:33px}
-.p05-nd.is-rc{background:#4a83c6;border:solid 5px var(--c-ink);border-radius:12px;color:#fff}
-.p05-ar{width:6px;height:30px;background:var(--c-ink);position:relative}
-.p05-ar:after{content:'';position:absolute;left:-9px;bottom:-4px;border:12px solid transparent;border-top:14px solid var(--c-ink);border-bottom:0}
-.jig-tray.p05-tray{top:770px;height:170px;justify-content:center;gap:120px}
-.jig-tray-label.p05-tab{top:712px;min-width:0;height:74px;padding:6px 34px 4px;font-size:40px;border-radius:22px 22px 0 0}
-.p05-sh{width:300px;height:110px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;padding-top:4px;font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-ink);cursor:grab;touch-action:none;user-select:none}
-.p05-sh.is-ov{background:#6dd36f;border:solid 6px var(--c-ink);border-radius:55px}
-.p05-sh.is-rc{background:#4a83c6;border:solid 6px var(--c-ink);border-radius:14px;color:#fff}
-.p05-sh.is-clone{position:absolute;z-index:20;pointer-events:none;cursor:grabbing}
-.p05-hide{display:none!important}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>들이마신 공기 흐름 순서도 익히기</title>
+  <link rel="stylesheet" href="../../resources/css/common.css">
+  <style>
+    /* [전체 배경: 부드러운 에듀테크 톤] */
+    main.bg-default {
+      background:
+        radial-gradient(circle at 18% 30%, rgba(130, 201, 30, 0.08) 0%, transparent 35%),
+        radial-gradient(circle at 82% 60%, rgba(51, 154, 240, 0.1) 0%, transparent 40%),
+        radial-gradient(#d8e2ed 1.5px, transparent 1.5px),
+        linear-gradient(180deg, #f8fafd 0%, #edf2f7 100%);
+      background-size: auto, auto, 28px 28px, 100% 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* [좌측: AI 로봇 캐릭터 & 말풍선] */
+    .p05-char-wrap {
+      position: absolute;
+      left: 140px;
+      top: 240px;
+      width: 400px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .p05-bubble {
+      position: relative;
+      background: #ffffff;
+      border: 4px solid #339af0;
+      border-radius: 26px;
+      padding: 16px 26px 14px;
+      font-family: 'Cafe24 Ssurround', sans-serif;
+      font-size: 26px;
+      color: #1864ab;
+      line-height: 1.45;
+      text-align: center;
+      box-shadow: 0 10px 24px rgba(51, 154, 240, 0.18);
+      margin-bottom: 20px;
+      animation: p05BubbleFloat 3s ease-in-out infinite;
+    }
+    .p05-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-top: 16px solid #339af0;
+    }
+    .p05-bubble::before {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-top: 12px solid #ffffff;
+      z-index: 1;
+    }
+    @keyframes p05BubbleFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .p05-char-img {
+      width: 340px;
+      height: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 16px 24px rgba(43, 58, 85, 0.18));
+      transform: scaleX(-1);
+    }
+
+    /* [중앙: 순서도 흐름 컨테이너] */
+    .p05-fc {
+      position: absolute;
+      left: 640px;
+      top: 165px;
+      width: 660px;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(8px);
+      border: 5px solid var(--c-blue);
+      border-radius: 36px;
+      box-shadow: 0 16px 36px rgba(43, 58, 85, 0.12), inset 0 2px 4px rgba(255, 255, 255, 0.8);
+      padding: 22px 30px 24px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 10;
+    }
+
+    /* 노드 카드 기본 */
+    .p05-nd {
+      width: 500px;
+      height: 78px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-top: 2px;
+      font-family: 'Cafe24 Ssurround', sans-serif;
+      font-size: 36px;
+      color: #2b3a55;
+      letter-spacing: -0.03em;
+      white-space: nowrap;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+      user-select: none;
+    }
+
+    /* [드래그 전 빈 슬롯: 시작/끝 포함 모든 슬롯이 사각 점선!] */
+    .p05-nd.is-slot {
+      border: 4px dashed #94a3b8;
+      border-radius: 0 !important; /* 드래그 전에는 시작/끝도 모두 사각형 점선! */
+      background: #f1f5f9;
+      color: #475569;
+      box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.05);
+    }
+    .p05-nd.is-slot:not(.is-dim) {
+      border-color: #339af0;
+      background: #e7f5ff;
+      color: #1971c2;
+      animation: p05PulseSlot 1.8s infinite alternate ease-in-out;
+    }
+    @keyframes p05PulseSlot {
+      0% { box-shadow: inset 0 0 10px rgba(51, 154, 240, 0.1), 0 0 0 0 rgba(51, 154, 240, 0.4); }
+      100% { box-shadow: inset 0 0 16px rgba(51, 154, 240, 0.2), 0 0 0 8px rgba(51, 154, 240, 0); }
+    }
+    .p05-nd.is-slot.is-dim {
+      opacity: 0.35;
+      border-color: #cbd5e1;
+      background: #f8fafc;
+      color: #94a3b8;
+    }
+    .p05-nd.is-over {
+      border-color: #ff922b !important;
+      background: #fff4e6 !important;
+      color: #d9480f !important;
+      transform: scale(1.03);
+    }
+
+    /* [채워진 상태: 타원 (진짜 타원 Ellipse)] */
+    .p05-nd.is-ov {
+      width: 320px;
+      background: linear-gradient(135deg, #51cf66 0%, #2b8a3e 100%);
+      border: 4px solid #1e6b30;
+      border-radius: 50% !important; /* 드래그 후 타원으로 변신! */
+      color: #ffffff;
+      box-shadow: 0 6px 14px rgba(43, 138, 62, 0.35), inset 0 3px 0 rgba(255, 255, 255, 0.4);
+      animation: p05Pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    /* [채워진 상태: 사각형 (각진 직각 사각형)] */
+    .p05-nd.is-rc {
+      background: linear-gradient(135deg, #339af0 0%, #1864ab 100%);
+      border: 4px solid #144f88;
+      border-radius: 0 !important; /* 각진 사각형 */
+      color: #ffffff;
+      box-shadow: 0 6px 14px rgba(24, 100, 171, 0.35), inset 0 3px 0 rgba(255, 255, 255, 0.4);
+      animation: p05Pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes p05Pop {
+      0% { transform: scale(0.9); }
+      70% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    /* 연결 화살표 */
+    .p05-ar {
+      width: 8px;
+      height: 35px;
+      background: #339af0;
+      position: relative;
+      margin: 7px 0;
+      border-radius: 4px;
+    }
+    .p05-ar::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: -7px;
+      transform: translateX(-50%);
+      border: 9px solid transparent;
+      border-top: 11px solid #339af0;
+      border-bottom: 0;
+    }
+
+    /* [하단 보관함 트레이 & 탭] */
+    .jig-tray-label.p05-tab {
+      top: 560px;
+      left: 11%;
+      transform: translateX(-50%);
+      min-width: 0;
+      height: 56px;
+      padding: 8px 16px 6px;
+      font-family: 'Cafe24 Ssurround', sans-serif;
+      font-size: 38px;
+      font-weight: 700;
+      background: none;
+      color: #ffffff;
+      border: 0;
+      z-index: 16;
+    }
+    .jig-tray-label.p05-tab::after {
+      display: none !important; /* 오른쪽 아래 날개 곡선 삭제 */
+    }
+
+    .jig-tray.p05-tray {
+      top: 544px;
+      left: 18%;
+      transform: translateX(-50%);
+      width: 510px;
+      height: 384px;
+      background: var(--c-navy);
+      border: 5px solid var(--c-sky);
+      border-radius: 28px;
+      box-shadow: 0 16px 36px rgba(43, 58, 85, 0.25);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      padding-top: 40px;
+      z-index: 15;
+    }
+
+    /* 도형 블록 */
+    .p05-sh {
+      width: 300px;
+      height: 100px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-top: 4px;
+      font-family: 'Cafe24 Ssurround', sans-serif;
+      font-size: 40px;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+    }
+    .p05-sh.is-ov {
+      background: linear-gradient(135deg, #51cf66 0%, #2b8a3e 100%);
+      border: 5px solid #1e6b30;
+      border-radius: 50% !important; /* 진짜 타원 */
+      color: #ffffff;
+      box-shadow: 0 8px 16px rgba(43, 138, 62, 0.4), inset 0 3px 0 rgba(255, 255, 255, 0.4);
+    }
+    .p05-sh.is-rc {
+      background: linear-gradient(135deg, #339af0 0%, #1864ab 100%);
+      border: 5px solid #144f88;
+      border-radius: 0 !important; /* 각진 사각형 */
+      color: #ffffff;
+      box-shadow: 0 8px 16px rgba(24, 100, 171, 0.4), inset 0 3px 0 rgba(255, 255, 255, 0.4);
+    }
+    .p05-sh.is-clone {
+      position: absolute;
+      z-index: 999;
+      pointer-events: none !important;
+      cursor: grabbing;
+      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.35);
+    }
+
+    .p05-hide { display: none !important; }
+  </style>
 </head>
 <body>
 <div id="page-fade"></div>
@@ -30,8 +280,18 @@
   <div id="stage-spacer">
     <div id="stage" class="stage">
       <main class="bg-default">
+        <!-- 기존 공통 제목 알약 그대로 사용 -->
         <p class="ask-pill is-fit"><span id="p05Pill">‘시작’과 ‘끝’에 알맞은 모양을 씌워 주세요.</span></p>
 
+        <!-- [좌측: AI 로봇 캐릭터 & 말풍선] -->
+        <!-- <div class="p05-char-wrap">
+          <div class="p05-bubble">
+            <span id="p05Bubble">공기가 이동하는 순서대로<br>알맞은 모양을 끌어다 놓아봐!</span>
+          </div>
+          <img src="img/p04_character.png" class="p05-char-img" alt="AI 로봇 캐릭터">
+        </div> -->
+
+        <!-- [중앙: 순서도 흐름] -->
         <div class="p05-fc" id="p05Flow">
           <div class="p05-nd is-slot is-end drop-zone" data-slot="a">시작</div>
           <div class="p05-ar"></div>
@@ -46,29 +306,35 @@
           <div class="p05-nd is-slot is-end drop-zone" data-slot="a">끝</div>
         </div>
 
-        <div class="jig-tray-label p05-tab">보관함</div>
+        <!-- [하단: 도형 보관함 트레이 & 네모난 위쪽 라운드 탭] -->
+        <div class="jig-tray-label p05-tab">도형 보관함</div>
         <div class="jig-tray p05-tray">
           <div class="p05-sh is-ov" id="p05Ov" data-shape="ov">타원</div>
           <div class="p05-sh is-rc" id="p05Rc" data-shape="rc">사각형</div>
         </div>
 
-        <div class="avatar-modal is-off" id="p05Mid" style="z-index:30">
-          <div class="avatar-card">
+        <!-- 1단계 완료 중간 모달 -->
+        <div class="avatar-modal is-off" id="p05Mid">
+          <div class="avatar-card is-side">
             <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
-            <div class="avatar-card-body is-side"><p class="avatar-card-text">순서도의 시작과 끝을 타원으로 완성했어요.<br>이제 공기가 이동하는 일을 적은 칸에<br>알맞은 모양을 씌워 볼까요?</p></div>
+            <div class="avatar-card-body"><p class="avatar-card-text">순서도의 시작과 끝을 타원으로 완성했어요.<br>이제 공기가 이동하는 일을 적은 칸에<br>알맞은 모양을 씌워 볼까요?</p></div>
             <a class="avatar-card-btn next-btn card-btn is-popup js-sfx" id="p05MidBtn" data-sound="sound/click.mp3">다음</a>
           </div>
         </div>
 
-        <div class="avatar-modal is-off" id="p05Fin" style="z-index:30">
-          <div class="avatar-card">
+        <!-- 최종 완료 모달 -->
+        <div class="avatar-modal is-off" id="p05Fin">
+          <div class="avatar-card is-side">
             <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
-            <div class="avatar-card-body is-side"><p class="avatar-card-text" id="p05FinText"></p></div>
+            <div class="avatar-card-body"><p class="avatar-card-text" id="p05FinText"></p></div>
             <a class="avatar-card-btn next-btn card-btn is-popup js-sfx" id="p05FinBtn" data-sound="sound/click.mp3">다음</a>
             <a href="page06.html" class="js-nav-effect avatar-card-btn next-btn card-btn is-popup js-sfx p05-hide" id="p05FinGo" data-sound="sound/click.mp3">다음</a>
           </div>
         </div>
+
       </main>
+
+      
     </div>
   </div>
 </div>
@@ -118,9 +384,15 @@
   }
 
   const scale = () => $('stage').getBoundingClientRect().width / 1920;
+
+  // 여유 마진(패딩)을 두어 드래그 감도 대폭 향상!
   const hit = (s, x, y) => {
     const r = s.getBoundingClientRect();
-    return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+    const sc = scale();
+    const padX = 40 * sc; // 좌우 40px 여유
+    const padY = 32 * sc; // 상하 32px 여유
+    return x >= (r.left - padX) && x <= (r.right + padX) &&
+           y >= (r.top - padY) && y <= (r.bottom + padY);
   };
 
   shapes.forEach((orig) => {
@@ -175,6 +447,7 @@
     $('p05Mid').classList.add('is-off');
     stage = 2;
     $('p05Pill').textContent = '하는 일이 적힌 칸에 알맞은 모양을 씌워 주세요.';
+    $('p05Bubble').innerHTML = '공기가 지나가는 일에는<br>네모난 사각형을 씌워 봐!';
     refresh();
     guide();
   });

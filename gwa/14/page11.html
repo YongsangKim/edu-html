@@ -6,17 +6,13 @@
     <title>슝슝! 의사결정 나무 레이스!</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-      .p11-race-bg{position:absolute;left:0;top:0;width:1920px;height:960px;background:url('img/race_bg.png') no-repeat center/cover;overflow:hidden}
-      .p11-lv{position:absolute;left:50px;top:36px;height:84px;margin:0;padding:6px 38px 0;box-sizing:border-box;display:flex;align-items:center;border-radius:42px;background:var(--c-navy);border:solid 5px var(--c-sky);font-family:'Cafe24 Ssurround';font-size:48px;color:#fff;z-index:4}
-      .p11-flags{position:absolute;right:50px;top:30px;height:80px;padding:0 24px;border-radius:40px;background:rgba(255,255,255,.92);border:solid 4px var(--c-navy);display:flex;align-items:center;gap:16px;z-index:4}
-      .p11-flags img{width:54px;height:54px;object-fit:contain}
-      .p11-flags img.is-off{filter:grayscale(1);opacity:.35}
-      .p11-mmap{position:absolute;right:50px;top:124px;width:360px;height:256px;border-radius:22px;background:rgba(255,255,255,.94);border:solid 5px var(--c-navy);box-shadow:0 8px 0 rgba(0,0,0,.15);padding:8px 10px 10px;box-sizing:border-box;z-index:4}
-      .p11-mmap-hd{margin:0 0 2px;font-family:'Cafe24 Ssurround';font-size:20px;color:var(--c-navy);text-align:center}
-      .p11-mmap svg{width:100%;height:204px;display:block}
-      #mapPin{pointer-events:none;filter:drop-shadow(0 2px 4px rgba(255,46,76,.6))}
-      .p11-qsign{position:absolute;left:50%;top:38px;transform:translateX(-50%);min-width:860px;height:130px;padding:8px 50px 0;box-sizing:border-box;border-radius:28px;border:solid 8px #5c3a18;background:linear-gradient(180deg,#fff9e6,#ffe8a3);box-shadow:0 12px 0 rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:56px;color:var(--c-ink);letter-spacing:-0.04em;z-index:4;transition:all .3s ease}
-      .p11-qsign.is-warn{border-color:#e0314b;background:#fff0f2;color:#e0314b}
+      .p11-race-bg{position:absolute;left:0;top:0;width:1920px;height:960px;background:url('img/race_bg.jpg') no-repeat center/cover;overflow:hidden}
+      .p11-flags{position:absolute;right:45px;top:40px;width:320px;display:flex;align-items:center;justify-content:center;gap:10px;z-index:4;background:none;border:none;box-shadow:none;padding:0}
+      .p11-flags img{width:100px;height:110px;object-fit:contain}
+      .p11-mmap{position:absolute;right:20px;top:160px;width:380px;height:380px;z-index:4}
+      .p11-mmap svg{width:100%;height:100%;display:block;filter:drop-shadow(0 6px 12px rgba(0,0,0,.25))}
+      .p11-ask-pill.ask-pill.has-stage{width:1380px;min-height:104px;z-index:4;left:11%;transform:scale(0.9);box-shadow:0 15px 0 0 rgba(86,148,231,0.4)}
+      .p11-ask-pill.ask-pill.has-stage i{background:url(img/p14_bg_ask.png) no-repeat}
       @keyframes p11KartVibe{
         0%,100%{transform:translateY(0)}
         50%{transform:translateY(-3px)}
@@ -26,21 +22,61 @@
       .p11-cart.go-right{left:72%;top:385px;transform:translateX(-50%) scale(.78)}
       .p11-cart-inner{position:relative;width:100%;height:100%;animation:p11KartVibe .32s ease-in-out infinite}
       .p11-cart-vehicle{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;display:block;z-index:1}
-      .p11-cart-item{position:absolute;left:50%;top:242px;transform:translateX(-50%);width:78px;height:88px;object-fit:contain;z-index:2;filter:drop-shadow(0 4px 6px rgba(0,0,0,.35))}
-      .p11-yn-btn{position:absolute;bottom:48px;width:380px;height:116px;font-size:64px;z-index:6;margin:0;display:flex;align-items:center;justify-content:center;padding-top:8px}
-      .p11-yn-btn.is-yes{left:140px}
-      .p11-yn-btn.is-no{right:140px}
+      .p11-cart-item{position:absolute;left:50%;top:155px;transform:translateX(-50%);width:135px;height:180px;object-fit:contain;z-index:2;filter:drop-shadow(0 4px 8px rgba(0,0,0,.45))}
+      .p11-cart-guard{position:absolute;left:50%;top:155px;transform:translateX(-50%);width:135px;height:180px;object-fit:contain;display:block;z-index:3;pointer-events:none}
+      .p11-station{position:absolute;left:50%;top:290px;transform:translateX(-50%);width:220px;z-index:3;pointer-events:none;transition:opacity .25s ease}
+      .p11-station.is-sink{top:275px;width:190px}
+      .p11-cart-item.fly-to-bin{animation:p11BottleFly .85s cubic-bezier(.22,.8,.36,1) forwards;z-index:10}
+      @keyframes p11BottleFly{
+        0%{transform:translateX(-50%) translateY(0) scale(1) rotate(0deg);opacity:1;filter:drop-shadow(0 4px 8px rgba(0,0,0,.45))}
+        30%{transform:translateX(calc(-50% + 160px)) translateY(-380px) scale(.75) rotate(-20deg);opacity:1}
+        60%{transform:translateX(calc(-50% + 360px)) translateY(-390px) scale(.48) rotate(-45deg);opacity:1}
+        85%{transform:translateX(calc(-50% + 500px)) translateY(-300px) scale(.24) rotate(-70deg);opacity:.9}
+        100%{transform:translateX(calc(-50% + 542px)) translateY(-273px) scale(.1) rotate(-85deg);opacity:0;filter:drop-shadow(0 0 0 rgba(0,0,0,0))}
+      }
+      @keyframes p11BinBump{
+        0%,100%{transform:translateX(-50%) scale(1)}
+        45%{transform:translateX(-50%) scale(1.08,.92)}
+        75%{transform:translateX(-50%) scale(.96,1.04)}
+      }
+      .p11-station.is-bump{transform-origin:50% 100%;animation:p11BinBump .35s ease-out}
+      .p11-bottle-flight{position:absolute;left:893px;top:625px;width:135px;height:180px;z-index:10;pointer-events:none;filter:drop-shadow(0 8px 16px rgba(0,0,0,.4));transform-origin:65% 35%;transition:none}
+      .p11-flight-img{width:100%;height:100%;object-fit:contain;display:block}
+      .p11-juice-pour-wrap{position:absolute;left:938px;top:285px;width:30px;height:55px;z-index:9;pointer-events:none}
+      .p11-juice-stream{position:absolute;left:8px;top:0;width:14px;height:45px;background:linear-gradient(180deg,#ffa500 0%,#ff7700 80%,#ff5500 100%);border-radius:7px;box-shadow:0 0 10px rgba(255,140,0,.9);animation:p11JuicePulse .18s infinite alternate ease-in-out}
+      @keyframes p11JuicePulse{
+        0%{transform:scaleX(.85);opacity:.9}
+        100%{transform:scaleX(1.15);opacity:1}
+      }
+      .p11-juice-drop{position:absolute;background:#ff7700;border-radius:50%;box-shadow:0 0 6px #ffa500}
+      .p11-juice-drop.d1{left:4px;top:60px;width:8px;height:8px;animation:p11Drop1 .35s infinite linear}
+      .p11-juice-drop.d2{left:18px;top:70px;width:6px;height:6px;animation:p11Drop2 .4s infinite linear .1s}
+      .p11-juice-drop.d3{left:10px;top:78px;width:10px;height:10px;animation:p11Drop3 .3s infinite linear .05s}
+      @keyframes p11Drop1{
+        0%{transform:translate(0,0) scale(1);opacity:1}
+        100%{transform:translate(-8px,20px) scale(.3);opacity:0}
+      }
+      @keyframes p11Drop2{
+        0%{transform:translate(0,0) scale(1);opacity:1}
+        100%{transform:translate(10px,18px) scale(.3);opacity:0}
+      }
+      @keyframes p11Drop3{
+        0%{transform:translate(0,0) scale(1);opacity:1}
+        100%{transform:translate(2px,15px) scale(1.3);opacity:0}
+      }
+      .p11-sink-ripple{position:absolute;left:928px;top:318px;width:44px;height:16px;border-radius:50%;border:3px solid rgba(255,140,0,.7);background:rgba(255,170,0,.3);z-index:4;pointer-events:none;animation:p11Ripple .5s infinite ease-out}
+      @keyframes p11Ripple{
+        0%{transform:scale(.5);opacity:1}
+        100%{transform:scale(1.3);opacity:0}
+      }
+      .p11-yn-btn{position:absolute;bottom:70px;width:440px;height:116px;font-size:90px;z-index:6;margin:0;display:flex;align-items:center;justify-content:center;gap:20px;padding-top:20px;border-radius:60px}
+      .p11-yn-btn.is-yes{left:200px}
+      .p11-yn-btn.is-no{right:200px}
+      .p11-btn-ic{width:90px;height:90px;object-fit:contain;pointer-events:none;margin-top:-10px}
       .p11-pick-bar{position:absolute;left:60px;right:60px;bottom:34px;height:240px;border-radius:30px;background:rgba(27,22,64,.92);border:solid 6px var(--c-yellow);display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;z-index:7}
       .p11-pick-bar p{margin:0;font-family:'Cafe24 Ssurround';font-size:36px;color:var(--c-yellow)}
       .p11-pick-row{display:flex;gap:32px}
       .p11-pick-row .card-btn{margin:0;min-width:0;width:520px;height:108px;font-size:42px;display:flex;align-items:center;justify-content:center;padding:8px 20px 0}
-      .p11-sink-panel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:900px;height:620px;background:#fff;border:solid 8px var(--c-navy);border-radius:32px;box-shadow:0 16px 40px rgba(0,0,0,.3);display:none;flex-direction:column;align-items:center;justify-content:center;gap:24px;z-index:8}
-      .p11-sink-lead{margin:0;font-family:'Cafe24 Ssurround';font-size:42px;color:var(--c-navy)}
-      .p11-bottle-box{width:240px;height:280px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .4s ease}
-      .p11-bottle-box.is-poured{transform:rotate(70deg) translate(20px,-30px)}
-      .p11-bottle-box img{width:180px;height:240px;object-fit:contain}
-      .p11-sink-bowl{width:560px;height:120px;background:linear-gradient(180deg,#dbe5f2,#b8cadf);border:solid 6px #7c8ea3;border-radius:0 0 60px 60px;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:30px;color:#5a6c82}
-      .p11-fg{position:absolute;left:340px;top:840px;width:110px;z-index:10;pointer-events:none}
     </style>
 </head>
 <body>
@@ -50,55 +86,49 @@
       <div id="stage" class="stage">
         <main class="bg-default">
           <div class="p11-race-bg"></div>
+          <img class="p11-station" id="p11Station" src="img/p11_bin_pet.png" alt="페트병 분리배출함">
 
-          <p class="p11-lv" id="p11RoundBadge">1라운드</p>
-          <div class="p11-qsign" id="p11Qsign">음료를 다 비웠나요?</div>
+          <div class="p11-juice-pour-wrap" id="p11JuicePourWrap" style="display:none">
+            <div class="p11-juice-stream"></div>
+            <div class="p11-juice-drop d1"></div>
+            <div class="p11-juice-drop d2"></div>
+            <div class="p11-juice-drop d3"></div>
+          </div>
+          <div class="p11-sink-ripple" id="p11SinkRipple" style="display:none"></div>
+
+          <div class="p11-bottle-flight" id="p11BottleFlight" style="display:none">
+            <img class="p11-flight-img" id="p11FlightImg" src="img/p11_item_glass_full.png" alt="오렌지 주스 병">
+          </div>
+
+          <p class="ask-pill has-stage p11-ask-pill" id="p11AskPill">
+            <i id="p11RoundBadge">1 ROUND</i>
+            <span class="p11-qsign" id="p11Qsign">음료를 다 비웠나요?</span>
+          </p>
 
           <div class="p11-flags">
-            <img src="img/image27.png" alt="1R" id="flag1" class="is-off">
-            <img src="img/image27.png" alt="2R" id="flag2" class="is-off">
-            <img src="img/image27.png" alt="3R" id="flag3" class="is-off">
+            <img src="img/p11_flag_off.png" alt="1R" id="flag1">
+            <img src="img/p11_flag_off.png" alt="2R" id="flag2">
+            <img src="img/p11_flag_off.png" alt="3R" id="flag3">
           </div>
 
           <div class="p11-mmap">
-            <p class="p11-mmap-hd">레이스 트랙 Map</p>
-            <svg viewBox="0 0 326 195" id="p11MapSvg">
-              <rect x="10" y="10" width="306" height="175" rx="35" fill="#f0f7ea" stroke="#d5e8ca" stroke-width="2"/>
-              <path id="raceTrackPath" d="M 50,35 L 246,35 A 45,45 0 0,1 291,80 L 291,115 A 45,45 0 0,1 246,160 L 80,160 A 45,45 0 0,1 35,115 L 35,80 A 45,45 0 0,1 80,35 L 50,35 Z" fill="none" stroke="#cfd8dc" stroke-width="32" stroke-linejoin="round"/>
-              <path d="M 50,35 L 246,35 A 45,45 0 0,1 291,80 L 291,115 A 45,45 0 0,1 246,160 L 80,160 A 45,45 0 0,1 35,115 L 35,80 A 45,45 0 0,1 80,35 L 50,35 Z" fill="none" stroke="#ffffff" stroke-width="3" stroke-dasharray="8,6" stroke-linejoin="round"/>
-              <path id="raceSinkPath" d="M 120,35 Q 163,12 206,35" fill="none" stroke="#80deea" stroke-width="8" stroke-dasharray="4,4"/>
-              <rect x="145" y="6" width="36" height="16" rx="5" fill="#e0f7fa" stroke="#00acc1" stroke-width="1.5"/>
-              <text x="163" y="15" text-anchor="middle" dominant-baseline="central" font-size="9" fill="#00838f" font-family="'Cafe24 Ssurround', sans-serif" font-weight="bold">개수대</text>
-              <line x1="50" y1="20" x2="50" y2="50" stroke="#1b1640" stroke-width="4" stroke-dasharray="3,3"/>
-              <text x="50" y="14" text-anchor="middle" font-size="12">🏁</text>
-              <text x="50" y="62" text-anchor="middle" font-size="10" fill="#2465a5" font-weight="bold" font-family="'Cafe24 Ssurround', sans-serif">START</text>
-              <polygon points="105,32 113,35 105,38" fill="#90a4ae"/>
-              <polygon points="288,60 291,68 294,60" fill="#90a4ae"/>
-              <polygon points="220,157 212,160 220,163" fill="#90a4ae"/>
-              <circle cx="163" cy="35" r="10" fill="#fff9c4" stroke="#fbc02d" stroke-width="2"/>
-              <text x="163" y="36" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="bold" fill="#8a6200" font-family="'Cafe24 Ssurround', sans-serif">Q1</text>
-              <circle cx="291" cy="98" r="10" fill="#ede7f6" stroke="#7e57c2" stroke-width="2"/>
-              <text x="291" y="99" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="bold" fill="#5e35b1" font-family="'Cafe24 Ssurround', sans-serif">Q2</text>
-              <circle cx="163" cy="160" r="10" fill="#ede7f6" stroke="#7e57c2" stroke-width="2"/>
-              <text x="163" y="161" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="bold" fill="#5e35b1" font-family="'Cafe24 Ssurround', sans-serif">Q3</text>
-              <circle cx="95" cy="160" r="10" fill="#ede7f6" stroke="#7e57c2" stroke-width="2"/>
-              <text x="95" y="161" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="bold" fill="#5e35b1" font-family="'Cafe24 Ssurround', sans-serif">Q4</text>
-              <circle cx="35" cy="98" r="14" fill="#e8f5e9" stroke="#43a047" stroke-width="2"/>
-              <text x="35" y="99" text-anchor="middle" dominant-baseline="central" font-size="13">📦</text>
-              <text x="35" y="122" text-anchor="middle" font-size="9" fill="#2e7d32" font-weight="bold" font-family="'Cafe24 Ssurround', sans-serif">배출함</text>
-              <circle cx="50" cy="35" r="8" fill="#ff2e4c" stroke="#ffffff" stroke-width="2.5" id="mapPin"/>
+            <svg viewBox="0 0 400 400" id="p11MapSvg">
+              <image href="img/p11_map.png" width="400" height="400"/>
+              <path id="raceTrackPath" d="M 200,317 L 85,317 C 65,317 56,300 56,260 L 56,170 C 56,125 75,115 108,140 C 135,168 150,220 162,255 C 170,275 185,275 192,255 C 200,220 220,165 224,120 C 228,88 245,74 270,78 C 295,82 336,105 336,150 C 336,180 306,198 306,224 C 306,236 312,246 324,258 C 338,272 338,295 320,317 L 200,317" fill="none" stroke="none"/>
+              <image id="mapPin" href="img/p11_map_aro.png" width="88" height="88" x="-44" y="-44" style="filter: drop-shadow(0 3px 5px rgba(0,0,0,.35));" transform="translate(200, 317)"/>
             </svg>
           </div>
 
           <div class="p11-cart" id="p11Cart">
             <div class="p11-cart-inner">
-              <img class="p11-cart-item" id="p11CartItem" src="img/image28.png" alt="빈 물 페트병">
+              <img class="p11-cart-item" id="p11CartItem" src="img/p11_item_pet.png" alt="빈 물 페트병">
               <img class="p11-cart-vehicle" src="img/robot_kart_rear.png" alt="분리배출 로봇 카트">
+              <img class="p11-cart-guard" id="p11CartGuard" src="img/p11_kart_guard.png" alt="" onerror="this.style.display='none'">
             </div>
           </div>
 
-          <button type="button" class="card-btn p11-yn-btn is-yes" id="btnYes">예</button>
-          <button type="button" class="card-btn p11-yn-btn is-no" id="btnNo">아니오</button>
+          <button type="button" class="card-btn p11-yn-btn is-yes" id="btnYes">예<img src="img/p11_icon_o.png" alt="O" class="p11-btn-ic"></button>
+          <button type="button" class="card-btn p11-yn-btn is-no" id="btnNo">아니오<img src="img/p11_icon_x.png" alt="X" class="p11-btn-ic"></button>
 
           <div class="p11-pick-bar" id="p11PickBar">
             <p>우유갑을 알맞은 분리배출함으로 보내려면 새 질문이 필요해요!</p>
@@ -108,17 +138,6 @@
               <button type="button" class="card-btn" data-pick="no2">둥근 모양인가요?</button>
             </div>
           </div>
-
-          <div class="p11-sink-panel" id="p11SinkPanel">
-            <p class="p11-sink-lead">남은 음료를 개수대에 비워주세요!</p>
-            <div class="p11-bottle-box" id="p11SinkBottle">
-              <img id="p11SinkBottleImg" src="img/image30.png" alt="주스가 남은 병">
-            </div>
-            <div class="p11-sink-bowl">개수대</div>
-            <button type="button" class="card-btn is-popup" id="btnSinkResume" style="display:none;min-width:260px;height:84px;font-size:38px">다시 출발하기</button>
-          </div>
-
-          <img class="p11-fg" id="p11Finger" src="../../resources/img/common/img_finger01.png" alt="">
 
           <div class="ox-result-wrong is-avatar is-off" id="p11WrongModal">
             <div class="avatar-popup-panel">
@@ -134,8 +153,9 @@
           <div class="avatar-modal is-off" id="r1ClearModal">
             <div class="avatar-card">
               <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
-              <div class="avatar-card-body is-side">
-                <p class="avatar-card-text">1라운드 성공!<br>투명한 물 페트병이 플라스틱 분리배출함에 알맞게 들어갔어요!<br>다음 라운드로 출발해 볼까요?</p>
+              <div class="avatar-card-body">
+                <p class="avatar-card-title">1라운드 성공!</p>
+                <p class="avatar-card-text">투명한 물 페트병이 플라스틱 분리배출함에<br>알맞게 들어갔어요!<br>다음 라운드로 출발해 볼까요?</p>
               </div>
               <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup" id="btnToR2" data-sound="sound/click.mp3">다음 라운드</a>
             </div>
@@ -144,8 +164,9 @@
           <div class="avatar-modal is-off" id="r2ClearModal">
             <div class="avatar-card">
               <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
-              <div class="avatar-card-body is-side">
-                <p class="avatar-card-text">2라운드 성공!<br>남은 음료를 깨끗이 비운 유리병을 유리 분리배출함에 넣었어요!<br>마지막 라운드로 출발해 볼까요?</p>
+              <div class="avatar-card-body">
+                <p class="avatar-card-title">2라운드 성공!</p>
+                <p class="avatar-card-text">남은 음료를 깨끗이 비운 유리병을 유리 분리배출함에 넣었어요!<br>마지막 라운드로 출발해 볼까요?</p>
               </div>
               <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup" id="btnToR3" data-sound="sound/click.mp3">다음 라운드</a>
             </div>
@@ -204,12 +225,12 @@
       var btnYes = document.getElementById('btnYes');
       var btnNo = document.getElementById('btnNo');
       var pickBar = document.getElementById('p11PickBar');
-      var sinkPanel = document.getElementById('p11SinkPanel');
-      var sinkBottle = document.getElementById('p11SinkBottle');
-      var sinkBottleImg = document.getElementById('p11SinkBottleImg');
-      var btnSinkResume = document.getElementById('btnSinkResume');
+      var station = document.getElementById('p11Station');
+      var flightBottle = document.getElementById('p11BottleFlight');
+      var flightImg = document.getElementById('p11FlightImg');
+      var juiceWrap = document.getElementById('p11JuicePourWrap');
+      var sinkRipple = document.getElementById('p11SinkRipple');
       var mapPin = document.getElementById('mapPin');
-      var finger = document.getElementById('p11Finger');
       var raceTrackPath = document.getElementById('raceTrackPath');
 
       var wrongModal = document.getElementById('p11WrongModal');
@@ -221,19 +242,22 @@
 
       var PIN_CHECKPOINTS = {
         START: 0,
-        Q1: 113,
-        Q2: 284.7,
-        Q3: 455.4,
-        Q4: 523.4,
-        FINISH: 626.1
+        R1_MID: 180,
+        R1_FLAG: 364,
+        R2_DIP: 490,
+        R2_HILL: 620,
+        R2_FLAG: 747.5,
+        R3_CURVE1: 820,
+        R3_CURVE2: 880,
+        R3_FLAG: 939,
+        FINISH: 1159.4
       };
       var curPinLength = 0;
       var pinAnimId = null;
 
       function setPinCoords(x, y) {
         if (mapPin) {
-          mapPin.setAttribute('cx', x);
-          mapPin.setAttribute('cy', y);
+          mapPin.setAttribute('transform', 'translate(' + x + ',' + y + ')');
         }
       }
 
@@ -267,90 +291,115 @@
         pinAnimId = requestAnimationFrame(step);
       }
 
-      function animatePinToPoint(targetX, targetY, duration, callback) {
-        if (pinAnimId) {
-          cancelAnimationFrame(pinAnimId);
-          pinAnimId = null;
-        }
-        var startX = parseFloat(mapPin.getAttribute('cx')) || 163;
-        var startY = parseFloat(mapPin.getAttribute('cy')) || 35;
-        var startTime = null;
-        var dur = duration || 500;
-
-        function step(timestamp) {
-          if (!startTime) startTime = timestamp;
-          var elapsed = timestamp - startTime;
-          var p = Math.min(elapsed / dur, 1);
-          var ease = p < 0.5 ? 2 * p * p : -1 + (4 - 2 * p) * p;
-          var curX = startX + (targetX - startX) * ease;
-          var curY = startY + (targetY - startY) * ease;
-          setPinCoords(curX, curY);
-          if (p < 1) {
-            pinAnimId = requestAnimationFrame(step);
-          } else {
-            pinAnimId = null;
-            if (typeof callback === 'function') callback();
-          }
-        }
-        pinAnimId = requestAnimationFrame(step);
+      function playGoalIn(callback) {
+        cartItem.classList.remove('fly-to-bin');
+        void cartItem.offsetWidth;
+        cartItem.classList.add('fly-to-bin');
+        setTimeout(function () {
+          station.classList.remove('is-bump');
+          void station.offsetWidth;
+          station.classList.add('is-bump');
+        }, 650);
+        setTimeout(function () {
+          station.classList.remove('is-bump');
+          if (typeof callback === 'function') callback();
+        }, 950);
       }
 
       function setupRound1() {
         curRound = 1;
         curStep = 0;
-        roundBadge.textContent = '1라운드';
-        cartItem.src = 'img/image28.png';
+        roundBadge.textContent = '1 ROUND';
+        station.className = 'p11-station';
+        station.src = 'img/p11_bin_pet.png';
+        station.alt = '페트병 분리배출함';
+        cartItem.className = 'p11-cart-item';
+        cartItem.src = 'img/p11_item_pet.png';
+        cartItem.style.opacity = '1';
+        flightBottle.style.display = 'none';
+        juiceWrap.style.display = 'none';
+        sinkRipple.style.display = 'none';
+        btnYes.disabled = false;
+        btnNo.disabled = false;
+        btnYes.style.pointerEvents = '';
+        btnNo.style.pointerEvents = '';
         cart.className = 'p11-cart';
         qsign.className = 'p11-qsign';
         qsign.textContent = '음료를 다 비웠나요?';
+        flag1.src = 'img/p11_flag_off.png';
+        flag2.src = 'img/p11_flag_off.png';
+        flag3.src = 'img/p11_flag_off.png';
         curPinLength = PIN_CHECKPOINTS.START;
-        setPinCoords(50, 35);
-        setTimeout(function () {
-          animatePinAlongTrack(PIN_CHECKPOINTS.Q1, 600);
-        }, 300);
+        setPinCoords(200, 317);
       }
 
       function setupRound2() {
         curRound = 2;
         curStep = 0;
-        roundBadge.textContent = '2라운드';
-        cartItem.src = 'img/image30.png';
+        roundBadge.textContent = '2 ROUND';
+        station.className = 'p11-station is-sink';
+        station.src = 'img/p11_sink.png';
+        station.alt = '개수대';
+        cartItem.className = 'p11-cart-item';
+        cartItem.src = 'img/p11_item_glass_full.png';
+        cartItem.style.opacity = '1';
+        flightBottle.style.display = 'none';
+        juiceWrap.style.display = 'none';
+        sinkRipple.style.display = 'none';
+        btnYes.disabled = false;
+        btnNo.disabled = false;
+        btnYes.style.pointerEvents = '';
+        btnNo.style.pointerEvents = '';
         cart.className = 'p11-cart';
         qsign.className = 'p11-qsign';
         qsign.textContent = '음료를 다 비웠나요?';
-        curPinLength = PIN_CHECKPOINTS.START;
-        setPinCoords(50, 35);
-        setTimeout(function () {
-          animatePinAlongTrack(PIN_CHECKPOINTS.Q1, 600);
-        }, 300);
-        flag1.classList.remove('is-off');
+        flag1.src = 'img/p11_flag.png';
+        flag2.src = 'img/p11_flag_off.png';
+        flag3.src = 'img/p11_flag_off.png';
+        curPinLength = PIN_CHECKPOINTS.R1_FLAG;
+        if (raceTrackPath && raceTrackPath.getPointAtLength) {
+          var pt = raceTrackPath.getPointAtLength(curPinLength);
+          setPinCoords(pt.x, pt.y);
+        }
       }
 
       function setupRound3() {
         curRound = 3;
         curStep = 0;
-        roundBadge.textContent = '3라운드';
-        cartItem.src = 'img/image32.png';
+        roundBadge.textContent = '3 ROUND';
+        station.className = 'p11-station';
+        station.src = 'img/p11_bin_carton.png';
+        station.alt = '종이팩 분리배출함';
+        cartItem.className = 'p11-cart-item';
+        cartItem.src = 'img/p11_item_carton.png';
+        cartItem.style.opacity = '1';
+        flightBottle.style.display = 'none';
+        juiceWrap.style.display = 'none';
+        sinkRipple.style.display = 'none';
+        btnYes.disabled = false;
+        btnNo.disabled = false;
+        btnYes.style.pointerEvents = '';
+        btnNo.style.pointerEvents = '';
         cart.className = 'p11-cart';
         qsign.className = 'p11-qsign';
         qsign.textContent = '음료를 다 비웠나요?';
-        curPinLength = PIN_CHECKPOINTS.START;
-        setPinCoords(50, 35);
-        setTimeout(function () {
-          animatePinAlongTrack(PIN_CHECKPOINTS.Q1, 600);
-        }, 300);
-        flag2.classList.remove('is-off');
+        flag1.src = 'img/p11_flag.png';
+        flag2.src = 'img/p11_flag.png';
+        flag3.src = 'img/p11_flag_off.png';
+        curPinLength = PIN_CHECKPOINTS.R2_FLAG;
+        if (raceTrackPath && raceTrackPath.getPointAtLength) {
+          var pt = raceTrackPath.getPointAtLength(curPinLength);
+          setPinCoords(pt.x, pt.y);
+        }
       }
 
       function handleAnswer(ans) {
-        finger.style.display = 'none';
-
         if (curRound === 1) {
           if (curStep === 0) {
             if (ans === 'yes') {
               SFX.play('correct');
               cart.classList.add('go-left');
-              animatePinAlongTrack(PIN_CHECKPOINTS.Q2, 700);
+              animatePinAlongTrack(PIN_CHECKPOINTS.R1_MID, 700);
               setTimeout(function () {
                 cart.className = 'p11-cart';
                 curStep = 1;
@@ -364,10 +413,16 @@
           } else if (curStep === 1) {
             if (ans === 'yes') {
               SFX.play('correct');
+              btnYes.disabled = true;
+              btnNo.disabled = true;
+              btnYes.style.pointerEvents = 'none';
+              btnNo.style.pointerEvents = 'none';
               cart.classList.add('go-left');
-              animatePinAlongTrack(PIN_CHECKPOINTS.FINISH, 750, function () {
-                flag1.classList.remove('is-off');
-                r1ClearModal.classList.remove('is-off');
+              animatePinAlongTrack(PIN_CHECKPOINTS.R1_FLAG, 750, function () {
+                playGoalIn(function () {
+                  flag1.src = 'img/p11_flag.png';
+                  r1ClearModal.classList.remove('is-off');
+                });
               });
             } else {
               SFX.play('wrong');
@@ -379,14 +434,68 @@
           if (curStep === 0) {
             if (ans === 'no') {
               SFX.play('correct');
-              cart.classList.add('go-right');
-              animatePinToPoint(163, 14, 600);
+              btnYes.disabled = true;
+              btnNo.disabled = true;
+              btnYes.style.pointerEvents = 'none';
+              btnNo.style.pointerEvents = 'none';
+              animatePinAlongTrack(PIN_CHECKPOINTS.R2_DIP, 1600);
+
+              cartItem.style.opacity = '0';
+              flightBottle.style.display = 'block';
+              flightBottle.style.transition = 'none';
+              flightBottle.style.left = '893px';
+              flightBottle.style.top = '625px';
+              flightBottle.style.transform = 'rotate(0deg)';
+              flightImg.src = 'img/p11_item_glass_full.png';
+
+              flightBottle.offsetHeight;
+              flightBottle.style.transition = 'left 0.75s cubic-bezier(.22,.8,.36,1), top 0.75s cubic-bezier(.22,.8,.36,1)';
+              flightBottle.style.left = '812px';
+              flightBottle.style.top = '220px';
+
               setTimeout(function () {
-                sinkPanel.style.display = 'flex';
-                sinkBottle.classList.remove('is-poured');
-                sinkBottleImg.src = 'img/image30.png';
-                btnSinkResume.style.display = 'none';
-              }, 700);
+                flightBottle.style.transition = 'transform 0.4s cubic-bezier(.34,1.56,.64,1)';
+                flightBottle.style.transform = 'rotate(65deg)';
+              }, 750);
+
+              setTimeout(function () {
+                juiceWrap.style.display = 'block';
+                sinkRipple.style.display = 'block';
+              }, 1150);
+
+              setTimeout(function () {
+                juiceWrap.style.display = 'none';
+                sinkRipple.style.display = 'none';
+                flightImg.src = 'img/p11_item_glass_empty.png';
+              }, 2150);
+
+              setTimeout(function () {
+                flightBottle.style.transition = 'transform 0.35s ease, left 0.35s ease, top 0.35s ease';
+                flightBottle.style.transform = 'rotate(0deg)';
+                flightBottle.style.left = '893px';
+                flightBottle.style.top = '220px';
+              }, 2350);
+
+              setTimeout(function () {
+                flightBottle.style.transition = 'top 0.7s cubic-bezier(.25,1,.5,1), left 0.7s cubic-bezier(.25,1,.5,1)';
+                flightBottle.style.top = '625px';
+                flightBottle.style.left = '893px';
+              }, 2700);
+
+              setTimeout(function () {
+                flightBottle.style.display = 'none';
+                cartItem.src = 'img/p11_item_glass_empty.png';
+                cartItem.style.opacity = '1';
+                station.className = 'p11-station';
+                station.src = 'img/p11_bin_glass.png';
+                station.alt = '유리병 분리배출함';
+                curStep = 1;
+                qsign.textContent = '유리인가요?';
+                btnYes.disabled = false;
+                btnNo.disabled = false;
+                btnYes.style.pointerEvents = '';
+                btnNo.style.pointerEvents = '';
+              }, 3400);
             } else {
               SFX.play('wrong');
               wrongMsg.innerHTML = '병 안에 아직 오렌지 주스가 남아 있어요!';
@@ -395,40 +504,16 @@
           } else if (curStep === 1) {
             if (ans === 'yes') {
               SFX.play('correct');
+              btnYes.disabled = true;
+              btnNo.disabled = true;
+              btnYes.style.pointerEvents = 'none';
+              btnNo.style.pointerEvents = 'none';
               cart.classList.add('go-left');
-              animatePinAlongTrack(PIN_CHECKPOINTS.Q2, 700);
-              setTimeout(function () {
-                cart.className = 'p11-cart';
-                curStep = 2;
-                qsign.textContent = '몸체가 투명한 플라스틱인가요?';
-              }, 700);
-            } else {
-              SFX.play('wrong');
-              wrongMsg.innerHTML = '음료를 깨끗하게 비웠어요!<br>‘예’를 선택해 볼까요?';
-              flashLayer(wrongModal);
-            }
-          } else if (curStep === 2) {
-            if (ans === 'no') {
-              SFX.play('correct');
-              cart.classList.add('go-right');
-              animatePinAlongTrack(PIN_CHECKPOINTS.Q3, 700);
-              setTimeout(function () {
-                cart.className = 'p11-cart';
-                curStep = 3;
-                qsign.textContent = '유리로 만들어졌나요?';
-              }, 700);
-            } else {
-              SFX.play('wrong');
-              wrongMsg.innerHTML = '플라스틱이 아니라 유리병이에요!<br>다시 선택해 볼까요?';
-              flashLayer(wrongModal);
-            }
-          } else if (curStep === 3) {
-            if (ans === 'yes') {
-              SFX.play('correct');
-              cart.classList.add('go-left');
-              animatePinAlongTrack(PIN_CHECKPOINTS.FINISH, 750, function () {
-                flag2.classList.remove('is-off');
-                r2ClearModal.classList.remove('is-off');
+              animatePinAlongTrack(PIN_CHECKPOINTS.R2_FLAG, 750, function () {
+                playGoalIn(function () {
+                  flag2.src = 'img/p11_flag.png';
+                  r2ClearModal.classList.remove('is-off');
+                });
               });
             } else {
               SFX.play('wrong');
@@ -441,7 +526,7 @@
             if (ans === 'yes') {
               SFX.play('correct');
               cart.classList.add('go-left');
-              animatePinAlongTrack(PIN_CHECKPOINTS.Q2, 700);
+              animatePinAlongTrack(PIN_CHECKPOINTS.R3_CURVE1, 700);
               setTimeout(function () {
                 cart.className = 'p11-cart';
                 curStep = 1;
@@ -456,7 +541,7 @@
             if (ans === 'no') {
               SFX.play('correct');
               cart.classList.add('go-right');
-              animatePinAlongTrack(PIN_CHECKPOINTS.Q3, 700);
+              animatePinAlongTrack(PIN_CHECKPOINTS.R3_CURVE2, 700);
               setTimeout(function () {
                 cart.className = 'p11-cart';
                 curStep = 2;
@@ -479,10 +564,16 @@
           } else if (curStep === 3) {
             if (ans === 'yes') {
               SFX.play('correct');
+              btnYes.disabled = true;
+              btnNo.disabled = true;
+              btnYes.style.pointerEvents = 'none';
+              btnNo.style.pointerEvents = 'none';
               cart.classList.add('go-left');
-              animatePinAlongTrack(PIN_CHECKPOINTS.FINISH, 750, function () {
-                flag3.classList.remove('is-off');
-                r3ClearModal.classList.remove('is-off');
+              animatePinAlongTrack(PIN_CHECKPOINTS.FINISH, 850, function () {
+                playGoalIn(function () {
+                  flag3.src = 'img/p11_flag.png';
+                  r3ClearModal.classList.remove('is-off');
+                });
               });
             } else {
               SFX.play('wrong');
@@ -496,28 +587,6 @@
       btnYes.addEventListener('click', function () { handleAnswer('yes'); });
       btnNo.addEventListener('click', function () { handleAnswer('no'); });
 
-      sinkBottle.addEventListener('click', function () {
-        if (!sinkBottle.classList.contains('is-poured')) {
-          SFX.play('correct');
-          sinkBottle.classList.add('is-poured');
-          setTimeout(function () {
-            sinkBottleImg.src = 'img/image31.png';
-            btnSinkResume.style.display = 'block';
-          }, 500);
-        }
-      });
-
-      btnSinkResume.addEventListener('click', function () {
-        sinkPanel.style.display = 'none';
-        cartItem.src = 'img/image31.png';
-        cart.className = 'p11-cart';
-        curStep = 1;
-        qsign.textContent = '음료를 다 비웠나요?';
-        animatePinToPoint(163, 35, 450, function () {
-          curPinLength = PIN_CHECKPOINTS.Q1;
-        });
-      });
-
       document.getElementById('btnToR2').addEventListener('click', function () {
         r1ClearModal.classList.add('is-off');
         setupRound2();
@@ -530,8 +599,7 @@
 
       document.getElementById('btnOpenPick').addEventListener('click', function () {
         r3WarnModal.classList.add('is-off');
-        qsign.classList.add('is-warn');
-        qsign.textContent = '⚠️ 어떤 질문이 들어가야 할까요?';
+        qsign.textContent = '어떤 질문이 들어가야 할까요?';
         btnYes.style.display = 'none';
         btnNo.style.display = 'none';
         pickBar.style.display = 'flex';
@@ -544,12 +612,14 @@
           if (pickVal === 'yes') {
             SFX.play('correct');
             pickBar.style.display = 'none';
-            qsign.classList.remove('is-warn');
             qsign.textContent = '종이로 만들어졌나요?';
             btnYes.style.display = 'flex';
             btnNo.style.display = 'flex';
+            station.className = 'p11-station';
+            station.src = 'img/p11_bin_carton.png';
+            station.alt = '종이팩 분리배출함';
             curStep = 3;
-            animatePinAlongTrack(PIN_CHECKPOINTS.Q4, 600);
+            animatePinAlongTrack(PIN_CHECKPOINTS.R3_FLAG, 600);
           } else {
             SFX.play('wrong');
             if (pickVal === 'no1') {

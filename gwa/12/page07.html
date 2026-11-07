@@ -6,16 +6,122 @@
 <title>순서도대로 일하는 AI</title>
 <link rel="stylesheet" href="../../resources/css/common.css">
 <style>
-.p07-panel{position:absolute;left:60px;top:180px;width:1800px;height:760px;box-sizing:border-box;border-radius:30px;background:#266cc8}
-.p07-fcard{position:absolute;left:40px;top:40px;width:600px;height:680px;box-sizing:border-box;border-radius:24px;background:var(--c-white);display:flex;align-items:center;justify-content:center}
-.p07-ill{position:absolute;left:680px;top:40px;width:1080px;height:400px;box-sizing:border-box;border-radius:24px;background:var(--c-white);overflow:hidden}
-.p07-ill i{position:absolute;font-style:normal;line-height:1}
-.p07-ring{position:absolute;width:110px;height:110px;box-sizing:border-box;border:dashed 6px #ff3b6b;border-radius:50%}
-.p07-opts{position:absolute;left:680px;top:470px;width:1080px;height:250px;display:flex;gap:30px}
-.p07-opts .quiz-graph{flex:1;height:250px;font-size:40px;align-items:center;justify-content:center;gap:10px;padding-top:14px}
-.p07-opts .quiz-graph i{font-style:normal;font-size:100px;line-height:1}
-.p07-opts .quiz-graph b{font-weight:400;letter-spacing:-0.04em;white-space:nowrap}
-.p07-hide{display:none!important}
+.ask-pill {
+  font-size: 52px !important;
+  white-space: nowrap !important;
+  padding: 10px 50px 6px !important;
+}
+
+.p07-panel {
+  position: absolute;
+  left: 60px;
+  top: 180px;
+  width: 1800px;
+  height: 760px;
+  box-sizing: border-box;
+  border-radius: 30px;
+  background: #266cc8;
+}
+.p07-fcard {
+  position: absolute;
+  left: 40px;
+  top: 40px;
+  width: 600px;
+  height: 680px;
+  box-sizing: border-box;
+  border-radius: 24px;
+  background: var(--c-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.p07-ill {
+  position: absolute;
+  left: 680px;
+  top: 40px;
+  width: 1080px;
+  height: 400px;
+  box-sizing: border-box;
+  border-radius: 24px;
+  border: 4px solid var(--c-blue);
+  background: var(--c-white);
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+}
+.p07-ill-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.p07-ring {
+  position: absolute;
+  left: 45px;
+  bottom: 35px;
+  width: 160px;
+  height: 100px;
+  box-sizing: border-box;
+  border: dashed 5px #ff3b6b;
+  border-radius: 50%;
+  animation: p07RingPulse 1.5s infinite ease-in-out;
+  pointer-events: none;
+}
+@keyframes p07RingPulse {
+  0% { transform: scale(0.95); opacity: 0.85; }
+  50% { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.85; }
+}
+
+.p07-opts {
+  position: absolute;
+  left: 680px;
+  top: 470px;
+  width: 1080px;
+  height: 250px;
+  display: flex;
+  gap: 30px;
+}
+.p07-opts .quiz-graph {
+  flex: 1;
+  height: 250px;
+  box-sizing: border-box;
+  border: 4px solid #cbd5e1;
+  border-radius: 24px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 12px 14px;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  user-select: none;
+}
+.p07-opts .quiz-graph:hover {
+  transform: translateY(-4px);
+  border-color: #339af0;
+  box-shadow: 0 16px 30px rgba(51, 154, 240, 0.25);
+  background: #f8fbff;
+}
+.p07-opt-img {
+  width: 125px;
+  height: 125px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.08));
+  pointer-events: none;
+}
+.p07-opts .quiz-graph b {
+  font-family: 'Cafe24 Ssurround', sans-serif;
+  font-weight: 700;
+  font-size: 34px;
+  color: #1e293b;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.p07-hide { display: none !important; }
 </style>
 </head>
 <body>
@@ -65,9 +171,9 @@
   const T = (x, y, s, fs, c) => '<text x="' + x + '" y="' + y + '" text-anchor="middle" dominant-baseline="middle" style="' + F + ';font-size:' + (fs || 34) + 'px;fill:' + (c || INK) + ';letter-spacing:-1px">' + s + '</text>';
   const glow = (svg) => '<g filter="url(#gl)">' + svg + '</g>';
   const stroke = (hl) => 'stroke="' + (hl ? '#ffcc00' : INK) + '" stroke-width="' + (hl ? 10 : 5) + '"';
-  const oval = (cx, y, w, s) => '<rect x="' + (cx - w / 2) + '" y="' + y + '" width="' + w + '" height="64" rx="32" fill="#6dd36f" ' + stroke(0) + '/>' + T(cx, y + 35, s);
+  const oval = (cx, y, w, s) => '<rect x="' + (cx - w / 2) + '" y="' + y + '" width="' + w + '" height="64" rx="50%" fill="#6dd36f" ' + stroke(0) + '/>' + T(cx, y + 35, s);
   const rect = (cx, y, w, s, hl) => '<rect x="' + (cx - w / 2) + '" y="' + y + '" width="' + w + '" height="64" rx="10" fill="#4a83c6" ' + stroke(hl) + '/>' + T(cx, y + 35, s, 34, '#fff');
-  const dia = (cx, y, w, h, l1, l2, hl) => '<polygon points="' + cx + ',' + y + ' ' + (cx + w / 2) + ',' + (y + h / 2) + ' ' + cx + ',' + (y + h) + ' ' + (cx - w / 2) + ',' + (y + h / 2) + '" fill="#ffd34d" ' + stroke(hl) + ' stroke-linejoin="round"/>' + T(cx, y + h / 2 - 18, l1, 30) + T(cx, y + h / 2 + 20, l2, 30);
+  const dia = (cx, y, w, h, l1, l2, hl) => '<polygon points="' + cx + ',' + y + ' ' + (cx + w / 2) + ',' + (y + h / 2) + ' ' + cx + ',' + (y + h) + ' ' + (cx - w / 2) + ',' + (y + h / 2) + '" fill="#ffd34d" ' + stroke(hl) + ' stroke-linejoin="round"/>' + T(cx, y + h / 2 - 18, l1, 30) + T(cx, y + h / 2 + 13, l2, 30);
   const arrow = (x, y1, y2) => '<line x1="' + x + '" y1="' + y1 + '" x2="' + x + '" y2="' + (y2 - 12) + '" stroke="' + INK + '" stroke-width="6"/><polygon points="' + (x - 12) + ',' + (y2 - 14) + ' ' + (x + 12) + ',' + (y2 - 14) + ' ' + x + ',' + y2 + '" fill="' + INK + '"/>';
 
   function chart(hl) {
@@ -84,26 +190,22 @@
     return s + '</svg>';
   }
 
-  const em = (ch, x, y, fs) => '<i style="left:' + x + 'px;top:' + y + 'px;font-size:' + fs + 'px">' + ch + '</i>';
-  const dust = (list) => list.map((p) => em('🟤', p[0], p[1], 46)).join('');
-  const room = (extra) => em('🛋️', 60, 150, 200) + em('🔋', 820, 170, 160) + em('🤖', 460, 250, 120) + extra;
-  const MANY = dust([[330, 320], [600, 330], [700, 250], [380, 250], [540, 180], [760, 340]]);
-  const SOME = dust([[600, 330], [700, 250], [540, 180]]);
-  const ONE = dust([[720, 300]]) + '<span class="p07-ring" style="left:690px;top:270px"></span>';
-
-  const ACTS = ['이동하며 청소하기', '바닥 살펴보기', '충전소로 돌아가기'];
-  const ICON = ['🧹', '🔍', '🔌'];
+  const ACTS = [
+    { title: '이동하며 청소하기', icon: 'img/p07_icon_clean.png' },
+    { title: '바닥 살펴보기', icon: 'img/p07_icon_search.png' },
+    { title: '충전소로 돌아가기', icon: 'img/p07_icon_charge.png' },
+  ];
   const ASK1 = '순서도를 보고 로봇청소기가 해야 할 일을 골라 보세요.';
   const QUIZ = [
-    { ask: ASK1, hl: [1], ill: room(MANY), ok: 0 },
-    { ask: ASK1, hl: [2], ill: room(SOME), ok: 1 },
-    { ask: '먼지가 남아있어요. 로봇청소기가 어떤 일을 해야 할까요?', hl: [3, 1], ill: room(ONE), ok: 0 },
-    { ask: ASK1, hl: [2], ill: room(''), ok: 1 },
-    { ask: '먼지가 없어 깨끗해요. 로봇청소기가 어떤 일을 해야 할까요?', hl: [3], ill: room(''), ok: 2 },
+    { ask: ASK1, hl: [1], img: 'img/p07_room_stage1.png', ring: false, ok: 0 },
+    { ask: ASK1, hl: [2], img: 'img/p07_room_stage2.png', ring: false, ok: 1 },
+    { ask: '먼지가 남아있어요. 로봇청소기가 어떤 일을 해야 할까요?', hl: [3, 1], img: 'img/p07_room_stage2.png', ring: true, ok: 0 },
+    { ask: ASK1, hl: [2], img: 'img/p07_room_stage3.png', ring: false, ok: 1 },
+    { ask: '먼지가 없어 깨끗해요. 로봇청소기가 어떤 일을 해야 할까요?', hl: [3, 4], img: 'img/p07_room_stage3.png', ring: false, ok: 2 },
   ];
   const FIN = [
     '순서도의 화살표를 따라<br>로봇청소기가 할 일을 골랐어요.',
-    'Canva를 통해 달리기 순서도를 완성해볼까요?',
+    'Canva를 통해 달리기 순서도를<br>완성해볼까요?',
   ];
   let qi = 0;
   let finStep = 0;
@@ -114,13 +216,21 @@
     locked = false;
     $('p07Ask').textContent = q.ask;
     $('p07Chart').innerHTML = chart(q.hl);
-    $('p07Ill').innerHTML = q.ill;
+    
+    // 3단계 고품질 거실 일러스트 & 남은 먼지 강조 링
+    let illHtml = '<img src="' + q.img + '" class="p07-ill-img" alt="거실 일러스트">';
+    if (q.ring) {
+      illHtml += '<div class="p07-ring"></div>';
+    }
+    $('p07Ill').innerHTML = illHtml;
+
+    // 하단 심플 PNG 아이콘 옵션 카드
     const wrap = $('p07Opts');
     wrap.innerHTML = '';
-    ACTS.forEach((t, i) => {
+    ACTS.forEach((act, i) => {
       const b = document.createElement('button');
       b.className = 'quiz-graph';
-      b.innerHTML = '<i>' + ICON[i] + '</i><b>' + t + '</b>';
+      b.innerHTML = '<img src="' + act.icon + '" class="p07-opt-img" alt=""><b>' + act.title + '</b>';
       b.addEventListener('click', () => {
         if (locked) return;
         if (i === q.ok) {

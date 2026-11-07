@@ -172,24 +172,26 @@ var TOC_HTML = `<div class="toc-layer">
             <div class="toc-accordion">
               <button class="toc-accordion-toggle js-sfx" data-sound="sound/click.mp3">12차시</button>
               <div class="toc-accordion-panel">
-                <a href="javascript:;" class="toc-sub-item">01</a>
-                <a href="javascript:;" class="toc-sub-item">02</a>
-                <a href="javascript:;" class="toc-sub-item">03</a>
-                <a href="javascript:;" class="toc-sub-item">04</a>
-                <a href="javascript:;" class="toc-sub-item">05</a>
-                <a href="javascript:;" class="toc-sub-item">06</a>
+                <a href="${ROOT}gwa/12/page01.html" class="toc-sub-item">1) 생일 축하해! 케이크 촛불 끄기</a>
+                <a href="${ROOT}gwa/12/page03.html" class="toc-sub-item">2) 개념 이해 영상</a>
+                <a href="${ROOT}gwa/12/page04.html" class="toc-sub-item">3) 들이마신 공기 흐름 순서도 익히기</a>
+                <a href="${ROOT}gwa/12/page06.html" class="toc-sub-item">4) 순서도대로 일하는 AI</a>
+                <a href="${ROOT}gwa/12/page08.html" class="toc-sub-item">5) Canva로 완성하는 달리기 순서도</a>
+                <a href="${ROOT}gwa/12/page09.html" class="toc-sub-item">6) 퀴즈 풀기</a>
+                <a href="${ROOT}gwa/12/page10.html" class="toc-sub-item">7) 생일 선물 팔찌 만들기</a>
               </div>
             </div>
 
             <div class="toc-accordion">
               <button class="toc-accordion-toggle js-sfx" data-sound="sound/click.mp3">13차시</button>
               <div class="toc-accordion-panel">
-                <a href="javascript:;" class="toc-sub-item">01</a>
-                <a href="javascript:;" class="toc-sub-item">02</a>
-                <a href="javascript:;" class="toc-sub-item">03</a>
-                <a href="javascript:;" class="toc-sub-item">04</a>
-                <a href="javascript:;" class="toc-sub-item">05</a>
-                <a href="javascript:;" class="toc-sub-item">06</a>
+                <a href="${ROOT}gwa/13/page01.html" class="toc-sub-item">1) 도전! 스무고개</a>
+                <a href="${ROOT}gwa/13/page03.html" class="toc-sub-item">2) 개념 이해 영상</a>
+                <a href="${ROOT}gwa/13/page04.html" class="toc-sub-item">3) 액체의 특징 찾아보기</a>
+                <a href="${ROOT}gwa/13/page07.html" class="toc-sub-item">4) AI처럼 특징으로 맞혀보기</a>
+                <a href="${ROOT}gwa/13/page09.html" class="toc-sub-item">5) 퀵 드로우로 AI와 그림 대결</a>
+                <a href="${ROOT}gwa/13/page10.html" class="toc-sub-item">6) 퀴즈 풀기</a>
+                <a href="${ROOT}gwa/13/page11.html" class="toc-sub-item">7) 식품공장 라벨 로봇</a>
               </div>
             </div>
 
@@ -209,12 +211,13 @@ var TOC_HTML = `<div class="toc-layer">
             <div class="toc-accordion">
               <button class="toc-accordion-toggle js-sfx" data-sound="sound/click.mp3">15차시</button>
               <div class="toc-accordion-panel">
-                <a href="javascript:;" class="toc-sub-item">01</a>
-                <a href="javascript:;" class="toc-sub-item">02</a>
-                <a href="javascript:;" class="toc-sub-item">03</a>
-                <a href="javascript:;" class="toc-sub-item">04</a>
-                <a href="javascript:;" class="toc-sub-item">05</a>
-                <a href="javascript:;" class="toc-sub-item">06</a>
+                <a href="${ROOT}gwa/15/page01.html" class="toc-sub-item">1) 오늘은 내가 바리스타!</a>
+                <a href="${ROOT}gwa/15/page03.html" class="toc-sub-item">2) 개념 이해 영상</a>
+                <a href="${ROOT}gwa/15/page04.html" class="toc-sub-item">3) 색의 진하기 따라 커피 사진 나누기</a>
+                <a href="${ROOT}gwa/15/page06.html" class="toc-sub-item">4) 커피주문 확인 AI가 틀리는 이유</a>
+                <a href="${ROOT}gwa/15/page09.html" class="toc-sub-item">5) 티처블 머신 사진으로 학습 시키기</a>
+                <a href="${ROOT}gwa/15/page10.html" class="toc-sub-item">6) 퀴즈 풀기</a>
+                <a href="${ROOT}gwa/15/page11.html" class="toc-sub-item">7) 주문 확인 로봇을 학습시켜라!</a>
               </div>
             </div>
 
