@@ -13,11 +13,10 @@
         .p06-files.is-off,.p06-info.is-off{display:none}
         .p06-files h3{margin:0 0 14px;text-align:center;font-family:'Cafe24 Ssurround';font-size:42px;color:var(--c-ink);letter-spacing:-0.05em}
         .p06-file-hold{height:104px;margin-bottom:12px}
-        .p06-file{height:104px;box-sizing:border-box;padding:2px 20px 0;display:flex;align-items:center;gap:16px;border:solid 5px var(--c-ink);border-radius:18px;background:var(--c-white);cursor:grab;touch-action:none;user-select:none;position:relative;z-index:5;
+        .p06-file{height:104px;box-sizing:border-box;padding:2px 20px 0;display:flex;align-items:center;gap:16px;border:solid 5px var(--c-ink);border-radius:18px;background:var(--c-white);cursor:pointer;user-select:none;position:relative;z-index:5;
           font-family:'Pretendard';font-weight:700;font-size:30px;line-height:1.2;letter-spacing:-0.04em;color:var(--c-ink);word-break:keep-all}
         .p06-file:hover{background:#eef5ff}
-        .p06-file.is-dragging{cursor:grabbing;z-index:60;box-shadow:0 8px 14px rgba(0,0,0,.25)}
-        .p06-file.is-wrong{animation:p06-shake .4s}
+        .p06-file.is-added{background:#e4f6e8;border-color:#1a7f37}
         @keyframes p06-shake{25%{transform:translateX(-14px)}75%{transform:translateX(14px)}}
         .p06-ext{flex:0 0 auto;width:62px;height:62px;display:flex;align-items:center;justify-content:center;border-radius:10px;color:#fff;font-weight:800;font-size:20px;letter-spacing:-.02em}
         .p06-ext.is-pdf{background:#d93a35}
@@ -29,8 +28,6 @@
 
         .p06-phone{top:180px;height:760px;border-bottom:0;border-bottom-right-radius:0;border-bottom-left-radius:0}
         .p06-phone .gn-screen{background:#fff;border-bottom-right-radius:0;border-bottom-left-radius:0}
-        .p06-drop{position:absolute;left:0;right:0;top:110px;bottom:230px;z-index:2}
-        .p06-drop.is-over{background:rgba(255,230,120,.35);outline:6px dashed #f4b400;outline-offset:-10px}
         .p06-phone .gn-src{opacity:0;transition:opacity .3s}
         .p06-phone .gn-src.is-in{opacity:1}
         .p06-title{position:absolute;left:0;right:0;top:600px;text-align:center;font-size:22px;font-weight:700;color:#1a7f37}
@@ -39,7 +36,7 @@
         .p06-set{left:1150px;top:60px}
         .p06-set .guide-bubble small{display:block;width:100%;box-sizing:border-box;margin-top:14px;padding:12px 14px 6px;border:solid 4px var(--c-purple);border-radius:20px;background:#fff;font-size:32px}
 
-        .p06-phone[data-step="func"] :is(.gn-bar,.gn-sec,.gn-srcs,.gn-fab,.gn-tabs,.p06-title,.p06-drop){display:none}
+        .p06-phone[data-step="func"] :is(.gn-bar,.gn-sec,.gn-srcs,.gn-fab,.gn-tabs,.p06-title){display:none}
         .p06-guide{position:absolute;left:0;right:0;top:60px;bottom:56px;padding:0 26px;display:none;flex-direction:column;gap:18px;background:#fff;z-index:3}
         .p06-phone[data-step="func"] .p06-guide{display:flex}
         .p06-guide h4{margin:0;padding:34px 0 14px;text-align:center;font-size:32px;font-weight:700;border-bottom:1px solid #e8e8ec}
@@ -56,14 +53,43 @@
         .p06-info h3{margin:0 0 24px;font-family:'Cafe24 Ssurround';font-size:56px;color:var(--c-purple);letter-spacing:-0.05em}
         .p06-info p{margin:0 0 36px;font-size:44px;line-height:1.4;font-weight:600;color:var(--c-ink);letter-spacing:-0.04em;word-break:keep-all}
         .p06-set.p06-lft{left:-110px}
+        .p06-tip{position:absolute;left:1277px;top:240px;width:561px;height:580px;display:flex;flex-direction:column;justify-content:center;box-sizing:border-box;padding:18px 24px;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:22px;box-shadow:0 8px 0 0 rgba(86,148,231,.2)}
+        .p06-tip h4{margin:0 0 8px;font-family:'Cafe24 Ssurround';font-size:36px;color:var(--c-navy);letter-spacing:-0.05em}
+        .p06-tip p{margin:0 0 8px;font-family:'Pretendard';font-weight:600;font-size:25px;line-height:1.35;color:#222;letter-spacing:-0.03em;word-break:keep-all}
+        .p06-tip p b{display:block;font-size:27px;color:#1f5fd0}
+        .p06-tip.is-off{display:none!important}
+        .p06-pop{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:100;background:rgba(27,23,56,.6);display:none}
+        .p06-pop.is-on{display:block}
+        .p06-pop-panel{position:absolute;left:360px;top:24px;width:1200px;box-sizing:border-box;padding:20px 40px 24px;background:var(--c-white);border:solid 6px var(--c-purple);border-radius:36px;box-shadow:0 12px 0 0 rgba(60,20,120,.35);display:flex;flex-direction:column;align-items:center;gap:14px}
+        .p06-pop-panel h3{margin:0;font-family:'Cafe24 Ssurround';font-size:50px;color:var(--c-purple);letter-spacing:-0.05em}
+        .p06-doc{width:100%;box-sizing:border-box;max-height:680px;display:flex;flex-direction:column;border:solid 4px #b9bfd6;border-radius:14px;overflow:hidden;background:#fff;font-family:'Pretendard';color:#222;text-align:left}
+        .p06-doc-head{flex:0 0 auto;display:flex;align-items:center;gap:16px;padding:12px 28px;background:#6a3fc7;color:#fff;font-size:32px;font-weight:800;letter-spacing:-0.04em}
+        .p06-doc-head .p06-ext{width:54px;height:54px;font-size:18px}
+        .p06-doc-meta{flex:0 0 auto;padding:12px 28px;background:#eef1fa;border-bottom:solid 3px #b9bfd6}
+        .p06-doc-meta div{display:flex;align-items:center;gap:14px;margin:4px 0;font-size:28px;font-weight:600;letter-spacing:-0.03em}
+        .p06-doc-meta b{flex:0 0 auto;min-width:80px;padding:2px 14px;border-radius:999px;background:#6a3fc7;color:#fff;font-size:24px;font-weight:700;text-align:center}
+        .p06-doc-body{flex:1 1 auto;min-height:0;overflow-y:auto;padding:14px 32px 6px}
+        .p06-doc-body h4{margin:0 0 10px;padding-bottom:8px;border-bottom:solid 3px #d5d9ea;font-size:32px;line-height:1.3;font-weight:800;letter-spacing:-0.04em;word-break:keep-all}
+        .p06-doc-body h4 em{font-style:normal;color:#6a3fc7}
+        .p06-doc-body p{margin:0 0 8px;font-size:27px;line-height:1.4;font-weight:500;letter-spacing:-0.03em;word-break:keep-all}
+        .p06-doc-body p.is-link{color:#1f5fd0;font-weight:800;text-decoration:underline}
+        .p06-pop-btns{display:flex;gap:24px}
         /* 미리보기(디자인 06p-1): 남색 판 + 위쪽 '미리보기' 알약 + 가운데 예시 그림. 그림 img/p06_prev_{slide|info|report|audio}.png (없으면 회색 임시 칸) */
-        .p06-prev{position:absolute;left:1255px;top:237px;width:613px;height:640px;box-sizing:border-box;padding-top:35px;background:#02307f;border:solid 4px #7ba7e6;border-radius:14px;z-index:6;display:flex;align-items:center;justify-content:center}
+        .p06-prev{position:absolute;left:1255px;top:237px;width:613px;height:640px;box-sizing:border-box;background:#02307f;border:solid 4px #7ba7e6;border-radius:14px;z-index:6;display:flex;align-items:center;justify-content:center}
         .p06-prev.is-off{display:none}
+        .p06-prev.is-left{left:82px;top:267px}
         .p06-prev-tag{z-index:2;position:absolute;left:50%;top:-90px;transform:translateX(-50%);width:263px;height:78px;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;border-radius:39px;background:#7ba7e6;border:solid 4px #a9c5f0;font-family:'Cafe24 Ssurround';font-size:48px;color:var(--c-white);letter-spacing:-0.04em;white-space:nowrap}
         .p06-pv{position:relative;box-sizing:border-box;background:#e9ecf5 center / cover no-repeat;border:solid 4px var(--c-white);border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-family:'Pretendard';font-weight:700;font-size:24px;color:#667;text-align:center}
         .p06-pv img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-        .p06-pv.is-slide{width:200px;height:510px}
-        .p06-pv.is-info{width:540px;height:364px}
+        .p06-pv.is-slide{width:560px;height:392px;background:none;border:0;border-radius:0;overflow:visible;display:grid;grid-template-columns:250px 60px 250px;grid-template-rows:168px 56px 168px}
+        .p06-pv.is-slide img{position:static;width:100%;height:100%;border:solid 4px var(--c-white);border-radius:10px;box-sizing:border-box}
+        .p06-sl{position:relative}
+        .p06-sl.is-1{grid-column:1;grid-row:1}.p06-sl.is-2{grid-column:3;grid-row:1}.p06-sl.is-3{grid-column:1;grid-row:3}.p06-sl.is-4{grid-column:3;grid-row:3}
+        .p06-ar{display:flex;align-items:center;justify-content:center}
+        .p06-ar svg{width:44px;height:44px;fill:none;stroke:#3385FF;stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+        .p06-ar.is-a{grid-column:2;grid-row:1}.p06-ar.is-b{grid-column:2;grid-row:2}.p06-ar.is-c{grid-column:2;grid-row:3}
+        .p06-ar.is-b svg{transform:rotate(135deg)}
+        .p06-pv.is-info{width:312px;height:559px}
         .p06-pv.is-report{width:417px;height:556px}
         .p06-pv.is-audio{width:540px;height:309px}
         .p06-gbtn.is-shake{animation:p06-shake .4s}
@@ -76,7 +102,7 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <p class="ask-pill is-medium is-fit" id="p06Ask"><span>믿을 수 있는 자료를 소스 창으로 옮겨 추가해주세요.</span></p>
+          <p class="ask-pill is-medium is-fit" id="p06Ask"><span>믿을 수 있는 자료가 무엇인지 확인하고 소스를 추가해보세요.</span></p>
 
           <div class="p06-files" id="p06Files">
             <h3>내 컴퓨터-문서 폴더</h3>
@@ -89,18 +115,28 @@
             <div class="gn-srcs" id="p06Srcs"></div>
             <p class="p06-title" id="p06Msg"></p>
             <div class="gn-fab" style="bottom:30px"><span class="gn-cam"><img src="../../resources/img/common/gn_photo.png" alt=""></span><span class="gn-btn">＋ 소스 추가</span></div>
-            
-            <div class="p06-drop drop-zone" id="p06Drop"></div>
             <div class="p06-guide" id="p06Guide"><h4>스튜디오</h4></div>
           </div></div>
 
-          <div class="guide-set is-main p06-set" id="p06Set">
+          <div class="p06-tip" id="p06Tip"><h4>자료를 고를 때 확인해요!</h4><p><b>누가 만들었나요?</b>만든 기관, 출처를 확인해요.</p><p><b>올바른 행동을 알려 주나요?</b>개인정보를 지키고, 다른 사람을 존중하는 내용인지 살펴봐요.</p><p><b>겁을 주거나 공유를 강요 하나요?</b>확인되지 않은 소문이나 공유를 강요하는 내용은 의심해요.</p><p><b>개인정보 입력이나 모르는 파일 다운로드를 요구하나요?</b>모르는 링크를 누르라는 내용은 주의해요.</p></div>
+          <div class="guide-set is-main p06-set" id="p06Set" style="display:none">
             <p class="guide-bubble is-center" id="p06Bubble"></p>
             <div class="guide-character"><img id="p06Char" src="../img/character/sa_main.png" alt="메인 캐릭터"></div>
           </div>
           <div class="p06-info is-off" id="p06Info"><h3 id="p06InfoT"></h3><p id="p06InfoP"></p><button type="button" class="card-btn is-popup js-sfx" id="p06InfoOk" data-sound="sound/click.mp3">확인</button></div>
 
           <div class="p06-prev is-off" id="p06Prev"><p class="p06-prev-tag">미리보기</p><div id="p06PrevB"></div></div>
+
+          <div class="p06-pop" id="p06Pop">
+            <div class="p06-pop-panel">
+              <h3>원문 내용을 확인하세요.</h3>
+              <div class="p06-doc" id="p06Doc"></div>
+              <div class="p06-pop-btns">
+                <button type="button" class="card-btn is-popup js-sfx" id="p06PopAdd" data-sound="sound/click.mp3">소스 추가</button>
+                <button type="button" class="card-btn is-popup js-sfx" id="p06PopClose" data-sound="sound/click.mp3">닫기</button>
+              </div>
+            </div>
+          </div>
 
           <div class="avatar-modal is-wrong is-off" id="p06Wrong">
             <div class="avatar-popup-panel">
@@ -133,16 +169,16 @@
   <script>
   (function () {
     const FILES = [
-      { key: 'police', ext: 'pdf', label: 'PDF', name: '[문서]_00경찰서 개인정보 보호 수칙', sub: '', ok: true, short: '경찰서 · 개인정보 보호 수칙', says: '개인정보 보호 수칙<br><small>비밀번호와 개인정보를<br>안전하게 지키는 방법</small>' },
-      { key: 'edu', ext: 'pdf', label: 'PDF', name: '[문서]_00교육청 올바른 인터넷 사용법', sub: '', ok: true, short: '교육청 · 올바른 인터넷 사용법', says: '올바른 인터넷 사용법<br><small>의심스러운 링크와 파일을 주의하며 인터넷을 사용하는 방법</small>' },
-      { key: 'blog', ext: 'img', label: 'IMG', name: '[사진]_익명게시판 인기글 모음', sub: '', ok: false },
-      { key: 'zip', ext: 'img', label: 'IMG', name: '[사진]_우리반 친구 웃긴 사진 모음', sub: '', ok: false },
+      { key: 'police', ext: 'pdf', label: 'PDF', name: '[문서]_OO경찰서 개인정보 보호 수칙', sub: '', ok: true, short: '경찰서 · 개인정보 보호 수칙', doc: ["[공식 안내문] 인터넷과 스마트폰을 사용할 때 내 개인정보를 안전하게 지키는 5가지 보호 수칙입니다.","1. 비밀번호는 복잡하게 만들고 나만 알고 있어요. 쉬운 번호(1234, 생일)는 사용하지 않습니다.","2. 이름, 전화번호, 집 주소는 함부로 쓰지 않습니다. 인터넷 게시판이나 모르는 살마에게 알려주지 않습니다.","3. 친구의 개인정보도 소중히 보호해야 합니다. 친구의 전화번호나 사진을 허락 없이 다른 사람에게 주지 않습니다.","4. 출처가 불분명한 앱이나 링크는 누르지 않습니다.","5 개인정보가 유출되었을 때는 즉시 도움을 요청합니다.","개인정보 침해신고센터: 국번 없이 118","발행: OO시청 안전총괄과 OO경찰서"] },
+      { key: 'edu', ext: 'pdf', label: 'PDF', name: '[문서]_OO교육청 올바른 인터넷 사용법', sub: '', ok: true, short: '교육청 · 올바른 인터넷 사용법', doc: ["[교육 포스터] 인터넷에서도 예쁜 말, 올바른 언어를 사용해요","우리가 만드는 따뜻하고 안전한 인터넷 세상! 함께 약속해요.","하나, 따뜻한 댓글 쓰기: 인터넷에서 친구나 다른 사람에게 기분 나쁜 말이나 나쁜 댓글을 쓰지 않아요.","둘, 사진 올리기 전 허락받기: 친구의 사진이나 동영상을 올릴 때는 반드시 친구에게 “올려도 돼?” 하고 물어봐요.","셋, 올바른 소통하기: 인터넷에서 마주치는 사람도 나와 똑같은 사람이에요. 서로 존중하는 말을 사용해요.","발행: OO시 교육청 민주시민교육과/OO중학교 학생회"] },
+      { key: 'blog', ext: 'img', label: 'IMG', name: '[사진]_익명게시판 인기글 모음', sub: '', ok: false, doc: ["[인기글] 인터넷에서 친구들과 재미있게 친해지는 최고의 방법","작성자: 알 수 없음","학교나 동네에서 친구들과 금방 친해지고 인기를 얻는 꿀팁을 알려드립니다! 친구의 엽기적인 모습을 몰래 찍으세요. 친구가 넘어지거나 실수할 때 몰래 사진이나 동영상을 찍어두세요. 허락 받지 않고 단체 채팅방이나 인터넷에 올리세요. 친구에게 물어보지 않고 바로 올리면 모두가 함께 웃으며 재미있어 합니다. 친구가 화를 내도 신경 쓰지 마세요. “장난인데 왜 그래?” 라고 말하고 더 많은 사람들에게 전달하면 됩니다."] },
+      { key: 'zip', ext: 'img', label: 'IMG', name: '[사진]_우리반 친구 웃긴 사진 모음', sub: '', ok: false, doc: ["[인기글] 우리 반 친구들 웃긴 사진 모음","작성자: 익명","수업 시간에 찍힌 사진부터 친구들의 재미있는 순간까지 다양하게 모아놨어요!","궁금하신 분들은 아래 링크를 눌러 확인해 보세요.","☞ [사진 보러 가기]","친구들에게도 공유해 주세요!"] },
     ];
     const FUNCS = [
-      { k: 'slide', label: '슬라이드', icon: ICONS.nbFnSlide, text: '입력한 자료를 바탕으로 4~5장 내외의 슬라이드 자료를 만들어요.' },
-      { k: 'info', label: '인포그래픽', icon: ICONS.nbFnInfo, text: '입력한 자료의 중요한 내용을 그림과 짧은 글로 정리해요. 원하는 그림 스타일도 고를 수 있어요.' },
-      { k: 'report', label: '보고서', icon: ICONS.nbFnReport, text: '입력한 자료의 내용을 주제에 맞게 정리한 글로 만들어요.' },
-      { k: 'audio', label: '오디오 오버뷰', icon: ICONS.nbFnAudio, text: '입력한 자료를 바탕으로 AI 진행자가 대화하는 팟캐스트 형태의 음성 파일을 만들 수 있어요.' },
+      { k: 'slide', label: '슬라이드', icon: ICONS.nbFnSlide, text: '입력한 자료의 핵심 내용을 여러 장의 발표용 슬라이드로 만들어요.' },
+      { k: 'info', label: '인포그래픽', icon: ICONS.nbFnInfo, text: '중요한 개념이나 관계를 한 눈에 보는 한 장짜리 포스터 형태로 만들어요.' },
+      { k: 'report', label: '보고서', icon: ICONS.nbFnReport, text: '입력한 자료의 내용을 정리해서 논리적인 긴 글 형태의 문서로 만들어요.' },
+      { k: 'audio', label: '오디오 오버뷰', icon: ICONS.nbFnAudio, text: '입력한 자료를 AI 진행자가 대화하는 팟캐스트 형태의 음성 자료로 만들어요.' },
     ];
     const byKey = (k) => FILES.find((f) => f.key === k);
 
@@ -151,7 +187,6 @@
     const msg = $('p06Msg');
     const bubble = $('p06Bubble');
     const charImg = $('p06Char');
-    const drop = $('p06Drop');
     let added = 0;
 
     const PDF = '<span class="gn-pdf">PDF</span>';
@@ -163,69 +198,58 @@
     FILES.filter((f) => f.ok).forEach((f) => {
       srcs.insertAdjacentHTML('beforeend', '<div class="gn-src" id="p06Src_' + f.key + '">' + PDF + f.short + '</div>');
     });
-    say('믿을 수 있는 문서 2개를<br>[소스] 창으로 끌어다 놓아주세요.', 'main', false, true);
 
-    const stage = $('stage');
-    const files = Array.from(filesBox.querySelectorAll('.p06-file'));
-    files.forEach((el) => {
-      el.addEventListener('pointerdown', (e) => {
-        if (el.dataset.placed) return;
-        e.preventDefault();
-        const s = stage.getBoundingClientRect().width / 1920;
-        const sx = e.clientX, sy = e.clientY;
-        el.setPointerCapture(e.pointerId);
-        el.classList.add('is-dragging');
-        const inDrop = (x, y) => { const r = drop.getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; };
-        const move = (ev) => {
-          el.style.transform = 'translate(' + (ev.clientX - sx) / s + 'px,' + (ev.clientY - sy) / s + 'px)';
-          drop.classList.toggle('is-over', inDrop(ev.clientX, ev.clientY));
-        };
-        const up = (ev) => {
-          el.removeEventListener('pointermove', move);
-          el.removeEventListener('pointerup', up);
-          el.removeEventListener('pointercancel', up);
-          el.classList.remove('is-dragging');
-          drop.classList.remove('is-over');
-          const f = byKey(el.dataset.key);
-          el.style.transform = '';
-          if (!inDrop(ev.clientX, ev.clientY)) return;
-          if (!f.ok) {
-            playWrong();
-            el.classList.remove('is-wrong');
-            void el.offsetWidth;
-            el.classList.add('is-wrong');
-            setTimeout(() => $('p06Wrong').classList.remove('is-off'), 400);
-            return;
-          }
-          el.dataset.placed = '1';
-          el.closest('.p06-file-hold').style.display = 'none';
-          playDrag();
-          const src = $('p06Src_' + f.key);
-          src.innerHTML = '<i class="gn-spin"></i>' + f.short;
-          src.classList.add('is-in');
-          msg.textContent = '';
-          setTimeout(() => {
-            src.innerHTML = PDF + f.short;
-            playCorrect();
-            msg.textContent = '신뢰할 수 있는 문서입니다!';
-            say(f.says, 'main_wave');
-            setTimeout(() => { msg.textContent = ''; }, 1000);
-            added += 1;
-            if (added === 2) setTimeout(stepFunc, 1800);
-          }, 1000);
-        };
-        el.addEventListener('pointermove', move);
-        el.addEventListener('pointerup', up);
-        el.addEventListener('pointercancel', up);
+    const META = /^(작성자|발행):\s*/;
+    const docHtml = (f) => {
+      const meta = f.doc.filter((t) => META.test(t)).map((t) => { const m = t.match(META); return '<div><b>' + m[1] + '</b><span>' + t.slice(m[0].length) + '</span></div>'; }).join('');
+      const rest = f.doc.filter((t) => !META.test(t));
+      const title = rest[0].replace(/^(\[[^\]]+\])/, '<em>$1</em>');
+      const body = rest.slice(1).map((t) => '<p' + (t.charAt(0) === '☞' ? ' class="is-link"' : '') + '>' + t + '</p>').join('');
+      return '<div class="p06-doc-head"><span class="p06-ext is-' + f.ext + '">' + f.label + '</span>' + f.name + '</div><div class="p06-doc-meta">' + meta + '</div><div class="p06-doc-body"><h4>' + title + '</h4>' + body + '</div>';
+    };
+    const pop = $('p06Pop');
+    let curFile = null;
+    Array.from(filesBox.querySelectorAll('.p06-file')).forEach((el) => {
+      el.addEventListener('click', () => {
+        curFile = byKey(el.dataset.key);
+        $('p06Doc').innerHTML = docHtml(curFile);
+        $('p06Doc').querySelector('.p06-doc-body').scrollTop = 0;
+        pop.classList.add('is-on');
       });
+    });
+    $('p06PopClose').addEventListener('click', () => pop.classList.remove('is-on'));
+    $('p06PopAdd').addEventListener('click', () => {
+      pop.classList.remove('is-on');
+      const f = curFile;
+      const el = filesBox.querySelector('.p06-file[data-key="' + f.key + '"]');
+      if (!f.ok) {
+        playWrong();
+        setTimeout(() => $('p06Wrong').classList.remove('is-off'), 400);
+        return;
+      }
+      if (el.dataset.placed) return;
+      el.dataset.placed = '1';
+      el.classList.add('is-added');
+      const src = $('p06Src_' + f.key);
+      src.innerHTML = '<i class="gn-spin"></i>' + f.short;
+      src.classList.add('is-in');
+      msg.textContent = '';
+      setTimeout(() => {
+        src.innerHTML = PDF + f.short;
+        playCorrect();
+        msg.textContent = '신뢰할 수 있는 문서입니다!';
+        setTimeout(() => { msg.textContent = ''; }, 1000);
+        added += 1;
+        if (added === 2) setTimeout(stepFunc, 1800);
+      }, 1000);
     });
     $('p06WrongOk').addEventListener('click', () => $('p06Wrong').classList.add('is-off'));
 
     function stepFunc() {
       filesBox.classList.add('is-off');
+      $('p06Tip').classList.add('is-off');
       $('p06Ask').innerHTML = '<span>스튜디오에 제시된 4가지 유형의 버튼을 눌러 내용을 확인해보세요.</span>';
       document.querySelector('.p06-phone').dataset.step = 'func';
-      $('p06Set').style.display = 'none';
       const info = $('p06Info');
       let cur = null;
       FUNCS.forEach((fn) => {
@@ -240,12 +264,16 @@
           cur = b;
           $('p06InfoT').textContent = fn.label;
           $('p06InfoP').textContent = fn.text;
+          $('p06PrevB').innerHTML = PREV[fn.k]();
+          $('p06Prev').classList.add('is-left');
+          $('p06Prev').classList.remove('is-off');
           info.classList.remove('is-off');
         });
         $('p06Guide').appendChild(b);
       });
       $('p06InfoOk').addEventListener('click', () => {
         info.classList.add('is-off');
+        $('p06Prev').classList.add('is-off');
         if (cur) cur.classList.add('is-seen');
         if ($('p06Guide').querySelectorAll('.p06-gbtn.is-seen').length === FUNCS.length) setTimeout(stepQuiz, 600);
       });
@@ -253,15 +281,15 @@
 
     /* 정리 화면(기획서 16p): 질문에 맞는 자료 버튼을 순서대로 고르면 다음 질문으로. 버튼을 누르면 오른쪽에 미리보기 예시 */
     const QZ = [
-      { k: 'slide', q: '친구들 앞에서 화면을 보여주며 발표하려면<br>4가지 자료 중 어떤 것을<br>사용해야 할까요?' },
-      { k: 'info', q: '그림과 짧은 글로 정보를 한눈에 보여 주려면 어떤 자료를 사용해야 할까요? 원하는 그림 스타일도 선택할 수 있어요.' },
-      { k: 'report', q: '자료의 내용을 글로 자세히 정리하려면 어떤 자료를 사용해야 할까요?' },
+      { k: 'slide', q: '여러 그림을 한 장씩 나누어 설명하는 방식은 어떤 자료에 대한 설명일까요?' },
+      { k: 'info', q: '중요한 내용을 한 장의 포스터로 정리해서 게시하려면 어떤 자료를 사용해야 할까요?' },
+      { k: 'report', q: '자료의 내용을 논리적으로 정리한 긴 글로 소개하려면 어떤 자료를 사용해야 할까요?' },
       { k: 'audio', q: 'AI 진행자들이 대화하며 설명하는 내용을 소리로 들으려면 어떤 자료를 사용해야 할까요?' },
     ];
     const pv = (cls, label, img) => '<div class="p06-pv ' + cls + '">' + label + '<img src="img/' + img + '" alt="" onerror="this.remove()"></div>';
     const PREV = {
-      slide: () => pv('is-slide', '슬라이드', 'p06_prev_slide.png'),
-      info: () => pv('is-info', '인포그래픽', 'p06_prev_info.png'),
+      slide: () => '<div class="p06-pv is-slide">' + [['cover', 1], ['1', 2], ['2', 3], ['3', 4]].map((x) => '<div class="p06-sl is-' + x[1] + '"><img src="img/p07_slide_' + x[0] + '.png" alt=""></div>').join('') + ['a', 'b', 'c'].map((d) => '<div class="p06-ar is-' + d + '"><svg viewBox="0 0 44 44"><path d="M6 22H36M24 10L36 22L24 34"/></svg></div>').join('') + '</div>',
+      info: () => pv('is-info', '인포그래픽', 'p06_prev_info_poster.png'),
       report: () => pv('is-report', '보고서', 'p06_prev_report.png'),
       audio: () => pv('is-audio', '오디오 오버뷰', 'p06_prev_audio.png'),
     };
@@ -271,6 +299,7 @@
       const btns = {};
       FUNCS.forEach((f, i) => { btns[f.k] = guide.querySelectorAll('.p06-gbtn')[i]; });
       $('p06Ask').innerHTML = '<span>알맞은 자료를 골라 보세요.</span>';
+      $('p06Prev').classList.remove('is-left');
       $('p06Set').style.display = '';
       $('p06Set').classList.add('p06-lft');
       let n = 0;

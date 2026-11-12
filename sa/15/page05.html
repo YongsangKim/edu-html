@@ -8,34 +8,40 @@
     <style>
         /* 기획서 수정본 7~10p. 행동 카드를 아래 '올바른 행동' / '주의할 행동' 상자로 끌어 넣기(공용 initMatchDrag). 1라운드 4장 → 2라운드 3장(상자는 비워서 다시 시작) → 정리 화면(7장 모두 분류, 3초) → 종료 모달 [다음].
            맞으면 카드가 상자로 들어가 위에서 사라지고, 틀리면 카드가 흔들리며 오답 팝업(카드별 문구) 후 제자리. 카드 문구·오답 설명은 CARDS */
-        .p04-cards{position:absolute;left:0;top:200px;width:1920px;height:330px}
-        .p04-hold{position:absolute;top:0;width:666px;height:137px}
-        .p04-card{width:666px;height:137px;box-sizing:border-box;padding:14px 22px 6px;border:solid 8px var(--c-ink);border-radius:30px;cursor:grab;user-select:none;position:relative;z-index:5;
-          display:flex;align-items:center;justify-content:center;text-align:center;font-family:'Cafe24 Ssurround';font-size:44px;line-height:1.2;letter-spacing:-0.05em;color:var(--c-ink);word-break:keep-all;
-          -webkit-text-stroke:8px #fff;paint-order:stroke fill;box-shadow:inset 6px 8px 8px rgba(255,255,255,.3),inset -6px -10px 10px rgba(0,0,0,.18)}
-        .p04-card[data-key="photo"]{background:linear-gradient(180deg,#b463ca,#a043ed)}
-        .p04-card[data-key="link"]{background:linear-gradient(180deg,#4e97ff,#7272fe)}
-        .p04-card[data-key="safe"]{background:linear-gradient(180deg,#da5ba6,#bf4573)}
-        .p04-card[data-key="rumor"]{background:linear-gradient(180deg,#fb8b16,#ef6a59)}
-        .p04-card[data-key="source"]{background:linear-gradient(180deg,#4bcc24,#19aa73)}
-        .p04-card[data-key="privacy"]{background:linear-gradient(180deg,#ffcf0e,#ffb70e)}
-        .p04-card[data-key="title"]{background:linear-gradient(180deg,#b463ca,#a043ed)}
+        :root{--p04-ink:#2b1f7e}
+        .p04-panel{position:absolute;left:58px;top:73px;width:1804px;height:860px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:22px;background:#fff}
+        .p04-store{position:absolute;left:94px;top:146px;width:1732px;height:313px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:22px;background:#2b6bcf}
+        .p04-cards{position:absolute;left:0;top:0;width:1920px;height:470px}
+        .p04-hold{position:absolute;top:0;width:720px;height:130px}
+        .p04-card{width:720px;height:130px;box-sizing:border-box;padding:8px 80px 0;border:solid 6px var(--p04-ink);border-radius:24px;cursor:grab;user-select:none;position:relative;z-index:5;
+          display:flex;align-items:center;justify-content:center;text-align:center;font-family:'Cafe24 Ssurround';font-size:38px;line-height:1.15;letter-spacing:-0.05em;color:var(--p04-ink);white-space:nowrap;
+          outline:dashed 4px #fff;outline-offset:-18px;box-shadow:4px 7px 0 rgba(27,23,56,.2)}
+        .p04-card span:before,.p04-card span:after{content:'';position:absolute;top:50%;width:47px;height:45px;margin-top:-22px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 47 45'%3E%3Cpolygon points='23.5,2.5 30.6,14.8 44.4,17.7 34.9,28.2 36.4,42.3 23.5,36.5 10.6,42.3 12.1,28.2 2.6,17.7 16.4,14.8' fill='%23fff' stroke='%23fff' stroke-width='5' stroke-linejoin='round'/%3E%3C/svg%3E") center/100% 100% no-repeat}
+        .p04-card span:before{left:22px}
+        .p04-card span:after{right:22px}
+        .p04-card[data-key="photo"]{background:#66dba5}
+        .p04-card[data-key="link"],.p04-card[data-key="privacy"]{background:#fbcf88}
+        .p04-card[data-key="safe"]{background:#d985ff}
+        .p04-card[data-key="rumor"],.p04-card[data-key="title"]{background:#ff8282}
+        .p04-card[data-key="source"]{background:#8a9cf9}
         .p04-card.is-dragging{cursor:grabbing;z-index:50}
         .p04-card.is-wrong{animation:p04-shake .4s}
         @keyframes p04-shake{25%{transform:translateX(-14px)}75%{transform:translateX(14px)}}
 
-        .p04-box{position:absolute;top:562px;width:729px;height:376px;box-sizing:border-box;border:solid 8px var(--c-ink);border-radius:30px;padding:58px 24px 14px;display:flex;flex-direction:column;gap:10px;align-items:center}
-        .p04-box.is-ok{left:217px;background:#dff3e4}
-        .p04-box.is-no{left:974px;background:#fde3e1}
-        .p04-tag{position:absolute;left:50%;top:-44px;transform:translateX(-50%);min-width:360px;height:80px;box-sizing:border-box;padding:6px 40px 0;display:flex;align-items:center;justify-content:center;background:var(--c-navy);border-radius:40px;
-          font-family:'Cafe24 Ssurround';font-size:48px;color:var(--c-white);letter-spacing:-0.04em;white-space:nowrap}
+        .p04-box{position:absolute;top:480px;width:850px;height:433px;box-sizing:border-box;border:solid 5px;border-radius:22px;padding:95px 0 14px;display:flex;flex-direction:column;gap:25px;align-items:center;box-shadow:12px 14px 0 rgba(27,23,56,.12)}
+        .p04-box.is-ok{left:92px;background:#e2fcd2;border-color:#66dba5}
+        .p04-box.is-no{left:976px;background:#fdd5f6;border-color:#ee88bb}
+        .p04-rb{position:absolute;z-index:6;top:461px;--rb-w:360px;--rb-h:85px;--rb-fs:52px;--rb-tw:88px;--rb-th:63px;--rb-ext:45px;--rb-drop:12px;--rb-notch:24px;--rb-sd-y:12px}
+        .p04-rb.is-ok{left:338px;--rb-bg:#66d8a1;--rb-tail:#b2e791;--rb-fold:#94e079;--rb-shadow:#849a90}
+        .p04-rb.is-no{left:1223px;--rb-bg:#ec85b6;--rb-tail:#e791d6;--rb-fold:#e079be;--rb-shadow:#9383a4}
         .p04-box .p04-card{cursor:default}
-        .p04-box .p04-hold{position:static;width:100%;height:137px}
+        .p04-box .p04-hold{position:static;width:720px;height:130px}
 
-        .p04-end{position:absolute;left:0;right:0;top:140px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:60px;color:var(--c-navy);letter-spacing:-0.04em}
-        .p04-box.is-sum{top:300px;height:600px;gap:14px;padding-top:70px;justify-content:flex-start}
-        .p04-box.is-sum .p04-sumcard{width:640px;min-height:100px;box-sizing:border-box;padding:10px 20px 4px;border:solid 6px var(--c-ink);border-radius:24px;display:flex;align-items:center;justify-content:center;text-align:center;background:#fff;font-family:'Cafe24 Ssurround';font-size:36px;line-height:1.2;letter-spacing:-0.05em;color:var(--c-ink);word-break:keep-all}
-        .p04-box.is-sum .p04-sumcard.is-gap{visibility:hidden}
+        main.is-sum .p04-panel{background:#92b8e6}
+        main.is-sum .p04-store{display:none}
+        main.is-sum .p04-box{top:208px;height:705px;padding-top:75px;justify-content:flex-start}
+        main.is-sum .p04-rb{top:146px}
+        main.is-sum .p04-rb.is-ok{left:336px}
         .p04-gone{display:none}
         #p04Wrong,#p04Done{z-index:120}
     </style>
@@ -46,12 +52,15 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <p class="ask-pill is-fit"><span>행동 카드를 알맞은 상자로 옮겨 주세요.</span></p>
+          <div class="p04-panel"></div>
+          <div class="p04-store"></div>
+          <p class="ask-pill is-fit" style="top:23px"><span>행동 카드를 알맞은 상자로 옮겨 주세요.</span></p>
 
+          <div class="p04-box is-ok drop-zone" data-type="ok"></div>
+          <div class="p04-box is-no drop-zone" data-type="no"></div>
+          <p class="ribbon is-tag p04-rb is-ok">올바른 행동</p>
+          <p class="ribbon is-tag p04-rb is-no">주의할 행동</p>
           <div class="p04-cards" id="p04Cards"></div>
-
-          <div class="p04-box is-ok drop-zone" data-type="ok"><span class="p04-tag">올바른 행동</span></div>
-          <div class="p04-box is-no drop-zone" data-type="no"><span class="p04-tag">주의할 행동</span></div>
 
           <div class="avatar-modal is-wrong is-off" id="p04Wrong">
             <div class="avatar-popup-panel">
@@ -84,15 +93,15 @@
   <script>
   (function () {
     const CARDS = [
-      { key: 'photo', round: 1, text: '친구 얼굴이 나온 사진은 반드시 허락을 받고 올려요', type: 'ok', why: '다른 사람의 얼굴이 나온 사진은 허락을 받고 올려야 해요.' },
-      { key: 'link', round: 1, text: '친구가 보낸 링크라도 출처를 확인한 뒤 열어봐요.', type: 'ok', why: '친구가 보낸 링크라도 출처를 먼저 확인해야 안전해요.' },
-      { key: 'safe', round: 1, text: '친구에게 도움이 될 것 같은 안전 정보는 바로 공유해요.', type: 'no', why: '도움이 될 것 같아도 출처를 확인하지 않고 바로 공유하면 안 돼요.' },
+      { key: 'photo', round: 1, text: '친구 얼굴이 나온 사진은<br>반드시 허락을 받고 올리기', type: 'ok', why: '다른 사람의 얼굴이 나온 사진은 허락을 받고 올려야 해요.' },
+      { key: 'link', round: 1, text: '친구가 보낸 링크라도<br>출처를 확인한 뒤 열어보기', type: 'ok', why: '친구가 보낸 링크라도 출처를 먼저 확인해야 안전해요.' },
+      { key: 'safe', round: 1, text: '친구에게 도움이 될 것 같은<br>안전 정보는 바로 공유하기', type: 'no', why: '도움이 될 것 같아도 출처를 확인하지 않고 바로 공유하면 안 돼요.' },
       { key: 'rumor', round: 1, text: '친구에게 받은 소문 내용 전달하기', type: 'no', why: '확인되지 않은 소문을 퍼뜨리면 다른 사람이 피해를 볼 수 있어요.' },
-      { key: 'source', round: 2, text: '공유하기 전에 원래 출처의 내용 확인하기.', type: 'ok', why: '어디에서 나온 정보인지 확인하고 공유하면 우리 동네의 안전에 도움이 돼요.' },
+      { key: 'source', round: 2, text: '공유하기 전에<br>원래 출처의 내용 확인하기', type: 'ok', why: '어디에서 나온 정보인지 확인하고 공유하면 우리 동네의 안전에 도움이 돼요.' },
       { key: 'privacy', round: 2, text: '타인의 개인정보 보호하기', type: 'ok', why: '다른 사람의 이름, 전화번호, 주소도 소중해요.' },
       { key: 'title', round: 2, text: '자극적인 제목의 기사 무작정 믿기', type: 'no', why: '눈길을 끄는 제목만 보고 믿어도 될까요? 출처와 내용도 확인해야 해요.' },
     ];
-    const POS = { 1: [[282, 7], [972, 7], [282, 173], [972, 173]], 2: [[282, 7], [972, 7], [627, 173]] };
+    const POS = { 1: [[198, 168], [1004, 168], [198, 308], [1004, 308]], 2: [[198, 168], [1004, 168], [600, 308]] };
     const by = (k) => CARDS.find((c) => c.key === k);
     const box = document.querySelector('.p04-cards');
     const zones = Array.from(document.querySelectorAll('.p04-box'));
@@ -103,7 +112,7 @@
       zones.forEach((z) => { delete z.dataset.filled; Array.from(z.querySelectorAll('.p04-hold')).forEach((x) => x.remove()); });
       const list = shuffleArray(CARDS.filter((c) => c.round === round));
       list.forEach((c, i) => {
-        box.insertAdjacentHTML('beforeend', '<div class="p04-hold" style="left:' + POS[round][i][0] + 'px;top:' + POS[round][i][1] + 'px"><div class="p04-card" data-key="' + c.key + '">' + c.text + '</div></div>');
+        box.insertAdjacentHTML('beforeend', '<div class="p04-hold" style="left:' + POS[round][i][0] + 'px;top:' + POS[round][i][1] + 'px"><div class="p04-card" data-key="' + c.key + '"><span>' + c.text + '</span></div></div>');
       });
       initMatchDrag({
         cards: Array.from(box.querySelectorAll('.p04-card')),
@@ -137,10 +146,10 @@
     function showSummary() {
       document.querySelector('.ask-pill span').textContent = '행동 카드를 모두 알맞게 분류했어요!';
       box.innerHTML = '';
+      document.querySelector('main').classList.add('is-sum');
       zones.forEach((z) => {
-        z.classList.add('is-sum');
         Array.from(z.querySelectorAll('.p04-hold')).forEach((x) => x.remove());
-        CARDS.filter((c) => c.type === z.dataset.type).forEach((c) => z.insertAdjacentHTML('beforeend', '<div class="p04-sumcard">' + c.text + '</div>'));
+        CARDS.filter((c) => c.type === z.dataset.type).forEach((c) => z.insertAdjacentHTML('beforeend', '<div class="p04-card" data-key="' + c.key + '"><span>' + c.text + '</span></div>'));
       });
       setTimeout(() => $('p04Done').classList.remove('is-off'), 3000);
     }
