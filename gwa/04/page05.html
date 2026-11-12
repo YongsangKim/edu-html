@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI의 두 가지 실수</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 디자인 없음, 사회 디자인 문법(파란 판 + 흰 카드)으로 만든 러프한 틀 - 기획서 11~14p(Summery 표 반영). 빈칸 두 개는 순서 무관, 채워진 빈칸을 다시 누르면 그 활동을 처음부터 다시. 둘 다 끝나면 [다음] → 마무리 안내.
+           이미지 생성 오류: 오류 이미지 2장을 눌러 동그라미 채점 → 둘 다 끝나면 설명 문구로 바뀌고 [이전] / 인공지능 환각: 점 3개(3초) → 답변 → 설명 문구로 바뀌고 [이전] */
+
+        .p05-board{position:absolute;left:100px;top:200px;width:1720px;height:550px;border-radius:20px;background:#2a6bd0}
+        .p05-vboard{position:absolute;left:700px;top:180px;width:1180px;height:600px;border-radius:20px;background:#2a6bd0}
+        .p05-term{position:absolute;left:150px;width:1620px;height:210px;box-sizing:border-box;padding:0 40px;border-radius:24px;background:var(--c-white);box-shadow:0 8px 0 0 rgba(1,24,92,.35);display:flex;flex-wrap:wrap;align-content:center;align-items:center;column-gap:20px;font-family:'Cafe24 Ssurround';font-size:56px;color:var(--c-ink);letter-spacing:-0.05em}
+        .p05-term.t1{top:240px}
+        .p05-term.t2{top:490px}
+        .p05-term .p05-lab{flex:0 0 380px;box-sizing:border-box;height:110px;padding-top:8px;display:flex;align-items:center;line-height:1;white-space:nowrap}
+        .p05-term .p05-eo{flex:0 0 auto;height:110px;padding-top:8px;display:flex;align-items:center;line-height:1}
+        .p05-term .p05-end2{flex:0 0 100%;text-align:left;line-height:1.1;white-space:nowrap}
+        .p05-term .card-btn{flex:1 1 0;box-sizing:border-box;min-width:0;width:auto;height:90px;min-height:0;padding:8px 20px 0;font-size:56px;line-height:1;white-space:nowrap;display:flex;align-items:center;justify-content:center}
+        .p05-term .card-btn.is-blank{font-size:72px;border:dashed 6px #adacb2;box-shadow:none;background:#f1f1f6;color:#adacb2}
+        .p05-term .card-btn.is-blank:hover{border-color:var(--c-violet)}
+        .p05-term .card-btn.is-blank:active{border-color:var(--c-orchid)}
+        .p05-term .card-btn.is-blank:active,.p05-term .card-btn.is-filled:active{box-shadow:none !important;translate:none !important}
+        .p05-term .card-btn.is-filled{border:solid 5px var(--c-ink);border-radius:14px;box-shadow:none;background:none;color:var(--c-ink);flex:0 0 auto;padding:8px 10px 0}
+        .p05-term .card-btn.is-filled:hover{border-color:var(--c-violet);color:var(--c-violet)}
+        .p05-term .card-btn.is-filled:active{border-color:var(--c-orchid);color:var(--c-orchid)}
+
+        .p05-view{position:absolute;inset:0;z-index:10}
+        .p05-view.is-off{display:none}
+
+        .p05-photos{position:absolute;left:730px;top:220px;width:1120px;height:520px;display:flex;gap:40px}
+        .p05-photo{position:relative;flex:1 1 0;box-sizing:border-box;border:solid 6px var(--c-ink);border-radius:24px;background:#dff2ff;box-shadow:0 8px 0 0 rgba(1,24,92,.35);display:flex;align-items:center;justify-content:center;font-size:200px;line-height:1;cursor:pointer;padding:0;overflow:hidden}
+        .p05-photo img{display:block;width:100%;height:100%;object-fit:cover}
+        .p05-photo:hover:not(.is-done){border-color:var(--c-violet)}
+        .p05-photo:active:not(.is-done){border-color:var(--c-orchid)}
+        .p05-photo.is-done{cursor:default}
+        .p05-circle{position:absolute;left:50%;top:50%;width:260px;height:260px;margin:-130px 0 0 -130px;pointer-events:none}
+        .p05-circle circle{fill:none;stroke:#e8353a;stroke-width:10;stroke-linecap:round;stroke-dasharray:640;stroke-dashoffset:640}
+        .p05-photo.is-done .p05-circle circle{animation:p05-draw .6s ease forwards}
+        @keyframes p05-draw{to{stroke-dashoffset:0}}
+
+        .p05-land{left:835px;top:245px;width:910px;height:470px}
+        .p05-land:before{right:auto;left:196px;top:-13px;width:220px;height:4px;border-radius:3px 3px 0 0;background:linear-gradient(90deg,#1b1b1f 0 103px,transparent 103px 148px,#1b1b1f 148px 220px)}
+        .p05-land.has-cam:after{left:9px;top:50%;margin:-11px 0 0}
+        .p05-chat{background:#fafafa}
+        .p05-chat .phone-status{left:0;top:450px;width:450px;transform-origin:0 0;transform:rotate(-90deg)}
+        .p05-chat .phone-nav{left:844px;top:450px;bottom:auto;width:450px;transform-origin:0 0;transform:rotate(-90deg)}
+        .p05-msgs{position:absolute;left:40px;top:0;right:46px;bottom:0;padding:40px 40px 0 48px;box-sizing:border-box}
+        .p05-me{margin-left:auto;max-width:520px;box-sizing:border-box;padding:12px 24px;border-radius:28px;background:#fff;font-size:28px;line-height:1.4;word-break:keep-all;box-shadow:0 0 10px 5px rgba(0,0,0,0.05)}
+        .p05-ai{margin-top:26px;font-size:28px;line-height:1.5;color:#111;word-break:keep-all;background:#e6effa;;box-sizing:border-box;padding:12px 24px;border-radius:28px;max-width:520px}
+        .p05-ai .gc-think{transform:scale(1.2);transform-origin:left center}
+
+        #p05Set1,#p05Set2{--gc-left:10px;--gb-bottom:585px;--gc-bottom:0}
+        /* #p05Set1 .guide-bubble.is-long,#p05Set2 .guide-bubble.is-long{font-size:42px;padding:20px} */
+        .p05-end{z-index:120}
+        .next-btn.card-btn.is-start{right:50px;bottom:50px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div id="p05Main">
+            <p class="ask-pill is-fit"><span>빈칸을 선택해 내용을 확인해 볼까요?</span></p>
+            <div class="p05-board"></div>
+            <div class="p05-term t1">
+              <span class="p05-lab">이미지 생성 오류는</span>
+              <button type="button" class="card-btn is-blank js-sfx" id="p05B1" data-sound="sound/click.mp3">?</button>
+              <span class="p05-eo">를</span>
+              <span class="p05-end2">말한다</span>
+            </div>
+            <div class="p05-term t2">
+              <span class="p05-lab">인공지능 환각은</span>
+              <button type="button" class="card-btn is-blank js-sfx" id="p05B2" data-sound="sound/click.mp3">?</button>
+              <span class="p05-eo">를</span>
+              <span class="p05-end2">말한다</span>
+            </div>
+            <button type="button" class="card-btn is-start next-btn-activity is-hide js-sfx" id="p05Next" data-sound="sound/click.mp3">다음</button>
+          </div>
+
+          <div class="p05-view is-off" id="p05V1">
+            <p class="ask-pill is-fit"><span>이미지 생성 오류</span></p>
+            <div class="guide-set is-main" id="p05Set1">
+              <p class="guide-bubble is-center" id="p05Say1"></p>
+              <div class="guide-character"><img id="p05Char1" src="../img/character/gwa_main_point.png" alt="아로 캐릭터"></div>
+            </div>
+            <div class="p05-vboard"></div>
+            <div class="p05-photos">
+              <button type="button" class="p05-photo js-sfx" data-sound="sound/click.mp3"><img src="img/p02_art1.jpg" alt=""><svg class="p05-circle" viewBox="0 0 260 260"><circle cx="130" cy="130" r="100"/></svg></button>
+              <button type="button" class="p05-photo js-sfx" data-sound="sound/click.mp3"><img src="img/p02_art5.jpg" alt=""><svg class="p05-circle" viewBox="0 0 260 260"><circle cx="130" cy="130" r="100"/></svg></button>
+            </div>
+            <button type="button" class="card-btn is-start next-btn-activity is-hide js-sfx" data-back data-sound="sound/click.mp3">이전</button>
+          </div>
+
+          <div class="p05-view is-off" id="p05V2">
+            <p class="ask-pill is-fit"><span>인공지능 환각</span></p>
+            <div class="guide-set is-main" id="p05Set2">
+              <p class="guide-bubble is-center" id="p05Say2"></p>
+              <div class="guide-character"><img id="p05Char2" src="../img/character/gwa_main_point.png" alt="아로 캐릭터"></div>
+            </div>
+            <div class="p05-vboard"></div>
+            <div class="phone-frame has-cam p05-land">
+              <div class="phone-screen is-gpt p05-chat" id="p05Chat">
+                <div class="phone-status is-dark"></div>
+                <div class="p05-msgs">
+                  <p class="p05-me">경상도에 있는 송북의 오늘 날씨는 어때?</p>
+                  <p class="p05-ai" id="p05Ai"></p>
+                </div>
+                <div class="phone-nav"></div>
+              </div>
+            </div>
+            <button type="button" class="card-btn is-start next-btn-activity is-hide js-sfx" data-back data-sound="sound/click.mp3">이전</button>
+          </div>
+
+          <div class="avatar-modal p05-end is-off" id="p05End">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body"><p class="avatar-card-text">AI는 그림을 잘못 만들기도 하고, 사실이 아닌 정보를 진짜처럼 이야기하기도 하는 두 가지 실수를 모두 알아보았어요.</p></div>
+                  <a href="page06.html" class="avatar-card-btn card-btn is-popup is-arrow js-nav-effect js-sfx" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body"><p class="avatar-card-text">그렇다면 AI가 실수를 했는지 확인하고, 올바르게 수정하려면 어떻게 해야 할까요?</p></div>
+                  <a href="page06.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="AI의 두 가지 실수" data-next="page06.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const FILL = ['그림의 모양이나 글자를 잘못 표현하는 실수', '근거 없는 정보를 사실처럼 제시하는 실수'];
+    const SAY1 = ['사진을 클릭해<br>어색한 부분을 확인해요.', '인공지능이 그림을 만드는 과정에서 사람이나 사물의 모양을 이상하게 표현하거나<br>글자를 잘못 만드는 실수를<br>‘이미지 생성 오류‘라고 해요.'];
+    const SAY2 = ['AI와의 대화를<br>한번 살펴볼까요?', '송북은 실제 지역이 아니라 만들어 낸 이름이에요. 그런데 AI는 실제로 존재하는 지역처럼 날씨를 알려 주었네요!', '이렇게 근거 없는 정보를 사실처럼 만들어 내는 실수를 ‘인공지능 환각’ 이라고 해요.'];
+    const done = [false, false];
+    const main = $('p05Main');
+    const views = [$('p05V1'), $('p05V2')];
+    const blanks = [$('p05B1'), $('p05B2')];
+    let timer = null;
+
+    const say1 = initGuideSay({ bubble: $('p05Say1'), img: $('p05Char1'), set: $('p05Set1') });
+    const say2 = initGuideSay({ bubble: $('p05Say2'), img: $('p05Char2'), set: $('p05Set2') });
+
+    function reset(i) {
+      clearTimeout(timer);
+      $('p05Say2').onclick = null;
+      views[i].querySelector('[data-back]').classList.add('is-hide');
+      if (i === 0) {
+        say1(SAY1[0], 'main_point');
+        views[0].querySelectorAll('.p05-photo').forEach((p) => p.classList.remove('is-done'));
+      } else {
+        say2(SAY2[0], 'main_point');
+        $('p05Chat').classList.remove('is-done');
+        $('p05Ai').innerHTML = '<span class="gc-think"><i></i><i></i><i></i></span>';
+        timer = setTimeout(() => {
+          $('p05Ai').innerHTML = '송북의 오늘 날씨는 맑습니다.<br>현재 기온은 24℃ 입니다.';
+          $('p05Chat').classList.add('is-done');
+          setTimeout(() => complete(1), 800);
+        }, 3000);
+      }
+    }
+
+    function open(i) {
+      main.style.display = 'none';
+      views[i].classList.remove('is-off');
+      reset(i);
+    }
+
+    function complete(i) {
+      done[i] = true;
+      if (i === 0) {
+        say1(SAY1[1], 'smile_present');
+        views[0].querySelector('[data-back]').classList.remove('is-hide');
+        return;
+      }
+      say2(SAY2[1], 'smile_present', undefined, undefined, '다음');
+      $('p05Say2').onclick = (e) => {
+        if (!e.target.closest('.card-btn')) return;
+        playClick();
+        $('p05Say2').onclick = null;
+        say2(SAY2[2], 'smile_present');
+        views[1].querySelector('[data-back]').classList.remove('is-hide');
+      };
+    }
+
+    function back(i) {
+      clearTimeout(timer);
+      $('p05Say2').onclick = null;
+      views[i].classList.add('is-off');
+      main.style.display = '';
+      if (done[i]) {
+        blanks[i].textContent = FILL[i];
+        blanks[i].classList.remove('is-blank');
+        blanks[i].classList.add('is-filled');
+      }
+      if (done[0] && done[1]) $('p05Next').classList.remove('is-hide');
+    }
+
+    blanks.forEach((b, i) => b.addEventListener('click', () => { done[i] = false; b.classList.remove('is-filled'); b.classList.add('is-blank'); b.textContent = '?'; open(i); }));
+    views.forEach((v, i) => v.querySelector('[data-back]').addEventListener('click', () => back(i)));
+
+    views[0].querySelectorAll('.p05-photo').forEach((p) => p.addEventListener('click', () => {
+      if (p.classList.contains('is-done')) return;
+      p.classList.add('is-done');
+      playCorrect();
+      if (views[0].querySelectorAll('.p05-photo.is-done').length === 2) setTimeout(() => complete(0), 800);
+    }));
+
+    $('p05Next').addEventListener('click', () => $('p05End').classList.remove('is-off'));
+  })();
+  </script>
+</body>
+</html>

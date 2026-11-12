@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI의 실수를 직접 확인하고 수정하기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 기획서 20~35p(Summery 표 반영), 시안 디자인/과학4차시/시안/p10_*.png. 가운데 폰(Gemini 채팅 공용 .gc-*) · 왼쪽 안내 말풍선+캐릭터 · 오른쪽 프롬프트 버튼.
+           흐름(3회 반복): 프롬프트 버튼 → 입력창에 글자가 써짐 → 보내기 → 생성 중(3초) → 생성됨 [다음] → 이미지 누르기 → 크게 보기 [다음] → 다음 수정 / 마지막은 3장 비교 → page11.
+           이미지는 img/p10_gen1~3.jpg 를 넣으면 자리표시자(원) 대신 보임 */
+
+        .p10-side{position:absolute;left:1253px;top:0;width:595px;height:960px;display:flex;flex-direction:column;justify-content:center;gap:24px}
+        .p10-side:empty{display:none}
+        .p10-side .card-btn{width:100%;min-width:0;height:auto;min-height:100px;padding:22px 26px 14px;font-size:44px;line-height:1.2;letter-spacing:-0.05em;word-break:keep-all}
+
+
+        .p10-big{position:absolute;left:700px;top:70px;width:1180px;height:664px;box-sizing:border-box;border:solid 6px var(--c-ink);border-radius:40px;background:var(--c-white);box-shadow:0 8px 0 0 rgba(1,24,92,.35);overflow:hidden}
+        .p10-big.is-off{display:none}
+        .p10-big .gc-pic{width:100%;height:100%}
+        .p10-cmp{position:absolute;left:1060px;top:35px;width:444px;display:flex;flex-direction:column;align-items:center;gap:0}
+        .p10-cmp.is-off{display:none}
+        .p10-cmp .gc-pic{width:510px;height:270px;aspect-ratio:auto;border:solid 6px var(--c-ink);border-radius:24px;box-sizing:border-box;overflow:hidden;background:var(--c-white)}
+        .p10-cmp svg{display:block;width:70px;height:46px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="guide-set is-main" id="p10Set" style="--gc-left:10px;--gb-bottom:640px">
+            <p class="guide-bubble is-center" id="p10Bubble"></p>
+            <div class="guide-character"><img id="p10Char" src="../img/character/gwa_main_point.png" alt="메인 캐릭터"></div>
+          </div>
+
+          <div class="phone-frame has-cam gc-phone" id="p10Phone" data-screen="chat"><div class="phone-screen" id="p10Screen">
+            <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gstar" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fb4b4b"/><stop offset=".25" stop-color="#f6b40e"/><stop offset=".5" stop-color="#3b82f6"/><stop offset=".8" stop-color="#2f7df6"/><stop offset="1" stop-color="#12b866"/></linearGradient></defs></svg>
+            <div class="gc gc-chat">
+              <div class="phone-status is-dark" data-time="17:58"></div>
+              <div class="gc-top"><span class="gc-menu"><i data-ic="menuHalf"></i></span><span class="gc-model">Gemini <b>자동 모드</b><i data-ic="chev"></i></span><span class="is-gap"></span><span class="t-empty"><i data-ic="tempChat"></i><i data-ic="avatarG" class="gc-avatar"></i></span><span class="t-talk"><i data-ic="compose"></i><i data-ic="dotsH"></i></span></div>
+              <div class="gc-hello"><i data-ic="gemini"></i>무엇이 궁금하세요?</div>
+              <div class="gc-msgs" id="p10Chat"></div>
+              
+              <div class="gc-input" id="p10Input"><i data-ic="plus"></i><span class="is-gap is-ph" id="p10Text">Gemini에게 물어보세요</span><i data-ic="micG" class="gc-mic"></i><span class="gc-wave"><i data-ic="voice"></i></span><span class="gc-stop"><i></i></span><button type="button" class="gc-send" id="p10Send" aria-label="보내기"><i data-ic="sendUp"></i></button></div>
+              <div class="kbd-cj"></div>
+              <div class="phone-nav"></div>
+            </div>
+          </div></div>
+
+          <div class="p10-big is-off" id="p10Big"><div class="gc-pic" id="p10ZoomPic"></div></div>
+
+          <div class="p10-cmp is-off" id="p10Cmp">
+            <div class="gc-pic"><img src="img/p10_gen1.jpg" alt="" onerror="this.remove()"></div>
+            <i data-ic="arrowDownFat"></i>
+            <div class="gc-pic"><img src="img/p10_gen2.jpg" alt="" onerror="this.remove()"></div>
+            <i data-ic="arrowDownFat"></i>
+            <div class="gc-pic"><img src="img/p10_gen3.jpg" alt="" onerror="this.remove()"></div>
+          </div>
+
+          <div class="p10-side" id="p10Side"></div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="AI의 실수를 직접 확인하고 수정하기" data-next="page11.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script src="../../resources/js/box-edit.js"></script>
+  <script>
+  (function () {
+    const R = [
+      { prompt: '맑은 날에 마당에서 사람이 빨래를 널고 있는 사진을 만들어 줘. 옆에는 ‘맑은 날 빨래하기’라는 안내판을 넣어줘.', src: 'img/p10_gen1.jpg', cap: '오류 이미지',
+        say: ['자세히 보니 사람의 발이 3개이고 안내판의 글자도<br>이상해요!', '잘못된 부분을 하나씩 수정해볼까요?'] },
+      { prompt: '빨래를 널고 있는 사람의 발이 3개야. 발을 2개로 자연스럽게 수정해 줘.', src: 'img/p10_gen2.jpg', cap: '사진 속 사람의 발이 2개로 수정 됐지만, 안내판의 글자로 알아볼 수 없는 형태로 생성된 오류 이미지',
+        say: ['발의 개수가 올바르게 수정 되었네요!', '그런데 안내판의 글자는 아직 이상해요. 잘못된 부분이 더 있는지 확인하고 다시<br>수정해 볼까요?'] },
+      { prompt: '안내판의 글자가 잘못되었어. ‘맑은 날 빨래 하기‘라는 글자로 정확하게 수정해 줘.', src: 'img/p10_gen3.jpg', cap: '사진 속 사람의 발이 2개이고, 원하는 글자로 적힌 안내판이 생성된 이미지',
+        say: ['이번에는 그림이 모두 올바르게 수정<br>됐어요!'] },
+    ];
+    const SAYS = {
+      prompt: ['입력창에 입력해보세요.', 'main_point'],
+      send0: ['전송 버튼을 눌러,<br>Gemini에게 물어볼까요?', 'main_point'],
+      send: ['전송 버튼을 클릭해요.', 'main_point'],
+      gen0: ['이미지를 생성하고 있어요.', 'main'],
+      gen: ['수정 요청 이미지를<br>생성하고 있어요.', 'main'],
+      done: ['이미지가 생성 <br>됐어요!', 'smile_point'],
+      look: ['생성한 이미지를 클릭해, 자세히 살펴볼까요?', 'main_point'],
+      cmp: ['AI에게 무엇이 잘못 되었는지<br>구체적으로 알려주면<br>결과물을 수정하는데<br>도움이 돼요.', 'smile_present'],
+      hallu: ['이번에는 AI 환각을<br>살펴 볼까요?', 'wink_point']
+    };
+    const phone = $('p10Phone'), screen = $('p10Screen'), chat = $('p10Chat'), input = $('p10Input'), text = $('p10Text'), send = $('p10Send');
+    const side = $('p10Side'), zoom = $('p10Big'), cmp = $('p10Cmp');
+    const say = initGuideSay({ bubble: $('p10Bubble'), img: $('p10Char'), set: $('p10Set'), keep: true });
+    const sy = (k, pose, medium, long, next) => { const t = SAYS[k]; say(t[0], pose || t[1], medium, long, next); };
+    const gc = initGeminiChat({ phone, screen, chat, input, text });
+    const FG = { send: [22, -5], img: [0, 0] };
+    const HOT = { send: [0, 0, 0, 0], img: [0, 0, 0, 0] };
+    let fgKey = '?';
+    const guide = (el, key, o) => {
+      fgKey = key;
+      el.dataset.hit = key;
+      BoxEdit.padEl(el, key, HOT);
+      pointFingerAt(el, Object.assign({ onMain: true, pulse: true, dx: FG[key][0], dy: FG[key][1] }, o));
+    };
+    const setSide = (...els) => { side.innerHTML = ''; els.forEach((e) => side.appendChild(e)); };
+
+    function base(r, withCur) {
+      clearFingers();
+      gc.clear();
+      gc.wait(false);
+      gc.kb(false);
+      gc.setInput('');
+      zoom.classList.add('is-off');
+      cmp.classList.add('is-off');
+      $('p10Bubble').onclick = null;
+      phone.style.display = '';
+      setSide();
+      for (let k = r; k < r + (withCur ? 1 : 0); k++) {
+        gc.addMe(R[k].prompt);
+        const p = gc.addPic({ src: R[k].src });
+        gc.acts(p.ai, 'pic');
+      }
+      gc.talk(r > 0 || !!withCur);
+    }
+
+    function stepPrompt(r) {
+      base(r);
+      gc.kb(true);
+      sy('prompt');
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'card-btn js-sfx';
+      b.dataset.sound = 'sound/click.mp3';
+      b.textContent = R[r].prompt;
+      b.addEventListener('click', () => { playClick(); setSide(); gc.typePrompt(R[r].prompt, () => stepSend(r)); });
+      setSide(b);
+    }
+    function stepSend(r, edit) {
+      if (edit) { base(r); gc.kb(true); gc.setInput(R[r].prompt); }
+      sy(r === 0 ? 'send0' : 'send');
+      guide(send, 'send');
+      send.onclick = () => {
+        send.onclick = null;
+        playClick(); clearFingers();
+        gc.kb(false); gc.talk(); gc.addMe(R[r].prompt); gc.setInput('');
+        stepGen(r, true);
+      };
+    }
+    function stepGen(r, live) {
+      if (!live) { base(r); gc.talk(); gc.addMe(R[r].prompt); }
+      gc.wait(true);
+      const ai = gc.addAi('<div class="gc-status"><i></i>이미지를 만들고 있습니다</div>');
+      const pic = document.createElement('div');
+      pic.className = 'gc-pic is-gen';
+      ai.appendChild(pic);
+      sy(r === 0 ? 'gen0' : 'gen');
+      if (live) setTimeout(() => stepDone(r, true), 3000);
+    }
+    function stepDone(r, live) {
+      if (live) { chat.lastElementChild.remove(); } else { base(r); gc.talk(); gc.addMe(R[r].prompt); }
+      gc.wait(false);
+      const p = gc.addPic({ src: R[r].src });
+      gc.acts(p.ai, 'pic');
+      say(SAYS.done[0], SAYS.done[1], undefined, undefined, '다음');
+      $('p10Bubble').onclick = (e) => {
+        if (!e.target.closest('.card-btn')) return;
+        playClick();
+        $('p10Bubble').onclick = null;
+        stepLook(r);
+      };
+    }
+    function stepLook(r, edit) {
+      if (edit) { base(r, true); }
+      sy('look');
+      const pic = chat.querySelector('.gc-ai:last-child .gc-pic');
+      guide(pic, 'img');
+      pic.classList.add('is-hit');
+      pic.onclick = () => { pic.onclick = null; playClick(); clearFingers(); stepZoom(r); };
+    }
+    function stepZoom(r, edit) {
+      if (edit) base(r, true);
+      zoom.classList.remove('is-off');
+      phone.style.display = 'none';
+      $('p10ZoomPic').innerHTML = '<img src="' + R[r].src + '" alt="" onerror="this.remove()">';
+      say(R[r].say[0], 'main_point', undefined, undefined, '다음');
+      $('p10Bubble').onclick = (e) => {
+        if (!e.target.closest('.card-btn')) return;
+        playClick();
+        $('p10Bubble').onclick = null;
+        if (r < 2) {
+          say(R[r].say[1], 'wink_point', undefined, undefined, '다음');
+          $('p10Bubble').onclick = (e2) => {
+            if (!e2.target.closest('.card-btn')) return;
+            playClick();
+            $('p10Bubble').onclick = null;
+            stepPrompt(r + 1);
+          };
+        } else stepCompare();
+      };
+    }
+    function stepCompare() {
+      clearFingers();
+      phone.style.display = 'none';
+      zoom.classList.add('is-off');
+      cmp.classList.remove('is-off');
+      setSide();
+      sy('cmp', null, undefined, undefined, '다음');
+      $('p10Bubble').onclick = (e) => { if (!e.target.closest('.card-btn')) return; playClick(); $('p10Bubble').onclick = (e2) => { if (!e2.target.closest('.card-btn')) return; playClick(); $('p10Bubble').onclick = null; navigateTo('page11.html'); }; sy('hallu', null, undefined, undefined, '다음'); };
+    }
+
+    const STEPS = [];
+    [0, 1, 2].forEach((r) => {
+      const n = (r + 1) + '회 · ';
+      STEPS.push({ t: n + '프롬프트 버튼', run: () => stepPrompt(r) });
+      STEPS.push({ t: n + '보내기 클릭', run: () => stepSend(r, true) });
+      STEPS.push({ t: n + '생성 중', run: () => stepGen(r, false) });
+      STEPS.push({ t: n + '생성됨 + 다음', run: () => stepDone(r, false) });
+      STEPS.push({ t: n + '이미지 누르기', run: () => stepLook(r, true) });
+      STEPS.push({ t: n + '크게 보기 + 다음', run: () => stepZoom(r, true) });
+    });
+    STEPS.push({ t: '3장 비교 + 다음', run: () => stepCompare() });
+
+    if (BoxEdit.on) {
+      const m = location.search.match(/[?&]step=([0-9]+)/);
+      let cur = m ? Math.min(Math.max(+m[1], 1), STEPS.length) : 1;
+      BoxEdit.stepEdit({
+        key: () => fgKey, count: STEPS.length + 1, get: () => cur, set: (n) => { cur = n; },
+        go: (n) => { if (n < 1) return; cur = n; BoxEdit.syncStep(n); clearFingers(); STEPS[n - 1].run(); },
+        label: (n) => '단계 ' + n + ' / ' + STEPS.length + ' · ' + (STEPS[n - 1] ? STEPS[n - 1].t : ''),
+        say, bubble: $('p10Bubble'), img: $('p10Char')
+      });
+      STEPS[cur - 1].run();
+      return;
+    }
+    stepPrompt(0);
+  })();
+  </script>
+</body>
+</html>

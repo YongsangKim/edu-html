@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오늘은 내가 여행 플래너!</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 기획서 32~73p. 네이버 지도 실습(안동 하회마을). 휴대폰 화면은 기획서에 들어 있는 실제 네이버 지도 앱 캡처(img/p10_img{번호}.png, 기획서 그림 번호)를 그대로 쓰고,
+           식당 이름 가림·새 글자·사진 자리는 기획서 슬라이드의 위치·크기·색을 따라 위에 얹음(좌표는 휴대폰 화면 기준 %). 예약 폼·확인 화면은 실제 앱 모양을 HTML로 그림.
+           누를 곳(.p10-hot)은 투명 — 위치는 HIT 표(기본)+HOT 표(보정), 손가락은 FG 표. 사진 자리는 임시 이모지 이미지(img/p10_ph_*.png) — 실제 사진이 오면 같은 파일명으로 덮어쓰면 됨.
+           고른 식당·인원·날짜·시간은 예약 확인(46p)·완료(47p) 화면에 그대로 보여줌. 캐릭터는 임시로 sa/06 캐릭터 복사본 */
+
+        .p10-pic{position:absolute;overflow:hidden}
+        .p10-pic img{position:absolute;display:block;max-width:none}
+        .p10-shp{position:absolute}
+        .p10-ph{position:absolute;border-radius:14px;background:#e9eef6 center / cover no-repeat}
+        .p10-ov{position:absolute;box-sizing:border-box;padding:11px 22px;white-space:pre;line-height:1.2;font-weight:500;color:#111}
+        .p10-chip44{position:absolute;top:64.4%;width:21.5%;height:5.4%;border:1px solid #d6d9df;border-radius:12px;background:#fff}
+        .p10-d44{top:64.4%;width:21.5%;height:5.4%;padding:0;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;color:#222}
+
+        /* 누를 곳: 투명(깜빡임은 공용 .hit-pulse) */
+        .p10-hot{z-index:7;position:absolute;box-sizing:border-box;padding:0;border:0;border-radius:14px;background:transparent;cursor:pointer}
+        .p10-hot.is-off{pointer-events:none}
+        .p10-hot.is-wrong{animation:fix-word-shake .3s ease}
+
+        /* 예약 폼·확인 화면: 실제 앱(1080x2340) 크기로 그린 뒤 화면 폭에 맞춰 축소 */
+        .f{position:absolute;left:0;top:0;width:1080px;height:2340px;transform:scale(.4159,.37995);transform-origin:0 0;background:#fff;font-family:'Pretendard';color:#111;overflow:hidden}
+        .f *{box-sizing:border-box}
+        .f-stat{position:absolute;left:0;top:0;width:100%;height:107px;background:url('img/p10_img28.png') top / 100% auto no-repeat;z-index:4}
+        .f-head{position:absolute;left:0;top:107px;width:100%;height:105px;background:#fff;z-index:4;display:flex;align-items:center;padding:0 42px;font:700 52px 'Pretendard'}
+        .f-head .f-back{flex:0 0 auto;width:30px;height:30px;margin:0 46px 0 14px;border:solid #111;border-width:0 0 6px 6px;transform:rotate(45deg)}
+        .f-head .f-x{position:relative;flex:0 0 auto;width:52px;height:52px;margin-left:auto}
+        .f-head .f-x:before,.f-head .f-x:after{content:'';position:absolute;left:-6px;top:23px;width:64px;height:6px;border-radius:3px;background:#111;transform:rotate(45deg)}
+        .f-head .f-x:after{transform:rotate(-45deg)}
+        .f-scroll{position:absolute;left:0;top:212px;width:100%;height:1799px;overflow-y:auto;scrollbar-width:none}
+        .f-scroll::-webkit-scrollbar{display:none}
+        .f-in{position:relative;width:100%}
+        .f-bar{position:absolute;left:0;top:2011px;width:100%;height:212px;background:#fff;border-top:2px solid #eceef1;z-index:4}
+        .f-nav{position:absolute;left:0;top:2223px;width:100%;height:117px;background:url('img/p10_img28.png') bottom / 100% auto no-repeat;z-index:4}
+        .f-btn{position:absolute;top:36px;height:122px;border-radius:61px;font:600 42px 'Pretendard';cursor:pointer;border:0;padding:0}
+        .f-btn.is-sub{border:2px solid #d9dce2;background:#fff;color:#222}
+        .f-btn.is-main{background:#2f6bf5;color:#fff}
+        .f-btn:disabled{background:#eceef2;color:#b0b5be;cursor:default}
+        .f-t{position:absolute;left:42px;margin:0;font:700 49px/1.2 'Pretendard';white-space:nowrap}
+        .f-card{position:absolute;left:42px;width:996px;border-radius:36px;padding:34px 40px}
+        .f-chip{position:absolute;top:431px;width:157px;height:102px;border:2px solid #dfe2e8;border-radius:51px;background:#fff;font:500 40px 'Pretendard';color:#222;cursor:pointer;padding:0}
+        .f-chip.is-on{background:#2f6bf5;border-color:#2f6bf5;color:#fff;font-weight:700}
+        .f-mon{position:absolute;left:0;width:100%;top:752px;text-align:center;font:700 52px 'Pretendard'}
+        .f-mon span{display:inline-block;margin:0 70px;font-weight:400;font-size:56px}
+        .f-wd{position:absolute;top:872px;width:142px;margin-left:-71px;text-align:center;font:500 37px 'Pretendard';color:#222}
+        .f-d{position:absolute;width:142px;height:146px;border:0;background:none;padding:0;font:500 41px 'Pretendard';color:#222;cursor:pointer;z-index:0}
+        .f-d small{display:block;margin-top:-4px;font-size:22px;line-height:1.1;color:#e5484d}
+        .f-d.is-red{color:#e5484d}
+        .f-d.is-on{color:#fff}
+        .f-d.is-on small{color:#fff}
+        .f-d.is-on:before{content:'';position:absolute;left:1px;top:8px;width:140px;height:132px;border-radius:30px;background:#2f6bf5;z-index:-1}
+        .f-time{position:absolute;left:0;top:1700px;width:100%}
+        .f-time p{position:absolute;left:42px;top:0;margin:0;font:400 36px 'Pretendard';color:#555}
+        .f-time button{position:absolute;top:70px;width:233px;height:100px;border:2px solid #dfe2e8;border-radius:50px;background:#fff;font:500 38px 'Pretendard';color:#222;cursor:pointer;padding:0}
+        .f-time button.is-on{background:#2f6bf5;border-color:#2f6bf5;color:#fff;font-weight:700}
+        .f-toast{position:absolute;left:42px;top:550px;padding:18px 32px;border-radius:20px;background:#2f6bf5;color:#fff;font:600 31px 'Pretendard';z-index:5}
+        .f-toast:before{content:'';position:absolute;left:46px;top:-18px;border:18px solid transparent;border-top:0;border-bottom:20px solid #2f6bf5}
+        .f-line{position:absolute;left:0;width:100%;height:18px;background:#f3f4f6}
+        .f-gray{position:absolute;left:42px;width:996px;background:#f4f5f7;border-radius:30px}
+        .f-sm{position:absolute;margin:0;font:400 36px/1.3 'Pretendard';color:#444}
+        .f-chev{position:absolute;right:34px;width:28px;height:28px;margin-top:20px;border:solid #444;border-width:0 5px 5px 0;transform:rotate(45deg)}
+        .f-chv{display:inline-block;width:14px;height:14px;margin:0 0 6px 18px;border:solid #444;border-width:0 3px 3px 0;vertical-align:middle;transform:rotate(45deg)}
+        .p10-toast{display:none}
+
+        .p10-input.card-btn{position:absolute;left:1290px;top:50%;transform:translateY(-50%);width:560px;height:auto;min-height:100px;padding:14px 30px 10px;display:flex;align-items:center;justify-content:center;font-size:44px;line-height:1.2}
+        .p10-opts.cf-opts{top:50%;transform:translateY(-50%);gap:30px}
+        .p10-opts.cf-opts .card-btn{height:150px;padding:10px 10px 4px;font-size:50px;line-height:1.2}
+        .p10-next.card-btn{display:flex;align-items:center;justify-content:center;min-width:0;width:300px;height:110px;margin-bottom:20px;padding:8px 10px 0;font-size:56px;z-index:7}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="guide-set is-main" id="p10Set">
+            <p class="guide-bubble is-center" id="p10Bubble"></p>
+            <div class="guide-character"><img id="p10Char" src="../img/character/sa_main.png" alt="메인 캐릭터"></div>
+          </div>
+          <div class="phone-frame has-cam p10-phone"><div class="phone-screen" id="p10Screen"></div></div>
+          <button class="card-btn p10-input is-hide" id="p10Input"></button>
+          <div class="cf-opts p10-opts is-hide" id="p10Opts"></div>
+          <button class="card-btn js-sfx next-btn p10-next is-hide" id="p10Next" data-sound="sound/click.mp3">다음</button>
+
+          <div class="avatar-modal is-off" id="p10Done">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <p class="avatar-card-title">여행 계획 세우기 완료!</p>
+                <p class="avatar-card-text">네이버 지도의 기능을 익히고 활용해서 나의 여행 계획을 세웠어요. 즐거운 여행을 떠나요!</p>
+              </div>
+              <a href="page11.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="오늘은 내가 여행 플래너!" data-next="page11.html"></script>
+  <script src="../../resources/js/toc.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script src="../../resources/js/box-edit.js"></script>
+  <script>
+  (function () {
+    const LAY = {};
+    LAY[33] = [["p",16,0,0,100.1,100,0,0,0,0]];
+    LAY[34] = [["p",17,0,0,100.1,100,0,0,0,0]];
+    LAY[35] = [["p",18,0,0,100.1,100,0,0,0,0]];
+    LAY[36] = [["p",19,0,0,100.1,100,0,0,0,0]];
+    LAY[37] = [["p",20,0,0,100.1,100,0,0,0,0]];
+    LAY[38] = LAY[37];
+    LAY[39] = [["p",21,0,0,100.1,100,0,0,0,0]];
+    LAY[40] = [["p",22,0,0,100.1,100,0,0,0,0]];
+    LAY[41] = LAY[40];
+    LAY[42] = [["p",23,0,0,100.1,100,0,0,0,0],
+          ["s",2.6,30.1,98,64.6,"#ffffff",0],
+          ["t","국특원 찜닭",-5,29.2,48.6,6.5,"",9,0,"#0070C0","l"],
+          ["t","한식",34.6,29.3,23.6,6,"",8,0,"","l"],
+          ["t","영업 중 〮 리뷰 120",-4.4,34.3,65.7,6,"",8,0,"","l"],
+          ["s",0.1,40.3,48.6,19.4,"#ffffff",1],
+          ["s",50.1,40.3,48.6,19.4,"#ffffff",1],
+          ["t","에듀국시",-5,60.6,39.1,6.5,"",9,0,"#0070C0","l"],
+          ["t","국수",25.4,61.5,23.6,6,"",8,0,"","l"],
+          ["t","영업 중 〮 리뷰 51",-4.4,65.8,60,6,"",8,0,"","l"],
+          ["s",0.1,71.8,48.6,19.4,"#ffffff",1],
+          ["s",50.1,71.8,48.6,19.4,"#ffffff",1]];
+    LAY[43] = [["p",25,0,0,100.1,100,0,0,0,0],
+          ["t","142m",2.8,62.4,13.3,2.9,"#ffffff",5,1,"","ctr"],
+          ["t","국특원 찜닭",1.9,52.6,33.3,3.5,"#ffffff",7,1,"","ctr"],
+          ["t","국특원 찜닭",39.6,30.8,20.9,1.8,"#F7F7F7",4,1,"","ctr"],
+          ["t","국특원 찜닭",11.6,6,33.3,3.5,"#ffffff",7,1,"","ctr"],
+          ["s",3.2,72.3,47.3,22.3,"#ffffff",1],
+          ["s",52.3,72.3,47.3,22.3,"#ffffff",1],
+          ["p",26,0,66.3,100.1,5.5,0,0.731,0,0.2145]];
+    LAY[44] = [["p",27,0,0,100.1,100,0,0,0,0],
+          ["t","국특원 찜닭",10.8,5.5,36.6,3.5,"#ffffff",7,1,"","ctr"],
+          ["s",2.2,28.4,95.8,23.4,"#ffffff",1],
+          ["s",3.5,58.6,94.5,9.2,"#ffffff",0],
+          ["s",2.2,66.7,95.8,9.2,"#ffffff",0],
+          ["s",-3.4,64.7,24.2,5,"#ffffff",0],
+          ["t","10.1 (목)",-5,65.1,27.4,4.3,"",6,0,"","ctr"],
+          ["s",24.8,64.7,24.2,5,"#ffffff",0],
+          ["t","10.2 (금)",23.2,65.1,27.4,4.3,"",6,0,"","ctr"],
+          ["s",53.5,64.7,24.2,5,"#ffffff",0],
+          ["t","10.3 (토)",51.9,65.1,27.4,4.3,"",6,0,"","ctr"],
+          ["s",79.7,64.7,24.2,5,"#ffffff",0],
+          ["t","10.4 (일)",78.1,65.1,27.4,4.3,"",6,0,"","ctr"],
+          ["s",3.5,52.6,27.2,7.4,"#ffffff",0],
+          ["t","예약",-1.4,53.1,23.6,6,"#ffffff",8,1,"","ctr"],
+          ["t","2~5명",0,57.9,24.2,5.2,"",6,0,"","l"]];
+    LAY[47] = [["p",35,0,0,100.1,100,0,0,0,0],
+          ["t","국특원 찜닭",10.3,4.3,27.1,5.2,"#999999",6,1,"","ctr"],
+          ["s",0,53.2,100.1,41.6,"#ffffff",0],
+          ["s",21.8,40.3,56.5,9.3,"#ffffff",0],
+          ["t","국특원 찜닭 ›\n예약\n10.2.(금) 오후 1:00 〮 4명",14.8,39.4,70.4,11.6,"",7,0,"#0070C0","ctr"]];
+    LAY[48] = [["p",25,0,0,100.1,100,0,0,0,0],
+          ["t","142m",2.8,62.4,13.3,2.9,"#ffffff",5,1,"","ctr"],
+          ["t","국특원 찜닭",1.9,52.6,33.3,3.5,"#ffffff",7,1,"","ctr"],
+          ["t","국특원 찜닭",32,29.9,36.1,3.5,"#F7F7F7",6,1,"","ctr"],
+          ["t","국특원 찜닭",11.6,6,33.3,3.5,"#ffffff",7,1,"","ctr"],
+          ["s",3.2,72.3,47.3,22.3,"#ffffff",1],
+          ["s",52.3,72.3,47.3,22.3,"#ffffff",1],
+          ["p",26,0,66.3,100.1,5.5,0,0.731,0,0.2145]];
+    LAY[49] = [["p",24,0,0,100.1,100,0,0,0,0],
+          ["s",2.1,30.1,98,64.6,"#ffffff",0],
+          ["t","국특원 찜닭",-3.7,29.2,48.6,6.5,"",12,0,"#0070C0","l"],
+          ["t","한식",37.5,29.6,23.6,6,"",10,0,"","l"],
+          ["t","영업 중",-3.2,34.3,32.1,6,"",10,0,"","l"],
+          ["s",1.4,40.3,48.6,19.4,"#ffffff",1],
+          ["s",51.4,40.3,48.6,19.4,"#ffffff",1],
+          ["t","에듀국시",-3.7,60.6,39.1,6.5,"",12,0,"#0070C0","l"],
+          ["t","국수",26.7,60.8,23.6,6,"",10,0,"","l"],
+          ["t","영업 중",-3.2,65.8,32.1,6,"",10,0,"","l"],
+          ["s",1.4,71.8,48.6,19.4,"#ffffff",1],
+          ["s",51.4,71.8,48.6,19.4,"#ffffff",1]];
+    LAY[50] = [["p",36,0,0,100.1,100,0,0,0,0],
+          ["s",2.1,30.1,98,64.6,"#ffffff",0],
+          ["t","하회마을 나룻배",-3.7,29.2,62.5,6.5,"",12,0,"#0070C0","l"],
+          ["t","리뷰50",-3.2,34.3,30.4,6,"",10,0,"","l"],
+          ["t","선착장",50.6,29.6,29.8,6,"",10,0,"","l"],
+          ["t","도산서원",-3.7,60.3,39.1,6.5,"",12,0,"#0070C0","l"],
+          ["t","리뷰4,976",-3.2,65.5,38.6,6,"",10,0,"","l"],
+          ["t","국가유산",27.5,60.8,36,6,"",10,0,"","l"],
+          ["s",2.6,40.7,47.6,16.7,"#ffffff",1],
+          ["s",52.5,40.7,47.6,16.7,"#ffffff",1],
+          ["s",2.6,72.4,47.6,16.7,"#ffffff",1],
+          ["s",52.5,72.4,47.6,16.7,"#ffffff",1]];
+    LAY[51] = LAY[50];
+    LAY[52] = [["p",37,0,0,100.1,100,0,0,0,0]];
+    LAY[53] = [["p",38,0,0,100,99.9,0,0,0,0]];
+    LAY[54] = LAY[50];
+    LAY[55] = [["p",39,0,0,100.1,100,0,0,0,0]];
+    LAY[56] = [["p",40,0,0,99.8,99.7,0,0,0,0]];
+    LAY[57] = LAY[50];
+    LAY[58] = LAY[52];
+    LAY[59] = LAY[52];
+    LAY[60] = [["p",41,0,0,100.1,100,0,0,0,0]];
+    LAY[61] = [["p",42,0,0,100,99.9,0,0,0,0]];
+    LAY[62] = LAY[61];
+    LAY[63] = LAY[50];
+    LAY[64] = [["p",43,0,0,100,99.8,0,0,0,0]];
+    LAY[65] = [["p",44,0,0,100.1,100,0,0,0,0],
+          ["s",19.6,6.1,55.4,3.4,"#ffffff",0],
+          ["t","출발지 입력",15.2,5.2,32,4.7,"",5,0,"","l"]];
+    LAY[66] = [["p",45,0,0,100.1,100,0,0,0,0]];
+    LAY[67] = [["p",46,0,0,100,99.8,0,0,0,0]];
+    LAY[68] = LAY[67];
+    LAY[69] = LAY[64];
+    LAY[70] = [["p",47,0,0,99.8,99.7,0,0,0,0]];
+    LAY[71] = [["p",48,0,0,100.1,100,0,0,0,0],
+          ["s",0,31.7,100.1,62.8,"#ffffff",0]];
+    LAY[72] = [["p",49,0,0,100.1,100,0,0,0,0]];
+
+    // 눌러야 할 곳의 기본 위치 [x%, y%, 폭%, 높이%] — 지도 캡처 위라 기준 요소가 없어서 이 표가 기준. 같은 자리는 같은 이름으로 씀
+    const HIT = {
+      search: [2.7, 4.8, 80.6, 5.9], star: [75, 52, 13, 5.5], save: [3.7, 88.1, 92.7, 5.8], topBack: [4, 5.4, 10, 4.8], navBack: [70, 94.7, 17, 4.7],
+      info: [0.7, 56.7, 98.6, 8.8], hours: [0, 68.5, 99.2, 5.9], nearbyTab: [68, 49.8, 14, 5.2], reserve: [38, 65.8, 19.6, 6.1], searchOpt: [3.4, 16.7, 93.1, 4.9],
+      play: [57, 16.2, 15, 4.4], arrive1: [21, 63.6, 17.5, 5], arrive2: [20.5, 66.5, 18, 5], homeBtn: [3.5, 10, 10, 5], arrive3: [21, 17.6, 17, 5],
+      depart: [4.5, 5, 91, 5.2], depart2: [3, 17.6, 18, 5], save2: [79, 21.4, 19, 5],
+      row1: [0, 28.7, 100, 31], row2: [0, 60.1, 100, 31.4], route1: [0, 36, 100, 31], route2: [0, 67.6, 100, 27.4],
+      list1: [0, 15.5, 100, 7.5], list2: [0, 23.8, 100, 7.5], final1: [0, 27, 100, 31], final2: [0, 59.5, 100, 34]
+    };
+    const STEPS = [
+      { s: 32, bubble: '네이버 지도를 클릭해요.', home: true, pose: '' },
+      { s: 33, bubble: '검색창을 클릭해요.', hot: ['search'], pose: 'wink_point' },
+      { s: 34, bubble: '오른쪽의 버튼을 눌러<br>여행지를 검색해요.', input: '안동 하회마을', pose: '' },
+      { s: 35, bubble: '좋아요! 여행 장소를 저장해봐요.<br>별 버튼을 클릭해요.', hot: ['star'], pose: 'wink_present' },
+      { s: 36, bubble: '저장 버튼을 클릭해요.', hot: ['save'], pose: 'wink_point4' },
+      { s: 37, bubble: '잘했어요!<br>본격적으로 여행 계획을<br>세워봐요.', next: true, pose: '' },
+      { s: 38, bubble: '운영 시간을 확인해볼까요?<br>아래의 정보창을 클릭해요.', hot: ['info'], pose: 'wink_present' },
+      { s: 39, bubble: '운영 시간 부분을<br>클릭해서 자세히 살펴봐요.', hot: ['hours'], pose: 'wink_point3' },
+      { s: 40, bubble: '운영 시간을 확인했어요!', next: true, pose: '' },
+      { s: 41, bubble: '이번엔 여행지 주변의<br>맛집과 카페를 탐방해봐요.<br>주변 탭을 클릭해요.', hot: ['nearbyTab'], pose: 'wink_point2' },
+      { s: 42, bubble: '여행지 주변에 맛있는<br>식당이 있어요!<br>가고 싶은 식당을 선택해요.', rows: [{ r: 'row1', pick: '국특원 찜닭' }, { r: 'row2', pick: '에듀국시' }], pose: '' },
+      { s: 43, bubble: '원활한 여행을 위해<br>식당을 예약해볼까요?<br>예약 버튼을 클릭해요.', hot: ['reserve'], pose: 'wink_present' },
+      { s: 44, bubble: '‘인원, 날짜, 시간으로 검색’을 클릭해 예약을 진행해요.', hot: ['searchOpt'], pose: 'wink_point' },
+      { s: 45, bubble: '식당 방문을 희망하는<br>인원, 날짜, 시간을 순서대로 선택해요.', form: 'reserve', pose: '' },
+      { s: 46, bubble: '내가 선택한 내용을 확인하고<br>화면을 아래로 내려<br>개인정보 수집 및 제공에 동의함 버튼을 클릭해요.', form: 'confirm', pose: 'wink_present' },
+      { s: 47, bubble: '예약을 완료했어요!<br>남은 여행 계획을 마저 세워봐요.', next: true, pose: '' },
+      { s: 48, bubble: '뒤로 가기를 눌러 주변에 함께 가볼 만한 곳을 찾아봐요.', hot: ['topBack', 'navBack'], pose: 'wink_open' },
+      { s: 49, bubble: '놀거리 버튼을 클릭해요.', hot: ['play'], pose: 'wink_point' },
+      { s: 50, bubble: '다양한 곳이 있어요!<br>각 장소의 정보를 확인해 1시간 이내로 이동할 수 있는 곳을 찾아볼까요?', next: true, pose: '' },
+      { s: 51, bubble: '하회마을 나룻배부터<br>확인해봐요. 장소를 클릭해요.', rows: [{ r: 'row1' }, { r: 'row2', off: true }], pose: 'wink_point2' },
+      { s: 52, bubble: '도착 버튼을 클릭해<br>이동 시간을 확인해요.', hot: ['arrive1'], pose: 'wink_point3' },
+      { s: 53, bubble: '하회마을 나룻배까지는<br>12분이 소요돼요. 이어서<br>다음 장소를 확인해봐요.', next: true, pose: '' },
+      { s: 54, bubble: '도산서원을 클릭해<br>이동 시간을 확인해봐요.', rows: [{ r: 'row1', off: true }, { r: 'row2' }], pose: 'wink_point3' },
+      { s: 55, bubble: '도착 버튼을 클릭해요.', hot: ['arrive2'], pose: 'wink_present' },
+      { s: 56, bubble: '도산서원까지는<br>2시간 23분이 소요돼요.', next: true, pose: '' },
+      { s: 57, bubble: '1시간 이내로 이동할 수 있는 장소는 어디인가요?', rows: [{ r: 'row1', right: true }, { r: 'row2', wrong: '하회마을 나룻배까지는 12분,<br>도산서원까지는 2시간 23분이<br>소요돼요.' }], pose: 'wink_open' },
+      { s: 58, bubble: '좋아요!<br>하회마을 나룻배로 결정했어요.', next: true, pose: '' },
+      { s: 59, bubble: '별 모양 버튼을 클릭해<br>장소를 저장해요.', hot: ['star'], pose: 'wink_point2' },
+      { s: 60, bubble: '저장 버튼을 클릭해요.', hot: ['save'], pose: 'wink_point4' },
+      { s: 61, bubble: '좋아요!<br>이제 마지막으로 장소 별 이동 시간을 확인해봐요.', next: true, pose: '' },
+      { s: 62, bubble: '뒤로가기 버튼을 클릭해요.', hot: ['topBack', 'navBack'], pose: 'wink_present' },
+      { s: 63, bubble: '홈 버튼을 클릭해요.', hot: ['homeBtn'], pose: 'wink_open' },
+      { s: 64, bubble: '안동역에서 안동 하회마을까지의<br>이동 경로를 알아봐요.<br>도착 버튼을 클릭해요.', hot: ['arrive3'], pose: 'wink_point' },
+      { s: 65, bubble: '출발지 입력창을 클릭해요.', hot: ['depart'], pose: 'wink_present' },
+      { s: 66, bubble: '오른쪽의 버튼을 클릭해<br>안동역을 입력해요.', input: '안동역', pose: '' },
+      { s: 67, bubble: '추천된 이동 경로를 확인했어요! 시간과 이동 방법을 비교해 나에게 알맞은 경로를 골라봐요.', rows: [{ r: 'route1' }, { r: 'route2' }], opts: ['급행2번 버스<br>탑승하기', '210번 버스<br>탑승하기'], pose: 'wink_present' },
+      { s: 68, bubble: '뒤로 가기 버튼을 눌러<br>이전 화면으로 돌아가요.', hot: ['navBack'], pose: '' },
+      { s: 69, bubble: '마지막으로, 안동 하회마을에서<br>하회마을 나룻배까지의<br>이동 경로를 확인해봐요.<br>출발 버튼을 클릭해요.', hot: ['depart2'], pose: 'wink_point' },
+      { s: 70, bubble: '저장 버튼을 클릭해요.', hot: ['save2'], pose: 'wink_present' },
+      { s: 71, bubble: '내가 저장한 장소들의 목록이에요!<br>하회마을 나룻배를 클릭해요.', rows: [{ r: 'list1', off: true }, { r: 'list2' }], pose: '' },
+      { s: 72, bubble: '나에게 알맞은 이동 경로를<br>고르면 여행 계획 세우기 완료!', rows: [{ r: 'final1' }, { r: 'final2' }], opts: ['풍천2번 버스<br>탑승 후 도보로 이동', '210번 버스<br>탑승 후 도보로 이동'], last: true, pose: 'wink_present' }
+    ];
+
+    const screen = $('p10Screen');
+    const bubble = $('p10Bubble');
+    const say = initGuideSay({ bubble, img: $('p10Char'), set: $('p10Set') });
+    // 손가락 위치 보정 [dx, dy] — 눌러야 할 곳 이름별. ?edit 로 손가락을 눌러 맞춘 뒤 표시줄 값을 옮겨 적음. 포즈는 STEPS 각 줄에 pose: '…' 를 적음('' 이면 main)
+    const FG = {
+      app: [15, -37], search: [-140, -20], star: [0, 0], save: [-150, -30],
+      topBack: [0, 0], navBack: [10, -30], info: [-210, -40], hours: [-80, -30],
+      nearbyTab: [0, 0], reserve: [0, 0], searchOpt: [-190, -20], play: [0, 0],
+      arrive1: [0, 0], arrive2: [0, 0], arrive3: [0, 0], depart: [-210, -20],
+      depart2: [0, 0], save2: [0, 0], homeBtn: [20, -10], agree: [0, 0],
+      book: [0, 0]
+    };
+    // 클릭 영역 보정 [dx, dy, dw, dh] — HIT 기본 위치에서 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
+    const HOT = {
+      search: [0, 0, 0, 0], star: [0, 0, 0, 0], save: [0, 0, 0, 0],
+      topBack: [0, 0, 0, 0], navBack: [0, 0, 0, 0], info: [0, 0, 0, 0],
+      hours: [0, 0, 0, 0], nearbyTab: [0, 0, 0, 0], reserve: [0, 0, 0, 0],
+      searchOpt: [0, 0, 0, 0], play: [0, 0, 0, 0], arrive1: [0, 0, 0, 0],
+      arrive2: [0, 0, 0, 0], arrive3: [0, 0, 0, 0], depart: [0, 0, 0, 0],
+      depart2: [0, 0, 0, 0], save2: [0, 0, 0, 0], homeBtn: [0, 0, 0, 0],
+      row1: [0, 0, 0, 0], row2: [0, 0, 0, 0], route1: [0, 0, 0, 0],
+      route2: [0, 0, 0, 0],
+      list1: [0, 0, 0, 0], list2: [0, 0, 0, 0], final1: [0, 0, 0, 0], final2: [0, 0, 0, 0]
+    };
+    const fgo = (key, extra) => BoxEdit.fgo(FG, key, extra);
+    BoxEdit.fingerTag();
+    const input = $('p10Input');
+    const nextBtn = $('p10Next');
+    const picked = { restaurant: '국특원 찜닭', people: '', date: '', time: '' };
+    const PT = 3.1; // 기획서 1pt = 화면 3.1px
+    const LISTS = [42, 49, 50, 51, 54, 57, 63]; // 목록 화면: 기획서 글자가 실제 앱보다 커서 줄임
+    const IC_P = ic('userFill', 'width="46" height="46" style="vertical-align:-8px;margin-right:14px"');
+    const IC_C = ic('calendarFill', 'width="46" height="46" style="vertical-align:-8px;margin-right:14px"');
+    let i = 0;
+
+    const go = () => { clearFingers(); i += 1; render(); };
+    const pct = (v) => v + '%';
+    const isNoodle = () => picked.restaurant === '에듀국시';
+
+    // 기획서의 글자 중 고른 값으로 바뀌는 부분
+    function dyn(t, s) {
+      let o = t.replace(/〮/g, '·').replace('국특원 찜닭', picked.restaurant);
+      if (s === 49 && o === '한식' && isNoodle()) o = '국수';
+      if (s === 47) o = o.replace(/10\.2\.\(금\) 오후 1:00 · 4명/, picked.date + ' 오후 ' + picked.time + ' · ' + picked.people);
+      return o;
+    }
+
+    // 사진 자리(임시 이모지 이미지): 슬라이드·순서마다 어떤 사진을 넣을지
+    function phImg(s, k) {
+      if (s === 42) return ['chicken_a', 'chicken_b', 'noodle_a', 'noodle_b'][k];
+      if (s === 49) return (isNoodle() ? ['noodle_a', 'noodle_b', 'chicken_b', 'chicken_a'] : ['chicken_a', 'chicken_b', 'noodle_b', 'noodle_a'])[k];
+      if (s === 43 || s === 48) return (isNoodle() ? ['noodle_a', 'noodle_b'] : ['chicken_a', 'chicken_b'])[k];
+      if (s === 44) return isNoodle() ? 'noodle_big' : 'chicken_big';
+      return ['boat_a', 'boat_b', 'dosan_a', 'dosan_b'][k];
+    }
+
+    function layers(s) {
+      let ph = 0;
+      let lastName = null;
+      const CAT = ['한식', '국수', '중식', '선착장', '국가유산'];
+      (LAY[s] || []).forEach((e) => {
+        if (e[0] === 'p') {
+          const d = document.createElement('div');
+          d.className = 'p10-pic';
+          d.style.cssText = 'left:' + pct(e[2]) + ';top:' + pct(e[3]) + ';width:' + pct(e[4]) + ';height:' + pct(e[5]);
+          const l = e[6], t = e[7], r = e[8], b = e[9];
+          const bw = 100 / (1 - l - r), bh = 100 / (1 - t - b);
+          d.innerHTML = '<img src="img/p10_img' + e[1] + '.png" alt="" style="width:' + bw + '%;height:' + bh + '%;left:' + (-l * bw) + '%;top:' + (-t * bh) + '%">';
+          screen.appendChild(d);
+        } else if (e[0] === 's') {
+          const d = document.createElement('div');
+          if (e[6] && (s === 43 || s === 48) && ph === 0) {
+            const bg = document.createElement('div');
+            bg.className = 'p10-shp';
+            bg.style.cssText = 'left:0;top:71.8%;width:100.2%;height:23.2%;background:#fff';
+            screen.appendChild(bg);
+          }
+          if (e[6]) {
+            d.className = 'p10-ph';
+            d.style.backgroundImage = "url('img/p10_ph_" + phImg(s, ph++) + ".png')";
+          } else {
+            d.className = 'p10-shp';
+            d.style.background = e[5];
+          }
+          d.style.left = pct(e[1]); d.style.top = pct(e[2]); d.style.width = pct(e[3]); d.style.height = pct(e[4]);
+          screen.appendChild(d);
+        } else {
+          if (LISTS.includes(s) && lastName && CAT.includes(e[1])) {
+            const sp = document.createElement('span');
+            sp.textContent = dyn(e[1], s);
+            sp.style.cssText = 'margin-left:9px;font-weight:400;color:#666;font-size:.85em';
+            lastName.appendChild(sp);
+            return;
+          }
+          const d = document.createElement('div');
+          d.className = 'p10-ov';
+          d.textContent = dyn(e[1], s);
+          if (e[9] === '#0070C0') lastName = d;
+          const dm = s === 44 && /^10\.(\d) \(.\)$/.exec(e[1]);
+          if (dm) {
+            const k = Number(dm[1]) - 1;
+            const chip = document.createElement('div');
+            chip.className = 'p10-chip44';
+            chip.style.left = pct(3.5 + 23.9 * k);
+            screen.appendChild(chip);
+            d.classList.add('p10-d44');
+            d.style.left = pct(3.5 + 23.9 * k);
+            screen.appendChild(d);
+            return;
+          }
+          d.style.cssText = 'left:' + pct(e[10] === 'l' ? e[2] + 2.3 + (s === 42 ? 1.3 : 0) : e[2]) + ';top:' + pct(e[3]) + ';width:' + pct(e[4]) + ';height:' + pct(e[5]) + ';font-size:' + (e[7] * PT * (LISTS.includes(s) && e[7] >= 8 ? 0.55 : (s === 44 && e[7] >= 6 ? 0.82 : 1))) + 'px;font-weight:' + (e[8] ? 700 : 500) +
+            (e[6] ? ';background:' + e[6] : '') + (e[9] ? ';color:' + e[9] : '') + (e[10] === 'ctr' ? ';text-align:center' : '') + (e[6] === '#999999' ? ';color:#111' : '');
+          // 식당 이름(제목)은 가운데 정렬이 아니라 원래 앱 제목처럼 한 줄 왼쪽 정렬 (기획서의 가운데 정렬은 잘못)
+          if (e[10] === 'ctr' && e[1] === '국특원 찜닭' && e[6] !== '#F7F7F7') {
+            d.style.textAlign = 'left';
+            d.style.whiteSpace = 'nowrap';
+            const dy = s === 44 ? -1.3 : s === 47 ? 0 : (e[3] < 20 ? -1.04 : 0);
+            d.style.top = pct(e[3] + dy);
+            if (dy) d.style.height = pct(e[5] - dy);
+            d.style.paddingLeft = (s === 44 ? 7.7 : s === 47 ? 2.4 : (e[3] < 20 ? 15.7 : 8.5)) + 'px';
+          }
+          screen.appendChild(d);
+        }
+      });
+    }
+
+    function hot(name, onClick, cls) {
+      const r = HIT[name];
+      const b = document.createElement('button');
+      b.className = 'p10-hot' + (cls ? ' ' + cls : '');
+      b.dataset.hit = name;
+      b.style.cssText = 'left:' + pct(r[0]) + ';top:' + pct(r[1]) + ';width:' + pct(r[2]) + ';height:' + pct(r[3]);
+      b.addEventListener('click', onClick);
+      screen.appendChild(b);
+      BoxEdit.padEl(b, name, HOT);
+      return b;
+    }
+
+    function render() {
+      const st = STEPS[i];
+      say(st.bubble, st.pose || 'main');
+      $('p10Done').classList.add('is-off');
+      screen.innerHTML = '';
+      showIf(input, false);
+      showIf(nextBtn, false);
+      showIf($('p10Opts'), !!st.opts);
+      $('p10Opts').innerHTML = '';
+      clearFingers();
+
+      if (st.home) { screen.innerHTML = '<div class="app-home is-sky"><div class="phone-status is-dark"></div><button type="button" class="app-icon is-dark" id="p10App"><i style="background:#fff"><img src="../../resources/img/app/logo_navermap.png" alt="" style="object-fit:contain"></i>네이버 지도</button><div class="phone-nav"></div></div>'; initPhoneBars();
+        $('p10App').addEventListener('click', () => { playClick(); go(); });
+        pointFingerAt($('p10App'), fgo('app'));
+      }
+      else if (!st.form) layers(st.s);
+
+      if (st.hot && !st.home) {
+        const hs = st.hot.map((n) => hot(n, () => { playClick(); go(); }, 'hit-pulse'));
+        pointFingerAt(hs[0], fgo(st.hot[0]));
+      }
+      if (st.rows) {
+        st.rows.forEach((row) => {
+          hot(row.r, (ev) => {
+            const b = ev.currentTarget;
+            if (row.wrong) {
+              playWrong();
+              b.classList.remove('is-wrong');
+              void b.offsetWidth;
+              b.classList.add('is-wrong');
+              say(row.wrong, st.pose || 'main');
+              return;
+            }
+            if (row.pick) picked.restaurant = row.pick;
+            if (st.last) { playCorrect(); $('p10Done').classList.remove('is-off'); return; }
+            if (row.right) playCorrect(); else playClick();
+            go();
+          }, row.off ? 'is-off' : (st.rows.some((x) => x.wrong || x.right) ? '' : 'hit-pulse'));
+        });
+      }
+      if (st.opts) {
+        st.opts.forEach((t) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'card-btn js-sfx';
+          b.dataset.sound = 'sound/click.mp3';
+          b.innerHTML = t;
+          b.addEventListener('click', () => {
+            if (st.last) { playCorrect(); $('p10Done').classList.remove('is-off'); return; }
+            playClick();
+            go();
+          });
+          $('p10Opts').appendChild(b);
+        });
+      }
+      if (st.input) {
+        input.textContent = st.input;
+        showIf(input, true);
+      }
+      if (st.form === 'reserve') reserveForm();
+      if (st.form === 'confirm') confirmForm();
+      if (st.next) showIf(nextBtn, true);
+    }
+
+    input.addEventListener('click', () => { playClick(); go(); });
+    nextBtn.addEventListener('click', () => go());
+
+    const DOW = ['일', '월', '화', '수', '목', '금', '토'];
+    const HOL = { 3: '개천절', 5: '대체휴일', 9: '한글날' };
+    const fdate = (d) => '10. ' + d + '. (' + DOW[(d + 3) % 7] + ')';
+
+    // 45p: 인원 → 날짜 → 시간 순서로 처음 선택(그 뒤 변경은 자유), 셋 다 고르면 다음 활성
+    function reserveForm() {
+      let cal = DOW.map((d, c) => '<div class="f-wd" style="left:' + (113 + 142.4 * c) + 'px">' + d + '</div>').join('');
+      for (let d = 1; d <= 31; d++) {
+        const c = (d + 3) % 7, r = Math.floor((d + 3) / 7);
+        const red = c === 0 || HOL[d];
+        cal += '<button class="f-d' + (red ? ' is-red' : '') + '" data-d="' + d + '" style="left:' + (113 + 142.4 * c - 71) + 'px;top:' + (1009 + 147 * r - 73) + 'px">' + d + (HOL[d] ? '<small>' + HOL[d] + '</small>' : '') + '</button>';
+      }
+      const people = [2, 3, 4, 5].map((n, k) => '<button class="f-chip" data-p="' + n + '명" style="left:' + (42 + 177 * k) + 'px">' + n + '명</button>').join('');
+      const times = ['12:00', '1:00', '2:00', '3:00'].map((t, k) => '<button data-t="' + t + '" style="left:' + (42 + 253 * k) + 'px">' + t + '</button>').join('');
+      const f = document.createElement('div');
+      f.className = 'f';
+      f.innerHTML =
+        '<div class="f-stat"></div><div class="f-head">예약하기<span class="f-x"></span></div>' +
+        '<div class="f-scroll" id="fScroll"><div class="f-in" id="fIn" style="height:1700px">' +
+        '<div class="f-card f-gray" style="top:60px;height:192px;border-radius:36px;padding:38px 40px"><p style="margin:0;font:400 36px \'Pretendard\';color:#777">2~5명 · <span style="color:#2f6bf5">신청후확정</span></p><p style="margin:14px 0 0;font:700 48px \'Pretendard\'">예약 ›</p></div>' +
+        '<p class="f-t" style="top:307px">' + IC_P + '인원을 선택해 주세요</p>' + people +
+        '<p class="f-t" id="fHead2" style="top:629px">' + IC_C + '날짜 · 시간을 선택해 주세요</p>' +
+        '<div class="f-mon"><span>‹</span>2026. 10<span>›</span></div>' + cal +
+        '<div class="f-time is-hide" id="fTime"><p>오후</p>' + times + '</div>' +
+        '<p class="f-toast is-hide" id="fToast">인원을 먼저 선택해주세요.</p>' +
+        '</div></div>' +
+        '<div class="f-bar"><button class="f-btn is-sub" style="left:42px;width:491px">닫기</button><button class="f-btn is-main" id="fNext" style="left:552px;width:486px" disabled>다음</button></div><div class="f-nav"></div>';
+      screen.appendChild(f);
+
+      const sel = (sel, el) => f.querySelectorAll(sel).forEach((b) => b.classList.toggle('is-on', b === el));
+      const check = () => { $('fNext').disabled = !(picked.people && picked.date && picked.time); };
+      const head2 = () => {
+        $('fHead2').innerHTML = IC_C + (picked.date ? picked.date.replace(/^10\.(\d+)\.\((.)\)$/, '10. $1. ($2)') : '날짜') + (picked.time ? ' · 오후 ' + picked.time : ' · 시간을 선택해 주세요');
+        if (!picked.date) $('fHead2').innerHTML = IC_C + '날짜 · 시간을 선택해 주세요';
+      };
+      f.querySelectorAll('.f-chip').forEach((b) => b.addEventListener('click', () => {
+        playClick(); sel('.f-chip', b); picked.people = b.dataset.p; check();
+      }));
+      f.querySelectorAll('.f-d').forEach((b) => b.addEventListener('click', () => {
+        if (!picked.people) {
+          const t = $('fToast');
+          t.classList.remove('is-hide');
+          clearTimeout(t.__t);
+          t.__t = setTimeout(() => t.classList.add('is-hide'), 3000);
+          return;
+        }
+        playClick(); sel('.f-d', b);
+        const d = Number(b.dataset.d);
+        picked.date = '10.' + d + '.(' + DOW[(d + 3) % 7] + ')';
+        $('fTime').classList.remove('is-hide');
+        $('fIn').style.height = '1960px';
+        head2(); check();
+        setTimeout(() => $('fScroll').scrollTo({ top: 520, behavior: 'smooth' }), 50);
+      }));
+      f.querySelectorAll('.f-time button').forEach((b) => b.addEventListener('click', () => {
+        playClick(); sel('.f-time button', b); picked.time = b.dataset.t; head2(); check();
+      }));
+      $('fNext').addEventListener('click', () => { playClick(); go(); });
+    }
+
+    // 46p: 선택 내용 확인 → 동의 체크 → 예약하기
+    function confirmForm() {
+      const f = document.createElement('div');
+      f.className = 'f';
+      f.innerHTML =
+        '<div class="f-stat"></div><div class="f-head"><span class="f-back"></span>예약하기<span class="f-x"></span></div>' +
+        '<div class="f-scroll" id="fScroll"><div class="f-in" style="height:3320px">' +
+        '<div class="f-card" style="top:16px;height:299px;border:3px solid #6b7280;padding:38px 40px"><p style="margin:0;font:700 46px \'Pretendard\'">예약</p>' +
+        '<p style="margin:20px 0 0;font:400 40px/1.5 \'Pretendard\'"><span style="color:#888">일정 · </span>' + picked.date + ' 오후 ' + picked.time + '</p><p style="margin:0;font:400 40px/1.5 \'Pretendard\'"><span style="color:#888">인원 · </span>' + picked.people + '</p></div>' +
+        '<div class="f-gray" style="top:401px;height:165px"><p class="f-t" style="left:40px;top:50px;font-size:44px">쿠폰 2개</p><p class="f-sm" style="right:115px;top:56px;font-size:40px">쿠폰 선택</p><span class="f-chev" style="top:40px"></span></div>' +
+        '<div class="f-line" style="top:660px;height:3px;left:42px;width:996px"></div>' +
+        '<p class="f-t" style="top:740px;font-size:52px">예약자 정보</p>' +
+        '<p class="f-t" style="top:858px;font-size:44px">김누리</p><p class="f-sm" style="left:42px;top:925px;font-size:40px;color:#222">010-12**-34**</p>' +
+        '<div style="position:absolute;right:42px;top:850px;width:155px;height:92px;border-radius:22px;background:#f1f2f4;font:500 36px/92px \'Pretendard\';text-align:center">변경</div>' +
+        '<div class="f-gray" style="top:1058px;height:242px"><p class="f-sm" style="left:42px;top:40px;color:#9aa0ab">업체에 요청하실 내용을 적어주세요.</p><p class="f-sm" style="right:42px;bottom:24px;font-size:30px;color:#9aa0ab">0 / 500</p></div>' +
+        '<div class="f-gray" style="top:1360px;height:100px;border-radius:50px;left:130px;width:820px"><p class="f-sm" style="left:0;width:100%;top:26px;text-align:center;font-size:34px">실제 방문자가 다르다면 정보를 추가해주세요.<i class="f-chv"></i></p></div>' +
+        '<div class="f-line" style="top:1540px;height:3px;left:42px;width:996px"></div>' +
+        '<p class="f-t" style="top:1610px;font-size:52px">예약 시 확인해 주세요.</p>' +
+        '<div class="f-gray" style="top:1740px;height:300px;padding:40px"><p style="margin:0;font:700 44px \'Pretendard\'">주차 안내</p><p style="margin:24px 0 0;font:400 40px/1.4 \'Pretendard\';color:#444">매장 전용 주차장 이용 바랍니다.</p></div>' +
+        '<div class="f-line" style="top:2130px"></div>' +
+        '<p class="f-t" style="top:2260px;font-size:52px">판매자 정보</p><span class="f-chev" style="top:2236px"></span>' +
+        '<div class="f-line" style="top:2400px;height:3px;left:42px;width:996px"></div>' +
+        '<div id="fAgree" style="position:absolute;left:42px;top:2480px;width:996px;height:120px;display:flex;align-items:center;gap:26px;cursor:pointer;font:700 50px \'Pretendard\'"><i id="fBox" style="flex:0 0 62px;height:62px;border:3px solid #c7cbd3;border-radius:50%"></i>아래 내용에 모두 동의합니다<small style="font-size:32px;color:#2f6bf5;font-weight:500">*필수</small></div>' +
+        '<div class="f-gray" style="top:2650px;height:300px"><p class="f-sm" style="left:42px;top:50px;font:600 40px \'Pretendard\';color:#222">개인정보 수집 및 이용 안내</p><span class="f-chev" style="top:36px"></span><div style="position:absolute;left:0;top:148px;width:100%;height:2px;background:#e6e8ec"></div><p class="f-sm" style="left:42px;top:200px;font:600 40px \'Pretendard\';color:#222">개인정보 제3자 제공 동의</p><span class="f-chev" style="top:186px"></span></div>' +
+        '</div></div>' +
+        '<div class="f-bar"><button class="f-btn is-sub" style="left:42px;width:200px">이전</button><button class="f-btn is-main" id="fBook" style="left:262px;width:776px" disabled>예약하기</button></div><div class="f-nav"></div>';
+      screen.appendChild(f);
+      const agree = $('fAgree');
+      pointFingerAt(agree, fgo('agree', { pulse: true }));
+      agree.addEventListener('click', () => {
+        playClick();
+        $('fBox').style.cssText += ';background:#2f6bf5;border-color:#2f6bf5';
+        $('fBox').innerHTML = ic('check', 'width="40" height="40" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:7px"');
+        $('fBook').disabled = false;
+        say('예약하기 버튼을 클릭해<br>마무리해요!', 'main');
+        pointFingerAt($('fBook'), fgo('book', { pulse: true }));
+      });
+      $('fBook').addEventListener('click', () => { playCorrect(); go(); });
+    }
+
+    // 좌표 수정 모드(?edit): 눌러야 할 곳(점선 박스)과 손가락을 눌러 방향키(1px, Shift 10px)로 맞추고 표시줄 값을 HOT·FG 표에 붙여 넣음
+    BoxEdit.stepEdit({
+      unit: 1,
+      count: STEPS.length + 1, get: () => i + 1, set: (n) => { i = n - 1; }, go: (n) => { if (n < 1) return; BoxEdit.syncStep(n); i = n - 1; render(); },
+      label: (n) => '단계 ' + n + ' / ' + STEPS.length + ' (캡처 ' + STEPS[n - 1].s + ')',
+      say, bubble, img: $('p10Char')
+    });
+    render();
+  })();
+  </script>
+</body>
+</html>

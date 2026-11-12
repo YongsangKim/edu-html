@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI의 실수, 3단계로 확인하기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 디자인 없음, 사회 디자인 문법(파란 판 + 흰 카드)으로 만든 러프한 틀 - 기획서 16p. 1단계 → 2단계 → 3단계 순서대로 눌러 설명을 확인(이미 확인한 버튼은 다시 선택 가능), 설명칸은 처음에 '?', 셋 다 확인하면 [다음] */
+
+        .p07-tabs{position:absolute;left:100px;top:190px;width:1720px;height:88px;display:flex;z-index:5}
+        .p07-tab{flex:1 1 0;min-width:0;height:94px;box-sizing:border-box;border:solid 6px var(--c-ink);border-radius:30px 30px 0 0;background:var(--c-sky);color:var(--c-white);font-family:'Cafe24 Ssurround';font-size:60px;line-height:94px;text-align:center;cursor:pointer;padding:0}
+        .p07-tab.is-selected{background:var(--c-navy);border-bottom:0}
+        .p07-tab:disabled{background:color-mix(in srgb,var(--c-sky) 55%,transparent);color:rgba(255,255,255,.55);cursor:default}
+        .p07-box{position:absolute;left:100px;top:278px;width:1720px;height:490px;box-sizing:border-box;padding:40px 20px 20px;border:solid 6px var(--c-ink);border-radius:0 0 30px 30px;background:var(--c-white);display:flex;flex-direction:column;gap:10px;overflow:hidden}
+        .p07-box h3{margin:0;font-family:'Cafe24 Ssurround';font-size:70px;line-height:1.1;color:var(--c-purple);letter-spacing:-0.06em;text-align:center}
+        .p07-box p{margin:0;font-family:'Cafe24 Ssurround';font-size:42px;line-height:1.3;color:var(--c-ink);letter-spacing:-0.06em;text-align:center}
+        .p07-box .is-sum{font-size:48px;color:var(--c-purple)}
+        .p07-box .p07-label{align-self:flex-start;margin:0 0 0 40px;padding:6px 26px 0;border-radius:16px;background:var(--c-blue);font-family:'Cafe24 Ssurround';font-size:40px;line-height:1.3;color:var(--c-white)}
+        .p07-box #p07Text{align-self:stretch;text-align:left;padding:0 40px;line-height:1.35}
+        .p07-box.is-empty{align-items:center;background:var(--c-white) url(img/p07_question.png) center / 360px auto no-repeat}
+        .p07-box.is-empty>*{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="ask-pill is-fit"><span>차례대로 버튼을 눌러 내용을 확인해 볼까요?</span></p>
+
+          <div class="p07-tabs">
+            <button type="button" class="p07-tab js-sfx" data-step="0" data-sound="sound/click.mp3">1단계</button>
+            <button type="button" class="p07-tab js-sfx" data-step="1" data-sound="sound/click.mp3" disabled>2단계</button>
+            <button type="button" class="p07-tab js-sfx" data-step="2" data-sound="sound/click.mp3" disabled>3단계</button>
+          </div>
+
+          <div class="p07-box is-empty" id="p07Box">
+            <h3 id="p07Title"></h3>
+            <p class="is-sum" id="p07Sum"></p>
+            <span class="p07-label">설명</span>
+            <p id="p07Text"></p>
+          </div>
+
+          <button type="button" class="card-btn is-start next-btn-activity is-hide js-sfx" id="p07Next" data-sound="sound/click.mp3">다음</button>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="AI의 실수, 3단계로 확인하기" data-next="page08.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const STEPS = [
+      { title: '꼼꼼하게 살펴보기', sum: 'AI가 만든 그림이나 글에 잘못된 부분이 없는지 꼼꼼하게 살펴본다.', text: '- AI가 만든 그림이나 글을 자세히 살펴봐요.<br>- 이상하거나 잘못된 부분이 있는지 확인하는 것이 중요해요!' },
+      { title: '출처를 열어 확인하고 비교하기', sum: 'AI가 알려준 출처를 직접 열어 보고, 실제 자료와 비교하여 정보가 정확한지 확인한다.', text: '- AI가 알려준 출처도 틀릴 수 있어요.<br>- 인터넷 주소를 직접 눌러 보고, 그곳에 정말 해당 정보가 있는지 확인해요.<br>- 다른 믿을 만한 자료와 비교하는 것도 중요해요!' },
+      { title: '수정하고 다시 확인하기', sum: '잘못된 부분을 바르게 수정하고, 수정한 결과를 다시 확인한다.', text: '- 잘못된 부분을 발견했다면 정확한 정보를 바탕으로 수정해요.<br>- 수정한 내용에도 실수가 없는지 다시 확인해야 해요!' },
+    ];
+    const btns = Array.from(document.querySelectorAll('[data-step]'));
+    let seen = 0;
+
+    btns.forEach((b, i) => b.addEventListener('click', () => {
+      const s = STEPS[i];
+      $('p07Box').classList.remove('is-empty');
+      $('p07Title').textContent = s.title;
+      $('p07Sum').innerHTML = s.sum;
+      $('p07Text').innerHTML = s.text;
+      btns.forEach((x) => x.classList.toggle('is-selected', x === b));
+      if (i === seen) {
+        seen++;
+        if (btns[seen]) btns[seen].disabled = false;
+        else $('p07Next').classList.remove('is-hide');
+      }
+    }));
+
+    $('p07Next').addEventListener('click', () => navigateTo('page08.html'));
+  })();
+  </script>
+</body>
+</html>

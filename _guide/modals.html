@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UI 가이드 - 팝업·모달</title>
+<link rel="stylesheet" href="../resources/css/common.css">
+<link rel="stylesheet" href="guide.css">
+<style>
+.g-code{margin:14px 0 0;padding:14px 18px;border-radius:10px;background:#1b1738;color:#e8e6ff;font:13px/1.55 Consolas,'Courier New',monospace;white-space:pre;overflow-x:auto}
+.g-diff{width:100%;border-collapse:collapse;font-size:15px;background:#fff;margin:0 0 24px}
+.g-diff th,.g-diff td{padding:8px 12px;border:1px solid #cfd6e2;text-align:left;vertical-align:top}
+.g-diff th{background:#eef1f6}
+.g-rules{margin:0 0 10px;padding-left:22px;font-size:16px;line-height:1.75;color:#2a2f3d}
+.g-rules li{margin:0 0 6px}
+.g-rules code,.g-diff code{background:#eef1f6;padding:1px 6px;border-radius:4px;font-size:14px}
+.g-item{min-width:0}
+.m-stage{background:#c2d9e9;overflow:hidden}
+.m-bgp{position:absolute;left:560px;top:40px;width:800px;height:100px;border-radius:50px;background:#fff;opacity:.9}
+.m-bgq{position:absolute;left:260px;top:240px;width:1400px;height:600px;border-radius:40px;background:#fff;opacity:.85}
+</style>
+</head>
+<body>
+<div class="g-wrap">
+<h1>팝업·모달</h1>
+<p class="g-note">공용 <code>css/common.css</code>의 모달 틀을 실제로 불러 그린 견본입니다(1920×960을 줄이고 딤까지 포함). 유형마다 이름 · 언제 쓰나 · 견본 · 복사용 마크업 · 쓰는 곳 순이며, 쓰는 곳은 확정 범위(사회 1~12차시 · 과학 1~3차시)와 gwa/05 page09 · gwa/07 page08에서만 적었습니다. 견본 문구는 실제 페이지 문구입니다. JS가 채우는 문구는 페이지 코드의 실제 문구를 넣었습니다.</p>
+<ul class="g-toc"></ul>
+<h2>공통 규칙</h2>
+
+<ul class="g-rules">
+<li><b>상자 하나</b> — 크림 바탕 · 6px 보라 테두리 · 모서리 120 · 최소 높이 256. 아바타는 상자 안 왼쪽 위(<code>left:10 · top:10</code>, 지름 224 보라 원)에 고정. 투명 캐릭터는 원 모양으로 잘림. 원이 그림에 박힌 <code>avatar_finish.png</code>는 공용 CSS가 그림 이름으로 알아서 맞춤(수식어 <code>.is-ring</code>도 있음). 본문은 왼쪽 274px부터 왼쪽 정렬, 오른쪽 여백 70.</li>
+<li><b>글자 두 단계</b> — 제목·한 줄 큰 글 80px / 본문 60px. 그 밖의 크기를 페이지에서 따로 쓰지 않음.</li>
+<li><b>상자 전체 기준 가운데</b>(캐릭터 자리 포함) — 카드 제목(수식어 없이 늘)과 알약형 <code>.avatar-popup-body.is-finish</code>의 큰 글. 값은 <code>margin-left:-204px</code>이며 페이지에서 건드리지 않음. <b>제목 자동 크기</b>: 공용 <code>initWrongPopupAutoSize</code>가 보일 때마다·문구가 바뀔 때마다 재서 80px 한 줄이면 위처럼 가운데, 두 줄 이상이면 자동으로 <code>is-small</code>(60px)이 붙으며 제목 역할을 잃고 <b>본문처럼 왼쪽 정렬</b>(<code>margin-left:0</code>, 아바타 오른쪽 본문 시작점). 페이지에 <code>is-small</code>을 미리 넣지 않음.</li>
+<li><b>예외 <code>is-left</code></b> — 한 줄 80px 제목이 아바타 원과 겹치거나 40px 미만으로 붙을 때만 그 제목에 <code>is-left</code>(카드 <code>.avatar-card-title</code>·알약 큰 글 모두)를 붙이면 가운데 대신 본문 시작점에서 왼쪽 정렬(80px 유지). 예 <code>sa/13/page07</code> “개인정보 지우기 완료!”.</li>
+<li><b>보조 문구</b> — <code>.avatar-popup-sub</code>는 늘 60px. 페이지에서 <code>style="font-size"</code>나 <code>.is-small</code>로 줄이지 않음.</li>
+<li><b>정답 팝업</b> — 아바타 + “정답이에요!” + 오른쪽 <code>icon_correct.png</code>. 퀴즈에서는 정답 효과음과 함께 <b>3초 뒤 자동으로 다음 문제</b>(버튼 없음, 기획서 일괄 규칙).</li>
+<li><b>오답 팝업</b> — 힌트 있음: <code>.hint-title</code> + <code>.avatar-popup-text.is-small</code>(60). 힌트 없음: 공용 <code>initWrongPopupAutoSize</code>가 80px 한 줄이면 큰 글자 가운데, 넘치면 자동 60(왼쪽). 페이지에 <code>is-small</code>을 미리 넣지 않음.</li>
+<li><b>버튼</b> — 모달 안 버튼은 <code>card-btn is-popup</code>이고 <code>next-btn</code>을 붙이지 않음(자간 0.2em이 붙어 글자 수에 따라 어색해짐). 눌러서 클릭음이 나도록 <code>js-sfx</code> + <code>data-sound</code>.</li>
+<li><b>줄바꿈</b> — 카드 본문에 줄 맞춤용 <code>&lt;br&gt;</code>을 넣지 않고 자연 줄바꿈(<code>text-wrap</code>도 쓰지 않음). 팝업 폭·크기는 공용 CSS가 정하고 페이지에서 지정하지 않음. 트로피 일러스트는 넣지 않음.</li>
+<li><b>지금 남은 수식어</b> — 카드: <code>.avatar-card-avatar.is-ring</code>(제목은 한 줄이면 상자 전체 기준 가운데, 필요할 때만 <code>.avatar-card-title.is-left</code>). 알약: <code>.avatar-popup-text.is-small</code>(60) · <code>.is-center</code> · <code>.avatar-popup-body.is-finish</code>(큰 글은 한 줄이면 가운데, 필요할 때만 <code>.avatar-popup-text.is-left</code>) · <code>.avatar-popup-sub.is-small|is-tight</code> · <code>.avatar-popup-avatar.is-ring</code>. 사진 카드: <code>.photo-modal.is-middle</code> · <code>.photo-card.is-small|is-contain</code>.</li>
+</ul>
+<h2>1. 정답 팝업</h2>
+<p class="g-note">퀴즈·활동에서 맞았을 때 잠깐 뜨는 팝업. 마크업은 <code>.ox-result-correct.is-avatar</code> 하나. 정답 효과음과 함께 뜨고, <b>퀴즈에서는 3초 뒤 자동으로 다음 문제로 넘어갑니다(버튼 없음)</b>. 체크는 아바타와 좌우 대칭.</p>
+<div class="g-list"><div class="g-item"><p class="g-meta"><b>한 줄 정답</b> · 문구 한 줄 + 오른쪽 체크(<code>.avatar-popup-extra</code>)<br>쓰는 곳: sa/01/page14 · sa/02/page12 · sa/03/page11<br><span class="g-local">사회 아바타</span></p><div class="g-view"><div class="g-stage m-stage"><div class="m-bgp"></div><div class="m-bgq"></div>
+<div class="ox-result-correct is-avatar" data-sound="sound/correct.mp3">
+  <div class="avatar-popup-panel">
+    <div class="avatar-popup-avatar"><img src="../resources/img/common/avatar_correct.png" alt=""></div>
+    <div class="avatar-popup-body">
+      <p class="avatar-popup-text">정답이에요!</p>
+    </div>
+    <div class="avatar-popup-extra"><img src="../resources/img/common/icon_correct.png" alt=""></div>
+  </div>
+</div></div></div><pre class="g-code">&lt;div class="ox-result-correct is-avatar is-off" data-sound="sound/correct.mp3"&gt;
+  &lt;div class="avatar-popup-panel"&gt;
+    &lt;div class="avatar-popup-avatar"&gt;&lt;img src="../../resources/img/common/avatar_correct.png" alt=""&gt;&lt;/div&gt;
+    &lt;div class="avatar-popup-body"&gt;
+      &lt;p class="avatar-popup-text"&gt;정답이에요!&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="avatar-popup-extra"&gt;&lt;img src="../../resources/img/common/icon_correct.png" alt=""&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre></div>
+<div class="g-item"><p class="g-meta"><b>한 줄 정답 (과학 아바타)</b> · 그림 파일만 다르고 구조는 같음<br>쓰는 곳: gwa/03/page02 · gwa/03/page03 · gwa/03/page04</p><div class="g-view"><div class="g-stage m-stage"><div class="m-bgp"></div><div class="m-bgq"></div>
+<div class="ox-result-correct is-avatar" data-sound="sound/correct.mp3">
+  <div class="avatar-popup-panel">
+    <div class="avatar-popup-avatar"><img src="../resources/img/common/avatar_correct_gwa.png" alt=""></div>
+    <div class="avatar-popup-body">
+      <p class="avatar-popup-text">정답이에요!</p>
+    </div>
+    <div class="avatar-popup-extra"><img src="../resources/img/common/icon_correct.png" alt=""></div>
+  </div>
+</div></div></div><pre class="g-code">&lt;div class="ox-result-correct is-avatar is-off" data-sound="sound/correct.mp3"&gt;
+  &lt;div class="avatar-popup-panel"&gt;
+    &lt;div class="avatar-popup-avatar"&gt;&lt;img src="../../resources/img/common/avatar_correct_gwa.png" alt=""&gt;&lt;/div&gt;
+    &lt;div class="avatar-popup-body"&gt;
+      &lt;p class="avatar-popup-text"&gt;정답이에요!&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="avatar-popup-extra"&gt;&lt;img src="../../resources/img/common/icon_correct.png" alt=""&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre></div>
+<div class="g-item"><p class="g-meta"><b>큰 글 + 보조 문구</b> · 정답 뒤에 한 줄 설명을 붙일 때(<code>.avatar-popup-sub</code> 60px). 문구는 JS가 채우는 곳도 있음<br>쓰는 곳: sa/02/page14 · sa/05/page02<br><span class="g-local">샘플 문구는 sa/02/page14 에서 가져옴</span></p><div class="g-view"><div class="g-stage m-stage"><div class="m-bgp"></div><div class="m-bgq"></div>
+<div class="ox-result-correct is-avatar">
+  <div class="avatar-popup-panel">
+    <div class="avatar-popup-avatar"><img src="../resources/img/common/avatar_correct.png" alt=""></div>
+    <div class="avatar-popup-body">
+      <p class="avatar-popup-text">GOOD!</p>
+      <p class="avatar-popup-sub">안전한 기사예요</p>
+    </div>
+    <div class="avatar-popup-extra"><img src="../resources/img/common/icon_correct.png" alt=""></div>
+  </div>
+</div></div></div><pre class="g-code">&lt;div class="ox-result-correct is-avatar is-off"&gt;
+  &lt;div class="avatar-popup-panel"&gt;
+    &lt;div class="avatar-popup-avatar"&gt;&lt;img src="../../resources/img/common/avatar_correct.png" alt=""&gt;&lt;/div&gt;
+    &lt;div class="avatar-popup-body"&gt;
+      &lt;p class="avatar-popup-text"&gt;GOOD!&lt;/p&gt;
+      &lt;p class="avatar-popup-sub"&gt;안전한 기사예요&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="avatar-popup-extra"&gt;&lt;img src="../../resources/img/common/icon_correct.png" alt=""&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre></div></div>
+<h2>2. 오답 팝업</h2>
+<p class="g-note">틀렸을 때 뜨는 팝업. 마크업은 <code>.ox-result-wrong.is-avatar</code> 하나이고 아바타는 공용 <code>avatar_incorrect.png</code>. 힌트 알약(<code>.hint-title</code>)이 있으면 본문은 처음부터 <code>.is-small</code>(60px). 힌트가 없으면 <b>페이지에 <code>is-small</code>을 미리 넣지 않습니다</b> — 공용 <code>initWrongPopupAutoSize</code>가 80px 한 줄이면 큰 글자 가운데, 넘치면 자동으로 60px 왼쪽 정렬로 바꿉니다.</p>
+<div class="g-list"><div class="g-item"><p class="g-meta"><b>힌트 없음 · 한 줄</b> · 80px 한 줄이면 큰 글자를 상자 가운데에<br>쓰는 곳: sa/01/page14 · gwa/03/page02 · sa/04/page02 · sa/03/page09</p><div class="g-view"><div class="g-stage m-stage"><div class="m-bgp"></div><div class="m-bgq"></div>
+<div class="ox-result-wrong is-avatar" data-sound="sound/incorrect.mp3">
+  <div class="avatar-popup-panel">
+    <div class="avatar-popup-avatar"><img src="../resources/img/common/avatar_incorrect.png" alt=""></div>
+    <div class="avatar-popup-body">
+      <p class="avatar-popup-text">문장을 다시 한 번 잘 읽어봐요.</p>
+    </div>
+  </div>
+</div></div></div><pre class="g-code">&lt;div class="ox-result-wrong is-avatar is-off" data-sound="sound/incorrect.mp3"&gt;
+  &lt;div class="avatar-popup-panel"&gt;
+    &lt;div class="avatar-popup-avatar"&gt;&lt;img src="../../resources/img/common/avatar_incorrect.png" alt=""&gt;&lt;/div&gt;
+    &lt;div class="avatar-popup-body"&gt;
+      &lt;p class="avatar-popup-text"&gt;문장을 다시 한 번 잘 읽어봐요.&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre></div>
+<div class="g-item"><p class="g-meta"><b>힌트 없음 · 긴 문구 (자동 60)</b> · 한 줄에 안 들어가면 스크립트가 알아서 <code>is-small</code>을 붙임(샘플은 붙은 뒤의 모습)<br>쓰는 곳: sa/01/page16 · sa/05/page02<br><span class="g-local">마크업에는 is-small 없음</span></p><div class="g-view"><div class="g-stage m-stage"><div class="m-bgp"></div><div class="m-bgq"></div>
+<div class="ox-result-wrong is-avatar" data-sound="sound/incorrect.mp3">
+  <div class="avatar-popup-panel">
+    <div class="avatar-popup-avatar"><img src="../resources/img/common/avatar_incorrect.png" alt=""></div>
+    <div class="avatar-popup-body">
+      <p class="avatar-popup-text is-small">이미지와 프롬프트를 다시 한 번 비교해보세요.</p>
+    </div>
+  </div>
+</div></div></div><pre class="g-code">&lt;div class="ox-result-wrong is-avatar is-off" data-sound="sound/incorrect.mp3"&gt;
+  &lt;div class="avatar-popup-panel"&gt;
+    &lt;div class="avatar-popup-avatar"&gt;&lt;img src="../../resources/img/common/avatar_incorrect.png" alt=""&gt;&lt;/div&gt;
+    &lt;div class="avatar-popup-body"&gt;
+      &lt;p class="avatar-popup-text"&gt;이미지와 프롬프트를 다시 한 번 비교해보세요.&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre></div>
+<div class="g-item"><p class="g-meta"><b>힌트 있음</b> · <code>.hint-title</code> 알약 + 본문 60px(<code>.avatar-popup-text.is-small</code>)<br>쓰는 곳: sa/02/page12 · sa/07/page05 · gwa/02/page02 · gwa/01/page11</p><div class="g-view"><div class="g-stage m-stage"><div class="m-bgp"></div><div class="m-bgq"></div>
+<div class="ox-result-wrong is-avatar" data-sound="sound/incorrect.mp3">
+  <div class="avatar-popup-panel">
+    <div class="avatar-popup-avatar"><img src="../resources/img/common/avatar_incorrect.png" alt=""></div>
+    <div class="avatar-popup-body">
+      <p class="hint-title">힌트</p>
+      <p class="avatar-popup-text is-small">문장을 다시 한 번 잘 읽어봐요.</p>
+    </div>
+  </div>
+</div></div></div><pre class="g-code">&lt;div class="ox-result-wrong is-avatar is-off" data-sound="sound/incorrect.mp3"&gt;
+  &lt;div class="avatar-popup-panel"&gt;
+    &lt;div class="avatar-popup-avatar"&gt;&lt;img src="../../resources/img/common/avatar_incorrect.png" alt=""&gt;&lt;/div&gt;
+    &lt;div class="avatar-popup-body"&gt;
+      &lt;p class="hint-title"&gt;힌트&lt;/p&gt;
+      &lt;p class="avatar-popup-text is-small"&gt;문장을 다시 한 번 잘 읽어봐요.&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre></div></div>
+<h2>3. 오답 설명 모달</h2>
+<p class="g-note">틀린 이유를 설명하고 <b>확인 버튼으로 닫는</b> 모달(자동으로 사라지지 않음). 본문은 <code>.avatar-popup-body.is-finish</code> 안 <code>.avatar-popup-sub</code>(60px, 왼쪽). <code>.avatar-modal.is-wrong</code>은 표시용 이름일 뿐 CSS 규칙은 없음.</p>
+<div class="g-list"><div class="g-item"><p class="g-meta"><b>오답 설명 + 확인</b> · 설명 문구 + 오른쪽 아래 확인 버튼<br>쓰는 곳: sa/12/page02 · sa/12/page09</p><div class="g-view"><div class="g-stage m-stage"><div class="m-bgp"></div><div class="m-bgq"></div>
+<div class="avatar-modal is-wrong">
+  <div class="avatar-popup-panel">
+    <div class="avatar-popup-avatar"><img src="../resources/img/common/avatar_incorrect.png" alt=""></div>
+    <div class="avatar-popup-body is-finish">
+      <p class="avatar-popup-sub">이 상황에서는 어떤 표지판이 필요할까요?<br>다시 한번 생각해보세요.</p>
+      <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">확인</button>
+    </div>
+  </div>
+</div></div></div><pre class="g-code">&lt;div class="avatar-modal is-wrong is-off"&gt;
+  &lt;div class="avatar-popup-panel"&gt;
+    &lt;div class="avatar-popup-avatar"&gt;&lt;img src="../../resources/img/common/avatar_incorrect.png" alt=""&gt;&lt;/div&gt;
+    &lt;div class="avatar-popup-body is-finish"&gt;
+      &lt;p class="avatar-popup-sub"&gt;이 상황에서는 어떤 표지판이 필요할까요?&lt;br&gt;다시 한번 생각해보세요.&lt;/p&gt;
+      &lt;button type="button" class="avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3"&gt;확인&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre></div></div>
+<h2>4. 완료·안내 카드</h2>
+<p class="g-note">완료·설명 안내 모달. <code>.avatar-modal</code> &gt; <code>.avatar-card</code> &gt; <code>img.avatar-card-avatar</code>(<code>avatar_finish.png</code> — 원이 그림에 박혀 있어 공용 CSS가 그림 이름으로 알아서 맞춤). 제목은 상자 전체 기준 가운데, 본문은 왼쪽 정렬, 버튼 <code>.avatar-card-btn.card-btn.is-popup</code>은 오른쪽 아래. 본문에는 줄 맞춤용 <code>&lt;br&gt;</code>을 넣지 않고 자연 줄바꿈에 맡김.</p>
+<div class="g-list"><div class="g-item"><p class="g-meta"><b>제목 + 본문</b> · 완료 제목과 설명을 함께<br>쓰는 곳: gwa/03/page03(첫 팝업) · gwa/01/page02(첫 단계)</p><div class="g-view"><div class="g-stage m-stage"><div class="m-bgp"></div><div class="m-bgq"></div>
+<div class="avatar-modal">
+  <div class="avatar-card">
+    <img class="avatar-card-avatar" src="../resources/img/common/avatar_finish.png" alt="">
+    <div class="avatar-card-body">
+      <p class="avatar-card-title">정보 분석 완료!</p>
+      <p class="avatar-card-text">각각의 음식 하나하나를 데이터 조각으로 볼 수 있고, 이런 음식들이 담긴 접시를 여러 데이터 조각이 담긴 ‘빅데이터’라고 볼 수 있어요.</p>
+    </div>
+    <a href="javascript:;" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3">→</a>
+  </div>
+</div></div></div><pre class="g-code">&lt;div class="avatar-modal is-off"&gt;
+  &lt;div class="avatar-card"&gt;
+    &lt;img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt=""&gt;
+    &lt;div class="avatar-card-body"&gt;
+      &lt;p class="avatar-card-title"&gt;정보 분석 완료!&lt;/p&gt;
+      &lt;p class="avatar-card-text"&gt;각각의 음식 하나하나를 데이터 조각으로 볼 수 있고, 이런 음식들이 담긴 접시를 여러 데이터 조각이 담긴 ‘빅데이터’라고 볼 수 있어요.&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;a href="javascript:;" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx is-arrow" data-sound="sound/click.mp3"&gt;→&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre></div>
+<div class="g-item"><p class="g-meta"><b>본문만</b> · 제목 없이 설명 한 덩어리<br>쓰는 곳: sa/10/page02 · gwa/03/page03(둘째 팝업)</p><div class="g-view"><div class="g-stage m-stage"><div class="m-bgp"></div><div class="m-bgq"></div>
+<div class="avatar-modal">
+  <div class="avatar-card">
+    <img class="avatar-card-avatar" src="../resources/img/common/avatar_finish.png" alt="">
+    <div class="avatar-card-body">
+      <p class="avatar-card-text">우리가 살아가는 지역 사회 안의 다양한 장소들을 확인하고, 그곳에서 무슨 일을 할 수 있는지 알아보았어요!</p>
+    </div>
+    <a href="page03.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+  </div>
+</div></div></div><pre class="g-code">&lt;div class="avatar-modal is-off"&gt;
+  &lt;div class="avatar-card"&gt;
+    &lt;img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt=""&gt;
+    &lt;div class="avatar-card-body"&gt;
+      &lt;p class="avatar-card-text"&gt;우리가 살아가는 지역 사회 안의 다양한 장소들을 확인하고, 그곳에서 무슨 일을 할 수 있는지 알아보았어요!&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;a href="page03.html" class="js-nav-effect avatar-card-btn card-btn is-popup js-sfx" data-sound="sound/click.mp3"&gt;다음&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre></div>
+<div class="g-item"><p class="g-meta"><b>단계형 · 1단계</b> · 여러 단계가 한 카드 안에서 바뀔 때 — <code>.step-flow</code> &gt; <code>.step-panel</code>(첫 칸만 보임). 중간 버튼은 <code>is-arrow</code>(→), 마지막은 글자 버튼<br>쓰는 곳: gwa/01/page02 · gwa/01/page03 · gwa/02/page02</p><div class="g-view"><div class="g-stage m-stage"><div class="m-bgp"></div><div class="m-bgq"></div>
+<div class="avatar-modal">
+  <div class="avatar-card">
+    <img class="avatar-card-avatar" src="../resources/img/common/avatar_finish.png" alt="">
+    <div class="step-flow">
+      <div class="step-panel">
+        <div class="avatar-card-body">
+          <p class="avatar-card-title">과일 수집 완료!</p>
+          <p class="avatar-card-text">이렇게 필요한 것을 모으는 것을 ‘수집’이라고 해요.</p>
+        </div>
+        <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup is-arrow" data-sound="sound/click.mp3">→</a>
+      </div>
+      <div class="step-panel is-hidden">
+        <div class="avatar-card-body"><p class="avatar-card-text">이제 수집한 과일들을 가지고 종류별로 분류하러 가볼까요?</p></div>
+        <a href="page03.html" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup" data-sound="sound/click.mp3">시작하기</a>
+      </div>
+    </div>
+  </div>
+</div></div></div><pre class="g-code">&lt;div class="avatar-modal is-off"&gt;
+  &lt;div class="avatar-card"&gt;
+    &lt;img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt=""&gt;
+    &lt;div class="step-flow"&gt;
+      &lt;div class="step-panel"&gt;
+        &lt;div class="avatar-card-body"&gt;
+          &lt;p class="avatar-card-title"&gt;과일 수집 완료!&lt;/p&gt;
+          &lt;p class="avatar-card-text"&gt;이렇게 필요한 것을 모으는 것을 ‘수집’이라고 해요.&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup is-arrow" data-sound="sound/click.mp3"&gt;→&lt;/a&gt;
+      &lt;/div&gt;
+      &lt;div class="step-panel is-hidden"&gt;
+        &lt;div class="avatar-card-body"&gt;&lt;p class="avatar-card-text"&gt;이제 수집한 과일들을 가지고 종류별로 분류하러 가볼까요?&lt;/p&gt;&lt;/div&gt;
+        &lt;a href="page03.html" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup" data-sound="sound/click.mp3"&gt;시작하기&lt;/a&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre></div>
+<div class="g-item"><p class="g-meta"><b>단계형 · 2단계</b> · 같은 마크업의 둘째 칸(<code>is-hidden</code>이 빠진 모습)<br>쓰는 곳: gwa/01/page02 · gwa/01/page03</p><div class="g-view"><div class="g-stage m-stage"><div class="m-bgp"></div><div class="m-bgq"></div>
+<div class="avatar-modal">
+  <div class="avatar-card">
+    <img class="avatar-card-avatar" src="../resources/img/common/avatar_finish.png" alt="">
+    <div class="step-flow">
+      <div class="step-panel is-hidden">
+        <div class="avatar-card-body">
+          <p class="avatar-card-title">과일 수집 완료!</p>
+          <p class="avatar-card-text">이렇게 필요한 것을 모으는 것을 ‘수집’이라고 해요.</p>
+        </div>
+        <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup is-arrow" data-sound="sound/click.mp3">→</a>
+      </div>
+      <div class="step-panel">
+        <div class="avatar-card-body"><p class="avatar-card-text">이제 수집한 과일들을 가지고 종류별로 분류하러 가볼까요?</p></div>
+        <a href="page03.html" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup" data-sound="sound/click.mp3">시작하기</a>
+      </div>
+    </div>
+  </div>
+</div></div></div><pre class="g-code">&lt;div class="avatar-modal is-off"&gt;
+  &lt;div class="avatar-card"&gt;
+    &lt;img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt=""&gt;
+    &lt;div class="step-flow"&gt;
+      &lt;div class="step-panel"&gt;
+        &lt;div class="avatar-card-body"&gt;
+          &lt;p class="avatar-card-title"&gt;과일 수집 완료!&lt;/p&gt;
+          &lt;p class="avatar-card-text"&gt;이렇게 필요한 것을 모으는 것을 ‘수집’이라고 해요.&lt;/p&gt;
+        &lt;/div&gt;
+        &lt;a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup is-arrow" data-sound="sound/click.mp3"&gt;→&lt;/a&gt;
+      &lt;/div&gt;
+      &lt;div class="step-panel is-hidden"&gt;
+        &lt;div class="avatar-card-body"&gt;&lt;p class="avatar-card-text"&gt;이제 수집한 과일들을 가지고 종류별로 분류하러 가볼까요?&lt;/p&gt;&lt;/div&gt;
+        &lt;a href="page03.html" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup" data-sound="sound/click.mp3"&gt;시작하기&lt;/a&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre></div></div>
+<h2>5. 알약형 완료 팝업</h2>
+<p class="g-note"><code>.avatar-popup-panel</code> 안에 큰 글 “좋아요!” + 설명 + 다음 버튼. 카드형과 모양은 같고, 큰 글은 <code>.avatar-popup-body.is-finish</code>가 상자 전체 기준 가운데로 보냄. 버튼 없는 짧은 안내 팝업(아래 둘째 칸)도 같은 틀.</p>
+<div class="g-list"><div class="g-item"><p class="g-meta"><b>좋아요! + 설명 + 다음</b> · 활동 마무리<br>쓰는 곳: sa/04/page06 · sa/07/page05 · sa/07/page09 · sa/12/page09</p><div class="g-view"><div class="g-stage m-stage"><div class="m-bgp"></div><div class="m-bgq"></div>
+<div class="avatar-modal">
+  <div class="avatar-popup-panel">
+    <div class="avatar-popup-avatar"><img src="../resources/img/common/avatar_correct.png" alt=""></div>
+    <div class="avatar-popup-body is-finish">
+      <p class="avatar-popup-text">좋아요!</p>
+      <p class="avatar-popup-sub">친구의 감정을 살펴보고 알맞은 표현을 선택했어요!</p>
+      <a href="page07.html" class="js-nav-effect avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3">다음</a>
+    </div>
+  </div>
+</div></div></div><pre class="g-code">&lt;div class="avatar-modal is-off"&gt;
+  &lt;div class="avatar-popup-panel"&gt;
+    &lt;div class="avatar-popup-avatar"&gt;&lt;img src="../../resources/img/common/avatar_correct.png" alt=""&gt;&lt;/div&gt;
+    &lt;div class="avatar-popup-body is-finish"&gt;
+      &lt;p class="avatar-popup-text"&gt;좋아요!&lt;/p&gt;
+      &lt;p class="avatar-popup-sub"&gt;친구의 감정을 살펴보고 알맞은 표현을 선택했어요!&lt;/p&gt;
+      &lt;a href="page07.html" class="js-nav-effect avatar-popup-next card-btn is-popup js-sfx" data-sound="sound/click.mp3"&gt;다음&lt;/a&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre></div>
+<div class="g-item"><p class="g-meta"><b>짧은 안내 (버튼 없음)</b> · 아바타 + 한 줄 안내, 본문 60px(<code>.is-small</code>)<br>쓰는 곳: sa/02/page03 · sa/04/page06<br><span class="g-local">아바타 avatar_quiz.png</span></p><div class="g-view"><div class="g-stage m-stage"><div class="m-bgp"></div><div class="m-bgq"></div>
+<div class="avatar-modal">
+  <div class="avatar-popup-panel">
+    <div class="avatar-popup-avatar"><img src="../resources/img/common/avatar_quiz.png" alt=""></div>
+    <div class="avatar-popup-body">
+      <p class="avatar-popup-text is-small">이모지를 눌러 스스로를 칭찬해봐요.</p>
+    </div>
+  </div>
+</div></div></div><pre class="g-code">&lt;div class="avatar-modal is-off"&gt;
+  &lt;div class="avatar-popup-panel"&gt;
+    &lt;div class="avatar-popup-avatar"&gt;&lt;img src="../../resources/img/common/avatar_quiz.png" alt=""&gt;&lt;/div&gt;
+    &lt;div class="avatar-popup-body"&gt;
+      &lt;p class="avatar-popup-text is-small"&gt;이모지를 눌러 스스로를 칭찬해봐요.&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre></div></div>
+<h2>6. 사진 모달</h2>
+<p class="g-note">정답 뒤에 사진과 설명을 보여 주는 모달(<code>.hint-quiz-correct.photo-modal</code> &gt; <code>.photo-card</code> + 확인 버튼). 직업 힌트 퀴즈는 <code>initJobHintQuiz</code>가 이 마크업을 안에서 그려 주므로 페이지에 직접 쓰지 않음. 변형: <code>.photo-modal.is-middle</code>(세로 가운데) · <code>.photo-card.is-small</code> · <code>.is-contain</code>. 이 카드는 아바타가 없는 흰 카드라 위 틀(크림 상자)과 다름.</p>
+<div class="g-list"><div class="g-item"><p class="g-meta"><b>사진 + 정답 문구</b> · 사진 위에 정답 제목, 아래에 설명, 아래쪽 확인 버튼<br>쓰는 곳: sa/01/page02 · sa/09/page02 (<code>initJobHintQuiz</code>) · sa/02/page03(페이지 전용 CSS)<br><span class="g-local">샘플 그림은 sa/01 것</span></p><div class="g-view"><div class="g-stage m-stage"><div class="m-bgp"></div><div class="m-bgq"></div>
+<div class="hint-quiz-correct photo-modal" data-sound="sound/correct.mp3">
+  <div class="photo-card">
+    <div class="photo-card-img" style="background-image:url('../sa/01/img/p02_photo_barista.png')"></div>
+    <p class="photo-card-title">정답이에요!</p>
+    <p class="photo-card-text">바리스타는 카페에서 커피와 여러 가지 음료를 만들어 손님에게 제공해요.</p>
+  </div>
+  <button type="button" class="hint-quiz-confirm card-btn is-popup js-sfx" data-sound="sound/click.mp3">확인</button>
+</div></div></div><pre class="g-code">&lt;div class="hint-quiz-correct photo-modal is-off" data-sound="sound/correct.mp3"&gt;
+  &lt;div class="photo-card"&gt;
+    &lt;div class="photo-card-img" style="background-image:url('img/p02_photo_barista.png')"&gt;&lt;/div&gt;
+    &lt;p class="photo-card-title"&gt;정답이에요!&lt;/p&gt;
+    &lt;p class="photo-card-text"&gt;바리스타는 카페에서 커피와 여러 가지 음료를 만들어 손님에게 제공해요.&lt;/p&gt;
+  &lt;/div&gt;
+  &lt;button type="button" class="hint-quiz-confirm card-btn is-popup js-sfx" data-sound="sound/click.mp3"&gt;확인&lt;/button&gt;
+&lt;/div&gt;</pre></div></div>
+<h2>7. 예·아니오 퀴즈 (confirm-quiz)</h2>
+<p class="g-note">예/아니오로 판단하는 흰 팝업(<code>.confirm-quiz</code> &gt; <code>.confirm-quiz-panel</code>). 패널을 <code>.confirm-quiz-question</code> · <code>-correct</code> · <code>-wrong</code> 세 장 겹쳐 두고 <code>hidden</code>으로 바꿔 보여 주며, <code>data-next-quiz</code>/<code>data-next-href</code>로 다음 팝업에 이어 붙임(기능 Z). 이 팝업은 아바타가 없고 버튼이 그림 이미지.</p>
+<div class="g-list"><div class="g-item"><p class="g-meta"><b>질문 패널</b> · 예/아니오 두 버튼<br>쓰는 곳: sa/01/page12<br><span class="g-local">복사용은 패널 하나만 적음 · 실제로는 3장 + hidden</span></p><div class="g-view"><div class="g-stage m-stage"><div class="m-bgp"></div><div class="m-bgq"></div>
+<div class="confirm-quiz p14-confirm-quiz">
+  <div class="confirm-quiz-panel confirm-quiz-question">
+    <p class="confirm-quiz-title"><img class="confirm-quiz-icon" src="../resources/img/common/icon_warning.png" alt="">주의</p>
+    <p class="confirm-quiz-text">AI로 만든 사진을 실제 나의 모습인 것처럼<br>다른 사람을 속여도 될까요?</p>
+    <div class="confirm-quiz-choices">
+      <button class="confirm-quiz-choice" data-correct="false">
+        <img src="../sa/01/img/p14_btn_yes.png" class="js-img-swap js-sfx"   data-sound="sound/click.mp3" alt="예">
+      </button>
+      <button class="confirm-quiz-choice" data-correct="true">
+        <img src="../sa/01/img/p14_btn_no.png" class="js-img-swap js-sfx"   data-sound="sound/click.mp3" alt="아니오">
+      </button>
+    </div>
+  </div>
+</div></div></div><pre class="g-code">&lt;div class="confirm-quiz p14-confirm-quiz hidden"&gt;
+  &lt;div class="confirm-quiz-panel confirm-quiz-question"&gt;
+    &lt;p class="confirm-quiz-title"&gt;&lt;img class="confirm-quiz-icon" src="../../resources/img/common/icon_warning.png" alt=""&gt;주의&lt;/p&gt;
+    &lt;p class="confirm-quiz-text"&gt;AI로 만든 사진을 실제 나의 모습인 것처럼&lt;br&gt;다른 사람을 속여도 될까요?&lt;/p&gt;
+    &lt;div class="confirm-quiz-choices"&gt;
+      &lt;button class="confirm-quiz-choice" data-correct="false"&gt;
+        &lt;img src="img/p14_btn_yes.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_yes_on.png" data-src-over="img/p14_btn_yes_over.png" data-sound="sound/click.mp3" alt="예"&gt;
+      &lt;/button&gt;
+      &lt;button class="confirm-quiz-choice" data-correct="true"&gt;
+        &lt;img src="img/p14_btn_no.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_no_on.png" data-src-over="img/p14_btn_no_over.png" data-sound="sound/click.mp3" alt="아니오"&gt;
+      &lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre></div>
+<div class="g-item"><p class="g-meta"><b>정답 패널</b> · 확인 버튼으로 다음 팝업(<code>data-next-quiz</code>)이나 페이지로<br>쓰는 곳: sa/01/page12</p><div class="g-view"><div class="g-stage m-stage"><div class="m-bgp"></div><div class="m-bgq"></div>
+<div class="confirm-quiz p14-confirm-quiz">
+  <div class="confirm-quiz-panel confirm-quiz-correct">
+    <p class="confirm-quiz-title">잘했어요</p>
+    <p class="confirm-quiz-text">맞아요! AI로 만들어진 모습은 실제 내 모습이 아니예요.<br>다른 사람에게 AI로 만든 모습이라고 말해야 해요.</p>
+    <button class="confirm-quiz-choice confirm-quiz-ok" data-next-quiz=".p14-confirm-quiz-2">
+      <img src="../sa/01/img/p14_btn_confirm.png" class="js-img-swap js-sfx"   data-sound="sound/click.mp3" alt="확인">
+    </button>
+  </div>
+</div></div></div><pre class="g-code">&lt;div class="confirm-quiz p14-confirm-quiz hidden"&gt;
+  &lt;div class="confirm-quiz-panel confirm-quiz-correct"&gt;
+    &lt;p class="confirm-quiz-title"&gt;잘했어요&lt;/p&gt;
+    &lt;p class="confirm-quiz-text"&gt;맞아요! AI로 만들어진 모습은 실제 내 모습이 아니예요.&lt;br&gt;다른 사람에게 AI로 만든 모습이라고 말해야 해요.&lt;/p&gt;
+    &lt;button class="confirm-quiz-choice confirm-quiz-ok" data-next-quiz=".p14-confirm-quiz-2"&gt;
+      &lt;img src="img/p14_btn_confirm.png" class="js-img-swap js-sfx" data-src-alt="img/p14_btn_confirm_on.png" data-src-over="img/p14_btn_confirm_over.png" data-sound="sound/click.mp3" alt="확인"&gt;
+    &lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre></div></div>
+<h2>이 틀을 쓰지 않는 특이 모달</h2>
+<p class="g-note">위 일곱 유형으로 만들지 않고 페이지·기능별로 따로 두는 모달 목록입니다. 새 모달이 필요하면 먼저 위 유형에 맞는지 보고, 맞지 않을 때만 아래처럼 따로 둡니다.</p>
+<table class="g-diff"><tr><th style="width:260px">종류</th><th>어디에 있나</th></tr><tr><td><b>아바타 없는 카드</b></td><td>gwa/13 page05 힌트 카드 · gwa/13 page09 <code>.p09-pk</code> · gwa/04 page14 참고자료(사용자가 다른 팝업으로 바꿀 예정)</td></tr><tr><td><b>Teachable 모의 화면</b></td><td>gwa/15 page09</td></tr><tr><td><b>레시피 팝업</b></td><td>gwa/15 page02</td></tr><tr><td><b>이미지형 오답 레이어</b></td><td><code>.line-result-wrong</code> 등 통이미지 레이어</td></tr><tr><td><b>예·아니오 퀴즈</b></td><td>위 7. 항목(<code>.confirm-quiz</code>) — 흰 패널·이미지 버튼이라 크림 상자 틀과 다름</td></tr><tr><td><b>사진 모달 · 집 속 물건 설명</b></td><td><code>.photo-modal</code>(위 6.) · <code>.hunt-modal</code>(예 gwa/05 page05 — 카드 틀을 쓰되 제목 줄바꿈 금지)</td></tr><tr><td><b>채팅 팝업</b></td><td><code>.talk-popup</code>(sa/04 page06 등) · <code>#chatappPopup</code></td></tr></table>
+</div>
+<script src="guide.js"></script>
+<script>initGuideTabs(wrapH2Sections(document.querySelector('.g-wrap')));if (window.scaleGuideViews) window.scaleGuideViews();</script>
+</body>
+</html>

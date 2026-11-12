@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>삼촌의 이사를 도와라!</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .p02-main {
+          position: absolute;
+          left: 0;
+          top: 120px;
+          width: 1920px;
+          height: 960px;
+          background: url('img/p02_bg_full.png') 0 -120px / 1920px 1080px no-repeat;
+        }
+
+        .p02-start {
+          position: absolute;
+          left: 1509px;
+          top: 540px;
+          min-width: 0;
+          width: 328px;
+          height: 80px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 50px;
+          padding: 4px 0 0;
+          text-decoration: none;
+          white-space: nowrap;
+        }
+
+        .p02-tray {
+          position: absolute;
+          left: 55px;
+          top: 655px;
+          width: 1810px;
+          height: 285px;
+          background: #023186;
+          border: 5px solid #91b9e7;
+          border-radius: 0 28px 28px 28px;
+          box-sizing: border-box;
+        }
+
+        .p02-tray-tab {
+          position: absolute;
+          left: -5px;
+          top: -100px;
+          width: 430px;
+          height: 101px;
+          background: #023186;
+          border: 5px solid #91b9e7;
+          border-bottom: none;
+          border-radius: 28px 28px 0 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: 'Cafe24 Ssurround', sans-serif;
+          font-size: 60px;
+          color: #ffffff;
+          letter-spacing: -0.05em;
+          padding-top: 14px;
+          box-sizing: border-box;
+          z-index: 2;
+        }
+
+        .p02-slider-view {
+          position: absolute;
+          left: 182px;
+          top: 36px;
+          width: 1435px;
+          height: 205px;
+          overflow: hidden;
+        }
+
+        .p02-slider-track {
+          display: flex;
+          width: calc(1435px * 2);
+          transition: transform 0.4s ease-in-out;
+        }
+        .p02-slider-track.is-page2 {
+          transform: translateX(-1435px);
+        }
+
+        .p02-page {
+          display: flex;
+          gap: 25px;
+          width: 1435px;
+          flex: 0 0 1435px;
+        }
+
+        .p02-card {
+          position: relative;
+          flex: none;
+          width: 267px;
+          height: 205px;
+          box-sizing: border-box;
+          border: 4px solid var(--c-sky);
+          border-radius: 24px;
+          background: #ffffff;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-end;
+          padding: 0 6px;
+          font-family: 'Cafe24 Ssurround', sans-serif;
+          font-size: 32px;
+          line-height: 1;
+          color: var(--c-ink);
+          letter-spacing: -0.05em;
+          white-space: nowrap;
+        }
+
+        .p02-card i {
+          position: absolute;
+          left: 50%;
+          top: 82px;
+          transform: translate(-50%, -50%);
+          width: 150px;
+          height: 112px;
+          background: center / contain no-repeat;
+          pointer-events: none;
+        }
+        .p02-card[data-key=tv] i { width: 158px; height: 118px; }
+        .p02-card[data-key=aircon] i { width: 177px; height: 80px; }
+        .p02-card[data-key=sensor] i { width: 109px; height: 89px; }
+        .p02-card[data-key=light] i { width: 160px; height: 93px; }
+        .p02-card[data-key=robot] i { width: 152px; height: 106px; }
+        .p02-card[data-key=hub] i { width: 145px; height: 129px; }
+        .p02-card[data-key=cctv] i { width: 150px; height: 134px; }
+        .p02-card[data-key=fridge] i { width: 150px; height: 140px; }
+        .p02-card[data-key=purifier] i { width: 150px; height: 140px; }
+        .p02-card[data-key=washer] i { width: 150px; height: 140px; }
+
+        .p02-card span {
+          display: block;
+        }
+
+        .p02-arrow {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 124px;
+          height: 119px;
+          padding: 0;
+          border: 0;
+          background: none;
+          cursor: pointer;
+          z-index: 10;
+        }
+        .p02-arrow img {
+          display: block;
+        }
+        .p02-arrow-prev {
+          left: 26px;
+        }
+        .p02-arrow-next {
+          right: 26px;
+        }
+        .p02-arrow.is-disabled {
+          opacity: 0.35;
+          pointer-events: none;
+          cursor: default;
+        }
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="p02-main">
+          <p class="ask-pill"><span>삼촌의 새 집을 살펴보세요.</span></p>
+
+          <a href="page03.html" class="card-btn p02-start js-nav-effect js-sfx" data-sound="sound/click.mp3">이사 짐 나르기</a>
+
+          <div class="p02-tray">
+            <div class="p02-tray-tab">이삿짐 목록</div>
+            <div class="p02-slider-view">
+              <div class="p02-slider-track">
+                <div class="p02-page" data-page="1">
+                  <div class="p02-card" data-key="tv"><i style="background-image:url('img/p03_dev_tv.png')"></i><span>스마트 TV</span></div>
+                  <div class="p02-card" data-key="aircon"><i style="background-image:url('img/p03_dev_aircon.png')"></i><span>스마트 에어컨</span></div>
+                  <div class="p02-card" data-key="sensor"><i style="background-image:url('img/p03_dev_sensor.png')"></i><span>온습도 센서</span></div>
+                  <div class="p02-card" data-key="light"><i style="background-image:url('img/p03_dev_light.png')"></i><span>스마트 전등</span></div>
+                  <div class="p02-card" data-key="robot"><i style="background-image:url('img/p03_dev_robot.png')"></i><span>스마트 로봇청소기</span></div>
+                </div>
+                <div class="p02-page" data-page="2">
+                  <div class="p02-card" data-key="hub"><i style="background-image:url('img/p03_dev_hub.png')"></i><span>AI 허브</span></div>
+                  <div class="p02-card" data-key="cctv"><i style="background-image:url('img/p03_dev_cctv.png')"></i><span>CCTV 카메라</span></div>
+                  <div class="p02-card" data-key="fridge"><i style="background-image:url('img/p03_dev_fridge.png')"></i><span>스마트 냉장고</span></div>
+                  <div class="p02-card" data-key="purifier"><i style="background-image:url('img/p03_dev_purifier.png')"></i><span>스마트 공기청정기</span></div>
+                  <div class="p02-card" data-key="washer"><i style="background-image:url('img/p03_dev_washer.png')"></i><span>스마트 세탁기</span></div>
+                </div>
+              </div>
+            </div>
+
+            <button type="button" class="p02-arrow p02-arrow-prev is-disabled" aria-label="이전 기기 목록">
+              <img src="../../resources/img/common/btn_arrow_left.png" class="js-img-swap js-sfx" data-src-alt="../../resources/img/common/btn_arrow_left_on.png" data-src-over="../../resources/img/common/btn_arrow_left_over.png" data-swap-reset="200" data-sound="sound/click.mp3" alt="">
+            </button>
+            <button type="button" class="p02-arrow p02-arrow-next" aria-label="다음 기기 목록">
+              <img src="../../resources/img/common/btn_arrow_right.png" class="js-img-swap js-sfx" data-src-alt="../../resources/img/common/btn_arrow_right_on.png" data-src-over="../../resources/img/common/btn_arrow_right_over.png" data-swap-reset="200" data-sound="sound/click.mp3" alt="">
+            </button>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="삼촌의 이사를 도와라!" data-next="page03.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const start = document.querySelector('.p02-start');
+    if (start) {
+      start.addEventListener('click', () => start.classList.add('is-pressed'));
+    }
+    const btnPrev = document.querySelector('.p02-arrow-prev');
+    const btnNext = document.querySelector('.p02-arrow-next');
+    const track = document.querySelector('.p02-slider-track');
+
+    btnNext.addEventListener('click', () => {
+      track.classList.add('is-page2');
+      btnNext.classList.add('is-disabled');
+      btnPrev.classList.remove('is-disabled');
+    });
+
+    btnPrev.addEventListener('click', () => {
+      track.classList.remove('is-page2');
+      btnPrev.classList.add('is-disabled');
+      btnNext.classList.remove('is-disabled');
+    });
+  })();
+  </script>
+</body>
+</html>

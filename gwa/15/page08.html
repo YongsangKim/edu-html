@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>커피주문 확인 AI가 틀리는 이유</title>
+  <link rel="stylesheet" href="../../resources/css/common.css">
+  <style>
+    .p08-board {
+      position: absolute;
+      left: 54px;
+      top: 100px;
+      width: 1812px;
+      height: 824px;
+      background: #266cc8;
+      border-radius: 24px;
+      box-shadow: inset 0 4px 12px rgba(8, 28, 68, 0.25);
+      z-index: 1;
+    }
+    .line-quiz {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 960px;
+      z-index: 2;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+    .line-quiz-svg {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 960px;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .line-quiz-line {
+      stroke: #ffe600;
+      stroke-width: 12;
+      stroke-linecap: round;
+    }
+    .line-quiz-temp {
+      stroke: #ffe600;
+      stroke-width: 12;
+      stroke-linecap: butt;
+      stroke-dasharray: 18 14;
+    }
+    .line-dot {
+      position: absolute;
+      top: 50%;
+      box-sizing: border-box;
+      border-radius: 50%;
+      cursor: grab;
+      transition: background 0.15s;
+      touch-action: none;
+    }
+    .line-dot::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 130px;
+      height: 130px;
+    }
+    .line-dot.is-on {
+      background: #ffe600 !important;
+    }
+
+    .line-quiz .line-item.left.p08-left-card {
+      position: absolute;
+      left: 250px;
+      width: 210px;
+      height: 250px;
+      padding: 0;
+      box-sizing: border-box;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      filter: drop-shadow(0 10px 16px rgba(12, 28, 64, 0.4));
+      transition: transform 0.15s ease, filter 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      touch-action: none;
+      cursor: grab;
+    }
+    .line-quiz .line-item.left.p08-left-card:hover:not([data-matched="true"]) {
+      transform: translateY(-3px) scale(1.02);
+      filter: drop-shadow(0 14px 22px rgba(12, 28, 64, 0.5));
+    }
+    .line-quiz .line-item.left.p08-left-card:active:not([data-matched="true"]) {
+      cursor: grabbing;
+    }
+    .line-quiz .line-item.left.p08-left-card.row-1 { top: 170px; }
+    .line-quiz .line-item.left.p08-left-card.row-2 { top: 415px; }
+    .line-quiz .line-item.left.p08-left-card.row-3 { top: 660px; }
+
+    .p08-photo-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 0;
+      background: transparent;
+      overflow: visible;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: none;
+    }
+    .p08-photo-inner > img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      z-index: 2;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .line-quiz .line-item.left.p08-left-card .line-dot {
+      right: -80px;
+      width: 44px;
+      height: 44px;
+      margin-top: -22px;
+      background: #0f2942;
+      border: 6px solid #fff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.28);
+    }
+
+    .line-quiz .line-item.right.p08-right-card {
+      position: absolute;
+      left: 902px;
+      width: 806px;
+      height: 196px;
+      border-radius: 26px;
+      border: 5px solid #fff;
+      box-shadow: 0 10px 0 0px rgba(12, 28, 64, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      box-sizing: border-box;
+      z-index: 2;
+      touch-action: none;
+      cursor: pointer;
+    }
+    .line-quiz .line-item.right.p08-right-card.row-1 {
+      top: 197px;
+      background: #ffc35b;
+    }
+    .line-quiz .line-item.right.p08-right-card.row-2 {
+      top: 442px;
+      background: #ff5ce1;
+    }
+    .line-quiz .line-item.right.p08-right-card.row-3 {
+      top: 687px;
+      background: #5bc2ff;
+    }
+    .p08-card-dashed {
+      width: 100%;
+      height: 100%;
+      border-radius: 18px;
+      border: 4px dashed rgba(255, 255, 255, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cafe24 Ssurround';
+      font-size: 52px;
+      font-weight: 900;
+      color: #0f2347;
+      letter-spacing: -1px;
+    }
+    .line-quiz .line-item.right.p08-right-card .line-dot {
+      left: -96px;
+      width: 44px;
+      height: 44px;
+      margin-top: -22px;
+      background: #0f2942;
+      border: 6px solid #fff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.28);
+      cursor: default;
+    }
+    .p08-ask{z-index:4;box-shadow:0 15px 0 0 rgba(25, 93, 185, 0.8)}
+  </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="p08-ask ask-pill is-fit"><span>AI가 잘 확인할 수 있도록 하려면 어떻게 해야 할까요?</span></p>
+          <div class="p08-board"></div>
+
+          <div class="line-quiz" id="p08Quiz">
+            <div class="line-item left p08-left-card row-1" data-id="1">
+              <div class="p08-photo-inner" id="p08Photo1">
+                <img src="img/p07_photo_2.png" alt="흐리게 찍힌 1샷 아이스 커피">
+              </div>
+              <span class="line-dot"></span>
+            </div>
+
+            <div class="line-item left p08-left-card row-2" data-id="2">
+              <div class="p08-photo-inner" id="p08Photo2">
+                <img src="img/p07_photo_3.png" alt="손가락이 같이 찍힌 2샷 아이스 커피">
+              </div>
+              <span class="line-dot"></span>
+            </div>
+
+            <div class="line-item left p08-left-card row-3" data-id="3">
+              <div class="p08-photo-inner" id="p08Photo3">
+                <img src="img/p07_photo_4.png" alt="확대해서 일부만 찍힌 1샷 아이스 커피">
+              </div>
+              <span class="line-dot"></span>
+            </div>
+
+            <div class="line-item right p08-right-card row-1" data-id="2">
+              <span class="line-dot"></span>
+              <div class="p08-card-dashed">손을 치우고 찍어요.</div>
+            </div>
+
+            <div class="line-item right p08-right-card row-2" data-id="3">
+              <span class="line-dot"></span>
+              <div class="p08-card-dashed">커피가 다 보이게 찍어요.</div>
+            </div>
+
+            <div class="line-item right p08-right-card row-3" data-id="1">
+              <span class="line-dot"></span>
+              <div class="p08-card-dashed">선명하게 찍어요.</div>
+            </div>
+
+            <svg class="line-quiz-svg" width="1920" height="960"></svg>
+          </div>
+
+          <div class="line-result-wrong is-off" data-sound="sound/incorrect.mp3"></div>
+
+          <div class="avatar-modal is-off" id="p08FinishModal">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">AI가 알아보지 못한 사진을 살펴보고, 어떻게 고치면 좋을지 알아보았어요.</p>
+                  </div>
+                  <a href="javascript:;" class="avatar-card-btn card-btn is-popup is-arrow js-nav-effect js-sfx" data-sound="sound/click.mp3" aria-label="다음">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">AI가 잘 알아보는 사진으로 지도학습을 해야 하고 정답을 알려줘서 특징을 쉽게 찾게 도와줘야 해요.</p>
+                  </div>
+                  <a href="javascript:;" class="avatar-card-btn card-btn is-popup is-arrow js-nav-effect js-sfx" data-sound="sound/click.mp3" aria-label="다음">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">이제 티처블 머신 프로그램으로 AI에게 사진과 정답을 알려주며 직접 가르쳐볼까요?</p>
+                  </div>
+                  <a href="page09.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="커피주문 확인 AI가 틀리는 이유" data-next="page09.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+    (function () {
+      const quiz = document.getElementById('p08Quiz');
+      const finishModal = document.getElementById('p08FinishModal');
+      const leftItems = Array.from(document.querySelectorAll('.line-quiz .line-item.left'));
+
+      const syncDots = () => {
+        if (!quiz) return;
+        quiz.querySelectorAll('.line-item').forEach((el) => {
+          const dot = el.querySelector('.line-dot');
+          if (dot) dot.classList.toggle('is-on', el.dataset.matched === 'true');
+        });
+      };
+
+      const checkComplete = () => {
+        syncDots();
+        const allMatched = leftItems.every((el) => el.dataset.matched === 'true');
+        if (allMatched) {
+          setTimeout(() => {
+            if (finishModal) finishModal.classList.remove('is-off');
+          }, 600);
+        }
+      };
+
+      if (quiz) {
+        quiz.addEventListener('pointerdown', (e) => {
+          const item = e.target.closest('.line-item.left');
+          if (item && item.dataset.matched !== 'true') {
+            const dot = item.querySelector('.line-dot');
+            if (dot) dot.classList.add('is-on');
+          }
+        });
+        quiz.addEventListener('pointercancel', syncDots);
+        quiz.addEventListener('pointerup', () => {
+          syncDots();
+          setTimeout(checkComplete, 200);
+        });
+      }
+
+      window.addEventListener('pointerup', () => {
+        setTimeout(checkComplete, 250);
+      });
+
+      const obs = new MutationObserver(() => {
+        syncDots();
+        if (leftItems.every((el) => el.dataset.matched === 'true')) {
+          obs.disconnect();
+          setTimeout(() => {
+            if (finishModal) finishModal.classList.remove('is-off');
+          }, 600);
+        }
+      });
+      leftItems.forEach((el) => obs.observe(el, { attributes: true, attributeFilter: ['data-matched'] }));
+    })();
+  </script>
+</body>
+</html>

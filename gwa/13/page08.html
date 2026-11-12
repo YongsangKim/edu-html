@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI처럼 특징으로 맞혀보기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .p08-pn{position:absolute;left:60px;top:175px;width:1800px;height:765px;box-sizing:border-box;border-radius:30px;background:#266cc8}
+        .p08-tb{table-layout:fixed;position:absolute;left:30px;top:30px;width:1060px;height:705px;border-collapse:separate;border-spacing:0;border-radius:20px;overflow:hidden;font-family:'Cafe24 Ssurround';letter-spacing:-0.04em}
+        .p08-tb th,.p08-tb td{text-align:center;font-weight:400;font-size:36px;line-height:1.15;border-right:solid 4px #266cc8;border-bottom:solid 4px #266cc8}
+        .p08-tb tr:first-child th{height:80px;background:var(--c-navy);color:#fff;font-size:38px}
+        .p08-tb td{background:#fff;color:var(--c-purple)}
+        .p08-tb td.nm{width:250px;background:#eef3fb;color:var(--c-navy)}
+        .p08-tb td.nm div{display:flex;align-items:center;justify-content:center;gap:6px;font-size:34px}
+        .p08-tb td.nm img{height:110px}
+        .p08-tb td.on{background:#fff4b8;box-shadow:inset 0 0 0 7px var(--c-yellow)}
+        .p08-tb tr>*:last-child{border-right:0}
+        .p08-tb tr:last-child>*{border-bottom:0}
+        .p08-ph{position:absolute;left:1120px;top:30px;width:650px;height:390px;box-sizing:border-box;border-radius:24px;background:#fff;display:flex;align-items:center;justify-content:center;gap:30px}
+        .p08-ph.is-pick{height:310px}
+        .p08-bt{display:flex;flex-direction:column;align-items:center;justify-content:center}
+        .p08-bt img{height:290px}
+        .p08-ph.is-pick .p08-bt img{height:220px}
+        .p08-tag{min-width:170px;height:70px;margin:0;padding:6px 30px 0;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border-radius:40px;border:solid 5px var(--c-ink);background:var(--c-yellow);font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-ink);white-space:nowrap}
+        .p08-ph.is-two .p08-bt{flex-direction:column;gap:10px}
+        .p08-ph.is-two .p08-bt img{height:230px}
+        .p08-ph.is-two.is-pick .p08-bt img{height:190px}
+        .p08-ph.is-two .p08-tag{position:static;min-width:140px;height:70px;font-size:46px}
+        .p08-cl{position:absolute;left:1120px;top:445px;width:650px;display:flex;flex-direction:column;gap:14px}
+        .p08-cl .check-row{min-height:0;height:86px;font-size:44px}
+        .p08-op{position:absolute;left:1120px;top:360px;width:650px;display:grid;grid-template-columns:1fr 1fr;gap:30px}
+        .p08-op .card-btn{min-width:0;width:100%;height:95px;margin:0;font-size:48px;display:flex;align-items:center;justify-content:center;padding:0}
+        .p08-nx{position:absolute;right:30px;top:615px}
+        .is-gone{display:none}
+        .p08-wrong{z-index:30}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="ask-pill is-fit"><span id="p08Pill">액체의 특징을 먼저 살펴볼까요?</span></p>
+          <div class="p08-pn">
+            <table class="p08-tb" id="p08Tb">
+              <tr><th>액체</th><th>색깔</th><th>투명한지</th><th>공기 방울</th></tr>
+              <tr><td class="nm"><div><img src="img/p08_t_water.png" alt="">물</div></td><td>색이 없어요</td><td>투명해요</td><td>없어요</td></tr>
+              <tr><td class="nm"><div><img src="img/p08_t_milk.png" alt="">우유</div></td><td>하얀색이에요</td><td>투명하지<br>않아요</td><td>없어요</td></tr>
+              <tr><td class="nm"><div><img src="img/p08_t_oj.png" alt="">오렌지<br>주스</div></td><td>주황색이에요</td><td>투명하지<br>않아요</td><td>없어요</td></tr>
+              <tr><td class="nm"><div><img src="img/p08_t_cider.png" alt="">사이다</div></td><td>색이 없어요</td><td>투명해요</td><td>있어요</td></tr>
+            </table>
+            <div class="p08-ph" id="p08Ph"></div>
+            <div class="p08-cl" id="p08Cl">
+              <div class="check-row js-sfx" data-sound="sound/click.mp3" data-c="1">색깔</div>
+              <div class="check-row js-sfx" data-sound="sound/click.mp3" data-c="2">투명한지</div>
+              <div class="check-row js-sfx" data-sound="sound/click.mp3" data-c="3">공기 방울</div>
+            </div>
+            <div class="p08-op opts is-gone" id="p08Op">
+              <a href="javascript:;" class="card-btn" data-n="물">물</a>
+              <a href="javascript:;" class="card-btn" data-n="우유">우유</a>
+              <a href="javascript:;" class="card-btn" data-n="오렌지 주스">오렌지 주스</a>
+              <a href="javascript:;" class="card-btn" data-n="사이다">사이다</a>
+            </div>
+            <a href="javascript:;" class="next-btn card-btn is-start p08-nx is-disabled is-off" id="p08Next">다음</a>
+          </div>
+
+          <div class="ox-result-wrong is-avatar is-off p08-wrong" id="p08Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body"><p class="avatar-popup-text">특징표를 다시 한번 살펴볼까요?</p></div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p08Done" style="z-index:30">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">두 액체는 보이는 특징이 같아서 구별하기 어려웠어요. 보이는 특징이 같으면, 다른 특징이 필요해요.</p>
+                  </div>
+                  <a href="javascript:;" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">최근에는 냄새나 맛을 파악하는 센서를 가진 AI가 있어서, 이런 경우에 도움이 되기도 해요.</p>
+                  </div>
+                  <a href="javascript:;" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">특징이 많을수록 AI는 더 정확하게 구별할 수 있어요. 이번에는 직접 그린 그림을 알아보는 AI를 만나볼까요?</p>
+                  </div>
+                  <a href="page09.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="AI처럼 특징으로 맞혀보기" data-next="page09.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const ROUNDS = [
+      { row: 2, ans: '우유', bottles: ['p08_milk_b.png'] },
+      { row: 3, ans: '오렌지 주스', bottles: ['p08_oj_b.png'] },
+      { row: 4, ans: '사이다', bottles: ['p08_cider_b.png'] },
+      { row: 1, ans: '물', bottles: ['p08_water_b.png', 'p08_vinegar_b.png'], two: true },
+    ];
+    const pill = $('p08Pill'), ph = $('p08Ph'), cl = $('p08Cl'), op = $('p08Op'), next = $('p08Next'), tb = $('p08Tb');
+    const rows = Array.from(cl.querySelectorAll('.check-row'));
+    const opts = Array.from(op.querySelectorAll('.card-btn'));
+    let r = 0, phase = 'A', solved = false;
+
+    const drawPh = () => {
+      const R = ROUNDS[r];
+      ph.className = 'p08-ph' + (R.two ? ' is-two' : '') + (phase === 'B' ? ' is-pick' : '');
+      ph.innerHTML = R.bottles.map((b) => '<div class="p08-bt"><img src="img/' + b + '" alt=""><p class="p08-tag">' + (solved ? (R.two ? R.ans + '?' : R.ans) : '?') + '</p></div>').join('');
+    };
+    const markCell = (c) => {
+      tb.rows[ROUNDS[r].row].cells[c].classList.add('on');
+    };
+    const pulseNext = () => {
+      rows.forEach((x) => x.classList.remove('hit-pulse'));
+      const n = rows.find((x) => !x.classList.contains('is-on'));
+      if (n) n.classList.add('hit-pulse');
+    };
+    const startRound = () => {
+      phase = 'A'; solved = false;
+      Array.from(tb.querySelectorAll('td.on')).forEach((c) => c.classList.remove('on'));
+      rows.forEach((x) => x.classList.remove('is-on', 'hit-pulse'));
+      opts.forEach((o) => o.classList.remove('is-selected'));
+      cl.classList.remove('is-gone');
+      op.classList.add('is-gone');
+      next.classList.add('is-off', 'is-disabled');
+      pill.textContent = ROUNDS[r].two ? '두 액체의 특징을 먼저 살펴볼까요?' : '액체의 특징을 먼저 살펴볼까요?';
+      drawPh();
+      pulseNext();
+    };
+    const startPick = () => {
+      phase = 'B';
+      rows.forEach((x) => x.classList.remove('hit-pulse'));
+      cl.classList.add('is-gone');
+      op.classList.remove('is-gone');
+      pill.textContent = ROUNDS[r].two ? '특징표를 보고 각각 어떤 액체인지 맞혀볼까요?' : '특징표를 보고 어떤 액체인지 맞혀볼까요?';
+      drawPh();
+    };
+
+    rows.forEach((row) => {
+      row.addEventListener('click', () => {
+        if (phase !== 'A' || row.classList.contains('is-on')) return;
+        row.classList.add('is-on');
+        markCell(Number(row.dataset.c));
+        if (rows.every((x) => x.classList.contains('is-on'))) startPick();
+        else pulseNext();
+      });
+    });
+
+    opts.forEach((o) => {
+      o.addEventListener('click', () => {
+        if (phase !== 'B' || solved) return;
+        if (o.dataset.n === ROUNDS[r].ans) {
+          playCorrect();
+          solved = true;
+          o.classList.add('is-selected');
+          next.classList.remove('is-off', 'is-disabled');
+          drawPh();
+        } else {
+          playWrong();
+          flashLayer($('p08Wrong'), 'is-off', 2000);
+        }
+      });
+    });
+
+    next.addEventListener('click', () => {
+      if (!solved) return;
+      playClick();
+      if (r < ROUNDS.length - 1) { r++; startRound(); }
+      else $('p08Done').classList.remove('is-off');
+    });
+
+    startRound();
+  })();
+  </script>
+</body>
+</html>

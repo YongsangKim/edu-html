@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>어떤 말을 전할까?</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .p05-bubble{left:62px;bottom:655px;width:475px;z-index:5;margin:0}
+        .p05-character{left:70px;top:348px;width:380px;height:582px}
+
+        .p05-panel{position:absolute;left:512px;top:39px;width:1352px;height:890px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:10px;overflow:hidden;background:#266cc8}
+        .p05-photo{width:100%;height:388px;background:var(--c-purple) center / cover no-repeat}
+        .p05-caption{width:100%;height:126px;margin:0;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;background:#faf8f9;font-family:'Cafe24 Ssurround';font-size:58px;color:var(--c-ink);letter-spacing:-0.05em}
+        .p05-opts{box-sizing:border-box;padding:44px 24px 0;display:grid;grid-template-columns:1fr 1fr;gap:41px 36px}
+        .p05-opts .card-btn{min-width:0;height:115px;padding:8px 20px 4px;font-size:46px;line-height:1.15;letter-spacing:-0.05em;word-break:keep-all}
+
+        .p05-send{position:absolute;left:261px;top:46px;width:1399px;height:595px;box-sizing:border-box;border:solid 5px #2077ec;border-radius:12px;background:var(--c-white);box-shadow:7px 10px 0 0 #bbc9e6}
+        .p05-send i{position:absolute;left:23px;top:22px;width:1345px;height:433px;;background: center / cover no-repeat}
+        .p05-send p{position:absolute;left:0;right:0;top:455px;height:130px;margin:0;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:60px;color:var(--c-ink);letter-spacing:-0.05em}
+        .p05-gauge{left:340px;top:681px;width:1215px;height:70px}
+        .p05-gauge .gauge-fill{transition:none}
+        .p05-gauge .gauge-fill.is-go{width:100%;transition:width 2.5s linear}
+        .p05-status{position:absolute;left:0;top:775px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:52px;color:var(--c-purple);letter-spacing:-0.04em}
+
+        .p05-fx{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none;overflow:hidden;z-index:20}
+        .p05-fx span{position:absolute;left:0;top:0;will-change:transform,opacity}
+        .p05-fx .is-paper{width:16px;height:26px;border-radius:3px}
+        .p05-fx .is-heart{width:58px;height:58px}
+        .p05-fx .is-heart img{display:block;width:100%;height:100%;object-fit:contain}
+
+        .p05 .is-off{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default p05">
+          <div id="p05Pick">
+            <p class="guide-bubble is-center p05-bubble" id="p05Bubble"></p>
+            <div class="char-box p05-character"><img src="img/p05_character.png" alt="메인 캐릭터"></div>
+            <div class="p05-panel">
+              <div class="p05-photo" id="p05Photo"></div>
+              <p class="p05-caption" id="p05Caption"></p>
+              <div class="p05-opts" id="p05Opts"></div>
+            </div>
+          </div>
+
+          <div class="is-off" id="p05SendView">
+            <div class="p05-send"><i id="p05SendImg"></i><p id="p05SendText"></p></div>
+            <div class="gauge is-thin is-robot p05-gauge"><div class="gauge-fill" id="p05Fill"></div></div>
+            <p class="p05-status" id="p05Status"></p>
+            <a href="javascript:;" class="js-sfx card-btn is-start next-btn-activity is-off" id="p05Next" data-sound="sound/click.mp3">다음</a>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="어떤 말을 전할까?" data-next="page06.html"></script>
+  <script src="../../resources/js/toc.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const ASK = '친구에게 어떤<br>말을 해줄까요?';
+    // 기획서 24~25p 보기 '네 덕분이'는 28p와 같은 '네 덕분에'로 맞춤
+    const ROUNDS = [
+      { caption: '시험에서 실수로 문제를 많이 틀린 친구',
+        opts: ['정말 대단해!', '다음에는 더 잘할 수 있을 거야!', '그것도 못 했어?', '축하해!'], answer: 1,
+        wrong: '친구는 지금 속상한 감정을 느끼고 있어요. 어떤 말을 해야 할까요?' },
+      { caption: '열심히 노력하여 태권도 검은 띠를 딴 친구',
+        opts: ['미안해. 내가 잘못했어.', '괜찮아. 다음에 다시 도전해보자!', '정말 대단해! 멋있다!', '고마워! 네 덕분에 힘이 나.'], answer: 2,
+        wrong: '친구는 지금 기쁘고 행복한 감정을 느끼고 있어요. 어떤 말을 해야 할까요?' },
+      { caption: '텃밭에서 기르던 작물이 시들어 슬퍼하는 친구',
+        opts: ['열심히 길렀을 텐데<br>정말 속상하겠다.', '고마워! 네 덕분에 힘이 나.', '정말 대단해! 멋있다!', '축하해. 열심히 노력했구나!'], answer: 0,
+        wrong: '친구는 지금 속상한 감정을 느끼고 있어요. 어떤 말을 해야 할까요?' }
+    ];
+
+    const bubble = $('p05Bubble');
+    const optsBox = $('p05Opts');
+    const nextBtn = $('p05Next');
+    const fill = $('p05Fill');
+    const gauge = document.querySelector('.p05-gauge');
+    const fx = document.createElement('div');
+    fx.className = 'p05-fx';
+    document.querySelector('main').appendChild(fx);
+    const COLORS = ['#ff4f8b', '#ffd83d', '#4d8bff', '#6ad17a', '#b37bff', '#ff9a3c'];
+
+    let index = 0;
+    let busy = false;
+    let bubbleTimer = null;
+    let fxRaf = null;
+
+    function clearFx() {
+      if (fxRaf) cancelAnimationFrame(fxRaf);
+      fxRaf = null;
+      fx.innerHTML = '';
+    }
+
+    function fanfare() {
+      clearFx();
+      const s = $('stage').getBoundingClientRect().width / 1920;
+      const main = fx.getBoundingClientRect();
+      const g = gauge.getBoundingClientRect();
+      const ox = (g.right - main.left) / s + 36;
+      const oy = (g.top - main.top) / s + 31.5;
+
+      const parts = [];
+      for (let i = 0; i < 36; i++) {
+        const isHeart = i < 10;
+        const el = document.createElement('span');
+        el.className = isHeart ? 'is-heart' : 'is-paper';
+        if (isHeart) el.innerHTML = '<img src="img/p13_gauge_heart.png" alt="">';
+        else el.style.background = COLORS[i % COLORS.length];
+        fx.appendChild(el);
+        const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 0.9;
+        const speed = (isHeart ? 900 : 1100) + Math.random() * 700;
+        parts.push({
+          el, isHeart,
+          x: ox, y: oy,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          rot: Math.random() * 360,
+          vr: (Math.random() - 0.5) * 900,
+          sway: Math.random() * Math.PI * 2,
+          life: 1.4 + Math.random() * 0.6
+        });
+      }
+
+      let last = performance.now();
+      let t = 0;
+      function frame(now) {
+        const dt = Math.min((now - last) / 1000, 0.05);
+        last = now;
+        t += dt;
+        let alive = 0;
+        parts.forEach((p) => {
+          if (!p.el) return;
+          p.vy += 2200 * dt;
+          p.vx *= 1 - 1.8 * dt;
+          p.vy *= 1 - (p.isHeart ? 1.2 : 2.2) * dt;
+          p.x += p.vx * dt + (p.isHeart ? 0 : Math.sin(t * 8 + p.sway) * 40 * dt);
+          p.y += p.vy * dt;
+          p.rot += p.vr * dt;
+          const fade = Math.max(0, Math.min(1, (p.life - t) / 0.4));
+          const scale = p.isHeart ? Math.min(1, 0.4 + t * 5) : 1;
+          const flip = p.isHeart ? 1 : Math.cos(t * 10 + p.sway);
+          p.el.style.transform = 'translate(' + p.x + 'px,' + p.y + 'px) translate(-50%,-50%) rotate(' + (p.isHeart ? p.rot * 0.15 : p.rot) + 'deg) scale(' + scale + ',' + (scale * flip) + ')';
+          p.el.style.opacity = fade;
+          if (fade <= 0) {
+            p.el.remove();
+            p.el = null;
+          } else {
+            alive += 1;
+          }
+        });
+        if (alive) fxRaf = requestAnimationFrame(frame);
+        else fxRaf = null;
+      }
+      fxRaf = requestAnimationFrame(frame);
+    }
+
+    function renderPick() {
+      const r = ROUNDS[index];
+      busy = false;
+      clearFx();
+      bubble.classList.remove('is-small');
+      bubble.innerHTML = ASK;
+      $('p05Photo').style.backgroundImage = "url('img/p05_sit" + (index + 1) + ".png')";
+      $('p05Caption').textContent = r.caption;
+      optsBox.innerHTML = '';
+      r.opts.forEach((o, k) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'card-btn';
+        btn.innerHTML = o;
+        btn.addEventListener('click', () => pick(k, btn));
+        optsBox.appendChild(btn);
+      });
+      $('p05SendView').classList.add('is-off');
+      $('p05Pick').classList.remove('is-off');
+    }
+
+    function pick(k, btn) {
+      if (busy) return;
+      const r = ROUNDS[index];
+      if (k !== r.answer) {
+        playWrong();
+        bubble.classList.add('is-small');
+        bubble.innerHTML = r.wrong;
+        clearTimeout(bubbleTimer);
+        bubbleTimer = setTimeout(() => { bubble.classList.remove('is-small'); bubble.innerHTML = ASK; }, 2000);
+        return;
+      }
+      busy = true;
+      clearTimeout(bubbleTimer);
+      playCorrect();
+      btn.classList.add('is-selected');
+      setTimeout(() => send(r.opts[k]), 600);
+    }
+
+    function send(message) {
+      $('p05Pick').classList.add('is-off');
+      $('p05SendView').classList.remove('is-off');
+      $('p05SendImg').style.backgroundImage = "url('img/p05_send" + (index + 1) + ".png')";
+      $('p05SendText').innerHTML = ROUNDS[index].caption;
+      $('p05Status').textContent = '마음을 전달하는 중이에요';
+      nextBtn.classList.add('is-off');
+      fill.className = 'gauge-fill';
+      void fill.offsetWidth;
+      fill.classList.add('is-go');
+      setTimeout(() => {
+        $('p05Status').textContent = '마음을 성공적으로 전달했어요!';
+        nextBtn.classList.remove('is-off');
+        fanfare();
+      }, 2600);
+    }
+
+    nextBtn.addEventListener('click', () => {
+      setTimeout(() => {
+        index += 1;
+        if (index < ROUNDS.length) renderPick();
+        else navigateTo('page06.html');
+      }, 300);
+    });
+
+    renderPick();
+  })();
+  </script>
+</body>
+</html>

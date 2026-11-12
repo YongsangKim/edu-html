@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>센서의 종류와 역할 알아보기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .line-quiz{position:absolute;left:0;top:0;width:1920px;height:960px}
+        .line-quiz-svg{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none;z-index:3}
+        .line-quiz-line{stroke:#2f6fed;stroke-width:14;stroke-linecap:round;filter:drop-shadow(0 4px 6px rgba(47,111,237,.35))}
+        .line-quiz-temp{stroke:#ffd83d;stroke-width:14;stroke-linecap:round;stroke-dasharray:18 14;filter:drop-shadow(0 4px 6px rgba(255,216,61,.5))}
+
+        .p05-item{position:absolute;z-index:2;height:132px;box-sizing:border-box;display:flex;align-items:center;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:26px;box-shadow:0 8px 0 0 rgba(27,23,56,.1);font-family:'Cafe24 Ssurround';letter-spacing:-0.05em;transition:transform .15s,box-shadow .15s,border-color .15s,background-color .15s}
+        .p05-item.left{left:70px;width:580px;padding:0 24px;cursor:grab}
+        .p05-item.left:hover:not([data-matched="true"]){transform:translateY(-2px);box-shadow:0 12px 0 0 rgba(27,23,56,.13)}
+        .p05-item.left:active:not([data-matched="true"]){cursor:grabbing}
+        .p05-item.right{left:1270px;width:580px;padding:0 32px;cursor:pointer}
+        .p05-item.right:hover:not([data-matched="true"]){border-color:#8278ff}
+
+        .p05-pic{flex:0 0 96px;width:96px;height:96px;border-radius:20px;display:flex;align-items:center;justify-content:center;margin-right:24px;border:solid 3px rgba(27,23,56,.08);background:#f4f6fa}
+        .p05-pic img{max-width:78px;max-height:78px;object-fit:contain;display:block}
+        .p05-item.is-red .p05-pic{background:#ffebeb}
+        .p05-item.is-blue .p05-pic{background:#ebf3ff}
+        .p05-item.is-purple .p05-pic{background:#f4ebff}
+        .p05-item.is-orange .p05-pic{background:#fff3eb}
+        .p05-item.is-green .p05-pic{background:#ebfbf0}
+
+        .p05-name{font-size:48px;color:var(--c-ink);line-height:1}
+        .p05-desc{margin:0;font-size:42px;line-height:1.2;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all}
+
+        .line-dot{position:absolute;top:50%;width:44px;height:44px;margin-top:-22px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:50%;background:#b6c3da;box-shadow:0 3px 6px rgba(0,0,0,.15);cursor:grab;transition:all .2s ease}
+        .line-dot::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:130px;height:130px}
+        .p05-item.left .line-dot{right:-74px}
+        .p05-item.right .line-dot{left:-74px;cursor:default}
+
+        .line-dot.is-on{background:#ffd83d;border-color:#48159c;box-shadow:0 0 0 7px rgba(255,216,61,.55);transform:scale(1.1)}
+        .p05-item[data-matched="true"]{background:#f3f7ff;border-color:#2f6fed}
+        .p05-item[data-matched="true"] .p05-name{color:#2f6fed}
+        .p05-item[data-matched="true"] .p05-desc{color:#2f6fed}
+        .p05-item[data-matched="true"] .line-dot{background:#2f6fed;border-color:#023187;box-shadow:0 0 0 5px rgba(47,111,237,.35)}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="ask-pill is-fit"><span>센서의 이름과 알맞은 역할을 선으로 이어 볼까요?</span></p>
+
+          <div class="line-quiz" id="p05Quiz">
+            <div class="p05-item left line-item left is-red" data-id="1" style="top:176px"><span class="p05-pic"><img src="img/p07_obj_thermo.png" alt="온·습도 센서"></span><span class="p05-name">온·습도 센서</span><span class="line-dot"></span></div>
+            <div class="p05-item left line-item left is-blue" data-id="2" style="top:328px"><span class="p05-pic"><img src="img/p07_obj_motion.png" alt="동작 센서"></span><span class="p05-name">동작 센서</span><span class="line-dot"></span></div>
+            <div class="p05-item left line-item left is-purple" data-id="3" style="top:480px"><span class="p05-pic"><img src="img/p07_obj_pressure.png" alt="압력 센서"></span><span class="p05-name">압력 센서</span><span class="line-dot"></span></div>
+            <div class="p05-item left line-item left is-orange" data-id="4" style="top:632px"><span class="p05-pic"><img src="img/p07_obj_leak.png" alt="침수 센서"></span><span class="p05-name">침수 센서</span><span class="line-dot"></span></div>
+            <div class="p05-item left line-item left is-green" data-id="5" style="top:784px"><span class="p05-pic"><img src="img/p07_obj_gas.png" alt="가스 센서"></span><span class="p05-name">가스 센서</span><span class="line-dot"></span></div>
+
+            <div class="p05-item right line-item right is-red" data-id="1" style="top:176px"><span class="line-dot"></span><p class="p05-desc">주변의 차가움과 뜨거움을 숫자로 감지해요.</p></div>
+            <div class="p05-item right line-item right is-purple" data-id="3" style="top:328px"><span class="line-dot"></span><p class="p05-desc">누르는 힘과 무게를 감지해요.</p></div>
+            <div class="p05-item right line-item right is-green" data-id="5" style="top:480px"><span class="line-dot"></span><p class="p05-desc">연기나 위험가스를 감지해요.</p></div>
+            <div class="p05-item right line-item right is-blue" data-id="2" style="top:632px"><span class="line-dot"></span><p class="p05-desc">사람이나 물체의 움직임을 감지해요.</p></div>
+            <div class="p05-item right line-item right is-orange" data-id="4" style="top:784px"><span class="line-dot"></span><p class="p05-desc">물이 새거나 차오르는 것을 감지해요.</p></div>
+            <svg class="line-quiz-svg" width="1920" height="960"></svg>
+          </div>
+          <div class="line-result-wrong is-off" data-sound="sound/incorrect.mp3"></div>
+
+          <div class="avatar-modal is-off" id="p05Done">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-title">정말 잘했어요!</p>
+                    <p class="avatar-card-text">각 센서의 역할을 정확하게 분류했어요.</p>
+                  </div>
+                  <a href="page06.html" class="avatar-card-btn card-btn is-popup is-arrow js-nav-effect js-sfx" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">이제 이 센서들이 집 안 어디에 설치되어 있는지 직접 찾아볼까요?</p>
+                  </div>
+                  <a href="page06.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="센서의 종류와 역할 알아보기" data-next="page06.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const quiz = $('p05Quiz');
+    const left = Array.from(quiz.querySelectorAll('.line-item.left'));
+    const sync = () => quiz.querySelectorAll('.line-item').forEach((el) => {
+      const isM = el.dataset.matched === 'true';
+      el.querySelector('.line-dot').classList.toggle('is-on', isM);
+    });
+    quiz.addEventListener('pointerdown', (e) => {
+      const item = e.target.closest('.line-item.left');
+      if (item && item.dataset.matched !== 'true') item.querySelector('.line-dot').classList.add('is-on');
+    });
+    quiz.addEventListener('pointercancel', sync);
+    quiz.addEventListener('pointerup', () => {
+      sync();
+      setTimeout(() => {
+        if (left.every((el) => el.dataset.matched === 'true')) $('p05Done').classList.remove('is-off');
+      }, 700);
+    });
+  })();
+  </script>
+</body>
+</html>

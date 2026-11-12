@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>액체의 특징 찾아보기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .p06-pn{position:absolute;left:60px;top:175px;width:1800px;height:480px;box-sizing:border-box;border-radius:30px;background:#266cc8}
+        .p06-ph{position:absolute;left:30px;top:30px;width:420px;height:420px;box-sizing:border-box;border-radius:24px;background:#fff;display:flex;align-items:center;justify-content:center}
+        .p06-ph img{height:340px}
+        .p06-ph b{position:absolute;left:50%;top:-4px;transform:translate(-50%,-50%);height:64px;padding:6px 40px 0;box-sizing:border-box;display:flex;align-items:center;border-radius:32px;background:var(--c-navy);font-family:'Cafe24 Ssurround';font-weight:400;font-size:44px;color:#fff;white-space:nowrap}
+        .p06-tb{table-layout:fixed;position:absolute;left:480px;top:30px;width:1290px;height:420px;border-collapse:separate;border-spacing:0;border-radius:20px;overflow:hidden;font-family:'Cafe24 Ssurround';letter-spacing:-0.04em}
+        .p06-tb th,.p06-tb td{text-align:center;font-weight:400;font-size:42px;line-height:1.15;border-right:solid 4px #266cc8;border-bottom:solid 4px #266cc8}
+        .p06-tb th{background:var(--c-navy);color:#fff}
+        .p06-tb tr>th:first-child{background:#5b3fb8;width:240px}
+        .p06-tb tr:first-child>th:first-child{background:var(--c-navy)}
+        .p06-tb td{background:#fff;color:var(--c-purple)}
+        .p06-tb tr>*:last-child{border-right:0}
+        .p06-tb tr:last-child>*{border-bottom:0}
+        .p06-opts.quiz-opts.is-row{top:720px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="ask-pill is-fit is-small"><span>앞에서 완성한 표와 사진을 보고, 어떤 액체인지 맞춰 볼까요?</span></p>
+          <div class="p06-pn">
+            <div class="p06-ph"><b id="p06Tag">?</b><img id="p06Pic" src="img/p06_oj.png" alt=""></div>
+            <table class="p06-tb">
+              <tr><th>특징</th><th>물</th><th>우유</th><th>오렌지 주스</th></tr>
+              <tr><th>색깔</th><td>색이 없어요</td><td>하얀색</td><td>주황색</td></tr>
+              <tr><th>투명한지</th><td>투명해요</td><td>투명하지<br>않아요</td><td>투명하지<br>않아요</td></tr>
+            </table>
+          </div>
+          <div class="answer-pick-quiz quiz-opts is-row p06-opts" id="p06Opts">
+            <button type="button" class="card-btn is-quiz">우유</button>
+            <button type="button" class="card-btn is-quiz">오렌지 주스</button>
+            <button type="button" class="card-btn is-quiz">물</button>
+          </div>
+
+          <div class="ox-result-wrong is-avatar is-off" id="p06Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">사진과 표의 내용이 일치하는지<br>다시 한번 확인해볼까요?</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p06Fin">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">색깔과 투명한지를 살펴보니 처음 보는 컵 속의 액체도 구분할 수 있었어요.</p>
+                  </div>
+                  <a href="javascript:;" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">AI도 특징을 활용해 액체를 구분해요. 이제 우리가 AI가 되어 특징으로 구분해볼까요?</p>
+                  </div>
+                  <a href="page07.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="액체의 특징 찾아보기" data-next="page07.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const QUIZ = [
+      { pic: 'img/p06_oj.png', answer: '오렌지 주스' },
+      { pic: 'img/p06_water.png', answer: '물' }
+    ];
+    const opts = Array.from(document.querySelectorAll('#p06Opts .card-btn'));
+    const tag = $('p06Tag');
+    const pic = $('p06Pic');
+    const wrong = $('p06Wrong');
+    let q = 0;
+    let busy = false;
+
+    opts.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (busy) return;
+        if (btn.textContent.trim() === QUIZ[q].answer) {
+          busy = true;
+          playCorrect();
+          tag.textContent = QUIZ[q].answer;
+          setTimeout(() => {
+            q += 1;
+            if (q < QUIZ.length) {
+              tag.textContent = '?';
+              pic.src = QUIZ[q].pic;
+              busy = false;
+            } else {
+              $('p06Fin').classList.remove('is-off');
+            }
+          }, 1000);
+        } else {
+          playWrong();
+          btn.classList.remove('is-wrong');
+          void btn.offsetWidth;
+          btn.classList.add('is-wrong');
+          flashLayer(wrong);
+        }
+      });
+    });
+  })();
+  </script>
+</body>
+</html>

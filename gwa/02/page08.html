@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>직접 만드는 막대그래프와 꺾은선그래프</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .ask-pill{font-size:64px;letter-spacing:-0.1em}
+
+        .temp-table{position:absolute;left:35px;top:174px;width:617px;height:619px;box-sizing:border-box;border-collapse:separate;border-spacing:0;border:solid 4px #023186;border-radius:14px;overflow:hidden;background:#dff6ff;
+          font-family:'Cafe24 Ssurround';text-align:center}
+        .temp-table th{height:56px;padding-top:4px;background:#266cc8;color:var(--c-white);font-weight:normal;font-size:42px;letter-spacing:-0.04em}
+        .temp-table th:first-child{width:237px}
+        .temp-table th + th{background:#69a0e8}
+        .temp-table td{padding:2px 0 0;font-size:48px;line-height:1;letter-spacing:-0.04em;color:var(--c-ink);background:#b7d9f7}
+        .temp-table td + td{background:#dff6ff;color:#266cc8}
+        .temp-table tr:nth-child(even) td{background:#b7dff5}
+        .temp-table tr:nth-child(even) td + td{background:#dffffb}
+        .temp-table tr.is-now td{background:#c5c2f6;color:#49225f;box-shadow:inset 0 3px 0 #a1b2e5,inset 0 -3px 0 #a1b2e5}
+        .temp-table tr.is-now td + td{background:#e5dcfb;color:#5166d2;box-shadow:inset 0 3px 0 #c1c9eb,inset 0 -3px 0 #c1c9eb}
+
+        .p08-talk{position:absolute;left:35px;top:790px;width:725px;height:140px;box-sizing:border-box;border:solid 4px var(--c-purple);border-radius:24px;background:var(--c-white);box-shadow:0 8px 0 0 rgba(72,21,156,.18);overflow:hidden;z-index:3}
+        .p08-talk img{position:absolute;left:-33px;bottom:-35px;width:auto;display:block}
+        .p08-talk p{position:absolute;left:230px;right:10px;top:0;bottom:0;margin:0;display:flex;align-items:center;flex-direction:column;justify-content:center;text-align:center;font-family:'Cafe24 Ssurround';font-size:48px;line-height:1.1;letter-spacing:-0.06em;color:var(--c-purple);word-break:keep-all}
+        .p08-talk p span{display:block;white-space:nowrap}
+        .p08-talk p.is-long{font-size:36px}
+        .p08-ic{width:46px;height:46px;margin:0 3px;flex:0 0 auto;vertical-align:middle}
+
+        .p08-chart{position:absolute;left:672px;top:174px;width:1213px;height:756px;box-sizing:border-box;border:solid 4px #2a6dd0;border-radius:20px;background:var(--c-white)}
+        .p08-plot{position:absolute;left:100px;top:56px;width:1048px;height:532px;border-left:solid 4px var(--c-ink);border-bottom:solid 4px var(--c-ink);
+          background-image:linear-gradient(#dde3ee 2px,transparent 2px);background-size:100% 88.667px}
+        .p08-yl{position:absolute;left:-76px;width:60px;text-align:right;font-family:'Cafe24 Ssurround';font-size:26px;color:#5b5e6e;transform:translateY(-50%)}
+        .p08-yt{position:absolute;left:-82px;top:-42px;font-family:'Cafe24 Ssurround';font-size:24px;color:#5b5e6e;white-space:nowrap}
+        .p08-col{position:absolute;bottom:0;width:78px;margin-left:-39px}
+        .p08-bar{position:absolute;left:0;bottom:0;width:100%;box-sizing:border-box;border:solid 3px #ff7a1a;border-bottom:0;background:var(--c-white)}
+        .p08-fill{position:absolute;left:0;bottom:0;width:100%;background:#ff7a1a;transition:height .25s ease}
+        .p08-col.is-active .p08-bar{border-width:0;box-shadow:0 0 0 5px #ff4ff9}
+        .p08-col.is-pick{cursor:pointer}
+        .p08-col.is-glow .p08-bar{animation:p08-glow 1s ease-in-out infinite}
+        @keyframes p08-glow{50%{box-shadow:0 0 0 8px var(--c-yellow),0 0 30px 8px var(--c-yellow)}}
+        .p08-col.is-answer .p08-fill{background:var(--c-yellow)}
+        .p08-col.is-answer .p08-bar{border-width:0;box-shadow:0 0 0 5px #ff7a1a}
+        .p08-val{position:absolute;left:-20px;width:118px;text-align:center;font-family:'Cafe24 Ssurround';font-size:28px;line-height:1;color:var(--c-ink);letter-spacing:-0.04em}
+        .p08-x{position:absolute;bottom:-46px;left:-20px;width:118px;text-align:center;font-family:'Cafe24 Ssurround';font-size:28px;color:var(--c-ink);letter-spacing:-0.04em}
+        .deg{font-family:'Pretendard', sans-serif;line-height:1;font-weight:500}
+
+        .p08-band{position:absolute;left:100px;top:632px;width:1062px;height:110px;box-sizing:border-box;border-radius:18px;background:#2a6dd0}
+        .p08-ctrl{position:absolute;left:10px;top:8px;width:552px;height:94px;box-sizing:border-box;border-radius:14px;background:#0a3190}
+        .p08-ctrl button{position:absolute;top:12px;width:228px;height:54px;min-width:0;padding:4px 0 0;display:flex;align-items:center;justify-content:center;gap:6px;font-size:44px;line-height:1;letter-spacing:-0.04em}
+        .p08-ctrl button:first-child{left:30px}
+        .p08-ctrl button + button{left:290px}
+        .p08-ctrl button:disabled{opacity:.55}
+        .p08-ctrl .p08-ic{margin:0 0 6px;width:42px}
+        .p08-start{position:absolute;top:18px;width:96px;height:64px;margin-left:-48px;min-width:0;padding:4px 0 0;font-size:30px;box-sizing:border-box}
+        .p08-start.is-selected{pointer-events:none}
+        .p08-start:disabled{opacity:.45;cursor:default}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="ask-pill is-fit"><span id="p08Ask">기온표를 보고 알맞은 높이까지 블록을 쌓아 보세요!</span></p>
+
+          <table class="temp-table"><thead><tr><th>시간</th><th>기온(<span class="deg">℃</span>)</th></tr></thead><tbody id="p08Rows"></tbody></table>
+
+          <div class="p08-chart">
+            <div class="p08-plot" id="p08Plot"><span class="p08-yt">기온(<span class="deg">℃</span>)</span></div>
+            <div class="p08-band" id="p08Band">
+              <div class="p08-ctrl">
+                <button type="button" class="card-btn js-sfx" data-sound="sound/click.mp3" id="p08Minus" aria-label="1도 내리기" disabled></button>
+                <button type="button" class="card-btn js-sfx" data-sound="sound/click.mp3" id="p08Plus" aria-label="1도 올리기" disabled></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="p08-talk">
+            <img src="img/p08_character.png" alt="">
+            <p id="p08Sub"></p>
+          </div>
+
+          <div class="ox-result-correct is-avatar is-off" id="p08Right">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_correct_gwa.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">잘했어요!</p>
+                <p class="avatar-popup-sub" id="p08RightText">기온표와 같은 높이로 막대를 쌓았어요.</p>
+              </div>
+              <div class="avatar-popup-extra"><img src="../../resources/img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p08Done">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body"><p class="avatar-card-text">막대의 높이를 비교하니 15시가 가장 덥고, 6시가 가장 춥다는 것을 한눈에 알 수 있어요!</p></div>
+                  <a href="page09.html" class="avatar-card-btn card-btn is-popup is-arrow js-nav-effect js-sfx" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body"><p class="avatar-card-text">막대그래프는 수치의 크기를 한눈에 비교하기 좋아요.</p></div>
+                  <a href="page09.html" class="avatar-card-btn card-btn is-popup is-arrow js-nav-effect js-sfx" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body"><p class="avatar-card-text">이번엔, 막대그래프의 점을 이어 꺾은선 그래프로 표현해볼까요?</p></div>
+                  <a href="page09.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">확인</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="직접 만드는 막대그래프와 꺾은선그래프" data-next="page09.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const TEMPS = [15, 15, 12, 20, 25, 30, 20, 15, 14];
+    const FIXED = 5;
+    const MAX = 30;
+    const PX = 532 / MAX;
+    const PITCH = 117;
+    const QUIZ = [
+      { ask: '하루 중 기온이 가장 높은 시간은 언제인가요?', sub: '막대가 가장 높이 쌓인 시간을 클릭해보세요.', answer: 5 },
+      { ask: '하루 중 기온이 가장 낮은 시간은 언제인가요?', sub: '막대가 가장 낮게 쌓인 시간을 클릭해보세요.', answer: 2 }
+    ];
+    const plot = $('p08Plot');
+    const band = $('p08Band');
+    const plus = $('p08Plus');
+    const minus = $('p08Minus');
+
+    const ic = (sign, color) => '<svg class="p08-ic" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="20" fill="' + color + '"/><rect x="9" y="17" width="22" height="6" rx="3" fill="#fff"/>' + (sign === '+' ? '<rect x="17" y="9" width="6" height="22" rx="3" fill="#fff"/>' : '') + '</svg>';
+    plus.innerHTML = '<span>1도</span>' + ic('+', '#1b2f8f');
+    minus.innerHTML = '<span>1도</span>' + ic('-', '#1b2f8f');
+    $('p08Sub').innerHTML = '<span>시작버튼을 누른 뒤</span><span>' + ic('+', '#48159c') + ic('-', '#48159c') + ' 버튼을 클릭해요.</span>';
+
+    for (let v = 0; v <= MAX; v += 5) {
+      const l = document.createElement('span');
+      l.className = 'p08-yl';
+      l.style.top = (532 - v * PX) + 'px';
+      l.textContent = v;
+      plot.appendChild(l);
+    }
+
+    const rows = TEMPS.map((t, i) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + i * 3 + '시</td><td>' + t + '</td>';
+      $('p08Rows').appendChild(tr);
+      return tr;
+    });
+
+    const cols = TEMPS.map((t, i) => {
+      const col = document.createElement('div');
+      col.className = 'p08-col';
+      col.style.left = (56 + PITCH * i) + 'px';
+      col.style.height = '532px';
+      col.innerHTML = '<div class="p08-bar" style="height:' + t * PX + 'px"><div class="p08-fill"></div></div><span class="p08-val"></span><span class="p08-x">' + i * 3 + '시</span>';
+      plot.appendChild(col);
+      return { el: col, fill: col.querySelector('.p08-fill'), val: col.querySelector('.p08-val'), now: i < FIXED ? t : 0, target: t };
+    });
+    const draw = (c) => {
+      c.fill.style.height = (c.now * PX) + 'px';
+      c.val.style.bottom = c.now ? (c.now * PX + 6) + 'px' : '8px';
+      c.val.textContent = c.now + '도';
+    };
+    cols.forEach(draw);
+
+    let active = null;
+    let built = 0;
+    const starts = cols.slice(FIXED).map((c, k) => {
+      const i = FIXED + k;
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'card-btn p08-start';
+      b.textContent = '시작';
+      b.style.left = (56 + PITCH * i + 4) + 'px';
+      b.addEventListener('click', () => {
+        playClick();
+        active = c;
+        b.classList.add('is-selected');
+        cols.forEach((x) => x.el.classList.toggle('is-active', x === c));
+        rows.forEach((r, ri) => r.classList.toggle('is-now', ri === i));
+        starts.forEach((s) => { if (!s.classList.contains('is-selected')) s.disabled = true; });
+        plus.disabled = false;
+        minus.disabled = false;
+      });
+      band.appendChild(b);
+      return b;
+    });
+
+    function step(d) {
+      if (!active) return;
+      active.now = Math.max(0, Math.min(MAX, active.now + d));
+      draw(active);
+      if (active.now !== active.target) return;
+      const i = cols.indexOf(active);
+      const b = starts[i - FIXED];
+      b.textContent = '완성';
+      active.el.classList.remove('is-active');
+      rows[i].classList.remove('is-now');
+      active = null;
+      plus.disabled = true;
+      minus.disabled = true;
+      playCorrect();
+      flashLayer($('p08Right'));
+      built += 1;
+      starts.forEach((s) => { if (!s.classList.contains('is-selected')) s.disabled = false; });
+      if (built === starts.length) setTimeout(() => quiz(0), 2200);
+    }
+    plus.addEventListener('click', () => step(1));
+    minus.addEventListener('click', () => step(-1));
+
+    function quiz(n) {
+      const q = QUIZ[n];
+      $('p08Ask').textContent = q.ask;
+      $('p08Sub').classList.add('is-long');
+      $('p08Sub').textContent = q.sub;
+      cols.forEach((c, i) => {
+        c.el.classList.toggle('is-glow', i === q.answer);
+        c.el.classList.toggle('is-pick', i === q.answer);
+      });
+      cols[q.answer].el.onclick = () => {
+        cols[q.answer].el.onclick = null;
+        cols[q.answer].el.classList.remove('is-glow', 'is-pick');
+        cols[q.answer].el.classList.add('is-answer');
+        playCorrect();
+        $('p08RightText').textContent = '';
+        flashLayer($('p08Right'), 'is-off', 3000);
+        setTimeout(() => {
+          if (n + 1 < QUIZ.length) quiz(n + 1);
+          else $('p08Done').classList.remove('is-off');
+        }, 3100);
+      };
+    }
+  })();
+  </script>
+</body>
+</html>

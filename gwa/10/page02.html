@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>쿵쾅쿵쾅! 힘차게 뛰는 심장 펌프</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .p02-body{position:absolute;left:693px;top:175px;width:534px;height:560px;background:url('img/p02_body.png') center / contain no-repeat;transition:filter .6s}
+        .p02-body.is-clear{filter:drop-shadow(0 0 26px rgba(47,191,113,.95))}
+        .p02-heart{position:absolute;left:905px;top:405px;width:110px;height:110px;display:flex;align-items:center;justify-content:center;filter:grayscale(1) opacity(.5);transition:transform .22s ease,filter .4s}
+        .p02-heart img{width:100%;height:100%;object-fit:contain}
+        .p02-heart.is-on{filter:none}
+        .p02-heart.is-small{transform:scale(.7)}
+        .p02-heart.is-big{transform:scale(1.18)}
+        .p02-flow{position:absolute;left:930px;top:430px;width:60px;height:60px;border-radius:50%;background:radial-gradient(circle,rgba(229,72,77,.55),rgba(229,72,77,0) 70%);opacity:0;pointer-events:none}
+        .p02-flow.is-go{animation:p02-flow .9s ease-out}
+        @keyframes p02-flow{from{transform:scale(.5);opacity:.9}to{transform:scale(8);opacity:0}}
+        .p02-btns{position:absolute;left:0;right:0;top:770px;display:flex;justify-content:center;gap:60px}
+        .p02-btns .card-btn{min-width:0;width:340px;height:110px;padding:10px 0 6px;font-size:54px}
+        .p02-btns .card-btn.hit-pulse{--pulse-w:20px;--pulse-y:10px;--pulse-c:#ffc21a}
+        .p02-set{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="ask-pill is-fit" id="p02Pill"><span id="p02PillText">깜빡임에 맞춰 버튼을 눌러 보세요.</span></p>
+
+          <div class="p02-body" id="p02Body"></div>
+          <div class="p02-flow" id="p02Flow"></div>
+          <div class="p02-heart" id="p02Heart"><img src="img/p08_heart.png" alt="심장"></div>
+
+          <div class="p02-btns">
+            <button type="button" class="card-btn" id="p02Og">오그라들기</button>
+            <button type="button" class="card-btn" id="p02Nl">늘어나기</button>
+          </div>
+
+          <div class="guide-set is-main p02-set" id="p02Set" style="--gc-left:10px;--gc-bottom:5px;--gb-bottom:565px">
+            <p class="guide-bubble is-center" id="p02Bubble"></p>
+            <div class="guide-character"><img id="p02Char" src="../img/character/gwa_main_point.png" alt="메인 캐릭터"></div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p02Done">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">우리가 살아 있는 동안 심장은 단 1초도 쉬지 않고 오그라들기와 늘어나기를 반복해요.</p>
+                  </div>
+                  <a href="page03.html" class="avatar-card-btn card-btn is-popup is-arrow js-nav-effect js-sfx" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">컴퓨터도 심장과 같이 똑같은 일을 여러 번 반복 해야 할 때가 있다는데, 확인하러 가볼까요?</p>
+                  </div>
+                  <a href="page03.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="쿵쾅쿵쾅! 힘차게 뛰는 심장 펌프" data-next="page03.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const pillText = $('p02PillText');
+    const heart = $('p02Heart');
+    const flow = $('p02Flow');
+    const body = $('p02Body');
+    const btn = { og: $('p02Og'), nl: $('p02Nl') };
+    const set = $('p02Set');
+    const bubble = $('p02Bubble');
+    const say = initGuideSay({ bubble, img: $('p02Char'), set, keep: true });
+    const kung = makeSfx('sound/p02_kung.wav', true);
+    const kwang = makeSfx('sound/p02_kwang.wav', true);
+    const heartFull = new Audio('sound/p02_heart_full.mp3');
+    heartFull.loop = true;
+    const GOAL = 5;
+    const ASK = '깜빡임에 맞춰 버튼을 눌러 보세요.';
+    const WRONG = '심장은 오그라들기와 늘어나기가 한번씩 반복적으로 움직여요.';
+    const LINES = ['심장을 움직였더니 피가 온몸을 돌기 시작했어요.', '심장은 오그라들기와 늘어나기를 반복하며 피를 보내요', '반복이란, 같은 것을 여러 번 하는 것을 말해요.'];
+    let last = null, streak = 0, locked = false, line = 0;
+
+    const mark = () => {
+      const want = last === 'og' ? 'nl' : 'og';
+      btn.og.classList.toggle('hit-pulse', !locked && want === 'og');
+      btn.nl.classList.toggle('hit-pulse', !locked && want === 'nl');
+    };
+    const beat = (kind, sfx = true) => {
+      heart.classList.add('is-on');
+      heart.classList.remove('is-small', 'is-big');
+      if (kind === 'og') { heart.classList.add('is-small'); if (sfx) kung(); } else { heart.classList.add('is-big'); if (sfx) kwang(); setTimeout(() => heart.classList.remove('is-big'), 220); }
+      flow.classList.remove('is-go');
+      void flow.offsetWidth;
+      flow.classList.add('is-go');
+    };
+    const showLine = () => {
+      const end = line === LINES.length - 1;
+      say(LINES[line], 'main_point', undefined, undefined, end ? '다음' : '→');
+      if (!end) bubble.querySelector('.card-btn').classList.add('is-arrow');
+    };
+    const clearGame = () => {
+      locked = true;
+      btn.og.classList.add('is-disabled');
+      btn.nl.classList.add('is-disabled');
+      mark();
+      body.classList.add('is-clear');
+      heartFull.currentTime = 0;
+      heartFull.play().catch(() => {});
+      let k = 0;
+      const timer = setInterval(() => { beat(k % 2 ? 'nl' : 'og', false); k++; }, 600);
+      setTimeout(() => {
+        clearInterval(timer);
+        heartFull.pause();
+        set.style.display = 'block';
+        line = 0;
+        showLine();
+      }, 3000);
+    };
+    const press = (kind) => {
+      if (locked) return;
+      if (kind === last) { streak = 0; pillText.textContent = WRONG; mark(); return; }
+      beat(kind);
+      last = kind;
+      streak++;
+      pillText.textContent = ASK;
+      if (streak >= GOAL) { clearGame(); return; }
+      mark();
+    };
+    btn.og.addEventListener('click', () => press('og'));
+    btn.nl.addEventListener('click', () => press('nl'));
+    bubble.addEventListener('click', (e) => {
+      if (!e.target.closest('.card-btn')) return;
+      playClick();
+      if (line < LINES.length - 1) { line++; showLine(); return; }
+      set.style.display = 'none';
+      $('p02Done').classList.remove('is-off');
+    });
+    mark();
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>식품공장 라벨 로봇</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* === [기존 필수 UI 컴포넌트 보존] === */
+        .p12-lv{position:absolute;left:50px;top:40px;height:84px;margin:0;padding:6px 36px 0;box-sizing:border-box;display:flex;align-items:center;border-radius:42px;background:var(--c-navy);font-family:'Cafe24 Ssurround';font-size:50px;color:#fff;z-index:20}
+        .p12-gauge{left:400px;top:50px;width:1200px;z-index:20}
+        .p12-mg{position:absolute;right:50px;top:30px;width:110px;height:110px;padding:0;border-radius:50%;border:solid 6px var(--c-ink);background:#fff;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:60px;line-height:1;cursor:pointer;z-index:20;transition:opacity .2s,filter .2s}
+        .p12-mg.is-off{opacity:.35;filter:grayscale(1);cursor:default}
+
+        /* === [식품 공장 배경] === */
+        .factory-bg{position:absolute;left:0;top:0;width:1920px;height:690px;pointer-events:none;background:linear-gradient(180deg,#e5eef8 0%,#f5f9fd 65%,#d8e6f5 100%)}
+        .factory-pipes{position:absolute;left:0;top:150px;width:100%;height:50px;opacity:.6}
+        .factory-window{position:absolute;left:80px;top:210px;width:340px;height:160px;background:rgba(255,255,255,.55);border:4px solid #b3cbe8;border-radius:18px;display:flex;gap:10px;padding:10px;box-sizing:border-box}
+        .factory-window span{flex:1;background:linear-gradient(180deg,#d2e5fc,#bddaf7);border-radius:8px}
+
+        /* === [컨베이어 벨트] === */
+        .conveyor-wrap{position:absolute;left:0;top:550px;width:1380px;height:140px;pointer-events:none}
+        .conveyor-belt{position:absolute;left:0;top:10px;width:100%;height:80px;background:repeating-linear-gradient(90deg,#3e4756 0 20px,#28303b 20px 40px);border:6px solid #1a2028;border-left:none;border-radius:0 40px 40px 0;box-shadow:0 14px 20px rgba(0,0,0,.22);box-sizing:border-box}
+        .conveyor-rollers{position:absolute;left:0;top:90px;width:100%;height:40px;display:flex;justify-content:space-around;padding:0 40px;box-sizing:border-box}
+        .conveyor-leg{width:32px;height:35px;background:linear-gradient(90deg,#707f94,#4e5b6d);border-radius:4px;box-shadow:inset 0 2px 4px rgba(255,255,255,.3)}
+
+        /* === [음료 병 아이템] === */
+        .p12-bt{--h:314px;position:absolute;top:246px;width:180px;height:314px;display:flex;align-items:flex-end;justify-content:center;transform-origin:bottom center;transition:left .9s ease,top .9s ease,transform .9s ease,opacity .9s ease;z-index:5}
+        .p12-bt.is-view{position:relative;top:auto;left:auto;transition:none}
+        .p12-bt.is-wait{transform:scale(.8);opacity:.6}
+        .p12-bt.is-drop{z-index:2;transform:scale(.45);opacity:0;transition:left .5s ease-in,top .6s ease-in .35s,transform .6s ease-in .35s,opacity .3s ease-in .65s}
+
+        /* 병 뒤의 별 그림 종이 (과학 학습용 투명도 검사판) */
+        .bt-star-sheet{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:210px;height:245px;background:#ffffff;border:3px solid #c8d8ec;border-radius:20px;box-shadow:0 8px 18px rgba(35,80,165,.12);display:flex;align-items:center;justify-content:center;box-sizing:border-box;z-index:1}
+        .sheet-star{width:140px;height:140px}
+        .sheet-star svg{width:100%;height:100%;filter:drop-shadow(0 4px 6px rgba(255,185,0,.45))}
+
+        /* 일체형 정밀 SVG 유리병 */
+        .bt-glass-unit{position:relative;width:180px;height:314px;z-index:3;filter:drop-shadow(0 10px 14px rgba(0,0,0,.15));transition:filter .2s}
+        .bt-glass-unit svg{width:100%;height:100%;display:block}
+        .p12-bt.is-over .bt-glass-unit{filter:drop-shadow(0 0 16px #ffea00) drop-shadow(0 0 6px #ffea00) drop-shadow(0 10px 14px rgba(0,0,0,.25))}
+
+        /* 부착된 라벨 스티커 */
+        .p12-stick{position:absolute;left:50%;top:58%;transform:translateX(-50%);padding:8px 20px 4px;box-sizing:border-box;border-radius:14px;border:solid 4px #1b4fb8;background:#fff;font-family:'Cafe24 Ssurround';font-size:26px;line-height:1.1;color:#1b4fb8;white-space:nowrap;z-index:10;box-shadow:0 6px 12px rgba(0,0,0,.2);animation:p12Stick .35s cubic-bezier(0.18, 0.89, 0.32, 1.28)}
+        @keyframes p12Stick{0%{opacity:0;transform:translateX(-50%) translateY(-50px) scale(0.6)}100%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
+
+        /* === [스마트 로봇 팔] === */
+        .p12-arm-wrap{position:absolute;left:880px;top:0;width:340px;height:250px;z-index:6;pointer-events:none;transition:transform .4s cubic-bezier(0.2, 0.8, 0.3, 1)}
+        .p12-arm-wrap.is-down{transform:translateY(80px)}
+        .arm-base{position:absolute;left:50%;top:0;transform:translateX(-50%);width:160px;height:34px;background:#2a3442;border-radius:0 0 14px 14px;border:3px solid #161c24;border-top:none;display:flex;align-items:center;justify-content:center}
+        .arm-led{width:16px;height:16px;border-radius:50%;background:#00e862;box-shadow:0 0 12px #00e862}
+        .arm-mech{position:absolute;left:50%;top:34px;transform:translateX(-50%);width:180px;height:210px}
+
+        /* === [완성품 상자] === */
+        .box-station{position:absolute;left:1340px;top:380px;width:440px;height:270px;z-index:4}
+        .box-crate{position:absolute;left:0;bottom:0;width:100%;height:250px;background:linear-gradient(135deg,#db9346,#be742c);border:6px solid #57300c;border-radius:20px;box-shadow:0 16px 24px rgba(0,0,0,.22),inset 0 4px 10px rgba(255,255,255,.25);display:flex;flex-direction:column;align-items:center;justify-content:center}
+        .box-stamp{border:4px dashed #733f11;border-radius:12px;padding:10px 36px;background:rgba(255,255,255,.22);font-family:'Cafe24 Ssurround';font-size:38px;color:#3b1e05;letter-spacing:-0.04em}
+        .box-flap-l{position:absolute;left:-10px;top:30px;width:80px;height:34px;background:#be742c;border:5px solid #57300c;border-radius:8px 0 0 8px;transform:rotate(-24deg)}
+        .box-flap-r{position:absolute;right:-10px;top:30px;width:80px;height:34px;background:#be742c;border:5px solid #57300c;border-radius:0 8px 8px 0;transform:rotate(24deg)}
+
+        /* === [하단 라벨 스티커 트레이] === */
+        .p12-tray{position:absolute;left:0;top:690px;width:1920px;height:270px;background:linear-gradient(180deg,#193b70 0%,#0c2142 100%);border-top:8px solid #3775de;box-shadow:0 -10px 30px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;gap:40px;padding:10px 60px 20px;box-sizing:border-box;z-index:10}
+        .tray-pill{position:absolute;left:60px;top:-28px;background:#ff9900;border:4px solid #fff;border-radius:24px;padding:4px 28px;font-family:'Cafe24 Ssurround';font-size:26px;color:#fff;box-shadow:0 6px 12px rgba(0,0,0,.2);pointer-events:none}
+
+        /* 스티커 카드 */
+        .p12-st{width:530px;height:220px;box-sizing:border-box;background:#fff;border:6px solid #2d5ec7;border-radius:26px;box-shadow:0 10px 0 0 #13337a,0 16px 20px rgba(0,0,0,.25);display:flex;flex-direction:column;cursor:grab;padding:16px 26px;transition:transform .15s,box-shadow .15s;user-select:none;touch-action:none}
+        .p12-st:hover{transform:translateY(-6px)}
+        .p12-st.is-home{opacity:.35}
+        .p12-st.is-lift{position:absolute;margin:0;transform:rotate(-3deg) scale(.95);z-index:50;box-shadow:0 20px 32px rgba(0,0,0,.35);cursor:grabbing;pointer-events:none}
+        .p12-lock .p12-st{pointer-events:none}
+
+        .sticker-head{display:flex;align-items:center;justify-content:space-between;border-bottom:3px dashed #d5e0ee;padding-bottom:10px;margin-bottom:10px}
+        .sticker-name{font-family:'Cafe24 Ssurround';font-size:42px;color:#1c3d7e;letter-spacing:-0.04em}
+        .sticker-badge{background:#edf3fc;border:2px solid #ccdcee;border-radius:14px;padding:3px 14px;font-family:'Cafe24 Ssurround';font-size:20px;color:#3b66b2}
+        .sticker-traits{display:flex;flex-direction:column;gap:6px}
+        .trait-row{display:flex;align-items:center;gap:10px;font-family:'Cafe24 Ssurround';font-size:26px;color:#2d3848;letter-spacing:-0.04em}
+        .trait-dot{width:12px;height:12px;border-radius:50%;background:#3b74db;flex-shrink:0}
+
+        /* === [힌트 팝업 모달] === */
+        .p12-hm{width:1400px;padding:50px 60px}
+        .p12-hm .hint-title{width:max-content;margin:0 auto 20px}
+        .p12-hm-t{font-size:52px}
+        .p12-hm-x{position:absolute;right:30px;top:30px;width:90px;cursor:pointer}
+        .p12-hm-b{display:flex;align-items:center;justify-content:center;gap:80px;margin-top:30px}
+        .p12-hm-big{position:relative;width:420px;height:460px;border-radius:50%;background:#eef3fb;display:flex;align-items:center;justify-content:center;overflow:hidden;border:solid 8px var(--c-sky)}
+        .p12-hm-big .p12-bt{transition:none;z-index:auto;position:relative;top:auto;left:auto;transform:scale(1.28)}
+        .p12-hm-big i{position:absolute;right:20px;bottom:20px;font-style:normal;font-size:70px}
+        .p12-hm-l{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:24px;counter-reset:n}
+        .p12-hm-l li{counter-increment:n;display:flex;align-items:center;gap:20px;font-family:"Cafe24 Ssurround";font-size:44px;color:var(--c-purple);letter-spacing:-0.04em}
+        .p12-hm-l li:before{content:counter(n);width:64px;height:64px;border-radius:50%;background:var(--c-violet);color:#fff;display:flex;align-items:center;justify-content:center;padding-top:4px;box-sizing:border-box;font-size:38px}
+        .p12-hm-l b{font-weight:400;min-width:200px;height:70px;padding:6px 20px 0;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border-radius:35px;background:var(--c-navy);color:#fff;font-size:38px}
+        .p12-modal{z-index:30}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default" id="p12Main">
+
+          <!-- 1. 공장 배경 -->
+          <div class="factory-bg">
+            <svg class="factory-pipes" viewBox="0 0 1920 50" preserveAspectRatio="none">
+              <path d="M0,15 L1920,15 M0,38 L1920,38" stroke="#a6bfdc" stroke-width="8" fill="none" />
+              <rect x="250" y="8" width="30" height="16" rx="3" fill="#7599c4" />
+              <rect x="750" y="8" width="30" height="16" rx="3" fill="#7599c4" />
+              <rect x="1350" y="8" width="30" height="16" rx="3" fill="#7599c4" />
+            </svg>
+            <div class="factory-window"><span></span><span></span><span></span></div>
+          </div>
+
+          <!-- [기존 UI 보존] Level 1 표시, gauge is-thin 게이지 바, 돋보기 -->
+          <p class="p12-lv" id="p12Lv">Level 1</p>
+          <div class="gauge is-thin p12-gauge"><div class="gauge-fill" id="p12Fill" style="width:0%"></div></div>
+          <button type="button" class="p12-mg is-off" id="p12Mg">🔍</button>
+
+          <!-- 2. 컨베이어 벨트 -->
+          <div class="conveyor-wrap">
+            <div class="conveyor-belt"></div>
+            <div class="conveyor-rollers">
+              <div class="conveyor-leg"></div>
+              <div class="conveyor-leg"></div>
+              <div class="conveyor-leg"></div>
+              <div class="conveyor-leg"></div>
+              <div class="conveyor-leg"></div>
+            </div>
+          </div>
+
+          <!-- 3. 음료 병 컨테이너 -->
+          <div id="p12Bottles"></div>
+
+          <!-- 4. 스마트 로봇 팔 -->
+          <div class="p12-arm-wrap" id="p12Arm">
+            <div class="arm-base"><div class="arm-led"></div></div>
+            <svg class="arm-mech" viewBox="0 0 180 210">
+              <rect x="75" y="0" width="30" height="55" fill="#4a586d" rx="4" />
+              <circle cx="90" cy="65" r="22" fill="#2d3848" stroke="#687c97" stroke-width="5" />
+              <circle cx="90" cy="65" r="8" fill="#00e862" />
+              <rect x="78" y="75" width="24" height="70" fill="#5c6e88" rx="6" />
+              <path d="M74,60 Q50,110 74,155" fill="none" stroke="#ffaa00" stroke-width="5" />
+              <rect x="65" y="155" width="50" height="20" fill="#2d3848" rx="4" />
+              <rect x="42" y="175" width="96" height="18" fill="#1b4fb8" rx="6" stroke="#fff" stroke-width="3" />
+              <text x="90" y="188" font-family="'Cafe24 Ssurround'" font-size="12" fill="#fff" text-anchor="middle">LABEL STAMP</text>
+            </svg>
+          </div>
+
+          <!-- 5. 완성품 상자 -->
+          <div class="box-station">
+            <div class="box-crate">
+              <div class="box-flap-l"></div>
+              <div class="box-flap-r"></div>
+              <div class="box-stamp">📦 완성품 상자</div>
+            </div>
+          </div>
+
+          <!-- 6. 하단 라벨 스티커 트레이 -->
+          <div class="p12-tray" id="p12Tray"></div>
+
+          <!-- 7. 힌트 모달 -->
+          <div class="avatar-modal is-off p12-modal" id="p12Hint">
+            <div class="avatar-card p12-hm">
+              <img class="p12-hm-x js-sfx" id="p12HintX" data-sound="sound/click.mp3" src="../../resources/img/common/pop_btn_close.png" alt="">
+              <p class="hint-title">힌트</p>
+              <p class="avatar-card-text p12-hm-t">액체를 가까이에서 자세히 살펴 보세요.</p>
+              <div class="p12-hm-b">
+                <div class="p12-hm-big" id="p12Zoom"></div>
+                <ol class="p12-hm-l"><li><b>색깔</b>어떤 색인가요?</li><li><b>투명</b>별이 보이나요?</li><li><b>공기 방울</b>공기 방울이 있나요?</li></ol>
+              </div>
+            </div>
+          </div>
+
+          <!-- 8. 레벨 완료 모달들 -->
+          <div class="avatar-modal is-off p12-modal" id="p12End1">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <p class="avatar-card-text">좋아요! 색만 봐도 금방 구별이 가능했어요. 이제 색이 똑같은 음료가 나오니, 잘 살펴볼까요?</p>
+              </div>
+              <a href="javascript:;" class="avatar-card-btn card-btn is-popup js-sfx p12-go" data-sound="sound/click.mp3">시작하기</a>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off p12-modal" id="p12End2">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">잘했어요! 간장과 콜라는 물과 사이다처럼 색이 비슷해서 공기 방울로 구별이 가능했어요.</p>
+                  </div>
+                  <a href="javascript:;" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">이제 모두 섞여 나와요. 특징 2개를 확인하세요!</p>
+                  </div>
+                  <a href="javascript:;" class="avatar-card-btn card-btn is-popup js-sfx p12-go" data-sound="sound/click.mp3">시작하기</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off p12-modal" id="p12End3">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <p class="avatar-card-text">잘했어요! 액체들의 색이 같을 때에는 투명한지, 공기 방울이 있는지 여러 특징을 함께 봐야 해요.</p>
+              </div>
+              <a href="page13.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="식품공장 라벨 로봇" data-next="page13.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const DRINKS = {
+      soy:   { name: '간장',        liq: '#381c0e',               surf: '#522915', clear: false, air: false, lines: ['진한 갈색', '투명하지 않아요', '공기 방울이 없어요'] },
+      oj:    { name: '오렌지 주스', liq: '#ff9000',               surf: '#ffb833', clear: false, air: false, lines: ['주황색', '투명하지 않아요', '공기 방울이 없어요'] },
+      cider: { name: '사이다',      liq: 'rgba(215,238,255,.35)', surf: null,     clear: true,  air: true,  lines: ['색이 없어요', '투명해요', '공기 방울이 있어요'] },
+      cola:  { name: '콜라',        liq: '#230e06',               surf: '#421a0d', clear: false, air: true,  lines: ['진한 갈색', '투명하지 않아요', '공기 방울이 있어요'] },
+      osoda: { name: '오렌지 탄산음료', liq: 'rgba(255,140,20,.52)', surf: null,     clear: true,  air: true,  lines: ['주황색', '투명해요', '공기 방울이 있어요'] },
+      water: { name: '물',          liq: 'rgba(215,238,255,.3)',  surf: null,     clear: true,  air: false, lines: ['색이 없어요', '투명해요', '공기 방울이 없어요'] },
+    };
+
+    const LEVELS = [
+      { bottles: [['oj', ['soy', 'oj', 'cider']], ['cider', ['soy', 'oj', 'cider']], ['soy', ['soy', 'oj', 'cider']]] },
+      { bottles: [['cola', ['cola', 'soy']], ['soy', ['cola', 'soy']]] },
+      { bottles: [
+        ['cider', ['soy', 'water', 'cider']],
+        ['soy',   ['oj', 'cola', 'soy']],
+        ['osoda', ['oj', 'osoda', 'cola']],
+        ['water', ['water', 'cider', 'cola']],
+        ['cola',  ['soy', 'cola', 'cider']],
+        ['oj',    ['water', 'osoda', 'oj']],
+      ] },
+    ];
+
+    const HINT_AT = 2;
+    const STOP_X = 960, WAIT_X = 400, START_X = -260, BOX_X = 1450;
+
+    const main = $('p12Main');
+    const bottlesEl = $('p12Bottles');
+    const tray = $('p12Tray');
+    const fill = $('p12Fill');
+    const mg = $('p12Mg');
+    const arm = $('p12Arm');
+
+    let level = 0;
+    let idx = 0;
+    let cur = null;
+    let next = null;
+    let wrongs = 0;
+    let busy = true;
+    const labelSfx = makeSfx('sound/13차시_라벨 붙이는 효과음.mp3', true);
+    const clearSfx = makeSfx('sound/13차시_클리어 효과음.mp3', true);
+
+    const makeBottle = (key) => {
+      const d = DRINKS[key];
+      const el = document.createElement('div');
+      el.className = 'p12-bt' + (d.air ? ' has-air' : '');
+      const clipId = 'cavity_' + Math.random().toString(36).substr(2, 9);
+      
+      let html = '';
+      // 1) 관찰용 별 종이판 (배경)
+      html += '<div class="bt-star-sheet">';
+      html += '<div class="sheet-star">';
+      html += '<svg viewBox="0 0 100 100"><polygon points="50,5 64,36 98,36 70,57 81,91 50,70 19,91 30,57 2,36 36,36" fill="#ffd528" stroke="#e09c00" stroke-width="4" /></svg>';
+      html += '</div></div>';
+
+      // 2) 완벽한 일체형 SVG 유리병 (전면)
+      html += '<div class="bt-glass-unit">';
+      html += '<svg viewBox="0 0 180 314">';
+      html += '<defs>';
+      html += '<clipPath id="' + clipId + '">';
+      html += '<path d="M 72,26 L 72,68 C 72,92 24,102 24,124 L 24,292 Q 24,308 42,308 L 138,308 Q 156,308 156,292 L 156,124 C 156,102 108,92 108,68 L 108,26 Z" />';
+      html += '</clipPath>';
+      html += '<linearGradient id="glassGloss_' + clipId + '" x1="0" y1="0" x2="1" y2="0">';
+      html += '<stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"/>';
+      html += '<stop offset="14%" stop-color="#ffffff" stop-opacity="0.1"/>';
+      html += '<stop offset="85%" stop-color="#ffffff" stop-opacity="0.05"/>';
+      html += '<stop offset="100%" stop-color="#7eaee8" stop-opacity="0.32"/>';
+      html += '</linearGradient>';
+      html += '</defs>';
+
+      // 액체 채움 (불투명/투명)
+      html += '<g clip-path="url(#' + clipId + ')">';
+      html += '<rect x="0" y="80" width="180" height="235" fill="' + d.liq + '"/>';
+      if (!d.clear && d.surf) {
+        html += '<ellipse cx="90" cy="80" rx="35" ry="5" fill="' + d.surf + '" />';
+      }
+      if (d.air) {
+        html += '<circle cx="50" cy="270" r="4.5" fill="#ffffff" opacity="0.9"/>';
+        html += '<circle cx="90" cy="250" r="3" fill="#ffffff" opacity="0.9"/>';
+        html += '<circle cx="130" cy="260" r="5" fill="#ffffff" opacity="0.9"/>';
+        html += '<circle cx="70" cy="210" r="3.5" fill="#ffffff" opacity="0.85"/>';
+        html += '<circle cx="110" cy="190" r="4" fill="#ffffff" opacity="0.85"/>';
+        html += '<circle cx="55" cy="150" r="3" fill="#ffffff" opacity="0.8"/>';
+        html += '<circle cx="100" cy="140" r="4" fill="#ffffff" opacity="0.8"/>';
+        html += '<circle cx="125" cy="170" r="3" fill="#ffffff" opacity="0.8"/>';
+        html += '<circle cx="80" cy="110" r="3.5" fill="#ffffff" opacity="0.85"/>';
+      }
+      html += '</g>';
+
+      // 일체형 유리 외곽선
+      html += '<path d="M 72,26 L 72,68 C 72,92 24,102 24,124 L 24,292 Q 24,308 42,308 L 138,308 Q 156,308 156,292 L 156,124 C 156,102 108,92 108,68 L 108,26 Z" fill="url(#glassGloss_' + clipId + ')" stroke="#225bbd" stroke-width="5" />';
+
+      // 도톰한 유리 바닥층
+      html += '<path d="M 28,294 Q 90,301 152,294" stroke="#ffffff" stroke-width="5" fill="none" opacity="' + (d.clear ? '0.8' : '0.6') + '" />';
+      html += '<path d="M 34,301 Q 90,305 146,301" stroke="#225bbd" stroke-width="2.5" fill="none" opacity="0.45" />';
+
+      // 세로 유리 반사광
+      html += '<path d="M 38,130 L 38,280" stroke="#ffffff" stroke-width="7" stroke-linecap="round" opacity="0.8" />';
+      html += '<path d="M 50,140 L 50,260" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" opacity="0.55" />';
+      html += '<path d="M 80,34 L 80,64" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" opacity="0.75" />';
+
+      // 병 뚜껑
+      html += '<rect x="64" y="6" width="52" height="22" rx="6" fill="#1b4fb8" stroke="#0f3075" stroke-width="3" />';
+      html += '<line x1="74" y1="12" x2="106" y2="12" stroke="#6898f5" stroke-width="2" stroke-linecap="round" />';
+
+      html += '</svg></div>';
+
+      el.innerHTML = html;
+      return el;
+    };
+
+    const spawn = (i, x, wait) => {
+      const L = LEVELS[level];
+      if (i >= L.bottles.length) return null;
+      const el = makeBottle(L.bottles[i][0]);
+      el.style.transition = 'none';
+      el.style.left = START_X + 'px';
+      bottlesEl.appendChild(el);
+      void el.offsetWidth;
+      el.style.transition = '';
+      el.style.left = x + 'px';
+      if (wait) el.classList.add('is-wait');
+      return el;
+    };
+
+    const renderTray = () => {
+      const labels = LEVELS[level].bottles[idx][1];
+      tray.innerHTML = '<div class="tray-pill">알맞은 라벨 스티커를 병으로 드래그하세요!</div>';
+      labels.forEach((k) => {
+        const d = DRINKS[k];
+        const st = document.createElement('div');
+        st.className = 'p12-st';
+        st.dataset.key = k;
+        let traitsHtml = '';
+        d.lines.forEach((line) => {
+          traitsHtml += '<div class="trait-row"><span class="trait-dot"></span>' + line + '</div>';
+        });
+        st.innerHTML = '<div class="sticker-head">' +
+          '<span class="sticker-name">' + d.name + '</span>' +
+          '<span class="sticker-badge">라벨 스티커</span>' +
+          '</div>' +
+          '<div class="sticker-traits">' + traitsHtml + '</div>';
+        tray.appendChild(st);
+      });
+    };
+
+    const setMg = () => {
+      mg.classList.toggle('is-off', wrongs < HINT_AT);
+    };
+
+    const setFill = () => {
+      const n = LEVELS[level].bottles.length;
+      fill.style.width = (idx / n * 100) + '%';
+    };
+
+    const startBottle = () => {
+      wrongs = 0;
+      setMg();
+      renderTray();
+      busy = false;
+      tray.classList.remove('p12-lock');
+    };
+
+    const startLevel = (n) => {
+      level = n;
+      idx = 0;
+      bottlesEl.innerHTML = '';
+      $('p12Lv').textContent = 'Level ' + (n + 1);
+      fill.style.transition = 'none';
+      fill.style.width = '0%';
+      void fill.offsetWidth;
+      fill.style.transition = '';
+      cur = spawn(0, STOP_X, false);
+      next = spawn(1, WAIT_X, true);
+      setTimeout(startBottle, 950);
+      busy = true;
+      tray.classList.add('p12-lock');
+    };
+
+    const endLevel = () => {
+      clearSfx();
+      setTimeout(() => {
+        $('p12End' + (level + 1)).classList.remove('is-off');
+      }, 1200);
+    };
+
+    const advance = () => {
+      idx++;
+      setFill();
+      if (idx >= LEVELS[level].bottles.length) {
+        endLevel();
+        return;
+      }
+      cur = next;
+      cur.classList.remove('is-wait');
+      cur.style.left = STOP_X + 'px';
+      next = spawn(idx + 1, WAIT_X, true);
+      setTimeout(startBottle, 950);
+    };
+
+    const stickAndDrop = () => {
+      busy = true;
+      tray.classList.add('p12-lock');
+      mg.classList.add('is-off');
+      const name = DRINKS[LEVELS[level].bottles[idx][0]].name;
+      arm.classList.add('is-down');
+      setTimeout(() => {
+        const s = document.createElement('span');
+        s.className = 'p12-stick';
+        s.textContent = name;
+        cur.appendChild(s);
+        labelSfx();
+      }, 450);
+      setTimeout(() => arm.classList.remove('is-down'), 900);
+      setTimeout(() => {
+        const old = cur;
+        old.classList.add('is-drop');
+        old.style.left = (BOX_X - 90) + 'px';
+        old.style.top = '400px';
+        setTimeout(() => old.remove(), 1400);
+        setTimeout(advance, 700);
+      }, 1500);
+    };
+
+    const onCorrect = () => {
+      playCorrect();
+      stickAndDrop();
+    };
+
+    const onWrong = () => {
+      playWrong();
+      wrongs++;
+      setMg();
+    };
+
+    tray.addEventListener('pointerdown', (e) => {
+      if (busy) return;
+      const st = e.target.closest('.p12-st');
+      if (!st) return;
+      e.preventDefault();
+      playClick();
+      const m = main.getBoundingClientRect();
+      const s = m.width / 1920;
+      const clone = st.cloneNode(true);
+      clone.classList.add('is-lift');
+      main.appendChild(clone);
+      st.classList.add('is-home');
+      const w = st.offsetWidth, h = st.offsetHeight;
+      const move = (ev) => {
+        clone.style.left = ((ev.clientX - m.left) / s - w / 2) + 'px';
+        clone.style.top = ((ev.clientY - m.top) / s - h / 2) + 'px';
+        const r = cur.getBoundingClientRect();
+        const over = ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom;
+        cur.classList.toggle('is-over', over);
+        return over;
+      };
+      move(e);
+      const done = (ev) => {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', done);
+        window.removeEventListener('pointercancel', done);
+        const over = ev.type === 'pointercancel' ? false : move(ev);
+        cur.classList.remove('is-over');
+        clone.remove();
+        st.classList.remove('is-home');
+        if (!over) return;
+        if (st.dataset.key === LEVELS[level].bottles[idx][0]) onCorrect();
+        else onWrong();
+      };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', done);
+      window.addEventListener('pointercancel', done);
+    });
+
+    mg.addEventListener('click', () => {
+      if (mg.classList.contains('is-off') || busy) return;
+      playClick();
+      const key = LEVELS[level].bottles[idx][0];
+      const z = $('p12Zoom');
+      z.innerHTML = '<i>🔍</i>';
+      const b = makeBottle(key);
+      b.classList.add('is-view');
+      z.insertBefore(b, z.firstChild);
+      $('p12Hint').classList.remove('is-off');
+    });
+
+    $('p12HintX').addEventListener('click', () => {
+      $('p12Hint').classList.add('is-off');
+    });
+
+    document.querySelectorAll('.p12-go').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        btn.closest('.avatar-modal').classList.add('is-off');
+        startLevel(level + 1);
+      });
+    });
+
+    const q = parseInt(new URLSearchParams(location.search).get('level'), 10);
+    startLevel(q >= 1 && q <= 3 ? q - 1 : 0);
+  })();
+  </script>
+</body>
+</html>

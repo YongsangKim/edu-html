@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>쓱싹! 개인정보 지키기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 기획서 15~17p. 개인정보가 1곳씩 든 사진 5장을 차례로. [매직 지우개]를 누른 뒤 마우스를 문질러(흰색 펜으로 그려짐) 개인정보를 70% 이상 가리면 정답 효과음 + 그 부분이 깔끔하게 가려지고 강조, 2초 뒤 다음 사진.
+           개인정보가 아닌 곳을 문지르면 '사진을 다시 한번 살펴볼까요?', 버튼을 누르지 않고 문지르면 '먼저, 매직 지우개 버튼을 클릭해요.'(각각 2초 팝업). 좌표는 사진에 대한 [왼쪽%, 위%, 폭%, 높이%] (?edit) */
+        .p07-tip{position:absolute;left:0;top:50px;width:1920px;margin:0;text-align:center;font-size:56px;font-weight:500;color:var(--c-ink);letter-spacing:-0.04em}
+        .p07-panel{position:absolute;left:27px;top:86px;width:1866px;height:850px;box-sizing:border-box;background:#266cc8;border:solid 5px var(--c-ink);border-radius:10px;z-index:1}
+        .p07-frame{position:absolute;left:142px;top:197px;width:1159px;height:658px;box-sizing:border-box;background:#fff;border:solid 5px var(--c-ink);border-radius:10px;z-index:3}
+        .p07-photo{position:absolute;left:147px;top:201px;width:1150px;height:650px;overflow:hidden;background:#fff;border-radius:5px;z-index:4}
+        .p07-photo>img{display:block;width:100%;height:100%;object-fit:fill;user-select:none;-webkit-user-drag:none}
+        .p07-photo canvas{position:absolute;left:0;top:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
+        .p07-photo.is-erase canvas{cursor:none}
+        .p07-cursor{position:absolute;left:0;top:0;width:274px;height:192px;pointer-events:none;z-index:50;display:none}
+        .p07-cursor.is-show{display:block}
+        .p07-box{position:absolute;box-sizing:border-box;pointer-events:none}
+        .p07-box.is-glow{outline:8px solid #ffb400;outline-offset:2px;border-radius:12px;animation:p07-pulse .5s ease-in-out 4 alternate}
+        @keyframes p07-pulse{to{outline-color:#ff5a00;box-shadow:0 0 30px 10px rgba(255,180,0,.8)}}
+        body.is-edit .p07-box{outline:3px dashed #e60000;background:rgba(255,0,0,.15);pointer-events:auto;cursor:pointer;z-index:20}
+        .p07-dock{position:absolute;left:1354px;top:360px;width:481px;height:349px;box-sizing:border-box;background:#053c85 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='481' height='349'%3E%3Crect x='2.5' y='2.5' width='476' height='344' rx='17.5' fill='none' stroke='%2391b9e7' stroke-width='5' stroke-dasharray='20 10'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;border-radius:20px;z-index:3}
+        .p07-ribbon{left:1437px;top:294px;--ra-bg:#cffffe;--ra-fs:60px;--ra-ext:55px;--ra-th:62px;--ra-drop:29px;z-index:4}
+        .p07-tool{position:absolute;left:1407px;top:419px;width:374px;height:265px;padding:0;border:0;background:none;cursor:pointer;z-index:4}
+        .p07-tool img{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;-webkit-user-drag:none}
+        .p07-tool .p07-tool-on{display:none}
+        .p07-tool.is-on .p07-tool-on{display:block}
+        .p07-tool.is-on .p07-tool-off{display:none}
+        .p07-toast{position:absolute;left:50%;top:330px;width:900px;margin-left:-450px;box-sizing:border-box;padding:34px 20px 28px;border:solid 6px var(--c-ink);border-radius:28px;background:#fff;text-align:center;font-family:'Cafe24 Ssurround';font-size:54px;color:var(--c-ink);letter-spacing:-0.04em;box-shadow:0 10px 0 0 rgba(86,148,231,.3);z-index:100;pointer-events:none}
+        .p07-toast.is-off{display:none}
+        #p07Done{z-index:120}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="ask-pill is-fit is-medium">매직 지우개를 선택하고, 개인정보가 찍힌 곳을 문질러 보세요.</p>
+          <!-- <p class="p07-tip">매직 지우개를 선택하고, 개인정보가 찍힌 곳을 문질러 보세요.</p> -->
+          <div class="p07-panel"></div>
+          <div class="p07-frame"></div>
+          <div class="p07-photo" id="p07Photo"><img id="p07Img" alt="" draggable="false"><canvas id="p07Cv" width="1147" height="646"></canvas></div>
+          <div class="p07-dock"></div>
+          <p class="rb-arrow p07-ribbon"><span>매직지우개</span></p>
+          <button type="button" class="p07-tool js-sfx" id="p07Tool" data-sound="sound/click.mp3"><img class="p07-tool-off" src="img/p07_eraser_off.png" alt=""><img class="p07-tool-on" src="img/p07_eraser_on.png" alt=""></button>
+          <img class="p07-cursor" id="p07Cursor" src="img/p07_eraser_cursor.png" alt="">
+          <p class="p07-toast is-off" id="p07Toast"></p>
+
+          <div class="avatar-modal is-off" id="p07Done">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text is-left">개인정보 지우기 완료!</p>
+                <p class="avatar-popup-sub">사진을 공유하기 전에는<br>개인정보가 남아 있는지 꼭 확인해요.</p>
+                <a href="page08.html" class="avatar-popup-next card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="쓱싹! 개인정보 지키기" data-next="page08.html"></script>
+  <script src="../../resources/js/toc.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script src="../../resources/js/box-edit.js"></script>
+  <script>
+  (function () {
+    const PHOTOS = [
+      { img: 'img/p07_photo_1.png', box: [82, 62.9, 8.8, 9.1] },
+      { img: 'img/p07_photo_2.png', box: [48.3, 50.1, 9.1, 6.3] },
+      { img: 'img/p07_photo_3.png', box: [14.9, 55.2, 10.8, 12] },
+      { img: 'img/p07_photo_4.png', box: [72.1, 70.8, 15.7, 11.2] },
+      { img: 'img/p07_photo_5.png', box: [31.1, 60.4, 10.1, 10.2] }
+    ];
+    const W = 1147, H = 646, PEN = 46, NEED = 0.7, HX = 12, HY = 160;
+    const photo = $('p07Photo');
+    const cv = $('p07Cv');
+    const ctx = cv.getContext('2d', { willReadFrequently: true });
+    const tool = $('p07Tool');
+    const toast = $('p07Toast');
+    const stage = $('stage');
+    const cursor = $('p07Cursor');
+    let pi = 0, on = false, busy = false, mark = null, toastTimer = 0;
+    if (BoxEdit.on) document.body.classList.add('is-edit');
+
+    const px = (b) => [b[0] * W / 100, b[1] * H / 100, b[2] * W / 100, b[3] * H / 100];
+    function say(t) {
+      toast.textContent = t;
+      toast.classList.remove('is-off');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.add('is-off'), 2000);
+    }
+    function render() {
+      $('p07Img').src = PHOTOS[pi].img;
+      ctx.clearRect(0, 0, W, H);
+      if (mark) mark.remove();
+      mark = document.createElement('div');
+      mark.className = 'p07-box';
+      photo.appendChild(mark);
+      placePct(mark, PHOTOS[pi].box);
+      BoxEdit.tag(mark, PHOTOS[pi].box);
+      busy = false;
+    }
+    function coverage(b) {
+      const [x, y, w, h] = px(b).map(Math.round);
+      const d = ctx.getImageData(x, y, w, h).data;
+      let n = 0;
+      for (let i = 3; i < d.length; i += 16) if (d[i] > 128) n += 1;
+      return n / (d.length / 16);
+    }
+    tool.addEventListener('click', () => {
+      on = !on;
+      tool.classList.toggle('is-on', on);
+      photo.classList.toggle('is-erase', on);
+      if (!on) cursor.classList.remove('is-show');
+    });
+    function moveCursor(e) {
+      if (!on) return;
+      const sr = cursor.parentNode.getBoundingClientRect();
+      const k = 1920 / sr.width;
+      cursor.style.left = ((e.clientX - sr.left) * k - HX) + 'px';
+      cursor.style.top = ((e.clientY - sr.top) * k - HY) + 'px';
+      cursor.classList.add('is-show');
+    }
+    cv.addEventListener('pointermove', moveCursor);
+    cv.addEventListener('pointerenter', moveCursor);
+    cv.addEventListener('pointerleave', () => cursor.classList.remove('is-show'));
+
+    cv.addEventListener('pointerdown', (e) => {
+      if (BoxEdit.on || busy) return;
+      e.preventDefault();
+      if (!on) { playWrong(); say('먼저, 매직 지우개 버튼을 클릭해요.'); return; }
+      const r = cv.getBoundingClientRect();
+      const k = W / r.width;
+      cv.setPointerCapture(e.pointerId);
+      const target = px(PHOTOS[pi].box);
+      let touched = false;
+      let last = [(e.clientX - r.left) * k, (e.clientY - r.top) * k];
+      const dot = (p, q) => {
+        ctx.strokeStyle = '#fff'; ctx.fillStyle = '#fff';
+        ctx.lineWidth = PEN; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+        ctx.beginPath(); ctx.moveTo(q[0], q[1]); ctx.lineTo(p[0], p[1]); ctx.stroke();
+        if (p[0] > target[0] - 10 && p[0] < target[0] + target[2] + 10 && p[1] > target[1] - 10 && p[1] < target[1] + target[3] + 10) touched = true;
+      };
+      dot(last, last);
+      const before = ctx.getImageData(0, 0, W, H);
+      const move = (ev) => {
+        const p = [(ev.clientX - r.left) * k, (ev.clientY - r.top) * k];
+        dot(p, last);
+        last = p;
+      };
+      const up = () => {
+        cv.removeEventListener('pointermove', move);
+        cv.removeEventListener('pointerup', up);
+        cv.removeEventListener('pointercancel', up);
+        if (!touched) {
+          ctx.putImageData(before, 0, 0);
+          playWrong();
+          say('사진을 다시 한번 살펴볼까요?');
+          return;
+        }
+        if (coverage(PHOTOS[pi].box) >= NEED) {
+          busy = true;
+          ctx.fillStyle = '#fff';
+          ctx.fillRect(target[0], target[1], target[2], target[3]);
+          playCorrect();
+          mark.classList.add('is-glow');
+          setTimeout(() => {
+            pi += 1;
+            if (pi === PHOTOS.length) $('p07Done').classList.remove('is-off');
+            else render();
+          }, 2000);
+        }
+      };
+      cv.addEventListener('pointermove', move);
+      cv.addEventListener('pointerup', up);
+      cv.addEventListener('pointercancel', up);
+    });
+
+    if (BoxEdit.on) {
+      const m = location.search.match(/[?&]step=([0-9]+)/);
+      pi = m ? Math.max(0, Math.min(PHOTOS.length - 1, parseInt(m[1], 10))) : 0;
+      BoxEdit.init({
+        unit: 0.1,
+        name: () => '사진' + (pi + 1) + ' 개인정보',
+        apply: (el) => placePct(el, el._ref),
+        step: { count: PHOTOS.length, get: () => pi, set: (n) => { pi = n; }, go: (n) => { pi = n; BoxEdit.syncStep(n); $('p07Done').classList.add('is-off'); render(); }, label: (n) => '사진 ' + (n + 1) + ' / ' + PHOTOS.length }
+      });
+    }
+    render();
+  })();
+  </script>
+</body>
+</html>

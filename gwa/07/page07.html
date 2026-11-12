@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리 집 속 숨은 센서 찾기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .hunt-house{left:295px;top:170px}
+        .hunt-obj[data-key="thermo"]{left:323px;top:170px}
+        .hunt-obj[data-key="gas"]{left:803px;top:158px}
+        .hunt-obj[data-key="motion"]{left:1100px;top:267px}
+        .hunt-obj[data-key="leak"]{left:1020px;top:640px}
+    </style></head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="stage-board"></div>
+          <p class="ask-pill is-fit"><span>센서가 달린 물건을 찾아 클릭해 보세요.</span></p>
+          <img class="hunt-house" src="img/p07_house.png" alt="">
+          <button class="hunt-obj is-fill" data-key="thermo" aria-label="온·습도 센서"><img src="img/p07_obj_thermo.png" alt=""></button>
+          <button class="hunt-obj is-fill" data-key="gas" aria-label="가스 센서"><img src="img/p07_obj_gas.png" alt=""></button>
+          <button class="hunt-obj is-fill" data-key="motion" aria-label="동작 센서"><img src="img/p07_obj_motion.png" alt=""></button>
+          <button class="hunt-obj is-fill" data-key="leak" aria-label="침수 센서"><img src="img/p07_obj_leak.png" alt=""></button>
+
+          <div class="avatar-modal hunt-modal is-off" id="p07Info">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <div>
+                  <p class="avatar-card-title" id="p07Title">맞아요!</p>
+                  <p class="avatar-card-text" id="p07Text"></p>
+                  <a href="javascript:;" class="avatar-card-btn card-btn is-popup js-sfx" id="p07Next" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p07Done">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <div class="step-flow">
+                  <div class="step-panel is-title">
+                    <p class="avatar-card-text">집 안 곳곳에서 작동하고 있는 센서를 모두 찾았어요.</p>
+                    <a href="page08.html" class="avatar-card-btn card-btn is-popup is-arrow js-nav-effect js-sfx" data-sound="sound/click.mp3">→</a>
+                  </div>
+                  <div class="step-panel">
+                    <p class="avatar-card-text">MakeCode에서 온도 센서의 값을 활용해 스마트 에어컨 알리미 프로그램을 만들어볼까요?</p>
+                    <a href="page08.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="우리 집 속 숨은 센서 찾기" data-next="page08.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const INFO = {
+      thermo: '온·습도 센서는 실내 온·습도를 실시간 감지하여 에어컨이나 난방기를 작동 시켜요.',
+      motion: '동작 센서는 사람이 현관에 들어서는 움직임을 감지하여 현관등을 자동으로 켜요.',
+      gas: '가스 센서는 가스 누출이나 연기를 감지하여 경보음을 울리고 가스를 차단해요.',
+      leak: '침수 센서는 바닥에 물이 차오르거나 물이 새는 것을 감지하여 알려줘요.'
+    };
+    const objs = Array.from(document.querySelectorAll('.hunt-obj'));
+    let found = 0;
+    objs.forEach((o) => o.addEventListener('click', () => {
+      if (o.classList.contains('is-found')) return;
+      playClick();
+      o.classList.add('is-found');
+      found += 1;
+      $('p07Text').textContent = INFO[o.dataset.key];
+      $('p07Info').classList.remove('is-off');
+    }));
+    $('p07Next').addEventListener('click', () => {
+      $('p07Info').classList.add('is-off');
+      if (found === objs.length) $('p07Done').classList.remove('is-off');
+    });
+  })();
+  </script></body>
+</html>

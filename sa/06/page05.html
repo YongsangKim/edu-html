@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>쏙쏙! 재화와 서비스 보물 상자 분류하기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .p05-belt{position:absolute;left:0;top:370px;width:1920px;height:220px;background:url('img/p05_belt.png') no-repeat}
+        .p05-items{position:absolute;left:72px;top:175px;width:1740px;height:300px;overflow:visible}
+        @keyframes p05-in{from{transform:translateX(-1800px)}to{transform:none}}
+        .p05-item{position:absolute;bottom:10px;cursor:grab;touch-action:none;z-index:5;animation:p05-in .7s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--i) * .2s)}
+        .p05-item img{display:block;max-width:none;pointer-events:none}
+        .p05-item.is-dragging{cursor:grabbing;z-index:60}
+        .p05-item.is-back{transition:transform .3s ease}
+        .p05-item.is-gone{opacity:0;pointer-events:none;transition:transform .45s cubic-bezier(.45,0,.85,.55),opacity .2s .27s}
+        .p05-box.is-catch{animation:p05-catch .35s .4s ease-out}
+        @keyframes p05-catch{40%{transform:scale(1.06)}}
+
+        .p05-box{position:absolute;top:492px;width:466px;height:435px;box-sizing:border-box;background:transparent center / contain no-repeat;transition:transform .2s}
+        .p05-box-goods{left:240px;background-image:url('img/p05_box_goods.png')}
+        .p05-box-service{left:1172px;background-image:url('img/p05_box_goods.png')}
+        .p05-box span{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);height:84px;padding:6px 20px 0;box-sizing:border-box;display:flex;align-items:center;white-space:nowrap;
+          background:var(--c-white);border:solid 5px #053c85;border-radius:20px;font-family:'Cafe24 Ssurround';font-size:60px;color:var(--c-ink);letter-spacing:-0.08em}
+
+        .p05-bubble{position:absolute;left:50%;bottom:300px;transform:translateX(-50%);width:354px;min-height:153px;box-sizing:border-box;padding:24px 30px;display:flex;align-items:center;justify-content:center;text-align:center;
+          background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:36px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';font-size:44px;line-height:1.25;color:var(--c-purple);letter-spacing:-0.04em;word-break:keep-all;z-index:30}
+        .p05-bubble.is-right{width:560px;color:var(--c-blue)}
+        .p05-bubble.is-wrong{width:963px;font-size:42px;color:var(--c-ink)}
+        .p05-bubble:before{content:'';position:absolute;left:50%;bottom:-58px;margin-left:-50px;width:100px;height:70px;background:url('../../resources/img/common/p_guide_tail.png') 0 0 / contain no-repeat}
+        .p05-avatar{position:absolute;left:630px;bottom:0;width:575px;height:455px;z-index:29}
+        .p05-avatar img{display:block;width:100%;height:100%;object-fit:contain;object-position:bottom}
+
+        #p05Done{z-index:120}
+
+        .ask-pill>span{letter-spacing:-0.1em}
+        .p05-bg{position:absolute;left:48px;top:84px;width:1826px;height:638px;background:url('img/p05_bg.png') no-repeat}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p05-bg"></div>
+          <p class="ask-pill is-fit"><span>컨베이어 벨트 위의 아이콘을 알맞은 보물 상자에 넣어 봐요!</span></p>
+          <div class="p05-belt"></div>
+          <div class="p05-items" id="p05Items"></div>
+
+          <div class="p05-box drop-zone p05-box-goods" data-type="goods"><span>재화 보물 상자</span></div>
+          <div class="p05-box drop-zone p05-box-service" data-type="service"><span>서비스 보물 상자</span></div>
+          <p class="p05-bubble" id="p05Bubble"></p>
+          <div class="p05-avatar"><img src="img/r5.png" alt=""></div>
+
+          <div class="avatar-modal is-off" id="p05Done">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">좋아요!</p>
+                <p class="avatar-popup-sub">모든 아이콘을 알맞게 구분했어요!</p>
+                <a href="page06.html" class="avatar-popup-next card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="쏙쏙! 재화와 서비스 보물 상자 분류하기" data-next="page06.html"></script>
+  <script src="../../resources/js/toc.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const GOODS_WRONG = (subj) => subj + ' 우리가 눈으로 보고 손으로 잡을 수 있는 ‘물건’일까요, 누군가가 대신 해주는 ‘행동과 도움’일까요?';
+    const GOODS_RIGHT = (subj) => '맞아요! ' + subj + ' 우리가 사고 파는 재화예요.';
+    const SERVICE_WRONG = (subj, what) => subj + ' ' + what + ' ‘편리한 도움’일까요, 가방에 쏙 담는 ‘물건’일까요?';
+    const ROUNDS = [
+      [
+        { key: 'clothes', name: '옷', type: 'goods', subj: '옷은' },
+        { key: 'taxi', name: '택시 운전', type: 'service',
+          right: '맞아요! 택시 기사는 손님의 이동을 도와주는 서비스를 제공해요.',
+          wrong: SERVICE_WRONG('택시 기사님의 운전은', '목적지까지 안전하게 데려다주는') },
+        { key: 'pencil', name: '연필', type: 'goods', subj: '연필은' }
+      ],
+      [
+        { key: 'snack', name: '과자', type: 'goods', subj: '과자는' },
+        { key: 'mechanic', name: '정비사의 수리', type: 'service',
+          right: '맞아요! 정비사는 자동차의 수리를 도와주는 서비스를 제공해요.',
+          wrong: SERVICE_WRONG('정비사의 수리는', '자동차를 고쳐주는') },
+        { key: 'shoes', name: '신발', type: 'goods', subj: '신발은' },
+        { key: 'haircut', name: '미용사의 이발', type: 'service',
+          right: '맞아요! 미용사는 손님의 머리를 잘라주는 서비스를 제공해요.',
+          wrong: SERVICE_WRONG('미용사의 이발은', '머리를 잘라주는') }
+      ],
+      [
+        { key: 'delivery', name: '택배 배달', type: 'service',
+          right: '맞아요! 택배 기사님은 택배를 집 앞까지 배송해주는 서비스를 제공해요.',
+          wrong: SERVICE_WRONG('택배 기사님의 배달은', '물건을 집 앞까지 배달해주는') },
+        { key: 'bag', name: '가방', type: 'goods', subj: '가방은' },
+        { key: 'umbrella', name: '우산', type: 'goods', subj: '우산은' },
+        { key: 'doctor', name: '의사의 진료', type: 'service',
+          right: '맞아요! 의사 선생님은 아픈 환자를 치료하는 서비스를 제공해요.',
+          wrong: SERVICE_WRONG('의사 선생님의 진료는', '아픈 것을 치료해주는') },
+        { key: 'bread', name: '빵', type: 'goods', subj: '빵은' }
+      ]
+    ];
+    const DEFAULT_BUBBLE = '재화일까,<br>서비스일까?';
+
+    const itemsBox = $('p05Items');
+    const bubble = $('p05Bubble');
+    const boxes = Array.from(document.querySelectorAll('.p05-box'));
+    const stage = document.getElementById('stage');
+
+    let round = 0;
+    let left = 0;
+    let bubbleTimer = null;
+
+    function say(html, cls, ms) {
+      bubble.innerHTML = html;
+      bubble.className = 'p05-bubble' + (cls ? ' ' + cls : '');
+      clearTimeout(bubbleTimer);
+      if (ms) bubbleTimer = setTimeout(() => say(DEFAULT_BUBBLE), ms);
+    }
+
+    function boxAt(x, y) {
+      return boxes.find((b) => {
+        const r = b.getBoundingClientRect();
+        return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+      });
+    }
+
+    function renderRound() {
+      const items = ROUNDS[round];
+      left = items.length;
+      itemsBox.innerHTML = '';
+      const gap = 1740 / items.length;
+      items.forEach((it, i) => {
+        const el = document.createElement('div');
+        el.className = 'p05-item';
+        el.style.setProperty('--i', items.length - 1 - i);
+        el.style.left = Math.round(gap * i + (gap - 260) / 2) + 'px';
+        el.innerHTML = '<img src="img/p05_item_' + it.key + '.png" alt="' + it.name + '">';
+        bindDrag(el, it);
+        itemsBox.appendChild(el);
+      });
+      say(DEFAULT_BUBBLE);
+    }
+
+    function bindDrag(el, it) {
+      el.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        const s = stage.getBoundingClientRect().width / 1920;
+        const sx = e.clientX;
+        const sy = e.clientY;
+        el.setPointerCapture(e.pointerId);
+        let tx = 0;
+        let ty = 0;
+        el.classList.remove('is-back');
+        el.classList.add('is-dragging');
+        const move = (ev) => {
+          tx = (ev.clientX - sx) / s;
+          ty = (ev.clientY - sy) / s;
+          el.style.transform = 'translate(' + tx + 'px,' + ty + 'px)';
+          const over = boxAt(ev.clientX, ev.clientY);
+          boxes.forEach((b) => b.classList.toggle('is-over', b === over));
+        };
+        const up = (ev) => {
+          el.removeEventListener('pointermove', move);
+          el.removeEventListener('pointerup', up);
+          el.removeEventListener('pointercancel', up);
+          el.classList.remove('is-dragging');
+          boxes.forEach((b) => b.classList.remove('is-over'));
+          const box = boxAt(ev.clientX, ev.clientY);
+          if (box && box.dataset.type === it.type) {
+            playCorrect();
+            // 상자 입구(가운데 위쪽)로 날아 들어가며 작아지다 사라짐
+            const er = el.getBoundingClientRect();
+            const br = box.getBoundingClientRect();
+            el.classList.add('is-gone');
+            el.style.transform = 'translate(' + (tx + (br.left + br.width / 2 - er.left - er.width / 2) / s) + 'px,' + (ty + (br.top + br.height * 0.35 - er.top - er.height / 2) / s) + 'px) scale(.3)';
+            box.classList.add('is-catch');
+            setTimeout(() => box.classList.remove('is-catch'), 800);
+            say(it.type === 'goods' ? GOODS_RIGHT(it.subj) : it.right, 'is-right', 2000);
+            left -= 1;
+            if (!left) setTimeout(nextRound, 2000);
+            return;
+          }
+          el.classList.add('is-back');
+          el.style.transform = '';
+          if (box) {
+            playWrong();
+            say(it.type === 'goods' ? GOODS_WRONG(it.subj) : it.wrong, 'is-wrong', 5000);
+          }
+        };
+        el.addEventListener('pointermove', move);
+        el.addEventListener('pointerup', up);
+        el.addEventListener('pointercancel', up);
+      });
+    }
+
+    function nextRound() {
+      round += 1;
+      if (round < ROUNDS.length) {
+        renderRound();
+        return;
+      }
+      $('p05Done').classList.remove('is-off');
+    }
+
+    renderRound();
+  })();
+  </script>
+</body>
+</html>

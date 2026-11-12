@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI 가이드 - 안내 캐릭터·말풍선</title>
+    <link rel="stylesheet" href="../resources/css/common.css">
+    <link rel="stylesheet" href="guide.css">
+    <style>
+        .g-sets .g-meta{font-size:12.5px}
+        .g-list.g-sets{gap:12px!important}
+        .g-list.g-sets .g-item{flex:0 0 calc(25% - 9px)!important;max-width:calc(25% - 9px)!important;padding:10px}
+        .g-sets .g-view{aspect-ratio:5/6!important}
+        .g-sets .g-stage{height:2304px}
+        .g-crop{position:absolute;left:0;top:0;width:1920px;height:960px;transform:scale(2.4);transform-origin:0 0}
+    </style>
+</head>
+<body>
+  <div class="g-wrap">
+    <h1>안내 캐릭터 · 말풍선</h1>
+    <p class="g-note">실제 화면(1920×960)을 절반 크기로 보여줌. 모양은 공용 <code>.guide-bubble</code>(흰 말풍선 · 보라 테두리 · 48px · 꼬리 <code>img/common/p_guide_tail.png</code>)과 <code>.guide-character</code>(캐릭터 자리)로 통일. 말풍선과 캐릭터는 한 묶음으로 놓는 <code>.guide-set</code>을 쓰고, 캐릭터 그림은 사회 <code>sa/img/character/sa_*.png</code>, 과학 <code>gwa/img/character/gwa_*.png</code>(과학 전용 11포즈, 아래 과학 캐릭터 참고)에서 가져옴.</p>
+    <ul class="g-toc"></ul>
+
+    <h2>말풍선 + 캐릭터 한 세트 <code>.guide-set</code></h2>
+    <p class="g-note">
+      말풍선과 캐릭터를 한 묶음으로 놓는 방법입니다. 말풍선 자리는 공용으로 고정(아래 모서리 기준이라 글이 길어지면 위로 늘어남)이고, 캐릭터 그림은 전부 같은 캔버스(576×603)로 만들어져 있어서 <b>포즈가 달라도 위치·크기가 같습니다</b>(왼쪽 110px · 아래 40px). 포즈별 좌표를 따로 적지 않습니다. <code>is-포즈</code> 클래스는 이름표일 뿐 위치에는 영향이 없습니다.
+      마크업: <code>&lt;div class="guide-set is-wink-point4"&gt;&lt;p class="guide-bubble is-center"&gt;문구&lt;/p&gt;&lt;div class="guide-character"&gt;&lt;img src="../resources/img/character/sa_wink_point4.png" alt=""&gt;&lt;/div&gt;&lt;/div&gt;</code>.
+      말풍선 크기는 글 줄 수에 따라 <code>initGuideSay</code>가 자동으로 정함: 기본(폭 510 · 글자 48px) → 5줄 이상이면 <code>.is-medium</code> + <code>.is-long</code>(폭 610 · 44px) → 그래도 5줄 이상이면 <code>.is-large</code>(폭 660, 왼쪽으로 넓어짐). 꼬리 위치는 세 크기가 같고, 글자 간격을 더 좁힐 때는 <code>.is-tight</code>(-0.08em). 말풍선 폭 <code>--gb-w</code>·위치 <code>--gb-left</code>/<code>--gb-bottom</code>·캐릭터 <code>--gc-left</code>/<code>--gc-bottom</code>/<code>--gc-w</code> 는 페이지에서 덮어쓸 수 있음.
+    </p>
+    <div class="g-list g-sets">
+      <div class="g-item">
+        <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-main</code></b></p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-crop"><div class="guide-set is-main">
+            <p class="guide-bubble is-center">안녕! 함께 시작해 볼까요?</p>
+            <div class="guide-character"><img src="../sa/img/character/sa_main.png" alt=""></div>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-main-wave</code></b></p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-crop"><div class="guide-set is-main-wave">
+            <p class="guide-bubble is-center is-medium">친구의 메시지를 읽었을 때<br>어떤 감정이 드나요?</p>
+            <div class="guide-character"><img src="../sa/img/character/sa_main_wave.png" alt=""></div>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-wink-open</code></b></p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-crop"><div class="guide-set is-wink-open">
+            <p class="guide-bubble is-center">마음에 드는 것을<br>골라 볼까요?</p>
+            <div class="guide-character"><img src="../sa/img/character/sa_wink_open.png" alt=""></div>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-wink-point</code></b></p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-crop"><div class="guide-set is-wink-point">
+            <p class="guide-bubble is-center">위쪽 화면을<br>살펴봐요.</p>
+            <div class="guide-character"><img src="../sa/img/character/sa_wink_point.png" alt=""></div>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-wink-point2</code></b></p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-crop"><div class="guide-set is-wink-point2">
+            <p class="guide-bubble is-center">오른쪽 위를<br>눌러요.</p>
+            <div class="guide-character"><img src="../sa/img/character/sa_wink_point2.png" alt=""></div>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-wink-point3</code></b></p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-crop"><div class="guide-set is-wink-point3">
+            <p class="guide-bubble is-center">폰 화면을<br>눌러요.</p>
+            <div class="guide-character"><img src="../sa/img/character/sa_wink_point3.png" alt=""></div>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-wink-point4</code></b></p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-crop"><div class="guide-set is-wink-point4">
+            <p class="guide-bubble is-center">입력창을<br>클릭해보세요.</p>
+            <div class="guide-character"><img src="../sa/img/character/sa_wink_point4.png" alt=""></div>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-point-front</code></b></p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-crop"><div class="guide-set is-point-front">
+            <p class="guide-bubble is-center">화면 속 폰을<br>살펴봐요.</p>
+            <div class="guide-character"><img src="../sa/img/character/sa_point_front.png" alt=""></div>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-wink-present</code></b></p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-crop"><div class="guide-set is-wink-present">
+            <p class="guide-bubble is-center">이런 선택지가<br>있어요.</p>
+            <div class="guide-character"><img src="../sa/img/character/sa_wink_present.png" alt=""></div>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-smile-present</code></b></p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-crop"><div class="guide-set is-smile-present">
+            <p class="guide-bubble is-center">이런 선택지가<br>있어요.</p>
+            <div class="guide-character"><img src="../sa/img/character/sa_smile_present.png" alt=""></div>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-wink-jump</code></b></p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-crop"><div class="guide-set is-wink-jump">
+            <p class="guide-bubble is-center">잘했어요!</p>
+            <div class="guide-character"><img src="../sa/img/character/sa_wink_jump.png" alt=""></div>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-happy-jump</code></b></p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-crop"><div class="guide-set is-happy-jump">
+            <p class="guide-bubble is-center">모두 끝냈어요!<br>축하해요!</p>
+            <div class="guide-character"><img src="../sa/img/character/sa_happy_jump.png" alt=""></div>
+          </div></div>
+        </div></div>
+      </div>
+    </div>
+
+    <h2>과학 캐릭터 <code>gwa/img/character/gwa_*.png</code></h2>
+    <p class="g-note">
+      과학 차시용 안내 로봇(몸통에 플라스크·전구 문양)입니다. 사회와 마크업·좌표가 같고 그림 경로만 <code>../resources/img/character/gwa_*.png</code> 입니다. 포즈 11종: <code>main</code> · <code>main_point</code> · <code>smile_point</code> · <code>smile_present</code> · <code>wink_point</code> · <code>wink_point2</code> · <code>wink_point3</code> · <code>wink_point4</code> · <code>wink_present</code> · <code>wink_present2</code> · <code>wink_walk</code>.
+      <code>initGuideSay</code> 는 그림 경로의 <code>gwa_</code> 를 보고 과학 포즈 목록을 미리 불러옵니다.
+    </p>
+    <div class="g-list g-sets">
+      <div class="g-item">
+        <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-main</code></b></p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-crop"><div class="guide-set is-main">
+            <p class="guide-bubble is-center">안녕! 함께 시작해 볼까요?</p>
+            <div class="guide-character"><img src="../gwa/img/character/gwa_main.png" alt=""></div>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-main-point</code></b></p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-crop"><div class="guide-set is-main-point">
+            <p class="guide-bubble is-center">여기를 살펴봐요.</p>
+            <div class="guide-character"><img src="../gwa/img/character/gwa_main_point.png" alt=""></div>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-smile-point</code></b></p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-crop"><div class="guide-set is-smile-point">
+            <p class="guide-bubble is-center">이쪽을 눌러요.</p>
+            <div class="guide-character"><img src="../gwa/img/character/gwa_smile_point.png" alt=""></div>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-smile-present</code></b></p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-crop"><div class="guide-set is-smile-present">
+            <p class="guide-bubble is-center">잘했어요!<br>함께 정리해 봐요.</p>
+            <div class="guide-character"><img src="../gwa/img/character/gwa_smile_present.png" alt=""></div>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-wink-point</code></b></p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-crop"><div class="guide-set is-wink-point">
+            <p class="guide-bubble is-center">위쪽 화면을<br>살펴봐요.</p>
+            <div class="guide-character"><img src="../gwa/img/character/gwa_wink_point.png" alt=""></div>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-wink-point2</code></b></p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-crop"><div class="guide-set is-wink-point2">
+            <p class="guide-bubble is-center">오른쪽 위를<br>눌러요.</p>
+            <div class="guide-character"><img src="../gwa/img/character/gwa_wink_point2.png" alt=""></div>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-wink-point3</code></b></p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-crop"><div class="guide-set is-wink-point3">
+            <p class="guide-bubble is-center">폰 화면을<br>눌러요.</p>
+            <div class="guide-character"><img src="../gwa/img/character/gwa_wink_point3.png" alt=""></div>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-wink-point4</code></b></p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-crop"><div class="guide-set is-wink-point4">
+            <p class="guide-bubble is-center">아래쪽을<br>눌러요.</p>
+            <div class="guide-character"><img src="../gwa/img/character/gwa_wink_point4.png" alt=""></div>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-wink-present</code></b></p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-crop"><div class="guide-set is-wink-present">
+            <p class="guide-bubble is-center">이렇게 해 볼까요?</p>
+            <div class="guide-character"><img src="../gwa/img/character/gwa_wink_present.png" alt=""></div>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-wink-present2</code></b></p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-crop"><div class="guide-set is-wink-present2">
+            <p class="guide-bubble is-center">자, 보세요!</p>
+            <div class="guide-character"><img src="../gwa/img/character/gwa_wink_present2.png" alt=""></div>
+          </div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta" style="white-space:nowrap"><b><code>.guide-set.is-wink-walk</code></b></p>
+        <div class="g-view"><div class="g-stage">
+          <div class="g-crop"><div class="guide-set is-wink-walk">
+            <p class="guide-bubble is-center">다음으로<br>가 볼까요?</p>
+            <div class="guide-character"><img src="../gwa/img/character/gwa_wink_walk.png" alt=""></div>
+          </div></div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+  <script src="guide.js"></script>
+</body>
+</html>

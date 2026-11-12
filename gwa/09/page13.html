@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>첫 블록 코딩, 엔트리로 배우는 순차</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 23p. 엔트리 기본 화면(개발 기능 없는 그림)을 보여 주고, 안내 창의 [다음]을 누르면 문구가 바뀌고 [시작하기] 버튼이 나옴(블록 3개가 위에서 차례로 쌓이는 연출). 엔트리 화면 그림은 HTML 모형, 이미지 img/p13_*.png, 캐릭터는 gwa/08 캐릭터 임시 복사본 */
+        .en-tag{position:absolute;left:10px;top:8px;z-index:6;width:44px;height:44px;border-radius:50%;background:var(--c-purple);font-family:'Cafe24 Ssurround';font-size:28px;line-height:44px;text-align:center;color:var(--c-white);opacity:0}
+        .en-view{background:url('img/p13_stage_bg.png') center / cover no-repeat}
+
+        .en-btn.is-run{cursor:default}
+        .en-star{position:absolute;width:70px;height:70px;margin:-35px 0 0 -35px;background:url('../../resources/img/common/icon_star_on.png') center / contain no-repeat;filter:drop-shadow(0 3px 2px rgba(0,0,0,.2))}
+        .en-bot{position:absolute;width:84px;height:84px;margin:-42px 0 0 -42px;background:url('img/p13_bot.svg') center / contain no-repeat;z-index:2;transition:left 1s ease,top 1s ease}
+        .en-stage.is-intro .en-view{background-image:none}
+        .en-stage.is-intro .en-star{display:none}
+        .en-stage.is-intro .en-bot{left:250px!important;top:190px!important;width:220px;height:220px;margin:-110px 0 0 -110px}
+
+        .en-list .en-blk{width:360px;flex:none}
+
+        .en-ws .en-blk{position:absolute;left:60px;width:360px}
+        .en-slot{position:absolute;left:60px;width:360px;height:88px;background:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27360%27 height=%2788%27 viewBox=%270 0 360 88%27%3E%3Cpath d=%27M1,0 H164 L168,14 H192 L196,0 H359 V74 H196 L192,88 H168 L164,74 H1 Z%27 fill=%27%23ffd83d%27 fill-opacity=%27.14%27 stroke=%27%23ffd83d%27 stroke-width=%274%27 stroke-dasharray=%2710 7%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E") 0 0 / 360px 88px no-repeat;display:none}
+        .en-slot.is-on{display:block}
+        .en-trash{background-image:url('img/p14_trash.png')}
+
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="en-win"></div>
+          <div class="en-area en-stage is-intro" id="enStage" data-a="1"><span class="en-tag">1</span>
+            <div class="en-view"></div>
+            <div class="en-star" id="enStarMouth" style="left:230px;top:75px"></div>
+            <div class="en-star" id="enStarStomach" style="left:300px;top:175px"></div>
+            <div class="en-star" id="enStarIntestine" style="left:160px;top:310px"></div>
+            <div class="en-bot" id="enBot" style="left:100px;top:75px"></div>
+            <div class="en-btns"><button class="en-btn" type="button">+ 오브젝트 추가하기</button><button class="en-btn is-run" type="button">시작하기</button></div>
+          </div>
+          <div class="en-area en-objs" id="enObjs" data-a="2"><span class="en-tag">2</span>
+            <div class="en-objlist"><div class="en-obj"><i style="background-image:url('img/p13_bot.svg')"></i>엔트리봇</div></div>
+          </div>
+          <div class="en-area en-pal" id="enPal" data-a="3"><span class="en-tag">3</span>
+            <div class="en-cats" id="enCats"></div>
+            <div class="en-list" id="enList"></div>
+          </div>
+          <div class="en-area en-ws" id="enWs" data-a="4"><span class="en-tag">4</span>
+            <div class="en-blk blk is-start" id="enStart" style="left:60px;top:70px;width:360px">시작하기 버튼을 클릭했을 때</div>
+            <div class="en-slot" id="enSlot"></div>
+            <div class="en-trash" id="enTrash"></div>
+          </div>
+
+          <div class="en-guide">
+            <div class="en-char"><img src="../img/character/gwa_main_point.png" alt="메인 캐릭터"></div>
+            <p class="en-text" id="enText">블록 코딩이란? 명령이 적힌 블록을 위에서 아래로 차례대로 연결해서 컴퓨터에게 일을 시키는 방법이에요.</p>
+            <button class="card-btn is-popup js-sfx en-next" id="enNext" data-sound="sound/click.mp3">다음</button>
+            <a href="page14.html" class="js-nav-effect card-btn is-popup js-sfx en-next is-off" id="enGo" data-sound="sound/click.mp3">시작하기</a>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="첫 블록 코딩, 엔트리로 배우는 순차" data-next="page14.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const CATS = ['시작', '흐름', '움직임', '생김새', '소리', '판단', '계산'];
+    $('enCats').innerHTML = CATS.map((c) => '<button class="en-cat' + (c === '움직임' ? ' is-on' : '') + '">' + c + '</button>').join('');
+    const names = ['<i class="en-num">1</i>초 동안 입 위치로 이동하기', '<i class="en-num">1</i>초 동안 위 위치로 이동하기', '<i class="en-num">1</i>초 동안 장 위치로 이동하기'];
+    $('enList').innerHTML = names.map((n) => '<div class="en-blk blk">' + n + '</div>').join('');
+
+    $('enNext').addEventListener('click', () => {
+      $('enNext').classList.add('is-off');
+      $('enGo').classList.remove('is-off');
+      $('enText').textContent = '어려운 글자를 쓰지 않아도, 블록을 끼우기만 하면 컴퓨터가 그 순서대로 움직여요. 한번 같이 알아볼까요?';
+      const ws = $('enWs');
+      ['입으로 이동하기', '위로 이동하기', '장으로 이동하기'].forEach((n, i) => {
+        const b = document.createElement('div');
+        b.className = 'en-blk blk';
+        b.textContent = n;
+        b.style.cssText = 'z-index:' + (19 - i) + ';top:' + (144 + i * 74) + 'px;opacity:0;transform:translateY(-40px);transition:opacity .5s,transform .5s';
+        ws.appendChild(b);
+        setTimeout(() => { b.style.opacity = '1'; b.style.transform = 'none'; }, 400 + i * 700);
+      });
+    });
+  })();
+  </script>
+</body>
+</html>

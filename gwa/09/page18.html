@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>블록 코딩 순서대로 캐릭터 움직이기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .gm-panel{position:absolute;left:30px;top:115px;width:1860px;height:823px;box-sizing:border-box;background:#e4f3fb;border:4px solid var(--c-ink);border-radius:14px}
+        .ask-pill.gm-msg{left:150px;top:30px;width:1620px;height:165px;max-width:none;transform:none;padding:10px 40px 4px;font-size:58px;letter-spacing:-0.05em;background:var(--c-cream)}
+        .gm-msg img{width:64px;height:64px;vertical-align:-14px}
+
+        .gm-board{position:absolute;left:45px;top:198px;width:940px;height:732px}
+        .gm-heart{position:absolute;left:744px;top:356px;width:162px;height:154px;filter:drop-shadow(0 4px 5px rgba(30,40,90,.35))}
+        .gm-aro{position:absolute;width:245px;height:295px;z-index:3;transition:left .6s ease,top .6s ease}
+        .gm-aro img{display:block;width:100%;height:100%}
+        .gm-aro.is-no{animation:fix-word-shake .35s ease}
+        .gm-aro.is-cheer{animation:gm-cheer .5s ease-in-out 4}
+        @keyframes gm-cheer{0%,100%{transform:translateY(0)}50%{transform:translateY(-30px)}}
+
+        .gm-device{position:absolute;left:1040px;top:210px;width:810px;height:718px}
+        .gm-blocks{position:absolute;left:1208px;top:242px;width:475px}
+        .gm-block{position:relative;box-sizing:border-box;height:85px;margin-bottom:-2px;padding:0 20px 0 100px;display:flex;align-items:center;font-family:'Cafe24 Ssurround';font-size:40px;letter-spacing:-0.05em;color:var(--c-ink);-webkit-text-stroke:7px #fff;paint-order:stroke fill;border:4px solid var(--c-ink);border-radius:18px;white-space:nowrap;box-shadow:inset 3px 5px 7px rgba(255,255,255,.3),inset -3px -9px 9px rgba(0,0,0,.1)}
+        .gm-block:nth-child(1){background:#ffc70e;z-index:3}
+        .gm-block:nth-child(2){background:#6489ff;z-index:2}
+        .gm-block:nth-child(3){background:#f57b3a;z-index:1}
+        .gm-block:after{content:'';position:absolute;left:50%;bottom:-22px;width:36px;height:22px;margin-left:-18px;box-sizing:border-box;background:inherit;border:4px solid var(--c-ink);border-top:0;border-radius:0 0 18px 18px;background-image:linear-gradient(to bottom,rgba(0,0,0,.07),rgba(0,0,0,.07))}
+        .gm-block:before{content:'';position:absolute;left:50%;bottom:-4px;width:28px;height:4px;margin-left:-14px;background-color:inherit;background-image:linear-gradient(to bottom,rgba(0,0,0,.07),rgba(0,0,0,.07));z-index:1}
+        .gm-block .gm-no{position:absolute;left:28px;top:50%;width:52px;height:52px;margin-top:-26px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:50%;font-size:40px;padding-top:4px;color:#2a6fd6;-webkit-text-stroke:0}
+        .gm-star{position:absolute;left:1128px;top:287px;z-index:20;pointer-events:none;width:70px;height:70px;margin-top:-35px;background:url('../../resources/img/common/icon_star_on.png') center / contain no-repeat;filter:drop-shadow(0 6px 0 #d6dee8);transition:top .5s ease-in-out,opacity .3s}
+        .gm-block.is-now{animation:blk-glow 1s ease-in-out infinite}
+        .gm-block.is-blink{animation:blk-glow .35s ease-in-out 3}
+
+        .gm-key{position:absolute;padding:0;border:0;background:none;cursor:pointer}
+        .gm-key img{display:block}
+        .gm-key[data-dir="up"]{left:1378px;top:561px}
+        .gm-key[data-dir="left"]{left:1201px;top:664px}
+        .gm-key[data-dir="right"]{left:1554px;top:664px}
+        .gm-key[data-dir="down"]{left:1378px;top:758px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default" id="gmMain">
+          <div class="gm-panel"></div>
+          <p class="ask-pill is-fit gm-msg" id="gmMsg"></p>
+
+          <img class="gm-board" src="img/p_board.png" alt="">
+          <img class="gm-heart" src="img/p_heart.png" alt="">
+          <img class="gm-device" src="img/p18_device.png" alt="">
+          <i class="gm-star" id="gmStar"></i>
+          <div class="gm-blocks" id="gmBlocks">
+            <div class="gm-block" data-dir="right"><span class="gm-no">1</span>오른쪽으로 1칸 가기</div>
+            <div class="gm-block" data-dir="up"><span class="gm-no">2</span>위로 1칸 가기</div>
+            <div class="gm-block" data-dir="right"><span class="gm-no">3</span>오른쪽으로 1칸 가기</div>
+          </div>
+
+          <div class="gm-aro" id="gmAro"><img src="img/p18_aro.png" alt="아로"></div>
+
+          <button class="gm-key" data-dir="up" aria-label="위"><img class="js-img-swap" src="img/p18_key_up.png" data-src-alt="img/p18_key_up_on.png" data-src-over="img/p18_key_up_over.png" data-swap-reset="200" alt=""></button>
+          <button class="gm-key" data-dir="left" aria-label="왼쪽"><img class="js-img-swap" src="img/p18_key_left.png" data-src-alt="img/p18_key_left_on.png" data-src-over="img/p18_key_left_over.png" data-swap-reset="200" alt=""></button>
+          <button class="gm-key" data-dir="right" aria-label="오른쪽"><img class="js-img-swap" src="img/p18_key_right.png" data-src-alt="img/p18_key_right_on.png" data-src-over="img/p18_key_right_over.png" data-swap-reset="200" alt=""></button>
+          <button class="gm-key" data-dir="down" aria-label="아래"><img class="js-img-swap" src="img/p18_key_down.png" data-src-alt="img/p18_key_down_on.png" data-src-over="img/p18_key_down_over.png" data-swap-reset="200" alt=""></button>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="블록 코딩 순서대로 캐릭터 움직이기" data-next="page19.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const CX = [310, 513, 728];
+    const CY = [370, 545, 725];
+    const cellPos = (c, r) => [CX[c] - 155, CY[r] - 225];
+    const STAR = '<img src="../../resources/img/common/icon_star_on.png" alt="별">';
+    const DIR = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
+    const aro = $('gmAro');
+    const blocks = Array.from(document.querySelectorAll('#gmBlocks .gm-block'));
+    let pos = [0, 2];
+    let step = 0;
+    let busy = false;
+
+    const place = (el, c, r) => { const p = cellPos(c, r); el.style.left = p[0] + 'px'; el.style.top = p[1] + 'px'; };
+    place(aro, 0, 2);
+    const msg = (t, hint) => { $('gmMsg').innerHTML = '<span>' + t + '</span>'; $('gmMsg').classList.toggle('is-hint', !!hint); };
+    const star = $('gmStar');
+    const mark = () => {
+      blocks.forEach((b, i) => b.classList.toggle('is-now', i === step));
+      const cur = blocks[step];
+      star.style.opacity = cur ? 1 : 0;
+      if (cur) star.style.top = ($('gmBlocks').offsetTop + cur.offsetTop + cur.offsetHeight / 2) + 'px';
+    };
+    mark();
+    msg('왼쪽에 있는 블록이 아로가 따라야 할 알고리즘이에요.<br>노란 별(' + STAR + ')이 붙은 블록부터 하나씩 차례대로 따라가봐요.');
+
+    function press(dir) {
+      if (busy || step >= blocks.length) return;
+      if (dir !== blocks[step].dataset.dir) {
+        playWrong();
+        aro.classList.remove('is-no'); void aro.offsetWidth; aro.classList.add('is-no');
+        blocks[step].classList.remove('is-blink'); void blocks[step].offsetWidth; blocks[step].classList.add('is-blink');
+        msg('우리는 블록에 적힌 순서대로 가야 해요!<br>별이 있는 블록이 가리키는 방향으로 가 볼까요?', true);
+        return;
+      }
+      playDrag();
+      pos = [pos[0] + DIR[dir][0], pos[1] + DIR[dir][1]];
+      place(aro, pos[0], pos[1]);
+      blocks[step].classList.remove('is-now', 'is-blink');
+      step += 1;
+      if (step < blocks.length) {
+        mark();
+        msg('잘했어요! 노란 별(' + STAR + ')이 붙은 블록부터<br>하나씩 차례대로 따라가봐요.');
+        return;
+      }
+      busy = true;
+      star.style.transition = 'none';
+      star.style.opacity = 0;
+      setTimeout(arrive, 700);
+    }
+
+    const cheerSfx = makeSfx('sound/9차시_축하 효과음.mp3', true);
+    function arrive() {
+      aro.classList.add('is-cheer');
+      star.style.opacity = 0;
+      cheerSfx();
+      const fx = document.createElement('img');
+      fx.className = 'particle-effect';
+      fx.src = '../../resources/img/common/img_particle01.png';
+      fx.dataset.frame1 = '../../resources/img/common/img_particle01.png';
+      fx.dataset.frame2 = '../../resources/img/common/img_particle02.png';
+      fx.dataset.interval = '200';
+      fx.dataset.duration = '2500';
+      fx.alt = '';
+      $('gmMain').appendChild(fx);
+      initParticleEffect();
+      msg('도착완료! 블록이 정해진 순서대로 움직였더니 잘 도착했어요.');
+      setTimeout(() => msg('이렇게 명령을 위에서 아래로 차례대로 실행하는 것을<br>‘순차’라고 해요.'), 3000);
+      setTimeout(() => navigateTo('page19.html'), 7000);
+    }
+
+    document.querySelectorAll('.gm-key').forEach((k) => k.addEventListener('click', () => press(k.dataset.dir)));
+    document.addEventListener('keydown', (e) => {
+      const m = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' }[e.key];
+      if (m) {
+        e.preventDefault();
+        const im = document.querySelector('.gm-key[data-dir="' + m + '"] img');
+        im.src = im.dataset.srcAlt;
+        setTimeout(() => { im.src = im.dataset.originalSrc; }, 200);
+        press(m);
+      }
+    });
+  })();
+  </script>
+</body>
+</html>

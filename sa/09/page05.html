@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>지켜라! 우리 동네 안전망</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 기획서 10~12p. 왼쪽 '인물 카드' 3줄(사진+직업명 + 끌어 놓을 칸), 오른쪽 '역할 카드' 6장(무작위 배치) → 알맞은 칸에 끌어 넣으면 부착, 틀리면 제자리로.
+           2판(구급대원·환경미화원·버스 기사 → 경찰관·택배 기사·급식 조리사), 끝나면 활동 종료 팝업 */
+        .p05-panel{position:absolute;top:182px;height:730px;box-sizing:border-box;border-radius:14px}
+        .p05-panel.is-person{left:35px;width:811px;background:#dff6ff;border:solid 3px #91b9e7}
+        .p05-panel.is-role{left:867px;width:1022px;background:#266cc8}
+
+        .p05-rb{position:absolute;top:148px;margin:0;z-index:3}
+        .p05-rb:before{content:'';position:absolute}
+        .p05-rb span{position:relative;display:flex;align-items:center;justify-content:center;height:100%;box-sizing:border-box;padding-top:6px;font-family:'Cafe24 Ssurround';font-size:52px;letter-spacing:-0.04em;color:#1b1738}
+        .p05-rb.is-person{left:262px;width:357px;height:82px}
+        .p05-rb.is-person:before{left:-45px;top:37px;width:447px;height:70px;background:url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'447'%20height%3D'70'%3E%3Cpath%20fill%3D'%238196a8'%20d%3D'M75%2020H372V57H75Z'%2F%3E%3Cpath%20fill%3D'%238196a8'%20d%3D'M0%2013H90V70H0L22%2041Z'%2F%3E%3Cpath%20fill%3D'%238196a8'%20d%3D'M357%2013H447L425%2041L447%2070H357Z'%2F%3E%3Cpath%20fill%3D'%2391b9e7'%20d%3D'M0%200H90V57H0L22%2028Z'%2F%3E%3Cpath%20fill%3D'%2391b9e7'%20d%3D'M357%200H447L425%2028L447%2057H357Z'%2F%3E%3Cpath%20fill%3D'%237f9be6'%20d%3D'M48%2045H75V57Z'%2F%3E%3Cpath%20fill%3D'%237f9be6'%20d%3D'M372%2045H399L372%2057Z'%2F%3E%3C%2Fsvg%3E") no-repeat}
+        .p05-rb.is-person span{background:#dff6ff;border:solid 5px #fff}
+        .p05-role-rb{left:1219px;top:148px;z-index:3}
+
+        .p05-person{position:absolute;left:75px;width:253px;height:198px;box-sizing:border-box;padding:5px 5px 0 5px;background:#fff;border-radius:22px 0 0 22px;box-shadow:0 7px 0 #a3b5cf;overflow:hidden;display:flex;flex-direction:column}
+        .p05-person i{flex:1 1 auto;border-radius:17px 0 0 0;background:var(--c-mist) 0 0 / cover no-repeat}
+        .p05-person span{flex:0 0 58px;display:flex;align-items:center;justify-content:center;padding-top:4px;font-family:'Cafe24 Ssurround';font-size:38px;color:#1b1738;letter-spacing:-0.05em;line-height:1;white-space:nowrap}
+
+        .p05-slot,.p05-card{box-sizing:border-box;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center;font-family:'Cafe24 Ssurround';letter-spacing:-0.04em;word-break:keep-all}
+        .p05-slot:after,.p05-card:after{content:'';position:absolute;left:10px;top:10px;right:10px;bottom:10px;border:dashed 4px rgba(255,255,255,.55);border-radius:14px;pointer-events:none}
+        .p05-slot:before,.p05-card:before{content:'';position:absolute;left:-33px;top:50%;width:66px;height:66px;margin-top:-33px;box-sizing:border-box;border-radius:50%;z-index:1}
+
+        .p05-slot{position:absolute;left:328px;width:478px;height:198px;background:#cdddf2;border:solid 5px #fff;border-left:0;border-radius:0 22px 22px 0;box-shadow:0 7px 0 #a3b5cf;font-size:40px;color:#8892a9;white-space:nowrap}
+        .p05-slot:after{border-color:#e6eef9}
+        .p05-slot:before{background:#fff}
+        .p05-slot[data-filled]{background:none;border:0;box-shadow:none;overflow:visible}
+        .p05-slot[data-filled]:before,.p05-slot[data-filled]:after{display:none}
+        .p05-slot[data-filled] .p05-hint{display:none}
+
+        .p05-hold{position:absolute;width:435px;height:180px}
+        .p05-card{width:435px;height:180px;padding:4px 24px 0;border:solid 5px #fff;border-left:0;border-radius:10px 20px 20px 10px;cursor:grab;user-select:none;z-index:5;
+          font-size:36px;line-height:1.2z;color:#14285f;box-shadow:inset 4px 0 0 #fff,0 7px 0 #1f5eb9}
+        .p05-card:before{background:#266cc8;border:solid 4px #fff}
+        .p05-card:after{left:10px}
+        .p05-card[data-key="police"]{background:#df9af9}
+        .p05-card[data-key="cleaner"]{background:#94d2f9}
+        .p05-card[data-key="bus"]{background:#e6cfa4}
+        .p05-card[data-key="paramedic"]{background:#a2eea4}
+        .p05-card[data-key="cook"]{background:#a79af9}
+        .p05-card[data-key="courier"]{background:#e6a8a4}
+        .p05-card:hover{filter:brightness(1.06)}
+        .p05-card.is-dragging{cursor:grabbing;z-index:50}
+        .p05-slot .p05-card{cursor:default;width:100%;height:100%;white-space:normal;font-size:38px;line-height:1.25;padding-left:40px;border-width:4px 4px 4px 0;border-radius:0 22px 22px 0;box-shadow:0 7px 0 #a3b5cf}
+        .p05-slot .p05-card:before{background:#fff;border:0}
+
+        #p05Done{z-index:120}
+
+        .ask05{top:30px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="ask-pill is-fit ask05"><span>역할 카드를 드래그해 인물 카드와 알맞게 연결해보세요</span></p>
+
+          <div class="p05-panel is-person"></div>
+          <div class="p05-panel is-role"></div>
+          <p class="p05-rb is-person"><span>인물 카드</span></p>
+          <p class="rb-arrow p05-role-rb"><span>역할 카드</span></p>
+
+          <div id="p05Persons"></div>
+          <div id="p05Slots"></div>
+          <div id="p05Tray"></div>
+
+          <div class="avatar-modal is-off" id="p05Done">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">좋아요!</p>
+                <p class="avatar-popup-sub">이분들의 노력 덕분에 우리가<br>안전하게 생활할 수 있어요.</p>
+                <a href="page06.html" class="avatar-popup-next card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="지켜라! 우리 동네 안전망" data-next="page06.html"></script>
+  <script src="../../resources/js/toc.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  /* 인물 사진 img/p05_{id}.png (없으면 회색 칸) */
+  (function () {
+    const ROLES = [
+      { id: 'police', label: '경찰관', role: '동네를 살피고<br>안전을 지켜요' },
+      { id: 'cleaner', label: '환경미화원', role: '쓰레기를 치워<br>거리를 깨끗하게 해요' },
+      { id: 'bus', label: '버스 기사', role: '버스를 운전해<br>사람들을 안전하게<br>태워줘요' },
+      { id: 'paramedic', label: '구급대원', role: '다친 사람이 있을 때<br>응급처치를 하고<br>병원으로 옮겨요' },
+      { id: 'cook', label: '급식 조리사', role: '학생들이 먹을<br>급식을 만들어요' },
+      { id: 'courier', label: '택배 기사', role: '주문한 물건을<br>집까지 배달해요' },
+    ];
+    const byId = (id) => ROLES.find((r) => r.id === id);
+    const ROUNDS = [['paramedic', 'cleaner', 'bus'], ['police', 'courier', 'cook']];
+    const ROW_TOP = [265, 477, 689];
+    const CARD_POS = [[918, 285], [1400, 285], [918, 489], [1400, 489], [918, 693], [1400, 693]];
+    let round = 0;
+
+    const persons = $('p05Persons');
+    const slotsBox = $('p05Slots');
+    const tray = $('p05Tray');
+
+    function setup() {
+      const jobs = ROUNDS[round].map(byId);
+      persons.innerHTML = '';
+      slotsBox.innerHTML = '';
+      tray.innerHTML = '';
+      jobs.forEach((j, i) => {
+        persons.insertAdjacentHTML('beforeend', '<div class="p05-person" style="top:' + ROW_TOP[i] + 'px"><i style="background-image:url(\x27img/p05_' + j.id + '.png\x27)"></i><span>' + j.label + '</span></div>');
+        slotsBox.insertAdjacentHTML('beforeend', '<div class="p05-slot" style="top:' + ROW_TOP[i] + 'px" data-key="' + j.id + '"><span class="p05-hint">이곳에 드래그해 보세요</span></div>');
+      });
+      shuffleArray(ROLES).forEach((r, i) => {
+        tray.insertAdjacentHTML('beforeend', '<div class="p05-hold" style="left:' + CARD_POS[i][0] + 'px;top:' + CARD_POS[i][1] + 'px"><div class="p05-card" data-key="' + r.id + '">' + r.role + '</div></div>');
+      });
+      initMatchDrag({
+        cards: Array.from(tray.querySelectorAll('.p05-card')),
+        zones: Array.from(slotsBox.querySelectorAll('.p05-slot')),
+        onWrong: (card, slot) => {
+          if (slot) playWrong();
+        },
+        onDone: () => {
+          playCorrect();
+          setTimeout(() => {
+            round += 1;
+            if (round < ROUNDS.length) setup();
+            else flashLayer($('p05Done'), 'is-off', 600000);
+          }, 900);
+        }
+      });
+    }
+
+    setup();
+  })();
+  </script>
+</body>
+</html>

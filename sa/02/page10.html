@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나의 자랑거리를 소개하는 뉴스</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* --desk(이미지 url)는 공용 CSS에서 var()로 쓰면 css/ 기준으로 풀려 깨지므로 이 규칙들은 페이지에 둠 */
+        .cv-canvas, .cv-clips i{background:var(--desk,var(--c-white))}
+        .cv-design b{display:block;width:150px;height:84px;background:var(--desk)}
+        /* 디자인 없음 - 기획서 27~41p(40~41p 개인정보 확인은 완성하기 뒤 모달). 가운데 휴대폰은 기획서 Canva 캡처를 CSS로 그린 것(공용 .cv, page08과 같은 틀).
+           꾸민 뉴스데스크는 page08 템플릿+스티커를 겹쳐서 표시. 앱 아이콘·AI 음성 아바타(img/p10_canva_icon, p10_voice_*)는 기획서 이미지에서 잘라낸 것.
+           앞 활동 결과는 sessionStorage(sa02_article, sa02_desk), 목차로 바로 들어오면 기획서 기본 조합. 음성 예시는 sound/p10_tts_{minjun|yuna}.m4a */
+        .p10 .is-off{display:none}
+
+        /* 앱 아이콘 크기·위치는 sa/07 page09(Google 렌즈 앱)와 같게 */
+
+        .cv[data-screen="typing"]>.phone-screen>.phone-nav{background:#dfe2e8}
+
+
+
+
+        .cv-home, .cv-app, .cv-sheet, .kbd-db, .cv-textbar, .cv-txt{display:none}
+        .cv[data-screen="phone"] .cv-home{display:block}
+        .cv[data-screen="phone"]>.phone-screen>.phone-status,.cv[data-screen="app"]>.phone-screen>.phone-status{color:#111}
+        .cv[data-screen="phone"]>.phone-screen>.phone-status em,.cv[data-screen="app"]>.phone-screen>.phone-status em{background:#333;color:#fff}
+        .cv[data-screen="app"] .cv-app{display:block}
+        .cv[data-screen="text"] .cv-tsheet, .cv[data-screen="voice"] .cv-vsheet{display:block}
+        .cv[data-screen="typing"] .kbd-db, .cv[data-screen="typing"] .cv-textbar{display:block}
+        .cv[data-screen="typing"] .cv-textbar{display:flex}
+        .cv[data-screen="typing"] .cv-tabs{display:none}
+        .cv.has-text .cv-txt{display:block}
+        .cv-txt{top:auto;bottom:30px;transform:translateX(-50%)}
+
+        .p10-swipe{position:absolute;left:1084px;top:850px;width:110px;z-index:30;pointer-events:none;animation:p10-swipe 1.6s ease-in-out infinite}
+        @keyframes p10-swipe{0%{transform:translateX(0);opacity:0}15%{opacity:1}70%{transform:translateX(-300px);opacity:1}85%,100%{transform:translateX(-300px);opacity:0}}
+
+        .p10-load-btn{position:absolute;left:1302px;top:344px;width:515px;height:228px;font-size:56px;line-height:1.15}
+        .p10-finish-btn{position:absolute;right:90px;bottom:60px;display:flex;align-items:center;justify-content:center;text-decoration:none}
+
+        .p10-privacy{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:100;background:rgba(27,23,56,.5)}
+        .p10-privacy-panel{position:absolute;left:353px;top:80px;width:1214px;height:760px;box-sizing:border-box;background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:60px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';color:var(--c-purple);letter-spacing:-0.04em}
+        .p10-privacy-title{position:absolute;left:0;top:-50px;width:100%;margin:0;text-align:center}
+        .p10-privacy-title span{display:inline-block;padding:12px 60px 10px;background:var(--c-purple);border-radius:60px;font-size:60px;color:var(--c-white);box-shadow:0 14px 0 0 var(--c-mist)}
+        .p10-privacy-title img{width:64px;height:64px;margin:-12px 14px 0 0;vertical-align:middle}
+        .p10-privacy-sub{position:absolute;left:0;top:86px;width:100%;margin:0;text-align:center;font-size:48px;letter-spacing:-0.06em}
+        .p10-privacy-article{position:absolute;left:45px;top:170px;width:447px;height:420px;box-sizing:border-box;padding:24px 30px;background:#dff6ff;border:solid 4px #053c85;border-radius:28px;z-index:1}
+        .p10-privacy-article .ribbon{--rb-w:300px;--rb-h:67px;--rb-fs:36px;--rb-ls:0;--rb-color:#053c85;--rb-bg:#d3e7ff;--rb-bd:#91b9e7;--rb-shadow:transparent;--rb-tail:#91b9e7;--rb-fold:#799ce0;--rb-tw:70px;--rb-th:60px;--rb-ext:50px;--rb-drop:15px;margin:0 auto 14px;top:-33px;padding-top:4px}
+        .p10-privacy-article p{margin:0;font-family:'Pretendard';font-size:35px;line-height:1.45;font-weight:600;color:var(--c-ink);letter-spacing:-0.02em}
+        .p10-checks{position:absolute;left:520px;top:180px;width:620px;display:flex;flex-direction:column;gap:22px}
+        .p10-check{display:flex;align-items:center;gap:22px;width:100%;height:84px;padding:0 24px;box-sizing:border-box;border:solid 4px #eae0fd;border-radius:22px;background:var(--c-white);cursor:pointer;
+          font-family:'Cafe24 Ssurround';font-size:40px;color:var(--c-indigo);letter-spacing:-0.04em;text-align:left}
+        .p10-check:before{content:'';flex:0 0 auto;width:44px;height:44px;box-sizing:border-box;border:solid 5px var(--c-purple);border-radius:10px;background:var(--c-white) center / 100% no-repeat}
+        .p10-check:hover{border-color:var(--c-violet)}
+        .p10-check.is-checked{border-color:var(--c-purple);background:var(--c-purple);color:var(--c-white)}
+        .p10-check.is-checked:before{background-color:var(--c-white);border-color:var(--c-white);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' width='74px' height='79px'%3E%3Cpath fill-rule='evenodd' fill='rgb(255, 79, 249)' d='M69.913,1.205 C68.821,0.698 67.582,0.430 66.330,0.430 C63.814,0.430 61.444,1.517 60.129,3.269 L30.171,40.064 L13.608,27.472 C12.225,26.180 10.240,25.441 8.135,25.441 C6.557,25.441 5.053,25.850 3.787,26.624 C0.694,28.514 -0.057,32.057 2.077,34.689 L25.352,63.405 C26.704,65.072 28.969,66.067 31.412,66.067 C31.529,66.067 31.647,66.065 31.765,66.060 C34.312,65.959 36.637,64.752 37.834,62.909 L72.748,9.183 C74.613,6.313 73.368,2.809 69.913,1.205 Z'/%3E%3C/svg%3E")}
+        .p10-privacy-ok{position:absolute;left:50%;transform:translateX(-50%);top:610px;border:0;padding:0;cursor:pointer}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default p10">
+          <div class="guide-set is-main" id="p10Set">
+            <p class="guide-bubble is-center" id="p10Bubble"></p>
+            <div class="guide-character"><img id="p10Char" src="../img/character/sa_point_front.png" alt="메인 캐릭터"></div>
+          </div>
+
+          <div class="phone-frame has-cam cv has-nav" id="p10Phone" data-screen="phone">
+            <div class="phone-screen">
+            <div class="phone-status"><span>13:13</span><span class="sys"><i data-ic="mute"></i><i data-ic="wifi"></i><i data-ic="sig"></i><em>64</em></span></div>
+            <div class="cv-top">
+              <i data-ic="home"></i>
+              <i data-ic="undo" class="cv-undo"></i>
+              <i data-ic="redo" class="cv-undo is-dim"></i>
+              <span class="is-gap"></span>
+              <i data-ic="dotsH"></i>
+              <i data-ic="crownPro" style="color:#e3d8ff"></i>
+              <i data-ic="expandDiag"></i>
+              <i data-ic="out"></i>
+            </div>
+
+            <div class="cv-editor">
+              <div class="cv-canvas"><span class="cv-txt" id="p10Txt"></span></div>
+              <div class="cv-play"><b>0:00</b><i></i><span>0:15</span></div>
+              <div class="cv-ruler"><span>0초</span><i style="left:364px"></i><i style="left:434px"></i><i style="left:504px"></i></div>
+              <div class="cv-head"></div>
+              <div class="cv-row is-el"><i data-ic="elements"></i>요소 추가</div>
+              <div class="cv-row is-media"><i data-ic="plus"></i><span>미디어 추가</span><b>+</b><div class="cv-clips"><i></i><i></i></div></div>
+              <div class="cv-row is-audio"><i data-ic="note"></i>오디오 추가</div>
+            </div>
+
+            <div class="cv-sheet cv-tsheet">
+              <div class="cv-search"><i data-ic="search"></i><span class="cv-search-text">글꼴 및 조합 검색</span></div>
+              <button type="button" class="cv-tbtn is-add" data-hit="textbox"><i class="cv-ic" data-icon="textbox" style="margin-right:12px"></i>텍스트 상자 추가</button>
+              <button type="button" class="cv-tbtn is-magic"><i class="cv-ic" data-icon="magic"></i>Magic Write</button>
+              <p class="cv-h" style="top:244px;font-size:20px">기본 텍스트 스타일</p>
+              <div class="cv-tstyle is-1">제목 추가</div>
+              <div class="cv-tstyle is-2">부제목 추가</div>
+              <div class="cv-tstyle is-3">약간의 본문 텍스트 추가</div>
+            </div>
+
+            <div class="cv-sheet cv-vsheet">
+              <h4>AI 음성</h4>
+              <h5 style="top:82px">텍스트 입력</h5>
+              <div class="cv-vtext" id="p10VoiceText"><span id="p10VoiceTextBody">나의 자랑거리 뉴스를 만들어봐요</span><em>💡 예시 사용해보기</em></div>
+              <h5 style="top:304px">음성 선택</h5>
+              <div class="cv-vlang">한국어<i data-ic="chev"></i></div>
+              <div class="cv-voices" id="p10Voices">
+                <button type="button" class="cv-voice" data-voice="minjun"><img src="img/p10_voice_minjun.png" alt="">민준</button>
+                <button type="button" class="cv-voice" data-voice="yuna"><img src="img/p10_voice_yuna.png" alt="">유나</button>
+              </div>
+              <button type="button" class="cv-vmake" id="p10Make" data-hit="make">AI 음성 생성</button>
+            </div>
+
+            <div class="cv-textbar">
+              <span>💬</span><span style="background:linear-gradient(90deg,#f44,#fb3,#4c4,#39f);-webkit-background-clip:text;color:transparent">A</span><span>글꼴</span><span>110 pt</span><b>B</b><i>I</i><u>U</u><span class="is-gap"></span>
+              <button type="button" class="cv-check" data-hit="check" aria-label="완료"><i data-ic="check"></i></button>
+            </div>
+            <div id="kbdHost"></div>
+
+            <nav class="cv-tabs" id="p10Tabs" data-hit="swipe">
+              <div class="cv-track" id="p10Track">
+                <button type="button" class="cv-tab" data-icon="template"><i></i>추천 템플릿</button>
+                <button type="button" class="cv-tab" data-icon="elements"><i></i>요소</button>
+                <button type="button" class="cv-tab" data-tab="text" data-hit="text" data-icon="text"><i></i>텍스트</button>
+                <button type="button" class="cv-tab" data-icon="gallery"><i></i>갤러리</button>
+                <button type="button" class="cv-tab" data-icon="brand"><i></i>브랜드 센터</button>
+                <button type="button" class="cv-tab" data-icon="upload"><i></i>업로드 항목</button>
+                <button type="button" class="cv-tab" data-icon="tool"><i></i>도구</button>
+                <button type="button" class="cv-tab" data-icon="project"><i></i>프로젝트</button>
+                <button type="button" class="cv-tab" data-icon="apps"><i></i>앱</button>
+                <button type="button" class="cv-tab" data-tab="voice" data-hit="voice" data-icon="voice"><i></i>AI 음성</button>
+              </div>
+            </nav>
+
+            <div class="cv-app">
+              <p class="cv-app-title">오늘은 무엇을 만들어 볼까요?</p>
+              <div class="cv-app-search"><i data-ic="search"></i>어떤 걸 만들고 싶으세요?</div>
+              <p class="cv-app-h" style="top:266px">디자인 계속하기<span>모두 보기</span></p>
+              <div class="cv-designs">
+                <button type="button" class="cv-design" data-hit="design"><i><b></b></i></button>
+              </div>
+              <p class="cv-app-h" style="top:546px">시작 방법 선택</p>
+              <div class="cv-starts">
+                <div><img src="img/p10_ic_sns.png" alt="">SNS</div>
+                <div><img src="img/p10_ic_pres.png" alt="">프레젠테이션</div>
+                <div><img src="img/p10_ic_board.png" alt="">화이트보드</div>
+                <div><img src="img/p10_ic_custom.png" alt="">맞춤형 크기</div>
+                <div><img src="img/p10_ic_video.png" alt="">동영상</div>
+                <div><img src="img/p10_ic_print.png" alt="">인쇄 제품</div>
+                <div><img src="img/p10_ic_upload.png" alt="">업로드</div>
+                <div><img src="img/p10_ic_sheet.png" alt="">시트</div>
+              </div>
+              <div class="cv-appnav">
+                <span class="is-on"><img src="img/p10_nav_home.png" alt="">홈</span>
+                <span><img src="img/p10_nav_design.png" alt="">디자인</span>
+                <span><img src="img/p10_nav_tpl.png" alt="">템플릿</span>
+                <span><img src="img/p10_nav_ai.png" alt="">Canva AI</span>
+                <span><img src="img/p10_nav_more.png" alt="">더 보기</span>
+              </div>
+            </div>
+
+            <div class="cv-home app-home is-purple">
+              <button type="button" class="app-icon" data-hit="canva"><i><img src="../../resources/img/app/logo_canva.png" alt=""></i>Canva</button>
+            </div>
+            <div class="phone-nav"></div>
+            </div>
+          </div>
+
+          <img class="p10-swipe is-off" id="p10Swipe" src="../../resources/img/common/img_finger01.png" alt="">
+
+          <button type="button" class="card-btn p10-load-btn is-off" id="p10LoadBtn">나만의 기사문<br>텍스트 블록<br>불러오기</button>
+
+          <a href="javascript:;" class="js-sfx next-btn is-off" id="p10Next" data-sound="sound/click.mp3">
+            <img src="../../resources/img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../resources/img/common/btn_next_content_on.png" data-src-over="../../resources/img/common/btn_next_content_over.png" alt="다음">
+          </a>
+          <button type="button" class="card-btn is-popup p10-finish-btn is-off" id="p10Finish">완성하기</button>
+
+          <div class="p10-privacy is-off" id="p10Privacy">
+            <div class="p10-privacy-panel">
+              <p class="p10-privacy-title"><span><img src="img/p10_icon_search.png" alt="">개인정보 탐지 중입니다</span></p>
+              <p class="p10-privacy-sub">조합한 블록 내용 중에 민감한 개인정보가 섞여 있지 않나요?</p>
+              <div class="p10-privacy-article"><b class="ribbon">기사문 내용</b><p id="p10PrivacyText"></p></div>
+              <div class="p10-checks">
+                <button type="button" class="p10-check">이름이 들어있지 않아요.</button>
+                <button type="button" class="p10-check">집 주소가 들어있지 않아요.</button>
+                <button type="button" class="p10-check">전화번호가 들어있지 않아요.</button>
+                <button type="button" class="p10-check">학교 이름이 들어있지 않아요.</button>
+              </div>
+              <button type="button" class="p10-privacy-ok card-btn is-popup" id="p10PrivacyOk">확인</button>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p10PrivacyWarn">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_quiz.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small"><span>영상을 만들 때는 <span class="text-em">이름, 집 주소, 전화번호, 학교 이름</span>과 같은 개인정보가 포함되어 있지 않은 지 확인해야 해요!</span></p>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="나의 자랑거리를 소개하는 뉴스" data-next="page11.html"></script>
+  <script src="../../resources/js/toc.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script src="../../resources/js/box-edit.js"></script>
+  <script>document.getElementById('kbdHost').outerHTML = kbdDbHtml();</script>
+  <script>
+  (function () {
+    // 기획서 28p: 앞 활동 없이 목차로 들어오면 기본 기사문 + 아침 뉴스·여자 아나운서 조합
+    const DEFAULT_ARTICLE = '오늘의 주인공은 매일 꾸준히 연습해서 스스로 세운 목표를 이뤘다고 합니다. 매우 자랑스러운 기분이라고 전해왔습니다.';
+    const DEFAULT_DESK = 'a1';
+    const read = (k) => { try { return sessionStorage.getItem(k); } catch (e) { return null; } };
+    const article = read('sa02_article') || DEFAULT_ARTICLE;
+    const desk = read('sa02_desk') || DEFAULT_DESK;
+    const SHORT = article.split(' ').slice(0, 2).join(' ') + ' ···';
+
+    const STEPS = [
+      { bubble: 'Canva를 클릭해요.', screen: 'phone', hit: 'canva', pose: 'point_front' },
+      { bubble: '앞서 내가 만든<br>템플릿을 클릭해요.', screen: 'app', hit: 'design' },
+      { bubble: '아래의 ‘텍스트’를<br>클릭해요.', screen: 'edit', hit: 'text', pose: 'wink_point4' },
+      { bubble: '‘텍스트 상자 추가’<br>버튼을 클릭해요.', screen: 'text', hit: 'textbox', pose: 'wink_point' },
+      { bubble: '만들어 둔<br>나만의 기사문 블록을<br>입력해 볼까요?', screen: 'typing', txt: '단락 텍스트', sel: true, load: true },
+      { bubble: '체크 버튼을 눌러<br>텍스트 작업을 마무리해요.', screen: 'typing', txt: SHORT, sel: true, hit: 'check', pose: 'wink_present' },
+      { bubble: '좋아요!<br>이제 AI 음성 보이스를<br>골라봐요.', screen: 'edit', txt: SHORT, next: true },
+      { bubble: '아래의 편집 도구창을<br>오른쪽으로 슬라이드 해요.', screen: 'edit', txt: SHORT, hit: 'swipe', pose: 'wink_point4' },
+      { bubble: 'AI 음성 버튼을<br>클릭해요.', screen: 'edit', txt: SHORT, tools: true, hit: 'voice', pose: 'wink_point4' },
+      { bubble: 'AI 음성 아이콘을 클릭하여<br>예시 음성을 들어보고<br>선택해요.', screen: 'voice', tools: true, voice: true, pose: 'wink_present' },
+      { bubble: '만들어 둔<br>나만의 기사문 블록을<br>다시 한 번 입력해요.', screen: 'voice', tools: true, voice: true, load: true },
+      { bubble: '‘AI 음성 생성’<br>버튼을 클릭해요.', screen: 'voice', tools: true, voice: true, filled: true, hit: 'make', pose: 'wink_point4' },
+      { bubble: '좋아요!<br>‘완성하기’ 버튼을 눌러<br>뉴스 제작을 마무리해보세요.', screen: 'edit', txt: SHORT, tools: true, finish: true, pose: 'smile_present' }
+    ];
+    const TRACK_END = -372;
+
+    const phone = $('p10Phone');
+    const bubble = $('p10Bubble');
+    const say = initGuideSay({ bubble: bubble, img: $('p10Char'), set: $('p10Set'), keep: true });
+    const txt = $('p10Txt');
+    const track = $('p10Track');
+    const tabs = $('p10Tabs');
+    const swipeFinger = $('p10Swipe');
+    const voiceText = $('p10VoiceText');
+    const makeBtn = $('p10Make');
+    const loadBtn = $('p10LoadBtn');
+    const nextBtn = $('p10Next');
+    const finishBtn = $('p10Finish');
+    const hits = Array.from(phone.querySelectorAll('[data-hit]'));
+    const tts = {
+      minjun: new Audio('sound/p10_tts_minjun.m4a'),
+      yuna: new Audio('sound/p10_tts_yuna.m4a')
+    };
+
+    phone.style.setProperty('--desk', "url('img/p08_sticker_" + desk.charAt(1) + ".png') 0 36% / 66% auto no-repeat, url('img/p08_tpl_" + desk.charAt(0) + ".png') center / cover no-repeat");
+    phone.classList.add('is-edited');
+
+    // 손가락 위치 보정 [dx, dy] — 단계의 눌러야 할 곳(hit)별. ?edit 로 손가락을 눌러 맞춘 뒤 표시줄 값을 옮겨 적음
+    const FG = { canva: [15, -37], design: [0, 0], text: [0, 0], textbox: [80, -30], check: [0, 0], voice: [0, 0], make: [40, -30] };
+    // 클릭 영역 보정 [dx, dy, dw, dh] — 버튼 모양은 그대로, 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
+    const HOT = { canva: [0, 0, 0, 0], design: [0, 0, 0, 0], text: [0, 0, 0, 0], textbox: [0, 0, 0, 0], check: [0, 0, 0, 0], voice: [0, 0, 0, 0], make: [0, 0, 0, 0] };
+    BoxEdit.hitPad(hits, HOT);
+    let index = 0;
+    let voicePicked = false;
+
+    function render() {
+      const step = STEPS[index];
+      say(step.bubble, step.pose || 'main');
+      phone.dataset.screen = step.screen;
+      phone.classList.toggle('has-text', !!step.txt);
+      txt.textContent = step.txt || '';
+      txt.classList.toggle('is-sel', !!step.sel);
+      track.style.transform = step.tools ? 'translateX(' + TRACK_END + 'px)' : '';
+      phone.querySelectorAll('.cv-tab').forEach((t) => t.classList.toggle('is-on',
+        (t.dataset.tab === 'text' && step.screen === 'text') || (t.dataset.tab === 'voice' && step.screen === 'voice')));
+
+      voiceText.classList.toggle('is-filled', !!step.filled);
+      $('p10VoiceTextBody').textContent = step.filled ? article : '나의 자랑거리 뉴스를 만들어봐요';
+      makeBtn.classList.toggle('is-ready', !!step.filled);
+
+      loadBtn.classList.toggle('is-off', !step.load);
+      nextBtn.classList.toggle('is-off', !step.next);
+      resetImageSwap(nextBtn);
+      finishBtn.classList.toggle('is-off', !step.finish);
+
+      clearFingers();
+      hits.forEach((h) => h.classList.toggle('hit-pulse', h.dataset.hit === step.hit));
+      swipeFinger.classList.toggle('is-off', step.hit !== 'swipe');
+      const target = hits.find((h) => h.dataset.hit === step.hit);
+      if (target && step.hit !== 'swipe') {
+        const at = index;
+        const point = () => {
+          if (index !== at) return;
+          const fg = FG[step.hit] || [0, 0];
+          pointFingerAt(target, step.hit === 'canva' ? { onMain: true, dx: fg[0], dy: fg[1] } : { onMain: true, beside: true, dx: fg[0], dy: fg[1] });
+          // 하단 탭·버튼을 가리킬 때 손가락이 화면(960px) 아래로 잘리지 않게
+          if (!BoxEdit.on) document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.top = Math.min(parseFloat(f.style.top), 850) + 'px'; });
+        };
+        if (target.closest('.cv-track')) setTimeout(point, 450); else point();
+      }
+    }
+
+    function go() {
+      index += 1;
+      BoxEdit.syncStep(index + 1);
+      render();
+    }
+
+    hits.forEach((h) => h.addEventListener('click', () => {
+      if (!h.classList.contains('hit-pulse') || h.dataset.hit === 'swipe') return;
+      playClick();
+      go();
+    }));
+
+    // 편집 도구창 슬라이드: 마우스·손가락 모두(pointer + touch-action:none). 끄는 만큼 따라오고 40px 넘게 밀면 끝까지 넘어감
+    const stage = document.getElementById('stage');
+    let drag = null;
+    tabs.addEventListener('pointerdown', (e) => {
+      if (STEPS[index].hit !== 'swipe') return;
+      e.preventDefault();
+      tabs.setPointerCapture(e.pointerId);
+      drag = { x: e.clientX, scale: stage.getBoundingClientRect().width / 1920, dx: 0 };
+      track.classList.add('is-drag');
+      swipeFinger.classList.add('is-off');
+    });
+    tabs.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      drag.dx = Math.abs(e.clientX - drag.x) / drag.scale;
+      track.style.transform = 'translateX(' + Math.max(TRACK_END, -drag.dx) + 'px)';
+    });
+    const endDrag = () => {
+      if (!drag) return;
+      const moved = drag.dx;
+      drag = null;
+      track.classList.remove('is-drag');
+      if (moved > 40) {
+        track.style.transform = 'translateX(' + TRACK_END + 'px)';
+        setTimeout(go, 400);
+      } else {
+        track.style.transform = '';
+        swipeFinger.classList.remove('is-off');
+      }
+    };
+    tabs.addEventListener('pointerup', endDrag);
+    tabs.addEventListener('pointercancel', endDrag);
+
+    loadBtn.addEventListener('click', () => {
+      playClick();
+      go();
+    });
+
+    phone.querySelectorAll('.cv-voice').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (!STEPS[index].voice) return;
+        Object.values(tts).forEach((a) => { a.pause(); a.currentTime = 0; });
+        tts[btn.dataset.voice].play().catch(() => {});
+        try { sessionStorage.setItem('sa02_voice', btn.dataset.voice); } catch (e) {}
+        phone.querySelectorAll('.cv-voice').forEach((b) => b.classList.toggle('is-selected', b === btn));
+        if (!voicePicked && !STEPS[index].load) {
+          voicePicked = true;
+          nextBtn.classList.remove('is-off');
+        }
+      });
+    });
+
+    nextBtn.addEventListener('click', () => setTimeout(go, 300));
+
+    const privacy = $('p10Privacy');
+    const checks = Array.from(privacy.querySelectorAll('.p10-check'));
+    $('p10PrivacyText').textContent = article;
+    finishBtn.addEventListener('click', () => {
+      playClick();
+      clearFingers();
+      privacy.classList.remove('is-off');
+    });
+    checks.forEach((c) => c.addEventListener('click', () => {
+      playClick();
+      c.classList.toggle('is-checked');
+    }));
+    $('p10PrivacyOk').addEventListener('click', () => {
+      if (checks.every((c) => c.classList.contains('is-checked'))) {
+        playCorrect();
+        setTimeout(() => navigateTo('page11.html'), 1000);
+      } else {
+        playWrong();
+        flashLayer($('p10PrivacyWarn'));
+        resetImageSwap($('p10PrivacyOk'));
+      }
+    });
+
+    /* ?edit&step=N : 단계 N 으로 바로 열기(] [ 로 이동). 손가락(FG)·버튼 클릭 영역(HOT)을 클릭해 방향키로 조정(Alt+방향키 = 폭·높이). 오른쪽 아래 포즈판에서 캐릭터 포즈를 눌러 본 뒤 STEPS 줄의 pose 에 옮겨 적음 */
+    BoxEdit.stepEdit({
+      key: () => STEPS[index].hit || '?',
+      count: STEPS.length + 1,
+      get: () => index + 1,
+      set: (n) => { index = Math.max(0, Math.min(n, STEPS.length) - 1); },
+      go: (n) => { if (n < 1) return; index = n - 1; BoxEdit.syncStep(n); render(); },
+      label: (n) => '단계 ' + n + ' / ' + STEPS.length,
+      say, bubble, img: $('p10Char')
+    });
+    render();
+  })();
+  </script>
+</body>
+</html>

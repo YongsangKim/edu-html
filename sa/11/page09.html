@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인권 존중 포스터 제작소</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* ?edit&step=N 으로 단계를 바로 열고 캐릭터 포즈를 골라 볼 수 있음. 캐릭터 포즈는 STEPS 각 줄의 pose(sa/img/character/sa_*.png 의 * 부분) */
+        /* 기획서 26~68p. Canva로 인권 존중 포스터 만들기 실습. 가운데 휴대폰은 sa/02 page08·10과 같은 공용 .cv 틀 + 같은 방식(화면은 마크업에 모두 있고 단계마다 data-k로 보이기 · 누를 곳은 data-hit + .hit-pulse 깜빡임 · 손가락은 pointFingerAt).
+           앱 첫 화면·검색 화면은 공용 .cv-app 부품, 편집 화면은 기획서 캡처를 540x1170 좌표(.cu-ui, 화면에 맞춰 줄임)로 그린 것.
+           아이콘·썸네일처럼 그리기 어려운 조각만 캡처에서 오려 img/ui/ 에 둠. 고른 값(프롬프트 · 초안 이미지 · 문구 · 글꼴)은 화면 안에 그대로 그려짐.
+           흐름: 홈에서 Canva → 포스터(세로형 A2) → Magic Media 세로형 → 프롬프트(3가지 중 선택) → 이미지 생성(2초) → 초안 4장 보기(화살표)·고르기(프롬프트에 맞는 2장만 통과) → 포스터 제작 확인 → 크기 조정 → 문구 넣기(3가지 중 선택, 글꼴 바꾸기, 위로 옮기기) → AI 문구 넣기(아래로 옮기기) → 완성 → 다운로드 → 완성 포스터(68p).
+           초안 이미지 img/p09_draft_{1~4}.png(1·2번이 프롬프트에 맞는 초안, 3·4번은 맞지 않는 초안 — 3·4는 임시 그림, 실제 이미지가 오면 같은 파일명으로 덮어쓰기). 이전 버전: _backup_page09_before_cv.html */
+        [hidden]{display:none!important}
+
+        .p09-set{--gb-left:110px;--gb-w:610px}
+        .p09-set .guide-bubble,.p09-set .guide-bubble.is-long{font-size:40px}
+        .p09-set .guide-bubble img{height:1em;vertical-align:-0.15em;margin:0 6px}
+
+        /* 540x1170 좌표로 그린 편집 화면: 화면(522x1053)에 맞춰 가로 .967 · 세로 .9로 줄임 */
+        .p09-ui{transform:scale(.967,.9);background:none;--pulse-w:5.4px}
+        .p09-ui>.a,.p09-ui>div,.p09-ui>img{max-width:none}
+        .p09-ui .u-tabs.hit-pulse{animation:cv-target-in 1.2s ease-in-out infinite;touch-action:none;cursor:grab}
+        .p09-ui .u-tabs.hit-pulse .u-tab{pointer-events:none}
+        .p09-ui .u-track.is-drag{transition:none}
+        .p09-ui .u-tab.hit-pulse{animation:none}
+        /* 줄어든 그림(가로 .967 · 세로 .9) 안이라 sa/02 하단 탭과 같은 화면 크기가 되도록 크기·테두리 굵기를 보정 */
+        .p09-ui .u-tab.hit-pulse i{width:49.7px;height:46.7px;border-radius:13px;animation:cv-target 1.2s ease-in-out infinite}
+        /* 하단 도구 막대(편집·글꼴·텍스트 스타일·글꼴 크기·색상·확인) — 500x84 그림 좌표로 맞춤 */
+        .tbx{position:absolute;left:18px;top:1010px;width:500px;height:80px;border-radius:24px;background:#fff;box-shadow:0 6px 20px rgba(27,23,56,.16);padding:0}
+        .tbx-in{position:absolute;left:0;top:-4px;width:500px;height:84px;font-family:'Pretendard';display:flex;align-items:center}
+        .tbx-t{height:84px;padding:0;border:0;border-radius:18px;background:none;color:#14161f;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+        .tbx-t.is-on{background:#e2e3e7}
+        .tbx-t .tbi{height:30px;display:flex;flex-direction:row;align-items:center;justify-content:center;font-weight:400;line-height:1}
+        .tbx-t .tbi svg{display:block;fill:none;stroke:#14161f;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+        .tbx-t b{text-align:center;font:700 16px 'Pretendard';letter-spacing:-.01em;white-space:nowrap}
+        .tbx-t .tbi.is-ff{font-size:27px}
+        .tbx-t .tbi.is-ff em{font-size:27px;margin-left:-5px;    font-family:'Times New Roman', Times, serif}
+        .tbx-t .tbi.is-h{font-size:32px;font-family:'Times New Roman',Times,serif;}
+        .tbx-t .tbi.is-aa{font-size:28px;align-items:baseline}
+        .tbx-t .tbi.is-aa small{font-size:15px;margin-right:-5px}
+        .tbx-t .tbi.is-col{font-family:'Pretendard';font-weight:800;font-size:27px;flex-direction:column;justify-content:center}
+        .tbx-t .tbi.is-col i{display:block;flex:none;width:26px;height:5px;margin-top:-5px;border-radius:3px;background:linear-gradient(90deg,#f0622a,#f5c93a,#8ee05a,#4cc4e8,#2b5be3)}
+        .tbx-ok{width:52px;height:52px;box-sizing:border-box;padding:0;border:1px solid #e4e6ec;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:2px 2px 5px 2px #e4e6ec}
+        .tbx-ok svg{width:28px;height:28px;fill:none;stroke:#14161f;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+        /* 글꼴 고르기 위쪽 칩(현재 글꼴 이름 + 더보기 화살표) */
+        .tbx-chip{position:absolute;left:22px;top:930px;width:251px;height:73px;border-radius:24px;background:#fff}
+        .tbx-chip .nm{position:absolute;left:11px;top:10px;width:154px;height:53px;box-sizing:border-box;border:3px solid #7a3aee;border-radius:27px;background:#f4f5f8;display:flex;align-items:center;justify-content:center;font:500 19px 'Pretendard';color:#14161f;white-space:nowrap}
+        .tbx-chip .up{position:absolute;left:186.5px;top:9.5px;width:54px;height:54px;box-sizing:border-box;padding:0;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 7px rgba(27,23,56,.22);display:flex;align-items:center;justify-content:center}
+        .tbx-chip .up svg{width:24px;height:24px;fill:none;stroke:#14161f;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+        /* 위쪽 막대의 다운로드 아이콘 버튼 */
+        .u-bar .tbx-ib{position:absolute;top:14px;width:31px;height:31px;padding:0;border:0;background:none;color:inherit}
+        .u-bar .tbx-ib svg{position:static;top:auto;width:31px;height:31px}
+        .p09-ph{position:absolute;left:197px;top:517px;width:146px;height:36px;background:#d9e8ff;border-radius:3px;font-size:16px;color:#2b4a8a;display:flex;align-items:center;justify-content:center}
+        .p09-pg .t,.p09-pg .c{cursor:default}
+        .p09-selbox{position:absolute;z-index:3}
+        .p09-selbox>*{position:absolute}
+        .sel-ctx{width:192px;height:50px;border-radius:25px}
+        .sel-box{height:46px;border:solid 2px #7c3aed}
+        .sel-h1{width:16px;height:16px;border-radius:50%;background:#fff;border:solid 1px #aaa}
+        .sel-h2{width:10px;height:24px;border-radius:5px;background:#fff;border:solid 1px #aaa}
+        .p09-tobj{position:absolute;width:0;height:0;z-index:3;touch-action:none}
+        .p09-tobj>*{position:absolute}
+        .p09-tobj .sel-ctx{left:-96px;top:-102px}
+        .p09-tobj .tx{left:0;transform:translateX(-50%);top:-23px;width:max-content;padding:0 10px;height:46px;border:solid 2px #7c3aed;display:flex;align-items:center;justify-content:center;white-space:nowrap}
+        .p09-tobj .mv{cursor:grab;touch-action:none;border-radius:50%}
+        .p09-ui [data-k=flist],.p09-ui [data-k=fpick]{transform:translateY(-10px)}
+        .p09-tobj>*:not(.mv){pointer-events:none}
+
+        .p09-car{position:absolute;left:0;top:222px;width:540px;height:404px;overflow:hidden;z-index:2}
+        .p09-card{position:absolute;top:2%;width:74.4%;height:96%;border-radius:14px;background:#e9eef6 center / cover no-repeat;transition:left .35s ease}
+        .p09-pick{position:absolute;left:4.1%;top:2%;width:74.8%;height:96%;z-index:2;border:solid 3px transparent;border-radius:14px;background:transparent;padding:0;cursor:pointer}
+        .p09-arrow{position:absolute;top:50%;width:44px;height:44px;margin-top:-22px;padding:0;border:0;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 2px 8px rgba(0,0,0,.3);z-index:4;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .12s}
+        .p09-arrow svg{width:24px;height:24px;fill:none;stroke:#222;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+        .p09-arrow.is-prev{left:6%}
+        .p09-arrow.is-next{right:3%}
+        .p09-bar{position:absolute;left:22px;top:915px;width:497px;height:13px;background:#e1e3ea;border-radius:99px;overflow:hidden;z-index:3}
+        .p09-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#3cc5c9,#7b3fe4)}
+        .p09-bar.is-run i{width:100%;transition:width 2s linear}
+
+        .cv-app-search b{font-weight:500;color:var(--c-ink);font-size:21px}
+        .cv-app-search .cv-clear{margin-left:auto}
+        .cv-chip-row{position:absolute;left:16px;display:flex;gap:12px}
+        .cv-chip{display:flex;align-items:center;gap:8px;height:45px;padding:0 14px;border:solid 2px #dcdee6;border-radius:23px;background:var(--c-white);font-size:17px;font-weight:600;color:var(--c-ink)}
+        .cv-chip svg{width:22px;height:22px}
+        .cv-sels{position:absolute;left:14px;display:flex;gap:18px}
+        .cv-sel{width:114px;padding:0;border:0;background:none;border-radius:14px;text-align:center;font-size:14px;line-height:1.35;font-weight:500;color:#333}
+        .cv-sel img{display:block;width:86px;height:86px;margin:0 auto}
+        .cv-sel p{margin:6px 0 0}
+        .cv-tps{position:absolute;left:20px;width:calc(100% - 40px);display:grid;grid-template-columns:repeat(3,1fr);gap:20px;overflow:hidden;height:300px;align-content:start}
+        .cv-tps img{display:block;width:100%;height:193px;object-fit:cover;border-radius:6px}
+
+        .p09-swipe{position:absolute;width:110px;z-index:30;pointer-events:none;animation:p09-swipe 1.6s ease-in-out infinite}
+        @keyframes p09-swipe{0%{transform:translateX(0);opacity:0}15%{opacity:1}70%{transform:translateX(-240px);opacity:1}85%,100%{transform:translateX(-240px);opacity:0}}
+
+        .p09-right{position:absolute;left:1290px;top:50%;transform:translateY(-50%);width:560px;display:flex;flex-direction:column;gap:30px}
+        .p09-right.is-off{display:none}
+        .p09-right .card-btn{width:100%;min-width:0;height:auto;min-height:100px;padding:14px 30px 10px;font-size:44px;line-height:1.2}
+        .p09-right .card-btn.is-small{font-size:38px;padding-left:0;padding-right:0;letter-spacing:-0.1em}
+        .p09-next.card-btn{display:flex;align-items:center;justify-content:center;min-width:0;width:300px;height:110px;margin-bottom:20px;padding:8px 10px 0;font-size:56px;z-index:7}
+
+        .p09-poster{position:absolute;left:674px;top:135px;width:572px;height:790px;box-sizing:border-box;border:solid 4px var(--c-ink);background:#fff center / cover no-repeat;overflow:hidden;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p09-poster b{position:absolute;left:0;width:100%;text-align:center;font-family:'Pretendard';font-weight:800;letter-spacing:-0.03em;line-height:1.2}
+        .p09-poster .is-top{top:7%;font-size:56px;font-family:'Black Han Sans';font-weight:normal;color:#1b1738;text-shadow:0 0 8px #fff,0 0 8px #fff}
+        .p09-poster .is-bot{bottom:2.5%;font-size:23px;font-weight:600;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7)}
+        .p09-end-title{position:absolute;left:60px;top:30px;width:1800px;margin:0;font-family:'Cafe24 Ssurround';font-size:68px;line-height:1.3;text-align:center;letter-spacing:-0.06em;white-space:nowrap;background:linear-gradient(180deg,#02185c,#0362d7);-webkit-background-clip:text;background-clip:text;color:transparent}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main data-preload-fonts="Black Han Sans" class="bg-default">
+          <div class="guide-set is-main p09-set" id="p09Set">
+            <p class="guide-bubble is-center" id="p09Bubble"></p>
+            <div class="guide-character"><img id="p09Char" src="../img/character/sa_wink_point2.png" alt="메인 캐릭터"></div>
+          </div>
+
+          <div class="phone-frame has-cam cv has-nav p09-phone" id="p09Phone">
+            <div class="phone-screen">
+            <div class="phone-status"></div>
+
+            <div class="cv-home app-home is-purple" data-k="home">
+              <button type="button" class="app-icon" data-hit="canva"><i><img src="img/p09_canva_icon.png" alt=""></i>Canva</button>
+            </div>
+
+            <div class="cv-app" data-k="app">
+              <p class="cv-app-title">오늘은 무엇을 만들어 볼까요?</p>
+              <div class="cv-app-search" id="p09Search" data-hit="search"><i data-ic="search"></i><span class="cv-caret" id="p09Caret" hidden></span>어떤 걸 만들고 싶으세요?</div>
+              <p class="cv-app-h" style="top:266px">시작 방법 선택</p>
+              <div class="cv-starts" style="top:310px">
+                <div><img src="img/ui/ic_sns.png" alt="">SNS</div>
+                <div><img src="img/ui/ic_pres.png" alt="">프레젠테이션</div>
+                <div><img src="img/ui/ic_board.png" alt="">화이트보드</div>
+                <div><img src="img/ui/ic_custom.png" alt="">맞춤형 크기</div>
+                <div><img src="img/ui/ic_video.png" alt="">동영상</div>
+                <div><img src="img/ui/ic_print.png" alt="">인쇄 제품</div>
+                <div><img src="img/ui/ic_upload.png" alt="">업로드</div>
+                <div><img src="img/ui/ic_sheet.png" alt="">시트</div>
+              </div>
+              <p class="cv-app-h" style="top:640px">Canva 인기 디자인</p>
+              <div class="cv-starts is-th" style="top:684px">
+                <div><img src="img/ui/th_0.png" alt="">프레젠테이션</div>
+                <div><img src="img/ui/th_1.png" alt="">인스타그램 게시물</div>
+                <div><img src="img/ui/th_2.png" alt="">모바일 동영상</div>
+                <div><img src="img/ui/th_3.png" alt="">전단지</div>
+              </div>
+              <p class="cv-app-h" style="top:846px">기능 바로가기</p>
+              <div class="cv-appnav">
+                <span class="is-on"><img src="img/ui/nav_home.png" alt="">홈</span>
+                <span><img src="img/ui/nav_design.png" alt="">디자인</span>
+                <span><img src="img/ui/nav_tpl.png" alt="">템플릿</span>
+                <span><img src="img/ui/nav_ai.png" alt="">Canva AI</span>
+                <span><img src="img/ui/nav_more.png" alt="">더 보기</span>
+              </div>
+            </div>
+
+            <div class="cv-app" data-k="result">
+              <p class="cv-app-title">오늘은 무엇을 만들어 볼까요?</p>
+              <div class="cv-app-search"><i data-ic="search"></i><b>포스터</b><span class="cv-clear">✕</span></div>
+              <div class="cv-chip-row" style="top:252px">
+                <span class="cv-chip">카테고리<i data-ic="chev"></i></span>
+                <span class="cv-chip">스타일<i data-ic="chev"></i></span>
+                <span class="cv-chip">언어<i data-ic="chev"></i></span>
+              </div>
+              <p class="cv-app-h" style="top:340px;font-size:25px">빈 페이지에서 시작</p>
+              <div class="cv-sels" style="top:388px">
+                <button type="button" class="cv-sel" data-hit="poster"><img src="img/ui/p_poster.png" alt=""><p>포스터<br>(세로형 A2)</p></button>
+                <div class="cv-sel"><img src="img/ui/p_pres.png" alt=""><p>프레젠테이션<br>(4:3)</p></div>
+                <div class="cv-sel"><img src="img/ui/p_land.png" alt=""><p>포스터(가로형)</p></div>
+              </div>
+              <p class="cv-app-h" style="top:565px;font-size:25px">추천 템플릿 더 보기</p>
+              <div class="cv-tps" style="top:613px">
+                <img src="img/ui/tp_0.png" alt=""><img src="img/ui/tp_1.png" alt=""><img src="img/ui/tp_2.png" alt=""><img src="img/ui/tp_3.png" alt=""><img src="img/ui/tp_4.png" alt=""><img src="img/ui/tp_5.png" alt="">
+              </div>
+              <div class="cv-appnav">
+                <span class="is-on"><img src="img/ui/nav_home.png" alt="">홈</span>
+                <span><img src="img/ui/nav_design.png" alt="">디자인</span>
+                <span><img src="img/ui/nav_tpl.png" alt="">템플릿</span>
+                <span><img src="img/ui/nav_ai.png" alt="">Canva AI</span>
+                <span><img src="img/ui/nav_more.png" alt="">더 보기</span>
+              </div>
+            </div>
+
+            <div class="cu-ui p09-ui" id="p09Ui">
+              <div class="a" data-k="ed" style="inset:0;background:#f2f3f7"></div>
+              <div data-k="ed" id="p09Head"><div class="u-head"><div class="u-bar"><i data-ic="home" style="left:22px"></i><i data-ic="undo" style="left:73px" class="dim"></i><i data-ic="redo" class="dim" style="left:124px"></i><i data-ic="dotsH" style="left:334px"></i><i data-ic="crownPro" style="left:385px;color:#e8dcff"></i><button type="button" class="tbx-ib" data-hit="download" style="left:436px"><i data-ic="download"></i></button><i data-ic="out" style="left:487px"></i></div></div></div>
+
+              <div class="u-page p09-pg" id="p09Pg" data-k="pg"><b class="t js-phrase" id="p09PgT" data-hit="ptext"></b><b class="c" id="p09PgC" data-hit="ctext">AI로 만든 그림을 사용했어요.</b></div>
+              <div data-k="dots"><div class="u-dots"><i></i><i></i></div></div>
+              <div class="p09-ph" data-k="ph" id="p09Ph">단락 텍스트</div>
+
+              <div class="p09-selbox" data-k="sel" id="p09Sel">
+                <img class="sel-ctx" id="p09SelCtx" src="img/ui/sel_ctx.png" alt="">
+                <div class="sel-box" id="p09SelBox"></div>
+                <div class="sel-h1" id="p09SelH1"></div>
+                <div class="sel-h2" id="p09SelH2"></div>
+                <div class="u-rb" id="p09SelRot"><i data-ic="refresh"></i></div>
+                <div class="u-rb" id="p09SelMv"><i data-ic="moveAll"></i></div>
+              </div>
+
+              <div class="p09-tobj" data-k="tobj" id="p09Tobj" style="left:50%;top:45.8%">
+                <img class="sel-ctx" src="img/ui/sel_ctx.png" alt="">
+                <div class="tx" id="p09TobjTx"></div>
+                <div class="u-rb" style="left:-44px;top:64px"><i data-ic="refresh"></i></div>
+                <div class="u-rb mv" style="left:6px;top:64px" data-hit="move"><i data-ic="moveAll"></i></div>
+              </div>
+
+              <div data-k="mm0"><div class="u-sheet" style="top:59px;height:1111px"></div><div class="u-h1" style="top:88px">Magic Media</div><div class="u-info" style="top:89px">i</div><div class="u-line" style="top:148px"></div><div class="u-mtabs" style="top:156px"><span class="on" style="left:57px">이미지</span><span style="left:182px">그래픽</span><span style="left:290px">동영상</span><span style="left:392px">3D<b class="u-new">New</b></span></div><div class="u-uline" style="top:210px"></div><div class="u-lbl" style="top:224px">만들고 싶은 그래픽을 설명해 주세요</div><div class="u-ta">5개 이상의 단어를 입력하여 설명해 주세요.</div><div class="u-clear" style="left:449px;top:380px;display:none;font-size:17px">지우기</div><div class="u-chip is-pill" style="left:39px;top:371px"><i data-ic="bulb"></i>랜덤 생성</div><div class="u-chip" style="left:22px;top:441px"><i data-ic="photo"></i>스타일</div><div class="u-chip" data-hit="ratio" style="left:159px;top:441px"><i data-ic="crop"></i>정사각형</div><div class="u-btn" style="top:504px">이미지 생성</div><div class="u-lbl" style="top:856px">Magic Media 제작</div><div class="a" style="left:0;top:897px;width:540px;height:116px;overflow:hidden"><img class="a" src="img/ui/mmth_0.png" style="left:26px;top:0;width:116px;height:116px" alt=""><img class="a" src="img/ui/mmth_1.png" style="left:163px;top:0;width:116px;height:116px" alt=""><img class="a" src="img/ui/mmth_2.png" style="left:300px;top:0;width:116px;height:116px" alt=""><img class="a" src="img/ui/mmth_3.png" style="left:430px;top:0;width:100px;height:116px" alt=""></div></div>
+              <div data-k="mm1"><div class="u-sheet" style="top:59px;height:1111px"></div><div class="u-h1" style="top:88px">Magic Media</div><div class="u-info" style="top:89px">i</div><div class="u-line" style="top:148px"></div><div class="u-mtabs" style="top:156px"><span class="on" style="left:57px">이미지</span><span style="left:182px">그래픽</span><span style="left:290px">동영상</span><span style="left:392px">3D<b class="u-new">New</b></span></div><div class="u-uline" style="top:210px"></div><div class="u-lbl" style="top:224px">만들고 싶은 그래픽을 설명해 주세요</div><div class="u-ta" data-hit="prompt">5개 이상의 단어를 입력하여 설명해 주세요.</div><div class="u-clear" style="left:449px;top:380px;display:none;font-size:17px">지우기</div><div class="u-chip is-pill" style="left:39px;top:371px"><i data-ic="bulb"></i>랜덤 생성</div><div class="u-chip" style="left:22px;top:441px"><i data-ic="photo"></i>스타일</div><div class="u-chip" style="left:159px;top:441px"><i data-ic="crop"></i>세로형</div><div class="u-btn" style="top:504px">이미지 생성</div><div class="u-lbl" style="top:856px">Magic Media 제작</div><div class="a" style="left:0;top:897px;width:540px;height:116px;overflow:hidden"><img class="a" src="img/ui/mmth_0.png" style="left:26px;top:0;width:116px;height:116px" alt=""><img class="a" src="img/ui/mmth_1.png" style="left:163px;top:0;width:116px;height:116px" alt=""><img class="a" src="img/ui/mmth_2.png" style="left:300px;top:0;width:116px;height:116px" alt=""><img class="a" src="img/ui/mmth_3.png" style="left:430px;top:0;width:100px;height:116px" alt=""></div></div>
+              <div data-k="mm2"><div class="u-sheet" style="top:59px;height:1111px"></div><div class="u-h1" style="top:88px">Magic Media</div><div class="u-info" style="top:89px">i</div><div class="u-line" style="top:148px"></div><div class="u-mtabs" style="top:156px"><span class="on" style="left:57px">이미지</span><span style="left:182px">그래픽</span><span style="left:290px">동영상</span><span style="left:392px">3D<b class="u-new">New</b></span></div><div class="u-uline" style="top:210px"></div><div class="u-lbl" style="top:224px">만들고 싶은 그래픽을 설명해 주세요</div><div class="u-ta is-focus"><span class="car"></span>5개 이상의 단어를 입력하여 설명해 주세요.</div><div class="u-clear" style="left:449px;top:380px;display:none;font-size:17px">지우기</div><div class="u-chip is-pill" style="left:39px;top:371px"><i data-ic="bulb"></i>랜덤 생성</div><div class="u-chip" style="left:22px;top:441px"><i data-ic="photo"></i>스타일</div><div class="u-chip" style="left:159px;top:441px"><i data-ic="crop"></i>세로형</div><div class="u-btn" style="top:504px">이미지 생성</div><div class="u-lbl" style="top:856px">Magic Media 제작</div><div class="a" style="left:0;top:897px;width:540px;height:116px;overflow:hidden"><img class="a" src="img/ui/mmth_0.png" style="left:26px;top:0;width:116px;height:116px" alt=""><img class="a" src="img/ui/mmth_1.png" style="left:163px;top:0;width:116px;height:116px" alt=""><img class="a" src="img/ui/mmth_2.png" style="left:300px;top:0;width:116px;height:116px" alt=""><img class="a" src="img/ui/mmth_3.png" style="left:430px;top:0;width:100px;height:116px" alt=""></div></div>
+              <div data-k="mm3"><div class="u-sheet" style="top:59px;height:1111px"></div><div class="u-h1" style="top:88px">Magic Media</div><div class="u-info" style="top:89px">i</div><div class="u-line" style="top:148px"></div><div class="u-mtabs" style="top:156px"><span class="on" style="left:57px">이미지</span><span style="left:182px">그래픽</span><span style="left:290px">동영상</span><span style="left:392px">3D<b class="u-new">New</b></span></div><div class="u-uline" style="top:210px"></div><div class="u-lbl" style="top:224px">만들고 싶은 그래픽을 설명해 주세요</div><div class="u-ta is-focus is-typed"><span class="js-prompt"></span><span class="car"></span></div><div class="u-clear" style="left:449px;top:380px;display:block;font-size:17px">지우기</div><div class="u-chip is-pill" style="left:39px;top:371px"><i data-ic="bulb"></i>랜덤 생성</div><div class="u-chip" style="left:22px;top:441px"><i data-ic="photo"></i>스타일</div><div class="u-chip" style="left:159px;top:441px"><i data-ic="crop"></i>세로형</div><div class="u-btn is-on" data-hit="generate" style="top:504px">이미지 생성</div><div class="u-lbl" style="top:856px">Magic Media 제작</div><div class="a" style="left:0;top:897px;width:540px;height:116px;overflow:hidden"><img class="a" src="img/ui/mmth_0.png" style="left:26px;top:0;width:116px;height:116px" alt=""><img class="a" src="img/ui/mmth_1.png" style="left:163px;top:0;width:116px;height:116px" alt=""><img class="a" src="img/ui/mmth_2.png" style="left:300px;top:0;width:116px;height:116px" alt=""><img class="a" src="img/ui/mmth_3.png" style="left:430px;top:0;width:100px;height:116px" alt=""></div></div>
+              <div data-k="layout"><div class="u-sheet" style="top:59px;height:1111px"></div><div class="l" style="left:22px;top:84px;font-size:24px;font-weight:700;gap:18px"><span style="font-size:30px;font-weight:400">←</span> 레이아웃</div><div class="u-line" style="top:148px"></div><div class="a" style="left:73px;top:168px;width:125px;height:125px;border-radius:16px;border:solid 3px #7a45ee;background:#f1ecfd"><div class="a" style="left:44.5px;top:44.5px;width:30px;height:30px;border:solid 3px #333;border-radius:6px"></div></div><div class="a" style="left:211px;top:168px;width:125px;height:125px;border-radius:16px;border:solid 2px transparent;background:#eeeff3"><div class="a" style="left:39.5px;top:48.5px;width:40px;height:22px;border:solid 3px #333;border-radius:6px"></div></div><div class="a" data-hit="tall" style="left:346px;top:168px;width:125px;height:125px;border-radius:16px;border:solid 2px transparent;background:#eeeff3"><div class="a" style="left:48.5px;top:39.5px;width:22px;height:40px;border:solid 3px #333;border-radius:6px"></div></div><div class="c" style="left:73px;top:306px;width:125px;font-size:17px;font-weight:500">정사각형</div><div class="c" style="left:211px;top:306px;width:125px;font-size:17px;font-weight:500">가로형</div><div class="c" style="left:346px;top:306px;width:125px;font-size:17px;font-weight:500">세로형</div></div>
+              <div data-k="load"><div class="u-sheet" style="top:59px;height:1111px"></div><div class="u-h1" style="top:88px">Magic Media</div><div class="u-info" style="top:89px">i</div><div class="u-line" style="top:148px"></div><div class="u-mtabs" style="top:156px"><span class="on" style="left:57px">이미지</span><span style="left:182px">그래픽</span><span style="left:290px">동영상</span><span style="left:392px">3D<b class="u-new">New</b></span></div><div class="u-uline" style="top:210px"></div><div class="a" style="left:22px;top:243px;width:401px;height:401px;border-radius:16px;background:linear-gradient(160deg,#aeb4ee,#d3d1f4 55%,#e7e3f8)"></div><div class="a" style="left:434px;top:243px;width:130px;height:401px;border-radius:16px;background:linear-gradient(160deg,#c6caf2,#ebe8f9)"></div><div class="c" style="left:488px;top:428px;width:32px;height:32px;border-radius:50%;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.25)"><i data-ic="chevR" style="width:20px;height:20px"></i></div><div class="c" style="left:0;top:662px;width:540px;font-size:21px;line-height:1.5;padding:0 14px;text-wrap:balance;word-break:keep-all"><div>Canva가 “<b><span class="js-prompt"></span></b>”에 따라 그래픽을 생성하는 동안 기다려 주세요</div></div><div class="u-btn is-line" style="top:950px">취소</div><div class="p09-bar" id="p09Bar"><i></i></div></div>
+              <div data-k="mmres"><div class="u-sheet" style="top:59px;height:1111px"></div><div class="u-h1" style="top:88px">Magic Media</div><div class="u-info" style="top:89px">i</div><div class="u-line" style="top:148px"></div><div class="u-mtabs" style="top:156px"><span class="on" style="left:57px">이미지</span><span style="left:182px">그래픽</span><span style="left:290px">동영상</span><span style="left:392px">3D<b class="u-new">New</b></span></div><div class="u-uline" style="top:210px"></div><div class="a" style="left:22px;top:640px;width:496px;font-size:15px;line-height:1.55;color:#222">Canva는 회원님들과 함께 이 새로운 기술을 발전시켜 나가고 있으니, 이미지가 부적절해 보이는 경우 <u>신고</u>해 주세요.</div><div class="u-ta" style="top:697px;height:110px;padding:16px 18px;font-size:18px;color:#111;background:#fff"><span class="js-prompt"></span></div><div class="u-clear" style="left:456px;top:758px;font-size:16px">지우기</div><div class="u-chip" style="left:22px;top:817px;height:50px"><i data-ic="photo"></i>스타일</div><div class="u-chip" style="left:159px;top:817px;height:50px"><i data-ic="crop"></i>정사각형</div><div class="u-btn is-on" style="top:913px"><i data-ic="reload"></i>다시 생성</div><div class="u-btn is-line" style="top:977px">돌아가기</div>
+                <div class="p09-car" id="p09Car">
+                  <div class="p09-card"></div><div class="p09-card"></div><div class="p09-card"></div><div class="p09-card"></div>
+                  <button type="button" class="p09-arrow is-prev" id="p09Prev"><i data-ic="chevL"></i></button>
+                  <button type="button" class="p09-arrow is-next" id="p09Next2" data-hit="arrow"><i data-ic="chevR"></i></button>
+                  <button type="button" class="p09-pick" id="p09Pick" data-hit="pick"></button>
+                </div>
+              </div>
+              <div data-k="imgsel">
+                <div class="a js-draft" style="left:179px;top:259px;width:180px;height:178px;border:solid 2px #7c3aed;background:#e9eef6 center / cover"></div>
+                <div class="u-hb" style="left:398px;top:329px"><i data-ic="reload"></i></div>
+                <div class="u-sheet" style="top:590px;height:580px"></div><div class="u-h1" style="top:616px">Magic Media</div><div class="u-info" style="top:617px">i</div><div class="u-line" style="top:676px"></div><div class="u-mtabs" style="top:684px"><span class="on" style="left:57px">이미지</span><span style="left:182px">그래픽</span><span style="left:290px">동영상</span><span style="left:392px">3D<b class="u-new">New</b></span></div><div class="u-uline" style="top:738px"></div><div class="a js-draft" style="left:22px;top:752px;width:404px;height:258px;border-radius:14px;overflow:hidden;background:#e9eef6 center / cover"></div>
+              </div>
+              <div data-k="text"><div class="u-sheet" style="top:59px;height:1111px"></div><div class="u-fsearch" style="top:80px;height:72px;font-size:19px;color:#8a8c99;border-color:#e6e7ec"><i data-ic="search"></i>글꼴 및 조합 검색</div><div class="c" data-hit="insert" style="left:22px;top:174px;width:496px;height:52px;border-radius:12px;background:linear-gradient(90deg,#8b5cf6,#7a45ee);color:#fff;font-size:20px;font-weight:700;gap:14px"><i class="cv-ic" data-icon="textbox" style="margin:0"></i>텍스트 상자 추가</div><div class="c" style="left:22px;top:237px;width:496px;height:52px;border-radius:12px;border:solid 2px #e1e2e8;font-size:20px;font-weight:700;gap:12px"><i class="cv-ic" data-icon="magic" style="width:33px;height:33px;margin:0"></i>Magic Write</div><div class="u-fhead" style="top:321px;font-size:20px"><img src="img/ui/ts_brand.png" style="width:34px;height:34px" alt="">브랜드 키트</div><div class="a b nw" style="left:452px;top:322px;font-size:18px">편집</div><img class="a" src="img/ui/ts_crown.png" style="left:497px;top:322px;width:22px;height:22px" alt=""><div class="c" style="left:22px;top:361px;width:496px;height:52px;border-radius:12px;border:solid 2px #e1e2e8;font-size:19px;font-weight:700">브랜드 글꼴 추가</div><div class="a b" style="left:22px;top:436px;font-size:18px">기본 텍스트 스타일</div><div class="l" style="left:22px;top:474px;width:496px;height:79px;border:solid 2px #e1e2e8;border-radius:16px;padding:0 20px;font-size:40px;font-weight:800">제목 추가</div><div class="l" style="left:22px;top:566px;width:496px;height:65px;border:solid 2px #e1e2e8;border-radius:16px;padding:0 20px;font-size:26px;font-weight:700">부제목 추가</div><div class="l" style="left:22px;top:643px;width:496px;height:59px;border:solid 2px #e1e2e8;border-radius:16px;padding:0 20px;font-size:17.5px">약간의 본문 텍스트 추가</div><div class="a b" style="left:22px;top:724px;font-size:18px">동적 텍스트</div><div class="l" style="left:22px;top:761px;width:496px;height:114px;border:solid 2px #e1e2e8;border-radius:16px;padding:0 18px;font-size:19px;font-weight:700;gap:28px"><img src="img/ui/ts_pn.png" style="width:100px;height:100px;border-radius:8px;margin:0 0 0 -4px" alt="">페이지 번호</div><div class="a b" style="left:22px;top:900px;font-size:18px">앱</div><div class="a b" style="right:22px;top:902px;font-size:17px">모두 보기</div><img class="a" src="img/ui/ts_apps.png" style="left:0;top:940px;width:540px;height:76px" alt=""></div>
+              <div data-k="flist"><div class="u-sheet" style="top:590px;height:580px;z-index:1"></div><div class="a" style="left:0;top:612px;width:540px;text-align:center;font-size:18px;font-weight:700;z-index:2">글꼴</div><div class="a" data-hit="fontok" style="right:22px;top:610px;z-index:2"><i data-ic="check" style="width:32px;height:32px"></i></div><div class="a" style="left:0;top:680px;width:540px;height:428px;overflow:hidden;z-index:2"><div class="a" style="left:0;top:-680px;width:540px;height:1170px"><div class="u-fchips" style="top:685px"><span style="font-weight:800">디스플레이</span><span>필기체</span><span style="font-weight:800">굵게</span><span class="g">멋진</span><span>슬랩 세리프</span><span>···›</span></div><div class="u-fhead" style="top:765px"><i data-ic="doc"></i>문서 글꼴</div><div class="u-frow is-on" style="top:804px;height:50px">Noto Sans Kr<em>글꼴 스타일</em></div><div class="a" style="left:0;top:870px;width:540px;height:1px;background:#e6e7ec"></div><div class="u-fhead" style="top:891px">✦ 추천 폰트</div><div class="a b" style="right:22px;top:887px;font-size:22px">···</div><div class="u-frow is-big" style="top:929px"><span style="font-family:'Cafe24 Ssurround'">210 콤퓨타세탁</span></div><div class="u-frow" style="top:987px">Tlab 돋움 레귤러</div><div class="u-frow is-big" data-hit="han" style="top:1045px;height:50px"><span style="font-family:'Black Han Sans';font-weight:400">Black Han Sans</span><em>글꼴 스타일</em></div></div></div></div>
+              <div data-k="fpick"><div class="u-sheet" style="top:590px;height:580px;z-index:1"></div><div class="a" style="left:0;top:612px;width:540px;text-align:center;font-size:18px;font-weight:700;z-index:2">글꼴</div><div class="a" data-hit="fontok" style="right:22px;top:610px;z-index:2"><i data-ic="check" style="width:32px;height:32px"></i></div><div class="a" style="left:0;top:680px;width:540px;height:428px;overflow:hidden;z-index:2"><div class="a" style="left:0;top:-680px;width:540px;height:1170px"><div class="u-fchips" style="top:685px"><span style="font-weight:800">디스플레이</span><span>필기체</span><span style="font-weight:800">굵게</span><span class="g">멋진</span><span>슬랩 세리프</span><span>···›</span></div><div class="u-fhead" style="top:765px"><i data-ic="doc"></i>문서 글꼴</div><div class="u-frow" style="top:804px;height:50px">Noto Sans Kr<em>글꼴 스타일</em></div><div class="a" style="left:0;top:870px;width:540px;height:1px;background:#e6e7ec"></div><div class="u-fhead" style="top:891px">✦ 추천 폰트</div><div class="a b" style="right:22px;top:887px;font-size:22px">···</div><div class="u-frow is-big" style="top:929px"><span style="font-family:'Cafe24 Ssurround'">210 콤퓨타세탁</span></div><div class="u-frow" style="top:987px">Tlab 돋움 레귤러</div><div class="u-frow is-big is-on" style="top:1045px;height:50px"><span style="font-family:'Black Han Sans';font-weight:400">Black Han Sans</span><em>글꼴 스타일</em></div></div></div></div>
+              <div data-k="share"><div class="u-page js-draft" style=""><b class="t js-phrase" style="top:52px;font-size:41px;color:#111;text-shadow:0 0 8px rgba(255,255,255,.8);"></b><b class="c" style="top:660px;font-size:24px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7);">AI로 만든 그림을 사용했어요.</b></div><div class="a" style="left:0;top:108px;width:540px;height:1062px;background:rgba(40,44,70,.55)"></div><div class="u-modal" style="top:373px;height:797px"></div><img class="a" src="img/ui/sh_icons.png" style="left:0;top:410px;width:540px;height:120px" alt=""><div class="a" style="left:20px;top:556px;width:498px;height:370px;border-radius:18px;background:#e9e8dd"></div><div class="u-page is-small js-draft" style="left:181px;top:616px;width:183px;height:252px;box-shadow:none"><b class="t js-phrase" style="top:22px;font-size:15px;color:#111;text-shadow:0 0 8px rgba(255,255,255,.8);"></b><b class="c" style="top:225px;font-size:9px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7);">AI로 만든 그림을 사용했어요.</b></div><div class="c nw" style="left:400px;top:896px;width:112px;height:22px;border-radius:11px;background:#333;color:#fff;font-size:12px;font-weight:700">₩17,000부터</div><div class="u-btn is-on" style="top:950px;height:52px">Canva에서 인쇄</div><div class="u-btn is-line" data-hit="dl1" style="top:1024px;height:52px;font-weight:700">다운로드</div></div>
+              <div data-k="dl"><div class="u-page js-draft" style=""><b class="t js-phrase" style="top:52px;font-size:41px;color:#111;text-shadow:0 0 8px rgba(255,255,255,.8);"></b><b class="c" style="top:660px;font-size:24px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7);">AI로 만든 그림을 사용했어요.</b></div><div class="a" style="left:0;top:108px;width:540px;height:1062px;background:rgba(40,44,70,.55)"></div><div class="u-modal" style="top:342px;height:828px"></div><div class="l b" style="left:22px;top:352px;height:40px;font-size:19px;gap:14px"><span style="font-size:26px;font-weight:400">‹</span>다운로드</div><div class="u-line" style="top:402px"></div><div class="a b" style="left:22px;top:428px;font-size:15px">파일 형식</div><div class="l" style="left:22px;top:462px;width:496px;height:52px;border:solid 2px #dcdee6;border-radius:14px;padding:0 18px;font-size:17px;gap:12px"><i data-ic="photo" style="width:26px;height:26px"></i>PNG <span style="padding:2px 8px;border-radius:9px;background:#3b5be0;color:#fff;font-size:13px;font-weight:700">추천</span><span style="margin-left:auto"><i data-ic="chev" style="width:22px;height:22px"></i></span></div><div class="a" style="left:22px;top:538px;font-size:14px"><b>크기</b> <span style="color:#555">• 1,587×2,245 px</span> <span style="color:#f5b53c">♛</span></div><div class="a" style="left:22px;top:592px;width:386px;height:6px;border-radius:3px;background:#ddd"></div><div class="a" style="left:22px;top:592px;width:60px;height:6px;border-radius:3px;background:#7a45ee"></div><div class="a" style="left:70px;top:582px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 5px rgba(0,0,0,.35)"></div><div class="c" style="left:488px;top:566px;width:50px;height:50px;border:solid 2px #dcdee6;border-radius:12px;font-size:17px">1</div><div class="a b" style="left:22px;top:644px;font-size:15px">품질 <span style="color:#f5b53c">♛</span> ⓘ</div><div class="u-seg" style="top:676px"><span>압축</span><span class="on">높음</span><span>크기 제한</span></div><div class="a b" style="left:22px;top:756px;font-size:15px">투명 배경 <span style="color:#f5b53c">♛</span></div><div class="u-tg" style="top:750px"></div><div class="a" style="left:22px;top:808px;font-size:15px">다운로드 설정 저장</div><div class="u-tg" style="top:804px"></div><div class="a b" style="left:22px;top:858px;font-size:15px">페이지 선택</div><div class="u-seg" style="top:890px;background:#eef0f4"><span class="on">전체</span><span>이 페이지(1)</span><span>맞춤형</span></div><div class="u-btn is-on" data-hit="dl2" style="top:972px;height:52px;font-weight:700">다운로드</div></div>
+              <div data-k="done"><div class="u-page js-draft" style=""><b class="t js-phrase" style="top:52px;font-size:41px;color:#111;text-shadow:0 0 8px rgba(255,255,255,.8);"></b><b class="c" style="top:660px;font-size:24px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7);">AI로 만든 그림을 사용했어요.</b></div><div class="a" style="left:0;top:108px;width:540px;height:1062px;background:rgba(40,44,70,.55)"></div><div class="u-modal" style="top:509px;height:661px"></div><div class="l b" style="left:22px;top:524px;height:40px;font-size:19px;gap:12px"><span style="display:flex;width:30px;height:30px;border-radius:50%;background:#22a355;color:#fff;align-items:center;justify-content:center;font-size:18px">✓</span>다운로드 완료</div><div class="a" style="right:24px;top:526px;font-size:28px">✕</div><div class="a" style="left:22px;top:594px;width:496px;height:278px;border-radius:14px;background:#eef0f3"></div><div class="u-page is-small js-draft" style="left:186px;top:615px;width:168px;height:238px;box-shadow:0 2px 8px rgba(0,0,0,.2)"><b class="t js-phrase" style="top:18px;font-size:14px;color:#111;text-shadow:0 0 8px rgba(255,255,255,.8);"></b><b class="c" style="top:212px;font-size:8px;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7);">AI로 만든 그림을 사용했어요.</b></div><div class="a b" style="left:22px;top:887px;font-size:18px">단락 텍스트</div><div class="a" style="left:22px;top:925px;font-size:15px;color:#6a6c7a">카메라 롤에 저장했어요</div><div class="u-btn is-line" style="top:982px;height:52px;font-weight:700">공유</div><div class="u-btn is-on" style="top:1045px;height:52px;font-weight:700">열기</div></div>
+
+              <div data-k="tabs"><div class="u-tabs is-white" id="p09Tabs" data-hit="swipe"><div class="u-track"><div class="u-tab" data-tab="추천 템플릿" data-icon="template"><i></i>추천 템플릿</div><div class="u-tab" data-tab="요소" data-icon="elements"><i></i>요소</div><div class="u-tab" data-tab="텍스트" data-hit="tabtext" data-icon="text"><i></i>텍스트</div><div class="u-tab" data-tab="갤러리" data-icon="gallery"><i></i>갤러리</div><div class="u-tab" data-tab="브랜드 센터" data-icon="brand"><i></i>브랜드 센터</div><div class="u-tab" data-tab="업로드 항목" data-icon="upload"><i></i>업로드 항목</div><div class="u-tab" data-tab="도구" data-icon="tool"><i></i>도구</div><div class="u-tab" data-tab="프로젝트" data-icon="project"><i></i>프로젝트</div><div class="u-tab" data-tab="앱" data-icon="apps"><i></i>앱</div><div class="u-tab" data-tab="Magic Media" data-hit="mmtab" data-icon="magic"><i></i>Magic Media</div><div class="u-tab" data-tab="AI 음성" data-icon="voice"><i></i>AI 음성</div></div></div></div>
+              <div data-k="tbar"><div class="tbx"><div class="tbx-in"><button type="button" class="tbx-t" style="width:84px"><span class="tbi"><i data-ic="keyboard" width="26" height="18"></i></span><b>편집</b></button><button type="button" class="tbx-t" data-hit="tbfont" style="width:83px"><span class="tbi is-ff">F<em>f</em></span><b>글꼴</b></button><button type="button" class="tbx-t" style="width:100px"><span class="tbi is-h">H</span><b>텍스트 스타일</b></button><button type="button" class="tbx-t" style="width:84px"><span class="tbi is-aa"><small>A</small>A</span><b>글꼴 크기</b></button><button type="button" class="tbx-t" style="width:84px"><span class="tbi is-col">A<i></i></span><b>색상</b></button><button type="button" class="tbx-ok" data-hit="tbok"><i data-ic="check"></i></button></div></div></div>
+              <div data-k="tbarfont"><div class="tbx"><div class="tbx-in"><button type="button" class="tbx-t" style="left:3.5px;width:84px"><span class="tbi"><i data-ic="keyboard" width="26" height="18"></i></span><b>편집</b></button><button type="button" class="tbx-t is-on" data-hit="tbfont" style="left:94px;width:83px"><span class="tbi is-ff">F<em>f</em></span><b>글꼴</b></button><button type="button" class="tbx-t" style="left:176.5px;width:100px"><span class="tbi is-h">H</span><b>텍스트 스타일</b></button><button type="button" class="tbx-t" style="left:276px;width:84px"><span class="tbi is-aa"><small>a</small>A</span><b>글꼴 크기</b></button><button type="button" class="tbx-t" style="left:366px;width:84px"><span class="tbi is-col">A<i></i></span><b>색상</b></button><button type="button" class="tbx-ok" data-hit="tbok"><i data-ic="check"></i></button></div></div><div class="tbx-chip"><span class="nm">Noto Sans Kr</span><button type="button" class="up" data-hit="more"><i data-ic="sendUp"></i></button></div></div>
+              <div data-k="pbar"><div class="u-pbar is-edit" style="top:1034px"><span>↻</span><span style="color:#444">A</span><span>글꼴</span><span>50 pt</span><b style="font-size:21px">B</b><i style="font-size:21px;color:#999">I</i><u style="font-size:21px">U</u><span style="flex:1"></span><span class="u-ok" data-hit="check"><i data-ic="check"></i></span></div></div>
+            </div>
+
+            <div class="phone-nav"></div>
+            </div>
+          </div>
+
+          <img class="p09-swipe is-hide" id="p09Swipe" src="../../resources/img/common/img_finger01.png" alt="">
+          <div class="p09-right is-off" id="p09Right"></div>
+          <button class="card-btn js-sfx next-btn p09-next is-hide" id="p09Next" data-sound="sound/click.mp3">다음</button>
+
+          <p class="p09-end-title is-hide" id="p09EndTitle">AI의 도움을 받아 나만의 인권 존중 포스터를 만들었어요!</p>
+          <div class="p09-poster is-hide" id="p09Poster"><b class="is-top" id="p09PosterTop"></b><b class="is-bot">AI로 만든 그림을 사용했어요.</b></div>
+
+          <div class="avatar-modal is-wrong is-off" id="p09Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small">생성된 이미지가 프롬프트와 알맞나요?<br>다시 한번 확인해보세요.</p>
+                <p class="avatar-popup-sub" id="p09WrongPrompt"></p>
+                <button class="avatar-popup-next card-btn is-popup js-sfx" id="p09WrongOk" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="인권 존중 포스터 제작소" data-next="page10.html"></script>
+  <script src="../../resources/js/toc.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script src="../../resources/js/box-edit.js"></script>
+  <script>
+  (function () {
+    const CASES = [
+      { d: 'p09_wc_', ok: [true, true, true, true], t: '휠체어를 탄 학생과 친구들이<br>경사로로 함께 학교에 들어가는 그림', v: '휠체어를 탄 학생과 친구들이 경사로로 함께 학교에 들어가는 그림', q: '[휠체어를 탄 학생과 친구들이 경사로로 함께 학교에 들어가는 사진]' },
+      { d: 'p09_pg_', ok: [true, true, true, true], t: '다양한 친구들이<br>놀이터에서 손잡고 웃는 그림', v: '다양한 친구들이 놀이터에서 손잡고 웃는 그림', q: '[다양한 친구들이 놀이터에서 손잡고 웃는 사진]' },
+      { d: 'p09_cl_', ok: [true, true, true, true], t: '다양한 친구들이 교실에서<br>친구의 말을 잘 들어주는 그림', v: '다양한 친구들이 교실에서 친구의 말을 잘 들어주는 그림', q: '[다양한 친구들이 교실에서 친구의 말을 잘 들어주는 사진]' }
+    ];
+    const PHRASES = ['누구나 함께할 수 있어요', '우리는 모두 소중해요', '서로 다름을 존중해요'];
+    const CREDIT = 'AI로 만든 그림을 사용했어요.';
+    const OKDRAFT = [true, true, false, false];
+    const MOVE = '<img src="img/p09_ic_move.png" alt="이동">';
+    const UP = '<img src="img/p09_ic_up.png" alt="더보기">';
+    const TAB_MAX = 527;
+    const st = { c: null, phrase: '', draft: 0, car: 0, font: false, credit: false };
+
+    // 한 화면에 모든 부품이 마크업으로 있고, 단계마다 show에 적은 것만 보임(data-k).
+    // hit = 눌러야 하는 곳(data-hit) — 분홍으로 깜빡이고 손가락이 가리킴. 나머지 필드는 포스터·탭·오른쪽 버튼 등 그 단계의 상태.
+    const POS_NONE = { };
+    const STEPS = [
+      { pose: 'wink_point2', bubble: 'Canva를 클릭해요.', show: 'home', hit: 'canva' },
+      { pose: 'wink_point', bubble: '검색창을 클릭해요.', show: 'app', hit: 'search' },
+      { pose: 'wink_point3', bubble: '오른쪽의 버튼을 클릭해<br>포스터를 검색해요.', show: 'app', focus: true, btns: [{ t: '포스터' }] },
+      { pose: 'wink_point2', bubble: '세로형 포스터를 만들어볼까요?<br>포스터(세로형 A2)를 클릭해요.', show: 'result', hit: 'poster' },
+      { pose: 'main', bubble: '좋아요!<br>이제 AI를 활용해 포스터를<br>디자인해봐요.', show: 'ed pg dots tabs', pg: {}, next: true },
+      { pose: 'wink_present', bubble: '아래의 메뉴 탭을<br>오른쪽으로 슬라이드 해요.', show: 'ed pg dots tabs', pg: {}, hit: 'swipe' },
+      { pose: 'wink_point4', bubble: 'Magic Media를 클릭해요.', show: 'ed pg dots tabs', pg: {}, tabs: { off: TAB_MAX }, hit: 'mmtab' },
+      { pose: 'wink_point2', bubble: '이미지의 비율을 먼저 정해봐요.<br>정사각형 버튼을 클릭해요.', show: 'ed mm0 tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, hit: 'ratio' },
+      { pose: 'wink_point', bubble: '세로형 버튼을 클릭해요.', show: 'ed layout', hit: 'tall' },
+      { pose: 'main', bubble: '좋아요!<br>세로형 포스터에 맞도록<br>이미지 비율을 설정했어요.', show: 'ed mm1 tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, next: true },
+      { pose: 'wink_point', bubble: '이제 프롬프트를 입력해봐요.<br>입력창을 클릭해요.', show: 'ed mm1 tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, hit: 'prompt' },
+      { pose: 'wink_point2', bubble: '오른쪽 버튼을 클릭해<br>내가 조립한 프롬프트를<br>불러와봐요.', show: 'ed mm2 tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, btns: [{ t: '인권 존중 포스터<br>프롬프트 불러오기' }] },
+      { pose: 'main', bubble: '세 가지 경우 중 하나를 클릭해<br>내가 만들고 싶은 포스터의<br>프롬프트를 입력해요.', show: 'ed mm2 tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, cases: true },
+      { pose: 'wink_point2', bubble: '이미지 생성 버튼을<br>클릭해요.', show: 'ed mm3 tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, hit: 'generate' },
+      { pose: 'main', bubble: '내가 요청한 디자인을<br>AI가 만들어주고 있어요.', show: 'ed load tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, loading: true },
+      { pose: 'wink_point2', bubble: '포스터 초안이 완성되었어요!<br>화살표를 클릭해 4장을 모두<br>확인해봐요.', show: 'ed mmres tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, car: 'view', hit: 'arrow' },
+      { pose: 'wink_open', bubble: '어떤 이미지를 사용할까요?<br>프롬프트와 맞는 초안을 골라<br>이미지를 클릭해봐요.', show: 'ed mmres tabs', tabs: { off: TAB_MAX, on: 'Magic Media' }, car: 'pick', hit: 'pick', noFinger: true },
+      { pose: 'main', bubble: '해당 이미지로 포스터를<br>제작할까요?', show: 'ed pg dots imgsel tabs', pg: { small: true }, tabs: { off: TAB_MAX, on: 'Magic Media' }, btns: [{ t: '다시하기', back: 'pick' }, { t: '결정하기' }] },
+      { pose: 'wink_point3', bubble: '오른쪽의 버튼을 눌러<br>이미지의 크기를 알맞게 조정해요.', show: 'ed pg dots imgsel tabs', pg: { small: true }, tabs: { off: TAB_MAX, on: 'Magic Media' }, btns: [{ t: '크기 조정하기' }] },
+      { pose: 'main', bubble: '초안 이미지를 선택했어요!<br>이제 포스터에 들어갈 문구를<br>정해봐요.', show: 'ed pg dots tabs', pg: { draft: 1 }, next: true },
+      { pose: 'wink_point4', bubble: '텍스트를 클릭해요.', show: 'ed pg dots tabs', pg: { draft: 1 }, hit: 'tabtext' },
+      { pose: 'wink_point', bubble: '텍스트 상자 추가<br>버튼을 클릭해요.', show: 'ed pg text tabs', pg: { draft: 1 }, tabs: { off: 0, on: '텍스트' }, hit: 'insert', fg: [80, -30] },
+      { pose: 'main', bubble: '포스터와 어울리는 문구를<br>입력해볼까요? 오른쪽 버튼 중<br>원하는 문구를 선택해봐요.', show: 'ed pg pbar', typing: 'phrase', phrases: true },
+      { pose: 'wink_point4', bubble: '확인 버튼을 눌러<br>문구를 입력해요.', show: 'ed pg pbar', typing: 'phrase', hit: 'check' },
+      { pose: 'wink_point2', bubble: '위치를 포스터의 상단으로<br>옮겨 봐요. 문구를 클릭해요.', show: 'ed pg dots tabs', pg: { draft: 1, t: 334 }, hit: 'ptext' },
+      { pose: 'wink_present', bubble: MOVE + '이동 버튼을 꾹 눌러<br>위쪽으로 드래그 해보세요.', show: 'ed pg tbar tobj', pg: { draft: 1 }, drag: { text: () => st.phrase || PHRASES[1], fs: () => fsPhrase(), cx: 50, top: 45.8, end: 21.9, zone: [17, 27] }, hit: 'move' },
+      //
+      { pose: 'wink_point4', bubble: '좋아요! 이번에는<br>문구의 글씨체를 바꿔봐요.<br>글꼴을 클릭해요.', show: 'ed pg sel tbar', pg: { draft: 1, t: 52 }, sel: { yc: 256 }, hit: 'tbfont' },
+      //
+      { pose: 'wink_point4', bubble: UP + '더보기 버튼을 클릭해요.', show: 'ed pg sel tbarfont', pg: { draft: 1, t: 52 }, sel: { yc: 256 }, hit: 'more' },
+      { pose: 'wink_point4', bubble: '포스터를 만들 때는 대부분<br>눈에 잘 띄는 굵은 글씨를 사용해요.<br>추천 폰트를 사용해볼까요?', show: 'ed pg selS flist', pg: { draft: 1, t: 36, style: 'left:115px;top:128px;width:310px;height:440px', small0: true }, selS: true, hit: 'han', setFont: true },
+      { pose: 'wink_point2', bubble: '좋아요! 확인 버튼을 클릭해<br>편집을 완료해요.', show: 'ed pg selS fpick', pg: { draft: 1, t: 36, style: 'left:115px;top:128px;width:310px;height:440px', small0: true }, selS: true, hit: 'fontok' },
+      { pose: 'wink_point4', bubble: '마지막으로 AI를 활용한 제작물임을<br>밝히는 문구를 추가해야 해요.<br>다시 한번 텍스트를 클릭해요.', show: 'ed pg dots tabs', pg: { draft: 1, t: 52 }, hit: 'tabtext' },
+      { pose: 'wink_point', bubble: '텍스트 상자 추가<br>버튼을 클릭해요.', show: 'ed pg text tabs', pg: { draft: 1, t: 52 }, tabs: { off: 0, on: '텍스트' }, hit: 'insert' },
+      { pose: 'wink_point3', bubble: '오른쪽 버튼을 눌러<br>문구를 입력해요.', show: 'ed pg pbar', typing: 'credit', btns: [{ t: 'AI로 만든 그림을<br>사용했어요.', credit: true }] },
+      { pose: 'wink_point4', bubble: '확인 버튼을 클릭해요.', show: 'ed pg pbar', typing: 'credit', hit: 'check' },
+      { pose: 'wink_point2', bubble: '위치를 포스터의 하단으로<br>옮겨 봐요. 문구를 클릭해요.', show: 'ed pg dots tabs', pg: { draft: 1, t: 52, c: 334 }, hit: 'ctext' },
+      { pose: 'wink_present', bubble: MOVE + '이동 버튼을 꾹 눌러<br>아래쪽으로 드래그 해보세요.', show: 'ed pg tbar tobj', pg: { draft: 1, t: 52 }, drag: { cred: true, text: () => CREDIT, fs: () => 24, cx: 50, top: 45.8, end: 73.2, zone: [68, 78] }, hit: 'move' },
+      // 
+      { pose: 'wink_point4', bubble: '좋아요! 확인 버튼을 클릭해<br>포스터 만들기를 완료해요.', show: 'ed pg tbar', pg: { draft: 1, t: 52, c: 660 }, hit: 'tbok' },
+      { pose: 'main', bubble: '인권 존중 포스터를<br>완성했어요!', show: 'ed pg dots tabs', pg: { draft: 1, t: 52, c: 660 }, next: true },
+      //
+      { pose: 'wink_point', bubble: '오른쪽 위의 버튼을 클릭해<br>포스터를 다운로드 해봐요.', show: 'ed pg dots tabs dlbtn', pg: { draft: 1, t: 52, c: 660 }, hit: 'download' },
+      { pose: 'wink_point4', bubble: '아래의 다운로드 버튼을<br>클릭해요.', show: 'ed share', dark: true, hit: 'dl1' },
+      { pose: 'wink_point4', bubble: '아래의 다운로드 버튼을<br>클릭해요.', show: 'ed dl', dark: true, hit: 'dl2' },
+      { pose: 'happy_jump', bubble: '내가 만든 인권 존중 포스터를<br>저장했어요!', show: 'ed done', dark: true, next: true },
+      { end: true }
+    ];
+    const CUSTOM = new Set(['swipe', 'move', 'arrow', 'pick']);
+
+    const phone = $('p09Phone');
+    const ui = $('p09Ui');
+    const bubble = $('p09Bubble');
+    const set = $('p09Set');
+    const say = initGuideSay({ bubble: bubble, img: $('p09Char'), set: set, keep: true });
+    const right = $('p09Right');
+    const nextBtn = $('p09Next');
+    const status = phone.querySelector('.phone-status');
+    const parts = Array.from(phone.querySelectorAll('[data-k]'));
+    const hits = Array.from(phone.querySelectorAll('[data-hit]'));
+    // 클릭 영역 보정 [dx, dy, dw, dh] — 버튼 모양은 그대로, 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
+    const HOT = {
+      canva: [0, 0, 0, 0], search: [0, 0, 0, 0], poster: [0, 0, 0, 0], mmtab: [0, 0, 0, 0], ratio: [0, 0, 0, 0],
+      tall: [0, 0, 0, 0], prompt: [0, 0, 0, 0], generate: [0, 0, 0, 0], arrow: [0, 0, 0, 0], pick: [0, 0, 0, 0],
+      tabtext: [0, 0, 0, 0], insert: [0, 0, 0, 0], check: [0, 0, 0, 0], ptext: [0, 0, 0, 0], move: [0, 0, 0, 0],
+      tbfont: [0, 0, 0, 0], more: [-3.5, 0.5, 5, -1], han: [0, 0, 0, 0], fontok: [-2, -2, 2, 2], ctext: [0, 0, 0, 0],
+      tbok: [0, 0, 0, 0], download: [-20, -20, 45, 33], dl1: [0, 0, 0, 0], dl2: [0, 0, 0, 0]
+    };
+    BoxEdit.hitPad(hits, HOT);
+    const pg = $('p09Pg');
+    const pgT = $('p09PgT');
+    const pgC = $('p09PgC');
+    const track = ui.querySelector('.u-track');
+    const tabsEl = $('p09Tabs');
+    const swipeFinger = $('p09Swipe');
+    let i = 0;
+
+    const POSTER_T = () => st.phrase || PHRASES[1];
+    const dsrc = (n) => 'img/' + ((st.c && st.c.d) || 'p09_draft_') + n + '.png';
+    const fsPhrase = () => (st.font ? 44 : 41);
+    const tw = (t, fs) => Math.round([...t].reduce((a, c) => a + (c === ' ' ? fs * 0.32 : /[A-Za-z0-9.]/.test(c) ? fs * 0.58 : fs * 0.97), 0) + 16);
+
+    // 고른 값을 화면 곳곳에 반영(프롬프트·초안 이미지·문구)
+    function applyChoice() {
+      if (st.c) {
+        ui.querySelectorAll('.js-prompt').forEach((el) => { el.textContent = st.c.v; });
+        ui.querySelectorAll('.p09-card').forEach((el, n) => { el.style.backgroundImage = "url('" + dsrc(n + 1) + "')"; });
+      }
+      ui.querySelectorAll('.js-draft').forEach((el) => { el.style.backgroundImage = "url('" + dsrc(st.draft + 1) + "')"; });
+      ui.querySelectorAll('.js-phrase').forEach((el) => { el.textContent = POSTER_T(); });
+    }
+
+    // 포스터 캔버스: o.draft(초안 그림), o.t(문구 위치 px), o.c(AI 문구 위치), o.small, o.style
+    function setPoster(o) {
+      o = o || {};
+      pg.className = 'u-page p09-pg' + (o.small ? ' is-small' : '') + (st.font ? ' is-f' : '');
+      pg.style.cssText = o.style || '';
+      pg.style.backgroundImage = o.draft ? "url('" + dsrc(st.draft + 1) + "')" : '';
+      const small = o.small || o.small0;
+      pgT.hidden = o.t === undefined || o.t === null;
+      if (!pgT.hidden) pgT.style.cssText = 'top:' + o.t + 'px;font-size:' + (o.tfs || (small ? 26 : fsPhrase())) + 'px;color:#111;' + (o.draft ? 'text-shadow:0 0 8px rgba(255,255,255,.8);' : '');
+      pgC.hidden = o.c === undefined || o.c === null;
+      if (!pgC.hidden) pgC.style.cssText = 'top:' + o.c + 'px;font-size:' + (o.cfs || (small ? 14 : 24)) + 'px;color:' + (o.draft ? '#fff' : '#111') + ';' + (o.draft ? 'text-shadow:0 1px 4px rgba(0,0,0,.7);' : '');
+    }
+
+    // 문구를 고른 텍스트 상자(선택 표시): yc = 세로 가운데, w = 상자 폭
+    function setSel(yc, w, ctx) {
+      const set = (id, css) => { $(id).style.cssText = css; };
+      const sel = $('p09Sel');
+      sel.style.cssText = '';
+      set('p09SelCtx', 'left:175px;top:' + (yc - 102) + 'px');
+      set('p09SelBox', 'left:' + (270 - w / 2) + 'px;top:' + (yc - 23) + 'px;width:' + w + 'px');
+      set('p09SelH1', 'left:' + (270 - w / 2 - 9) + 'px;top:' + (yc - 32) + 'px');
+      set('p09SelH2', 'left:' + (270 + w / 2 - 6) + 'px;top:' + (yc - 12) + 'px');
+      set('p09SelRot', 'left:227px;top:' + (yc + 64) + 'px');
+      set('p09SelMv', 'left:277px;top:' + (yc + 64) + 'px');
+      $('p09SelCtx').hidden = !!ctx;
+    }
+    // 글꼴 고르는 단계: 줄어든 포스터 위 작은 선택 표시
+    function setSelSmall() {
+      const w = tw(POSTER_T(), 26);
+      $('p09Sel').style.cssText = '';
+      $('p09SelCtx').hidden = true;
+      $('p09SelBox').style.cssText = 'left:' + (270 - w / 2) + 'px;top:158px;width:' + w + 'px;height:34px';
+      $('p09SelH1').style.cssText = 'left:154px;top:150px;width:14px;height:14px';
+      $('p09SelH2').style.cssText = 'display:none';
+      $('p09SelRot').style.cssText = 'left:227px;top:229px';
+      $('p09SelMv').style.cssText = 'left:277px;top:229px';
+    }
+
+    // 손가락 위치 보정 [dx, dy] — 눌러야 할 곳(data-hit 이름, 그 밖에는 next·btn·mv·arrow)별, 표에 없으면 [0, 0]. ?edit 로 손가락을 눌러 맞춘 뒤 표시줄 값을 옮겨 적음
+    const FG = {
+      canva: [15, -37], search: [20, -30], poster: [0, 0], mmtab: [0, 0], ratio: [0, 0],
+      tall: [0, 0], prompt: [0, -60], generate: [50, -20], arrow: [0, 0], pick: [0, 0],
+      tabtext: [0, 0], insert: [80, -20], check: [0, 0], ptext: [0, 0], move: [0, 0],
+      tbfont: [12.1, 6.8], more: [1.2, 0], han: [0, -30], fontok: [0, 0], ctext: [0, 0],
+      tbok: [1.8, -2.5], download: [0.2, -7.4], dl1: [40, -20], dl2: [30, -20], next: [0, -50],
+      btn: [0, 0], mv: [0, 0]
+    };
+    let fgKey = '?';
+    function fingerTo(el, opt, delay, key) {
+      const at = i;
+      setTimeout(() => {
+        if (i !== at || !el || !el.isConnected) return;
+        fgKey = key || '?';
+        const fg = FG[fgKey] || [0, 0];
+        pointFingerAt(el, Object.assign({ onMain: true, beside: true }, opt || {}, { dx: fg[0], dy: fg[1] }));
+        // 하단 탭·버튼을 가리킬 때 손가락이 화면(960px) 아래로 잘리지 않게(편집 모드에서는 끔)
+        if (!BoxEdit.on) document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.top = Math.min(parseFloat(f.style.top), 850) + 'px'; });
+      }, delay || 350);
+    }
+
+    function setRight(list) {
+      right.innerHTML = '';
+      right.classList.toggle('is-off', !list.length);
+      list.forEach((o) => {
+        const b = document.createElement('button');
+        b.className = 'card-btn ' + (o.cls || '');
+        b.innerHTML = o.t;
+        b.addEventListener('click', () => { playClick(); o.fn(); });
+        right.appendChild(b);
+      });
+      return right.firstChild;
+    }
+
+    // 문구 입력 화면: 아직 안 넣었으면 "단락 텍스트" 자리 표시, 넣었으면 포스터에 문구가 보임
+    function typingPoster(s) {
+      if (s.typing === 'phrase') {
+        if (st.phrase) return { draft: 1, t: 334 };
+        return { draft: 1 };
+      }
+      return st.credit ? { draft: 1, t: 52, c: 334 } : { draft: 1, t: 52 };
+    }
+
+    function render() {
+      const s = STEPS[i];
+      right.classList.add('is-off');
+      right.innerHTML = '';
+      showIf(nextBtn, false);
+      nextBtn.onclick = null;
+      clearFingers();
+      swipeFinger.classList.add('is-hide');
+      $('p09EndTitle').classList.add('is-hide');
+      $('p09Poster').classList.add('is-hide');
+      $('p09Wrong').classList.add('is-off');
+      if (s.end) { end(); return; }
+
+      showIf($('p09Phone'), true);
+      showIf(set, true);
+      say(s.bubble, s.pose || 'wink_point2');
+
+      const keys = s.show.split(' ');
+      parts.forEach((el) => { el.hidden = !keys.includes(el.dataset.k); });
+      status.classList.toggle('is-dark', ['home', 'app', 'result'].some((k) => keys.includes(k)));
+      $('p09Caret').hidden = !s.focus;
+      $('p09Head').firstElementChild.classList.toggle('is-dark', !!s.dark);
+      ui.querySelectorAll('#p09Head .u-bar svg')[1].classList.toggle('dim', i < 19);
+
+      // 탭 막대: 밀려난 정도와 선택된 탭
+      const tb = s.tabs || {};
+      track.style.transform = 'translateX(' + (-(tb.off || 0)) + 'px)';
+      ui.querySelectorAll('.u-tab').forEach((t) => { t.classList.toggle('is-on', t.dataset.tab === tb.on); });
+
+      // 포스터와 선택 표시
+      const pgState = s.typing ? typingPoster(s) : s.pg;
+      setPoster(pgState);
+      $('p09Ph').hidden = !(s.typing && !(s.typing === 'phrase' ? st.phrase : st.credit));
+      if (s.typing === 'credit') $('p09Ph').style.top = '518px'; else $('p09Ph').style.top = '517px';
+      if (s.sel) setSel(s.sel.yc, tw(POSTER_T(), fsPhrase()));
+      if (s.selS) setSelSmall();
+      applyChoice();
+
+      if (s.car) setupCar(s.car);
+      // 눌러야 할 곳: 깜빡임 + 손가락 (sa/02와 같은 방식)
+      hits.forEach((h) => h.classList.toggle('hit-pulse', h.dataset.hit === s.hit && !h.closest('[hidden]')));
+      const target = hits.find((h) => h.dataset.hit === s.hit && !h.closest('[hidden]'));
+      let first = null;
+      if (s.hit === 'swipe') {
+        swipeAt(tabsEl);
+      } else if (target) {
+        first = target;
+        if (s.noFinger) { /* 손가락 없음 */ }
+        else if (target.closest('.u-track')) fingerTo(target, null, 750, s.hit);
+        else fingerTo(target, s.hit === 'canva' ? { beside: false } : null, 0, s.hit);
+      }
+
+      if (s.drag) setupDrag(s);
+      if (s.next) {
+        showIf(nextBtn, true);
+        nextBtn.onclick = () => go();
+        clearFingers();
+        fingerTo(nextBtn, { beside: false, x: 0.88 }, 0, 'next');
+      }
+      if (s.btns) {
+        setRight(s.btns.map((o) => ({
+          t: o.t, cls: o.cls,
+          fn: () => {
+            if (o.back) { go(STEPS.findIndex((x) => x.car === o.back)); return; }
+            if (o.credit) st.credit = true;
+            go();
+          }
+        })));
+        fingerTo(right.lastChild, { beside: false, x: 0.6 }, 0, 'btn');
+      }
+      if (s.cases) setRight(CASES.map((c) => ({ t: c.t, cls: 'is-small', fn: () => { st.c = c; go(); } })));
+      if (s.phrases) {
+        setRight(PHRASES.map((p) => ({ t: p, fn: () => { st.phrase = p; render(); } })));
+        if (st.phrase) {
+          Array.from(right.children).forEach((b, n) => b.classList.toggle('is-selected', PHRASES[n] === st.phrase));
+          showIf(nextBtn, true);
+          nextBtn.onclick = () => go();
+        }
+      }
+      const bar = $('p09Bar');
+      bar.classList.remove('is-run');
+      if (s.loading) {
+        setTimeout(() => bar.classList.add('is-run'), 50);
+        setTimeout(() => { if (STEPS[i] === s) go(); }, 2100);
+      }
+    }
+
+    const syncUrl = () => {
+      if (!BoxEdit.on) return;
+      const q = location.search.replace(/([?&])step=\d+/, '$1step=' + (i + 1));
+      history.replaceState(null, '', /[?&]step=/.test(location.search) ? q : location.search + (location.search ? '&' : '?') + 'step=' + (i + 1));
+    };
+    function go(n) {
+      i = n === undefined ? i + 1 : n;
+      syncUrl();
+      render();
+    }
+
+    hits.forEach((h) => h.addEventListener('click', () => {
+      const s = STEPS[i];
+      if (!h.classList.contains('hit-pulse') || CUSTOM.has(h.dataset.hit)) return;
+      playClick();
+      if (s.setFont) st.font = true;
+      go();
+    }));
+
+    // 아래 메뉴 탭 슬라이드(포인터): 끄는 만큼 따라오고 35% 넘게 밀면 끝까지
+    let dragTab = null;
+    tabsEl.addEventListener('pointerdown', (e) => {
+      if (STEPS[i].hit !== 'swipe') return;
+      e.preventDefault();
+      tabsEl.setPointerCapture(e.pointerId);
+      clearFingers();
+      swipeFinger.classList.add('is-hide');
+      dragTab = { x: e.clientX, w: ui.getBoundingClientRect().width, p: 0 };
+      track.classList.add('is-drag');
+    });
+    tabsEl.addEventListener('pointermove', (e) => {
+      if (!dragTab) return;
+      dragTab.p = Math.min(1, Math.abs(e.clientX - dragTab.x) / (dragTab.w * 0.6));
+      track.style.transform = 'translateX(' + (-dragTab.p * TAB_MAX) + 'px)';
+    });
+    const endTab = () => {
+      if (!dragTab) return;
+      const p = dragTab.p;
+      dragTab = null;
+      track.classList.remove('is-drag');
+      if (p > 0.35) {
+        track.style.transform = 'translateX(' + (-TAB_MAX) + 'px)';
+        playDrag();
+        setTimeout(() => go(), 450);
+      } else {
+        track.style.transform = '';
+        playWrong();
+        swipeAt(tabsEl);
+      }
+    };
+    tabsEl.addEventListener('pointerup', endTab);
+    tabsEl.addEventListener('pointercancel', endTab);
+
+    function swipeAt(el) {
+      const at = i;
+      setTimeout(() => {
+        if (i !== at) return;
+        const main = el.closest('main');
+        const s = main.getBoundingClientRect().width / main.offsetWidth;
+        const r = el.getBoundingClientRect();
+        const m = main.getBoundingClientRect();
+        swipeFinger.style.left = ((r.left - m.left + r.width) / s - 150) + 'px';
+        swipeFinger.style.top = ((r.top - m.top + r.height / 2) / s - 20) + 'px';
+        swipeFinger.classList.remove('is-hide');
+      }, 350);
+    }
+
+    // 이동 버튼을 끌어 문구 옮기기(위쪽/아래쪽 알맞은 칸에 놓아야 통과)
+    const tobj = $('p09Tobj');
+    const mv = tobj.querySelector('.mv');
+    let dragObj = null;
+    function setupDrag(s) {
+      const d = s.drag;
+      const tx = $('p09TobjTx');
+      tx.textContent = d.text();
+      tx.style.fontSize = d.fs() + 'px';
+      tx.style.fontFamily = !d.cred && st.font ? "'Black Han Sans'" : '';
+      tx.style.color = d.cred ? '#fff' : '#111';
+      tx.style.textShadow = d.cred ? '0 1px 4px rgba(0,0,0,.7)' : '0 0 8px rgba(255,255,255,.8)';
+      tobj.style.transition = 'none';
+      tobj.style.left = d.cx + '%';
+      tobj.style.top = d.top + '%';
+      dragObj = { d, on: false, sx: 0, sy: 0, x0: d.cx, y0: d.top };
+    }
+    const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+    mv.addEventListener('pointerdown', (e) => {
+      if (!dragObj || STEPS[i].hit !== 'move') return;
+      e.preventDefault();
+      clearFingers();
+      dragObj.on = true;
+      dragObj.sx = e.clientX; dragObj.sy = e.clientY;
+      dragObj.x0 = parseFloat(tobj.style.left); dragObj.y0 = parseFloat(tobj.style.top);
+      tobj.style.transition = 'none';
+      mv.setPointerCapture(e.pointerId);
+    });
+    mv.addEventListener('pointermove', (e) => {
+      if (!dragObj || !dragObj.on) return;
+      const r = ui.getBoundingClientRect();
+      tobj.style.left = clamp(dragObj.x0 + (e.clientX - dragObj.sx) / r.width * 100, 25, 75) + '%';
+      tobj.style.top = clamp(dragObj.y0 + (e.clientY - dragObj.sy) / r.height * 100, 10, 80) + '%';
+    });
+    const endDrag = () => {
+      if (!dragObj || !dragObj.on) return;
+      const d = dragObj.d;
+      dragObj.on = false;
+      const mid = parseFloat(tobj.style.top);
+      tobj.style.transition = 'left .2s ease,top .2s ease';
+      if (mid >= d.zone[0] && mid <= d.zone[1]) {
+        tobj.style.left = d.cx + '%';
+        tobj.style.top = d.end + '%';
+        playDrag();
+        setTimeout(() => go(), 700);
+      } else {
+        tobj.style.left = d.cx + '%';
+        tobj.style.top = d.top + '%';
+        playWrong();
+        fingerTo(mv, { beside: true }, 0, 'mv');
+      }
+    };
+    mv.addEventListener('pointerup', endDrag);
+    mv.addEventListener('pointercancel', endDrag);
+
+    // 초안 4장 넘겨 보기(화살표)·고르기
+    const cards = Array.from(ui.querySelectorAll('.p09-card'));
+    const prev = $('p09Prev');
+    const nxt = $('p09Next2');
+    const pick = $('p09Pick');
+    let seen = new Set([0]);
+    let carMode = '';
+    function layoutCar() {
+      cards.forEach((c, n) => { c.style.left = (4.1 + (n - st.car) * 77) + '%'; });
+      prev.hidden = st.car <= 0;
+      nxt.hidden = st.car >= cards.length - 1;
+      if (carMode === 'view') {
+        const all = seen.size === cards.length;
+        showIf(nextBtn, all);
+        if (all) nextBtn.onclick = () => go();
+      }
+    }
+    function setupCar(mode) {
+      carMode = mode;
+      st.car = 0;
+      seen = new Set([0]);
+      pick.hidden = mode !== 'pick';
+      layoutCar();
+    }
+    function toCard(n) {
+      playClick();
+      clearFingers();
+      st.car = n;
+      seen.add(n);
+      layoutCar();
+      // 4장을 다 볼 때까지 다음 화살표가 계속 깜빡이고 손가락이 따라감
+      const more = carMode === 'view' && !nxt.hidden;
+      nxt.classList.toggle('hit-pulse', more);
+      if (more) fingerTo(nxt, null, 0, 'arrow');
+    }
+    prev.addEventListener('click', () => toCard(st.car - 1));
+    nxt.addEventListener('click', () => { if (STEPS[i].car) toCard(st.car + 1); });
+    pick.addEventListener('click', () => {
+      if (STEPS[i].car !== 'pick') return;
+      if (!(st.c.ok || OKDRAFT)[st.car]) {
+        playWrong();
+        $('p09WrongPrompt').textContent = st.c.q;
+        $('p09Wrong').classList.remove('is-off');
+        return;
+      }
+      playCorrect();
+      st.draft = st.car;
+      setTimeout(() => go(), 600);
+    });
+
+    function end() {
+      showIf($('p09Phone'), false);
+      showIf(set, false);
+      right.classList.add('is-off');
+      $('p09EndTitle').classList.remove('is-hide');
+      const p = $('p09Poster');
+      p.style.backgroundImage = "url('" + dsrc(st.draft + 1) + "')";
+      $('p09PosterTop').textContent = st.phrase || PHRASES[1];
+      p.classList.remove('is-hide');
+      showIf(nextBtn, true);
+      nextBtn.onclick = () => setTimeout(() => navigateTo('page10.html'), 400);
+    }
+
+    $('p09WrongOk').addEventListener('click', () => $('p09Wrong').classList.add('is-off'));
+    st.c = CASES[1];
+    initPhoneBars();
+
+    /* ?edit&step=N : 단계 N 으로 바로 열기(] [ 또는 아래 버튼으로 이동). 그 앞 단계에서 정해지는 값(문구·초안·글꼴·AI 문구)은 미리 채워 둠.
+       화면 오른쪽 아래 포즈 선택판에서 그 단계 캐릭터 포즈를 눌러 보고, 이름을 STEPS 의 해당 줄 pose 에 옮겨 적음 */
+    if (BoxEdit.on) {
+      const prep = (idx) => {
+        const at = (f) => STEPS.findIndex(f);
+        st.draft = idx > at((x) => x.car === 'pick') ? 1 : 0;
+        st.phrase = idx > at((x) => x.phrases) ? PHRASES[1] : '';
+        st.credit = idx > at((x) => x.btns && x.btns[0] && x.btns[0].credit);
+        st.font = idx > at((x) => x.setFont);
+      };
+      BoxEdit.stepEdit({
+        key: () => fgKey, count: STEPS.length + 1, get: () => i + 1, set: (n) => { i = Math.max(0, n - 1); prep(i); },
+        go: (n) => { if (n < 1) return; i = n - 1; prep(i); syncUrl(); render(); }, label: (n) => '단계 ' + n + ' / ' + STEPS.length,
+        say, bubble, img: $('p09Char')
+      });
+    }
+    render();
+  })();
+  </script>
+</body>
+</html>

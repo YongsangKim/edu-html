@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관광객 안내 표지판 완성 게임</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 기획서 59~86p. 장소 3곳(공원 잔디밭·지하철·정자)이 같은 흐름: ① 알맞은 표지판을 사진 속 빈칸으로 끌어 넣기 → ② Papago 이미지 번역으로 영어 안내문 채우기(번역 결과를 눌러 입력)
+           → ③ 안내 방송용 안내문 고르기 → ④ 음성 번역 + 확성기로 한국어·영어 안내 방송(1회 이상 누르면 다음). 마지막 장소 뒤 완성 팝업 → 다음 페이지.
+           표지판 그림: img/p16_sign_{lawn,shoes,seat}.png (없으면 글자). 사진: img/photo_*.png, 빈칸·표지판 위치는 사진 크기에 대한 %. TTS: sound/sa12_tts_*.mp3 가 있으면 그것, 없으면 브라우저 음성 */
+        .p16-q{font-size:46px}
+        .p16-board{left:65px;top:175px;width:1790px;height:770px}
+        .p16-photo{position:absolute;left:97px;top:203px;width:1183px;height:714px;box-sizing:border-box;overflow:hidden;background:#ccd;border:solid 4px var(--c-ink);border-radius:14px}
+        .p16-pic{position:absolute;display:block}
+        .p16-pic img.bg{display:block;width:100%;height:auto}
+        .p16-zone{position:absolute;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-align:center;border:.35em dashed transparent;border-radius:.6em;background:rgba(255,255,255,0);color:var(--c-purple);font-weight:700;line-height:1.3;font-family:'Pretendard'}
+        .drop-zone[data-key="shoes"]{font-size:1.5em !important}
+        .p16-zone.is-over{background:rgba(255,230,120,.8)}
+        .p16-sign{position:absolute;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border-radius:.6em;color:var(--c-purple);font-weight:800;line-height:1.2;font-family:'Pretendard'}
+                .p16-eng{position:absolute;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-align:center;border-radius:.4em;color:var(--c-purple);font-weight:700;line-height:1;font-family:'Pretendard'}
+        .p16-eng.is-blank{border-style:dashed;border-color:#888;background:rgba(255,255,255,0);color:transparent;font-weight:500;border:0}
+        .p16-spk.card-btn{position:absolute;left:1088px;top:730px;width:150px;min-width:0;height:145px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:6}
+        .p16-spk img{width:96px;height:96px;object-fit:contain;display:block;pointer-events:none}
+        .p16-spk.card-btn:hover img{filter:brightness(2.1) saturate(1.3) hue-rotate(18deg)}
+        .p16-spk.card-btn.is-selected img{filter:brightness(0) saturate(100%) invert(37%) sepia(100%) saturate(459%) hue-rotate(263deg) brightness(120%) contrast(130%) brightness(1.5) drop-shadow(0 0 5px rgba(236,190,255,0.5)) drop-shadow(0 0 12px rgba(236,190,255,0.5)) drop-shadow(0 0 24px rgba(236,190,255,0.5))}
+        .p16-spk.is-off{display:none}
+        .p16-side{position:absolute;left:1300px;top:207px;width:534px}
+        .p16-rib{margin:0 auto 51px;--rb-w:314px}
+        .p16-card{height:146px;margin-bottom:39px;padding:0 30px 0 48px;gap:20px;font-size:38px}
+        .p16-card img{width:108px;height:108px;object-fit:contain;flex:0 0 auto}
+        .p16-card span{flex:1 1 auto;text-align:center}
+        .p16-card.is-drag{cursor:grab;touch-action:none}
+        .p16-card:not(.is-drag){cursor:pointer}
+        .p16-card:not(.is-drag):hover{transform:translateY(-3px)}
+        .p16-card.is-lock{pointer-events:none}
+        .p16-card.is-right{transform:translateY(8px);box-shadow:none}
+        .p16-phone{left:1380px;top:200px;transform:scale(.79);transform-origin:0 0}
+        .p16-next.is-off,.p16-side.is-off,.p16-phone.is-off,.p16-board.is-off{display:none}
+        #p16Wrong,#p16Done{z-index:120}
+
+        .p16-next.card-btn.is-start{left:485px;height:90px;top:780px;padding:0 0 0 10px;letter-spacing:0.2em;z-index:7}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="board-b is-line p16-board" id="p16Blue"></div>
+          <div class="board-w p16-board is-off" id="p16White"></div>
+          <p class="p16-q ask-pill is-medium is-fit" id="p16Q"><span></span></p>
+          <div class="p16-photo" id="p16Photo"></div>
+          <button type="button" class="card-btn p16-spk is-off" id="p16Spk" aria-label="확성기"><img src="img/icon_speaker.png" alt=""></button>
+          <div class="p16-side is-off" id="p16Side"></div>
+          <div class="phone-frame has-cam p16-phone is-off" id="p16Phone"><div class="phone-screen" id="p16Screen"></div></div>
+          <button type="button" class="card-btn is-start p16-next is-off js-sfx" id="p16Next" data-sound="sound/click.mp3">다음</button>
+
+          <div class="avatar-modal is-wrong is-off" id="p16Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-sub" id="p16WrongP"></p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p16WrongOk" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div>
+          <div class="avatar-modal is-off" id="p16Done">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-sub">Papago를 이용하여 관광객 안내 표지판을<br>완성했어요!</p>
+                <a href="page17.html" class="avatar-popup-next card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="관광객 안내 표지판 완성 게임" data-next="page17.html"></script>
+  <script src="../../resources/js/toc.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script src="../../resources/js/papago.js"></script>
+  <script>
+  (function () {
+    const SIGNS = [
+      { key: 'lawn', label: '잔디밭 출입 금지', img: 'img/p16_sign_lawn.png' },
+      { key: 'shoes', label: '신발을 벗어 주세요.', img: 'img/p16_sign_shoes.png' },
+      { key: 'seat', label: '임산부 배려석', img: 'img/p16_sign_seat.png' }
+    ];
+    const ROUNDS = [
+      { photo: 'img/photo_park_blank.png', ratio: 668 / 1367, where: '공원의 잔디밭에서', right: 'lawn',
+        zone: [22.6, 46.5, 54.4, 18], eng: [22.6, 57.5, 55.4, 8], fs: 2.1,
+        cam: { pos: '50% 50%', box: [1, 46, 98, 20] }, en: 'Keep off the grass.',
+        texts: ['잔디밭에서 신발을 벗으세요.', '잔디밭에 들어가지 마세요.', '잔디밭에 가방을 놓으세요.'], ans: 1, tts: 'lawn',
+        enSpeak: 'Don’t go onto the lawn.' },
+      { photo: 'img/photo_subway_blank.png', ratio: 623 / 1264, where: '지하철에서', right: 'seat',
+        zone: [62.5, 4, 15, 32], eng: [63.2, 28, 13, 12], fs: 1.8,
+        cam: { pos: '78% 50%', box: [25.7, 6, 47, 35] }, en: 'Seat for pregnant women',
+        texts: ['임산부가 앉을 수 있도록 자리를 비워주세요.', '다음 역에서 내릴 사람을 위해 자리를 비워주세요.', '무거운 가방을 놓을 수 있도록 자리를 비워주세요.'], ans: 0, tts: 'subway',
+        enSpeak: 'Please keep this seat available for pregnant women.' },
+      { photo: 'img/photo_pavilion.png', ratio: 724 / 1536, where: '정자에서', right: 'shoes',
+        zone: [74.2, 24, 9.2, 29.5], eng: [74.8, 40, 8, 12], fs: 1.2, signTop: true,
+        cam: { pos: '90% 50%', box: [35, 23, 32, 27] }, en: 'Please<br>take off your shoes.',
+        texts: ['정자에 올라가지 마세요.', '신발 바닥을 닦고 정자에 올라가세요.', '신발을 벗고 정자에 올라가세요.'], ans: 2, tts: 'pavilion',
+        enSpeak: 'Please take off your shoes before entering the pavilion.' }
+    ];
+    const SPK_ICON = ic('speakerWave');
+    let ri = 0, handler = null, spokeNow = false;
+    const timers = [];
+    const later = (fn, ms) => { timers.push(setTimeout(fn, ms)); };
+    const photo = $('p16Photo'), side = $('p16Side'), phone = $('p16Phone'), screen = $('p16Screen'), next = $('p16Next'), spk = $('p16Spk');
+    const setQ = (t) => { $('p16Q').firstElementChild.textContent = t; };
+    const R = () => ROUNDS[ri];
+
+    /* 사진: 상자를 꽉 채우게(cover) 깔고, 빈칸·표지판·영어 안내문은 사진 크기에 대한 %로 얹음. st = {zone, sign, eng: null|'blank'|글} */
+    function drawPhoto(st) {
+      const r = R();
+      const bw = photo.clientWidth, bh = photo.clientHeight;
+      const w = Math.max(bw, bh / r.ratio), h = w * r.ratio;
+      const pic = document.createElement('div');
+      pic.className = 'p16-pic';
+      pic.style.cssText = 'width:' + w + 'px;height:' + h + 'px;left:' + ((bw - w) / 2) + 'px;top:' + ((bh - h) / 2) + 'px;font-size:' + (w / 100) + 'px';
+      let html = '<img class="bg" src="' + r.photo + '" alt="">';
+      const z = r.zone, e = r.eng;
+      const box = (b) => 'left:' + b[0] + '%;top:' + b[1] + '%;width:' + b[2] + '%;height:' + b[3] + '%';
+      if (st.zone) html += '<div class="p16-zone" id="p16Zone" data-key="' + r.right + '" style="' + box(z) + ';font-size:2em">이곳에 표지판을 드래그해 보세요.</div>';
+      if (st.sign) {
+        const s = SIGNS.find((x) => x.key === r.right);
+        html += '<div class="p16-sign" style="' + box(z) + ';font-size:' + (r.signTop ? '1.9' : '2.5') + 'em;padding:0 4%;word-break:keep-all;color:var(--c-purple)' + (r.signTop ? ';justify-content:flex-start;padding-top:1%' : '') + '"><span>' + s.label + '</span></div>';
+      }
+      if (st.eng !== null && st.eng !== undefined) {
+        const blank = st.eng === 'blank';
+        html += '<div class="p16-eng' + (blank ? ' is-blank' : '') + '" style="' + box(e) + ';font-size:' + r.fs + 'em">' + (blank ? '영어 안내문 빈칸' : st.eng) + '</div>';
+      }
+      pic.innerHTML = html;
+      photo.innerHTML = '';
+      photo.appendChild(pic);
+    }
+
+    function show(html) { PP.mount(screen, html); }
+    function finger(el) {
+      clearFingers();
+      if (el) setTimeout(() => { if (el.isConnected) pointFingerAt(el, { onMain: true, dx: -10, dy: -20 }); }, 300);
+    }
+    function showSide(title, html) {
+      side.innerHTML = '<p class="ribbon is-tag p16-rib">' + title + '</p>' + html;
+      side.classList.remove('is-off');
+      phone.classList.add('is-off');
+      $('p16Blue').classList.remove('is-off');
+      $('p16White').classList.add('is-off');
+    }
+    function showPhone() {
+      side.classList.add('is-off');
+      phone.classList.remove('is-off');
+      $('p16Blue').classList.add('is-off');
+      $('p16White').classList.remove('is-off');
+    }
+    function wrong(msg) {
+      playWrong();
+      $('p16WrongP').innerHTML = msg;
+      $('p16Wrong').classList.remove('is-off');
+    }
+
+    /* ① 표지판 끌어 넣기 */
+    function stepSign() {
+      setQ('다음 장소에 알맞은 표지판을 골라 빈칸에 드래그해 넣어요.');
+      drawPhoto({ zone: true, eng: 'blank' });
+      spk.classList.add('is-off');
+      next.classList.add('is-off');
+      showSide('표지판', '');
+      const order = shuffleArray(SIGNS);
+      const cards = order.map((s) => {
+        const d = document.createElement('div');
+        d.className = 'p16-card is-drag dash-card is-light ' + { lawn: 'is-green', shoes: 'is-orange', seat: 'is-violet' }[s.key];
+        d.dataset.key = s.key;
+        d.innerHTML = '<img src="' + s.img + '" alt="" onerror="this.remove()"><span>' + s.label + '</span>';
+        side.appendChild(d);
+        return d;
+      });
+      initMatchDrag({
+        cards, zones: [$('p16Zone')], slop: 40,
+        onRight: (card) => {
+          playCorrect();
+          card.style.display = 'none';
+          drawPhoto({ sign: true, eng: 'blank' });
+          later(stepImage, 900);
+        },
+        onWrong: (card, zone) => { if (zone) wrong('다시 한번 생각해보세요.<br>' + R().where + ' 지켜야 할 규칙은 무엇일까요?'); }
+      });
+    }
+
+    /* ② 이미지 번역 */
+    const signOv = (r) => ({ box: r.cam.box, html: r.right === 'seat' ? '임산부<br>배려석' : (r.right === 'lawn' ? '잔디밭 출입 금지' : '신발을<br>벗어<br>주세요'), fs: (r.right === 'shoes' ? 27 : 34), bg: 'transparent', color: 'var(--c-purple)' });
+    function stepImage() {
+      setQ('Papago의 이미지 번역 기능을 사용하여 영어 안내문을 추가해요.');
+      showPhone();
+      imgHome();
+    }
+    function imgHome() {
+      show(PP.home({ to: '영어', hot: ['image'] }));
+      handler = imgCam;
+      finger(screen.querySelector('[data-hot="image"]'));
+    }
+    function imgCam() {
+      const r = R();
+      show(PP.cam({ to: '영어', photo: r.photo, pos: r.cam.pos, overlays: [signOv(r)], hot: ['shoot'] }));
+      finger(screen.querySelector('[data-hot="shoot"]'));
+      handler = imgLoad;
+    }
+    function imgLoad() {
+      const r = R();
+      show(PP.cam({ to: '영어', photo: r.photo, pos: r.cam.pos, overlays: [signOv(r)], load: true }));
+      handler = null;
+      later(imgResult, 1000);
+    }
+    function imgResult() {
+      const r = R();
+      show(PP.cam({ to: '영어', photo: r.photo, pos: r.cam.pos, mode: 'result', overlays: [{ box: r.cam.box, html: r.en, fs: (r.right === 'shoes' ? 27 : 34), bg: 'transparent', color: 'var(--c-purple)', hot: 'result' }] }));
+      finger(screen.querySelector('[data-hot="result"]'));
+      handler = () => {
+        handler = null;
+        playCorrect();
+        drawPhoto({ sign: true, eng: r.en });
+        later(stepText, 900);
+      };
+    }
+
+    /* ③ 안내문 고르기 */
+    function stepText() {
+      const r = R();
+      setQ('안내 방송을 위한 알맞은 안내문 골라 클릭해요.');
+      showSide('안내문', '');
+      r.texts.forEach((t, i) => {
+        const d = document.createElement('div');
+        d.className = 'p16-card dash-card is-light ' + ['is-green', 'is-orange', 'is-violet'][i];
+        d.style.fontSize = '34px';
+        d.textContent = t;
+        d.addEventListener('click', () => {
+          if (i !== r.ans) { wrong('다시 한번 생각해보세요.<br>표지판이 안내하고 있는 규칙은<br>무엇일까요?'); return; }
+          playCorrect();
+          d.classList.add('is-right', 'is-lock');
+          side.querySelectorAll('.p16-card').forEach((x) => x.classList.add('is-lock'));
+          later(stepVoice, 900);
+        });
+        side.appendChild(d);
+      });
+    }
+
+    /* ④ 음성 번역 + 확성기 */
+    function stepVoice() {
+      setQ('Papago의 음성 번역 기능을 사용하여 안내 방송을 해요.');
+      showPhone();
+      voiceHome();
+    }
+    function voiceHome() {
+      show(PP.home({ to: '영어', hot: ['voice'] }));
+      finger(screen.querySelector('[data-hot="voice"]'));
+      handler = () => {
+        handler = null;
+        const r = R();
+        const ko = r.texts[r.ans];
+        show(PP.voice({ to: '영어', state: 'listen' }));
+        PP.speak(ko, 'ko-KR', 'sa12_tts_' + r.tts + '_ko.mp3');
+        later(() => show(PP.voice({ to: '영어', state: 'result', src: ko, out: '' })), 400);
+        later(voiceResult, 1800);
+      };
+    }
+    function voiceResult() {
+      const r = R();
+      show(PP.voice({ to: '영어', state: 'result', src: r.texts[r.ans], out: r.enSpeak }));
+      spk.classList.remove('is-off');
+      finger(spk);
+    }
+
+    /* ?step=N 으로 열면 그 단계 화면부터 볼 수 있음(N은 0부터, 장소마다 7단계: 0 표지판 끌기 · 1 이미지 홈 · 2 카메라 · 3 번역 결과 · 4 안내문 고르기 · 5 음성 홈 · 6 음성 결과, 21은 완성 팝업).
+       ← → 키로도 이동. 단계 번호는 화면 왼쪽 위에 표시 */
+    const STAGES = 7;
+    let cur = 0;
+    function goStep(n) {
+      n = Math.max(0, Math.min(STAGES * ROUNDS.length, n));
+      cur = n;
+      timers.forEach(clearTimeout);
+      timers.length = 0;
+      clearFingers();
+      handler = null;
+      spokeNow = false;
+      spk.classList.remove('is-selected');
+      next.classList.add('is-off');
+      spk.classList.add('is-off');
+      $('p16Wrong').classList.add('is-off');
+      $('p16Done').classList.add('is-off');
+      if (n >= STAGES * ROUNDS.length) { ri = ROUNDS.length - 1; $('p16Done').classList.remove('is-off'); }
+      else {
+        ri = Math.floor(n / STAGES);
+        const st = n % STAGES, r = R();
+        if (st === 0) stepSign();
+        else if (st <= 3) { drawPhoto({ sign: true, eng: 'blank' }); setQ('Papago의 이미지 번역 기능을 사용하여 영어 안내문을 추가해요.'); showPhone(); [imgHome, imgCam, imgResult][st - 1](); if (st === 3) { handler = null; finger(null); } }
+        else if (st === 4) { drawPhoto({ sign: true, eng: r.en }); stepText(); }
+        else { drawPhoto({ sign: true, eng: r.en }); setQ('Papago의 음성 번역 기능을 사용하여 안내 방송을 해요.'); showPhone(); if (st === 5) voiceHome(); else voiceResult(); }
+      }
+      const tag = $('p16StepTag');
+      if (tag) tag.textContent = '단계 ' + n + ' / ' + (STAGES * ROUNDS.length);
+    }
+
+    spk.addEventListener('click', () => {
+      if (spokeNow) return;
+      spokeNow = true;
+      spk.classList.add('is-selected');
+      clearFingers();
+      const r = R();
+      PP.speak(r.texts[r.ans], 'ko-KR', 'sa12_tts_' + r.tts + '_ko.mp3', () => {
+        PP.speak(r.enSpeak, 'en-US', 'sa12_tts_' + r.tts + '_en.mp3', () => {
+          spokeNow = false;
+          spk.classList.remove('is-selected');
+          next.classList.remove('is-off');
+        });
+      });
+    });
+
+    screen.addEventListener('click', (e) => {
+      const t = e.target.closest('[data-hot]');
+      if (t && handler) { playClick(); const h = handler; handler = null; clearFingers(); h(t.dataset.hot); }
+    });
+    next.addEventListener('click', () => {
+      next.classList.add('is-off');
+      spk.classList.add('is-off');
+      ri += 1;
+      if (ri >= ROUNDS.length) { $('p16Done').classList.remove('is-off'); return; }
+      stepSign();
+    });
+    $('p16WrongOk').addEventListener('click', () => $('p16Wrong').classList.add('is-off'));
+    const m = location.search.match(/[?&]step=([0-9]+)/);
+    if (m) {
+      const tag = document.createElement('div');
+      tag.id = 'p16StepTag';
+      tag.style.cssText = 'position:absolute;left:10px;top:6px;z-index:200;padding:4px 12px;border-radius:12px;background:rgba(0,0,0,.65);color:#fff;font:600 22px Pretendard,sans-serif;pointer-events:none';
+      document.querySelector('main').appendChild(tag);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') location.search = '?step=' + (cur + 1);
+        else if (e.key === 'ArrowLeft') location.search = '?step=' + Math.max(0, cur - 1);
+      });
+      goStep(parseInt(m[1], 10));
+    } else stepSign();
+  })();
+  </script>
+</body>
+</html>

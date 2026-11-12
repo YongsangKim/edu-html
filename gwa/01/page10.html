@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내가 모은 데이터로 AI에게 질문하기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+        <style>
+        .gn-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin:18px 0 0;top:270px}
+        .phone-nav .gn-navbtn,.phone-nav .gn-hit{position:absolute;left:calc(21% - 22px);top:-5px;width:56px;height:56px;border-radius:18px;color:transparent;z-index:1}
+        .gn-photo{position:relative;height:142px;padding:0;border:0;font-size:56px;cursor:pointer;overflow:hidden}
+        .gn-photo img{display:block;width:100%;height:100%;object-fit:cover;pointer-events:none}
+        .gn-photo.is-on{outline:5px solid #ff4ff9;outline-offset:-3px}
+        .gn-photo.is-on:after{content:'✓';position:absolute;left:8px;top:8px;width:30px;height:30px;border-radius:50%;background:#1a73e8;color:#fff;font-size:23px;line-height:30px;font-family:'Pretendard'}
+        .gn-check{display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;background:#c9c9cf;color:#fff;font-size:34px;text-decoration:none}
+        .gn-check.is-ready{background:#1a73e8}
+        .gn-src{display:block;min-height:0;font-size:inherit;font-weight:inherit}
+        .gn-src div{display:flex;align-items:center;gap:12px;height:60px;font-size:18px;white-space:nowrap}
+        .gn-src div span{overflow:hidden;text-overflow:ellipsis}
+        .gn-toast{position:absolute;left:30px;right:30px;bottom:150px;padding:14px;border-radius:24px;background:#333;color:#fff;font-size:18px;text-align:center;z-index:9}
+        .gn-hit{display:flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:18px;color:#444;font-size:31px;text-decoration:none;pointer-events:none}
+        .gn-hit.is-ready{pointer-events:auto}
+        .gn-add{position:absolute;left:78px;right:78px;bottom:66px;display:flex;align-items:center;justify-content:center;height:56px;border-radius:28px;background:#dadadf;color:#999;font-size:18px;text-decoration:none;pointer-events:none}
+        .gn-add.is-ready{background:#1a73e8;color:#fff;pointer-events:auto}
+        .gn-chat-tab{flex:1 1 0;display:flex;align-items:center;justify-content:center}
+        .gn-tabs .gn-chat-tab{flex:1 1 0}
+        .gn-skel i{display:block;height:10px;margin:8px 0;border-radius:6px;background:linear-gradient(90deg,#ececf6 20%,#cfd0f3 50%,#ececf6 80%) 0 0 / 220% 100%;animation:gn-shimmer 1.4s linear infinite}
+        .gn-chip{flex:1 1 0;padding:14px 12px;border-radius:14px;background:#f4f4f7;color:#aaa;font-size:16px;line-height:1.35;border:0;height:auto}
+        .gn-audio{display:flex;align-items:center;justify-content:center;gap:8px;height:48px;margin:0 14px;border:1px solid #d6d6dd;border-radius:24px;font-size:18px}
+        .gn-audio svg{display:block;width:26px;height:26px;fill:none;stroke:var(--c-blue);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+        .p24-panel{position:absolute;left:1248px;top:156px;width:584px;height:656px;background:var(--c-ink);border-radius:28px;box-sizing:border-box;padding:28px 44px}
+        .p24-panel h3{margin:0 0 28px;text-align:center;font-family:'Cafe24 Ssurround';font-size:52px;font-weight:normal;color:var(--c-white);letter-spacing:-0.04em}
+        .p24-opt.card-btn{display:block;width:100%;min-width:0;height:104px;margin:0 0 30px;padding:0;font-size:48px;line-height:1.3;word-break:keep-all}
+        #p24Opt1{height:auto;min-height:104px;padding:12px 14px;line-height:1.2}
+        .p24-input{position:absolute;left:0;right:0;top:416px;height:130px;box-sizing:border-box;padding:12px 14px;background:#fff;border-top:1px solid #aaa;border-radius:18px 18px 0 0}
+        .p24-input > span{display:block;font-family:'Pretendard';font-size:22px;line-height:1.35;color:var(--c-ink)}
+        .p24-count{position:absolute;right:14px;bottom:10px;display:flex;align-items:center;gap:10px}
+        .p24-count span{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:16px;background:#eef0f7;font-size:17px}
+        .p24-count span svg{display:block;width:22px;height:22px}
+        .p24-count b{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:#c9c9cf;color:#fff;font-weight:400}
+        .p24-act.card-btn{position:absolute;right:1280px;top:222px;min-width:117px;height:62px;padding:0 10px;font-size:34px;line-height:1;z-index:3}
+        .p24-act.is-disabled{opacity:.4;pointer-events:none}
+        .guide-bubble.has-act{padding-bottom:50px;font-size:42px;text-align:left}
+        .kbd-cj ~ .phone-nav{display:none}
+        .p25-btn{position:absolute;left:1440px;width:395px;min-width:0;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-decoration:none;line-height:1.15}
+        .p25-btn.is-off{display:none}
+        .p25-again{top:580px;height:180px;font-size:68px;padding:12px 10px 8px}
+        .p25-next{top:800px;height:120px}
+        .gn-stream{position:absolute;left:0;right:0;top:222px;bottom:196px;overflow:auto;padding:0 30px;font-size:21px;line-height:1.65;color:#1b1b1f;scrollbar-width:thin;scrollbar-color:#8a63e8 transparent;letter-spacing:-0.02em}
+        .gn-stream::-webkit-scrollbar{width:8px}
+        .gn-stream::-webkit-scrollbar-thumb{border-radius:4px;background:#8a63e8}
+        .gn-stream .gn-ln{margin:0 0 14px;opacity:0;transform:translateY(8px);transition:opacity .5s ease,transform .5s ease}
+        .gn-stream .gn-ln.is-on{opacity:1;transform:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="guide-set is-main" id="p10Set">
+            <p class="guide-bubble" id="p10Bubble"></p>
+            <div class="guide-character"><img id="p10Char" src="../img/character/gwa_main.png" alt="메인 캐릭터"></div>
+          </div>
+          <div class="step-flow">
+          <div class="step-panel" data-page="10">
+          <div class="phone-frame has-cam gn-phone">
+<div class="gn-screen">
+            <div class="app-home is-purple">
+              <div class="phone-status is-dark" data-time="12:45"></div>
+              <a href="page11.html" class="js-nav-effect js-sfx app-icon is-dark gn-home-icon" data-hit="app" data-sound="sound/click.mp3" aria-label="Gemini Notebook"><i><img src="img/gemini_notebook_icon.png" alt=""></i>Notebook</a>
+              <div class="phone-nav"></div>
+            </div>
+          </div>
+          </div>
+          
+          </div>
+          <div class="step-panel" data-page="11">
+          <div class="phone-frame has-cam gn-phone">
+<div class="gn-screen">
+            <div class="phone-status is-dark" data-time="11:24" data-bat="81"></div>
+            <div class="gn-bar" style="border:0;font-size:29px;font-weight:500"><em>Gemini Notebook</em><span><img src="img/p11_search.png" alt=""></span><span style="display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;background:#12a58a;color:#fff;font-size:18px">유나</span></div>
+            <div style="position:absolute;left:0;right:0;top:355px;text-align:center">
+              <div style="font-size:60px"><img src="img/p11_start.png" alt=""></div>
+              <div style="font-size:26px">시작하기</div>
+              <div style="margin-top:8px;font-size:16px;color:#555">아래에서 첫 번째 노트북을 만들어 보세요</div>
+            </div>
+            <div class="gn-fab" style="bottom:50px"><span class="gn-cam"><img src="img/p11_photo.png" alt=""></span><a href="page12.html" class="js-nav-effect js-sfx" data-hit="new" data-sound="sound/click.mp3" style="display:inline-flex;align-items:center;gap:8px;height:52px;padding:0 24px;border-radius:26px;background:#111;color:#fff;font-size:20px;text-decoration:none">＋ 새로 만들기</a></div>
+            <div class="phone-nav"></div>
+          </div>
+          </div>
+          </div>
+          <div class="step-panel" data-page="12">
+          <div class="phone-frame has-cam gn-phone">
+<div class="gn-screen">
+            <div class="phone-status is-dark" data-time="11:55" data-bat="77"></div>
+            <div class="gn-dim"></div>
+            <div class="gn-sheet">
+              <span class="gn-sheet-x">✕</span>
+              <p class="gn-sheet-title">다음에서 AI 오디오 오버뷰를 만드세요</p>
+              <p class="gn-sheet-sub">내 문서</p>
+              <div class="gn-search">웹에서 소스를 찾으세요.<i>➤</i></div>
+              <p class="gn-note">또는 파일 업로드하기</p>
+              <div class="gn-list">
+                <div><img src="img/src_icon_file.png" alt="">파일</div>
+                <a href="page13.html" class="js-nav-effect js-sfx" data-hit="photo" data-sound="sound/click.mp3"><img src="img/src_icon_photo.png" alt="">사진</a>
+                <div><img src="img/src_icon_web.png" alt="">웹사이트</div>
+                <div><img src="img/src_icon_text.png" alt="">복사된 텍스트</div>
+                <div><img src="img/src_icon_play.png" alt="">Google Play 북</div>
+                <div><img src="img/src_icon_drive.png" alt="">Drive</div>
+              </div>
+              <p class="gn-foot">가져온 후 Drive 파일이 자동으로 동기화됩니다.</p>
+            </div>
+            <div class="phone-nav"></div>
+          </div>
+          </div>
+          </div>
+          <div class="step-panel" data-page="13">
+          <div class="phone-frame has-cam gn-phone">
+<div class="gn-screen" style="background:#8b8b8b">
+            <div class="phone-status is-dark" data-time="11:55" data-bat="77"></div>
+            <div class="gn-sheet" style="top:68px;background:#fff">
+              <p style="margin:22px 0 0;text-align:center;font-size:18px">최대 10장의 사진을 선택합니다.</p>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin:12px 12px 0">
+                <span style="display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;background:#f1f1f4;font-size:26px">✕</span>
+                <span style="display:flex;background:#f1f1f4;border-radius:22px;font-size:18px"><b style="padding:10px 14px;border-radius:22px;background:#dcdce2;font-weight:500">사진</b><b style="padding:10px 14px;font-weight:500">모음</b></span>
+                <a href="javascript:;" class="js-sfx gn-check" data-hit="check" data-sound="sound/click.mp3" aria-label="선택 완료">✓</a>
+              </div>
+              <div style="display:flex;gap:12px;margin:18px 12px 0;padding:14px;border-radius:16px;background:#f4f4f6;font-size:17px;line-height:1.5;color:#555">
+                <span style="font-size:34px"><img src="img/p13_photo.png" alt=""></span>
+                <span><b style="color:#1b1b1f;font-weight:600">사진에 비공개 접근</b><br>사용자의 사진 보관함이 여기에 나타나지만 ‘Notebook’ 앱은 오직 사용자가 선택한 항목에만 접근할 수 있습니다.<br><span style="color:#1a73e8">더 알아보기...</span></span>
+              </div>
+              <div class="gn-grid">
+                <button class="gn-photo c1r1" data-correct="true" aria-label="청소년 과학 체험 교실 뉴스"><img src="img/p13_photo_news1.png" alt=""></button>
+                <button class="gn-photo c2r1" data-correct="false" aria-label="강아지 사진"><img src="img/p13_photo_news2.png" alt=""></button>
+                <button class="gn-photo c3r1" data-correct="true" aria-label="깨끗한 바다 뉴스"><img src="img/p13_photo_news3.png" alt=""></button>
+                <button class="gn-photo c1r2" data-correct="false" aria-label="떡볶이 사진"><img src="img/p13_photo_news4.png" alt=""></button>
+                <button class="gn-photo c2r2" data-correct="true" aria-label="오늘 전국 날씨 뉴스"><img src="img/p13_photo_news5.png" alt=""></button>
+                <button class="gn-photo c3r2" data-correct="false" aria-label="야경 사진"><img src="img/p13_photo_news6.png" alt=""></button>
+              </div>
+            </div>
+            <div class="phone-nav"></div>
+          </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p13Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small">뉴스 기사 이미지만 선택해볼까요?</p>
+              </div>
+            </div>
+          </div>
+          </div>
+          <div class="step-panel" data-page="14">
+          <div class="phone-frame has-cam gn-phone">
+<div class="gn-screen">
+            <div class="phone-status is-dark" data-time="10:55" data-bat="84"></div>
+            <div class="gn-bar"><span>←</span><em id="nbTitle">제목 없는 노트북</em><span><img class="gn-ico" src="img/src_icon_share.png" alt="공유"></span><span>⋮</span></div>
+            <div style="position:absolute;left:0;right:0;top:118px;padding:0 24px;font-size:18px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:22px"><span>소스</span><span>⋮</span></div>
+              <div class="gn-src" id="srcList">
+                <div><i class="gn-spin"></i><span>image_picker_081FCDA7-5836-4794-A…</span></div>
+                <div><i class="gn-spin"></i><span>image_picker_4C09E2B1-77AD-4E3C-9…</span></div>
+                <div><i class="gn-spin"></i><span>image_picker_B7F0A3D2-1E5C-4B28-8…</span></div>
+              </div>
+            </div>
+            <div class="gn-fab" style="bottom:146px"><span class="gn-cam"><img src="img/p11_photo.png" alt=""></span><a href="page15.html" class="js-nav-effect js-sfx" data-hit="add" data-sound="sound/click.mp3" style="display:none;align-items:center;gap:8px;height:52px;padding:0 24px;border-radius:26px;background:#111;color:#fff;font-size:20px;text-decoration:none">＋ 소스 추가</a><span class="gn-btn" id="hitDummy">＋ 소스 추가</span></div>
+            <div class="gn-tabs"><div class="is-on"><img class="gn-tab-ico is-src" src="img/src_tab_source.png" alt="">소스</div><div class=""><img class="gn-tab-ico" src="img/src_tab_chat.png" alt="">채팅</div><div><img class="gn-tab-ico" src="img/src_tab_studio.png" alt="">스튜디오</div></div>
+            <div class="phone-nav"></div>
+          </div>
+          </div>
+          </div>
+          <div class="step-panel" data-page="15">
+          <div class="phone-frame has-cam gn-phone">
+<div class="gn-screen">
+            <div class="phone-status is-dark" data-time="11:55" data-bat="77"></div>
+            <div class="gn-dim"></div>
+            <div class="gn-sheet">
+              <span class="gn-sheet-x">✕</span>
+              <p class="gn-sheet-title">다음에서 AI 오디오 오버뷰를 만드세요</p>
+              <p class="gn-sheet-sub">내 문서</p>
+              <div class="gn-search">웹에서 소스를 찾으세요.<i>➤</i></div>
+              <p class="gn-note">또는 파일 업로드하기</p>
+              <div class="gn-list">
+                <div><img src="img/src_icon_file.png" alt="">파일</div>
+                <div><img src="img/src_icon_photo.png" alt="">사진</div>
+                <a href="javascript:;" class="js-nav-effect js-sfx" data-hit="web" data-sound="sound/click.mp3"><img src="img/src_icon_web.png" alt="">웹사이트</a>
+                <div><img src="img/src_icon_text.png" alt="">복사된 텍스트</div>
+                <div><img src="img/src_icon_play.png" alt="">Google Play 북</div>
+                <div><img src="img/src_icon_drive.png" alt="">Drive</div>
+              </div>
+              <p class="gn-foot">가져온 후 Drive 파일이 자동으로 동기화됩니다.</p>
+            </div>
+            <div class="phone-nav"></div>
+          </div>
+          </div>
+          </div>
+          <div class="step-panel" data-page="16">
+          <div class="phone-frame has-cam gn-phone">
+<div class="gn-screen" style="background:#8b8b8b">
+            <div class="phone-status is-dark" data-time="10:55" data-bat="84"></div>
+            <div class="gn-sheet" style="top:46px;border-radius:30px 30px 0 0">
+              <span style="position:absolute;left:18px;top:14px;font-size:29px">←</span>
+              <span class="gn-sheet-x" style="top:36px">✕</span>
+              <img src="img/src_icon_link.png" alt="" style="display:block;width:96px;height:96px;margin:74px auto 0">
+              <p style="margin:14px 0 0;text-align:center;font-size:30px;letter-spacing:-0.02em">웹사이트 또는 YouTube URL</p>
+              <p style="margin:18px 28px 0;text-align:center;font-size:20px;line-height:1.5;word-break:keep-all">웹사이트 또는 YouTube 동영상 링크를 붙여넣어 소스로 추가하세요.</p>
+              <div style="margin:22px 28px 0;display:flex;align-items:center;height:52px;padding:0 20px;border:1px solid #d6d6dd;border-radius:14px;font-size:18px">URL 붙여넣기</div>
+              <div style="margin:26px 22px 0;font-size:17px;line-height:1.7;color:#222;letter-spacing:-0.04em;word-break:keep-all">• 현재는 웹사이트에 표시되는 텍스트만 가져옵니다.<br>• 유료 기사는 지원되지 않습니다.<br>• YouTube의 경우 텍스트 스크립트만 가져옵니다.<br>• 공개 YouTube 동영상만 지원됩니다.<br>• 최근에 업로드된 동영상은 가져오지 못할 수 있습니다.</div>
+              <div style="position:absolute;left:78px;right:78px;bottom:66px;display:flex;align-items:center;justify-content:center;height:56px;border-radius:28px;background:#dadadf;color:#999;font-size:18px">추가</div>
+            </div>
+            <div class="phone-nav"><a href="javascript:;" class="js-nav-effect js-sfx gn-navbtn" data-hit="back" data-sound="sound/click.mp3"></a><i></i><b></b><u></u></div>
+          </div>
+          </div>
+          </div>
+          <div class="step-panel" data-page="17">
+          <div class="phone-frame has-cam gn-phone">
+            <div class="gn-screen" style="background:linear-gradient(180deg,#b9a99a 0%,#8a7f8c 55%,#6a6678 100%)">
+            <div class="phone-status is-dark" data-time="11:52" data-bat="83"></div>
+            <div style="position:absolute;left:14px;top:174px;width:100px;height:420px;border-radius:14px;background:#e9eaef;opacity:.9;font-size:36px;text-align:center;padding-top:30px"></div>
+            <a href="javascript:;" class="js-nav-effect js-sfx" data-hit="youtube" data-sound="sound/click.mp3" style="position:absolute;left:84px;top:129px;width:262px;height:526px;box-sizing:border-box;overflow:hidden;border-radius:16px;background:#fff;color:#111;text-decoration:none;font-size:17px"><img src="img/p18_youtube.jpg" alt="YouTube" style="display:block;width:100%;height:100%;object-fit:cover;object-position:top"></a>
+            <span style="position:absolute;left:182px;top:95px;width:62px;height:62px;border-radius:18px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:32px;z-index:2;overflow:hidden"><img src="img/src_icon_youtube.png" style="width:100%" alt=""></span>
+            <div style="position:absolute;left:360px;top:111px;width:80px;height:550px;border-radius:14px;background:#fff;opacity:.9"></div>
+            <div style="position:absolute;left:0;right:0;top:680px;text-align:center"><span style="display:inline-block;padding:12px 44px;border-radius:24px;background:rgba(255,255,255,.4);font-size:18px;color:#fff">모두 닫기</span></div>
+            <div style="position:absolute;left:22px;right:22px;top:745px;display:flex;justify-content:space-around">
+              <span style="width:68px;height:68px;border-radius:20px;background:#99130a;display:flex;align-items:center;justify-content:center;font-size:32px"><img src="img/src_icon_etc1.png" alt=""></span>
+              <span style="width:68px;height:68px;border-radius:20px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:32px"><img src="img/src_icon_etc2.png" alt=""></span>
+              <span style="width:68px;height:68px;border-radius:20px;background:#111;color:#fff;display:flex;align-items:center;justify-content:center;font-size:30px"><img src="img/src_icon_etc3.png" alt=""></span>
+              <span style="width:68px;height:68px;border-radius:20px;background:#fee500;display:flex;align-items:center;justify-content:center;font-size:32px"><img src="img/src_icon_etc4.png" alt=""></span>
+            </div>
+            <div class="phone-nav is-dark"></div>
+          </div>
+          </div>
+          </div>
+          <div class="step-panel" data-page="18">
+          <div class="phone-frame has-cam gn-phone" style="background:#0e0e0e">
+            <div class="gn-screen" style="background:url('img/p18_youtube.jpg') 0 40px / 100% auto no-repeat">
+            <div class="phone-status" data-time="11:52" data-bat="83"></div>
+            <a href="javascript:;" class="js-nav-effect js-sfx" data-hit="more" data-sound="sound/click.mp3" aria-label="더보기" style="position:absolute;left:374px;top:339px;width:46px;height:60px;border-radius:16px"></a>
+            <div class="phone-nav is-dark"></div>
+          </div>
+          </div>
+          
+          </div>
+          <div class="step-panel" data-page="19">
+          <div class="phone-frame has-cam gn-phone">
+<div class="gn-screen is-dark">
+            <div class="phone-status" data-time="1:16" data-bat="55"></div>
+            <div style="position:absolute;left:0;right:0;top:46px;display:flex;align-items:center;gap:10px;padding:0 14px;height:56px;font-size:20px"><span style="font-size:29px">‹</span><span style="flex:1;display:flex;justify-content:space-between;height:36px;align-items:center;padding:0 14px;border-radius:18px;background:#272727;font-size:18px">날씨<b style="font-weight:400">✕</b></span><span style="font-size:26px">🎤</span><span style="font-size:26px">⋮</span></div>
+            <div style="position:absolute;left:0;right:0;top:102px">
+              <div style="padding:14px;font-size:29px;font-weight:800;line-height:1.3;color:#5de0ff;background:linear-gradient(160deg,#1a2b5a,#14304f);height:110px;box-sizing:border-box">동해안·제주 5~30㎜ 비<br><span style="color:#fff">충청·남부 소나기</span></div>
+              <div style="display:flex;gap:12px;padding:12px 14px;font-size:16px;line-height:1.5"><span style="flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;background:#7a1f2c;font-size:29px">📺</span><span>[날씨] 동해안·제주 5~30㎜ 비..충청·남부 소나기 / SBS 모닝와이드 1부<br><span style="font-size:14px;color:#aaa">SBS 뉴스 · 조회수 1.1만회 · 6시간 전</span></span></div>
+              <div style="height:240px;background:url(img/p19_news.png) 0 0 / cover no-repeat"></div>
+            </div>
+            <div class="gn-dim" style="background:rgba(0,0,0,.55);bottom:56px"></div>
+            <div style="position:absolute;left:8px;right:8px;top:538px;bottom:56px;z-index:2;border-radius:20px 20px 0 0;background:#212121;font-size:18px">
+              <div style="margin:10px auto 0;width:36px;height:4px;border-radius:2px;background:#555"></div>
+              <p style="margin:14px 0 0 18px;font-size:18px">공유</p>
+              <div style="display:flex;justify-content:space-around;margin:14px 0 0;font-size:14px;text-align:center">
+                <span><span style="display:flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:50%;background:#111;font-size:31px"><img src="img/src_icon_etc3.png" alt="" style="width:100%"></span>X</span>
+                <span><span style="display:flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:50%;background:#fff;font-size:31px"><img src="img/src_icon_gmail.png" alt="" style="width:100%"></span>Gmail</span>
+                <span><span style="display:flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:50%;background:#2fd05b;font-size:31px">💬</span>메시지</span>
+                <span><span style="display:flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:50%;background:#3a3a3a;font-size:31px">⋯</span>더보기</span>
+              </div>
+              <div style="margin:16px 0 0;border-top:1px solid #333;padding-top:12px">
+                <a href="javascript:;" class="js-sfx" data-hit="copy" data-sound="sound/click.mp3" style="display:flex;align-items:center;gap:12px;margin:0 8px;padding:6px 14px 6px 6px;width:max-content;border-radius:30px;color:#fff;text-decoration:none"><span style="display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;background:#3a3a3a;font-size:26px">⧉</span>링크 복사</a>
+                <div style="display:flex;align-items:center;gap:12px;margin:8px 14px"><span style="display:flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;background:#3a3a3a;font-size:26px">✎</span>게시물 작성</div>
+              </div>
+            </div>
+            <div class="gn-toast gn-off" id="toast">클립보드에 복사됨</div>
+            <div class="phone-nav"><a href="javascript:;" class="js-nav-effect js-sfx gn-hit gn-navbtn" data-hit="back" data-sound="sound/click.mp3"></a><i></i><b></b><u></u></div>
+          </div>
+          </div>
+          </div>
+          <div class="step-panel" data-page="20">
+          <div class="phone-frame has-cam gn-phone">
+<div class="gn-screen" style="background:#8b8b8b">
+            <div class="phone-status is-dark" data-time="10:55" data-bat="84"></div>
+            <div class="gn-sheet" style="top:46px;border-radius:30px 30px 0 0">
+              <span style="position:absolute;left:18px;top:14px;font-size:29px">←</span>
+              <span class="gn-sheet-x" style="top:36px">✕</span>
+              <img src="img/src_icon_link.png" alt="" style="display:block;width:96px;height:96px;margin:74px auto 0">
+              <p style="margin:14px 0 0;text-align:center;font-size:30px;letter-spacing:-0.02em">웹사이트 또는 YouTube URL</p>
+              <p style="margin:18px 28px 0;text-align:center;font-size:20px;line-height:1.5;word-break:keep-all">웹사이트 또는 YouTube 동영상 링크를 붙여넣어 소스로 추가하세요.</p>
+              <a href="javascript:;" class="js-sfx" data-hit="url" data-sound="sound/click.mp3" style="display:flex;align-items:center;margin:22px 28px 0;height:52px;padding:0 20px;border-radius:14px;border:1px solid #d6d6dd;font-size:18px;color:#1b1b1f;text-decoration:none"><span id="urlText">URL 붙여넣기</span></a>
+              <div style="margin:26px 22px 0;font-size:17px;line-height:1.7;color:#222;letter-spacing:-0.04em;word-break:keep-all">• 현재는 웹사이트에 표시되는 텍스트만 가져옵니다.<br>• 유료 기사는 지원되지 않습니다.<br>• YouTube의 경우 텍스트 스크립트만 가져옵니다.<br>• 공개 YouTube 동영상만 지원됩니다.<br>• 최근에 업로드된 동영상은 가져오지 못할 수 있습니다.</div>
+              <a href="javascript:;" class="js-nav-effect js-sfx gn-add" data-hit="addUrl" data-sound="sound/click.mp3">추가</a>
+            </div>
+            <div class="phone-nav"></div>
+          </div>
+          </div>
+          </div>
+          <div class="step-panel" data-page="21">
+          <div class="phone-frame has-cam gn-phone">
+<div class="gn-screen">
+            <div class="phone-status is-dark" data-time="10:55" data-bat="84"></div>
+            <div class="gn-bar"><span>←</span><em>내가 모은 데이터로 AI에게 질문하기</em><span><img class="gn-ico" src="img/src_icon_share.png" alt="공유"></span><span>⋮</span></div>
+            <div style="position:absolute;left:0;right:0;top:118px;padding:0 24px;font-size:18px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:22px"><span>소스</span><span>☰ &nbsp;⋮</span></div>
+              <div class="gn-src">
+                <div><img class="gn-thumb" src="img/src_icon_photo_red.png" alt=""><span>image_날씨뉴스기사1</span></div>
+                <div><img class="gn-thumb" src="img/src_icon_photo_red.png" alt=""><span>image_날씨뉴스기사2</span></div>
+                <div><img class="gn-thumb" src="img/src_icon_photo_red.png" alt=""><span>image_날씨뉴스기사3</span></div>
+                <div id="ytRow"><i class="gn-spin"></i><span>https://youtu.be/…</span></div>
+              </div>
+            </div>
+            <div class="gn-fab" style="bottom:146px"><span class="gn-cam"><img src="img/p11_photo.png" alt=""></span><span class="gn-btn">＋ 소스 추가</span></div>
+            <div class="gn-tabs"><div><img class="gn-tab-ico is-src" src="img/src_tab_source.png" alt="">소스</div><div class="gn-chat-tab"><a href="javascript:;" class="js-nav-effect js-sfx" data-hit="chat" data-sound="sound/click.mp3" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 10px;border-radius:16px;color:#555;text-decoration:none"><img class="gn-tab-ico" src="img/src_tab_chat.png" alt="">채팅</a></div><div><img class="gn-tab-ico" src="img/src_tab_studio.png" alt="">스튜디오</div></div>
+            <div class="phone-nav"></div>
+          </div>
+          </div>
+          </div>
+          <div class="step-panel" data-page="22">
+          <div class="phone-frame has-cam gn-phone">
+<div class="gn-screen">
+            <div class="phone-status is-dark" data-time="10:56" data-bat="84"></div>
+            <div class="gn-bar"><span>←</span><em>내가 모은 데이터로 AI에게 질문하기</em><span><img class="gn-ico" src="img/src_icon_share.png" alt="공유"></span><span>⋮</span></div>
+            <div style="position:absolute;left:0;right:0;top:130px;padding:0 28px">
+              <span class="gn-hl" style="display:flex;align-items:center;justify-content:center;width:80px;height:80px;border-radius:20px;font-size:44px;outline-offset:0;border-radius:20px">🌡️</span>
+              <p style="margin:18px 0 0;font-size:34px;line-height:1.35;font-weight:400">내가 모은 데이터로 AI에게 질문하기</p>
+              <p style="margin:18px 0 0;font-size:17px">소스 2개</p>
+              <div class="gn-hl gn-skel" style="margin-top:12px;border-radius:30px;padding:26px 22px;outline-offset:0"><i style="width:80%"></i><i style="width:100%"></i><i style="width:60%"></i></div>
+              <p class="gn-disc" style="margin-top:30px">Gemini Notebook은 부정확할 수 있으므로 다시 한번 확인하세요.</p>
+            </div>
+            <div class="gn-chat-in" style="bottom:140px">소스 2개 요청…<span><i data-ic="nbSource"></i>2</span></div>
+            <div class="gn-tabs"><div class=""><img class="gn-tab-ico is-src" src="img/src_tab_source.png" alt="">소스</div><div class="is-on is-cur"><img class="gn-tab-ico" src="img/src_tab_chat.png" alt="">채팅</div><div><img class="gn-tab-ico" src="img/src_tab_studio.png" alt="">스튜디오</div></div>
+            <div class="phone-nav"></div>
+          </div>
+          </div>
+          </div>
+          <div class="step-panel" data-page="23">
+          <div class="phone-frame has-cam gn-phone">
+<div class="gn-screen">
+            <div class="phone-status is-dark" data-time="10:56" data-bat="84"></div>
+            <div class="gn-bar"><span>←</span><em>내가 모은 데이터로 AI에게 질문하기</em><span><img class="gn-ico" src="img/src_icon_share.png" alt="공유"></span><span>⋮</span></div>
+            <div style="position:absolute;left:0;right:0;top:118px;height:300px;overflow:hidden;padding:0 20px;font-size:20px;line-height:1.5">
+              은 낮 기온이 <b>30도 미만</b>으로 떨어지며 더위가 다소 주춤하겠으나, 남부 지방은 <b>폭염 특보</b>와 함께 습도 높은 무더위가 지속될 것으로 보입니다. 대기 불안정으로 인해 충청과 남부, 제주도 등 여러 지역에 <b>강한 소나기나 약한 비</b>가 예보되어 있어 주의가 필요합니다. 또한, 해상에서는 <b>비교적 높은 물결</b>이 일겠으며 내륙에는 구름 많은 날씨가 이어질 전망입니다. 모든 정보는 시민들이 <b>기상 변화</b>에 대비할 수 있도록 구체적인 수치와 지역별 상황을 종합하여 전달합니다.
+            </div>
+            <div class="gpt-tools" style="position:absolute;left:0;right:0;top:405px;padding:0 20px"><svg class="ic" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"></rect><path d="M4 16V6a2 2 0 012-2h10"></path></svg><svg class="ic" viewBox="0 0 24 24"><path d="M7 11v9H4v-9zM7 11l4-7a2 2 0 013 2v4h5a2 2 0 012 2.3l-1.2 7A2 2 0 0117.8 21H7"></path></svg><svg class="ic" viewBox="0 0 24 24"><path d="M7 13V4H4v9zM7 13l4 7c1.5 0 2.5-1.2 2.2-2.7L12.7 15H19a2 2 0 001.9-2.6L19.1 5.9A2 2 0 0017.2 4H7"></path></svg></div>
+            <div class="gn-audio" style="position:absolute;left:0;right:0;top:455px"><i data-ic="nbFnAudio"></i>AI 오디오 오버뷰</div>
+            <div style="position:absolute;left:0;right:0;top:525px"><div style="display:flex;gap:10px;margin:0 14px"><span class="gn-chip">오늘 지역별 강수량과<br>소나기 예보를 자세히 알려줘</span><span class="gn-chip">현재 기온 현황과 남부지방의<br>폭염 특보 상황이 궁금해</span></div></div>
+            <p class="gn-disc" style="position:absolute;left:0;right:0;top:620px">Gemini Notebook은 부정확할 수 있으므로 다시 한번 확인하세요.</p>
+            <a href="javascript:;" class="js-nav-effect js-sfx gn-chat-in" data-hit="ask" data-sound="sound/click.mp3" style="bottom:140px;text-decoration:none">소스 2개 요청…<span><i data-ic="nbSource"></i>2</span></a>
+            <div class="gn-tabs"><div class=""><img class="gn-tab-ico is-src" src="img/src_tab_source.png" alt="">소스</div><div class="is-on is-cur"><img class="gn-tab-ico" src="img/src_tab_chat.png" alt="">채팅</div><div><img class="gn-tab-ico" src="img/src_tab_studio.png" alt="">스튜디오</div></div>
+            <div class="phone-nav"></div>
+          </div>
+          </div>
+          </div>
+          <div class="step-panel" data-page="24">
+          <div class="phone-frame has-cam gn-phone">
+<div class="gn-screen">
+            <div class="phone-status is-dark" data-time="10:57" data-bat="84"></div>
+            <div class="gn-bar"><span>←</span><em>내가 모은 데이터로 AI에게 질문하기</em><span><img class="gn-ico" src="img/src_icon_share.png" alt="공유"></span><span>⋮</span></div>
+            <div class="gpt-tools" style="position:absolute;left:0;right:0;top:118px;padding:0 20px"><svg class="ic" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"></rect><path d="M4 16V6a2 2 0 012-2h10"></path></svg><svg class="ic" viewBox="0 0 24 24"><path d="M7 11v9H4v-9zM7 11l4-7a2 2 0 013 2v4h5a2 2 0 012 2.3l-1.2 7A2 2 0 0117.8 21H7"></path></svg><svg class="ic" viewBox="0 0 24 24"><path d="M7 13V4H4v9zM7 13l4 7c1.5 0 2.5-1.2 2.2-2.7L12.7 15H19a2 2 0 001.9-2.6L19.1 5.9A2 2 0 0017.2 4H7"></path></svg></div>
+            <div class="gn-audio" style="position:absolute;left:0;right:0;top:166px"><i data-ic="nbFnAudio"></i>AI 오디오 오버뷰</div>
+            <div style="position:absolute;left:0;right:0;top:230px"><div style="display:flex;gap:10px;margin:0 14px"><span class="gn-chip">오늘 지역별 강수량과<br>소나기 예보를 자세히 알려줘</span><span class="gn-chip">현재 기온 현황과 남부지방의<br>폭염 특보 상황이 궁금해</span></div></div>
+            <p class="gn-disc" style="position:absolute;left:0;right:0;top:356px">Gemini Notebook은 부정확할 수 있으므로 다시 한번 확인하세요.</p>
+            <div class="p24-input"><span id="p24Text"></span><div class="p24-count"><span><i data-ic="nbSource"></i>2 ▾</span><b>➤</b></div></div>
+            <div class="kbd-cj"><div class="kbd-cj-tools"><i><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M8.6 14.2c1.8 2 5 2 6.8 0"/><path d="M9 9.6h.01M15 9.6h.01" stroke-width="2.2"/></svg></i><i><svg viewBox="0 0 24 24"><path d="M9.5 8.5V6.2a2 2 0 012-2h6.3a2 2 0 012 2v6.3a2 2 0 01-2 2h-2.3"/><rect x="3.7" y="9.5" width="10.8" height="10.3" rx="2.2"/><path d="M6.9 17.2l2.2-5.4 2.2 5.4M7.7 15.4h2.8"/></svg></i><i><svg viewBox="0 0 24 24"><rect x="5.3" y="4.6" width="13.4" height="16" rx="3.6"/><path d="M9.6 8.6h4.8"/></svg></i><i><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" transform="translate(1.5 1.5) scale(.875)"/></svg></i><i class="is-bare"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.7" fill="currentColor" stroke="none"/></svg></i></div><div class="kbd-cj-rows"><div class="kbd-cj-row"><div class="kbd-cj-key"><small>1</small>ㅣ</div><div class="kbd-cj-key"><small>2</small>·</div><div class="kbd-cj-key"><small>3</small>ㅡ</div><div class="kbd-cj-key is-dk"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H9a2 2 0 0 1-1.414-.586l-5.414-5.414a2 2 0 0 1 0-2.828L7.586 4.586A2 2 0 0 1 9 4z"/><path d="m16 9-6 6"/><path d="m10 9 6 6"/></svg></div></div><div class="kbd-cj-row"><div class="kbd-cj-key"><small>4</small>ㄱㅋ</div><div class="kbd-cj-key"><small>5</small>ㄴㄹ</div><div class="kbd-cj-key"><small>6</small>ㄷㅌ</div><div class="kbd-cj-key is-dk"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 5v8a2 2 0 01-2 2H5M9 11l-4 4 4 4"/></svg></div></div><div class="kbd-cj-row"><div class="kbd-cj-key"><small>7</small>ㅂㅍ</div><div class="kbd-cj-key"><small>8</small>ㅅㅎ</div><div class="kbd-cj-key"><small>9</small>ㅈㅊ</div><div class="kbd-cj-key is-dk" style="letter-spacing:0;font-size:26px">.,?!</div></div><div class="kbd-cj-row"><div class="kbd-cj-key is-s">!#1</div><div class="kbd-cj-key is-s2"><em>한 &nbsp; &nbsp; &nbsp;<br>&nbsp; &nbsp; &nbsp; <span>영</span></em></div><div class="kbd-cj-key"><small>0</small>ㅇㅁ</div><div class="kbd-cj-key  is-dk"><svg viewBox="0 0 44 20" width="46" height="20" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5v9h38V5"/></svg></div><div class="kbd-cj-key is-dk" style="letter-spacing:0;font-size:18px">한자</div></div></div></div>
+            <div class="phone-nav"></div>
+          </div>
+          </div>
+          <div class="p24-panel">
+            <h3>프롬프트 선택하기</h3>
+            <button class="card-btn p24-opt" id="p24Opt1"></button>
+            <button class="card-btn p24-opt" id="p24Opt2"></button>
+          </div>
+          <button class="card-btn p24-act is-disabled" id="p24Act" data-hit="act"></button>
+          </div>
+          <div class="step-panel" data-page="25">
+          <div class="phone-frame has-cam gn-phone">
+<div class="gn-screen">
+            <div class="phone-status is-dark" data-time="10:57" data-bat="83"></div>
+            <div class="gn-bar"><span>←</span><em>내가 모은 데이터로 AI에게 질문하기</em><span><img class="gn-ico" src="img/src_icon_share.png" alt="공유"></span><span>⋮</span></div>
+            <div class="gn-ask" style="position:absolute;left:54px;right:22px;top:120px;padding:14px 18px;border-radius:20px 20px 0 20px;background:#e8e8fb;font-size:18px;line-height:1.5"><span id="p25Q"></span></div>
+            <div id="p25Wait" class="gn-think" style="top:236px">
+              <div class="gn-think-head"><img src="../../resources/img/common/logo_gemini.png" alt=""><span>답변을 만들고 있어요</span></div>
+              <i style="width:92%"></i><i style="width:78%"></i><i style="width:60%"></i>
+            </div>
+            <div id="p25Answer" class="gn-off">
+              <div id="p25Text" class="gn-stream"></div>
+            </div>
+            <div class="gn-chat-in" style="bottom:140px">소스 2개 요청…<span><i data-ic="nbSource"></i>2 ▾</span></div>
+            <div class="gn-tabs"><div class=""><img class="gn-tab-ico is-src" src="img/src_tab_source.png" alt="">소스</div><div class="is-on is-cur"><img class="gn-tab-ico" src="img/src_tab_chat.png" alt="">채팅</div><div><img class="gn-tab-ico" src="img/src_tab_studio.png" alt="">스튜디오</div></div>
+            <div class="phone-nav"></div>
+          </div>
+          </div>
+          <a href="page10.html?step=15" class="js-nav-effect js-sfx card-btn p25-btn p25-again is-off" id="p25Again" data-sound="sound/click.mp3">다른 질문<br>확인 하기</a>
+          <a href="javascript:;" class="js-sfx card-btn p25-btn p25-next is-off" id="p25Next" data-sound="sound/click.mp3">다음</a>
+
+<div class="avatar-modal is-off" id="p25Finish">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <p class="avatar-card-title">AI와 함께 날씨 정보를 분석하고, 요약했어요!</p>
+                <p class="avatar-card-text">이제 퀴즈를 풀며 배운 내용을 확인해볼까요?</p>
+              </div>
+              <a href="page11.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+            </div>
+          </div>
+          </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="내가 모은 데이터로 AI에게 질문하기" data-next="page11.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script src="../../resources/js/box-edit.js"></script>
+  <script>
+  (function () {
+    const flow = document.querySelector('.step-flow');
+    const panels = Array.from(flow.querySelectorAll(':scope > .step-panel'));
+    const saved = panels.map((p) => p.innerHTML);
+    const enters = [];
+    const bubble = $('p10Bubble');
+    const say = initGuideSay({ bubble: bubble, img: $('p10Char'), set: $('p10Set') });
+
+    const STEPS = [
+      { pose: 'main', bubble: '내가 수집한 날씨 데이터를 Gemini Notebook을 활용하여 AI에게 질문해볼까요?', hit: 'app' },
+      { pose: 'wink_point4', bubble: '아래의 + 새로 만들기 버튼을<br>클릭해보세요.', hit: 'new' },
+      { pose: 'wink_point2', bubble: '‘사진’ 버튼을 눌러,<br>날씨 기사 이미지 파일을<br>선택해주세요.', hit: 'photo' },
+      { pose: 'wink_present', bubble: '뉴스 기사 이미지만 선택해볼까요?', hit: 'check' },
+      { pose: 'main', bubble: 'Gemini Notebook에 날씨 뉴스 이미지가 업로드 중이에요..', hit: 'add' },
+      { pose: 'wink_point3', bubble: '유튜브 링크를<br>추가해볼까요?', hit: 'web' },
+      { pose: 'wink_point4', bubble: '유튜브 링크를<br>추가해볼까요?', hit: 'back' },
+      { pose: 'wink_present', bubble: '유튜브 링크를<br>추가해볼까요?', hit: 'youtube' },
+      { pose: 'wink_point', bubble: '유튜브 링크를<br>추가해볼까요?', hit: 'more' },
+      { pose: 'wink_present', bubble: '유튜브 링크를<br>추가해볼까요?', hit: 'copy' },
+      { pose: 'smile_point', bubble: '유튜브 링크를<br>추가해볼까요?', hit: 'url' },
+      { pose: '', bubble: 'Gemini Notebook에<br>유튜브 동영상<br>업로드 중이에요..', hit: 'chat' },
+      { pose: '', bubble: 'Gemini Notebook이<br>이미지와 영상을<br>학습하고 있어요..' },
+      { pose: 'wink_point3', bubble: '날씨 데이터가 학습된<br>AI에게 질문 해볼까요?', hit: 'ask' },
+      { pose: 'wink_present', bubble: '어떤 질문을 해볼까요?<br>질문을 직접 선택해<br>만들어보아요.', hit: 'act' },
+      { pose: '', bubble: 'AI가 생성한 답변을<br>확인해보세요.' }
+    ];
+    const SAYS = {
+      uploaded: ['Gemini Notebook에 날씨 뉴스 이미지가 업로드 되었어요! 이제 유튜브 링크를 추가해볼까요?', 'wink_present'],
+      learn: ['AI에게 이미지와 영상을<br>학습 시켜볼까요?', 'wink_present']
+    };
+    const FG = { app: [0, 0], new: [0, 0], photo: [0, 0], check: [0, 0], add: [0, 0], web: [-70, -20], back: [24, -34], youtube: [-10, -60], more: [30, 0], copy: [0, 0], url: [0, 0], addUrl: [-40, -30], chat: [30, -20], ask: [0, 0], act: [0, 0] };
+    const HOT = { app: [0, 0, 0, 0], new: [0, 0, 0, 0], photo: [0, 0, 0, 0], check: [0, 0, 0, 0], add: [0, 0, 0, 0], web: [0, 0, 0, 0], back: [-20, 0, 40, 0], youtube: [0, 0, 0, 0], more: [15, 20, 11, 0], copy: [0, 0, 0, 0], url: [0, 0, 0, 0], addUrl: [0, 0, 0, 0], chat: [-40, 0, 80, 0], ask: [0, 0, 0, 0], act: [0, 0, 0, 0] };
+    const FGW = { back: 80 };
+
+    let tok = 0;
+    let cur = 0;
+    let editSub = 0, stopIdx = 0;
+    const SUB = { 3: 3, 4: 2, 9: 3, 10: 2, 11: 2, 14: 6 };
+    const STOPS = [];
+    panels.forEach((p, i) => { for (let j = 0; j < (SUB[i] || 1); j++) STOPS.push([i, j]); });
+    const stopName = (n) => STOPS[n - 1][0] + 1 + (SUB[STOPS[n - 1][0]] ? '.' + (STOPS[n - 1][1] + 1) : '');
+    const setStop = (k) => { stopIdx = k; cur = STOPS[k][0]; editSub = STOPS[k][1]; };
+    const stopFromUrl = () => {
+      const m = location.search.match(/[?&]step=([0-9]+)(?:\.([0-9]+))?/);
+      const k = m ? STOPS.findIndex((s) => s[0] === +m[1] - 1 && s[1] === (+m[2] || 1) - 1) : 0;
+      return k < 0 ? 0 : k;
+    };
+
+    function scoped(panel) {
+      return new Proxy(document, {
+        get(t, p) {
+          if (p === 'getElementById') return (id) => panel.querySelector('#' + id);
+          if (p === 'querySelector') return (s) => panel.querySelector(s);
+          if (p === 'querySelectorAll') return (s) => panel.querySelectorAll(s);
+          const v = t[p];
+          return typeof v === 'function' ? v.bind(t) : v;
+        }
+      });
+    }
+
+    function goNext(panel) {
+      if (BoxEdit.on) return;
+      const next = panels[panels.indexOf(panel) + 1];
+      if (!next) return;
+      panel.classList.add('is-hidden');
+      next.classList.remove('is-hidden');
+      next.dispatchEvent(new CustomEvent('step:visible'));
+    }
+
+    function point(panel, name, first) {
+      const el = panel.querySelector('[data-hit="' + name + '"]');
+      if (!el) return;
+      const o = BoxEdit.fgo(FG, name, first ? {} : { pulse: true });
+      if (FGW[name]) o.w = FGW[name];
+      pointFingerAt(el, o);
+    }
+
+    function run(i) {
+      clearFingers();
+      cur = i;
+      tok += 1;
+      const s = STEPS[i];
+      say(s.bubble, s.pose);
+      bubble.classList.toggle('has-act', i === 14);
+      panels.forEach((p, k) => { if (k === i) p.classList.remove('is-hidden'); });
+      BoxEdit.hitPad(panels[i].querySelectorAll('[data-hit]'), HOT);
+      if (enters[i]) enters[i](panels[i], tok);
+    }
+
+    panels.forEach((panel, i) => panel.addEventListener('step:visible', () => run(i)));
+
+    BoxEdit.stepEdit({
+      count: STOPS.length + 1,
+      get: () => stopIdx + 1,
+      set: () => setStop(stopFromUrl()),
+      go: (n) => {
+        if (n < 1) return;
+        clearFingers();
+        setStop(n - 1);
+        const q = location.search.replace(/([?&])step=[0-9.]+/, '$1step=' + stopName(n));
+        history.replaceState(null, '', /[?&]step=/.test(location.search) ? q : location.search + (location.search ? '&' : '?') + 'step=' + stopName(n));
+        panels.forEach((p, k) => {
+          p.classList.toggle('is-hidden', k !== cur);
+          p.innerHTML = saved[k];
+        });
+        initPhoneBars();
+        run(cur);
+      },
+      label: (n) => '단계 ' + stopName(n) + ' / ' + panels.length + ' (page ' + panels[STOPS[n - 1][0]].dataset.page + ')',
+      say, bubble, img: $('p10Char')
+    });
+
+    enters[0] = function (panel) {
+      point(panel, 'app', true);
+    };
+
+    enters[1] = function (panel) {
+      point(panel, 'new');
+    };
+
+    enters[2] = function (panel) {
+      point(panel, 'photo');
+    };
+
+    enters[3] = function (panel) {
+      const document = scoped(panel);
+      (function () {
+        const photos = Array.from(document.querySelectorAll('.gn-photo'));
+        const check = document.querySelector('[data-hit="check"]');
+        const wrongModal = document.getElementById('p13Wrong');
+        const NEED = photos.filter((p) => p.dataset.correct === 'true').length;
+        let locked = false;
+      
+        function guideFinger() {
+          clearFingers();
+          const on = (p) => p.classList.contains('is-on');
+          const allDone = photos.every((p) => (p.dataset.correct === 'true') === on(p));
+          if (allDone) pointFingerAt(check, BoxEdit.fgo(FG, 'check', { pulse: true }));
+        }
+      
+        photos.forEach((p) => {
+          p.addEventListener('click', () => {
+            if (locked) return;
+            p.classList.toggle('is-on');
+            check.classList.toggle('is-ready', photos.some((x) => x.classList.contains('is-on')));
+            guideFinger();
+            playClick();
+          });
+        });
+      
+        check.addEventListener('click', () => {
+          if (locked) return;
+          const picked = photos.filter((p) => p.classList.contains('is-on'));
+          if (!picked.length) return;
+          const allCorrect = picked.length === NEED && picked.every((p) => p.dataset.correct === 'true');
+      
+          if (allCorrect) {
+            locked = true;
+            playCorrect();
+            setTimeout(() => goNext(panel), 700);
+            return;
+          }
+          playWrong();
+          photos.forEach((p) => p.classList.remove('is-on'));
+          check.classList.remove('is-ready');
+          guideFinger();
+          wrongModal.classList.remove('is-off');
+          clearTimeout(wrongModal.__hideTimer);
+          wrongModal.__hideTimer = setTimeout(() => wrongModal.classList.add('is-off'), 2000);
+        });
+        if (BoxEdit.on && editSub > 0) {
+          if (editSub === 1) {
+            photos.forEach((p) => { if (p.dataset.correct === 'true') p.classList.add('is-on'); });
+            check.classList.add('is-ready');
+            guideFinger();
+          } else {
+            wrongModal.classList.remove('is-off');
+          }
+        }
+      })();
+    };
+
+    enters[4] = function (panel, my) {
+      if (BoxEdit.on && editSub === 0) return;
+      const document = scoped(panel);
+      const STEP = BoxEdit.on ? 0 : 2333;
+      const rows = document.querySelectorAll('#srcList > div');
+      const hit = document.querySelector('[data-hit="add"]');
+      const done = () => {
+        if (my !== tok) return;
+        say(SAYS.uploaded[0], SAYS.uploaded[1]);
+        document.getElementById('nbTitle').textContent = '내가 모은 데이터로 AI에게 질문하기';
+        setTimeout(() => {
+          if (my !== tok) return;
+          document.getElementById('hitDummy').style.display = 'none';
+          hit.style.display = 'inline-flex';
+          point(panel, 'add');
+        }, BoxEdit.on ? 0 : 1000);
+      };
+      rows.forEach((row, i) => {
+        setTimeout(() => {
+          if (my !== tok) return;
+          row.innerHTML = '<img class="gn-thumb" src="img/src_icon_photo_red.png" alt=""><span>image_날씨뉴스기사' + (i + 1) + '</span>';
+          sfx.upload();
+        }, STEP * (i + 1));
+      });
+      setTimeout(done, STEP * 3);
+    };
+
+    enters[5] = function (panel) {
+      point(panel, 'web');
+    };
+
+    enters[6] = function (panel) {
+      point(panel, 'back');
+    };
+
+    enters[7] = function (panel) {
+      point(panel, 'youtube');
+    };
+
+    enters[8] = function (panel) {
+      point(panel, 'more');
+    };
+
+    enters[9] = function (panel, my) {
+      const document = scoped(panel);
+      const copy = document.querySelector('[data-hit="copy"]');
+      const back = document.querySelector('[data-hit="back"]');
+      point(panel, 'copy');
+      if (BoxEdit.on) {
+        if (editSub === 1) {
+          clearFingers();
+          document.getElementById('toast').classList.remove('gn-off');
+        } else if (editSub === 2) {
+          back.classList.add('is-ready');
+          point(panel, 'back');
+        }
+        return;
+      }
+      copy.addEventListener('click', () => {
+        clearFingers();
+        document.getElementById('toast').classList.remove('gn-off');
+        setTimeout(() => {
+          if (my !== tok) return;
+          document.getElementById('toast').classList.add('gn-off');
+          back.classList.add('is-ready');
+          point(panel, 'back');
+        }, 3000);
+      });
+    };
+
+    enters[10] = function (panel, my) {
+      const document = scoped(panel);
+      const url = document.querySelector('[data-hit="url"]');
+      const add = document.querySelector('[data-hit="addUrl"]');
+      point(panel, 'url');
+      if (BoxEdit.on) {
+        if (editSub === 1) {
+          document.getElementById('urlText').textContent = 'https://youtu.be/…';
+          add.classList.add('is-ready');
+          point(panel, 'addUrl');
+        }
+        return;
+      }
+      url.addEventListener('click', () => {
+        clearFingers();
+        document.getElementById('urlText').textContent = 'https://youtu.be/…';
+        setTimeout(() => {
+          if (my !== tok) return;
+          add.classList.add('is-ready');
+          point(panel, 'addUrl');
+        }, 600);
+      });
+    };
+
+    enters[11] = function (panel, my) {
+      const document = scoped(panel);
+      const finish = () => {
+        if (my !== tok) return;
+        document.getElementById('ytRow').innerHTML = '<img class="gn-thumb" src="img/src_icon_youtube.png" alt=""><span>[날씨클릭] 오늘 곳곳 비·소나기...습도 높은 무…</span>';
+        sfx.upload();
+        say(SAYS.learn[0], SAYS.learn[1]);
+        setTimeout(() => {
+          if (my !== tok) return;
+          point(panel, 'chat');
+        }, BoxEdit.on ? 0 : 1000);
+      };
+      if (BoxEdit.on && editSub === 0) return;
+      setTimeout(finish, BoxEdit.on ? 0 : 7000);
+    };
+
+    enters[12] = function (panel, my) {
+      setTimeout(() => { if (my === tok) goNext(panel); }, 5000);
+    };
+
+    enters[13] = function (panel) {
+      point(panel, 'ask');
+    };
+
+    enters[14] = function (panel) {
+      const document = scoped(panel);
+      (function () {
+        const STEPS = [
+          { options: ['첨부한 신문 기사와 동영상에서'], action: '다음' },
+          { options: ['서울의 최고 기온을', '오후 날씨 상태를'], action: '다음' },
+          { options: ['가르쳐 줘.', '요약해 줘.'], action: '입력 완료' },
+        ];
+      
+        const opt1 = document.getElementById('p24Opt1');
+        const opt2 = document.getElementById('p24Opt2');
+        const act = document.getElementById('p24Act');
+        const text = document.getElementById('p24Text');
+      
+        let step = 0;
+        const picked = [];
+      
+        function render() {
+          const s = STEPS[step];
+          opt1.textContent = s.options[0];
+          opt2.textContent = s.options[1] || '';
+          opt2.style.display = s.options[1] ? '' : 'none';
+          opt1.classList.remove('is-selected');
+          opt2.classList.remove('is-selected');
+          act.textContent = s.action;
+          act.classList.add('is-disabled');
+          renderText();
+          clearFingers();
+          BoxEdit.padEl(act, 'act', HOT);
+        }
+      
+        function renderText() {
+          text.textContent = picked.join(' ');
+        }
+      
+        [opt1, opt2].forEach((btn) => {
+          btn.addEventListener('click', () => {
+            opt1.classList.toggle('is-selected', btn === opt1);
+            opt2.classList.toggle('is-selected', btn === opt2);
+            picked[step] = btn.textContent;
+            renderText();
+            act.classList.remove('is-disabled');
+            clearFingers();
+            pointFingerAt(act, BoxEdit.fgo(FG, 'act', { pulse: true }));
+            playClick();
+          });
+        });
+      
+        act.addEventListener('click', () => {
+          playClick();
+          if (step < STEPS.length - 1) {
+            step += 1;
+            render();
+            return;
+          }
+          try {
+            sessionStorage.setItem('gwa01_prompt', picked.join(' '));
+          } catch (err) { /* sessionStorage를 못 쓰는 환경이면 무시 */ }
+          setTimeout(() => goNext(panel), 300);
+        });
+      
+        if (BoxEdit.on && editSub > 0) {
+          step = Math.floor(editSub / 2);
+          for (let j = 0; j < step; j++) picked[j] = STEPS[j].options[0];
+        }
+        render();
+        if (BoxEdit.on && editSub % 2 === 1) {
+          opt1.classList.add('is-selected');
+          picked[step] = opt1.textContent;
+          renderText();
+          act.classList.remove('is-disabled');
+        }
+        if (BoxEdit.on) point(panel, 'act');
+      })();
+    };
+
+    enters[15] = function (panel, my) {
+      const document = scoped(panel);
+      (function () {
+        const LOADING_MS = BoxEdit.on ? 0 : 5000;
+        const again = document.getElementById('p25Again');
+        const next = document.getElementById('p25Next');
+        const finish = document.getElementById('p25Finish');
+        let q = '첨부한 신문 기사와 동영상에서 오후 날씨 상태를 요약해 줘.';
+        try { q = sessionStorage.getItem('gwa01_prompt') || q; } catch (err) { /* sessionStorage를 못 쓰는 환경이면 기본 문구 */ }
+        document.getElementById('p25Q').textContent = q;
+      
+        setTimeout(function () {
+          if (my !== tok) return;
+          document.getElementById('p25Wait').classList.add('gn-off');
+          document.getElementById('p25Answer').classList.remove('gn-off');
+        // 기획서 35p: 질문 조합 4가지마다 AI 답변이 다름(기획서 폴더 '과학1차시-AI-생성-답변.png' 기준)
+        var AI = '<img class="gn-ai" src="../../resources/img/common/logo_gemini.png" alt="">';
+        var ANSWERS = {
+          '기온|가르쳐': [
+            '<b>' + AI + 'AI 답변 (단순 정보 추출)</b>',
+            '첨부하신 신문기사와 날씨 영상에 따르면, 오늘 <b>서울의 낮 최고 기온은 24도</b>입니다.'
+          ],
+          '기온|요약': [
+            '<b>' + AI + 'AI 답변 (맥락과 소스 종합 요약)</b>',
+            '기사와 영상 속 서울 기온 관련 핵심 내용을 정리한 요약입니다.',
+            '• <b>서울 최고 기온:</b> 낮 최고 <b>24도</b>로 확인됩니다.',
+            '• <b>체감 특징:</b> 전국 낮 최고 기온(30도)에 비하면 서울은 기온이 상대적으로 낮지만, 영상과 기사에서 공통적으로 강조하듯 <b>75% 안팎의 높은 습도</b> 때문에 실제 체감 온도는 기온보다 높고 꿉꿉하게 느껴집니다.'
+          ],
+          '날씨|가르쳐': [
+            '<b>' + AI + 'AI 답변 (명시적 정보 및 행동 안내)</b>',
+            '신문기사와 영상 소스를 통해 확인된 오늘 오후 날씨 상태 및 주의사항입니다.',
+            '☔ <b>오후 강수:</b> 오후부터 비구름이 들어오며 강수 확률 70%로 비가 시작됩니다.',
+            '☂️ <b>준비물:</b> 기상캐스터 및 기사 안내에 따라 <b>외출 시 우산을 꼭 챙기셔야 합니다.</b>',
+            '⚠️ <b>안전 주의:</b> 비가 밤까지 이어질 수 있으므로 미끄러운 빗길 이동 시 안전에 주의하시기 바랍니다.'
+          ],
+          '날씨|요약': [
+            '<b>' + AI + 'AI 답변 (전체 멀티미디어 종합 요약)</b>',
+            '제공된 기사 3편과 날씨 뉴스 영상 전체를 분석하여 정리한 오후 날씨 종합 요약입니다.',
+            '1. <b>비 시작 및 지속성 (레이더 영상 분석):</b> 오후부터 강수 확률 70%로 비가 오기 시작하며, 밤까지 비가 지속되는 곳이 있습니다.',
+            '2. <b>높은 습도와 후텁지근한 무더위:</b> 비가 내려도 기온이 낮 최고 30도까지 오르고, 습도가 75% 안팎으로 높아 오후 내내 꿉꿉하고 후텁지근한 날씨가 이어집니다.',
+            '3. <b>종합 결론:</b> 텍스트와 영상 모두 ‘오후 비 + 높은 습도 + 체감 더위’를 핵심 특징으로 지목하고 있으므로, 우산 지참과 빗길 안전사고 대비가 필요합니다.'
+          ]
+        };
+        var kind = (q.indexOf('기온') >= 0 ? '기온' : '날씨') + '|' + (q.indexOf('요약') >= 0 ? '요약' : '가르쳐');
+        var box = document.getElementById('p25Text');
+        box.innerHTML = ANSWERS[kind].map(function (h) { return '<p class="gn-ln">' + h + '</p>'; }).join('');
+          var lines = Array.from(box.querySelectorAll('.gn-ln'));
+          lines.forEach(function (ln, i) {
+            setTimeout(function () {
+              ln.classList.add('is-on');
+            }, 500 + i * 500);
+          });
+          setTimeout(function () {
+            again.classList.remove('is-off');
+            next.classList.remove('is-off');
+          }, 500 + lines.length * 500 + 500);
+        }, LOADING_MS);
+      
+        next.addEventListener('click', function () {
+          setTimeout(function () { finish.classList.remove('is-off'); }, 300);
+        });
+      })();
+    };
+
+    {
+      const now = BoxEdit.on ? cur : panels.findIndex((p) => !p.classList.contains('is-hidden'));
+      if (BoxEdit.on && now > 0) {
+        panels.forEach((p, k) => { p.classList.toggle('is-hidden', k !== now); });
+        initPhoneBars();
+      }
+      run(now < 0 ? 0 : now);
+    }
+  })();
+  </script>
+</body>
+</html>

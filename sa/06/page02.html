@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>출동! 우리 동네 심부름 탐험대</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 3~7p. 학생 캐릭터를 알맞은 건물로 끌어다 놓기(질문 4개 차례로). 놓은 뒤 캐릭터는 제자리로 돌아오고,
+           맞힌 건물은 img/p02_bld_{key}_on.png 로 바뀐 채 유지. 지도 img/p02_map.png, 건물 img/p02_bld_{key}.png, 학생 캐릭터 img/p02_student.png */
+
+        .p02-map{position:absolute;left:60px;top:40px;width:1800px;height:650px;box-sizing:border-box;border:solid 5px #266cc8;border-radius:15px;background:var(--c-cream) url('img/p02_map.png') center / cover no-repeat}
+        .p02-place{position:absolute;display:block;max-width:none;transition:filter .2s}
+        /* 학생을 끄는 동안 놓을 수 있는 건물이 은은하게 깜빡이고, 위에 올리면 노랗게 빛남 */
+        .p02-dragging .p02-place{animation:p02-hint 1s ease-in-out infinite}
+        @keyframes p02-hint{50%{filter:drop-shadow(0 0 12px rgba(255,216,61,.85))}}
+        .p02-dragging .p02-place.is-over{animation:none;filter:drop-shadow(0 0 4px #fff) drop-shadow(0 0 10px #ffd83d) drop-shadow(0 0 22px #ffd83d)}
+
+        .p02-student{position:absolute;left:88px;top:355px;width:473px;height:595px;background:url('img/p02_student.png') center bottom / contain no-repeat;cursor:grab;touch-action:none;z-index:20}
+        .p02-student.is-dragging{cursor:grabbing;z-index:60}
+        .p02-student.is-back{transition:left .3s ease,top .3s ease}
+
+        .p02-bubble{position:absolute;left:480px;top:667px;width:1371px;min-height:210px;box-sizing:border-box;padding:14px 50px;display:flex;align-items:center;
+          background:transparent;border:solid 6px transparent;
+          font-family:'Cafe24 Ssurround';font-size:70px;line-height:1.25;color:var(--c-ink);letter-spacing:-0.06em;word-break:keep-all;margin:0;z-index:10}
+
+        #p02Done{z-index:120}
+        .p02-bubble-shadow{position:absolute;left:460px;top:645px;}
+        .p02-bubble-shadow svg{position:relative;z-index:2}
+        .p02-bubble-shadow:after{content:'';position:absolute;left:50px;top:10px;width:1310px;height:256px;border-radius:20px;background:rgba(70,78,239,0.2);z-index:1;box-shadow:5px 5px 5px 0 rgba(70,78,239,0.2)}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p02-map"></div>
+          <img class="p02-place" data-key="bakery" style="left:396px;top:69px" src="img/p02_bld_bakery.png" data-on="img/p02_bld_bakery_on.png" alt="">
+          <img class="p02-place" data-key="stationery" style="left:1054px;top:55px" src="img/p02_bld_stationery.png" data-on="img/p02_bld_stationery_on.png" alt="">
+          <img class="p02-place" data-key="hospital" style="left:703px;top:361px" src="img/p02_bld_hospital.png" data-on="img/p02_bld_hospital_on.png" alt="">
+          <img class="p02-place" data-key="salon" style="left:1322px;top:341px" src="img/p02_bld_salon.png" data-on="img/p02_bld_salon_on.png" alt="">
+
+          <div class="p02-student" id="p02Student" aria-label="학생 캐릭터"></div>
+          <p class="p02-bubble" id="p02Bubble">
+            
+          </p>
+          <div class="p02-bubble-shadow">
+          <svg width="1376px" height="281px">
+            <path fill-rule="evenodd"  fill="rgb(254, 251, 249)" stroke="#053c85" stroke-width="5" d="M1336.996,256.628 L56.918,256.628 C48.634,256.628 41.918,249.912 41.918,241.628 L41.918,97.664 L10.036,79.257 C7.216,77.629 7.216,73.559 10.036,71.931 L41.918,53.524 L41.918,22.892 C41.918,14.608 48.634,7.892 56.918,7.892 L1336.996,7.892 C1345.281,7.892 1351.996,14.608 1351.996,22.892 L1351.996,241.628 C1351.996,249.912 1345.281,256.628 1336.996,256.628 Z"/>
+            </svg>
+          </div>
+          <div class="swipe-guide" id="p02Guide" style="position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none;z-index:70">
+            <img class="swipe-guide-finger" src="../../resources/img/common/img_finger01.png" alt="" style="position:absolute;width:110px" data-start-left="290" data-start-top="610" data-end-left="870" data-end-top="460" data-move-ms="1200" data-pause-ms="500" data-repeat="3">
+          </div>
+          <div class="avatar-modal is-off" id="p02Done">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">좋아요!</p>
+                <p class="avatar-popup-sub">모든 미션을 성공했어요.</p>
+                <a href="page03.html" class="avatar-popup-next card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="출동! 우리 동네 심부름 탐험대" data-next="page03.html"></script>
+  <script src="../../resources/js/toc.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const MISSIONS = [
+      { key: 'hospital', ask: '독감에 걸려서 아파요. 어디로 가야 할까요?', done: '병원에서 독감 진료를 받았어요!' },
+      { key: 'bakery', ask: '내일 친구의 생일 축하 케이크를 사주고 싶어요. 어디로 가야 할까요?', done: '빵집에서 맛있는 케이크를 구매했어요!' },
+      { key: 'salon', ask: '앞머리가 눈을 가려서 책을 읽을 때 불편해요. 어디로 가야 할까요?', done: '미용실에서 앞머리를 잘랐어요!' },
+      { key: 'stationery', ask: '내일은 미술시간이에요. 그런데 집에 다양한 색연필이 없어요. 어디로 가야 할까요?', done: '문구점에서 색연필을 구매했어요!' }
+    ];
+    const WRONG = '다시 한 번 잘 생각해봐요.';
+
+    const main = document.querySelector('main');
+    const student = $('p02Student');
+    const bubble = $('p02Bubble');
+    const places = Array.from(document.querySelectorAll('.p02-place'));
+    const stage = document.getElementById('stage');
+
+
+    let index = 0;
+    let locked = false;
+    let wrongTimer = null;
+
+    function ask() {
+      bubble.textContent = MISSIONS[index].ask;
+      // bubble.textContent = MISSIONS[index].ask + ' 알맞은 장소로 학생을 드래그해보세요.';
+      locked = false;
+    }
+
+    function placeAt(x, y) {
+      return places.find((p) => {
+        const r = p.getBoundingClientRect();
+        return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+      });
+    }
+
+    student.addEventListener('pointerdown', (e) => {
+      if (locked) return;
+      $('p02Guide').style.display = 'none';
+      e.preventDefault();
+      const s = stage.getBoundingClientRect().width / 1920;
+      const sx = e.clientX;
+      const sy = e.clientY;
+      student.setPointerCapture(e.pointerId);
+      const sr = student.getBoundingClientRect();
+      student.style.transformOrigin = (sx - sr.left) / s + 'px ' + (sy - sr.top) / s + 'px';
+      student.classList.remove('is-back');
+      student.classList.add('is-dragging');
+      main.classList.add('p02-dragging');
+      student.style.transform = 'scale(.5)';
+
+      const move = (ev) => {
+        student.style.transform = 'translate(' + (ev.clientX - sx) / s + 'px,' + (ev.clientY - sy) / s + 'px) scale(.5)';
+        const over = placeAt(ev.clientX, ev.clientY);
+        places.forEach((p) => p.classList.toggle('is-over', p === over));
+      };
+      const up = (ev) => {
+        student.removeEventListener('pointermove', move);
+        student.removeEventListener('pointerup', up);
+        student.removeEventListener('pointercancel', up);
+        student.classList.remove('is-dragging');
+        main.classList.remove('p02-dragging');
+        student.classList.add('is-back');
+        student.style.transform = '';
+        student.style.transformOrigin = '';
+        places.forEach((p) => p.classList.remove('is-over'));
+        const place = placeAt(ev.clientX, ev.clientY);
+        if (place) drop(place);
+      };
+      student.addEventListener('pointermove', move);
+      student.addEventListener('pointerup', up);
+      student.addEventListener('pointercancel', up);
+    });
+
+    function drop(place) {
+      const m = MISSIONS[index];
+      if (place.dataset.key !== m.key) {
+        playWrong();
+        bubble.textContent = WRONG;
+        clearTimeout(wrongTimer);
+        wrongTimer = setTimeout(() => { if (!locked) bubble.textContent = m.ask; }, 2000);
+        return;
+      }
+      clearTimeout(wrongTimer);
+      locked = true;
+      playCorrect();
+      place.src = place.dataset.on;
+      bubble.textContent = m.done;
+      // 기획서: 맞힌 문구 2초 뒤 다음 질문(마지막이면 완료 팝업)
+      setTimeout(() => {
+        if (index === MISSIONS.length - 1) {
+          $('p02Done').classList.remove('is-off');
+          return;
+        }
+        index += 1;
+        ask();
+      }, 2000);
+    }
+
+    ask();
+  })();
+  </script>
+</body>
+</html>

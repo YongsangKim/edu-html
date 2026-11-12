@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>순서대로! 데이터 측정에서 시각화까지</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        #p06Set{--gb-left:22px;--gb-w:520px;--gc-left:0;--gc-bottom:-9px;--gb-bottom:616px}
+        #p06Set .guide-bubble{--tail-x:267px;padding:20px 14px 14px;line-height:1.1}
+        #p06Set .guide-bubble:not(.is-long){font-size:46px}
+        .ask-pill{letter-spacing:-0.1em}
+
+        .p06-board{position:absolute;left:459px;top:172px;width:1393px;height:730px;border-radius:16px;background:#2a6dd0}
+        .p06-band{position:absolute;left:498px;top:207px;width:1317px;height:330px;border-radius:6px;background:#dff6ff}
+        .p06-band.is-all{animation:p06-glow 1s ease-in-out 3}
+        @keyframes p06-glow{50%{box-shadow:0 0 0 12px var(--c-orchid),0 0 40px 10px var(--c-orchid)}}
+
+        .p06-steps{position:absolute;left:580px;top:220px;width:1153px;height:297px;display:flex;align-items:center;justify-content:space-between}
+        .p06-step{position:relative}
+        .p06-step b{position:absolute;left:50%;top:-62px;width:224px;height:60px;margin-left:-112px;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;background:var(--c-white);border:solid 4px #a9c8ee;border-bottom:0;border-radius:14px 14px 0 0;font-weight:normal;font-family:'Cafe24 Ssurround';font-size:42px;letter-spacing:-0.04em;color:#2a6dd0}
+        .p06-slot{width:321px;height:297px;box-sizing:border-box;border:dashed 4px rgba(141,178,227,.3);border-radius:46px;background:var(--c-white);display:flex;align-items:center;justify-content:center;transition:border-color .3s}
+        .p06-step.is-now .p06-slot{border-color:#8db2e3}
+        .p06-step.is-done .p06-slot{border-color:transparent;background:none}
+        .p06-arrow{width:46px;height:98px;margin-top:-22px;background:#05408f;clip-path:polygon(0 0,42% 0,100% 50%,42% 100%,0 100%,58% 50%)}
+
+        .p06-tray{position:absolute;left:614px;top:573px;width:1083px;height:305px;display:flex;justify-content:space-between}
+        .p06-hold{width:326px;height:305px;display:flex;justify-content:center}
+        .p06-card{position:relative;z-index:5;filter:drop-shadow(0 12px 4px rgba(20,50,130,.35));touch-action:none;cursor:grab}
+        .p06-card img{display:block;pointer-events:none;user-select:none}
+        .p06-card.is-dragging{z-index:50;cursor:grabbing}
+        .p06-slot .p06-card{cursor:default}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="ask-pill is-fit"><span>온습도계가 데이터를 처리하는 순서에 맞게 카드를 올려보세요!</span></p>
+
+          <div class="p06-board"></div>
+          <div class="p06-band" id="p06Band"></div>
+
+          <div class="p06-steps" id="p06Steps">
+            <div class="p06-step"><b>1단계</b><div class="p06-slot" data-key="measure"></div></div>
+            <span class="p06-arrow"></span>
+            <div class="p06-step"><b>2단계</b><div class="p06-slot" data-key="record"></div></div>
+            <span class="p06-arrow"></span>
+            <div class="p06-step"><b>3단계</b><div class="p06-slot" data-key="visual"></div></div>
+          </div>
+
+          <div class="p06-tray" id="p06Tray"></div>
+
+          <div class="guide-set" id="p06Set">
+            <p class="guide-bubble is-center" id="p06Bubble">데이터 처리의<br>순서에 맞게<br>카드를 올려보세요</p>
+            <div class="guide-character"><img id="p06Char" src="img/p06_character.png" alt="메인 캐릭터"></div>
+          </div>
+
+          <div class="ox-result-wrong is-avatar is-off" id="p06Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="hint-title">힌트</p>
+                <p class="avatar-popup-text is-small" id="p06HintText"></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p06Done">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-title">잘했어요!</p>
+                    <p class="avatar-card-text">데이터를 처리하기 위한 3단계를 잘 확인했나요?</p>
+                  </div>
+                  <a href="page07.html" class="avatar-card-btn card-btn is-popup is-arrow js-nav-effect js-sfx" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">1단계는 도구로 수치를 ‘측정’하는 단계!</p>
+                  </div>
+                  <a href="page07.html" class="avatar-card-btn card-btn is-popup is-arrow js-nav-effect js-sfx" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">2단계는 측정한 값을 기록하는 단계!</p>
+                  </div>
+                  <a href="page07.html" class="avatar-card-btn card-btn is-popup is-arrow js-nav-effect js-sfx" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">3단계는 그래프로 시각화하는 단계예요!</p>
+                  </div>
+                  <a href="page07.html" class="avatar-card-btn card-btn is-popup is-arrow js-nav-effect js-sfx" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">이제 우리 그래프로 시각화하는 3단계를 조금 더 연습해 볼까요?</p>
+                  </div>
+                  <a href="page07.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="순서대로! 데이터 측정에서 시각화까지" data-next="page07.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const HINTS = ['처음에는 도구로 수치를 재는 일을 해요.', '잰 숫자를 표에 적고 다듬는 단계예요.', '숫자를 그림이나 그래프로 바꾸는 마지막 단계예요.'];
+    const STEPS = [
+      { key: 'measure', name: '측정', text: '잘했어! 첫번째 단계는 ‘측정’이야. 온도계나 습도계 같은 도구로 수치를 재는 것을 ‘측정’이라고 해.' },
+      { key: 'record', name: '기록·정리', text: '잘했어! 두번째 단계는 ‘기록·정리’야. 측정한 숫자를 표의 알맞은 칸에 적고 다듬는 것을 ‘기록·정리’라고 해.' },
+      { key: 'visual', name: '시각화', text: '마지막 단계는 ‘시각화’야. 복잡한 숫자를 그림이나 그래프로 바꾸어 한눈에 보기 쉽게 만드는 것을 ‘시각화’라고 해.' }
+    ];
+    const tray = $('p06Tray');
+    const say = initGuideSay({ bubble: $('p06Bubble'), img: $('p06Char'), set: $('p06Set'), poses: [] });
+    const steps = Array.from(document.querySelectorAll('.p06-step'));
+    const zones = steps.map((s) => s.querySelector('.p06-slot'));
+
+    const cards = shuffleArray(STEPS).map((s) => {
+      const hold = document.createElement('div');
+      hold.className = 'p06-hold';
+      const c = document.createElement('div');
+      c.className = 'p06-card';
+      c.dataset.key = s.key;
+      c.innerHTML = '<img src="img/p06_card_' + s.key + '.png" alt="' + s.name + '" draggable="false">';
+      hold.appendChild(c);
+      tray.appendChild(hold);
+      return c;
+    });
+
+    let now = 0;
+    let hintTimer = null;
+    // 지금 단계 칸만 받음(나머지 칸은 찬 것으로 처리해서 놓아도 반응 없음)
+    function activate() {
+      steps.forEach((s, i) => s.classList.toggle('is-now', i === now));
+      zones.forEach((z, i) => { if (i === now) delete z.dataset.filled; else z.dataset.filled = '1'; });
+      clearTimeout(hintTimer);
+      const showHint = () => say((now + 1) + '단계에 와야 할 카드는 무엇일까요?');
+      if (now === 0) hintTimer = setTimeout(showHint, 3000); else showHint();
+    }
+
+    initMatchDrag({
+      cards: cards,
+      zones: zones,
+      slop: 40,
+      onRight: () => {
+        clearTimeout(hintTimer);
+        playCorrect();
+        const step = STEPS[now];
+        steps[now].classList.remove('is-now');
+        steps[now].classList.add('is-done');
+        zones.forEach((z) => { z.dataset.filled = '1'; });
+        say(step.text);
+        const voice = new Audio('sound/p06_step' + (now + 1) + '.mp3');
+        voice.play().catch(() => {});
+        setTimeout(() => {
+          now += 1;
+          if (now < STEPS.length) { activate(); return; }
+          $('p06Band').classList.add('is-all');
+          setTimeout(() => $('p06Done').classList.remove('is-off'), 3200);
+        }, 5000);
+      },
+      onWrong: (card, zone) => {
+        if (!zone) return;
+        playWrong();
+        $('p06HintText').textContent = HINTS[now];
+        flashLayer($('p06Wrong'));
+      }
+    });
+
+    activate();
+  })();
+  </script>
+</body>
+</html>

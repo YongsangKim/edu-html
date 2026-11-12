@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>배려와 존중의 갈림길</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 기획서 73~81p. 도입(2초 뒤 출발!) → 생활 속 상황 7개: 두 보기 중 배려하고 존중하는 쪽을 고르면 정답 효과음과 함께 왼쪽 지도 위 메인 캐릭터가 길을 따라 한 칸 이동, 틀리면 카드 흔들림(오답 효과음). 마지막 정답 뒤 도착(2초) → page13.
+           지도는 기획서처럼 건물 12칸(4×3) 사이의 길(교차점 5×4). 출발(왼쪽 아래) → 도착(오른쪽 위), 정답 보기 카드의 화살표(위쪽 카드 ↑, 아래쪽 카드 →)가 이동 방향. 정답 위치는 기획서 슬라이드 순서대로 고정 */
+
+        .p12-board{position:absolute;left:41px;top:48px;width:1074px;height:857px;box-sizing:border-box;border-radius:10px;background:#cfe8b5 center / 100% 100% no-repeat}
+        .p12-board.is-fallback{border:solid 6px var(--c-purple)}
+        .p12-road{position:absolute;left:0;top:0;width:100%;height:100%}
+        .p12-board:not(.is-fallback) .p12-flag{display:none}
+        .p12-flag{position:absolute;margin:0;white-space:nowrap;height:70px;padding:6px 30px 0;box-sizing:border-box;display:flex;align-items:center;border-radius:35px;background:var(--c-purple);border:solid 4px var(--c-cream);font-family:'Cafe24 Ssurround';font-size:40px;color:var(--c-white);letter-spacing:-0.04em;transform:translate(-50%,0)}
+        .p12-flag.is-goal{background:#e5484d}
+        .p12-trail{stroke-dasharray:1;stroke-dashoffset:1;animation:p12-trail .9s ease forwards}
+        .p12-dot{opacity:0;animation:p12-dot .01s .9s forwards}
+        @keyframes p12-dot{to{opacity:1}}
+        @keyframes p12-trail{to{stroke-dashoffset:0}}
+        .p12-char{position:absolute;left:0;top:0;width:auto;max-width:none;transform:translate(-50%,-100%);transition:left 1.1s ease,top 1.1s ease;z-index:3;pointer-events:none}
+
+        .p12-panel{position:absolute;left:1121px;top:48px;width:756px;height:857px;box-sizing:border-box;border:solid 5px var(--c-purple);background:#dff6ff;border-radius:15px}
+        .p12-q{position:absolute;left:1149px;top:70px;width:700px;height:240px;margin:0;display:flex;align-items:center;justify-content:center;text-align:center;font-family:'Cafe24 Ssurround';font-size:58px;line-height:1.2;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all}
+        .p12-opts{position:absolute;left:1189px;top:340px;width:620px;height:520px}
+        .p12-card{position:absolute;left:0;width:620px;height:190px;box-sizing:border-box;padding:0 30px 0 26px;display:flex;align-items:center;gap:24px;text-align:left;border:solid 6px var(--c-purple);border-radius:30px;background:var(--c-white);cursor:pointer;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
+          font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.25;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all;transition:border-color .15s,background .15s}
+        .p12-card:nth-of-type(1){top:0}
+        .p12-card:nth-of-type(2){top:330px}
+        .p12-card:hover{border-color:var(--c-sky);background:var(--c-pale)}
+        .p12-card.is-selected{border-color:#ff2fc2}
+        .p12-card.is-wrong{animation:fix-word-shake .3s ease}
+        .p12-card i{flex:0 0 96px;width:96px;height:96px;border-radius:24px;background:var(--c-purple);display:flex;align-items:center;justify-content:center}
+        .p12-card i svg{width:60px;height:60px;fill:none;stroke:var(--c-white);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+        .p12-vs{position:absolute;left:50%;top:205px;width:110px;height:110px;margin-left:-55px;border-radius:50%;background:var(--c-navy);border:solid 6px var(--c-cream);display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:48px;color:var(--c-white);z-index:2}
+        .p12-opts.is-locked{pointer-events:none}
+        .p12-opts.is-off,.p12-q.is-off{display:none}
+
+        .p12-big{position:absolute;left:1121px;top:48px;width:756px;height:857px;margin:0;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:130px;color:var(--c-purple);letter-spacing:-0.05em}
+        .p12-big.is-off{display:none}
+        .p12-arrive.is-off{display:none}
+        .p12-bubble{position:absolute;left:1224px;top:96px;width:498px;height:226px;margin:0;box-sizing:border-box;padding-top:10px;display:flex;align-items:center;justify-content:center;border:solid 5px var(--c-purple);border-radius:20px;background:var(--c-white);font-family:'Cafe24 Ssurround';font-size:130px;color:var(--c-purple);letter-spacing:-0.05em;z-index:2;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
+        .p12-bubble:before,.p12-bubble:after{content:'';position:absolute;clip-path:polygon(0 0,100% 0,100% 100%)}
+        .p12-bubble:before{left:190px;top:100%;width:86px;height:58px;background:var(--c-purple)}
+        .p12-bubble:after{left:196px;top:calc(100% - 6px);width:70px;height:50px;background:var(--c-white);z-index:1}
+        .p12-robot{position:absolute;right:0px;bottom:28px;height:776px;width:auto;pointer-events:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p12-board" id="p12Board">
+            <svg class="p12-road" id="p12Road" viewBox="0 0 1074 857" preserveAspectRatio="none"></svg>
+            <p class="p12-flag" id="p12Start">출발!</p>
+            <p class="p12-flag is-goal" id="p12Goal">도착!</p>
+            <img class="p12-char" id="p12Char" alt="캐릭터">
+          </div>
+
+          <div class="p12-panel"></div>
+          <p class="p12-big" id="p12Big">출발!</p>
+          <p class="p12-q is-off" id="p12Q"></p>
+          <div class="p12-opts is-off" id="p12Opts"></div>
+          <div class="p12-arrive is-off" id="p12Arrive">
+            <p class="p12-bubble">도착!</p>
+            <img class="p12-robot" src="img/p12_arrive.png" onerror="this.onerror=null;this.src='img/p13_character.png'" alt="메인 캐릭터">
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="배려와 존중의 갈림길" data-next="page13.html"></script>
+  <script src="../../resources/js/toc.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    /* 지도 통이미지 img/p12_map.png (1074x857, 캐릭터·길 선 없는 배경). 점선 교차점 5x4 의 보드 안 좌표(px)는 디자인에서 잰 값 — 지도 그림이 바뀌면 여기만 맞춤.
+       캐릭터 3종 img/p12_char_start.png(출발) · p12_char_move.png(움직이는 중) · p12_char_goal.png(도착). 높이 h, 기준점(교차점)에서 가로 dx · 세로 dy 만큼 옮겨 놓음(아래 가운데가 기준).
+       이미지가 없으면 지도는 직접 그린 길로, 캐릭터는 메인 캐릭터로 대신 보임 */
+    const NX = 5, NY = 4, DX = 217, DY = 185, ROAD = 84;
+    const XS = [95, 317, 532, 746, 967], YS = [140, 330, 512, 698];
+    const node = (i, j) => [XS[i], YS[j]];
+    const CHAR = {
+      start: { src: 'img/p12_char_start.png', h: 185, dx: 120, dy: 32 },
+      move: { src: 'img/p12_char_move.png', h: 185, dx: 0, dy: 32 },
+      goal: { src: 'img/p12_char_goal.png', h: 205, dx: -77, dy: 45 }
+    };
+    const MOVES = ['R', 'U', 'R', 'U', 'U', 'R', 'R'];
+    const PTS = [[0, 3]];
+    MOVES.forEach((m) => { const p = PTS[PTS.length - 1]; PTS.push(m === 'R' ? [p[0] + 1, p[1]] : [p[0], p[1] - 1]); });
+    const QUESTIONS = [
+      { pos: 'bottom', q: '함께 놀고 싶어 하는 친구에게 어떻게 말할까요?', right: '우리 같이 놀자!', wrong: '옆에서 보고 있어도 돼.' },
+      { pos: 'top', q: '친구가 천천히 이야기하고 있어요. 어떻게 할까요?', right: '끝까지 듣고 기다려요.', wrong: '말을 끊고 내가 말해요.' },
+      { pos: 'bottom', q: '나와 다른 의견을 말하는 친구에게 어떻게 말할까요?', right: '친구의 이유를<br>먼저 들어요.', wrong: '이유를 듣기 전에<br>내 생각대로 정해요.' },
+      { pos: 'top', q: '친구가 모둠 활동에 참여하고 싶다고 했어요. 어떻게 할까요?', right: '하고 싶은 역할을<br>물어보고 함께 나눠요.', wrong: '친구는 옆에서<br>보게 해요.' },
+      { pos: 'top', q: '친구가 발표하다가 실수를 해서 ‘내가 다시 말해 볼게.’ 라고 했어요. 어떻게 할까요?', right: '다시 말하도록<br>기다려요.', wrong: '내가 대신 발표해요.' },
+      { pos: 'bottom', q: '친구의 물건을 사용하고 싶어요. 어떻게 할까요?', right: '사용해도 되는지<br>먼저 물어봐요.', wrong: '묻지 않고 잠깐 쓴 뒤<br>돌려줘요.' },
+      { pos: 'bottom', q: '학급 대표 후보가 되고 싶은 학생을 모집해요. 어떻게 정할까요?', right: '원하는 학생 모두에게<br>후보가 될 기회를 줘요.', wrong: '잘할 것 같은 학생만<br>후보로 정해요.' }
+    ];
+    const ARROWS = {
+      top: '<i>' + ic('arrowUp') + '</i>',
+      bottom: '<i>' + ic('arrowR2') + '</i>'
+    };
+    const W = 1074, H = 857;
+    const road = $('p12Road');
+    const board = $('p12Board');
+    const charImg = $('p12Char');
+    let charAt = null;
+    const optsBox = $('p12Opts');
+    const qBox = $('p12Q');
+    const big = $('p12Big');
+    let step = 0;
+
+    const BUILD = ['🏠', '🏫', '🌳', '🏢', '⛲', '🏪', '🌳', '🏠', '🏥', '🌳', '🏡', '🏬'];
+    function drawRoad() {
+      let s = '';
+      const half = ROAD / 2;
+      for (let j = 0; j < NY - 1; j++) {
+        for (let i = 0; i < NX - 1; i++) {
+          const [x, y] = node(i, j);
+          s += '<rect x="' + (x + half) + '" y="' + (y + half) + '" width="' + (DX - ROAD) + '" height="' + (DY - ROAD) + '" rx="22" fill="#fff" stroke="#8fbf74" stroke-width="5"/>'
+            + '<text x="' + (x + DX / 2) + '" y="' + (y + DY / 2 + 22) + '" font-size="64" text-anchor="middle">' + BUILD[j * (NX - 1) + i] + '</text>';
+        }
+      }
+      let d = '';
+      for (let i = 0; i < NX; i++) d += 'M' + node(i, 0)[0] + ',' + node(0, 0)[1] + ' V' + node(0, NY - 1)[1] + ' ';
+      for (let j = 0; j < NY; j++) d += 'M' + node(0, j)[0] + ',' + node(0, j)[1] + ' H' + node(NX - 1, j)[0] + ' ';
+      road.innerHTML = '<path d="' + d + '" fill="none" stroke="#a98a55" stroke-width="' + (ROAD + 10) + '" stroke-linecap="round" stroke-linejoin="round"/>'
+        + '<path d="' + d + '" fill="none" stroke="#f2d9a6" stroke-width="' + ROAD + '" stroke-linecap="round" stroke-linejoin="round"/>'
+        + '<path d="' + d + '" fill="none" stroke="#fff" stroke-width="5" stroke-dasharray="22 20"/>' + s + '<g id="p12Trail"></g><g id="p12Dots"></g>'
+        + [[PTS[0], '#4b1fb8'], [PTS[PTS.length - 1], '#e5484d']].map((m) => '<circle cx="' + node(...m[0])[0] + '" cy="' + node(...m[0])[1] + '" r="20" fill="#fff" stroke="' + m[1] + '" stroke-width="9"/>').join('');
+    }
+    function setChar(kind, pt) {
+      const c = CHAR[kind];
+      charAt = pt || charAt;
+      charImg.onerror = () => { charImg.onerror = null; charImg.src = '../img/character/sa_main.png'; };
+      if (charImg.dataset.kind !== kind) { charImg.dataset.kind = kind; charImg.src = c.src; }
+      charImg.style.height = c.h + 'px';
+      charImg.style.left = (charAt[0] + c.dx) + 'px';
+      charImg.style.top = (charAt[1] + c.dy) + 'px';
+    }
+    function place(el, p, dy) {
+      el.style.left = (p[0] / W * 100) + '%';
+      el.style.top = (p[1] / H * 100) + '%';
+      if (dy) el.style.marginTop = dy + 'px';
+    }
+
+    function showQuestion() {
+      const q = QUESTIONS[step];
+      big.classList.add('is-off');
+      qBox.innerHTML = q.q;
+      qBox.style.fontSize = (q.q.length <= 24 ? 66 : q.q.length <= 36 ? 56 : 48) + 'px';
+      qBox.classList.remove('is-off');
+      optsBox.innerHTML = '<span class="p12-vs">VS</span>';
+      optsBox.classList.remove('is-off', 'is-locked');
+      const other = q.pos === 'top' ? 'bottom' : 'top';
+      const list = q.pos === 'top' ? [{ t: q.right, right: true, dir: 'top' }, { t: q.wrong, dir: 'bottom' }] : [{ t: q.wrong, dir: 'top' }, { t: q.right, right: true, dir: 'bottom' }];
+      list.forEach((o) => {
+        const b = document.createElement('button');
+        b.className = 'p12-card';
+        b.innerHTML = ARROWS[o.dir] + '<span>' + o.t + '</span>';
+        b.addEventListener('click', () => pick(b, o.right));
+        optsBox.appendChild(b);
+      });
+    }
+
+    function pick(b, right) {
+      if (!right) {
+        playWrong();
+        b.classList.remove('is-wrong');
+        void b.offsetWidth;
+        b.classList.add('is-wrong');
+        return;
+      }
+      playCorrect();
+      b.classList.add('is-selected');
+      optsBox.classList.add('is-locked');
+      step += 1;
+      const a = node(...PTS[step - 1]), c = node(...PTS[step]);
+      $('p12Trail').insertAdjacentHTML('beforeend', '<path class="p12-trail" pathLength="1" d="M' + a[0] + ',' + a[1] + ' L' + c[0] + ',' + c[1] + '" fill="none" stroke="#4b1fb8" stroke-width="12" stroke-linecap="round"/>');
+      $('p12Dots').insertAdjacentHTML('beforeend', '<circle class="p12-dot" cx="' + c[0] + '" cy="' + c[1] + '" r="11" fill="#4b1fb8"/>');
+      setChar(step < QUESTIONS.length ? 'move' : 'goal', c);
+      setTimeout(() => {
+        if (step < QUESTIONS.length) { showQuestion(); return; }
+        qBox.classList.add('is-off');
+        optsBox.classList.add('is-off');
+        $('p12Arrive').classList.remove('is-off');
+        setTimeout(() => navigateTo('page13.html'), 2000);
+      }, 1300);
+    }
+
+    const mapImg = new Image();
+    mapImg.onload = () => { board.style.backgroundImage = "url('img/p12_map.png')"; road.innerHTML = '<g id="p12Trail"></g><g id="p12Dots"></g>'; };
+    mapImg.onerror = () => { board.classList.add('is-fallback'); drawRoad(); };
+    mapImg.src = 'img/p12_map.png';
+    setChar('start', node(...PTS[0]));
+    const s = $('p12Start'), g = $('p12Goal');
+    place(s, [node(...PTS[0])[0] + 30, node(...PTS[0])[1] + ROAD / 2 + 8]);
+    place(g, [node(...PTS[PTS.length - 1])[0] - 30, node(...PTS[PTS.length - 1])[1] - ROAD / 2 - 8 - 70]);
+    setTimeout(showQuestion, 2000);
+  })();
+  </script>
+</body>
+</html>

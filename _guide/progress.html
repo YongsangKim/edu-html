@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI 가이드 - 진행도</title>
+    <link rel="stylesheet" href="../resources/css/common.css">
+    <link rel="stylesheet" href="guide.css">
+    <style>
+        /* 게이지 왼쪽 아이콘은 공용 기본(img/common/icon_gauge_star.png). 다른 그림은 페이지에서 .pNN-gauge:before{background-image} 로 바꿈 */
+        .g-gauge-heart{position:absolute;left:0;top:50%;width:120px;height:auto;margin:-52px 0 0 -60px;z-index:2}
+        .g-gauge-small:before{left:-30px;top:-20px;width:90px;height:85px}
+        .g-gauge-small .gauge-fill{border-radius:24px}
+        .g-gauge-small .gauge-fill:after{top:7px;height:7px}
+    </style>
+</head>
+<body>
+  <div class="g-wrap">
+    <h1>진행도 (게이지 · 별 · 배지)</h1>
+    <p class="g-note">실제 화면(1920×960)을 절반 크기로 보여줌. 공용 <code>css/common.css</code>를 고치면 실제 페이지에도 그대로 반영됨.</p>
+    <ul class="g-toc"></ul>
+
+    <h2>1. 진행 게이지 <code>.gauge</code> + <code>.gauge-fill</code> — 공용화 완료</h2>
+    <p class="g-note">
+      마크업: <code>&lt;div class="gauge pNN-gauge"&gt;&lt;div class="gauge-fill" id="…"&gt;&lt;/div&gt;&lt;/div&gt;</code> — 채움 폭은 스크립트에서 <code>style.width = '40%'</code>.
+      모양(하늘색 테두리 · 자홍→노랑 그라데이션 · 광택 줄)은 전부 공용이고, 페이지에는 <b>위치·폭</b>과 <b>왼쪽 별 아이콘</b>(<code>.pNN-gauge:before{background-image:url('img/…')}</code>)만 둠.
+      기본 높이 94px, 얇게 쓸 때는 <code>.gauge.is-thin</code>(64px · 별 100×94). 세로형 <code>.is-vertical</code>은 확정 차시에서 아직 안 써서 견본에서 뺌(CSS는 그대로). 그 밖의 크기는 페이지에서 덮어씀.
+    </p>
+    <div class="g-list">
+      <div class="g-item">
+        <p class="g-meta"><b>기본 94px</b> (별 124×117)<br>sa/10:07 · gwa/01:02·03</p>
+        <div class="g-view"><div class="g-stage">
+          <div class="gauge g-gauge-star" style="left:200px;top:200px;width:1500px"><div class="gauge-fill" style="width:30%"></div></div>
+          <div class="gauge g-gauge-star" style="left:200px;top:450px;width:1500px"><div class="gauge-fill" style="width:70%"></div></div>
+          <div class="gauge g-gauge-star" style="left:200px;top:700px;width:1500px"><div class="gauge-fill" style="width:100%"></div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta"><b>얇게 <code>.is-thin</code> 64px</b> (별 100×94)<br>sa/02:14 · sa/03:05·10·13 · sa/04:16 · sa/06:12 · sa/07:12 · sa/08:13</p>
+        <div class="g-view"><div class="g-stage">
+          <div class="gauge is-thin g-gauge-star" style="left:200px;top:400px;width:1500px"><div class="gauge-fill" style="width:50%"></div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta"><b>왼쪽 아이콘 바꾸기 — 공용 프리셋</b> <code>.gauge.is-star-on</code>(별 켜진 모양) · <code>.is-pencil</code>(연필). 클래스 하나만 더하면 됨, 위치·폭만 페이지에서 지정<br>별 켜진 모양 sa/07:12 / 연필 sa/02:06(굵기 56px로 줄임)</p>
+        <div class="g-view"><div class="g-stage">
+          <div class="gauge is-thin" style="left:200px;top:150px;width:1500px"><div class="gauge-fill" style="width:50%"></div></div>
+          <div class="gauge is-thin is-star-on" style="left:200px;top:380px;width:1500px"><div class="gauge-fill" style="width:50%"></div></div>
+          <div class="gauge is-pencil g-gauge-small" style="left:200px;top:640px;width:900px;height:56px;border-width:5px;border-radius:28px"><div class="gauge-fill" style="width:66.6%"></div></div>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta"><b>로봇 + 편지 — 공용 프리셋 <code>.gauge.is-thin.is-robot</code></b> 왼쪽 로봇·오른쪽 끝 편지가 자동으로 붙음. 위치 미세 조정은 페이지에서 <code>--gi-x</code>·<code>--gi-y</code>(로봇) · <code>--ge-r</code>·<code>--ge-t</code>(편지)로 덮어씀<br>sa/03:05·10·13 마음 전달·마음 게이지(채움 끝에 하트 <code>.p12-gauge-heart</code>)</p>
+        <div class="g-view"><div class="g-stage">
+          <div class="gauge is-thin is-robot" style="left:340px;top:300px;width:1215px;height:70px"><div class="gauge-fill" style="width:40%"></div></div>
+          <div class="gauge is-thin is-robot" style="left:340px;top:600px;width:1215px;height:70px"><div class="gauge-fill" style="width:75%"></div><img class="g-gauge-heart" style="left:75%" src="../sa/03/img/p13_gauge_heart.png" alt=""></div>
+        </div></div>
+      </div>
+    </div>
+
+    <h2>2. 별 진행도 — 공용 <code>.prompt-fix-stars-pill</code></h2>
+    <p class="g-note">별 이미지 <code>img/common/icon_star.png</code> ↔ <code>icon_star_on.png</code>(맞힐 때마다 하나씩 켬). 쓰는 곳 sa/01:16.</p>
+    <div class="g-list">
+      <div class="g-item">
+        <p class="g-meta"><b>별 3개 알약</b><br>공용 <code>.prompt-fix-stars-pill</code> sa/01:16</p>
+        <div class="g-view"><div class="g-stage">
+          <div class="prompt-fix-stars-pill" style="left:300px;top:300px">
+            <img class="find-star" src="../resources/img/common/icon_star_on.png" alt=""><img class="find-star" src="../resources/img/common/icon_star_on.png" alt=""><img class="find-star" src="../resources/img/common/icon_star.png" alt="">
+          </div>
+        </div></div>
+      </div>
+    </div>
+
+    <h2>3. STAGE · 문제 번호 알약 — <code>.ask-pill.has-stage</code> 공용</h2>
+    <p class="g-note">하늘색(#91b9e7) 알약 + 진한 테두리 + 아래 연한 그림자. <code>&lt;p class="ask-pill has-stage is-fit"&gt;&lt;i&gt;STAGE 1&lt;/i&gt;&lt;span&gt;문구&lt;/span&gt;&lt;/p&gt;</code>, 왼쪽 칸 글자는 "STAGE 1"·"문제 1"처럼 페이지에서 바꿈. 쓰는 곳 sa/01:16 · sa/04:16 · sa/05:02·08 · sa/10:02.</p>
+    <div class="g-list">
+      <div class="g-item">
+        <p class="g-meta"><b>STAGE / 문제 번호 + 문구</b><br>sa/01:16 · sa/04:16 · sa/05:02 · sa/10:02</p>
+        <div class="g-view"><div class="g-stage">
+          <p class="ask-pill has-stage is-fit" style="left:600px;top:150px;transform:none"><i>STAGE 1</i><span>사진을 잘 살펴보세요.</span></p>
+          <p class="ask-pill has-stage is-fit" style="left:600px;top:450px;transform:none"><i>문제 1</i><span>잘못된 분석 정보를 찾아요.</span></p>
+        </div></div>
+      </div>
+    </div>
+
+    <h2>4. 단계 점 <code>.prompt-steps .step-dot</code> — 공용</h2>
+    <p class="g-note">현재 단계만 <code>.is-active</code>(남색 그라데이션), 점 크기는 <code>--sd</code>(기본 108px), 점 사이 선은 자동. 기능 S(프롬프트 빌더)는 자동으로 켜 주고, 그 외에는 스크립트에서 직접 켬.</p>
+    <div class="g-list">
+      <div class="g-item">
+        <p class="g-meta"><b>1 · 2 · 3 단계</b><br>sa/01:08 · sa/05:02</p>
+        <div class="g-view"><div class="g-stage">
+          <div class="prompt-steps" style="position:absolute;left:300px;top:400px;transform:scale(2);transform-origin:0 0">
+            <span class="step-dot">1</span><span class="step-dot is-active">2</span><span class="step-dot">3</span>
+          </div>
+        </div></div>
+      </div>
+    </div>
+
+    <h2>5. 단계 점 + 제목 세트 <code>.step-head</code> — 공용</h2>
+    <p class="g-note"><code>.step-head</code> 안에 <code>.prompt-steps</code>(점)와 <code>.ask-pill</code>(제목)을 나란히 넣으면 점 사이 선이 제목 알약까지 이어집니다. 위치는 기본 left 80 · top 48, 간격은 <code>--sh-gap</code>. 예 sa/05:02.</p>
+    <div class="g-list">
+      <div class="g-item">
+        <p class="g-meta"><b>점 3개 + STAGE 제목</b><br>sa/05:02</p>
+        <div class="g-view"><div class="g-stage">
+          <div class="step-head">
+            <div class="prompt-steps"><span class="step-dot is-active">1</span><span class="step-dot">2</span><span class="step-dot">3</span></div>
+            <p class="ask-pill has-stage"><i>STAGE1</i><span>박물관까지 어떻게 갈까?</span></p>
+          </div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+  <script src="guide.js"></script>
+</body>
+</html>

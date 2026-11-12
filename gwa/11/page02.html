@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>콩팥 필터를 부탁해~</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .p02-lab-wrap {
+            position: absolute;
+            left: 210px;
+            top: 20px;
+            width: 1500px;
+            height: 920px;
+            z-index: 1;
+        }
+
+        .p02-blood-zone {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1500px;
+            height: 460px;
+            box-sizing: border-box;
+            background: radial-gradient(ellipse at 50% 35%, #ff9e9e 0%, #f47d7d 45%, #e35a5a 80%, #be3c3c 100%);
+            border: 5px solid #233567;
+            border-bottom: none;
+            border-radius: 36px 36px 0 0;
+            box-shadow: inset 0 24px 28px rgba(255, 255, 255, 0.45), inset 0 -24px 30px rgba(130, 20, 20, 0.4);
+            overflow: hidden;
+        }
+
+        .p02-blood-zone::before {
+            content: '';
+            position: absolute;
+            left: -18px;
+            top: -5px;
+            bottom: -5px;
+            width: 44px;
+            border-radius: 50%;
+            background: linear-gradient(90deg, #8d2222 0%, #cf4c4c 100%);
+            border: 5px solid #233567;
+            box-shadow: inset -6px 0 10px rgba(0, 0, 0, 0.35);
+            pointer-events: none;
+            z-index: 5;
+        }
+        .p02-blood-zone::after {
+            content: '';
+            position: absolute;
+            right: -18px;
+            top: -5px;
+            bottom: -5px;
+            width: 44px;
+            border-radius: 50%;
+            background: linear-gradient(90deg, #cf4c4c 0%, #8d2222 100%);
+            border: 5px solid #233567;
+            box-shadow: inset 6px 0 10px rgba(0, 0, 0, 0.35);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .p02-bg-cells {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+            opacity: 0.55;
+        }
+        .p02-cell {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, rgba(255, 210, 210, 0.45) 0%, rgba(210, 50, 50, 0.35) 60%, rgba(140, 20, 20, 0.45) 100%);
+            filter: blur(1.5px);
+        }
+        .p02-cell.c1 { left: 80px; top: 70px; width: 110px; height: 65px; transform: rotate(-18deg); }
+        .p02-cell.c2 { left: 340px; top: 220px; width: 130px; height: 75px; transform: rotate(24deg); }
+        .p02-cell.c3 { left: 620px; top: 60px; width: 95px; height: 55px; transform: rotate(-8deg); }
+        .p02-cell.c4 { left: 910px; top: 210px; width: 125px; height: 70px; transform: rotate(15deg); }
+        .p02-cell.c5 { left: 1180px; top: 90px; width: 140px; height: 80px; transform: rotate(-25deg); }
+        .p02-cell.c6 { left: 1350px; top: 250px; width: 100px; height: 60px; transform: rotate(12deg); }
+
+        .p02-filter-bar {
+            position: absolute;
+            left: 0;
+            top: 456px;
+            width: 1500px;
+            height: 68px;
+            box-sizing: border-box;
+            background: #2b0c15;
+            border-left: 5px solid #233567;
+            border-right: 5px solid #233567;
+            z-index: 3;
+            overflow: visible;
+        }
+
+        .p02-mem-wing {
+            position: absolute;
+            top: 0;
+            height: 68px;
+            box-sizing: border-box;
+            background: linear-gradient(180deg, #ffa89b 0%, #f37d6a 50%, #d85743 100%);
+            border-top: 5px solid #233567;
+            border-bottom: 5px solid #233567;
+            box-shadow: inset 0 4px 6px rgba(255, 255, 255, 0.7), inset 0 -4px 6px rgba(120, 25, 15, 0.4);
+            z-index: 4;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .p02-mem-wing.is-l {
+            left: 0;
+            border-left: none;
+            border-right: 4px solid #233567;
+            border-radius: 0 34px 34px 0;
+        }
+        .p02-mem-wing.is-r {
+            right: 0;
+            border-right: none;
+            border-left: 4px solid #233567;
+            border-radius: 34px 0 0 34px;
+        }
+
+        .p02-filter-pores {
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(ellipse 9px 5px at center, rgba(140, 25, 15, 0.4) 100%, transparent 100%);
+            background-size: 34px 22px;
+            background-repeat: repeat-x;
+            background-position: center;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .p02-hole {
+            position: absolute;
+            top: 456px;
+            width: 140px;
+            height: 68px;
+            transform: translateX(-50%);
+            box-sizing: border-box;
+            border-radius: 34px;
+            border: 4px solid #00f0ff;
+            background: radial-gradient(ellipse at center, rgba(0, 240, 255, 0.15) 0%, rgba(20, 8, 14, 0.95) 75%);
+            box-shadow: 0 0 18px #00f0ff, 0 0 32px rgba(0, 240, 255, 0.6), inset 0 0 14px rgba(0, 240, 255, 0.85);
+            z-index: 6;
+            pointer-events: none;
+        }
+
+        .p02-hole-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 26px;
+            line-height: 1;
+            color: #00f0ff;
+            text-shadow: 0 0 10px #00f0ff;
+            animation: p02PulseArrow 1.2s ease-in-out infinite alternate;
+        }
+        .p02-hole-arrow.is-l { left: -32px; }
+        .p02-hole-arrow.is-r { right: -32px; }
+        @keyframes p02PulseArrow {
+            from { transform: translateY(-50%) scale(0.9); opacity: 0.7; }
+            to { transform: translateY(-50%) scale(1.15); opacity: 1; }
+        }
+
+        .p02-hole-stream {
+            position: absolute;
+            left: 50%;
+            top: 64px;
+            transform: translateX(-50%);
+            width: 124px;
+            height: 160px;
+            background: linear-gradient(180deg, rgba(0, 240, 255, 0.45) 0%, rgba(255, 255, 255, 0.25) 30%, rgba(255, 255, 255, 0) 100%);
+            clip-path: polygon(18% 0%, 82% 0%, 100% 100%, 0% 100%);
+            pointer-events: none;
+            filter: blur(1.5px);
+            opacity: 0.85;
+            animation: p02StreamShimmer 1.8s ease-in-out infinite alternate;
+        }
+        @keyframes p02StreamShimmer {
+            from { opacity: 0.6; height: 140px; }
+            to { opacity: 0.95; height: 175px; }
+        }
+
+        .p02-urine-zone {
+            position: absolute;
+            left: 0;
+            top: 520px;
+            width: 1500px;
+            height: 400px;
+            box-sizing: border-box;
+            background: linear-gradient(180deg, #fffbeb 0%, #fff3b0 35%, #ffe675 75%, #ffd43f 100%);
+            border: 5px solid #233567;
+            border-top: none;
+            border-radius: 0 0 36px 36px;
+            box-shadow: inset 0 24px 30px rgba(255, 255, 255, 0.8), inset 0 -18px 24px rgba(200, 150, 20, 0.35);
+            overflow: hidden;
+        }
+
+        .p02-urine-wave {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 90px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0,40 C150,90 350,10 500,50 C650,90 850,20 1000,60 C1100,85 1150,45 1200,50 L1200,120 L0,120 Z' fill='%23f6c828' opacity='0.45'/%3E%3Cpath d='M0,60 C200,20 400,80 600,45 C800,10 950,75 1200,40 L1200,120 L0,120 Z' fill='%23ebb916' opacity='0.35'/%3E%3C/svg%3E") repeat-x;
+            background-size: 750px 90px;
+            animation: p02WaveMove 12s linear infinite;
+            pointer-events: none;
+        }
+        @keyframes p02WaveMove {
+            from { background-position-x: 0; }
+            to { background-position-x: 750px; }
+        }
+
+        .p02-bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9) 0%, rgba(255, 235, 130, 0.4) 60%, rgba(220, 160, 20, 0.6) 100%);
+            border: 1.5px solid rgba(255, 255, 255, 0.7);
+            pointer-events: none;
+            animation: p02BubbleRise 6s ease-in infinite;
+        }
+        .p02-bubble.b1 { left: 160px; bottom: 20px; width: 22px; height: 22px; animation-duration: 5s; animation-delay: 0.5s; }
+        .p02-bubble.b2 { left: 420px; bottom: 35px; width: 32px; height: 32px; animation-duration: 6.5s; animation-delay: 1.8s; }
+        .p02-bubble.b3 { left: 740px; bottom: 15px; width: 26px; height: 26px; animation-duration: 5.2s; animation-delay: 2.7s; }
+        .p02-bubble.b4 { left: 1050px; bottom: 30px; width: 36px; height: 36px; animation-duration: 7s; animation-delay: 0.2s; }
+        .p02-bubble.b5 { left: 1330px; bottom: 25px; width: 20px; height: 20px; animation-duration: 5.8s; animation-delay: 3.3s; }
+        @keyframes p02BubbleRise {
+            0% { transform: translateY(0) scale(0.85); opacity: 0; }
+            20% { opacity: 0.85; }
+            80% { opacity: 0.85; }
+            100% { transform: translateY(-240px) scale(1.15); opacity: 0; }
+        }
+
+        .p02-tag {
+            position: absolute;
+            box-sizing: border-box;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Cafe24 Ssurround', sans-serif;
+            font-weight: 700;
+            border-radius: 26px;
+            z-index: 10;
+            pointer-events: none;
+            letter-spacing: -0.03em;
+        }
+        .p02-tag-dot {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+        }
+
+        .p02-tag.is-blood {
+            left: 50%;
+            top: 24px;
+            transform: translateX(-50%);
+            background: #ffffff;
+            border: 4px solid #e24e5a;
+            color: #d63342;
+            font-size: 28px;
+            padding: 8px 34px;
+            box-shadow: 0 8px 18px rgba(160, 20, 30, 0.28);
+        }
+        .p02-tag.is-blood .p02-tag-dot { background: #e24e5a; box-shadow: 0 0 6px rgba(226, 78, 90, 0.7); }
+
+        .p02-tag.is-filter {
+            left: 32px;
+            top: 468px;
+            background: #e83856;
+            border: 3.5px solid #ffffff;
+            color: #ffffff;
+            font-size: 24px;
+            padding: 6px 24px;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+            z-index: 12;
+        }
+
+        .p02-tag.is-urine {
+            left: 32px;
+            top: 544px;
+            background: #ffffff;
+            border: 4px solid #d89600;
+            color: #b07500;
+            font-size: 26px;
+            padding: 8px 28px;
+            box-shadow: 0 8px 18px rgba(180, 130, 10, 0.22);
+            z-index: 12;
+        }
+        .p02-tag.is-urine .p02-tag-dot { background: #e0a112; box-shadow: 0 0 6px rgba(224, 161, 18, 0.7); }
+
+        .p02-score-capsule {
+            position: absolute;
+            left: 36px;
+            top: 24px;
+            display: inline-flex;
+            align-items: center;
+            height: 64px;
+            padding: 0 22px 0 14px;
+            background: #ffffff;
+            border: 4px solid #233567;
+            border-radius: 32px;
+            box-shadow: 0 8px 18px rgba(35, 53, 103, 0.22);
+            z-index: 15;
+            gap: 12px;
+        }
+        .p02-score-star {
+            width: 44px;
+            height: 44px;
+            object-fit: contain;
+            filter: drop-shadow(0 3px 5px rgba(255, 175, 0, 0.5));
+        }
+        .p02-score-bar-bg {
+            position: relative;
+            width: 170px;
+            height: 22px;
+            background: #e2e8f0;
+            border: 3px solid #233567;
+            border-radius: 11px;
+            overflow: hidden;
+        }
+        .p02-score-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ffb703 0%, #fb8500 100%);
+            border-radius: 8px;
+            transition: width 0.35s ease-out;
+        }
+        .p02-score-text {
+            font-family: 'Cafe24 Ssurround', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: #233567;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .p02-gauge-aside {
+            position: absolute;
+            left: 70px;
+            top: 90px;
+            height: 760px;
+            z-index: 10;
+        }
+
+        .p02-field {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1920px;
+            height: 960px;
+            z-index: 8;
+            touch-action: none;
+            cursor: ew-resize;
+        }
+        .p02-it {
+            position: absolute;
+            transform: translateX(-50%);
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .p02-it-img-box {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .p02-it-img-box img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.22));
+        }
+        .p02-it-badge {
+            margin-top: 6px;
+            padding: 3px 16px 2px;
+            background: #ffffff;
+            border: 3px solid #233567;
+            border-radius: 16px;
+            font-family: 'Cafe24 Ssurround', sans-serif;
+            font-size: 24px;
+            line-height: 1.2;
+            color: #1e293b;
+            white-space: nowrap;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.18);
+        }
+        .p02-it.is-gone { opacity: 0; transition: opacity 0.5s ease; }
+        .p02-it.is-quick { opacity: 0; transition: opacity 0.15s ease; }
+
+        .p02-wrong { z-index: 30; }
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="gauge is-thin is-vertical p02-gauge-aside" style="height:760px">
+            <div class="gauge-fill" id="p02GaugeFill" style="height:0%"></div>
+          </div>
+
+          <div class="p02-lab-wrap">
+            <div class="p02-blood-zone">
+              <div class="p02-score-capsule">
+                <img class="p02-score-star" src="../../resources/img/common/icon_gauge_star.png" alt="별">
+                <div class="p02-score-bar-bg">
+                  <div class="p02-score-bar-fill" id="p02ScoreFill"></div>
+                </div>
+                <span class="p02-score-text" id="p02ScoreText">0 / 10</span>
+              </div>
+
+              <div class="p02-bg-cells">
+                <div class="p02-cell c1"></div>
+                <div class="p02-cell c2"></div>
+                <div class="p02-cell c3"></div>
+                <div class="p02-cell c4"></div>
+                <div class="p02-cell c5"></div>
+                <div class="p02-cell c6"></div>
+              </div>
+
+              <div class="p02-tag is-blood"><span class="p02-tag-dot"></span>혈관 속</div>
+            </div>
+
+            <div class="p02-filter-bar">
+              <div class="p02-mem-wing is-l" id="p02MemL">
+                <div class="p02-filter-pores"></div>
+              </div>
+              <div class="p02-mem-wing is-r" id="p02MemR">
+                <div class="p02-filter-pores"></div>
+              </div>
+            </div>
+            <div class="p02-tag is-filter">콩팥 필터</div>
+
+            <div class="p02-hole" id="p02Hole">
+              <span class="p02-hole-arrow is-l">◄</span>
+              <span class="p02-hole-arrow is-r">►</span>
+              <div class="p02-hole-stream"></div>
+            </div>
+
+            <div class="p02-urine-zone">
+              <div class="p02-urine-wave"></div>
+              <div class="p02-bubble b1"></div>
+              <div class="p02-bubble b2"></div>
+              <div class="p02-bubble b3"></div>
+              <div class="p02-bubble b4"></div>
+              <div class="p02-bubble b5"></div>
+            </div>
+            <div class="p02-tag is-urine"><span class="p02-tag-dot"></span>오줌이 모이는 곳</div>
+          </div>
+
+          <div class="p02-field" id="p02Field"></div>
+
+          <div class="ox-result-wrong is-avatar is-off p02-wrong" id="p02Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body"><p class="avatar-popup-text">이 알갱이는 구멍보다 커서<br>통과할 수 없어요.</p></div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p02Done" style="z-index:30">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-title is-left" style="padding:0;margin-bottom:40px">정말 잘했어요!</p>
+                    <p class="avatar-card-text">필터 구멍보다 작으면 통과하고 크면 남겨서<br>위쪽 피는 깨끗해지고<br>아래에는 오줌이 모이게 됐어요!</p>
+                  </div>
+                  <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">‘만약 구멍보다 작다면 통과’처럼<br>조건에 따라 행동을 달리했어요.</p>
+                  </div>
+                  <a href="javascript:;" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body is-side">
+                    <p class="avatar-card-text">컴퓨터도 조건에 따라<br>어떻게 작동되는지 알아볼까요?</p>
+                  </div>
+                  <a href="page03.html" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="콩팥 필터를 부탁해~" data-next="page03.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const SUBS = {
+      water:   { name: '물',     size: 76,  ok: true },
+      waste:   { name: '노폐물', size: 108, ok: true },
+      rbc:     { name: '적혈구', size: 170, ok: false },
+      protein: { name: '단백질', size: 216, ok: false },
+      wbc:     { name: '백혈구', size: 259, ok: false },
+    };
+    const KEYS = Object.keys(SUBS);
+    const LANES = [580, 960, 1340];
+    const HOLE_W = 140;
+    const HOLE_MIN = 280, HOLE_MAX = 1640, HOLE_SPEED = 900;
+    const MEM_TOP = 476, START_Y = 25, SPEED = 85, FIRST_MS = 300, GAP_MS = 800, TARGET = 10, FALL_END = 740;
+
+    const field = $('p02Field');
+    const holeEl = $('p02Hole');
+    const memL = $('p02MemL');
+    const memR = $('p02MemR');
+    const fillSide = $('p02GaugeFill');
+    const scoreFill = $('p02ScoreFill');
+    const scoreText = $('p02ScoreText');
+    const wrongLayer = $('p02Wrong');
+    const mainEl = document.querySelector('main');
+
+    let holeX = 960;
+    let items = [];
+    let waitMs = FIRST_MS;
+    let judging = false;
+    let lastKey = '';
+    let lastLane = -1;
+    let correct = 0;
+    let paused = false;
+    let ended = false;
+    let last = 0;
+    const keys = { left: false, right: false };
+    let dragging = false;
+
+    const drawHole = () => {
+      const relX = holeX - 210;
+      holeEl.style.left = relX + 'px';
+      const half = HOLE_W / 2;
+      memL.style.width = Math.max(0, relX - half) + 'px';
+      memR.style.left = (relX + half) + 'px';
+      memR.style.width = Math.max(0, 1500 - (relX + half)) + 'px';
+    };
+
+    const setGauge = () => {
+      const pct = Math.min(100, Math.round((correct / TARGET) * 100));
+      fillSide.style.height = pct + '%';
+      scoreFill.style.width = pct + '%';
+      scoreText.textContent = correct + ' / ' + TARGET;
+    };
+
+    const createItemNode = (key, s, x, y) => {
+      const el = document.createElement('div');
+      el.className = 'p02-it';
+      el.style.left = x + 'px';
+      el.style.top = y + 'px';
+
+      const imgBox = document.createElement('div');
+      imgBox.className = 'p02-it-img-box';
+      imgBox.style.width = s.size + 'px';
+      imgBox.style.height = s.size + 'px';
+      imgBox.innerHTML = '<img src="img/p02_' + key + '.png" alt="' + s.name + '">';
+
+      const badge = document.createElement('span');
+      badge.className = 'p02-it-badge';
+      badge.textContent = s.name;
+
+      el.appendChild(imgBox);
+      el.appendChild(badge);
+      return el;
+    };
+
+    const spawn = () => {
+      let key;
+      do { key = KEYS[Math.floor(Math.random() * KEYS.length)]; } while (key === lastKey);
+      lastKey = key;
+      const s = SUBS[key];
+      let lane;
+      do { lane = Math.floor(Math.random() * LANES.length); } while (lane === lastLane);
+      lastLane = lane;
+      const x = LANES[lane];
+      judging = true;
+
+      const el = createItemNode(key, s, x, START_Y);
+      field.appendChild(el);
+      items.push({ el, s, x, y: START_Y, state: 'fall' });
+    };
+
+    const finish = () => {
+      ended = true;
+      setTimeout(() => $('p02Done').classList.remove('is-off'), 900);
+    };
+
+    const reach = (it) => {
+      judging = false;
+      waitMs = GAP_MS;
+      const half = it.s.size / 2;
+      const hl = holeX - HOLE_W / 2, hr = holeX + HOLE_W / 2;
+      const ov = Math.min(it.x + half, hr) - Math.max(it.x - half, hl);
+      if (it.s.ok) {
+        if (Math.abs(it.x - holeX) <= HOLE_W / 2) {
+          it.state = 'through';
+          playCorrect();
+          correct++;
+          setGauge();
+          if (correct >= TARGET) finish();
+        } else {
+          it.state = 'done';
+          it.y = MEM_TOP - it.s.size;
+          it.el.style.top = it.y + 'px';
+          it.el.classList.add('is-quick');
+          setTimeout(() => it.el.remove(), 200);
+        }
+        return;
+      }
+      it.state = 'done';
+      it.y = MEM_TOP - it.s.size;
+      it.el.style.top = it.y + 'px';
+      if (ov >= HOLE_W * 0.4) {
+        playWrong();
+        paused = true;
+        flashLayer(wrongLayer, 'is-off', 2000);
+        setTimeout(() => { paused = false; }, 2000);
+      }
+      setTimeout(() => it.el.classList.add('is-gone'), 800);
+      setTimeout(() => it.el.remove(), 1400);
+    };
+
+    const tick = (t) => {
+      const dt = Math.min(0.05, (t - (last || t)) / 1000);
+      last = t;
+      if (!paused) {
+        const dir = (keys.right ? 1 : 0) - (keys.left ? 1 : 0);
+        if (dir) holeX = Math.max(HOLE_MIN, Math.min(HOLE_MAX, holeX + dir * HOLE_SPEED * dt));
+        drawHole();
+        if (!ended) {
+          if (!judging) {
+            waitMs -= dt * 1000;
+            if (waitMs <= 0) spawn();
+          }
+        }
+        items.forEach((it) => {
+          if (it.state === 'done') return;
+          it.y += SPEED * dt;
+          if (it.state === 'fall' && it.y + it.s.size >= MEM_TOP) reach(it);
+          if (it.state === 'through') {
+            if (it.y > FALL_END) { it.state = 'done'; it.el.remove(); return; }
+            it.el.style.opacity = Math.max(0, Math.min(1, (FALL_END - it.y) / 160));
+          }
+          if (it.state !== 'done') it.el.style.top = it.y + 'px';
+        });
+        items = items.filter((it) => it.state !== 'done' || it.el.isConnected);
+      }
+      requestAnimationFrame(tick);
+    };
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') { keys.left = true; e.preventDefault(); }
+      else if (e.key === 'ArrowRight') { keys.right = true; e.preventDefault(); }
+    });
+    document.addEventListener('keyup', (e) => {
+      if (e.key === 'ArrowLeft') keys.left = false;
+      else if (e.key === 'ArrowRight') keys.right = false;
+    });
+    window.addEventListener('blur', () => { keys.left = keys.right = false; });
+
+    const moveTo = (e) => {
+      if (paused) return;
+      const r = mainEl.getBoundingClientRect();
+      holeX = Math.max(HOLE_MIN, Math.min(HOLE_MAX, (e.clientX - r.left) / currentScale));
+    };
+    field.addEventListener('pointerdown', (e) => { dragging = true; field.setPointerCapture(e.pointerId); moveTo(e); });
+    field.addEventListener('pointermove', (e) => { if (dragging) moveTo(e); });
+    const endDrag = () => { dragging = false; };
+    field.addEventListener('pointerup', endDrag);
+    field.addEventListener('pointercancel', endDrag);
+
+    drawHole();
+    requestAnimationFrame(tick);
+  })();
+  </script>
+</body>
+</html>

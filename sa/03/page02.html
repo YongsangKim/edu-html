@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마음을 전하는 빙고 게임</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 3~17p. 3x3 빙고판에서 상황 카드를 골라 알맞은 말을 고르면 그 칸 완료(색 바뀜·다시 못 누름).
+           가로·세로·대각선 한 줄이 되면 BINGO + 팡파레 → 완료 팝업. 상황 삽화 img/p02_sit_{key}.png */
+
+
+        .p02-board{position:absolute;left:58px;top:167px;width:1805px;height:743px;box-sizing:border-box;background:#faf7fb;border:solid 5px var(--c-navy);border-radius:20px}
+        .p02-grid-bg{position:absolute;left:57px;top:161px;width:1806px;height:775px;background:var(--c-navy);border-radius:20px}
+        .p02-cells{position:absolute;left:127px;top:180px;width:1663px;display:grid;grid-template-columns:repeat(3,541px);gap:10px 20px}
+        .p02-cell{position:relative;display:flex;flex-direction:column;justify-content:flex-start;width:541px;height:240px;box-sizing:border-box;padding:0;overflow:visible;background:#faf7fb;border:solid 5px #eeeaf3;border-radius:20px;cursor:pointer;font-family:'Cafe24 Ssurround';font-size:41px;letter-spacing:-0.06em;color:var(--c-ink);white-space:nowrap}
+        .p02-cell img{display:block;width:100%;height:165px;object-fit:cover;object-position:50% 25%;border-radius:15px 15px 0 0}
+        .p02-cell span{box-sizing:border-box;position:absolute;left:0;right:0;bottom:0;height:70px;display:flex;align-items:center;justify-content:center;padding-top:14px}
+        .p02-cell.is-done{pointer-events:none;border-color:#ff4ff9;box-shadow:0 0 0 5px #ff4ff9}
+        .p02-cell .p02-star{height:auto;object-fit:fill;border-radius:0;position:absolute;left:50%;top:132px;width:130px;height:auto;translate:-50% -50%;z-index:2}
+        .p02-line{position:absolute;height:28px;margin-top:-14px;background:#ff4ff9;border-radius:14px;z-index:1}
+        .p02.is-grid .p02-board{display:none}
+        .p02-bingo{position:absolute;left:739px;top:20px;width:458px;height:161px;margin:0;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:130px;
+          color:#ff4f8b;-webkit-text-stroke:6px var(--c-white);paint-order:stroke fill;letter-spacing:-0.04em;z-index:20;animation:p02-bingo .6s cubic-bezier(.3,1.6,.5,1)}
+        @keyframes p02-bingo{from{transform:scale(.2);opacity:0}to{transform:none;opacity:1}}
+
+        .p02-sit-illust{position:absolute;left:107px;top:210px;width:541px;height:665px;box-sizing:border-box;background:#faf7fb;border:solid 5px var(--c-navy);border-radius:20px;overflow:hidden}
+        .p02-sit-illust img{display:block;width:100%;height:517px;object-fit:cover;object-position:50% 25%}
+        .p02-sit-illust span{box-sizing:border-box;position:absolute;left:0;right:0;bottom:0;height:138px;display:flex;align-items:center;justify-content:center;padding-top:4px;text-align:center;font-family:'Cafe24 Ssurround';font-size:52px;line-height:1.1;letter-spacing:-0.06em;color:var(--c-ink);white-space:nowrap}
+        .p02-sit-text{position:absolute;left:686px;top:232px;width:1134px;height:310px;margin:0;box-sizing:border-box;padding:30px 30px;display:flex;align-items:center;
+          background:#dff6ff;border:solid 4px var(--c-navy);border-radius:20px;font-family:'Cafe24 Ssurround';font-size:66px;line-height:1.3;color:var(--c-ink);letter-spacing:-0.04em;word-break:keep-all}
+        .p02-opts{position:absolute;left:698px;top:622px;width:1112px;display:flex;justify-content:space-between}
+        .p02-opts .card-btn{width:340px;min-width:0;height:183px;padding:10px 14px 4px;font-size:42px;line-height:1.2;letter-spacing:-0.05em;word-break:keep-all}
+
+        .p02 .is-off{display:none}
+        #p02Wrong, #p02Right{z-index:120}
+        #p02Done{z-index:130}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default p02 is-grid">
+          <p class="ask-pill is-fit" id="p02Title">상황 카드를 선택해 보세요!</p>
+          <div class="p02-board"></div>
+
+          <div id="p02BoardView">
+            <div class="p02-grid-bg"></div>
+            <div class="p02-cells" id="p02Cells"></div>
+          </div>
+
+          <div class="is-off" id="p02SitView">
+            <div class="p02-sit-illust" id="p02SitIllust"></div>
+            <p class="p02-sit-text" id="p02SitText"></p>
+            <div class="p02-opts" id="p02Opts"></div>
+          </div>
+
+          <p class="p02-bingo is-off" id="p02Bingo">BINGO!</p>
+          <img class="particle-effect is-off" id="p02Fx" src="../../resources/img/common/img_particle01.png" alt="">
+
+          <div class="ox-result-wrong is-avatar is-off" id="p02Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">친구의 마음을 잘 들여다봐요.</p>
+              </div>
+            </div>
+          </div>
+          <div class="ox-result-correct is-avatar is-off" id="p02Right">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">좋아요!</p>
+                <p class="avatar-popup-sub">친구의 마음에 쏙 드는 말이에요.</p>
+              </div>
+              <div class="avatar-popup-extra"><img src="../../resources/img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div>
+          <div class="avatar-modal is-off" id="p02Done">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-sub">친구의 마음을 살펴 빙고를 완성했어요!</p>
+                <a href="page03.html" class="avatar-popup-next card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="마음을 전하는 빙고 게임" data-next="page03.html"></script>
+  <script src="../../resources/js/toc.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    // 빙고판 칸 순서(기획서 3p 배치): 왼쪽 위부터 가로로
+    const CELLS = [
+      { key: 'testgood', label: '시험을 잘 본 친구', text: '친구가 시험에서 좋은 점수를 받았어요.<br>어떤 말을 해주면 좋을까요?',
+        opts: ['괜찮아,<br>다음에 잘하면 돼.', '정말 잘했어!<br>대단해!', '왜 맨날<br>잘 보는 거야?'], answer: 1 },
+      { key: 'testbad', label: '시험을 망쳐서<br>속상한 친구', text: '친구가 시험을 망쳐서 속상해하고 있어요.<br>어떤 말을 해주면 좋을까요?',
+        opts: ['괜찮아,<br>다음에 잘하면 돼.', '그 정도로 속상해?<br>별일 아니야.', '왜 그렇게<br>공부를 안 했어?'], answer: 0 },
+      { key: 'sick', label: '몸이 아픈 친구', text: '친구가 감기에 걸려서 아파하고 있어요.<br>어떤 말을 해주면 좋을까요?',
+        opts: ['빨리<br>나았으면 좋겠어.', '에구,<br>왜 이렇게 약해?', '괜찮아,<br>다음에 잘하면 돼.'], answer: 0 },
+      { key: 'award', label: '대회에서 상을<br>받은 친구', text: '친구가 대회에서 상을 받았어요.<br>어떤 말을 해주면 좋을까요?',
+        opts: ['축하해!<br>정말 대단하다.', '괜찮아.<br>다음에는 상 받을 수 있을 거야.', '나는 상 안 줘도<br>괜찮아.'], answer: 0 },
+      { key: 'fight', label: '친구와 싸워서<br>속상한 친구', text: '친구와 싸워서 속상해하고 있어요.<br>어떤 말을 해주면 좋을까요?',
+        opts: ['넌 왜 맨날 싸워?<br>그만해!', '많이 속상했겠다.', '난 그 친구가<br>더 좋아.'], answer: 1 },
+      { key: 'challenge', label: '새로운 도전에<br>성공한 친구', text: '친구가 새로운 도전에 성공했어요.<br>어떤 말을 해주면 좋을까요?',
+        opts: ['운이 좋아서<br>성공한 거야.', '다음에<br>더 잘하면 돼.', '멋져!<br>정말 잘했어!'], answer: 2 },
+      { key: 'homework', label: '숙제가 어려워서<br>걱정하는 친구', text: '친구가 어려운 숙제 때문에 걱정하고 있어요.<br>어떤 말을 해주면 좋을까요?',
+        opts: ['괜찮아.<br>내가 도와줄게.', '이것도 몰라?', '너 정말<br>공부 잘하는구나!'], answer: 0 },
+      { key: 'birthday', label: '생일인 친구', text: '친구의 생일이에요.<br>어떤 말을 해주면 좋을까요?',
+        opts: ['생일 축하해!', '너 정말<br>대단하다!', '괜찮아,<br>다음에 잘하면 돼.'], answer: 0 },
+      { key: 'nervous', label: '처음 하는 일에<br>긴장하는 친구', text: '친구가 처음 해보는 일이라 긴장하고 있어요.<br>어떤 말을 해주면 좋을까요?',
+        opts: ['정말 잘했어!', '힘내!<br>넌 잘할 수 있어!', '고마워.'], answer: 1 }
+    ];
+    const LINES = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]];
+
+    const title = $('p02Title');
+    const main = document.querySelector('main');
+    const cellsBox = $('p02Cells');
+    const optsBox = $('p02Opts');
+    const done = new Set();
+    let busy = false;
+
+    CELLS.forEach((c, i) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'p02-cell';
+      btn.innerHTML = '<img src="img/p02_sit_' + c.key + '.png" alt=""><span>' + c.label.replace('<br>', ' ') + '</span>';
+      btn.addEventListener('click', () => { playClick(); openSituation(i); });
+      cellsBox.appendChild(btn);
+    });
+    const cellEls = Array.from(cellsBox.children);
+
+    function showBoard() {
+      title.textContent = '상황 카드를 선택해 보세요!';
+      main.classList.add('is-grid');
+      $('p02SitView').classList.add('is-off');
+      $('p02BoardView').classList.remove('is-off');
+    }
+
+    function openSituation(i) {
+      const c = CELLS[i];
+      busy = false;
+      title.textContent = '친구의 마음을 생각해 볼까요?';
+      main.classList.remove('is-grid');
+      $('p02SitIllust').innerHTML = '<img src="img/p02_sit_' + c.key + '.png" alt=""><span>' + c.label + '</span>';
+      $('p02SitText').innerHTML = c.text;
+      optsBox.innerHTML = '';
+      c.opts.forEach((o, k) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'card-btn';
+        btn.innerHTML = o;
+        btn.addEventListener('click', () => answer(i, k, btn));
+        optsBox.appendChild(btn);
+      });
+      $('p02BoardView').classList.add('is-off');
+      $('p02SitView').classList.remove('is-off');
+    }
+
+    function answer(i, k, btn) {
+      if (busy) return;
+      if (k !== CELLS[i].answer) {
+        playWrong();
+        flashLayer($('p02Wrong'));
+        return;
+      }
+      busy = true;
+      playCorrect();
+      btn.classList.add('is-selected');
+      flashLayer($('p02Right'));
+      setTimeout(() => {
+        done.add(i);
+        cellEls[i].classList.add('is-done');
+        const star = document.createElement('img');
+        star.className = 'p02-star';
+        star.src = '../../resources/img/common/icon_gauge_star.png';
+        star.alt = '';
+        cellEls[i].appendChild(star);
+        showBoard();
+        if (LINES.some((line) => line.every((n) => done.has(n)))) bingo();
+      }, 2000);
+    }
+
+    function drawLine(line) {
+      const first = cellEls[line[0]], last = cellEls[line[2]];
+      const x1 = first.offsetLeft + first.offsetWidth / 2, y1 = first.offsetTop + 132;
+      const x2 = last.offsetLeft + last.offsetWidth / 2, y2 = last.offsetTop + 132;
+      const bar = document.createElement('div');
+      bar.className = 'p02-line';
+      bar.style.cssText = 'left:' + x1 + 'px;top:' + y1 + 'px;width:' + Math.hypot(x2 - x1, y2 - y1) + 'px;transform-origin:0 50%;transform:rotate(' + Math.atan2(y2 - y1, x2 - x1) + 'rad)';
+      cellsBox.appendChild(bar);
+    }
+
+    function bingo() {
+      LINES.filter((line) => line.every((n) => done.has(n))).forEach(drawLine);
+      $('p02Bingo').classList.remove('is-off');
+      const fx = $('p02Fx');
+      fx.classList.remove('is-off');
+      fx.dataset.frame2 = '../../resources/img/common/img_particle02.png';
+      initParticleEffect();
+      setTimeout(() => $('p02Done').classList.remove('is-off'), 1200);
+    }
+  })();
+  </script>
+</body>
+</html>

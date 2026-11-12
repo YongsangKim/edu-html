@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 그림 전시회의 비밀</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 디자인 없음, 사회 디자인 문법(파란 판 + 흰 카드 + 알약)으로 만든 러프한 틀 - 기획서 3~8p(Summery 표 반영). 전시회(그림 5점, 찾은 그림은 어둡게+선택 불가, 오른쪽 위 돋보기 5개가 왼쪽부터 컬러)
+           → 그림 크게 보기(그림 왼쪽, 작품 정보 오른쪽 아래 + 소리 아이콘 TTS, 힌트 오른쪽 위) → 이상한 부분 클릭 → 고쳐짐 안내([전시회로 가기], 마지막 그림은 [다음]) → 5점을 모두 찾으면 마무리 안내. 일러스트·오류 위치(.p02-hot)는 임시 */
+
+        .p02-prog{position:absolute;right:60px;top:30px;margin:0;display:flex;align-items:center;min-height:96px;padding:6px 44px 0;border:solid 6px var(--c-blue);border-radius:60px;background:#fff;white-space:nowrap}
+        .p02-prog span{display:flex;align-items:center;gap:12px;padding:0}
+        .p02-prog b{font-family:'Cafe24 Ssurround';font-weight:400;font-size:52px;color:var(--c-navy);margin-right:10px;letter-spacing:-0.05em}
+        .p02-prog i{font-style:normal;font-size:56px;line-height:1;filter:grayscale(1);opacity:.45;padding-bottom:8px}
+        .p02-prog i img{display:block;height:62px;width:auto}
+        .p02-prog i.is-on{filter:none;opacity:1}
+
+        .p02-board{position:absolute;left:60px;top:160px;width:1800px;height:760px;border-radius:20px;background:#2a6bd0}
+        .p02-gallery{position:absolute;left:60px;top:160px;width:1800px;height:760px}
+        .p02-art{position:absolute;width:540px;height:335px;box-sizing:border-box;padding:0;border:solid 6px var(--c-ink);border-radius:24px;background:var(--c-white);overflow:hidden;display:flex;flex-direction:column;cursor:pointer;box-shadow:0 8px 0 0 rgba(1,24,92,.35)}
+        .p02-art .p02-frame{position:relative;flex:1 1 auto;display:flex;align-items:center;justify-content:center;background:#dff2ff;font-size:120px;line-height:1}
+        .p02-art .p02-cap{flex:0 0 78px;display:flex;align-items:center;justify-content:center;padding-top:6px;background:var(--c-white);font-family:'Cafe24 Ssurround';font-size:50px;line-height:1;color:var(--c-ink);letter-spacing:-0.05em}
+        .p02-art .p02-frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(6px);transform:scale(1.15)}
+        .p02-art .p02-frame{overflow:hidden}
+        .p02-view>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:18px}
+        .p02-art:hover:not(.is-found){border-color:var(--c-violet)}
+        .p02-art:active:not(.is-found){border-color:var(--c-orchid)}
+        .p02-art.is-found{pointer-events:none}
+        .p02-art.is-found .p02-frame:before{content:'';position:absolute;inset:0;background:rgba(27,23,56,.55)}
+        .p02-art.is-found .p02-frame:after{content:'찾았다!';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-10deg);padding:6px 20px 0;border:solid 8px #e8353a;border-radius:16px;background:rgba(255,255,255,.92);font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.1;color:#e8353a;white-space:nowrap}
+        .p02-art.a1{left:40px;top:30px}
+        .p02-art.a2{left:630px;top:30px}
+        .p02-art.a3{left:1220px;top:30px}
+        .p02-art.a4{left:335px;top:395px}
+        .p02-art.a5{left:925px;top:395px}
+
+        .p02-detail{position:absolute;inset:0;z-index:10}
+        .p02-detail.is-off{display:none}
+        .p02-dboard{position:absolute;left:60px;top:80px;width:1800px;height:800px;border-radius:20px;background:#2a6bd0}
+        .p02-view{position:absolute;left:100px;top:120px;width:1190px;height:720px;box-sizing:border-box;border:solid 6px var(--c-ink);border-radius:24px;background:#dff2ff;display:flex;align-items:center;justify-content:center;font-size:300px;cursor:pointer;box-shadow:0 8px 0 0 rgba(1,24,92,.35)}
+        .p02-view.is-fixed{border-color:#33b560}
+        .p02-view.is-shake{animation:fix-word-shake .3s ease}
+        .p02-hot{position:absolute;width:200px;height:200px;border-radius:50%;box-sizing:border-box}
+        .p02-hintbtn{position:absolute;left:1640px;top:120px;min-width:0;width:180px;height:76px;padding:6px 10px 0;font-size:40px}
+        .p02-info{position:absolute;left:1320px;bottom:120px;width:500px;box-sizing:border-box;padding:80px 20px 15px;border:solid 6px var(--c-ink);border-radius:24px;background:#dff6ff;box-shadow:0 8px 0 0 rgba(1,24,92,.35);font-family:'Cafe24 Ssurround';letter-spacing:-0.05em;color:var(--c-ink);display:flex;flex-direction:column;gap:10px}
+        .p02-info p{margin:0;font-size:38px;line-height:1.2;word-break:keep-all;letter-spacing:-0.06em}
+        .p02-info b{color:var(--c-purple);font-weight:400;margin-right:10px}
+        .p02-speak{position:absolute;right:14px;top:12px;width:62px;height:62px;padding:0;border:solid 5px var(--c-navy);border-radius:50%;background:var(--c-white);font-size:32px;line-height:1;cursor:pointer}
+        .p02-speak.is-on{background:var(--c-sky-pale)}
+        .p02-detail.is-speaking .p02-view,.p02-detail.is-speaking .p02-hintbtn{pointer-events:none}
+        #p02Fix,#p02End,#p02Hint{z-index:120}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="p02-prog" id="p02Prog"><span><b>찾았다!</b><i><img src="img/p02_icon_search.png" alt=""></i><i><img src="img/p02_icon_search.png" alt=""></i><i><img src="img/p02_icon_search.png" alt=""></i><i><img src="img/p02_icon_search.png" alt=""></i><i><img src="img/p02_icon_search.png" alt=""></i></span></p>
+          <div class="p02-board"></div>
+          <div class="p02-gallery" id="p02Gallery"></div>
+
+          <div class="p02-detail opts is-off" id="p02Detail">
+            <div class="p02-dboard"></div>
+            <div class="p02-info">
+              <button type="button" class="p02-speak js-sfx" id="p02Speak" data-sound="sound/click.mp3" aria-label="작품 정보 듣기">🔊</button>
+              <p><b>제목:</b><span id="p02Title"></span></p>
+              <p><b>작가:</b><span id="p02Author"></span></p>
+              <p><b>작품 의도:</b><span id="p02Intent"></span></p>
+            </div>
+            <button type="button" class="card-btn is-popup p02-hintbtn js-sfx" id="p02HintBtn" data-sound="sound/click.mp3">힌트</button>
+            <div class="p02-view" id="p02View"><img id="p02Pic" alt=""><span class="p02-hot" id="p02Hot"></span></div>
+          </div>
+
+          <div class="ox-result-wrong is-avatar is-off" id="p02Hint">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="hint-title">힌트</p>
+                <p class="avatar-popup-text is-small" id="p02HintText"></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p02Fix">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_correct_gwa.png" alt="">
+              <p class="avatar-card-title is-left">찾았다! 이상한 부분!</p>
+              <p class="avatar-card-text">이상한 부분이 바르게 고쳐졌어요.</p>
+              <button type="button" class="avatar-card-btn card-btn is-popup js-sfx" id="p02ToGallery" data-sound="sound/click.mp3">전시회로 가기</button>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p02End">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body"><p class="avatar-card-text">정말 잘했어요! 그림에서 이상한 부분을 모두 찾았어요. AI가 만든 그림에도 실수가 있었네요.</p></div>
+                  <a href="page03.html" class="avatar-card-btn card-btn is-popup is-arrow js-nav-effect js-sfx" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body"><p class="avatar-card-text">AI는 사람의 팔을 3개로 그리기도 하고, 그림에 어울리지 않는 것을 넣거나 글자를 이상하게 만드는 실수를 하기도 해요.</p></div>
+                  <a href="page03.html" class="avatar-card-btn card-btn is-popup is-arrow js-nav-effect js-sfx" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body"><p class="avatar-card-text">그렇다면 AI가 만든 결과물은 어떻게 살펴보고 확인해야 할까요?</p></div>
+                  <a href="page03.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="AI 그림 전시회의 비밀" data-next="page03.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script src="../../resources/js/box-edit.js"></script>
+  <script>
+  (function () {
+    const ARTS = [
+      { cap: '비 오는 날의 등굣길', pic: 'img/p02_art1.jpg', title: '비 오는 날의 등굣길', author: 'OO중학교 3학년 1반 이로운', intent: '비가 오는 날에는 우산과 우비, 장화를 입고 등교해요!', hint: '사람의 팔 부분을 잘 살펴볼까요?', hot: [437, 283, 200, 200] },
+      { cap: '맑은 여름날의 공원', pic: 'img/p02_art2.jpg', title: '햇볕이 쨍쨍한 여름날', author: 'OO중학교 3학년 1반 김루리', intent: '한여름의 햇볕이 쨍쨍한 날, 사람들이 시원한 옷을 입고 공원에서 즐겁게 산책하는 모습을 표현하고 싶었어요!', hint: '여름 풍경에 어울리지 않는 것이 있는지 살펴볼까요?', hot: [443, 194, 340, 480] },
+      { cap: '바람이 부는 날의 운동장', pic: 'img/p02_art3.jpg', title: '바람이 부는 날', author: 'OO중학교 3학년 1반 최선영', intent: '바람이 부는 날, 운동장에서 친구들이 형형색색의 바람개비를 들고 뛰어노는 모습을 표현하고 싶었어요!', hint: '바람개비의 날개 부분을 잘 살펴볼까요?', hot: [335, 12, 250, 250] },
+      { cap: '눈 오는 날의 하굣길', pic: 'img/p02_art4.jpg', title: '하얀 눈이 내리는 겨울', author: 'OO중학교 3학년 1반 신훈록', intent: '겨울철 하얀 눈이 내리는 날, 친구들이 두꺼운 외투와 목도리, 장갑을 착용하고 하교하는 모습을 표현하고 싶었어요!', hint: '강아지의 다리 부분을 잘 살펴볼까요?', hot: [380, 440, 260, 240] },
+      { cap: '비 온 뒤의 안전 안내판', pic: 'img/p02_art5.jpg', title: '비가 그친 뒤에는 조심해요!', author: 'OO중학교 3학년 1반 손민서', intent: '비가 그친 뒤에도 바닥이 미끄러울 수 있으므로 사람들이 조심해서 길을 걸을 수 있도록 ‘미끄럼 주의’라는 문구가 적힌 안전 안내판을 표현하고 싶었어요!', hint: '안내판에 적힌 글자를 잘 살펴볼까요?', hot: [559, 178, 260, 310] },
+    ];
+    const found = ARTS.map(() => false);
+    let cur = -1;
+
+    const gallery = $('p02Gallery');
+    ARTS.forEach((a, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'p02-art a' + (i + 1) + ' js-sfx';
+      b.dataset.sound = 'sound/click.mp3';
+      b.innerHTML = '<span class="p02-frame"><img src="' + a.pic + '" alt=""></span><span class="p02-cap">' + a.cap + '</span>';
+      b.addEventListener('click', () => { playClick(); open(i); });
+      gallery.appendChild(b);
+    });
+
+    function refresh() {
+      Array.from(gallery.children).forEach((b, i) => b.classList.toggle('is-found', found[i]));
+      Array.from($('p02Prog').querySelectorAll('i')).forEach((m, i) => m.classList.toggle('is-on', i < found.filter(Boolean).length));
+    }
+
+    function showGallery(on) {
+      gallery.style.display = on ? '' : 'none';
+      $('p02Prog').style.display = on ? '' : 'none';
+      document.querySelector('.p02-board').style.display = on ? '' : 'none';
+    }
+
+    let currentTtsAudio = null;
+    function stopSpeak() {
+      if (currentTtsAudio) {
+        currentTtsAudio.pause();
+        currentTtsAudio.currentTime = 0;
+        currentTtsAudio = null;
+      }
+      if (window.speechSynthesis) speechSynthesis.cancel();
+      $('p02Detail').classList.remove('is-speaking');
+      $('p02Speak').classList.remove('is-on');
+    }
+
+    function placeHot(el) {
+      const h = el._ref;
+      el.style.left = h[0] + 'px';
+      el.style.top = h[1] + 'px';
+      el.style.width = h[2] + 'px';
+      el.style.height = h[3] + 'px';
+    }
+
+    function open(i) {
+      stopSpeak();
+      cur = i;
+      const a = ARTS[i];
+      $('p02Title').textContent = a.title;
+      $('p02Author').textContent = a.author;
+      $('p02Intent').textContent = a.intent;
+      $('p02Pic').src = a.pic;
+      const hot = $('p02Hot');
+      BoxEdit.tag(hot, a.hot);
+      hot._sel = 'hot' + (i + 1);
+      placeHot(hot);
+      $('p02View').classList.remove('is-fixed', 'is-shake');
+      $('p02Detail').classList.remove('is-off');
+      showGallery(false);
+    }
+
+    $('p02Speak').addEventListener('click', () => {
+      if ($('p02Speak').classList.contains('is-on')) {
+        stopSpeak();
+        return;
+      }
+      stopSpeak();
+      const a = ARTS[cur];
+      $('p02Detail').classList.add('is-speaking');
+      $('p02Speak').classList.add('is-on');
+      currentTtsAudio = new Audio('sound/' + encodeURIComponent(a.title) + '.mp3');
+      currentTtsAudio.onended = currentTtsAudio.onerror = stopSpeak;
+      currentTtsAudio.play().catch(() => {
+        if (window.speechSynthesis) {
+          const u = new SpeechSynthesisUtterance('제목, ' + a.title + '. 작가, ' + a.author + '. 작품 의도, ' + a.intent);
+          u.lang = 'ko-KR';
+          u.onend = u.onerror = stopSpeak;
+          speechSynthesis.speak(u);
+        } else {
+          stopSpeak();
+        }
+      });
+    });
+
+    $('p02View').addEventListener('click', (e) => {
+      if (found[cur]) return;
+      const r = $('p02Hot').getBoundingClientRect();
+      const hit = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      if (hit) {
+        stopSpeak();
+        found[cur] = true;
+        $('p02View').classList.add('is-fixed');
+        playCorrect();
+        $('p02ToGallery').textContent = found.every(Boolean) ? '다음' : '전시회로 가기';
+        $('p02Fix').classList.remove('is-off');
+      } else {
+        playWrong();
+        const v = $('p02View');
+        v.classList.remove('is-shake');
+        void v.offsetWidth;
+        v.classList.add('is-shake');
+      }
+    });
+
+    $('p02HintBtn').addEventListener('click', () => {
+      $('p02HintText').textContent = ARTS[cur].hint;
+      flashLayer($('p02Hint'), 'is-off', 2000);
+    });
+
+    $('p02ToGallery').addEventListener('click', () => {
+      $('p02Fix').classList.add('is-off');
+      $('p02Detail').classList.add('is-off');
+      showGallery(true);
+      refresh();
+      if (found.every(Boolean)) $('p02End').classList.remove('is-off');
+    });
+
+    window.addEventListener('pagehide', stopSpeak);
+    BoxEdit.init({
+      apply: placeHot,
+      format: (el) => el._ref.join(', '),
+      name: () => '정답 영역',
+      step: { count: ARTS.length, get: () => cur, set: (n) => { cur = n; }, go: (n) => { found[n] = false; open(n); BoxEdit.syncStep(n); }, label: (n) => '그림 ' + (n + 1) + ' / ' + ARTS.length + ' ' + ARTS[n].cap }
+    });
+    if (BoxEdit.on) { cur = Math.max(cur, 0); BoxEdit.syncStep(cur); open(cur); }
+    refresh();
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 날씨 데이터 분석과 맞춤 추천</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .p10-scr{position:absolute;inset:0;display:none}
+        .p10-phone[data-screen="home"] .p10-home, .p10-phone[data-screen="chat"] .p10-chat{display:block}
+        .p10-phone svg.ic, .p10-sheet svg{display:block;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+        .p10-phone .gpt-bar.is-focus .gpt-ph{display:none}
+        .p10-phone .gpt-bar.is-tall{min-height:127px}
+        .p10-fc{position:relative;width:140px;height:140px;box-sizing:border-box;padding:0 12px 12px;border-radius:20px;background:#f2f2f3;display:flex;align-items:flex-end;font-size:15px;font-weight:500;line-height:1.35;color:#111}
+        .p10-fc>svg{position:absolute;left:4px;top:6px;width:56px;height:56px}
+        .p10-fc-x{position:absolute;right:8px;top:8px;width:30px;height:30px;border-radius:50%;background:#e4e4e6;display:flex;align-items:center;justify-content:center}
+        .p10-fc-x svg{width:16px;height:16px}
+
+        .p10-sheet{position:absolute;inset:0;z-index:6;background:#f4f4f4;font-family:'Pretendard';color:#111}
+        .p10-sh-x,.p10-sh-more{position:absolute;top:46px;width:46px;height:46px;border-radius:50%;background:var(--c-white);box-shadow:0 2px 10px rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center}
+        .p10-sh-x{left:15px}
+        .p10-sh-more{right:15px}
+        .p10-sh-x svg,.p10-sh-more svg{width:22px;height:22px}
+        .p10-sh-title{position:absolute;left:0;right:0;top:56px;margin:0;text-align:center;font-size:20px;font-weight:600}
+        .p10-sh-add{position:absolute;right:15px;top:48px;width:78px;height:42px;border:0;border-radius:21px;background:#000;color:var(--c-white);font-family:inherit;font-size:16px;font-weight:600;cursor:pointer;z-index:2}
+        .p10-sh-up{position:absolute;left:14px;right:13px;top:122px;height:50px;box-sizing:border-box;padding-left:14px;display:flex;align-items:center;gap:16px;border-bottom:solid 1px #e2e2e2;font-size:18px}
+        .p10-sh-up svg{width:20px;height:20px}
+        .p10-sh-lab{position:absolute;left:20px;top:188px;margin:0;font-size:16px;font-weight:600}
+        .p10-files{position:absolute;left:20px;top:221px;right:20px;display:grid;grid-template-columns:1fr 1fr;gap:15px}
+        .p10-files.is-locked{pointer-events:none}
+        .p10-file{position:relative;height:195px;box-sizing:border-box;padding:16px 14px;border:solid 2px #fff;border-radius:16px;background:var(--c-white);text-align:left;font-family:inherit;font-size:19px;font-weight:500;line-height:1.55;letter-spacing:-0.04em;color:#111;cursor:pointer;box-shadow:0 0 5px 1px rgba(0,0,0,0.03)}
+        .p10-file.is-selected{border:solid 2px var(--c-ink)}
+        .p10-file.is-wrong{animation:fix-word-shake .3s ease}
+        .p10-pdf{position:absolute;left:12px;bottom:12px;width:40px;height:40px}
+        .p10-radio{position:absolute;right:12px;top:8px;width:24px;height:24px;border-radius:50%;border:solid 2px #ddd;background:#fcfcfc}
+        .p10-file.is-selected .p10-radio{background:#000;border-color:#000}
+        .p10-file.is-selected .p10-radio::after{content:'\2713';position:absolute;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--c-white);font-size:18px;line-height:1}
+        .p10-sh-search{position:absolute;left:20px;right:20px;bottom:60px;height:50px;box-sizing:border-box;padding-left:18px;border-radius:24px;background:var(--c-white);box-shadow:0 0 20px rgba(0,0,0,.1);display:flex;align-items:center;gap:12px;font-size:18px;color:#555}
+        .p10-sh-search svg{width:20px;height:20px}
+
+        .p10-card{position:absolute;left:1220px;top:380px;width:636px;height:218px;min-width:0;padding:8px 16px 0;font-size:44px;line-height:1.28;letter-spacing:-0.06em;word-break:keep-all}
+        .p10-go.card-btn.is-popup.is-arrow{position:absolute;left:540px;top:270px;min-width:0;width:120px;height:60px;font-size:60px;padding:0;line-height:0.5;z-index:3}
+        .guide-set.p10-wide{--gb-left:55px;--gb-w:640px;--gb-bottom:590px}
+        .guide-set.p10-wide .guide-bubble{padding-bottom:50px;text-align:left;--tail-x:435px}
+
+        .guide-set.p10-wide2{--gb-left:55px;--gb-w:640px;--gb-bottom:605px}
+        .guide-set.p10-wide2 .guide-bubble{text-align:center;--tail-x:435px;font-size:42px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="guide-set is-main" id="p10Set">
+            <p class="guide-bubble is-center" id="p10Bubble"></p>
+            <div class="guide-character"><img id="p10Char" src="../img/character/gwa_wink_walk.png" alt="메인 캐릭터"></div>
+          </div>
+
+          <div class="phone-frame has-cam p10-phone" id="p10Phone" data-screen="home"><div class="phone-screen is-gpt" id="p10Scr">
+            <div class="p10-scr p10-home app-home is-pink">
+              <div class="phone-status is-dark"></div>
+              <button type="button" class="app-icon is-dark" id="p10App" data-hit="app" aria-label="ChatGPT"><i style="background:#fff"><img src="../../resources/img/app/icon_chatgpt.png" alt="" style="width:72px;height:72px;object-fit:contain"></i>ChatGPT</button>
+              <div class="phone-nav"></div>
+            </div>
+
+            <div class="p10-scr p10-chat">
+              <div class="phone-status is-dark"></div>
+              <div class="gpt-head">
+                <span class="gpt-round is-l"><i data-ic="menuHalf"></i></span>
+                <span class="gpt-seg" id="p10Seg"><b>Chat</b><b>Work</b></span>
+                <span class="gpt-round is-r" id="p10RoundR"><i data-ic="chat"></i></span>
+                <span class="gpt-pill is-hide" id="p10Pill"><i data-ic="compose"></i><i data-ic="dotsV"></i></span>
+              </div>
+              <div class="gpt-log" id="p10Log"></div>
+              <div class="gpt-sugg is-hide" id="p10Sugg">
+                <span><svg viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="3"/><circle cx="15.5" cy="9" r="1.6"/><path d="M3.5 17l5-5 4 4 2.5-2.5 5.5 5"/></svg>이미지나 스티커 만들어줘</span>
+                <span><svg viewBox="0 0 24 24"><path d="M4.5 19.5l.9-4L16.2 4.7a2 2 0 012.8 0l.3.3a2 2 0 010 2.8L8.5 18.6z"/><path d="M14.5 6.5l3 3"/></svg>글쓰기</span>
+              </div>
+              <div class="gpt-bar is-start" id="p10Bar" data-hit="bar">
+                <div class="gpt-file"><div class="p10-fc"><i data-ic="pdf" class="ic"></i><span class="p10-fc-x"><i data-ic="x" class="ic"></i></span>12월 1일~10일<br>날씨 데이터</div></div>
+                <div class="prompt-preview" id="p10Input"></div>
+                <div class="gpt-bar-row">
+                  <button type="button" class="gpt-plus" data-hit="plus" aria-label="첨부"><i data-ic="plus"></i></button>
+                  <span class="gpt-ph" id="p10Ph">ChatGPT에게 물어보세요</span>
+                  <i data-ic="mic" class="gpt-mic"></i>
+                  <span class="gpt-voice" id="p10Voice"></span>
+                </div>
+              </div>
+              <div class="gpt-menu is-hide" id="p10Menu">
+                <button type="button"><i><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="3"/><circle cx="12" cy="13.5" r="3.5"/><path d="M8 7l2-3h4l2 3"/></svg></i>카메라</button>
+                <button type="button"><i><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="15" cy="9" r="2"/><path d="M3 17l5-5 5 5"/></svg></i>사진</button>
+                <button type="button" id="p10File" data-hit="file"><i><svg class="ic" viewBox="0 0 24 24"><path d="M8 12l6-6a3 3 0 114 4l-8 8a5 5 0 01-7-7l7-7"/></svg></i>파일</button>
+                <button type="button"><i><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M16 12v1.5a2.5 2.5 0 005 0V12a9 9 0 10-3.5 7.1"/></svg></i>플러그인</button>
+                <button type="button"><i><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 13l4-4M5.5 17.5h13"/></svg></i>더 보기</button>
+              </div>
+              <div class="kbd-cj is-hide"></div>
+            </div>
+
+            <div class="p10-sheet is-hide" id="p10Sheet">
+              <div class="phone-status is-dark"></div>
+              <span class="p10-sh-x"><i data-ic="x"></i></span>
+              <p class="p10-sh-title">파일 추가</p>
+              <span class="p10-sh-more"><i data-ic="dotsV"></i></span>
+              <button type="button" class="p10-sh-add is-hide js-sfx" id="p10Add" data-hit="add" data-sound="sound/click.mp3">추가</button>
+              <div class="p10-sh-up"><svg viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg>파일 업로드</div>
+              <p class="p10-sh-lab">최근</p>
+              <div class="p10-files" id="p10Files">
+                <button type="button" class="p10-file" aria-label="12월 1일~10일 미세먼지 데이터">12월 1일~10일<br>미세먼지 데이터<i class="p10-pdf" data-ic="pdf"></i><span class="p10-radio"></span></button>
+                <button type="button" class="p10-file" aria-label="11월 1일~10일 날씨 데이터">11월 1일~10일<br>날씨 데이터<i class="p10-pdf" data-ic="pdf"></i><span class="p10-radio"></span></button>
+                <button type="button" class="p10-file" aria-label="12월 11일~20일 날씨 데이터">12월 11일~20일<br>날씨 데이터<i class="p10-pdf" data-ic="pdf"></i><span class="p10-radio"></span></button>
+                <button type="button" class="p10-file" data-ok="1" aria-label="12월 1일~10일 날씨 데이터">12월 1일~10일<br>날씨 데이터<i class="p10-pdf" data-ic="pdf"></i><span class="p10-radio"></span></button>
+              </div>
+              <div class="p10-sh-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>라이브러리 검색</div>
+            </div>
+            <div class="phone-nav"></div>
+          </div></div>
+
+          <button type="button" class="card-btn p10-card is-hide" id="p10Card1" data-hit="card1">12월 1일~10일 날씨 데이터를 줄게. 이 데이터 속 날씨의 공통된 특징을 분석해 줘!</button>
+          <button type="button" class="card-btn p10-card is-hide" id="p10Card2" data-hit="card2">이 날씨 분석 결과를 바탕으로,<br>오늘 외출할 때 입을 옷과 챙길 물건, 추천 음식을 알려줘!</button>
+          <button type="button" class="card-btn is-popup is-arrow p10-go is-hide" id="p10Go" data-hit="go">→</button>
+          <button type="button" class="card-btn is-start next-btn-activity is-hide" id="p10Next" data-hit="next">다음</button>
+
+          <div class="avatar-modal is-off" id="p10Pop1">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <p class="avatar-card-title">잘 했어요.</p>
+                <p class="avatar-card-text">날씨 뿐만 아니라 여러가지 빅데이터 사이에서 패턴을 찾을 때도 대화형 AI를 유용하게 이용할 수 있어요.</p>
+              </div>
+              <a href="javascript:;" class="avatar-card-btn card-btn is-popup is-arrow js-sfx" id="p10Arrow" data-sound="sound/click.mp3">→</a>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p10Pop2">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <p class="avatar-card-text">참! AI가 정확하게 데이터 마이닝을 하려면 빅데이터를 구성하기 전 데이터 조각들이 먼저 바르고 정확해야 한다는 거 잊지 않았죠?</p>
+              </div>
+              <a href="page11.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="AI 날씨 데이터 분석과 맞춤 추천" data-next="page11.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script src="../../resources/js/box-edit.js"></script>
+  <script>
+  (function () {
+    const TEXT1 = '12월 1일~10일 날씨 데이터를 줄게.\n이 데이터 속 날씨의 공통된 특징을 분석해 줘!';
+    const TEXT2 = '이 날씨 분석 결과를 바탕으로, 오늘 외출할 때 입을 옷과 챙길 물건, 추천 음식을 알려줘!';
+    const TOOLS = '<div class="gpt-tools"><svg class="ic" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V6a2 2 0 012-2h10"/></svg><svg class="ic" viewBox="0 0 24 24"><path d="M7 11v9H4v-9zM7 11l4-7a2 2 0 013 2v4h5a2 2 0 012 2.3l-1.2 7A2 2 0 0117.8 21H7"/></svg><svg class="ic" viewBox="0 0 24 24"><path d="M20 12a8 8 0 11-2.6-5.9M20 4v5h-5"/></svg></div>';
+    const ANS1 = [
+      '📊 12월 1일부터 10일까지의 데이터를 분석한 결과입니다.',
+      '🌡️ 기온: 평균 기온이 0도로 매우 낮고 춥습니다.',
+      '💧 습도: 평균 습도가 30%로 매우 건조합니다.',
+      '☁️ 날씨: 눈이 오거나 흐린 날이 많습니다.',
+      '❄️ 종합 특징: 전형적인 추운 겨울철 날씨 패턴을 보이고 있습니다.'
+    ];
+    const ANS2 = [
+      '❄️ 분석된 춥고 건조한 겨울 날씨 패턴을 바탕으로 다음 생활 행동을 추천합니다.',
+      '🧥 옷(의): 두꺼운 패딩 점퍼, 목도리, 장갑 착용',
+      '🧴 물건(용품): 피부 건조를 막기 위한 핸드크림과 립밤',
+      '🍲 음식(식): 몸을 따뜻하게 해주는 따뜻한 우동과 핫초코'
+    ];
+    const DOT = '<span class="gpt-dot"></span>';
+    const me = (t) => '<div class="gpt-me">' + t.replace(/\n/g, ' ') + '</div>';
+    const ai = (lines) => '<div class="gpt-ai">' + lines.map((l) => '<p class="p10-ln">' + l + '</p>').join('') + TOOLS + '</div>';
+
+    const STEPS = [
+      { pose: 'wink_walk', bubble: 'ChatGPT를 클릭해요.', hit: 'app' },
+      { pose: 'wink_point4', bubble: '입력창을<br>클릭해보세요.', hit: 'bar' },
+      { pose: 'smile_present', bubble: '입력창을<br>입력해보세요.' },
+      { pose: 'wink_point2', bubble: '날씨 데이터<br>파일을 첨부해볼까요?', hit: 'plus' },
+      { pose: 'wink_present', bubble: '날씨 데이터<br>파일을 첨부해볼까요?', hit: 'file' },
+      { pose: 'wink_present', bubble: '12월 1일~10일 날씨 데이터<br>파일을 찾아 눌러주세요.', medium: true, hit: 'add' },
+      { pose: 'wink_point2', bubble: '전송 버튼을 눌러,<br>GPT에게 물어볼까요?', hit: 'send' },
+      { pose: '', bubble: '답변을 생성하고 있어요.' },
+      { pose: 'smile_present', bubble: '복잡한 숫자와 글자로 된 데이터를 입력하자, AI가 순식간에 ‘추운 겨울철 날씨’라는 핵심 패턴을 분석해 내는 과정을 확인할 수 있어요!' },
+      { pose: 'wink_point4', bubble: '입력창을<br>클릭해보세요.', hit: 'bar2' },
+      { pose: 'wink_point', bubble: '입력창에<br>입력해보세요.' },
+      { pose: 'wink_point2', bubble: '전송 버튼을<br>눌러주세요.', hit: 'send' },
+      { pose: '', bubble: '답변을 생성하고 있어요.' },
+      { pose: 'smile_present', bubble: 'AI가 단순 데이터 분석에 그치지 않고, 분석 결과를 바탕으로 오늘 외출할 때 필요한 의식주 정보까지 스스로 추론하여 추천하고 있다는 것을 확인할 수 있어요.' }
+    ];
+    const SAYS = { pick: ['파일을 첨부해주세요.', 'wink_point'] };
+    const FG = { app: [20, -40], bar: [-160, -30], plus: [20, 0], file: [-50, -30], add: [0, 0], send: [0, 0], bar2: [-160, -30] };
+    const HOT = { app: [0, 0, 0, 0], bar: [0, 0, 0, 0], plus: [-10, -10, 20, 20, 30], file: [0, 0, 0, 0], add: [0, 0, 0, 0], send: [-2, -2, 4, 4], bar2: [0, 0, 0, 0] };
+
+    const say = initGuideSay({ bubble: $('p10Bubble'), img: $('p10Char'), set: $('p10Set'), keep: true });
+    const phone = $('p10Phone'), scr = $('p10Scr'), log = $('p10Log'), bar = $('p10Bar'), input = $('p10Input'), ph = $('p10Ph'), voice = $('p10Voice');
+    const kbd = scr.querySelector('.kbd-cj');
+    const BARS = '<i style="height:6px"></i><i style="height:12px"></i><i style="height:16px"></i><i style="height:10px"></i><i style="height:5px"></i>';
+    let cur = 0;
+    let tok = 0;
+    let picked = false;
+    let stopType = null;
+    const lnHtml = (s) => s.replace(/[\uD800-\uDBFF]$/, '').split('\n').map((l) => '<p class="p10-ln">' + l + '</p>').join('');
+
+    function pad(el, key) {
+      Array.from(el.children).forEach((c) => { if (c.tagName === 'HIT-PAD') c.remove(); });
+      BoxEdit.padEl(el, key, HOT);
+    }
+    function point(key, first, my) {
+      const el = document.querySelector('[data-hit="' + key + '"]');
+      if (!el) return;
+      pad(el, key);
+      setTimeout(() => {
+        if (my !== tok) return;
+        pointFingerAt(el, BoxEdit.fgo(FG, key, first ? {} : { pulse: true }));
+      }, 50);
+    }
+
+    function render(i) {
+      cur = i;
+      const my = ++tok;
+      clearFingers();
+      const s = STEPS[i];
+      const talk = i >= 7;
+      phone.dataset.screen = i === 0 ? 'home' : (i === 5 ? 'sheet' : 'chat');
+      showIf($('p10Seg'), !talk);
+      showIf($('p10RoundR'), !talk);
+      showIf($('p10Pill'), talk);
+      showIf($('p10Sugg'), i === 1 || i === 2);
+      if (stopType) { stopType(); stopType = null; }
+      const typed = (i === 8 || i === 13) && !BoxEdit.on;
+      const open = '<div class="gpt-ai"></div>';
+      log.innerHTML = i === 7 ? me(TEXT1) + DOT : i === 8 ? me(TEXT1) + (typed ? open : ai(ANS1)) : (i >= 9 && i <= 11) ? me(TEXT1) + ai(ANS1) : i === 12 ? me(TEXT2) + DOT : i === 13 ? me(TEXT2) + (typed ? open : ai(ANS2)) : '';
+      const kb = i === 3 || i === 4 || i === 6 || i === 10 || i === 11;
+      showIf(kbd, kb);
+      scr.classList.toggle('has-kb', kb);
+      bar.classList.toggle('is-start', i === 1 || i === 2 || i >= 7 && i !== 10 && i !== 11 );
+      bar.classList.toggle('is-focus', i === 2);
+      bar.classList.toggle('has-file', i === 6);
+      bar.dataset.hit = i === 9 ? 'bar2' : 'bar';
+      if (i === 6 || i === 11) voice.dataset.hit = 'send'; else delete voice.dataset.hit;
+      input.textContent = (i >= 3 && i <= 6) ? TEXT1 : i === 11 ? TEXT2 : '';
+      ph.textContent = i >= 7 ? 'ChatGPT에게 답장하기' : 'ChatGPT에게 물어보세요';
+      const mode = ((i >= 3 && i <= 6) || i === 11) ? 'send' : (i === 7 || i === 12 || typed ? 'stop' : 'bars');
+      voice.className = 'gpt-voice' + (mode === 'send' ? ' is-send' : '');
+      voice.innerHTML = mode === 'stop' ? '<b></b>' : BARS;
+      showIf($('p10Menu'), i === 4);
+      showIf($('p10Sheet'), i === 5);
+      showIf($('p10Card1'), i === 2);
+      showIf($('p10Card2'), i === 10);
+      showIf($('p10Go'), i === 8 && !typed);
+      showIf($('p10Next'), i === 13 && !typed);
+      $('p10Pop1').classList.add('is-off');
+      $('p10Pop2').classList.add('is-off');
+      $('p10Set').classList.toggle('p10-wide', i === 8 );
+      $('p10Set').classList.toggle('p10-wide2', i === 13);
+
+      picked = false;
+      $('p10Files').classList.remove('is-locked');
+      Array.from($('p10Files').children).forEach((f) => f.classList.remove('is-selected'));
+      showIf($('p10Add'), false);
+      if (typed) say('', s.pose); else say(s.bubble, s.pose, s.medium);
+
+      if (typed) {
+        const box = log.querySelector('.gpt-ai');
+        stopType = typeText(box, (i === 8 ? ANS1 : ANS2).join('\n'), {
+          speed: 20,
+          render: lnHtml,
+          onTick: () => { log.scrollTop = log.scrollHeight; },
+          onDone: () => {
+            if (my !== tok) return;
+            box.insertAdjacentHTML('beforeend', TOOLS);
+            voice.innerHTML = BARS;
+            say(s.bubble, s.pose, s.medium);
+            showIf($('p10Go'), i === 8);
+            showIf($('p10Next'), i === 13);
+          }
+        });
+      }
+
+      if (i === 5 && BoxEdit.on) pickOk();
+      if (s.hit) point(s.hit, i === 0, my);
+      if (!BoxEdit.on && (i === 7 || i === 12)) setTimeout(() => { if (my === tok) render(i + 1); }, 3000);
+    }
+
+    function pickOk() {
+      const ok = $('p10Files').querySelector('[data-ok]');
+      ok.classList.add('is-selected');
+      picked = true;
+      $('p10Files').classList.add('is-locked');
+      showIf($('p10Add'), true);
+      say(SAYS.pick[0], SAYS.pick[1]);
+      point('add', false, tok);
+    }
+
+    $('p10App').addEventListener('click', () => { if (cur !== 0) return; playClick(); render(1); });
+    bar.addEventListener('click', () => {
+      if (cur === 1) { playClick(); render(2); } else if (cur === 9) { playClick(); render(10); }
+    });
+    voice.addEventListener('click', () => { if (cur === 6) { playClick(); render(7); } else if (cur === 11) { playClick(); render(12); } });
+    $('p10Card1').addEventListener('click', () => { if (cur !== 2) return; playClick(); render(3); });
+    phone.querySelector('[data-hit="plus"]').addEventListener('click', () => { if (cur !== 3) return; playClick(); render(4); });
+    $('p10File').addEventListener('click', () => { if (cur !== 4) return; playClick(); render(5); });
+    Array.from($('p10Files').children).forEach((f) => f.addEventListener('click', () => {
+      if (cur !== 5 || picked) return;
+      if (!f.dataset.ok) {
+        playWrong();
+        f.classList.remove('is-wrong');
+        void f.offsetWidth;
+        f.classList.add('is-wrong');
+        return;
+      }
+      playCorrect();
+      clearFingers();
+      pickOk();
+    }));
+    $('p10Add').addEventListener('click', () => { if (cur !== 5 || !picked) return; render(6); });
+    $('p10Go').addEventListener('click', () => { if (cur !== 8) return; playClick(); render(9); });
+    $('p10Card2').addEventListener('click', () => { if (cur !== 10) return; playClick(); render(11); });
+    $('p10Next').addEventListener('click', () => { if (cur !== 13) return; playClick(); $('p10Pop1').classList.remove('is-off'); });
+    $('p10Arrow').addEventListener('click', () => { $('p10Pop1').classList.add('is-off'); $('p10Pop2').classList.remove('is-off'); });
+
+    BoxEdit.stepEdit({
+      count: STEPS.length + 1,
+      get: () => cur + 1,
+      set: (n) => { cur = Math.max(0, Math.min(n, STEPS.length) - 1); },
+      go: (n) => {
+        if (n < 1) return;
+        BoxEdit.syncStep(n);
+        render(n - 1);
+      },
+      label: (n) => '단계 ' + n + ' / ' + STEPS.length,
+      say, bubble: $('p10Bubble'), img: $('p10Char')
+    });
+    render(cur);
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>액체의 특징 찾아보기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .p05-pn{position:absolute;left:60px;top:175px;width:1800px;height:765px;box-sizing:border-box;border-radius:30px;background:#266cc8}
+        .p05-ph{position:absolute;top:30px;width:560px;height:330px;box-sizing:border-box;border-radius:24px;background:#fff;display:flex;align-items:flex-end;justify-content:center;gap:4px;padding-bottom:20px}
+        .p05-ph img{object-fit:contain;position:absolute}
+        .p05-ph b{position:absolute;left:50%;top:-4px;transform:translate(-50%,-50%);height:64px;padding:6px 34px 0;box-sizing:border-box;display:flex;align-items:center;border-radius:32px;background:var(--c-navy);font-family:'Cafe24 Ssurround';font-weight:400;font-size:40px;color:#fff;white-space:nowrap}
+        .p05-tb{table-layout:fixed;position:absolute;left:30px;top:390px;width:1740px;border-collapse:separate;border-spacing:0;border-radius:20px;overflow:hidden;font-family:'Cafe24 Ssurround';letter-spacing:-0.04em}
+        .p05-tb th,.p05-tb td{height:76px;text-align:center;font-weight:400;font-size:40px;border-right:solid 4px #266cc8;border-bottom:solid 4px #266cc8}
+        .p05-tb th{background:var(--c-navy);color:#fff}
+        .p05-tb td{background:#fff;color:var(--c-purple)}
+        .p05-tb tr>*:first-child{width:300px}
+        .p05-tb tr>*:last-child{border-right:0}
+        .p05-tb tr:last-child>*{border-bottom:0;height:110px}
+        .p05-tb td.q{color:#b0b8cf;font-size:56px}
+        .p05-tb tr.c th{background:#5b3fb8}
+        .p05-tb td.drop-zone.is-over{outline:0;box-shadow:inset 0 0 0 8px var(--c-yellow)}
+        .p05-tb td[data-filled] .p05-qm{display:none}
+        .p05-tb td .dc-card{position:relative;display:flex;width:300px;height:80px;box-sizing:border-box;margin:0 auto;border:solid 5px var(--c-ink);border-radius:40px;padding-top:4px;font-size:38px;cursor:default;align-items:center;justify-content:center}
+        .p05-cds{position:absolute;left:0;right:0;top:620px;display:flex;justify-content:center;gap:60px}
+        .p05-slot{position:relative;width:405px;height:110px}
+        .p05-slot .dc-card{position:absolute;left:0;top:0;width:405px;height:110px;font-size:46px;border:solid 7px var(--c-ink);border-radius:55px;letter-spacing:-0.04em}
+        .w-none{background:repeating-conic-gradient(#fff 0 25%,#e6ebf3 0 50%) 0 0/28px 28px}
+        .w-white{background:#fff}
+        .w-orange{background:linear-gradient(180deg,#ffb04a,#ff8a1f)}
+        .p05-hint{position:absolute;right:60px;top:40px;min-width:0;width:180px;height:76px;padding:6px 10px 0;font-size:40px}
+        .p05-hm{width:1500px;padding:50px 60px 50px;border-radius:60px}
+        .p05-hm .hint-title{width:max-content;margin:0 auto 24px}
+        .p05-hm-t{font-size:48px}
+        .p05-hm-x{position:absolute;right:30px;top:30px;width:90px;cursor:pointer}
+        .p05-row{display:flex;justify-content:center;gap:50px;margin-top:36px}
+        .p05-row figure{margin:0;width:380px;height:440px;position:relative;border-radius:24px;background:#eef3fb;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:20px;box-sizing:border-box}
+        .p05-row b{position:absolute;top:16px;font-family:'Cafe24 Ssurround';font-weight:400;font-size:40px;color:var(--c-navy)}
+        .p05-row figcaption{margin-top:10px;font-family:'Cafe24 Ssurround';font-size:40px;color:var(--c-purple);letter-spacing:-0.04em}
+        .p05-sw{width:260px;height:260px;margin-bottom:20px;box-sizing:border-box;border:solid 6px var(--c-ink);border-radius:36px}
+        .p05-fr{position:relative;width:340px;height:300px;overflow:hidden;display:flex;align-items:flex-end;justify-content:center}
+        .p05-fr .p05-cup-base{position:absolute;left:50%;bottom:0;transform:translateX(-50%);height:300px;object-fit:contain;pointer-events:none}
+        .p05-fr .p05-cup-star{position:absolute;left:50%;bottom:0;transform:translateX(-50%);height:300px;object-fit:contain;pointer-events:none;animation:p05PaperReveal 3.2s ease-in-out infinite}
+        @keyframes p05PaperReveal{
+          0%,10%{clip-path:inset(0 0 100% 0)}
+          40%,82%{clip-path:inset(0 0 0 0)}
+          95%,100%{clip-path:inset(0 0 100% 0)}
+        }
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="ask-pill is-fit is-small"><span id="p05Pill">사진을 보고 알맞은 색깔 카드를 표에 끌어다 놓아 보세요.</span></p>
+          <a class="card-btn is-popup p05-hint js-sfx" id="p05HintBtn" data-sound="sound/click.mp3">힌트</a>
+          <div class="p05-pn">
+            <div class="p05-ph" style="left:30px"><b>물</b><img id="p05W1" src="img/p05_water_s.png" style="left:-4px;bottom:5px;height:220px" alt=""><img id="p05W2" src="img/p05_water_l.png" style="left:155px;bottom:7px;height:250px" alt=""><img id="p05W3" src="img/p05_water_b.png" style="left:304px;bottom:16px;height:284px" alt=""></div>
+            <div class="p05-ph" style="left:620px"><b>우유</b><img src="img/p05_milk_s.png" style="left:-16px;bottom:2px;height:222px" alt=""><img src="img/p05_milk_l.png" style="left:155px;bottom:14px;height:242px" alt=""><img src="img/p05_milk_b.png" style="left:356px;bottom:8px;height:293px" alt=""></div>
+            <div class="p05-ph" style="left:1210px"><b>오렌지 주스</b><img src="img/p05_oj_s.png" style="left:6px;bottom:4px;height:211px" alt=""><img src="img/p05_oj_l.png" style="left:170px;bottom:16px;height:235px" alt=""><img src="img/p05_oj_b.png" style="left:360px;bottom:6px;height:289px" alt=""></div>
+            <table class="p05-tb">
+              <tr><th>특징</th><th>물</th><th>우유</th><th>오렌지 주스</th></tr>
+              <tr class="c" id="p05Row"></tr>
+            </table>
+            <div class="p05-cds" id="p05Tray"></div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p05Hint1">
+            <div class="avatar-card p05-hm">
+              <img class="p05-hm-x js-img-swap js-sfx" data-src-over="../../resources/img/common/pop_btn_close_over.png" data-src-alt="../../resources/img/common/pop_btn_close_on.png" data-swap-reset="true" data-sound="sound/click.mp3" src="../../resources/img/common/pop_btn_close.png" alt="닫기">
+              <p class="hint-title">힌트</p>
+              <p class="avatar-card-text p05-hm-t">액체의 색깔과 같은 카드를 찾아보세요.</p>
+              <div class="p05-row">
+                <figure><b>물</b><div class="p05-sw w-none"></div></figure>
+                <figure><b>우유</b><div class="p05-sw w-white"></div></figure>
+                <figure><b>오렌지 주스</b><div class="p05-sw w-orange"></div></figure>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p05Hint2">
+            <div class="avatar-card p05-hm">
+              <img class="p05-hm-x js-img-swap js-sfx" data-src-over="../../resources/img/common/pop_btn_close_over.png" data-src-alt="../../resources/img/common/pop_btn_close_on.png" data-swap-reset="true" data-sound="sound/click.mp3" src="../../resources/img/common/pop_btn_close.png" alt="닫기">
+              <p class="hint-title">힌트</p>
+              <p class="avatar-card-text p05-hm-t">컵 뒤의 별이 비치는지 살펴보고, 알맞은 카드를 찾아보세요.</p>
+              <div class="p05-row">
+                <figure>
+                  <b>물</b>
+                  <div class="p05-fr">
+                    <img class="p05-cup-base" src="img/p05_hint_water_mask.png" alt="물">
+                    <img class="p05-cup-star" src="img/p05_hint_water.png" alt="물과 별">
+                  </div>
+                  <figcaption>별이 보여요</figcaption>
+                </figure>
+                <figure>
+                  <b>우유</b>
+                  <div class="p05-fr">
+                    <img class="p05-cup-base" src="img/p05_hint_milk_mask.png" alt="우유">
+                    <img class="p05-cup-star" src="img/p05_hint_milk.png" alt="우유와 별">
+                  </div>
+                  <figcaption>별이 보이지 않아요</figcaption>
+                </figure>
+                <figure>
+                  <b>오렌지 주스</b>
+                  <div class="p05-fr">
+                    <img class="p05-cup-base" src="img/p05_hint_oj_mask.png" alt="오렌지 주스">
+                    <img class="p05-cup-star" src="img/p05_hint_oj.png" alt="오렌지 주스와 별">
+                  </div>
+                  <figcaption>별이 보이지 않아요</figcaption>
+                </figure>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p05Fin">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body"><p class="avatar-card-text">물은 어디에 담겨도 다 투명해요. 그릇이 달라도 액체의 성질은 똑같아요. 우유와 주스는 둘 다 투명하지 않고, 색깔이 달라요.</p></div>
+              <a href="page06.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="액체의 특징 찾아보기" data-next="page06.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const LIQ = ['water', 'milk', 'oj'];
+    const STEPS = [
+      {
+        pill: '사진을 보고 알맞은 색깔 카드를 표에 끌어다 놓아 보세요.',
+        label: '색깔',
+        answers: ['none', 'white', 'orange'],
+        cards: [
+          { val: 'white', cls: 'w-white', text: '하얀색' },
+          { val: 'orange', cls: 'w-orange', text: '주황색' },
+          { val: 'none', cls: 'w-none', text: '색이 없어요' }
+        ]
+      },
+      {
+        pill: '사진을 보고 알맞은 투명 카드를 표에 끌어다 놓아 보세요.',
+        label: '투명한지',
+        answers: ['clear', 'opaque', 'opaque'],
+        cards: [
+          { val: 'opaque', cls: 'w-white', text: '투명하지 않아요', copies: 2 },
+          { val: 'clear', cls: 'w-white', text: '투명해요' }
+        ]
+      }
+    ];
+
+    const row = $('p05Row');
+    const tray = $('p05Tray');
+    const hintBtn = $('p05HintBtn');
+    const hints = [$('p05Hint1'), $('p05Hint2')];
+    let step = 0;
+    let succeeded = false;
+
+    const guide = () => {
+      if (succeeded) return;
+      const slot = tray.querySelector('.p05-slot');
+      const card = slot && slot.lastElementChild;
+      if (card) pointFingerAt(card, { pulse: true });
+    };
+
+    const render = () => {
+      const S = STEPS[step];
+      succeeded = false;
+      $('p05Pill').textContent = S.pill;
+      row.innerHTML = '<th>' + S.label + '</th>' + LIQ.map((k, i) => '<td class="q" data-val="' + S.answers[i] + '"><span class="p05-qm">?</span></td>').join('');
+      tray.innerHTML = S.cards.map((c) => {
+        let html = '';
+        for (let n = 0; n < (c.copies || 1); n++) html += '<div class="dc-card ' + c.cls + '" data-val="' + c.val + '">' + c.text + '</div>';
+        return '<div class="p05-slot">' + html + '</div>';
+      }).join('');
+      if (step === 1) {
+        $('p05W1').src = 'img/p05_water_s_star.png';
+        $('p05W2').src = 'img/p05_water_l_star.png';
+        $('p05W3').src = 'img/p05_water_b_star.png';
+      }
+
+      const zones = Array.from(row.querySelectorAll('td'));
+      let placed = 0;
+      initMatchDrag({
+        cards: Array.from(tray.querySelectorAll('.dc-card')),
+        zones: zones,
+        silent: true,
+        match: (card, zone) => card.dataset.val === zone.dataset.val,
+        onRight: (card, zone) => {
+          placed += 1;
+          succeeded = true;
+          clearFingers();
+          zone.classList.remove('q');
+          if (placed < zones.length) playCorrect();
+        },
+        onWrong: (card, zone) => {
+          if (!zone) return;
+          playWrong();
+          card.classList.remove('is-wrong');
+          void card.offsetWidth;
+          card.classList.add('is-wrong');
+          guide();
+        },
+        onDone: () => {
+          playCorrect();
+          setTimeout(() => {
+            if (step === 0) {
+              step = 1;
+              render();
+            } else {
+              hintBtn.style.display = 'none';
+              $('p05Fin').classList.remove('is-off');
+            }
+          }, 1000);
+        }
+      });
+      guide();
+    };
+
+    tray.addEventListener('pointerdown', clearFingers, true);
+
+    hintBtn.addEventListener('click', () => {
+      clearFingers();
+      const currentHint = hints[step];
+      const closeBtn = currentHint.querySelector('.p05-hm-x');
+      if (closeBtn) {
+        closeBtn.classList.remove('is-swapped');
+        closeBtn.src = closeBtn.dataset.originalSrc || '../../resources/img/common/pop_btn_close.png';
+      }
+      currentHint.classList.remove('is-off');
+    });
+    hints.forEach((m) => {
+      const closeBtn = m.querySelector('.p05-hm-x');
+      closeBtn.addEventListener('click', () => {
+        setTimeout(() => {
+          m.classList.add('is-off');
+          closeBtn.classList.remove('is-swapped');
+          closeBtn.src = closeBtn.dataset.originalSrc || '../../resources/img/common/pop_btn_close.png';
+          guide();
+        }, 120);
+      });
+    });
+
+    render();
+  })();
+  </script>
+</body>
+</html>

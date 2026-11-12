@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>삼촌의 이사를 도와라!</title>
+  <link rel="stylesheet" href="../../resources/css/common.css">
+  <style>
+    .p03-step{top:24px;width:1710px;height:104px;font-size:67px}
+    .ask-pill.has-stage.p03-step>i{width:435px}
+    .p03-step>span{justify-content:flex-start;padding:8px 35px 0;white-space:nowrap}
+    .p03-scene{position:absolute;left:0;top:-120px;width:1920px;height:1080px;background-position:0 0;background-size:1920px 1080px;background-repeat:no-repeat;pointer-events:none;z-index:1}
+    .p03-scene.is-round1{background-image:url('img/p03_bg_round1_clean.png')}
+    .p03-scene.is-round2{background-image:url('img/p03_bg_round2_clean.png')}
+
+    .p03-character{position:absolute;left:20px;top:160px;width:440px;height:615px;pointer-events:none;z-index:4}
+    .p03-character img{width:100%;height:100%;display:block}
+
+    .p03-bubble{position:absolute;margin:0;left:296px;top:159px;width:330px;min-height:125px;box-sizing:border-box;padding:12px 16px;display:flex;align-items:center;justify-content:center;text-align:center;
+      background:var(--c-white);border:solid 5px #053c85;border-radius:24px;box-shadow:0 6px 10px rgba(5,60,133,.15);
+      font-family:'Cafe24 Ssurround';font-size:28px;line-height:1.35;color:#266cc8;letter-spacing:-0.05em;word-break:keep-all;z-index:10}
+    .p03-bubble::before{content:'';position:absolute;left:-33px;top:50%;margin-top:-18px;width:33px;height:36px;background:#053c85;clip-path:polygon(8.32px 14.85px,10.73px 12.63px,28px 4px,33px 4px,33px 32px,28px 32px,10.73px 23.37px,8.32px 21.15px,7.42px 18px);z-index:1}
+    .p03-bubble::after{content:'';position:absolute;left:-33px;top:50%;margin-top:-18px;width:34px;height:36px;background:var(--c-white);clip-path:polygon(12.42px 18px,12.97px 17.11px,28px 9.59px,34px 9.59px,34px 26.41px,28px 26.41px,12.97px 18.89px);z-index:2}
+    .p03-bubble.is-off{display:none}
+
+    .p03-zone{position:absolute;box-sizing:border-box;border:3px dashed #266cc8;border-radius:12px;background:rgba(255,255,255,.4);z-index:5}
+    .p03-zone[data-filled]{border-color:transparent;background:none}
+
+    .p03-tray{position:absolute;left:55px;top:655px;width:1810px;height:285px;box-sizing:border-box;background:#023186;border:5px solid #91b9e7;border-radius:0 28px 28px 28px;z-index:15}
+    .p03-tray-badge{position:absolute;left:-5px;top:-100px;width:430px;height:101px;box-sizing:border-box;background:#023186;border:5px solid #91b9e7;border-bottom:none;border-radius:28px 28px 0 0;font-family:'Cafe24 Ssurround',sans-serif;font-size:60px;color:#ffffff;letter-spacing:-0.05em;padding-top:14px;display:flex;align-items:center;justify-content:center;z-index:16}
+    .p03-tray-inner{width:100%;height:100%;display:flex;gap:25px;justify-content:center;align-items:center;padding:0 20px;box-sizing:border-box}
+    .p03-tray-inner.is-r2{gap:112px}
+
+    .p03-card{position:relative;flex:none;width:267px;height:205px;box-sizing:border-box;border:4px solid var(--c-sky);border-radius:24px;background:var(--c-white);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 6px;
+      font-family:'Cafe24 Ssurround';font-size:32px;line-height:1;color:var(--c-ink);letter-spacing:-0.05em;white-space:nowrap;cursor:grab;user-select:none}
+    .p03-card i{position:absolute;left:50%;top:82px;transform:translate(-50%,-50%);width:150px;height:112px;background-repeat:no-repeat;background-position:center;background-size:contain;pointer-events:none}
+    .p03-card[data-key=tv] i{width:158px;height:118px}
+    .p03-card[data-key=aircon] i{width:177px;height:80px}
+    .p03-card[data-key=sensor] i{width:109px;height:89px}
+    .p03-card[data-key=light] i{width:160px;height:93px}
+    .p03-card[data-key=robot] i{width:152px;height:106px}
+    .p03-card[data-key=hub] i{width:145px;height:129px}
+    .p03-card[data-key=cctv] i{width:150px;height:134px}
+    .p03-card[data-key=fridge] i{width:150px;height:140px}
+    .p03-card[data-key=purifier] i{width:150px;height:140px}
+    .p03-card[data-key=washer] i{width:150px;height:140px}
+    .p03-card span{pointer-events:none}
+    .p03-card.is-dragging{cursor:grabbing;z-index:100;box-shadow:0 10px 24px rgba(0,0,0,.3)}
+
+    .p03-zone .p03-card{position:absolute;left:0;top:0;width:100%;height:100%;padding:0;border:none;background:none;font-size:0;cursor:default;box-shadow:none}
+    .p03-zone .p03-card i{left:0;top:0;transform:none;width:100%;height:100%;background-size:contain}
+    .p03-zone .p03-card[data-key=fridge] i,.p03-zone .p03-card[data-key=purifier] i,.p03-zone .p03-card[data-key=washer] i{background-position:center bottom}
+    .p03-zone .p03-card span{display:none}
+  </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="ask-pill has-stage p03-step"><i id="p03Round">1 ROUND</i><span>스마트 기기를 알맞은 위치로 옮겨 주세요.</span></p>
+          <div class="p03-scene is-round1" id="p03Scene"></div>
+          <div class="p03-character"><img id="p03CharImg" src="img/p03_char_cutout.png" alt="삼촌과 로운이"></div>
+          <p class="p03-bubble" id="p03Bubble"></p>
+
+          <div id="p03Zones"></div>
+
+          <div class="p03-tray">
+            <span class="p03-tray-badge">이삿짐 목록</span>
+            <div class="p03-tray-inner" id="p03Tray"></div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p03Clear1">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_correct_gwa.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">1라운드 완료!</p>
+                <p class="avatar-popup-sub">거실의 스마트 기기를 모두 배치했어요.</p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p03BtnNextRound" data-sound="sound/click.mp3">2라운드로 가기</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p03Clear2">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_finish.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">이사 완료!</p>
+                <p class="avatar-popup-sub">스마트 기기를 모두 제자리에 배치했어요.<br>센서와 AI 허브의 비밀을 영상으로 확인해 봐요!</p>
+                <a href="page04.html" class="avatar-popup-next card-btn is-popup js-nav-effect js-sfx" id="p03BtnFinal" data-sound="sound/click.mp3">확인</a>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="삼촌의 이사를 도와라!" data-next="page04.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const ROUNDS = [
+      {
+        roundText: '1 ROUND',
+        introText: '스마트 기기를<br>알맞은 위치로 옮겨 줘!',
+        devices: [
+          { key: 'tv', name: '스마트 TV', zone: [501, 317, 175, 111],
+            hint: '스마트 TV를<br>거실 화분 옆에 놓아줘.', placedMsg: '잘했어!<br>스마트 TV를 제자리에 놓았어.' },
+          { key: 'aircon', name: '스마트 에어컨', zone: [1190, 231, 206, 75],
+            hint: '스마트 에어컨을<br>거실 창문 오른쪽 위에 설치해줘.', placedMsg: '잘했어!<br>스마트 에어컨을 제자리에 놓았어.' },
+          { key: 'sensor', name: '온습도 센서', zone: [1402, 320, 87, 75],
+            hint: '온습도 센서를<br>거실 벽에 설치해줘.', placedMsg: '잘했어!<br>온습도 센서를 제자리에 놓았어.' },
+          { key: 'light', name: '스마트 전등', zone: [858, 142, 157, 75],
+            hint: '스마트 전등을<br>거실 천장에 달아줘.', placedMsg: '잘했어!<br>스마트 전등을 제자리에 놓았어.' },
+          { key: 'robot', name: '스마트 로봇청소기', zone: [1298, 540, 159, 75],
+            hint: '스마트 로봇청소기를<br>거실 바닥에 놓아줘.', placedMsg: '잘했어!<br>스마트 로봇청소기를 제자리에 놓았어.' },
+          { key: 'hub', name: 'AI 허브', zone: [841, 466, 159, 75],
+            hint: 'AI 허브를<br>거실 테이블 위에 놓아줘.', placedMsg: '잘했어!<br>AI 허브를 제자리에 놓았어.' }
+        ]
+      },
+      {
+        roundText: '2 ROUND',
+        introText: '새로운 스마트 기기도<br>알맞은 위치로 옮겨 줘!',
+        devices: [
+          { key: 'cctv', name: 'CCTV 카메라', zone: [692, 194, 97, 81],
+            hint: 'CCTV 카메라를<br>현관문 위에 설치해줘.', placedMsg: '잘했어!<br>CCTV 카메라를 제자리에 놓았어.' },
+          { key: 'fridge', name: '스마트 냉장고', zone: [1078, 295, 139, 295],
+            hint: '스마트 냉장고를<br>주방 싱크대 옆에 놓아줘.', placedMsg: '잘했어!<br>스마트 냉장고를 제자리에 놓았어.' },
+          { key: 'purifier', name: '스마트 공기청정기', zone: [1470, 373, 70, 220],
+            hint: '스마트 공기청정기를<br>침실 침대 옆에 놓아줘.', placedMsg: '잘했어!<br>스마트 공기청정기를 제자리에 놓았어.' },
+          { key: 'washer', name: '스마트 세탁기', zone: [1575, 410, 151, 184],
+            hint: '스마트 세탁기를<br>다용도실에 놓아줘.', placedMsg: '잘했어!<br>스마트 세탁기를 제자리에 놓았어.' }
+        ]
+      }
+    ];
+
+    const scene = $('p03Scene');
+    const zonesWrap = $('p03Zones');
+    const tray = $('p03Tray');
+    const bubble = $('p03Bubble');
+    const roundPill = $('p03Round');
+    const charImg = $('p03CharImg');
+
+    let round = 0;
+    let placed = 0;
+
+    function open(id) { $(id).classList.remove('is-off'); }
+    function close(id) { $(id).classList.add('is-off'); }
+
+    function renderRound() {
+      const r = ROUNDS[round];
+      placed = 0;
+      charImg.src = 'img/p03_char_cutout.png';
+      roundPill.textContent = r.roundText;
+      scene.className = 'p03-scene is-round' + (round + 1);
+      zonesWrap.innerHTML = '';
+      tray.innerHTML = '';
+      tray.classList.toggle('is-r2', round === 1);
+      bubble.innerHTML = r.introText;
+      bubble.classList.remove('is-off');
+
+      const zones = r.devices.map((d) => {
+        const z = document.createElement('div');
+        z.className = 'p03-zone';
+        z.dataset.key = d.key;
+        z.style.cssText = 'left:' + d.zone[0] + 'px;top:' + d.zone[1] + 'px;width:' + d.zone[2] + 'px;height:' + d.zone[3] + 'px';
+        zonesWrap.appendChild(z);
+        return z;
+      });
+
+      const cards = r.devices.map((d) => {
+        const c = document.createElement('div');
+        c.className = 'p03-card';
+        c.dataset.key = d.key;
+        c.innerHTML = '<i style="background-image:url(\'img/p03_dev_' + d.key + '.png\')"></i><span>' + d.name + '</span>';
+        c.addEventListener('pointerdown', () => {
+          if (c.dataset.placed) return;
+          bubble.innerHTML = d.hint;
+        });
+        tray.appendChild(c);
+        return c;
+      });
+
+      initMatchDrag({
+        cards: cards,
+        zones: zones,
+        silent: true,
+        slop: 40,
+        onRight: (card, zone) => {
+          placed += 1;
+          playCorrect();
+          const dev = r.devices.find((d) => d.key === card.dataset.key);
+          if (dev) {
+            bubble.innerHTML = dev.placedMsg;
+          }
+          if (placed === r.devices.length) {
+            charImg.src = 'img/p03_char_cutout2.png';
+            setTimeout(showClear, 700);
+          }
+        },
+        onWrong: (card, zone) => {
+          if (!zone) return;
+          playWrong();
+          bubble.innerHTML = '여기가 아닌 것 같아.<br>다시 한번 생각해 봐!';
+        }
+      });
+    }
+
+    function showClear() {
+      if (round === 0) {
+        open('p03Clear1');
+      } else {
+        open('p03Clear2');
+      }
+    }
+
+    $('p03BtnNextRound').addEventListener('click', () => {
+      close('p03Clear1');
+      round = 1;
+      renderRound();
+    });
+
+    const wantStep = parseInt(new URLSearchParams(location.search).get('step'), 10);
+    if (wantStep >= 3) round = 1;
+    renderRound();
+    if (wantStep === 2) {
+      charImg.src = 'img/p03_char_cutout2.png';
+      open('p03Clear1');
+    } else if (wantStep === 4) {
+      charImg.src = 'img/p03_char_cutout2.png';
+      open('p03Clear2');
+    }
+  })();
+  </script>
+</body>
+</html>

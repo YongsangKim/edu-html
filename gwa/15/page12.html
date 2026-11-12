@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주문 확인 로봇을 학습시켜라!</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .p12-view{position:absolute;inset:0;width:1920px;height:960px}
+        .p12-view.is-off{display:none}
+
+        .p12-kiosk{position:absolute;left:12px;top:5px;width:1896px;height:955px;box-sizing:border-box;background:url('img/p12_bg.png') center / contain no-repeat;overflow:hidden}
+
+        .p12-timer{position:absolute;left:1440px;top:22px;width:411px;height:208px;box-sizing:border-box;background:url('img/p12_clock.png') center / contain no-repeat;z-index:6;display:flex;align-items:center;justify-content:center;padding-left:88px;padding-right:24px}
+        .p12-time-tx{font-family:'Cafe24 Ssurround';font-size:78px;color:#fff;letter-spacing:0.02em;text-shadow:0 0 16px #38b6ff,0 0 30px #38b6ff;padding-top:4px}
+        .p12-timer.is-warn .p12-time-tx{color:#fff3e0;text-shadow:0 0 18px #ff9100,0 0 34px #ff6d00;animation:p12Pulse .7s ease-in-out infinite}
+        .p12-timer.is-danger .p12-time-tx{color:#fff;text-shadow:0 0 18px #ff2a85,0 0 36px #ff0055;animation:p12Pulse .45s ease-in-out infinite}
+        @keyframes p12Pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+
+        .p12-card-stage{position:absolute;left:740px;top:200px;width:416px;height:470px;box-sizing:border-box;border-radius:18px;background:#fff;box-shadow:0 16px 36px rgba(0,0,0,.45);padding:18px 18px 64px;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:space-between;transition:transform .18s ease}
+        .p12-card-stage.is-pop{animation:p12CardIn .22s ease-out}
+        @keyframes p12CardIn{0%{transform:scale(.88);opacity:.5}100%{transform:scale(1);opacity:1}}
+        .p12-card-Photo{width:380px;height:380px;border-radius:12px;overflow:hidden;background:#e8dccb;position:relative}
+        .p12-card-Photo img{width:100%;height:100%;object-fit:cover;display:block}
+        .p12-card-cnt{position:absolute;left:0;right:0;bottom:14px;text-align:center;font-family:'Cafe24 Ssurround';font-size:32px;color:#5a657d;letter-spacing:0.04em}
+
+        .p12-tray{position:absolute;left:2px;bottom:12px;width:1896px;height:215px;background:rgba(38,108,200,0.85);border-top:solid 5px #1e4b94;border-radius:0 0 24px 24px;display:flex;align-items:center;justify-content:center;gap:34px;padding:0 40px 10px;box-sizing:border-box;z-index:6}
+        .p12-tray .card-btn{min-width:0;width:414px;height:160px;padding:0 24px;border-radius:24px;display:flex;align-items:center;justify-content:center;gap:18px;font-size:72px;line-height:1}
+        .p12-tray .card-btn img{height:128px;width:auto;flex:0 0 auto;display:block;object-fit:contain}
+        .p12-tray .card-btn.is-bad{font-size:62px;gap:14px}
+        .p12-tray .card-btn.is-bad img{height:114px;width:114px}
+        .p12-tray .card-btn span{padding-top:4px}
+
+        .p12-res-left{position:absolute;left:18px;top:12px;width:1336px;height:935px;box-sizing:border-box;background:url('img/p12_bg2.png') center / contain no-repeat;overflow:hidden}
+        .p12-res-screen{position:absolute;left:55px;top:75px;width:1226px;height:670px;box-sizing:border-box;display:grid;grid-template-columns:repeat(5,176px);grid-template-rows:repeat(4,154px);gap:18px 20px;justify-content:center;align-content:center}
+
+        .p12-mini{position:relative;width:155px;height:160px;box-sizing:border-box;border-radius:10px;background:#fff;padding:6px 6px 24px;box-shadow:0 4px 12px rgba(0,0,0,.45);display:flex;flex-direction:column;align-items:center;justify-content:space-between}
+        .p12-mini-ph{position:relative;width:100%;height:100%;border-radius:6px;overflow:hidden;background:#e8dccb}
+        .p12-mini-ph img{width:100%;height:100%;object-fit:cover;display:block}
+        .p12-mini-tag{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:52px;color:#fff;-webkit-text-stroke:10px #2b2684;paint-order:stroke fill;letter-spacing:-0.04em;padding-top:6px}
+        .p12-mini-tag.is-q{font-size:66px;-webkit-text-stroke:10px #7a2684}
+        .p12-mini-bad-img{width:96px;height:96px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.35))}
+        .p12-mini-err{position:absolute;right:-14px;top:-14px;width:64px;height:64px;border-radius:50%;background:#ff4ff9;border:solid 4px #fff;box-shadow:0 4px 10px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:46px;color:#fff;z-index:5;animation:p12Pulse .8s ease-in-out infinite}
+        .p12-mini-err:after{content:'';position:absolute;left:-5px;bottom:3px;border:8px solid transparent;border-right-color:#ff4ff9;border-bottom-color:#ff4ff9;transform:rotate(-15deg)}
+
+        .p12-res-right{position:absolute;left:1370px;top:12px;width:532px;height:935px;box-sizing:border-box;border:solid 7px #2264c5;border-radius:16px;background:#fff;overflow:hidden;box-shadow:0 8px 20px rgba(0,0,0,.15);display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:24px 20px;box-sizing:border-box}
+        .p12-rbot-fig{position:absolute;left:-23px;top:0}
+        .p12-rbot-img{max-width:480px;max-height:400px;object-fit:contain;display:block}
+
+        .p12-res-bottom-wrap{position:relative;top:444px;width:100%;height:450px;display:flex;align-items:center;justify-content:center}
+        .p12-res-aro{position:absolute;left:-15px;z-index:3;transition:opacity .35s ease,transform .35s ease}
+        .p12-res-aro.is-hide{opacity:0;transform:translateY(30px);pointer-events:none}
+
+        .p12-res-acts{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;z-index:5;transition:opacity .35s ease}
+        .p12-res-acts.is-off{opacity:0;pointer-events:none}
+        .p12-res-acts .card-btn{min-width:0;width:350px;height:100px;font-size:56px;padding:6px 20px 0;margin:0;display:flex;align-items:center;justify-content:center}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default" id="p12Main">
+
+          <div class="p12-view" id="p12PlayView">
+            <div class="p12-kiosk">
+              <div class="p12-timer" id="p12TimerBox">
+                <span class="p12-time-tx" id="p12TimeTx">01:00</span>
+              </div>
+
+              <div class="p12-card-stage" id="p12CardStage">
+                <div class="p12-card-Photo" id="p12CurPhoto"></div>
+                <div class="p12-card-cnt" id="p12CardCnt">1 / 20</div>
+              </div>
+
+              <div class="p12-tray opts">
+                <button type="button" class="card-btn" data-ans="1샷">
+                  <img src="img/p12_btn_1.png" alt="1샷">
+                  <span>1샷</span>
+                </button>
+                <button type="button" class="card-btn" data-ans="2샷">
+                  <img src="img/p12_btn_2.png" alt="2샷">
+                  <span>2샷</span>
+                </button>
+                <button type="button" class="card-btn" data-ans="3샷">
+                  <img src="img/p12_btn_3.png" alt="3샷">
+                  <span>3샷</span>
+                </button>
+                <button type="button" class="card-btn is-bad" data-ans="못 써요">
+                  <img src="img/p12_btn_bad.png" alt="못 써요">
+                  <span>못 써요</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="p12-view is-off" id="p12ResView">
+            <div class="p12-res-left">
+              <div class="p12-res-screen" id="p12ResGrid"></div>
+            </div>
+
+            <div class="p12-res-right">
+              <div class="p12-rbot-fig" id="p12ResRobot"></div>
+              <div class="p12-res-bottom-wrap">
+                <img class="p12-res-aro" id="p12ResAro" src="img/p12_aro_sad.png" alt="바리스타 아로">
+                <div class="p12-res-acts is-off" id="p12ResActs">
+                  <button type="button" class="card-btn" id="p12RetryBtn">다시하기</button>
+                  <button type="button" class="card-btn" id="p12FinishBtn">끝내기</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="주문 확인 로봇을 학습시켜라!" data-next="page13.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    function buildDeck() {
+      const list = [];
+      for (let i = 1; i <= 5; i++) {
+        list.push({ ans: '1샷', src: 'img/p12_s1_' + i + '.png' });
+      }
+      for (let i = 1; i <= 5; i++) {
+        list.push({ ans: '2샷', src: 'img/p12_s2_' + i + '.png' });
+      }
+      for (let i = 1; i <= 5; i++) {
+        list.push({ ans: '3샷', src: 'img/p12_s3_' + i + '.png' });
+      }
+      const badIdxs = [1, 2, 3, 4, 5, 6];
+      shuffleArray(badIdxs);
+      for (let i = 0; i < 5; i++) {
+        list.push({ ans: '못 써요', src: 'img/p12_bad_' + badIdxs[i] + '.png' });
+      }
+      return shuffleArray(list);
+    }
+
+    const playView = $('p12PlayView');
+    const resView = $('p12ResView');
+    const timerBox = $('p12TimerBox');
+    const timeTx = $('p12TimeTx');
+    const curPhoto = $('p12CurPhoto');
+    const cardCnt = $('p12CardCnt');
+    const cardStage = $('p12CardStage');
+    const resGrid = $('p12ResGrid');
+    const resRobot = $('p12ResRobot');
+    const resAro = $('p12ResAro');
+    const resActs = $('p12ResActs');
+
+    let deck = [];
+    let picks = [];
+    let idx = 0;
+    let remain = 60;
+    let tickTimer = null;
+    let navTimer = null;
+    let aroTimer = null;
+    let active = false;
+    let currentBgm = null;
+
+    function stopBgm() {
+      if (currentBgm) {
+        currentBgm.pause();
+        currentBgm.currentTime = 0;
+        currentBgm = null;
+      }
+    }
+
+    function playBgm(src) {
+      stopBgm();
+      try {
+        currentBgm = new Audio(src);
+        currentBgm.play().catch(() => {});
+      } catch (e) {}
+    }
+
+    function clearAllTimers() {
+      if (tickTimer) { clearInterval(tickTimer); tickTimer = null; }
+      if (navTimer) { clearTimeout(navTimer); navTimer = null; }
+      if (aroTimer) { clearTimeout(aroTimer); aroTimer = null; }
+    }
+
+    function fmtTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+    }
+
+    function updateTimerUi() {
+      timeTx.textContent = fmtTime(remain);
+      timerBox.classList.toggle('is-warn', remain <= 30 && remain > 10);
+      timerBox.classList.toggle('is-danger', remain <= 10);
+    }
+
+    function showCurrentCard() {
+      curPhoto.innerHTML = '<img src="' + deck[idx].src + '" alt="커피 사진">';
+      cardCnt.textContent = (idx + 1) + ' / 20';
+      cardStage.classList.remove('is-pop');
+      void cardStage.offsetWidth;
+      cardStage.classList.add('is-pop');
+    }
+
+    function finishGame() {
+      active = false;
+      clearAllTimers();
+      playView.classList.add('is-off');
+      resView.classList.remove('is-off');
+
+      resGrid.innerHTML = '';
+      let allCorrect = true;
+      for (let i = 0; i < 20; i++) {
+        const item = deck[i];
+        const userAns = picks[i];
+        const ok = userAns === item.ans;
+        if (!ok) allCorrect = false;
+
+        const mini = document.createElement('div');
+        mini.className = 'p12-mini';
+        let tagHtml = '';
+        if (!userAns) {
+          tagHtml = '<div class="p12-mini-tag is-q">?</div>';
+        } else if (userAns === '못 써요') {
+          tagHtml = '<div class="p12-mini-tag"><img src="img/p12_btn_bad2.png" class="p12-mini-bad-img" alt="못 써요"></div>';
+        } else {
+          tagHtml = '<div class="p12-mini-tag">' + userAns + '</div>';
+        }
+        mini.innerHTML = '<div class="p12-mini-ph"><img src="' + item.src + '" alt="커피">' + tagHtml + '</div>' +
+          (ok ? '' : '<span class="p12-mini-err">!</span>');
+        resGrid.appendChild(mini);
+      }
+
+      if (allCorrect) {
+        playBgm('sound/15차시_정답 BGM.mp3');
+        resRobot.innerHTML = '<img src="img/p12_robot_happy.png" class="p12-rbot-img" alt="기뻐하는 로봇">';
+        resAro.src = 'img/p12_aro_happy.png';
+        resAro.classList.remove('is-hide');
+        resActs.classList.add('is-off');
+        navTimer = setTimeout(() => navigateTo('page13.html'), 3000);
+      } else {
+        playBgm('sound/15차시_오답 BGM.mp3');
+        resRobot.innerHTML = '<img src="img/p12_robot_sad.png" class="p12-rbot-img" alt="슬퍼하는 로봇">';
+        resAro.src = 'img/p12_aro_sad.png';
+        resAro.classList.remove('is-hide');
+        resActs.classList.add('is-off');
+        aroTimer = setTimeout(() => {
+          resAro.classList.add('is-hide');
+          resActs.classList.remove('is-off');
+        }, 2200);
+      }
+    }
+
+    function startGame() {
+      stopBgm();
+      clearAllTimers();
+      deck = buildDeck();
+      picks = new Array(20).fill(null);
+      idx = 0;
+      remain = 60;
+      active = true;
+      resView.classList.add('is-off');
+      playView.classList.remove('is-off');
+      updateTimerUi();
+      showCurrentCard();
+
+      tickTimer = setInterval(() => {
+        if (!active) return;
+        remain--;
+        if (remain <= 0) {
+          remain = 0;
+          updateTimerUi();
+          finishGame();
+        } else {
+          updateTimerUi();
+        }
+      }, 1000);
+    }
+
+    document.querySelectorAll('.p12-tray .card-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (!active) return;
+        playClick();
+        picks[idx] = btn.dataset.ans;
+        idx++;
+        if (idx >= 20) {
+          finishGame();
+        } else {
+          showCurrentCard();
+        }
+      });
+    });
+
+    $('p12RetryBtn').addEventListener('click', () => {
+      playClick();
+      startGame();
+    });
+
+    $('p12FinishBtn').addEventListener('click', () => {
+      playClick();
+      navigateTo('page13.html');
+    });
+
+    window.addEventListener('pagehide', stopBgm);
+
+    startGame();
+  })();
+  </script>
+</body>
+</html>

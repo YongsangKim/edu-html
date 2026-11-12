@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>의사결정 나무 따라 내려가기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+      .p05-pn{position:absolute;left:40px;top:165px;width:1840px;height:765px;box-sizing:border-box;border-radius:28px;background:#266cc8}
+      .p05-shelf{position:absolute;left:24px;top:20px;width:635px;height:719px;background:url('img/p05_shelf_bg.png') no-repeat center / cover;box-sizing:border-box;overflow:hidden}
+      .p05-shelf-row{position:absolute;left:0;right:0}
+      .p05-shelf-row.r1{top:57px;height:244px}
+      .p05-shelf-row.r2{top:314px;height:244px}
+      .p05-shelf-row.r3{bottom:25px;height:80px;display:flex;justify-content:center;align-items:center}
+      .p05-cup{position:absolute;width:120px;display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:transform .3s ease,filter .3s ease}
+      .p05-cup[data-liquid="cider"]{left:157px;top:0}
+      .p05-cup[data-liquid="honey"]{left:367px;top:0}
+      .p05-cup[data-liquid="water"]{left:51px;top:0}
+      .p05-cup[data-liquid="oil"]{left:261px;top:0}
+      .p05-cup[data-liquid="grape"]{left:472px;top:0}
+      .p05-cup.is-on .p05-cup-visual{filter:drop-shadow(5px 0 0 #ff4ff9) drop-shadow(-5px 0 0 #ff4ff9) drop-shadow(0 5px 0 #ff4ff9) drop-shadow(0 -5px 0 #ff4ff9)}
+      .p05-cup.is-done{opacity:.4;filter:grayscale(.4)}
+      .p05-cup.is-tilted{transform:rotate(36deg) translateY(-14px)}
+      .p05-cup-visual{position:relative;width:120px;height:196px;display:flex;align-items:flex-end;justify-content:center}
+      .p05-cup-img{display:block;pointer-events:none}
+      .p05-liquid-svg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:118px;height:196px;z-index:1}
+      .p05-glass-overlay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:118px;height:196px;z-index:2;pointer-events:none;mix-blend-mode:multiply}
+      .p05-liquid{transform-box:view-box;transform-origin:59px 95px}
+      .p05-liquid-oil{transition:transform .5s ease-out}
+      .p05-liquid-honey{transition:transform 10s cubic-bezier(0.2, 0.8, 0.4, 1)}
+      .p05-cup.is-tilted .p05-liquid{transform:rotate(-36deg)}
+      .p05-cup span{display:flex;align-items:center;justify-content:center;min-width:100px;height:44px;padding:0 14px;margin-top:4px;border-radius:999px;background:#fff;border:solid 5px #6898fb;font-family:'Cafe24 Ssurround';font-size:30px;color:var(--c-ink);letter-spacing:-0.04em;white-space:nowrap;box-sizing:border-box}
+      .p05-tilt-btn{width:320px;height:72px;border-radius:999px;border:solid 3px #eae0fd;background:linear-gradient(180deg,#e6dafe,var(--c-cream));box-shadow:0 6px 0 0 #a9a2ff,0 6px 0 6px #035fd3;font-family:'Cafe24 Ssurround';font-size:38px;color:var(--c-indigo);display:flex;align-items:center;justify-content:center;cursor:pointer;padding-top:4px;letter-spacing:-0.04em;box-sizing:border-box;transition:transform .15s ease,box-shadow .15s ease,color .15s ease}
+      @media (hover:hover){.p05-tilt-btn:hover{color:var(--c-violet)}}
+      .p05-tilt-btn:active{transform:translateY(6px);box-shadow:0 2px 0 0 #a9a2ff,0 2px 0 6px #035fd3;color:var(--c-orchid)}
+      .p05-rcard{position:absolute;left:680px;top:20px;width:1135px;height:720px;box-sizing:border-box;border-radius:24px;border:solid 6px #fff;background:#fff}
+      .p05-tree-wrap{position:absolute;left:52px;top:30px;width:1040px;height:525px}
+      .p05-tree-svg{position:absolute;left:0;top:0;width:1040px;height:525px;display:block;pointer-events:none}
+      .p05-qcard{position:absolute;box-sizing:border-box;padding-top:4px;border-radius:18px;border:solid 4px #7c6fc4;background:#f8f6ff;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:34px;color:#1b1640;letter-spacing:-0.04em;text-align:center;box-shadow:0 4px 10px rgba(0,0,0,.06);transition:all .25s ease;z-index:2}
+      .p05-qcard.is-active{background:#fff8cc;border:solid 5px var(--c-yellow);box-shadow:0 0 20px rgba(255,200,0,.85);color:#1b1640;font-weight:bold}
+      .p05-leaf{position:absolute;box-sizing:border-box;border-radius:18px;border:dashed 4px #9aa3b5;background:#f3f5fa;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:42px;color:#7b86a8;letter-spacing:-0.04em;text-align:center;transition:all .25s ease;z-index:2}
+      .p05-leaf.is-done{border:solid 4px #5c9486;background:#dcf0ea;color:#0c614b;font-size:32px;font-weight:bold;box-shadow:0 4px 10px rgba(92,148,134,.2)}
+      .p05-yn-row{position:absolute;left:0;right:0;bottom:35px;display:flex;justify-content:center;gap:60px}
+      .p05-yn-row .card-btn{margin:0;min-width:0;width:340px;height:90px;font-size:56px;display:flex;align-items:center;justify-content:center;padding-top:16px}
+      .p05-fg{position:absolute;left:360px;top:790px;width:110px;z-index:10;pointer-events:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="ask-pill is-fit is-tight"><span id="p05AskText">컵에 담긴 액체를 보고 질문에 답해보세요.</span></p>
+
+          <div class="p05-pn">
+            <div class="p05-shelf">
+              <div class="p05-shelf-row r1">
+                <div class="p05-cup is-on" data-liquid="cider">
+                  <div class="p05-cup-visual">
+                    <img class="p05-cup-img" src="img/p05_cup_cider.png" alt="사이다">
+                  </div>
+                  <span>사이다</span>
+                </div>
+                <div class="p05-cup" data-liquid="honey">
+                  <div class="p05-cup-visual">
+                    <svg class="p05-liquid-svg" viewBox="0 0 118 196">
+                      <defs>
+                        <clipPath id="p05ClipHoney">
+                          <path d="M 4,12 L 114,12 L 99,165 Q 59,170 19,165 Z"/>
+                        </clipPath>
+                      </defs>
+                      <path d="M 0,4 Q 59,-1 117,4 L 98,186 Q 96,193 88,194 Q 59,195 30,194 Q 22,193 20,186 Z" fill="#ffffff"/>
+                      <g clip-path="url(#p05ClipHoney)">
+                        <g class="p05-liquid p05-liquid-honey">
+                          <rect x="-80" y="52" width="280" height="150" fill="#df7800"/>
+                          <rect x="-80" y="52" width="280" height="18" fill="#f59e0b" opacity="0.85"/>
+                          <path d="M -10,55 Q 59,65 128,55" fill="none" stroke="#fef3c7" stroke-width="3.5"/>
+                        </g>
+                      </g>
+                    </svg>
+                    <img class="p05-glass-overlay" src="img/p05_cup_glass.png" alt="꿀">
+                  </div>
+                  <span>꿀</span>
+                </div>
+              </div>
+              <div class="p05-shelf-row r2">
+                <div class="p05-cup" data-liquid="water">
+                  <div class="p05-cup-visual">
+                    <img class="p05-cup-img" src="img/p05_cup_water.png" alt="물">
+                  </div>
+                  <span>물</span>
+                </div>
+                <div class="p05-cup" data-liquid="oil">
+                  <div class="p05-cup-visual">
+                    <svg class="p05-liquid-svg" viewBox="0 0 118 196">
+                      <defs>
+                        <clipPath id="p05ClipOil">
+                          <path d="M 4,12 L 114,12 L 99,165 Q 59,170 19,165 Z"/>
+                        </clipPath>
+                      </defs>
+                      <path d="M 0,4 Q 59,-1 117,4 L 98,186 Q 96,193 88,194 Q 59,195 30,194 Q 22,193 20,186 Z" fill="#ffffff"/>
+                      <g clip-path="url(#p05ClipOil)">
+                        <g class="p05-liquid p05-liquid-oil">
+                          <rect x="-80" y="52" width="280" height="150" fill="#eab308"/>
+                          <rect x="-80" y="52" width="280" height="16" fill="#fef08a" opacity="0.85"/>
+                          <path d="M -10,55 Q 59,63 128,55" fill="none" stroke="#fff" stroke-width="3"/>
+                        </g>
+                      </g>
+                    </svg>
+                    <img class="p05-glass-overlay" src="img/p05_cup_glass.png" alt="식용유">
+                  </div>
+                  <span>식용유</span>
+                </div>
+                <div class="p05-cup" data-liquid="grape">
+                  <div class="p05-cup-visual">
+                    <img class="p05-cup-img" src="img/p05_cup_grape.png" alt="포도 주스">
+                  </div>
+                  <span>포도 주스</span>
+                </div>
+              </div>
+              <div class="p05-shelf-row r3">
+                <button type="button" class="p05-tilt-btn" id="btnTilt">컵 기울이기</button>
+              </div>
+            </div>
+
+            <div class="p05-rcard">
+              <div class="p05-tree-wrap">
+                <svg class="p05-tree-svg" viewBox="0 0 1040 525">
+                  <defs>
+                    <marker id="arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#2465a5"/>
+                    </marker>
+                  </defs>
+
+                  <path d="M 410,82 L 410,114 M 180,114 L 640,114" fill="none" stroke="#2465a5" stroke-width="4.5" stroke-linecap="round"/>
+                  <path d="M 180,114 L 180,142" fill="none" stroke="#2465a5" stroke-width="4.5" marker-end="url(#arrow)"/>
+                  <path d="M 640,114 L 640,142" fill="none" stroke="#2465a5" stroke-width="4.5" marker-end="url(#arrow)"/>
+                  <rect x="259" y="98" width="72" height="32" rx="16" fill="#fff" stroke="#d0d7de" stroke-width="2"/>
+                  <text x="295" y="114" text-anchor="middle" dominant-baseline="central" style="font-family:'Cafe24 Ssurround';font-size:22px;fill:#e0314b">아니오</text>
+                  <rect x="497" y="98" width="56" height="32" rx="16" fill="#fff" stroke="#d0d7de" stroke-width="2"/>
+                  <text x="525" y="114" text-anchor="middle" dominant-baseline="central" style="font-family:'Cafe24 Ssurround';font-size:22px;fill:#266cc8">네</text>
+
+                  <path d="M 180,211 L 180,248 M 88,248 L 273,248" fill="none" stroke="#2465a5" stroke-width="4.5" stroke-linecap="round"/>
+                  <path d="M 88,248 L 88,282" fill="none" stroke="#2465a5" stroke-width="4.5" marker-end="url(#arrow)"/>
+                  <path d="M 273,248 L 273,282" fill="none" stroke="#2465a5" stroke-width="4.5" marker-end="url(#arrow)"/>
+                  <rect x="106" y="232" width="56" height="32" rx="16" fill="#fff" stroke="#d0d7de" stroke-width="2"/>
+                  <text x="134" y="248" text-anchor="middle" dominant-baseline="central" style="font-family:'Cafe24 Ssurround';font-size:22px;fill:#266cc8">네</text>
+                  <rect x="190" y="232" width="72" height="32" rx="16" fill="#fff" stroke="#d0d7de" stroke-width="2"/>
+                  <text x="226" y="248" text-anchor="middle" dominant-baseline="central" style="font-family:'Cafe24 Ssurround';font-size:22px;fill:#e0314b">아니오</text>
+
+                  <path d="M 640,211 L 640,248 M 475,248 L 805,248" fill="none" stroke="#2465a5" stroke-width="4.5" stroke-linecap="round"/>
+                  <path d="M 475,248 L 475,282" fill="none" stroke="#2465a5" stroke-width="4.5" marker-end="url(#arrow)"/>
+                  <path d="M 805,248 L 805,282" fill="none" stroke="#2465a5" stroke-width="4.5" marker-end="url(#arrow)"/>
+                  <rect x="527" y="232" width="56" height="32" rx="16" fill="#fff" stroke="#d0d7de" stroke-width="2"/>
+                  <text x="555" y="248" text-anchor="middle" dominant-baseline="central" style="font-family:'Cafe24 Ssurround';font-size:22px;fill:#266cc8">네</text>
+                  <rect x="689" y="232" width="72" height="32" rx="16" fill="#fff" stroke="#d0d7de" stroke-width="2"/>
+                  <text x="725" y="248" text-anchor="middle" dominant-baseline="central" style="font-family:'Cafe24 Ssurround';font-size:22px;fill:#e0314b">아니오</text>
+
+                  <path d="M 805,351 L 805,390 M 703,390 L 908,390" fill="none" stroke="#2465a5" stroke-width="4.5" stroke-linecap="round"/>
+                  <path d="M 703,390 L 703,426" fill="none" stroke="#2465a5" stroke-width="4.5" marker-end="url(#arrow)"/>
+                  <path d="M 908,390 L 908,426" fill="none" stroke="#2465a5" stroke-width="4.5" marker-end="url(#arrow)"/>
+                  <rect x="726" y="374" width="56" height="32" rx="16" fill="#fff" stroke="#d0d7de" stroke-width="2"/>
+                  <text x="754" y="390" text-anchor="middle" dominant-baseline="central" style="font-family:'Cafe24 Ssurround';font-size:22px;fill:#266cc8">네</text>
+                  <rect x="820" y="374" width="72" height="32" rx="16" fill="#fff" stroke="#d0d7de" stroke-width="2"/>
+                  <text x="856" y="390" text-anchor="middle" dominant-baseline="central" style="font-family:'Cafe24 Ssurround';font-size:22px;fill:#e0314b">아니오</text>
+                </svg>
+
+                <div class="p05-qcard is-active" id="nodeQ0" style="left:280px;top:16px;width:260px;height:66px;">색이 있나요?</div>
+                <div class="p05-qcard" id="nodeQ1" style="left:26px;top:145px;width:315px;height:66px;">공기 방울이 있나요?</div>
+                <div class="p05-qcard" id="nodeQ2" style="left:515px;top:145px;width:250px;height:66px;">보라색인가요?</div>
+                <div class="p05-leaf" id="leafCider" style="left:15px;top:285px;width:145px;height:74px;">?</div>
+                <div class="p05-leaf" id="leafWater" style="left:200px;top:285px;width:145px;height:74px;">?</div>
+                <div class="p05-leaf" id="leafGrape" style="left:398px;top:285px;width:155px;height:74px;">?</div>
+                <div class="p05-qcard" id="nodeQ3" style="left:627px;top:285px;width:347px;height:66px;">아주 천천히 흐르나요?</div>
+                <div class="p05-leaf" id="leafHoney" style="left:630px;top:430px;width:145px;height:74px;">?</div>
+                <div class="p05-leaf" id="leafOil" style="left:835px;top:430px;width:145px;height:74px;">?</div>
+              </div>
+
+              <div class="p05-yn-row">
+                <button type="button" class="card-btn" id="btnYes">네</button>
+                <button type="button" class="card-btn" id="btnNo">아니오</button>
+              </div>
+            </div>
+          </div>
+
+          <img class="p05-fg" id="p05FingerGuide" src="../../resources/img/common/img_finger01.png" alt="" style="display:none">
+
+          <div class="ox-result-wrong is-avatar is-off" id="wrongModal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar">
+                <img src="../../resources/img/common/avatar_incorrect.png" alt="">
+              </div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">다시 한번 생각해볼까요?</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="photo-modal is-off" id="liquidCorrectModal">
+            <div class="photo-card">
+              <div class="photo-card-img" id="liquidPhoto"></div>
+              <p class="photo-card-title">정답이에요!</p>
+              <p class="photo-card-text">이 컵에 담긴 액체는 <strong id="doneLiquidName">사이다</strong><span id="doneLiquidEnd">였어요</span>.</p>
+            </div>
+            <button type="button" class="card-btn is-popup js-sfx" id="btnNextLiquid" data-sound="sound/click.mp3">다음</button>
+          </div>
+
+          <div class="avatar-modal is-off" id="allDoneModal">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">다섯 가지 액체를 모두 알아냈어요! 질문을 따라 내려가면 무엇인지 쉽게 찾을 수 있어요.</p>
+                  </div>
+                  <a href="javascript:;" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">다음에는 우리가 직접 액체를 나누는 질문을 만들어 의사결정 나무를 완성해볼까요?</p>
+                  </div>
+                  <a href="page06.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="의사결정 나무 따라 내려가기" data-prev="page04.html" data-next="page06.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+    (function () {
+      var liquids = {
+        cider: { name: '사이다', path: ['no', 'yes'], leafId: 'leafCider' },
+        water: { name: '물', path: ['no', 'no'], leafId: 'leafWater' },
+        grape: { name: '포도 주스', path: ['yes', 'yes'], leafId: 'leafGrape' },
+        honey: { name: '꿀', path: ['yes', 'no', 'yes'], leafId: 'leafHoney' },
+        oil: { name: '식용유', path: ['yes', 'no', 'no'], leafId: 'leafOil' }
+      };
+
+      var currentLiquidKey = 'cider';
+      var currentStep = 0;
+      var completed = {};
+
+      var askText = document.getElementById('p05AskText');
+      var btnTilt = document.getElementById('btnTilt');
+      var btnYes = document.getElementById('btnYes');
+      var btnNo = document.getElementById('btnNo');
+      var btnNextLiquid = document.getElementById('btnNextLiquid');
+      var doneLiquidName = document.getElementById('doneLiquidName');
+      var fg = document.getElementById('p05FingerGuide');
+      var cups = document.querySelectorAll('.p05-cup');
+
+      function getActiveNodeId() {
+        if (currentStep === 0) return 'nodeQ0';
+        var pathSoFar = liquids[currentLiquidKey].path.slice(0, currentStep).join('_');
+        if (pathSoFar === 'no') return 'nodeQ1';
+        if (pathSoFar === 'yes') return 'nodeQ2';
+        if (pathSoFar === 'yes_no') return 'nodeQ3';
+        return 'nodeQ0';
+      }
+
+      function updateTreeVisuals() {
+        ['nodeQ0', 'nodeQ1', 'nodeQ2', 'nodeQ3'].forEach(function (id) {
+          var el = document.getElementById(id);
+          if (el) el.classList.remove('is-active');
+        });
+
+        var activeId = getActiveNodeId();
+        var activeEl = document.getElementById(activeId);
+        if (activeEl) {
+          activeEl.classList.add('is-active');
+        }
+
+        if (activeId === 'nodeQ3') {
+          btnTilt.classList.add('hit-pulse');
+          askText.textContent = '컵 기울이기 버튼을 눌러 액체가 흐르는 모습을 확인해보세요.';
+        } else {
+          btnTilt.classList.remove('hit-pulse');
+          askText.textContent = '컵에 담긴 액체를 보고 질문에 답해보세요.';
+        }
+      }
+
+      function selectLiquid(key) {
+        if (completed[key]) return;
+        btnNextLiquid.classList.remove('is-pressed');
+        currentLiquidKey = key;
+        currentStep = 0;
+        cups.forEach(function (c) {
+          c.classList.remove('is-on');
+          if (c.getAttribute('data-liquid') === key) {
+            c.classList.add('is-on');
+          }
+        });
+        updateTreeVisuals();
+      }
+
+      cups.forEach(function (c) {
+        c.addEventListener('click', function () {
+          var k = c.getAttribute('data-liquid');
+          selectLiquid(k);
+        });
+      });
+
+      var isTilted = false;
+      btnTilt.addEventListener('click', function () {
+        playClick();
+        isTilted = !isTilted;
+        cups.forEach(function (c) {
+          var k = c.getAttribute('data-liquid');
+          if (k === 'honey' || k === 'oil') {
+            c.classList.toggle('is-tilted', isTilted);
+          }
+        });
+      });
+
+      function handleAnswer(ans) {
+        var info = liquids[currentLiquidKey];
+        var expected = info.path[currentStep];
+
+        if (ans === expected) {
+          SFX.play('correct');
+          currentStep++;
+          if (currentStep >= info.path.length) {
+            completed[currentLiquidKey] = true;
+            var cupEl = document.querySelector('.p05-cup[data-liquid="' + currentLiquidKey + '"]');
+            if (cupEl) cupEl.classList.add('is-done');
+
+            var leafEl = document.getElementById(info.leafId);
+            if (leafEl) {
+              leafEl.classList.add('is-done');
+              leafEl.textContent = info.name;
+            }
+
+            doneLiquidName.textContent = info.name;
+            var lastCode = info.name.charCodeAt(info.name.length - 1);
+            var hasFinal = lastCode >= 0xAC00 && lastCode <= 0xD7A3 && (lastCode - 0xAC00) % 28 !== 0;
+            document.getElementById('doneLiquidEnd').textContent = hasFinal ? '이었어요' : '였어요';
+            document.getElementById('liquidPhoto').style.backgroundImage = "url('img/p05_photo_" + currentLiquidKey + ".jpg')";
+            btnNextLiquid.classList.remove('is-pressed');
+            document.getElementById('liquidCorrectModal').classList.remove('is-off');
+          } else {
+            updateTreeVisuals();
+          }
+        } else {
+          SFX.play('wrong');
+          flashLayer(document.getElementById('wrongModal'));
+        }
+      }
+
+      btnYes.addEventListener('click', function () { handleAnswer('yes'); });
+      btnNo.addEventListener('click', function () { handleAnswer('no'); });
+
+      btnNextLiquid.addEventListener('click', function () {
+        btnNextLiquid.classList.remove('is-pressed');
+        document.getElementById('liquidCorrectModal').classList.add('is-off');
+        isTilted = false;
+        cups.forEach(function (c) {
+          c.classList.remove('is-tilted');
+        });
+        var keys = ['cider', 'honey', 'water', 'oil', 'grape'];
+        var nextKey = null;
+        for (var i = 0; i < keys.length; i++) {
+          if (!completed[keys[i]]) {
+            nextKey = keys[i];
+            break;
+          }
+        }
+        if (nextKey) {
+          selectLiquid(nextKey);
+        } else {
+          document.getElementById('allDoneModal').classList.remove('is-off');
+        }
+      });
+
+      selectLiquid('cider');
+    })();
+  </script>
+</body>
+</html>

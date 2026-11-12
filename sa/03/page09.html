@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마음을 전하는 카드 만들기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 47~49p. 상황 고르기 → 표현 고르기(틀리면 오답 팝업). 맞으면 선택(상황·문구)을 sessionStorage 'sa03p09'에 저장하고 page10(Canva 카드 만들기)으로 이동.
+           상황 그림 img/p09_sit_{key}.png, 오답 표현을 골랐을 때 안내는 기획서에 없어 빙고 게임 오답 문구를 씀. */
+
+        .p09 .ask-pill.is-fit{max-width:none;letter-spacing:-0.1em}
+        .p09-sits{position:absolute;left:57px;top:165px;width:1806px;height:612px;box-sizing:border-box;padding:0 38px;display:flex;align-items:center;gap:42px;
+          background:#266cc8;border:solid 4px var(--c-ink);border-radius:24px}
+        .p09-sit{flex:1 1 0;min-width:0;height:556px;padding:0;box-sizing:border-box;border:0;border-radius:12px;background:#faf8f9;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;align-items:center;
+          font-family:'Cafe24 Ssurround';font-size:48px;line-height:1.1;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all;box-shadow:0 0 0 6px rgba(255,255,2555,1)}
+        .p09-sit i{flex:1 1 auto;width:100%;background:var(--c-purple) center / cover no-repeat}
+        .p09-sit span{flex:0 0 133px;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 16px}
+        .p09-sit:not(.is-selected):hover{box-shadow:0 0 0 6px color-mix(in srgb,var(--c-violet) 50%,transparent)}
+        .p09-sit:not(.is-selected):active{box-shadow:0 0 0 6px color-mix(in srgb,var(--c-orchid) 50%,transparent)}
+        .p09-sit.is-selected{box-shadow:0 0 0 9px #ff4ff9}
+        .p09-exprs{position:absolute;left:123px;top:165px;width:1674px;height:612px;box-sizing:border-box;padding:0 70px;display:grid;grid-template-columns:1fr 1fr;gap:62px 68px;align-content:center;
+          background:#266cc8;border:solid 4px var(--c-ink);border-radius:24px}
+        .p09-exprs .card-btn{width:auto;min-width:0;height:220px;padding:10px 30px 4px;display:flex;align-items:center;justify-content:center;font-size:60px;line-height:1.25}
+        .p09-exprs .card-btn.is-selected:hover{color:var(--c-orchid)}
+        .p09-step-next{position:absolute;left:756px;top:800px}
+
+        #p09Wrong{z-index:130}
+        .p09 .is-off{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default p09">
+          <!-- 1. 상황 고르기 -->
+          <div id="p09SitView">
+            <p class="ask-pill is-fit">다음 중 한 가지의 상황을 고르세요.</p>
+            <div class="p09-sits" id="p09Sits"></div>
+          </div>
+          <!-- 2. 표현 고르기 -->
+          <div class="is-off" id="p09ExprView">
+            <p class="ask-pill is-fit" id="p09ExprHead"></p>
+            <div class="p09-exprs" id="p09Exprs"></div>
+          </div>
+          <a href="javascript:;" class="js-sfx p09-step-next is-disabled" id="p09StepNext" data-sound="sound/click.mp3">
+            <img src="../../resources/img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../resources/img/common/btn_next_content_on.png" data-src-over="../../resources/img/common/btn_next_content_over.png" alt="다음">
+          </a>
+
+          <div class="ox-result-wrong is-avatar is-off" id="p09Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">친구의 마음을 잘 들여다봐요.</p>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="마음을 전하는 카드 만들기" data-next="page10.html"></script>
+  <script src="../../resources/js/toc.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const SITUATIONS = {
+      sports: { label: '체육대회에서 우승한 친구', ask: '체육대회에서 우승한 친구에게 어떤 말을 해야 할까요?',
+        right: ['우승한 거 정말 축하해!', '열심히 노력한 만큼<br>좋은 결과가 있었네!'], wrong: ['힘내! 다음에는<br>더 잘할 수 있을 거야.', '우승한 게 뭐가 대단해?'] },
+      hand: { label: '손을 다쳐 피아노를<br>치지 못하는 친구', ask: '손을 다쳐 피아노를 치지 못하는 친구에게 어떤 말을 해야 할까요?',
+        right: ['손 많이 아프겠다.<br>빨리 나았으면 좋겠어.', '피아노를 못 쳐서<br>속상하겠다. 힘내!'], wrong: ['피아노 연주<br>정말 멋졌어!', '피아노 좀 못 치는 게<br>뭐 어때?'] },
+      umbrella: { label: '비 오는 날<br>우산을 씌워주는 친구', ask: '비 오는 날 우산을 씌워주는 친구에게 어떤 말을 해야 할까요?',
+        right: ['우산 씌워줘서<br>정말 고마워!', '네 덕분에 비를 맞지 않았어.<br>고마워!'], wrong: ['비 오는 날에는<br>우산을 꼭 챙겨야 해.', '우산 씌워주는 건<br>당연한 거 아니야?'] }
+    };
+    const COLORS = [
+      { name: '분홍색', value: '#ffc9dc', ink: '#1b1738' }, { name: '노란색', value: '#fff1a8', ink: '#1b1738' },
+      { name: '흰색', value: '#ffffff', ink: '#1b1738' }, { name: '녹색', value: '#2e8b57', ink: '#ffffff' }, { name: '남색', value: '#1f2a6b', ink: '#ffffff' }
+    ];
+    const FONTS = [
+      { name: 'KCC도담도담체', family: "'KCC-DodamDodam','Cafe24 Ssurround'" },
+      { name: 'KCC무럭무럭체', family: "'KCC-MurukMuruk','Pretendard'" }
+    ];
+    const HELP = ['배경을 클릭해 색상을 바꿀 수 있어요.', '텍스트를 클릭해<br>글꼴, 크기, 형식을 변경할 수 있어요.'];
+
+    const stepNext = $('p09StepNext');
+
+    let sitKey = null;
+    let expr = null;
+    let onStepNext = null;
+
+    function waitStepNext(fn) {
+      onStepNext = fn;
+      resetImageSwap(stepNext);
+      stepNext.classList.remove('is-disabled');
+    }
+    stepNext.addEventListener('click', () => {
+      if (!onStepNext) return;
+      const fn = onStepNext;
+      onStepNext = null;
+      setTimeout(() => { stepNext.classList.add('is-disabled'); resetImageSwap(stepNext); fn(); }, 300);
+    });
+
+    // 1. 상황
+    Object.keys(SITUATIONS).forEach((key) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'p09-sit';
+      b.innerHTML = '<i style="background-image:url(\'img/p09_sit_' + key + '.png\')"></i><span>' + SITUATIONS[key].label + '</span>';
+      b.addEventListener('click', () => {
+        playClick();
+        $('p09Sits').querySelectorAll('.p09-sit').forEach((x) => x.classList.toggle('is-selected', x === b));
+        sitKey = key;
+        if (!onStepNext) waitStepNext(showExpr);
+      });
+      $('p09Sits').appendChild(b);
+    });
+
+    // 2. 표현
+    function showExpr() {
+      const s = SITUATIONS[sitKey];
+      $('p09SitView').classList.add('is-off');
+      $('p09ExprView').classList.remove('is-off');
+      $('p09ExprHead').textContent = s.ask;
+      const box = $('p09Exprs');
+      box.innerHTML = '';
+      shuffleArray(s.right.map((t) => ({ t, ok: true })).concat(s.wrong.map((t) => ({ t, ok: false })))).forEach((o) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'card-btn';
+        b.innerHTML = o.t;
+        b.addEventListener('click', () => {
+          playClick();
+          box.querySelectorAll('.card-btn').forEach((x) => x.classList.toggle('is-selected', x === b));
+          expr = o;
+          if (!onStepNext) waitStepNext(checkExpr);
+        });
+        box.appendChild(b);
+      });
+    }
+    function checkExpr() {
+      if (!expr.ok) {
+        playWrong();
+        flashLayer($('p09Wrong'));
+        waitStepNext(checkExpr);
+        return;
+      }
+      sessionStorage.setItem('sa03p09', JSON.stringify({ sit: sitKey, t: expr.t }));
+      navigateTo('page10.html');
+    }
+  })();
+  </script>
+</body>
+</html>

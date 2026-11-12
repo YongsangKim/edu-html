@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>설리번 플러스로 체험하는 이미지 인식</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서(AI실습) 1p. 왼쪽 안내 말풍선+캐릭터, 가운데 폰(기본 홈 화면에 설리번 플러스 앱 아이콘, img/p08_app_icon.png 없으면 이모지),
+           오른쪽 주의사항 카드 4장. 말풍선의 [확인]을 누르면 카드가 위에서부터 차례로 나타나고, 4장이 다 나오면 안내가 바뀌며 앱 아이콘이 반짝(클릭 유도) → page09 */
+        .guide-set{--gb-w:630px;--gb-left:60px}
+        .p08-screen{position:relative;width:100%;height:100%}
+        .p08-app i{background:#4f7cf7;font-size:70px}
+        .p08-cards{position:absolute;left:1260px;top:60px;width:610px;display:flex;flex-direction:column;gap:26px}
+        .p08-card{min-height:190px;box-sizing:border-box;padding:30px 30px 20px 140px;display:flex;align-items:center;position:relative;
+          background:var(--c-white);border:solid 5px var(--c-purple);border-radius:30px;box-shadow:0 8px 0 0 var(--c-sky-pale);
+          font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.25;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all;opacity:0;transform:translateY(-20px);transition:opacity .4s,transform .4s}
+        .p08-card.is-on{opacity:1;transform:none}
+        .p08-card:before{content:attr(data-n);position:absolute;left:30px;top:50%;width:80px;height:80px;margin-top:-38px;border-radius:50%;background:#e8605f;border:solid 4px var(--c-white);box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;font-size:48px;color:var(--c-white)}
+
+        .app-home .app-icon i{border-radius:0}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="guide-set is-main" id="p08Set">
+            <p class="guide-bubble is-center" id="p08Bubble"></p>
+            <div class="guide-character"><img id="p08Char" src="../img/character/gwa_smile_present.png" alt="메인 캐릭터"></div>
+          </div>
+
+          <div class="phone-frame p08-phone">
+            <div class="phone-screen p08-screen app-home is-sky">
+              <div class="phone-status is-dark"></div>
+              <a href="page09.html" class="js-nav-effect js-sfx app-icon is-dark is-static p08-app" id="p08App" data-sound="sound/click.mp3" style="text-decoration:none"><i><img src="../../resources/img/app/logo_sullivan.png" alt=""></i>설리번 플러스</a>
+              <div class="phone-nav"></div>
+            </div>
+          </div>
+
+          <div class="p08-cards" id="p08Cards">
+            <div class="p08-card" data-n="1">물체 전체가 화면에 들어오게 해요.</div>
+            <div class="p08-card" data-n="2">밝고 흔들리지 않게 촬영해요.</div>
+            <div class="p08-card" data-n="3">배경은 깔끔하게 정리해요.</div>
+            <div class="p08-card" data-n="4">한 번에 하나의 물체만 카메라에 담아요.</div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="설리번 플러스로 체험하는 이미지 인식" data-next="page09.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const cards = Array.from(document.querySelectorAll('.p08-card'));
+    const say = initGuideSay({ bubble: $('p08Bubble'), img: $('p08Char'), set: $('p08Set'), keep: true });
+    say('눈이 되어주는 설리번+를 활용하여 우리 주변의<br>사물과 글자, 얼굴을<br>인식해볼까요?<br>', 'smile_present', undefined, undefined, '확인');
+    $('p08App').addEventListener('click', (e) => { if (!$('p08App').classList.contains('is-ready')) e.stopImmediatePropagation(), e.preventDefault(); }, true);
+    $('p08Bubble').addEventListener('click', (e) => {
+      if (!e.target.closest('.card-btn')) return;
+      playClick();
+      say('AI가 화면을 정확하게 인식하게 하려면 꼭 확인해야 할 점들이 있어요.', 'wink_present');
+      cards.forEach((c, i) => setTimeout(() => {
+        c.classList.add('is-on');
+        playDrag();
+        if (i === cards.length - 1) setTimeout(() => {
+          say('주의사항 카드 4개를 모두 확인했어요! 설리번 플러스 앱을 클릭하세요.', 'wink_present2');
+          $('p08App').classList.remove('is-static');
+          $('p08App').classList.add('is-ready');
+          pointFingerAt($('p08App'), { onMain: true, dx: 15, dy: -37 });
+        }, 900);
+      }, 1200 * (i + 1)));
+    });
+  })();
+  </script>
+</body>
+</html>

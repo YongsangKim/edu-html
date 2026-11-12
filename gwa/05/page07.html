@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI의 이미지 분석 정보 알아보기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .p07-obj{position:absolute;left:400px;top:160px;width:1121px;height:425px;box-sizing:border-box;border:solid 4px #0a3a8a;border-radius:16px;background:var(--c-white);overflow:hidden;display:flex;flex-direction:column}
+        .p07-pic{flex:0 0 310px;background:#dff3fd;display:flex;align-items:center;justify-content:center}
+        .p07-pic img{display:block;height:280px}
+        .p07-text{flex:1 1 auto;margin:0;padding-top:6px;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:70px;letter-spacing:-0.05em;color:var(--c-ink);word-break:keep-all}
+        .p07-tiles{position:absolute;left:425px;top:230px;width:1067px;display:flex;justify-content:space-between}
+        .p07-tile{width:337px;height:280px;box-sizing:border-box;border:solid 4px #2a6bd0;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;background:var(--c-white)}
+        .p07-tile span{flex:1 1 auto;display:flex;align-items:center;justify-content:center}
+        .p07-tile span img{display:block}
+        .p07-tile b{flex:0 0 73px;display:flex;align-items:center;justify-content:center;padding-top:4px;background:#91b7e8;font-family:'Cafe24 Ssurround';font-weight:400;font-size:46px;color:var(--c-white);letter-spacing:-0.07em;white-space:nowrap}
+        .p07-cards{position:absolute;left:107px;top:645px;width:1707px;display:flex;justify-content:space-between}
+        .p07-cards .card-btn{width:515px;min-width:0;height:225px;display:flex;align-items:center;justify-content:center;gap:14px;padding:10px 10px 0;font-size:70px}
+        .p07-cards .card-btn img{display:block;flex:0 0 auto;max-height:200px}
+        #p07Next{left:1540px;top:475px;right:auto;bottom:auto;width:320px;height:90px;margin:0;font-size:60px}
+        .p07-rcard{border-radius:50px}
+        .p07-rcard .photo-card-title{font-size:80px;margin:0 0 20px}
+        .photo-card.p07-rcard .photo-card-img{width:auto;height:auto;max-width:700px;max-height:330px}
+        .p07-rcard .photo-card-text{font-size:60px;margin:20px 0 0}
+        .p07-rfoot{display:flex;justify-content:flex-end;margin-top:10px}
+        .p07-rfoot .card-btn{min-width:0;width:175px}
+        .p07-hide,.card-btn.p07-hide{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="stage-board has-floor"></div>
+          <p class="ask-pill is-fit"><span id="p07Ask">AI가 분석한 이미지 속 사물의 특징을 살펴볼까요?</span></p>
+          <div class="p07-obj" id="p07Obj">
+            <div class="p07-pic"><img src="img/p07_question.png" alt=""></div>
+            <p class="p07-text" id="p07Text"></p>
+          </div>
+          <div class="p07-tiles p07-hide" id="p07Tiles"></div>
+          <div class="p07-cards opts" id="p07Cards"></div>
+          <button class="card-btn is-start next-btn p07-hide js-sfx" id="p07Next" data-sound="sound/click.mp3">다음</button>
+
+          <div class="photo-modal is-middle is-off" id="p07Right">
+            <div class="photo-card is-small is-contain p07-rcard">
+              <p class="photo-card-title">정답이에요!</p>
+              <img class="photo-card-img" id="p07Photo" alt="">
+              <p class="photo-card-text" id="p07RightSub"></p>
+              <div class="p07-rfoot"><button class="card-btn is-popup is-arrow js-sfx" id="p07RightNext" data-sound="sound/click.mp3">→</button></div>
+            </div>
+          </div>
+          <div class="ox-result-wrong is-avatar is-off" id="p07Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">AI가 분석한 사물의 특징을<br>다시 한번 살펴볼까요?</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p07Done">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <div class="step-flow">
+                  <div class="step-panel is-title">
+                    <p class="avatar-card-text">AI가 분석한 정보를 보고, 어떤 이미지인지 모두 맞췄어요.</p>
+                    <a href="page08.html" class="avatar-card-btn card-btn is-popup is-arrow js-nav-effect js-sfx" data-sound="sound/click.mp3">→</a>
+                  </div>
+                  <div class="step-panel">
+                    <p class="avatar-card-text">AI는 모양과 색깔 외에도 선, 패턴, 그림자 같은 훨씬 더 많고 세밀한 정보를 다양하게 분석하여 이미지의 특징을 찾아내요.</p>
+                    <a href="page08.html" class="avatar-card-btn card-btn is-popup is-arrow js-nav-effect js-sfx" data-sound="sound/click.mp3">→</a>
+                  </div>
+                  <div class="step-panel">
+                    <p class="avatar-card-text">설리번 플러스에서 카메라에 비친 모습을 AI가 어떻게 설명해 주는지 직접 확인해볼까요?</p>
+                    <a href="page08.html" class="avatar-card-btn card-btn is-popup is-start js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="AI의 이미지 분석 정보 알아보기" data-next="page08.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const QS = [
+      { texts: ['동그란 모양이에요.', '빨간색이에요.', '꼭지와 잎이 있어요.'], chips: ['둥근 모양', '빨간색', '꼭지와 잎'],
+        opts: [['사과', true], ['토마토'], ['공']], fb: 'AI가 분석한 이미지는 사과였어요.' },
+      { texts: ['길쭉하고 휘어진 모양이에요.', '노란색이에요.', '양 끝이 가늘고 껍질이 있어요.'], chips: ['길쭉하고 휘어진 모양', '노란색', '꼭지'],
+        opts: [['레몬'], ['초승달'], ['바나나', true]], fb: 'AI가 분석한 이미지는 바나나였어요.' },
+      { texts: ['길쭉한 네모 모양이에요.', '파란색이에요.', '많은 창문과 큰 문이 있어요.'], chips: ['길쭉한 네모 모양', '파란색', '많은 창문과 큰 문'],
+        opts: [['트럭'], ['버스', true], ['승용차']], fb: 'AI가 분석한 이미지는 버스였어요.' }
+    ];
+    const KINDS = ['shape', 'color', 'feat'];
+    const LABELS = ['모양', '색깔', '특징'];
+    const img = (n) => '<img src="img/p07_q' + (q + 1) + '_' + n + '.png" alt="">';
+    const show = (el, on) => el.classList.toggle('p07-hide', !on);
+    let q = 0;
+
+    function fit(el) {
+      let f = 46;
+      el.style.fontSize = f + 'px';
+      while (el.scrollWidth > el.clientWidth && f > 26) { f -= 2; el.style.fontSize = f + 'px'; }
+    }
+
+    function startQ() {
+      $('p07Ask').textContent = 'AI가 분석한 이미지 속 사물의 특징을 살펴볼까요?';
+      $('p07Text').textContent = '';
+      show($('p07Obj'), true); show($('p07Tiles'), false);
+      $('p07Cards').innerHTML = '';
+      LABELS.forEach((t, i) => {
+        const b = document.createElement('button');
+        b.className = 'card-btn';
+        b.textContent = t;
+        b.addEventListener('click', () => {
+          playClick();
+          $('p07Text').textContent = QS[q].texts[i];
+          Array.from($('p07Cards').children).forEach((o) => o.classList.toggle('is-selected', o === b));
+        });
+        $('p07Cards').appendChild(b);
+      });
+      show($('p07Next'), true);
+    }
+
+    function startAnswer() {
+      const d = QS[q];
+      $('p07Ask').textContent = 'AI가 분석한 특징을 보고, 어떤 사물인지 맞혀 볼까요?';
+      show($('p07Obj'), false); show($('p07Tiles'), true); show($('p07Next'), false);
+      $('p07Tiles').innerHTML = d.chips.map((c, i) => '<div class="p07-tile"><span>' + img(KINDS[i]) + '</span><b>' + c + '</b></div>').join('');
+      Array.from($('p07Tiles').querySelectorAll('b')).forEach(fit);
+      $('p07Cards').innerHTML = '';
+      d.opts.forEach((o, i) => {
+        const b = document.createElement('button');
+        b.className = 'card-btn';
+        b.innerHTML = img('c' + (i + 1)) + '<span>' + o[0] + '</span>';
+        b.addEventListener('click', () => pick(!!o[1]));
+        $('p07Cards').appendChild(b);
+      });
+    }
+
+    function pick(right) {
+      playClick();
+      if (!right) {
+        playWrong();
+        flashLayer($('p07Wrong'), 'is-off', 2000);
+        return;
+      }
+      playCorrect();
+      $('p07Photo').src = 'img/p07_q' + (q + 1) + '_photo.png';
+      $('p07RightSub').textContent = QS[q].fb;
+      Array.from($('p07Cards').children).forEach((b) => { b.disabled = true; });
+      $('p07Right').classList.remove('is-off');
+    }
+
+    $('p07RightNext').addEventListener('click', () => {
+      $('p07Right').classList.add('is-off');
+      if (q < QS.length - 1) { q += 1; startQ(); }
+      else $('p07Done').classList.remove('is-off');
+    });
+
+    $('p07Next').addEventListener('click', startAnswer);
+    startQ();
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI 가이드 - 제목 (리본·알약)</title>
+    <link rel="stylesheet" href="../resources/css/common.css">
+    <link rel="stylesheet" href="guide.css">
+    <style>
+        /* 이 페이지 안에서만 쓰는 복사본(실제 페이지 CSS 그대로 옮겨 모양 비교용). 공용 클래스로 합칠 때 기준이 됨 */
+        .rb-row{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+        .rb-item{box-sizing:border-box;padding:16px;background:#fff;border-radius:14px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+        .rb-item .g-meta{margin:12px 0 0}
+        .rb-stage{position:relative;overflow:hidden;border-radius:10px;background:#c2d9e9}
+        .rb-stage .ribbon{box-sizing:border-box}
+        .rb-scale{position:absolute;left:0;top:0;transform-origin:0 0}
+
+        .t-pane.is-off{display:none}
+        .g-toc li.is-off{display:none}
+    </style>
+</head>
+<body>
+  <div class="g-wrap">
+    <h1>제목 (리본 · 알약)</h1>
+    <p class="g-note">화면 맨 위에 놓는 제목 모양 모음. 탭으로 알약 / 리본을 나눠 봄.</p>
+    <div class="g-tabs" id="tTabs"><button type="button" data-t="pill">알약 제목</button><button type="button" data-t="ribbon">리본 제목</button></div>
+    <ul class="g-toc"></ul>
+    
+
+    <div class="t-pane" data-t="pill">
+    <p class="g-note">화면 맨 위에 놓는 <b>흰 알약 제목</b>과 STAGE 알약(<code>.has-stage</code>). 리본과 달리 CSS 한 덩어리로 그려 변수 없이 클래스만 붙임.</p>
+    <h2>알약 제목 <code>.ask-pill</code> — 공용화 완료</h2>
+    <p class="g-note">화면 맨 위 가운데에 놓는 <b>흰 알약 제목</b>(흰 바탕 + 진한 테두리 5px + 아래 하늘색 그림자 15px, 글자 <code>--c-ink</code>). 헤더 제목과 별개로 그 화면에서 할 일·질문을 알려줄 때 씀(줄바꿈 가능). 마크업 <code>&lt;p class="ask-pill"&gt;</code>(기본: 폭 1000, 글자가 길면 두 줄로 늘어남) · 글자 길이에 맞춰 폭이 줄어들게 하려면 <code>.is-fit</code> 추가 · <code>.is-wide</code>(폭 1700, 확정 차시에서는 아직 안 씀) · <code>.is-small</code>(글자 50px, 폭을 줄이려면 <code>.is-fit</code>과 같이 · 최대 1700). 위치는 기본 가운데·top 40px이고 필요하면 페이지에서 top만 덮어씀.</p>
+    <div class="g-list">
+      <div class="g-item">
+        <p class="g-meta"><b>① 기본 — 폭 1000</b> 폭 1000 · 최소 높이 100 · 70px · radius 80 · top 40 (가운데 정렬 · 글자가 길면 두 줄로 늘어남)<br>sa/04:02 · sa/07:07·09 · gwa/01:14 <code>.ask-pill</code></p>
+        <div class="g-view"><div class="g-stage bg-default">
+          <p class="ask-pill">우리 동네 장소를 선택해요!</p>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta"><b>① 글자 길이에 맞춤</b> 최소 높이 100 · 70px · radius 80 · 좌우 padding 60 · top 40(기본과 같음)<br>sa/01:05 · sa/03:02·09 · sa/06:05 · sa/09:13 · sa/11:05 · sa/13:05 · sa/15:05 <code>.ask-pill.is-fit</code></p>
+        <div class="g-view"><div class="g-stage bg-default">
+          <p class="ask-pill is-fit">빈칸에 들어갈 알맞은 말을 선택해보세요.</p>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta"><b>② 작은 글자 .is-small — 두 줄 안내</b> 글자 50px · <code>&lt;br&gt;</code>로 두 줄 · 글자 길이에 맞춤(.is-fit, 최대 1700) · 강조는 <code>--c-purple</code> · 페이지 CSS 없음<br>sa/09:07 · sa/12:02·16 <code>.ask-pill.is-small.is-fit</code></p>
+        <div class="g-view"><div class="g-stage bg-default">
+          <p class="ask-pill is-small is-fit"><span><b>[누가, 어디서, 무엇을 하는지]</b> 구조에 맞춰<br>단어 블록을 알맞은 위치에 드래그해 보세요.</span></p>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta"><b>③ STAGE가 앞에 붙는 알약 .has-stage</b> <code>&lt;p class="ask-pill has-stage is-fit"&gt;&lt;i&gt;STAGE 1&lt;/i&gt;&lt;span&gt;질문&lt;/span&gt;&lt;/p&gt;</code> — 왼쪽 하늘색 STAGE 칸(폭 380) + 오른쪽 크림색 질문 칸. 위치만 페이지에서 지정<br>sa/01:16 · sa/04:16 · sa/05:02·08 · sa/10:02</p>
+        <div class="g-view"><div class="g-stage bg-default">
+          <p class="ask-pill has-stage is-fit"><i>STAGE 1</i><span>어떤 부분이 잘못 되었을까?</span></p>
+        </div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta"><b>④ 중간 글자 .is-medium — 두 줄 안내</b> 글자 60px · 줄 간격 1.2 · <code>&lt;br&gt;</code>로 두 줄 · 글자 길이에 맞춤(.is-fit, 최대 1700)<br>sa/01:05 · sa/12:09 · sa/13:02·07·09 · sa/14:05 <code>.ask-pill.is-fit.is-medium</code></p>
+        <div class="g-view"><div class="g-stage bg-default">
+          <p class="ask-pill is-fit is-medium">왼쪽에 있는 블록이 아로가 따라야 할 알고리즘이에요.<br>노란 별(★)이 붙은 블록부터 하나씩 차례대로 따라가봐요.</p>
+        </div></div>
+      </div>
+    </div>
+    </div>
+
+    <div class="t-pane is-off" data-t="ribbon">
+    <p class="g-note">화면 제목 판(리본)은 공용 <code>.ribbon</code> 하나로 그리고, 크기는 프리셋 3종(<code>.is-title</code> · <code>.is-tag</code> · <code>.is-hero</code>)으로 고릅니다. 페이지에는 <code>--rb-w</code>(너비)와 위치만 두고, 색·꼬리·그림자는 <code>--rb-*</code> 변수로 바꿉니다.</p>
+
+    <h2>공용 템플릿 <code>.ribbon</code> — 변수로 크기·색·꼬리 조절</h2>
+    <p class="g-note">공용 CSS(<code>css/common.css</code>)의 <code>.ribbon</code> 하나로, 가로·높이·글자 크기·색·꼬리 길이를 CSS 변수로 바꿔 씁니다.
+      마크업 <code>&lt;p class="ribbon" style="--rb-bg:#fff4d6"&gt;제목&lt;/p&gt;</code> 한 줄이면 됩니다(감싸는 <code>.ribbon-wrap</code> 필요 없음). 위치(left/top)는 페이지 CSS에서.
+      그림자는 판·꼬리·접힌 부분을 합친 모양에 한 번만 그려져 겹쳐도 진해지지 않습니다(<code>--rb-sd-y</code> 깊이, <code>--rb-shadow</code> 색, 끄려면 <code>transparent</code>).
+      접힌 삼각형 크기는 꼬리가 판에 겹치는 폭(<code>--rb-tw</code> − <code>--rb-ext</code>) × 판 아래로 내려온 길이(<code>--rb-drop</code>), 꼬리 홈 깊이는 <code>--rb-notch</code>, 판 테두리 두께는 <code>--rb-bdw</code>. 예: sa/05 page10 제목·준비물 카드 리본.</p>
+    <table class="g-diff" style="margin:0 0 20px;width:100%;border-collapse:collapse;font-size:14px;background:#fff">
+      <tr><th>변수</th><th>기본값</th><th>뜻</th></tr>
+      <tr><td><code>--rb-w</code> · <code>--rb-h</code></td><td>752px · 105px</td><td>판 가로·높이(꼬리의 접힘 삼각은 꼬리 높이에 비례해 같이 커짐)</td></tr>
+      <tr><td><code>--rb-fs</code> · <code>--rb-ls</code> · <code>--rb-color</code></td><td>70px · -0.05em · var(--c-ink)</td><td>글자 크기·자간·색</td></tr>
+      <tr><td><code>--rb-bg</code> · <code>--rb-bd</code> · <code>--rb-shadow</code></td><td>#dff6ff · #fff · rgba(54,98,170,.2)</td><td>판 색 · 테두리 색 · 아래 그림자 색</td></tr>
+      <tr><td><code>--rb-tail</code> · <code>--rb-fold</code></td><td>#719fdc · #5b84d6</td><td>꼬리 색 · 접힌 삼각 색(꼬리보다 진한 색)</td></tr>
+      <tr><td><code>--rb-tw</code> · <code>--rb-th</code></td><td>150px · 102px</td><td>꼬리 가로·높이</td></tr>
+      <tr><td><code>--rb-ext</code> · <code>--rb-drop</code></td><td>100px · 44px</td><td>꼬리가 판 바깥으로 나온 길이 · 판 아래로 내려온 길이(음수면 판에 가려짐)</td></tr>
+    </table>
+    <h2>크기 프리셋 — <code>.ribbon.is-title</code> · <code>.is-tag</code> · <code>.is-hero</code></h2>
+    <p class="g-note">프리셋이 높이·글자·테두리·꼬리 모양을 정하고, 페이지는 너비(<code>--rb-w</code>)와 위치만 지정합니다. 쓰는 곳 — 제목줄 <code>.is-title</code>: sa/01:06 · 04:03 · 05:10 · 06:07·09 · 10:05 · 11:02, 상자 위 이름표 <code>.is-tag</code>: sa/08:02 · 10:02 · 05:10, 큰 마무리 제목 <code>.is-hero</code>: sa/08:08.</p>
+    <div class="rb-row">
+      <div class="rb-item" style="width:592px">
+        <div class="rb-stage ribbon-wrap" style="width:560px;height:200px"><div class="rb-scale" style="transform:scale(.45);width:1244px;height:444px">
+          <p class="ribbon is-title" style="position:absolute;left:260px;top:90px;">제목줄 .is-title</p>
+        </div></div>
+        <p class="g-meta"><b>.is-title</b> · 높이 123 · 글자 70px</p>
+      </div>
+      <div class="rb-item" style="width:592px">
+        <div class="rb-stage ribbon-wrap" style="width:560px;height:200px"><div class="rb-scale" style="transform:scale(.45);width:1244px;height:444px">
+          <p class="ribbon is-tag" style="position:absolute;left:260px;top:90px;--rb-w:500px">이름표 .is-tag</p>
+        </div></div>
+        <p class="g-meta"><b>.is-tag</b> · 높이 82 · 글자 54px</p>
+      </div>
+      <div class="rb-item" style="width:592px">
+        <div class="rb-stage ribbon-wrap" style="width:560px;height:200px"><div class="rb-scale" style="transform:scale(.45);width:1244px;height:444px">
+          <p class="ribbon is-hero" style="position:absolute;left:200px;top:90px;--rb-w:800px">마무리 제목 .is-hero</p>
+        </div></div>
+        <p class="g-meta"><b>.is-hero</b> · 높이 160 · 글자 80px</p>
+      </div>
+    </div>
+
+    <h2>변수로 바꾸기 — <code>--rb-*</code></h2>
+    <div class="rb-row">
+      <div class="rb-item" style="width:592px">
+        <div class="rb-stage ribbon-wrap" style="width:560px;height:200px"><div class="rb-scale" style="transform:scale(.45);width:1244px;height:444px">
+          <p class="ribbon" style="position:absolute;left:260px;top:90px;">기본(sa/02:06)</p>
+        </div></div>
+        <p class="g-meta"><b>기본값</b> · 변수 없이 <code>.ribbon</code>만</p>
+      </div>
+      <div class="rb-item" style="width:592px">
+        <div class="rb-stage ribbon-wrap" style="width:560px;height:200px"><div class="rb-scale" style="transform:scale(.45);width:1244px;height:444px">
+          <p class="ribbon" style="position:absolute;left:260px;top:90px;--rb-w:600px;--rb-h:121px;--rb-fs:44px;--rb-ls:-0.08em;--rb-color:#053c85;--rb-tw:130px;--rb-ext:70px;--rb-drop:44px;left:150px">카드 위 리본(sa/02:14)</p>
+        </div></div>
+        <p class="g-meta"><b>B 값</b> · 가로 600 · 높이 121 · 글자 44 · 꼬리 바깥 70px</p>
+      </div>
+      <div class="rb-item" style="width:592px">
+        <div class="rb-stage ribbon-wrap" style="width:560px;height:200px"><div class="rb-scale" style="transform:scale(.45);width:1244px;height:444px">
+          <p class="ribbon" style="position:absolute;left:260px;top:90px;--rb-w:620px;--rb-h:84px;--rb-fs:52px;--rb-drop:36px;--rb-th:84px;--rb-tw:120px;left:200px">높이를 낮게</p>
+        </div></div>
+        <p class="g-meta"><b>높이 84px</b> · <code>--rb-h:84px; --rb-th:84px; --rb-tw:120px</code> 로 꼬리도 작게</p>
+      </div>
+      <div class="rb-item" style="width:592px">
+        <div class="rb-stage ribbon-wrap" style="width:560px;height:200px"><div class="rb-scale" style="transform:scale(.45);width:1244px;height:444px">
+          <p class="ribbon" style="position:absolute;left:260px;top:90px;--rb-bg:#fff4d6;--rb-bd:#ffe08a;--rb-shadow:rgba(150,110,20,.22);--rb-tail:#f2b84b;--rb-fold:#d79a2c;--rb-color:#6b3d00;left:240px">색 바꾸기(노랑)</p>
+        </div></div>
+        <p class="g-meta"><b>색만 바꿈</b> · <code>--rb-bg / --rb-bd / --rb-shadow / --rb-tail / --rb-fold / --rb-color</code></p>
+      </div>
+    </div>
+
+    <h2>화살꼬리 리본 — <code>.rb-arrow</code></h2>
+    <p class="g-note">기존 <code>.ribbon</code>(제비꼬리)과 달리 양 끝이 뾰족한 화살촉 모양이고, 몸통은 <code>span</code>·꼬리는 <code>:before</code>입니다. 마크업 <code>&lt;p class="rb-arrow"&gt;&lt;span&gt;글자&lt;/span&gt;&lt;/p&gt;</code>, 위치(left/top)와 z-index는 페이지에서. 쓰는 곳 — sa/09:05.</p>
+    <div class="rb-row">
+      <div class="rb-item" style="width:592px">
+        <div class="rb-stage ribbon-wrap" style="width:560px;height:200px"><div class="rb-scale" style="transform:scale(.45);width:1244px;height:444px">
+          <p class="rb-arrow" style="left:420px;top:150px"><span>역할 카드</span></p>
+        </div></div>
+        <p class="g-meta"><b>기본값</b> · 가로 315 · 높이 73 · 글자 52px · 꼬리 바깥 54px</p>
+      </div>
+      <div class="rb-item" style="width:592px">
+        <div class="rb-stage ribbon-wrap" style="width:560px;height:200px"><div class="rb-scale" style="transform:scale(.45);width:1244px;height:444px">
+          <p class="rb-arrow" style="left:420px;top:150px;--ra-bg:#fff4d6;--ra-tail:#f2b84b;--ra-fold:#d79a2c;--ra-color:#6b3d00"><span>노랑 변형</span></p>
+        </div></div>
+        <p class="g-meta"><b>색만 바꿈</b> · <code>--ra-bg / --ra-tail / --ra-fold / --ra-color</code> · 크기 <code>--ra-w / --ra-h / --ra-fs</code></p>
+      </div>
+    </div>
+    </div>
+
+  </div>
+  <script src="guide.js"></script>
+  <script>
+(function(){
+  const btns=[...document.querySelectorAll("#tTabs button")],panes=[...document.querySelectorAll(".t-pane")];
+  function show(k){
+    btns.forEach(b=>b.classList.toggle("is-on",b.dataset.t===k));
+    panes.forEach(p=>p.classList.toggle("is-off",p.dataset.t!==k));
+    document.querySelectorAll(".g-toc li").forEach(li=>{const h=document.getElementById(li.firstChild.getAttribute("href").slice(1));li.classList.toggle("is-off",!h||!h.closest(".t-pane[data-t=\""+k+"\"]"))});
+    history.replaceState(null,"","#"+k);
+    window.scaleGuideViews&&window.scaleGuideViews();
+  }
+  btns.forEach(b=>b.addEventListener("click",()=>show(b.dataset.t)));
+  const fromHash=()=>location.hash==="#ribbon"?"ribbon":"pill";
+  show(fromHash());
+  window.addEventListener("hashchange",()=>show(fromHash()));
+})();
+</script>
+</body>
+</html>

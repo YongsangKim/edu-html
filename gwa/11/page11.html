@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>조건 장바구니 배달 미션</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        main{overflow:hidden}
+        .p11-rule{position:absolute;left:34px;top:58px;width:815px;height:854px;box-sizing:border-box;border:solid 5px #266cc8;border-radius:36px;background:#dff6ff}
+        .p11-ttl{position:absolute;left:299px;top:125px;--rb-w:286px;--rb-h:82px;--rb-fs:54px;--rb-bdw:6px;--rb-bg:#7ba7f8;--rb-tail:#a9c4ea;--rb-fold:#8aa9e4;--rb-ext:64px;--rb-tw:120px;--rb-th:100px;--rb-drop:48px;--rb-notch:30px}
+        .p11-game{position:absolute;left:880px;top:58px;width:1006px;height:856px;background-size:100% 100%;overflow:hidden;touch-action:none;cursor:grab}
+        .p11-code{position:absolute;left:49px;top:249px;width:560px;transform:scale(1.25);transform-origin:0 0}
+        .p11-code .lb.is-c{left:0;width:100%;justify-content:center;padding:4px 0 0;height:100%}
+        .p11-lv{position:absolute;left:2px;top:0;pointer-events:none;z-index:2}
+        .p11-clip{position:absolute;left:0;top:0;width:1006px;height:856px;pointer-events:none;z-index:1}
+        .p11-fall{position:absolute;left:0;top:0;width:133px;height:133px;display:flex;align-items:center;justify-content:center;will-change:transform;pointer-events:none}
+        .p11-fall img{width:133px;height:133px;object-fit:contain;pointer-events:none}
+        .p11-banner.is-off{display:none}
+        .p11-banner{position:absolute;left:880px;top:420px;width:1006px;margin:0;text-align:center;z-index:20}
+        .p11-banner span{display:inline-block;min-width:560px;box-sizing:border-box;padding:18px 60px 10px;border:solid 9px #e4f4ff;border-radius:80px;background:#043f9b;font-family:'Cafe24 Ssurround';font-size:76px;color:var(--c-white);letter-spacing:-0.03em}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p11-rule">
+            <div class="p11-code" id="p11Code"></div>
+          </div>
+          <p class="ribbon is-title p11-ttl">조건표</p>
+          <div class="p11-game" id="p11Game">
+            <img class="p11-lv" id="p11Lv" src="img/p11_lv_1.png" alt="">
+            <div class="p11-clip" id="p11Clip"><div class="p11-fall" id="p11Fall"><img id="p11FallImg" src="" alt=""></div></div>
+          </div>
+
+          <p class="p11-banner is-off" id="p11Banner"><span id="p11BannerText"></span></p>
+
+          <div class="ox-result-wrong is-avatar is-off" id="p11Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">다시 한번 생각해볼까요?</p>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="조건 장바구니 배달 미션" data-next="page12.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script src="../../resources/js/entry.js"></script>
+  <script>
+  (function () {
+    const NEXT = 'page12.html';
+    const NEED = 7;
+    const FALL_SPEED = 90;
+    const MOVE_SPEED = 700;
+    const SINK_SPEED = 260;
+    const SHIFT_MS = 150;
+    const LAND_Y = 568;
+    const MISS_FADE_MS = 280;
+    const W = 1006;
+    const H = 856;
+    const START_X = 509;
+    const CLIP = [[101, 642], [100, 642], [103, 641]];
+    const HALF = 66.5;
+    const PRE_DIST = 60;
+    let pre = null;
+    const LEVELS = [
+      { centers: [257, 757], bw: 344, rule: { c: '빨간색', a: '1번 바구니로', e: '2번 바구니로' },
+        items: [['img/p11_apple.png', 0], ['img/p11_strawberry.png', 0], ['img/p11_grape.png', 1], ['img/p11_banana.png', 1]] },
+      { centers: [292, 720], bw: 344, rule: { c: '빨간색 또는 노란색', a: '1번 바구니로', e: '2번 바구니로' },
+        items: [['img/p11_apple.png', 0], ['img/p11_strawberry.png', 0], ['img/p11_banana.png', 0], ['img/p11_grape.png', 1], ['img/p11_kiwi.png', 1], ['img/p11_cucumber.png', 1]] },
+      { centers: [217, 508, 800], bw: 278, rule: { c: '빨간색 그리고 동그란 모양', a: '1번 바구니로', e: { c: '노란색 그리고 길쭉한 모양', a: '2번 바구니로', e: '3번 바구니로' } },
+        items: [['img/p11_apple.png', 0], ['img/p11_tomato.png', 0], ['img/p11_banana.png', 1], ['img/p11_corn.png', 1], ['img/p11_chili.png', 2], ['img/p11_lemon.png', 2], ['img/p11_grape.png', 2]] }
+    ];
+
+    const fall = $('p11Fall');
+    const fallImg = $('p11FallImg');
+    const game = $('p11Game');
+    const clip = $('p11Clip');
+    let level = Math.min(2, Math.max(0, (+new URLSearchParams(location.search).get('lv') || 1) - 1));
+    let count = 0;
+    let x = START_X;
+    let y = 0;
+    let sink = null;
+    let cur = null;
+    let state = 'idle';
+    let lastT = 0;
+    const keys = { left: false, right: false };
+
+    function place() {
+      fall.style.transform = 'translate(' + (x - HALF) + 'px,' + y + 'px)';
+    }
+
+    function renderLevel() {
+      const L = LEVELS[level];
+      $('p11Lv').src = 'img/p11_lv_' + (level + 1) + '.png';
+      game.style.backgroundImage = 'url(img/p11_bg_' + (level + 1) + '.png)';
+      clip.style.clipPath = 'inset(' + CLIP[level][0] + 'px 0 ' + (H - CLIP[level][1]) + 'px 0)';
+      const r = Entry.ifBlock(L.rule, { w: 560 });
+      const code = $('p11Code');
+      code.innerHTML = r.html;
+      code.style.height = r.h + 'px';
+      const fit = 249 + r.h * 1.25 <= 835;
+      const sc = fit ? 1.25 : Math.min(1.25, 610 / r.h);
+      code.style.transform = 'scale(' + sc + ')';
+      code.style.top = (fit ? 249 : 215) + 'px';
+      code.style.left = (fit ? 49 : (805 - 560 * sc) / 2) + 'px';
+      count = 0;
+    }
+
+    function banner(text, ms, then) {
+      $('p11BannerText').textContent = text;
+      $('p11Banner').classList.remove('is-off');
+      setTimeout(() => { $('p11Banner').classList.add('is-off'); if (then) then(); }, ms);
+    }
+
+    function startLevel() {
+      state = 'idle';
+      fall.style.opacity = 0;
+      renderLevel();
+      banner('Level ' + (level + 1) + ' 시작!', 5000, nextItem);
+    }
+
+    function nextItem() {
+      const L = LEVELS[level];
+      cur = L.items[Math.floor(Math.random() * L.items.length)];
+      fallImg.src = cur[0];
+      fall.style.opacity = 1;
+      x = START_X;
+      y = CLIP[level][0] - 113;
+      place();
+      state = 'fall';
+      pre = null;
+      lastT = performance.now();
+    }
+
+    function land() {
+      state = 'resolve';
+      pre = null;
+      const L = LEVELS[level];
+      const best = L.centers.findIndex((c) => Math.abs(c - x) <= L.bw / 2);
+      y = LAND_Y;
+      const lo = L.centers[best] - L.bw / 2 + 8 + HALF, hi = L.centers[best] + L.bw / 2 - 8 - HALF;
+      const toX = lo > hi ? L.centers[best] : Math.max(lo, Math.min(hi, x));
+      sink = { fromX: x, toX: toX, t: 0 };
+      place();
+      if (best === cur[1]) {
+        playCorrect();
+        count += 1;
+        if (count >= NEED) {
+          setTimeout(() => banner('Level ' + (level + 1) + ' 종료!', 1500, () => {
+            if (level < 2) { level += 1; startLevel(); }
+            else navigateTo(NEXT);
+          }), 400);
+        } else setTimeout(nextItem, 500);
+      } else wrong();
+    }
+
+    function wrong() {
+      playWrong();
+      flashLayer($('p11Wrong'), 'is-off', 2000);
+      setTimeout(nextItem, 2000);
+    }
+
+    function tick(now) {
+      const dt = Math.min((now - lastT) / 1000, 0.05);
+      lastT = now;
+      if (state === 'resolve' && sink && sink.miss) {
+        sink.t += dt * 1000;
+        y += FALL_SPEED * dt;
+        fall.style.opacity = Math.max(0, 1 - sink.t / MISS_FADE_MS);
+        place();
+        if (sink.t >= MISS_FADE_MS) { fall.style.opacity = 0; sink = null; }
+      } else if (state === 'resolve' && sink) {
+        sink.t += dt * 1000;
+        const k = Math.min(1, sink.t / SHIFT_MS);
+        x = sink.fromX + (sink.toX - sink.fromX) * (1 - (1 - k) * (1 - k));
+        y += SINK_SPEED * dt;
+        place();
+        if (y >= CLIP[level][1]) { fall.style.opacity = 0; sink = null; }
+      }
+      if (state === 'fall') {
+        if (!pre) {
+          if (keys.left) x -= MOVE_SPEED * dt;
+          if (keys.right) x += MOVE_SPEED * dt;
+          x = Math.max(HALF, Math.min(W - HALF, x));
+        }
+        y += FALL_SPEED * dt;
+        const endY = CLIP[level][1] - 133, startY = endY - PRE_DIST;
+        if (!pre && y >= startY) {
+          const L = LEVELS[level];
+          const b = L.centers.findIndex((c) => Math.abs(c - x) <= L.bw / 2);
+          if (b >= 0) {
+            const lo = L.centers[b] - L.bw / 2 + 8 + HALF, hi = L.centers[b] + L.bw / 2 - 8 - HALF;
+            pre = { fromX: x, toX: lo > hi ? L.centers[b] : Math.max(lo, Math.min(hi, x)), y0: y };
+          } else {
+            state = 'resolve';
+            sink = { miss: true, t: 0 };
+            wrong();
+          }
+        }
+        if (pre) {
+          const k = Math.max(0, Math.min(1, (y - pre.y0) / Math.max(1, endY - pre.y0)));
+          x = pre.fromX + (pre.toX - pre.fromX) * (1 - (1 - k) * (1 - k));
+        }
+        if (y >= LAND_Y) land();
+        else place();
+      }
+      requestAnimationFrame(tick);
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') { keys.left = true; e.preventDefault(); }
+      if (e.key === 'ArrowRight') { keys.right = true; e.preventDefault(); }
+    });
+    window.addEventListener('keyup', (e) => {
+      if (e.key === 'ArrowLeft') keys.left = false;
+      if (e.key === 'ArrowRight') keys.right = false;
+    });
+    game.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      const s = $('stage').getBoundingClientRect().width / 1920;
+      const sx = e.clientX;
+      const bx = x;
+      game.setPointerCapture(e.pointerId);
+      const move = (ev) => { if (state === 'fall' && !pre) { x = Math.max(HALF, Math.min(W - HALF, bx + (ev.clientX - sx) / s)); place(); } };
+      const up = () => { game.removeEventListener('pointermove', move); game.removeEventListener('pointerup', up); game.removeEventListener('pointercancel', up); };
+      game.addEventListener('pointermove', move);
+      game.addEventListener('pointerup', up);
+      game.addEventListener('pointercancel', up);
+    });
+
+    startLevel();
+    requestAnimationFrame(tick);
+  })();
+  </script>
+</body>
+</html>

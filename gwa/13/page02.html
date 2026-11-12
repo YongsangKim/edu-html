@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>도전! 스무고개</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .p02-hints{position:absolute;left:60px;top:40px;width:1420px;height:220px;display:flex;gap:30px}
+        .p02-hc{flex:1;position:relative;box-sizing:border-box;border-radius:30px;border:solid 6px var(--c-navy);background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:0 20px;font-family:'Cafe24 Ssurround';color:var(--c-ink);letter-spacing:-0.04em}
+        .p02-hc b{height:56px;padding:6px 28px 0;box-sizing:border-box;display:flex;align-items:center;border-radius:28px;background:var(--c-violet);color:#fff;font-weight:400;font-size:36px}
+        .p02-hc p{margin:0;font-size:44px;line-height:1.15;text-align:center;word-break:keep-all}
+        .p02-hc.is-done{background:#eef3fb}
+        .p02-hc.is-done p{color:#7b86a8}
+        .p02-hc.is-done b{background:#9aa6c8}
+        .p02-hc.is-now{box-shadow:0 0 0 8px var(--c-yellow)}
+        .p02-hc.is-back{background:repeating-linear-gradient(45deg,#4e7fe0 0 22px,#5b8bea 22px 44px);color:#fff}
+        .p02-hc.is-back p{color:#fff}
+        .p02-hc.is-back b{background:var(--c-navy)}
+        .p02-stars{position:absolute;right:60px;top:40px;width:340px;height:220px;box-sizing:border-box;border-radius:30px;background:var(--c-navy);display:flex;align-items:center;justify-content:center;gap:4px}
+        .p02-stars img{width:62px;height:62px}
+        .p02-pn{position:absolute;left:60px;top:300px;width:1800px;height:620px;box-sizing:border-box;border-radius:30px;background:#266cc8;display:flex;align-items:center;justify-content:center;gap:34px}
+        .p02-ob{position:relative;width:310px;height:500px;box-sizing:border-box;border-radius:30px;border:solid 6px var(--c-sky);background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;font-family:'Cafe24 Ssurround';font-size:52px;color:var(--c-purple);letter-spacing:-0.04em;cursor:pointer;text-align:center;word-break:keep-all}
+        .p02-ob img{width:230px;height:230px;object-fit:contain;pointer-events:none}
+        .p02-ob.is-on{border-color:var(--c-yellow);box-shadow:0 0 0 6px var(--c-yellow)}
+        .p02-ob.is-on:after{content:'';position:absolute;right:-26px;top:-26px;width:90px;height:90px;background:url('../../resources/img/common/icon_correct.png') center/contain no-repeat}
+        .p02-ob.is-off{opacity:.35;filter:grayscale(1);cursor:default;pointer-events:none}
+        .p02-wrong,.p02-done{z-index:30}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p02-hints" id="p02Hints"></div>
+          <div class="p02-stars" id="p02Stars"></div>
+          <div class="p02-pn" id="p02Pn"></div>
+
+          <div class="ox-result-wrong is-avatar is-off p02-wrong" id="p02Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body"><p class="avatar-popup-text">힌트를 다시 볼까요?</p></div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off p02-done" id="p02Done">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-title">정말 잘했어요!</p>
+                    <p class="avatar-card-text">색깔과 모양 같은 특징을 보고 다섯 물건을 모두 맞혔어요.</p>
+                  </div>
+                  <a href="javascript:;" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">물건 카드에 있었던 AI 스피커와 스마트폰도 특징을 활용해 목소리나 얼굴을 구분해요.</p>
+                  </div>
+                  <a href="javascript:;" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">AI는 어떻게 얼굴이나 물건을 알아볼까요? 영상을 보며 함께 알아봐요.</p>
+                  </div>
+                  <a href="page03.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="도전! 스무고개" data-next="page03.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const O = {
+      pencil: ['연필', 'pencil'], eraserRed: ['지우개', 'eraser_red'], ball: ['공', 'ball'], banana: ['바나나', 'banana'], ruler: ['자', 'ruler'],
+      eraser: ['지우개', 'eraser'], pingpong: ['탁구공', 'pingpong'], tissue: ['휴지', 'tissue'], notebook: ['공책', 'notebook'], scissors: ['가위', 'scissors'],
+      glass: ['유리컵', 'glass'], mug: ['머그컵', 'mug'], vase: ['꽃병', 'vase'], clearCase: ['투명한 필통', 'clear_case'], plate: ['유리 접시', 'plate'],
+      speaker: ['AI 스피커', 'speaker'], radio: ['라디오', 'radio'], tumbler: ['텀블러', 'tumbler'], pcase: ['필통', 'case'], tissueBox: ['사각 휴지', 'tissue_box'],
+      phone: ['스마트폰', 'phone'], calculator: ['계산기', 'calculator'], remote: ['리모컨', 'remote']
+    };
+    const PROBLEMS = [
+      { cards: ['pencil', 'eraserRed', 'ball', 'banana', 'ruler'],
+        hints: ['노란색이에요.', '길쭉해요.', '딱딱하고 끝이 뾰족해요.'],
+        sets: [['pencil', 'ball', 'banana'], ['pencil', 'banana'], ['pencil']] },
+      { cards: ['eraser', 'pingpong', 'tissue', 'notebook', 'scissors'],
+        hints: ['하얀색이에요.', '작은 네모 모양이에요.', '말랑말랑하고 고무 느낌이 나요.'],
+        sets: [['eraser', 'tissue', 'scissors'], ['eraser', 'tissue'], ['eraser']] },
+      { cards: ['glass', 'mug', 'vase', 'clearCase', 'plate'],
+        hints: ['투명해요.', '둥글고 긴 기둥 모양이에요.', '물을 마실 때 사용해요.'],
+        sets: [['glass', 'clearCase', 'plate'], ['glass', 'clearCase'], ['glass']] },
+      { cards: ['speaker', 'radio', 'tumbler', 'pcase', 'tissueBox'],
+        hints: ['검은색이에요.', '동그란 통 모양이에요.', '말을 걸면 알아듣고 대답해요.'],
+        sets: [['speaker', 'radio', 'tumbler'], ['speaker', 'tumbler'], ['speaker']] },
+      { cards: ['phone', 'calculator', 'remote', 'eraser', 'notebook'],
+        hints: ['검은색이에요.', '네모 모양에 매끈한 화면이 있어요.', '내 얼굴을 알아보고 잠금을 풀어요.'],
+        sets: [['phone', 'calculator', 'remote'], ['phone', 'calculator'], ['phone']] }
+    ];
+    const IMG = '../../resources/img/common/';
+    const hintsEl = $('p02Hints');
+    const starsEl = $('p02Stars');
+    const pn = $('p02Pn');
+    let q = 0, h = 0, solved = 0, locked = false;
+    let picked = new Set();
+    let els = {};
+
+    const drawStars = () => {
+      starsEl.innerHTML = '';
+      for (let i = 0; i < PROBLEMS.length; i++) {
+        const im = document.createElement('img');
+        im.src = IMG + (i < solved ? 'icon_star_on.png' : 'icon_star.png');
+        im.alt = '';
+        starsEl.appendChild(im);
+      }
+    };
+
+    const drawHints = () => {
+      const P = PROBLEMS[q];
+      hintsEl.innerHTML = '';
+      for (let i = 0; i < 3; i++) {
+        const d = document.createElement('div');
+        d.className = 'p02-hc ' + (i < h ? 'is-done' : i === h ? 'is-now' : 'is-back');
+        d.innerHTML = '<b>힌트 ' + (i + 1) + '</b><p>' + (i <= h ? P.hints[i] : '힌트 보기') + '</p>';
+        hintsEl.appendChild(d);
+      }
+    };
+
+    const refreshCards = () => {
+      const prev = h > 0 ? PROBLEMS[q].sets[h - 1] : null;
+      Object.keys(els).forEach((k) => {
+        els[k].classList.toggle('is-off', !!prev && !prev.includes(k));
+        els[k].classList.toggle('is-on', picked.has(k));
+      });
+    };
+
+    const startProblem = () => {
+      const P = PROBLEMS[q];
+      h = 0;
+      picked = new Set();
+      els = {};
+      locked = false;
+      pn.innerHTML = '';
+      shuffleArray(P.cards).forEach((k) => {
+        const d = document.createElement('div');
+        d.className = 'p02-ob';
+        d.innerHTML = '<img src="img/p02_' + O[k][1] + '.png" alt="">' + O[k][0];
+        d.addEventListener('click', () => pick(k));
+        els[k] = d;
+        pn.appendChild(d);
+      });
+      drawHints();
+      refreshCards();
+    };
+
+    const pick = (k) => {
+      if (locked) return;
+      const set = PROBLEMS[q].sets[h];
+      if (els[k].classList.contains('is-off') || picked.has(k)) return;
+      if (!set.includes(k)) {
+        playWrong();
+        flashLayer($('p02Wrong'), 'is-off', 2000);
+        return;
+      }
+      playCorrect();
+      picked.add(k);
+      els[k].classList.add('is-on');
+      if (picked.size < set.length) return;
+      locked = true;
+      if (h < 2) {
+        setTimeout(() => {
+          h++;
+          picked = new Set();
+          drawHints();
+          refreshCards();
+          locked = false;
+        }, 700);
+        return;
+      }
+      solved++;
+      drawStars();
+      setTimeout(() => {
+        if (q >= PROBLEMS.length - 1) {
+          $('p02Done').classList.remove('is-off');
+        } else {
+          q++;
+          startProblem();
+        }
+      }, 1400);
+    };
+
+    drawStars();
+    startProblem();
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>우리 동네 안전 지킴이 인터뷰</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 기획서 21~46p. 가운데 공용 폰 틀(.phone-frame.has-cam) 안에 Gemini 화면(홈 → 채팅), 왼쪽 메인 캐릭터 + 말풍선, 오른쪽에는 누를 버튼.
+           흐름: Gemini 앱 → 입력창 클릭 → 프롬프트 불러오기 → 블록 6개를 순서대로 클릭해 입력 → 보내기 → 로딩 3초 → 안전 지킴이 인사
+                 → (질문 3개 × [질문 버튼 → 보내기 → 로딩 3초 → 답변 → 팩트체크 팝업 2개 → 말풍선 피드백])
+           page07에서 저장한 sa09_job · sa09_style(sessionStorage)로 프롬프트·답변을 고르고, 맞힌 팩트체크 수는 sa09_score로 page10에 넘김 */
+
+
+
+        .p09-side{position:absolute;left:1253px;top:83px;width:595px;height:763px;box-sizing:border-box;padding:0 24px;display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:26px}
+        .p09-side:empty{display:none}
+        .p09-side .card-btn{width:100%;min-width:0;height:auto;min-height:100px;padding:8px 16px 4px;font-size:54px;line-height:1.2;letter-spacing:-0.05em}
+        .p09-blocks{display:flex;flex-direction:column;gap:35px}
+        .p09-side .p09-block{height:90px;font-size:54px}
+        .p09-block.is-wrong{animation:p09-shake .35s}
+        .p09-block.is-used{visibility:hidden}
+        @keyframes p09-shake{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+
+        .p09-fc-opts{display:flex;align-items:center;justify-content:center;gap:40px;margin:20px 0 0 -204px}
+        .p09-fc-opts .card-btn{min-width:0;width:auto;height:150px;padding:8px 20px 4px;font-size:50px;letter-spacing:-0.05em;line-height:1.2}
+        .p09-fc-ox{flex-direction:row;justify-content:center;gap:150px}
+        .p09-fc-ox .ox-pick{position:static;width:260px;height:260px;flex:0 0 auto}
+        .p09-fc .avatar-popup-extra{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="guide-set is-main" id="p09Set">
+            <p class="guide-bubble is-center" id="p09Bubble"></p>
+            <div class="guide-character"><img id="p09Char" src="../img/character/sa_wink_point2.png" alt="메인 캐릭터"></div>
+          </div>
+
+          <div class="phone-frame has-cam gc-phone" id="p09Phone" data-screen="home"><div class="phone-screen" id="p09Screen">
+            <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gstar" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fb4b4b"/><stop offset=".25" stop-color="#f6b40e"/><stop offset=".5" stop-color="#3b82f6"/><stop offset=".8" stop-color="#2f7df6"/><stop offset="1" stop-color="#12b866"/></linearGradient></defs></svg>
+
+            <div class="gc gc-home app-home is-purple">
+              <div class="phone-status is-dark" data-time="17:58"></div>
+              <button type="button" class="app-icon is-dark" id="p09App" aria-label="Gemini 앱"><i><i data-ic="gemini"></i></i>Gemini</button>
+              <div class="phone-nav"></div>
+            </div>
+
+            <div class="gc gc-chat">
+              <div class="phone-status is-dark" data-time="17:58"></div>
+              <div class="gc-top"><span class="gc-menu"><i data-ic="menuHalf"></i></span><span class="gc-model">Gemini <b>자동 모드</b><i data-ic="chev"></i></span><span class="is-gap"></span><span class="t-empty"><i data-ic="tempChat"></i><i data-ic="avatarG" class="gc-avatar"></i></span><span class="t-talk"><i data-ic="compose"></i><i data-ic="dotsH"></i></span></div>
+              <div class="gc-hello"><i data-ic="gemini"></i>무엇이 궁금하세요?</div>
+              <div class="gc-msgs" id="p09Chat"></div>
+              <div class="gc-input" id="p09Input"><i data-ic="plus"></i><span class="is-gap is-ph" id="p09Text">Gemini에게 물어보세요</span><i data-ic="micG" class="gc-mic"></i><span class="gc-wave"><i data-ic="voice"></i></span><span class="gc-stop"><i></i></span><button type="button" class="gc-send" id="p09Send" aria-label="보내기"><i data-ic="sendUp"></i></button></div>
+                <div class="kbd-cj"></div>
+              <div class="phone-nav"></div>
+            </div>
+          </div></div>
+
+          <div class="p09-side" id="p09Side"></div>
+          <a href="javascript:;" class="js-sfx next-btn is-off" id="p09Next" data-sound="sound/click.mp3">
+            <img src="../../resources/img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../resources/img/common/btn_next_content_on.png" data-src-over="../../resources/img/common/btn_next_content_over.png" alt="다음">
+          </a>
+
+          <div class="avatar-modal p09-fc is-off" id="p09Fc">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_quiz.png" alt="">
+              <p class="avatar-card-title" id="p09FcTitle"></p>
+              <p class="avatar-card-text" id="p09FcText"></p>
+              <div class="p09-fc-opts" id="p09FcOpts"></div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="우리 동네 안전 지킴이 인터뷰" data-next="page10.html"></script>
+  <script src="../../resources/js/toc.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script src="../../resources/js/box-edit.js"></script>
+  <script>
+  (function () {
+    /* 기획서 27p 인사 · 34p 질문별 답변(쉽게/예시)과 팩트체크 정답(true=사실 O) · 35p 거짓일 때 피드백 */
+    const JOBS = {
+      police: {
+        name: '경찰관',
+        hello: '충성! 안녕하세요!\n우리 동네 안전을 지키는 경찰관입니다. 오늘 하루도 안전하게 보내고 계신가요? 무슨 일이 생긴다면 저를 찾아주세요.\n더 궁금한 점이 있으신가요?',
+        qa: [
+          { easy: '사람들이 안전하게 생활하도록 동네를 살피고 위험에 처한 사람을 도와요. 범죄가 일어나면 사건을 조사하고 범인을 찾아요. 차와 사람들이 안전하게 다니도록 교통정리도 해요.',
+            example: '사람들이 안전하게 생활하도록 동네를 살피고 위험에 처한 사람을 도와요. 예를 들어, 길을 잃은 아이를 보호하고 가족을 찾도록 도와줘요. 신호등이 고장 나면 사람들이 안전하게 길을 건너도록 교통정리를 해요.', ok: true },
+          { easy: '도움이 필요한 사람을 도와 안전하게 지켜줬을 때 보람을 느껴요. 위험했던 사람이 무사히 집으로 돌아가면 마음이 놓여요. 도움을 받은 사람이 고맙다고 말해 주면 뿌듯해요.',
+            example: '도움이 필요한 사람을 도와 안전하게 지켜줬을 때 보람을 느껴요. 예를 들어, 길을 잃은 아이가 가족을 만나 웃는 모습을 보면 기뻐요. 아이와 가족이 고맙다고 인사하면 뿌듯해요.', ok: true },
+          { easy: '낮에 여러 곳을 순찰하고 사건을 해결하다 보면 몸이 힘들어요. 하지만 경찰관은 낮에만 출동하기 때문에 밤에는 일하지 않아요.',
+            example: '낮에 여러 곳을 순찰하고 사건을 해결하다 보면 몸이 힘들어요. 예를 들어, 교통사고 현장을 정리하고 동네를 돌아다니면 지치기도 해요. 하지만 밤에는 경찰관이 출동하지 않아서 쉴 수 있어요.', ok: false,
+            lie: '경찰관은 밤에도 위험한 일이 발생하면 현장으로 출동하는 멋진 우리 동네 영웅이에요.' },
+        ],
+      },
+      paramedic: {
+        name: '구급대원',
+        hello: '안녕하세요!\n우리 동네의 생명과 안전을 지키는 119 구급대원입니다. 오늘 하루도 다친 곳 없이 건강하게 지내고 계신가요? 다쳤거나 몸이 아프면 저를 찾아주세요.\n더 궁금한 점이 있으신가요?',
+        qa: [
+          { easy: '아프거나 다친 사람을 응급처치하고 병원으로 옮겨요. 환자가 빨리 치료받도록 돕는 일이에요. 병원에 도착하면 제가 직접 수술도 해요.',
+            example: '아프거나 다친 사람을 응급처치하고 병원으로 옮겨요. 예를 들어, 크게 다친 사람의 피를 멎게 도와주고 구급차로 병원에 데려가요. 병원에 도착하면 제가 직접 수술해서 다친 곳을 치료해요.', ok: false,
+            lie: '구급대원은 응급환자를 병원까지 데려다주지만 수술은 할 수 없어요.' },
+          { easy: '위급한 사람을 도와 병원으로 안전하게 옮겼을 때 보람을 느껴요. 제가 도운 사람이 치료받고 건강을 되찾으면 기뻐요. 환자나 가족이 고맙다고 말해 주면 뿌듯해요.',
+            example: '위급한 사람을 도와 병원으로 안전하게 옮겼을 때 보람을 느껴요. 예를 들어, 갑자기 쓰러진 사람을 응급처치하고 병원에 데려가요. 나중에 그 사람이 건강해졌다는 소식을 들으면 기뻐요.', ok: true },
+          { easy: '환자를 안전하게 옮기기 위해 힘을 많이 써야 할 때가 있어요. 환자가 누운 들것은 무거워서 동료와 힘을 모아 옮겨요. 계단이나 좁은 길에서는 더 조심해야 해요.',
+            example: '환자를 안전하게 옮기기 위해 힘을 많이 써야 할 때가 있어요. 예를 들어, 승강기가 없는 건물에서는 계단으로 환자를 옮겨야 해요. 들것이 흔들리지 않도록 동료와 발을 맞추며 조심해서 내려가요.', ok: true },
+        ],
+      },
+      cleaner: {
+        name: '환경미화원',
+        hello: '반갑습니다. 주민 여러분!\n우리 동네의 깨끗하고 쾌적한 거리를 책임지는 환경미화원입니다. 오늘도 반짝반짝 빛나는 하루를 보내고 계신가요? 길거리에 버려진 쓰레기가 있다면 저를 찾아주세요.\n더 궁금한 점이 있으신가요?',
+        qa: [
+          { easy: '길거리의 쓰레기를 치우고 수거해 동네를 깨끗하게 만들어요. 빗자루로 길을 쓸고 떨어진 쓰레기를 모아요. 사람들이 깨끗한 거리에서 생활하도록 도와요.',
+            example: '길거리의 쓰레기를 치우고 수거해 동네를 깨끗하게 만들어요. 예를 들어, 길에 떨어진 과자 봉지나 빈 병을 주워요. 바람에 흩어진 낙엽을 빗자루로 쓸어 모으기도 해요.', ok: true },
+          { easy: '거리를 깨끗하고 밝게 만들었을 때 보람을 느껴요. 쓰레기를 치우고 고장 난 가로등도 직접 고쳐요. 주민들이 깨끗하고 환한 길을 걸으면 뿌듯해요.',
+            example: '거리를 깨끗하고 밝게 만들었을 때 보람을 느껴요. 예를 들어, 골목의 쓰레기를 치우다가 꺼진 가로등을 발견하면 제가 직접 수리해요. 다시 밝아진 길로 주민들이 다니면 기뻐요.', ok: false,
+            lie: '환경미화원은 거리를 깨끗하게<br>청소하지만 가로등을 직접<br>수리하지 않아요.' },
+          { easy: '무거운 쓰레기를 옮기거나 날카로운 쓰레기를 치울 때 어려움을 겪어요. 쓰레기가 무거우면 몸에 힘이 많이 들어요. 깨진 유리에 다치지 않도록 조심해야 해요.',
+            example: '무거운 쓰레기를 옮기거나 날카로운 쓰레기를 치울 때 어려움을 겪어요. 예를 들어, 쓰레기봉투 안에 깨진 유리가 있으면 손을 다칠 수 있어요. 작업용 장갑을 끼고 조심해서 치워야 해요.', ok: true },
+        ],
+      },
+    };
+    const STYLES = { easy: '쉽게 설명해줘.', example: '예시를 들어 설명해줘.' };
+    const ASKS = (j) => [j.name + '은 어떤 일을 하나요?', '일을 하면서 어떨 때 보람을 느끼나요?', '어떤 어려움을 겪나요?'];
+    const METHODS = ['선생님이 주신 자료 확인하기', '공식 누리집에서 정보 확인하기', '실제 우리 동네 사진으로 확인하기'];
+    const GSTAR = ICONS.gemini;
+
+    let jobId = 'police', style = 'easy';
+    try { jobId = sessionStorage.getItem('sa09_job') || jobId; style = sessionStorage.getItem('sa09_style') || style; } catch (e) {}
+    if (!JOBS[jobId]) jobId = 'police';
+    if (!STYLES[style]) style = 'easy';
+    const job = JOBS[jobId];
+    const asks = ASKS(job);
+    const BLOCKS = [
+      ['너는 지금부터', ''], [job.name, 'is-job'], ['역할을 해줘.', ''],
+      ['내가 묻는 말에', ''], [job.name + '의 입장에서', 'is-job'], [STYLES[style], 'is-tail'],
+    ];
+    const PROMPT = BLOCKS.map((b) => b[0]).join(' ');
+
+    const bubble = $('p09Bubble');
+    const phone = $('p09Phone');
+    const screen = $('p09Screen');
+    const chat = $('p09Chat');
+    const input = $('p09Input');
+    const text = $('p09Text');
+    const send = $('p09Send');
+    const side = $('p09Side');
+    const fc = $('p09Fc');
+    let score = 0;
+
+    /* 말풍선이 바뀔 때마다 상황에 맞는 포즈로 캐릭터도 바뀜(공용 sa/img/sa_*.png) */
+    const charImg = $('p09Char');
+    const charSet = $('p09Set');
+    const POSES = ['main', 'wink_point', 'wink_point2', 'wink_point3', 'wink_point4', 'wink_present', 'main_wave', 'happy_jump', 'point_front'];
+    POSES.forEach((p) => { new Image().src = '../img/character/sa_' + p + '.png'; });
+    const say = initGuideSay({ bubble: bubble, img: charImg, set: charSet, keep: true });
+    // 상황별 말풍선 문구·포즈 한 곳(세 번째 true 는 넓은 말풍선). 포즈는 ?edit 포즈판에서 골라 이름만 바꿔 적음. 실제 진행과 ?edit 단계 보기가 같은 표를 씀
+    const SAYS = {
+      app: ['Gemini를 클릭해요.', 'wink_point2'],
+      input: ['먼저, 프롬프트를 입력하여<br>안전 지킴이 역할을 부여해봐요.<br>입력창을 클릭해요.', 'wink_point4', true],
+      load: ['오른쪽의 버튼을 클릭해 앞서 내가 작성한 프롬프트를 불러올게요.', 'wink_point3', true],
+      blocks: ['단어 블록을<br>순서대로 클릭하여<br>프롬프트를 입력해요.', 'wink_present'],
+      send: ['보내기 버튼을 클릭해요.', 'wink_point2'],
+      roleLoading: ['Gemini가 가상의 안전 지킴이 역할을 부여 받고 있어요!', 'main'],
+      hello: ['좋아요! 이제 본격적으로 인터뷰를 시작해볼까요?', 'main_wave'],
+      askBtn: ['오른쪽의 질문 버튼을<br>클릭해요.', 'wink_point2'],
+      nextInput: ['이어서 다음 질문을 해봐요.<br>입력창을 클릭해요.', 'wink_point4'],
+      lastInput: ['이어서 마지막 질문을 해봐요.<br>입력창을 클릭해요.', 'wink_point4'],
+      askSend: ['보내기 버튼을 클릭해<br>질문해요.', 'wink_point2'],
+      writing: ['답변을 작성하고 있어요.', 'main'],
+      answered: ['가상의 안전 지킴이가 답변했어요! 사실인지 확인해볼까요?', 'point_front'],
+      fbOk: ['좋아요! AI의 답변이 사실과 일치하는 것을 확인했어요.', 'wink_jump'],
+      fbLie: ['AI의 거짓말을 확인했어요!<br>', 'wink_present']
+    };
+    const sy = (key, tail) => { const t = SAYS[key]; say(t[0] + (tail || ''), t[1], !!t[2]); };
+    // 손가락 위치 보정 [dx, dy] — 눌러야 할 곳별. ?edit 로 손가락을 눌러 맞춘 뒤 표시줄 값을 옮겨 적음
+    const FG = { app: [15, -37], input: [-142, -18], send: [22, -5] };
+    // 클릭 영역 보정 [dx, dy, dw, dh] — 버튼 모양은 그대로, 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
+    const HOT = { app: [0, 0, 0, 0], input: [0, 0, 0, 0], send: [0, 0, 0, 0] };
+    let fgKey = '?';
+    const guide = (el, key, o) => {
+      fgKey = key;
+      el.dataset.hit = key;
+      BoxEdit.padEl(el, key, HOT);
+      pointFingerAt(el, Object.assign({ onMain: true, pulse: true, dx: FG[key][0], dy: FG[key][1] }, o));
+    };
+    const kb = (on) => screen.classList.toggle('has-kb', on);
+    const setInput = (v) => {
+      text.textContent = v || 'Gemini에게 물어보세요';
+      text.classList.toggle('is-ph', !v);
+      input.classList.toggle('has-text', !!v);
+    };
+    const talk = () => phone.classList.add('is-talk');
+    function addMe(v) {
+      const d = document.createElement('div');
+      d.className = 'gc-me';
+      d.textContent = v;
+      chat.appendChild(d);
+      chat.scrollTop = chat.scrollHeight;
+    }
+    function addAi() {
+      const d = document.createElement('div');
+      d.className = 'gc-ai';
+      d.innerHTML = '<span></span>';
+      chat.appendChild(d);
+      chat.scrollTop = chat.scrollHeight;
+      return d.querySelector('span');
+    }
+    const para = (s) => '<p>' + s.split('\n').join('</p><p>') + '</p>';
+    const ACTS = '<div class="gc-acts">'
+      + [ICONS.thumb, ICONS.thumbDown, ICONS.reload, ICONS.out, ICONS.copy, ICONS.dotsH, ICONS.speakerWave].join('')
+      + '</div><p class="gc-disc">Gemini는 AI이며 실수를 할 수 있습니다.</p>';
+    function typeInto(el, v, done) {
+      typeText(el, v, {
+        speed: 55, render: para, onTick: () => { chat.scrollTop = chat.scrollHeight; },
+        onDone: () => {
+          el.innerHTML = para(v) + ACTS;
+          phone.classList.remove('is-wait');
+          chat.scrollTop = chat.scrollHeight;
+          done();
+        }
+      });
+    }
+    function btn(label, onclick, cls) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'card-btn js-sfx ' + (cls || '');
+      b.dataset.sound = 'sound/click.mp3';
+      b.textContent = label;
+      b.addEventListener('click', () => { playClick(); clearFingers(); onclick(); });
+      return b;
+    }
+    const nextBtn = $('p09Next');
+    function showNext(fn) {
+      nextBtn.classList.remove('is-off');
+      resetImageSwap(nextBtn);
+      nextBtn.onclick = () => { nextBtn.classList.add('is-off'); fn(); };
+    }
+    function setSide(...els) {
+      nextBtn.classList.add('is-off');
+      side.innerHTML = '';
+      els.forEach((e) => side.appendChild(e));
+    }
+
+    /* 21 Gemini 앱 */
+    function stepApp() {
+      phone.dataset.screen = 'home';
+      sy('app');
+      setSide();
+      const app = $('p09App');
+      guide(app, 'app', { pulse: false });
+      app.onclick = () => { playClick(); clearFingers(); stepOpen(); };
+    }
+    /* 22 입력창 클릭 */
+    function stepOpen() {
+      phone.dataset.screen = 'chat';
+      sy('input');
+      guide(input, 'input');
+      input.onclick = () => { input.onclick = null; playClick(); clearFingers(); kb(true); stepLoad(); };
+    }
+    /* 23 프롬프트 불러오기 */
+    function stepLoad() {
+      sy('load');
+      const b = btn('안전 지킴이 프롬프트 불러오기', stepBlocks);
+      setSide(b);
+    }
+    /* 24 블록 순서대로 클릭 */
+    function stepBlocks() {
+      sy('blocks');
+      const grid = document.createElement('div');
+      grid.className = 'p09-blocks';
+      let next = 0;
+      shuffleArray(BLOCKS.map((b, i) => ({ t: b[0], c: b[1], i }))).forEach((b) => {
+        const el = document.createElement('button');
+        el.type = 'button';
+        el.className = 'card-btn p09-block';
+        el.textContent = b.t;
+        el.addEventListener('click', () => {
+          if (b.i !== next) {
+            playWrong();
+            el.classList.remove('is-wrong');
+            void el.offsetWidth;
+            el.classList.add('is-wrong');
+            return;
+          }
+          playClick();
+          el.classList.add('is-used');
+          next += 1;
+          setInput(BLOCKS.slice(0, next).map((x) => x[0]).join(' '));
+          if (next === BLOCKS.length) setTimeout(stepSend1, 500);
+        });
+        grid.appendChild(el);
+      });
+      setSide(grid);
+    }
+    /* 25 보내기 → 26 로딩 → 27 인사 */
+    function stepSend1() {
+      setSide();
+      sy('send');
+      guide(send, 'send');
+      send.onclick = () => {
+        send.onclick = null; playClick(); clearFingers();
+        kb(false); talk();
+        addMe(PROMPT); setInput('');
+        sy('roleLoading');
+        phone.classList.add('is-wait');
+        const ai = addAi();
+        ai.innerHTML = '<span class="gc-think"><i></i><i></i><i></i></span>';
+        chat.scrollTop = chat.scrollHeight;
+        setTimeout(() => {
+          typeInto(ai, job.hello, () => {
+            sy('hello');
+            showNext(() => ask(0));
+          });
+        }, 3000);
+      };
+    }
+
+    /* 28~46 질문 3회 */
+    function ask(q) {
+      setSide();
+      const go = () => {
+        sy('askBtn');
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'card-btn p09-ask js-sfx';
+        b.dataset.sound = 'sound/click.mp3';
+        b.textContent = asks[q];
+        b.addEventListener('click', () => { playClick(); clearFingers(); setInput(asks[q]); stepSend(q); });
+        setSide(b);
+      };
+      if (q === 0) { kb(true); go(); return; }
+      sy(q === 1 ? 'nextInput' : 'lastInput');
+      guide(input, 'input');
+      input.onclick = () => { input.onclick = null; playClick(); clearFingers(); kb(true); go(); };
+    }
+    function stepSend(q) {
+      setSide();
+      sy('askSend');
+      guide(send, 'send');
+      send.onclick = () => {
+        send.onclick = null; playClick(); clearFingers();
+        kb(false);
+        addMe(asks[q]); setInput('');
+        sy('writing');
+        phone.classList.add('is-wait');
+        const ai = addAi();
+        ai.innerHTML = '<span class="gc-think"><i></i><i></i><i></i></span>';
+        chat.scrollTop = chat.scrollHeight;
+        setTimeout(() => {
+          typeInto(ai, job.qa[q][style], () => {
+            sy('answered');
+            const b = btn('팩트체크', () => factCheck(q));
+            setSide(b);
+          });
+        }, 3000);
+      };
+    }
+    function factCheck(q) {
+      setSide();
+      $('p09FcTitle').innerHTML = '팩트체크!';
+      $('p09FcText').innerHTML = '어떤 방법으로 사실을 확인해볼까요? 원하는 방법을 선택해보세요.';
+      const opts = $('p09FcOpts');
+      opts.className = 'p09-fc-opts';
+      opts.innerHTML = '';
+      METHODS.forEach((m) => opts.appendChild(btn(m, () => verdict(q))));
+      fc.classList.remove('is-off');
+    }
+    function verdict(q) {
+      $('p09FcText').innerHTML = '실제 자료와 AI의 답변이 일치하는지 확인해보세요. 믿을 수 있는 정보인가요?';
+      const opts = $('p09FcOpts');
+      opts.className = 'p09-fc-opts p09-fc-ox';
+      opts.innerHTML = '';
+      [['o', true], ['x', false]].forEach(([k, v]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'ox-pick js-sfx is-' + k; b.dataset.sound = 'sound/click.mp3'; b.setAttribute('aria-label', k.toUpperCase()); b.innerHTML = '<img src="../../resources/img/common/icon_' + k + '.png" alt="' + k.toUpperCase() + '">'; const im = b.firstChild; b.addEventListener('pointerenter', () => { im.src = '../../resources/img/common/icon_' + k + '_on.png'; }); b.addEventListener('pointerleave', () => { im.src = '../../resources/img/common/icon_' + k + '.png'; }); b.addEventListener('click', () => { playClick(); clearFingers();
+        fc.classList.add('is-off');
+        const d = job.qa[q];
+        if (v === d.ok) score += 1;
+        if (d.ok) sy('fbOk'); else sy('fbLie', d.lie);
+        showNext(() => {
+          if (q < 2) { ask(q + 1); return; }
+          try { sessionStorage.setItem('sa09_score', String(score)); } catch (e) {}
+          navigateTo('page10.html');
+        });
+      }); opts.appendChild(b); });
+    }
+
+    /* ?edit : 클릭 영역(HOT)과 손가락(FG)을 클릭해 방향키로 맞춤(Alt+방향키 = 영역 폭·높이). 표시줄 값을 코드의 HOT·FG 표에 옮겨 적을 것.
+       ?edit&step=1 홈(앱 아이콘) · 2 입력창 클릭 · 3 보내기 클릭 (질문 2·3회째도 같은 FG 값을 씀) */
+    if (BoxEdit.on) {
+      const think = () => { phone.classList.add('is-wait'); const ai = addAi(); ai.innerHTML = '<span class="gc-think"><i></i><i></i><i></i></span>'; };
+      /* 처음 프롬프트부터 q 번째 질문까지의 대화를 타이머 없이 바로 채움 */
+      const convo = (q) => {
+        chat.innerHTML = '';
+        phone.dataset.screen = 'chat';
+        talk();
+        addMe(PROMPT);
+        addAi().innerHTML = para(job.hello) + ACTS;
+        for (let i = 0; i < q; i++) { addMe(asks[i]); addAi().innerHTML = para(job.qa[i][style]) + ACTS; }
+        chat.scrollTop = chat.scrollHeight;
+      };
+      const STEPS = [
+        { t: '홈 · Gemini 앱', run: () => { stepApp(); } },
+        { t: '입력창 클릭', run: () => { stepOpen(); } },
+        { t: '프롬프트 불러오기 버튼', run: () => { stepOpen(); clearFingers(); kb(true); stepLoad(); } },
+        { t: '단어 블록 클릭', run: () => { stepOpen(); clearFingers(); kb(true); stepBlocks(); } },
+        { t: '보내기 클릭', run: () => { stepOpen(); kb(true); setInput(PROMPT); stepSend1(); } },
+        { t: '역할 부여 로딩', run: () => { convo(0); chat.innerHTML = ''; addMe(PROMPT); think(); sy('roleLoading'); } },
+        { t: '인사 + 다음', run: () => { convo(0); sy('hello'); showNext(() => {}); } },
+      ];
+      [0, 1, 2].forEach((q) => {
+        const n = (q + 1) + '번째 질문 · ';
+        if (q > 0) STEPS.push({ t: n + '입력창 클릭', run: () => { convo(q); ask(q); } });
+        STEPS.push({ t: n + '질문 버튼', run: () => { convo(q); kb(true); ask(q); if (q > 0) input.onclick(); } });
+        STEPS.push({ t: n + '보내기 클릭', run: () => { convo(q); kb(true); setInput(asks[q]); stepSend(q); } });
+        STEPS.push({ t: n + '답변 작성 로딩', run: () => { convo(q); addMe(asks[q]); think(); sy('writing'); } });
+        STEPS.push({ t: n + '답변 · 팩트체크 버튼', run: () => { convo(q + 1); sy('answered'); setSide(btn('팩트체크', () => {})); } });
+        STEPS.push({ t: n + '팩트체크 방법 선택', run: () => { convo(q + 1); sy('answered'); factCheck(q); } });
+        STEPS.push({ t: n + '팩트체크 O/X', run: () => { convo(q + 1); sy('answered'); factCheck(q); verdict(q); } });
+        STEPS.push({ t: n + '피드백 + 다음', run: () => { convo(q + 1); const d = job.qa[q]; if (d.ok) sy('fbOk'); else sy('fbLie', d.lie); showNext(() => {}); } });
+      });
+      const m = location.search.match(/[?&]step=([0-9]+)/);
+      let cur = m ? Math.min(Math.max(+m[1], 1), STEPS.length) : 1;
+      BoxEdit.stepEdit({
+        key: () => fgKey, count: STEPS.length + 1, get: () => cur, set: (n) => { cur = n; },
+        go: (n) => { if (n < 1) return; cur = n; BoxEdit.syncStep(n); clearFingers(); STEPS[n - 1].run(); }, label: (n) => '단계 ' + n + ' / ' + STEPS.length + ' · ' + (STEPS[n - 1] ? STEPS[n - 1].t : ''),
+        say, bubble, img: charImg
+      });
+      STEPS[cur - 1].run();
+      return;
+    }
+
+    stepApp();
+  })();
+  </script>
+</body>
+</html>

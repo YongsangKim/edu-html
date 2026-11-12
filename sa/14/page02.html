@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 방패! 수상한 연락을 막아라</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 기획서 3~17p. 전화·문자 5건(① 보이스피싱 전화 ② 엄마 전화 ③ 대출 전화 ④ 친구 문자 ⑤ 스미싱 문자)이 차례로 오고, AI 경고를 보고 알맞은 버튼을 고름.
+           ①③⑤ 위험: 차단하기(문자는 ⑤만) = 정답 효과음 + 정답 팝업 → 확인 → 다음. 통화하기·링크 클릭하기는 오답 팝업(AI 경고창을 다시 읽어보라).
+           ②④ 안전: 통화하기·답장하기 = 정답 효과음 + 자동으로 다음 문제, 차단하기 = 오답 팝업. 마지막(⑤) 정답 뒤에 배지 팝업 → 다음 페이지
+           벨소리(sound/sa14_ring.mp3)는 전화 3건에서 1회, 문자 수신음(sound/sa14_sms.mp3)은 문자 2건에서 1회. 폰 틀 없이 화면 내용만 */
+        .p02-tip{top:20px}
+        .p02-panel{position:absolute;left:27px;top:69px;width:1866px;height:867px;box-sizing:border-box;background:#266cc8;border:solid 5px var(--c-ink);border-radius:10px;z-index:1}
+        .p02-view{position:absolute;left:427px;top:137px;width:1067px;height:607px;box-sizing:border-box;background:#fff;border:solid 5px #053c85;border-radius:10px;overflow:hidden;z-index:2}
+        .p02-char{position:absolute;display:block;z-index:4;pointer-events:none}
+        .p02-bubble{left:29px;top:156px;bottom:auto;width:501px;height:168px;min-height:0;padding:0 20px;font-size:42px;line-height:1.2;--tail-x:227px;z-index:5}
+        .p02-bubble.is-off{display:none}
+        .p02-bubble span{position:relative;z-index:1}
+        .p02-scr{position:absolute;left:327px;top:11px;width:400px;height:610px;overflow:hidden;border-radius:26px 26px 0 0;background:#1a1a2e}
+        .p02-bg{position:absolute;left:0;top:0;width:400px;height:auto;display:block}
+        .p02-scr.is-sms{background:#fbfbfd;border: solid 3px #666}
+        .p02-name{position:absolute;left:0;top:120px;width:100%;text-align:center;font-size:56px;color:#fff;letter-spacing:-0.03em}
+        .p02-num{position:absolute;left:0;top:112px;width:100%;text-align:center;font-size:40px;color:#fff}
+        .p02-card{position:absolute;left:14px;right:14px;top:190px;box-sizing:border-box;padding:18px 20px 14px;border-radius:16px;background:#d33b3b;color:#fff;box-shadow:0 10px 24px rgba(0,0,0,.35);opacity:0;transform:translateY(-16px);transition:opacity .4s,transform .4s;font-family:'Pretendard'}
+        .p02-card.is-on{opacity:1;transform:none}
+        .p02-card .t{display:flex;align-items:center;gap:16px}
+        .p02-card .ic{flex:0 0 auto;width:60px;height:60px;border-radius:50%;background:#fde0e0;display:flex;align-items:center;justify-content:center}
+        .p02-card .ic svg{width:34px;height:34px;fill:none;stroke:#e23a3a;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+        .p02-card.is-bank .ic{background:#ffe9e9}
+        .p02-card b{display:block;font-size:27px;line-height:1.15;letter-spacing:-0.02em}
+        .p02-card small{display:block;margin-top:3px;font-size:21px;font-weight:700;color:rgba(255,255,255,.72);letter-spacing:.01em}
+        .p02-card .x{position:absolute;right:14px;top:14px;width:22px;height:22px}
+        .p02-card .x svg,.p02-card .chev svg{width:100%;height:100%;fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+        .p02-card .chev{position:absolute;right:22px;top:62px;width:20px;height:20px}
+        .p02-card .tag{margin-top:14px;padding:11px 14px;border-radius:10px;background:#f2cccc;color:#222;font-size:18px;font-weight:700;display:flex;align-items:center;gap:8px}
+        .p02-card .tag em{font-style:normal;font-size:9px;line-height:.9;font-weight:800;color:#555;text-align:center}
+        .p02-card .row{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.28);font-size:18px;font-weight:700}
+        .p02-card .row span{display:flex;align-items:center;gap:7px}
+        .p02-card .row svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+        .p02-card.is-url{top:70px;background:#d33b3b}
+        .p02-card.is-url .msg{margin-top:12px;padding:14px;border-radius:10px;background:rgba(255,255,255,.85);color:#c22;font-size:20px;text-align:center}
+        .p02-card.is-url .msg i{display:inline-block;margin-top:8px;padding:4px 18px;border:1px solid #777;border-radius:14px;background:#fff;color:#333;font-size:18px;font-style:normal}
+        .p02-card .lk{margin-top:8px;font-size:20px;opacity:.95}
+        .p02-sms-head{position:absolute;left:0;top:0;width:100%;height:84px;box-sizing:border-box;padding:26px 22px 0;display:flex;align-items:center;gap:14px;font-size:24px;font-weight:700;color:#1b3a6b;background:#fbfbfd}
+        .p02-sms-head i{flex:0 0 auto;width:36px;height:36px;border-radius:50%;background:#e2e3e7}
+        .p02-sms-bubble{position:absolute;left:26px;top:100px;width:320px;box-sizing:border-box;padding:16px 18px;border-radius:22px;background:#d9e1f3;font-size:26px;line-height:1.4;color:var(--c-navy);word-break:keep-all}
+        .p02-sms-bubble u{color:#1a55cc}
+
+        .p02-btn{position:absolute;top:778px;z-index:3;display:flex;align-items:center;justify-content:center;gap:38px;width:498px;min-width:0;height:101px;padding:0;font-size:50px;line-height:1}
+        .p02-btn.is-go{left:436px}
+        .p02-btn.is-block{left:989px}
+        .p02-btn img{display:block;flex:0 0 auto;max-height:75px}
+        #p02Wrong,#p02Right,#p02Badge{z-index:120}
+
+        .p02-sms-head u{
+          margin-left:10px;
+          width: 10px;
+          height: 10px;
+          border: solid #666;
+          border-width: 0 0 2px 2px;
+          transform: rotate(45deg);
+        }
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="p02-tip ask-pill is-fit">핸드폰 화면을 확인하고 알맞은 버튼을 클릭해요.</p>
+          <div class="p02-panel"></div>
+          <div class="p02-view"><div class="p02-scr" id="p02Scr"></div></div>
+          <img class="p02-char" id="p02Char" src="img/p02_character_1.png" alt="">
+          <p class="guide-bubble is-center p02-bubble is-off" id="p02Bubble"></p>
+          <button type="button" class="card-btn p02-btn is-go js-sfx" id="p02Go" data-sound="sound/click.mp3"></button>
+          <button type="button" class="card-btn p02-btn is-block js-sfx" id="p02Block" data-sound="sound/click.mp3"><img src="img/p02_icon_block.png" alt="">차단하기</button>
+
+          <div class="avatar-modal is-wrong is-off" id="p02Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text is-left" id="p02WrongT"></p>
+                <p class="avatar-popup-sub" id="p02WrongP"></p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p02WrongOk" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div>
+          <div class="avatar-modal is-off" id="p02Right">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text" id="p02RightT"></p>
+                <p class="avatar-popup-sub" id="p02RightP"></p>
+                <button type="button" class="avatar-popup-next card-btn is-popup js-sfx" id="p02RightOk" data-sound="sound/click.mp3">확인</button>
+              </div>
+            </div>
+          </div>
+          <div class="avatar-modal is-off" id="p02Badge">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="img/p02_badge.png" alt="배지"></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-sub">수상한 요구를 멈추고 도움을 요청했어요!</p>
+                <a href="page03.html" class="avatar-popup-next card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="AI 방패! 수상한 연락을 막아라" data-next="page03.html"></script>
+  <script src="../../resources/js/toc.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const bell = new Audio('sound/sa14_ring.mp3');
+    const sms = new Audio('sound/sa14_sms.mp3');
+    const playClear = makeSfx('sound/sa14_clear.mp3', true);
+    const stopRing = () => { [bell, sms].forEach((a) => { a.pause(); a.currentTime = 0; }); };
+    const playBell = () => { stopRing(); bell.play().catch(() => {}); };
+    const playSms = () => { stopRing(); sms.play().catch(() => {}); };
+    const WARN_CALL = '잠깐! AI 경고창을 다시 한번 읽어봐요.';
+    const OKB = { t: '안전하게 차단했어요!', p: 'AI가 미리 위험한 번호인지 알려주어 피해를 막았어요.' };
+    const X = '<i class="x">' + ic('x') + '</i>', CV = '<span class="chev">' + ic('chevUp') + '</span>', SIREN = ic('siren'), ROW = '<div class="row"><span>' + ic('phone') + '통화</span><span>' + ic('memo') + '문자</span><span>' + ic('toggle', 'style="width:30px"') + '스팸 해제</span></div>';
+    const voice = (num, tag) => '<div class="p02-card" id="p02Card">' + X + CV + '<div class="t"><div class="ic">' + SIREN + '</div><div><b>보이스피싱 주의</b><small>' + num + '</small></div></div><div class="tag"><em>who<br>who</em>' + tag + '</div>' + ROW + '</div>';
+    const LOAN = '<div class="p02-card" id="p02Card">' + X + CV + '<div class="t"><div class="ic">' + SIREN + '</div><div><b>대출 안내</b><small>02-1234-5678</small></div></div><div class="tag"><em>who<br>who</em>스팸·신고 건수 167</div>' + ROW + '</div>';
+    const URLC = '<div class="p02-card is-url" id="p02Card"><i class="x">' + ic('x') + '</i><div class="t"><div class="ic">!</div><div><b>국제 발신</b><small>카카오톡 · 오후 5:21</small></div></div><div class="msg">주의! 악성 URL 실시간 탐지 결과, 1건의 주의 URL이 탐지되었어요!<br><i>탐지 결과 자세히 보기</i></div><div class="lk">알림 내용 기재 알림 내용 기재<br><b>delivery.service</b></div></div>';
+    const ROUNDS = [
+      { kind: 'call', pose: 1, html: '<div class="p02-num">010-0000-0000</div>' + voice('010-0000-0000', '보이스피싱 의심 번호'), card: 1000, ring: 'bell', go: ['통화하기', 'img/p02_icon_call.png'], right: 'block', wrong: { t: WARN_CALL, p: '위험한 전화는 절대 받지 마세요!' }, ok: OKB },
+      { kind: 'call', pose: 3, html: '<div class="p02-name">엄마</div>', ring: 'bell', go: ['통화하기', 'img/p02_icon_call.png'], right: 'go', say: '아! 기다리던 전화가 왔어!<br>전화를 받으려면<br>어떤 버튼을 눌러야 할까?', wrong: { t: '', p: '아는 사람의 연락이어도 돈, 개인정보, 앱 설치를 요구하면 멈추고 확인해요.' } },
+      { kind: 'call', pose: 2, html: '<div class="p02-num">02-1234-5678</div>' + LOAN, card: 1000, ring: 'bell', go: ['통화하기', 'img/p02_icon_call.png'], right: 'block', wrong: { t: WARN_CALL, p: '위험한 전화는 절대 받지 마세요!' }, ok: OKB },
+      { kind: 'sms', pose: 1, html: '<div class="p02-sms-head"><u></u><i></i>김누리</div><div class="p02-sms-bubble">아까 도서관에서 만나기로 한 거 기억나지?<br>내일 오후 2시에 입구에서 봐!</div>', ring: 'sms', go: ['답장하기', 'img/p02_icon_msg.png'], right: 'go', wrong: { t: '', p: '앞서 정한 도서관 약속을 확인하는 내용이에요.<br>돈이나 개인정보를 요구하는 내용은 없어요.' } },
+      { kind: 'sms', pose: 2, html: '<div class="p02-sms-head"><u></u></i>국제 발신</div><div class="p02-sms-bubble" style="width:340px">택배사의 실수로 고객님의 택배가 잘못 배송 되었습니다. 죄송합니다.<br>아래의 링크에 배송 정보를 입력해주시면 빠르게 배송해드리겠습니다.<br>감사합니다.<br><u>delivery.service</u></div>' + URLC, card: 1000, ring: 'sms', go: ['링크 클릭하기', 'img/p02_icon_link.png'], right: 'block', wrong: { t: WARN_CALL, p: '출처가 불분명한 링크는 절대 클릭하지 마세요!' }, ok: { t: '안전하게 차단했어요!', p: 'AI가 미리 위험한 링크인지 알려주어 피해를 막았어요.' }, last: true }
+    ];
+    const POSE = { 1: [4, 345], 2: [12, 335], 3: [32, 350] };
+    const scr = $('p02Scr'), go = $('p02Go'), block = $('p02Block');
+    let ri = 0, locked = false;
+
+    function render() {
+      const r = ROUNDS[ri];
+      locked = false;
+      scr.className = 'p02-scr' + (r.kind === 'sms' ? ' is-sms' : '');
+      scr.innerHTML = (r.kind === 'call' ? '<img class="p02-bg" src="img/m_image6.png" alt="">' : '') + r.html;
+      go.innerHTML = '<img src="' + r.go[1] + '" alt="">' + r.go[0];
+      const ch = $('p02Char');
+      ch.src = 'img/p02_character_' + r.pose + '.png';
+      ch.style.left = POSE[r.pose][0] + 'px';
+      ch.style.top = POSE[r.pose][1] + 'px';
+      $('p02Bubble').classList.toggle('is-off', !r.say);
+      if (r.say) { $('p02Bubble').innerHTML = '<span>' + r.say + '</span>'; }
+      (r.ring === 'bell' ? playBell : playSms)();
+      if (r.card) setTimeout(() => { const c = $('p02Card'); if (c) c.classList.add('is-on'); }, r.card);
+    }
+    function choose(which, btn) {
+      if (locked) return;
+      const r = ROUNDS[ri];
+      btn.classList.add('is-on');
+      setTimeout(() => btn.classList.remove('is-on'), 600);
+      if (which === r.right) {
+        stopRing();
+        playCorrect();
+        if (r.ok) {
+          locked = true;
+          setTimeout(() => {
+            $('p02RightT').textContent = r.ok.t;
+            $('p02RightP').textContent = r.ok.p;
+            $('p02Right').classList.remove('is-off');
+          }, 400);
+        } else {
+          locked = true;
+          setTimeout(next, 1400);
+        }
+        return;
+      }
+      playWrong();
+      $('p02WrongT').textContent = r.wrong.t;
+      $('p02WrongT').style.display = r.wrong.t ? '' : 'none';
+      $('p02WrongP').innerHTML = r.wrong.p;
+      setTimeout(() => $('p02Wrong').classList.remove('is-off'), 300);
+    }
+    function openBadge() {
+      $('p02Badge').classList.remove('is-off');
+      playClear();
+    }
+    function next() {
+      ri += 1;
+      if (ri >= ROUNDS.length) { openBadge(); return; }
+      render();
+    }
+    go.addEventListener('click', () => choose('go', go));
+    block.addEventListener('click', () => choose('block', block));
+    $('p02WrongOk').addEventListener('click', () => $('p02Wrong').classList.add('is-off'));
+    $('p02RightOk').addEventListener('click', () => {
+      $('p02Right').classList.add('is-off');
+      if (ROUNDS[ri].last) { ri += 1; openBadge(); return; }
+      next();
+    });
+    render();
+  })();
+  </script>
+</body>
+</html>

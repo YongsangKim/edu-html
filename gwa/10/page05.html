@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>정해진 횟수만큼만 반복하는 프린터</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .p05-main{background:url('img/p05_bg.jpg') center / 1920px 960px no-repeat}
+        .p05-desk{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none;z-index:2}
+        .p05-stack{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none;opacity:0;z-index:3}
+        .p05-stack.is-on{opacity:1}
+        .p05-paper{position:absolute;left:760px;top:415px;width:368px;height:212px;pointer-events:none;opacity:0;z-index:3;animation:p05-out var(--p05-dur,.9s) ease-in forwards}
+        @keyframes p05-out{
+            0%{opacity:0;transform:translate(0,-30px) scale(.92);filter:blur(7px)}
+            18%{opacity:1;transform:translate(0,0) scale(1);filter:blur(4px)}
+            55%{opacity:1;filter:blur(3px)}
+            100%{opacity:0;transform:translate(-236px,215px) scale(.55);filter:blur(5px)}
+        }
+        .p05-rep{position:absolute;left:1371px;top:127px;width:468px;height:541px;z-index:4}
+        .p05-rep img{display:block;width:100%;height:100%}
+        .p05-rep.is-glow{animation:p05-glow 1s ease-in-out infinite alternate}
+        @keyframes p05-glow{from{filter:drop-shadow(0 0 6px rgba(120,235,255,.7))}to{filter:drop-shadow(0 0 22px rgba(160,250,255,1))}}
+        .p05-slot{position:absolute;left:1424px;width:366px;height:86px;z-index:4;pointer-events:none;box-sizing:border-box;border:3px dashed rgba(91, 191, 225, 0.6);border-radius:15px;background:rgba(255,255,255,.1);transition:opacity .2s}
+        .p05-slot.is-hidden{opacity:0}
+        .p05-num{position:absolute;left:1400px;top:155px;width:170px;height:118px;z-index:6;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:82px;color:#c9f8ff;pointer-events:none;padding-top:4px}
+        .p05-blk{position:absolute;left:1412px;width:390px;height:113px;z-index:5;opacity:0;pointer-events:none}
+        .p05-blk img{display:block;width:100%;height:100%}
+        .p05-blk.is-drop{animation:p05-drop .7s cubic-bezier(.3,1.3,.5,1) forwards}
+        .p05-blk.is-set{opacity:1}
+        @keyframes p05-drop{from{opacity:0;transform:translateY(-320px)}35%{opacity:1}to{opacity:1;transform:none}}
+        .p05-card,.p05-run{position:absolute;top:708px;margin:0;padding:0;border:0;background:none;z-index:5;cursor:pointer;border-radius:26px;-webkit-tap-highlight-color:transparent}
+        .p05-card{width:163px;height:151px}
+        .p05-run{left:1500px;width:324px;height:151px}
+        .p05-card img,.p05-run img{display:block;width:100%;height:100%;pointer-events:none}
+        .p05-card.is-used{visibility:hidden}
+        .p05-card.is-off,.p05-run.is-off{pointer-events:none;cursor:default}
+        .p05-card.hit-pulse,.p05-run.hit-pulse{--pulse-w:10px}
+        .p05-pill{position:absolute;left:143px;top:810px;width:622px;height:90px;box-sizing:border-box;display:flex;border:solid 5px #1d2a66;border-radius:50px;overflow:hidden;background:#fff;z-index:7;font-family:'Cafe24 Ssurround';box-shadow:0 8px 12px rgba(0,0,0,.18)}
+        .p05-pill-l{flex:0 0 410px;background:#9cc3ee;color:#fff;font-size:56px;display:flex;align-items:center;justify-content:center;padding-top:6px;letter-spacing:-.03em}
+        .p05-pill-r{flex:1;color:#1d2a66;font-size:62px;display:flex;align-items:center;justify-content:center;padding-top:6px}
+        .p05-set .guide-character{z-index:1}
+        .p05-set .guide-bubble{z-index:8;font-size: 44px;}
+        .p05-set.is-hide{display:none}
+        .p05-set .guide-character{--gc-w:405px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="p05-main">
+          <img class="p05-desk" src="img/p05_desk.png" alt="">
+          <img class="p05-stack" id="p05S1" src="img/p05_stack_1.png" alt="">
+          <img class="p05-stack" id="p05S2" src="img/p05_stack_2.png" alt="">
+          <img class="p05-stack" id="p05S3" src="img/p05_stack_3.png" alt="">
+          <img class="p05-stack" id="p05S4" src="img/p05_stack_4.png" alt="">
+
+          <div class="guide-set p05-set" id="p05Set" style="--gb-left:15px;--gb-w:640px;--gb-bottom:647px;--tail-x:420px;--gc-left:5px;--gc-bottom:0px">
+            <p class="guide-bubble is-center is-long" id="p05Bubble"></p>
+            <div class="guide-character"><img id="p05Char" src="img/p05_character.png" alt="메인 캐릭터"></div>
+          </div>
+
+          <div class="p05-pill"><span class="p05-pill-l">인쇄된 보고서</span><span class="p05-pill-r" id="p05Count">00장</span></div>
+
+          <div class="p05-rep" id="p05Rep"><img src="img/p05_blk_repeat.png" alt=""></div>
+          <div class="p05-num" id="p05Num"></div>
+          <div class="p05-slot" id="p05Slot1" style="top:316px"></div>
+          <div class="p05-slot" id="p05Slot2" style="top:424px"></div>
+          <div class="p05-slot" id="p05Slot3" style="top:531px"></div>
+          <div class="p05-blk" id="p05B1" style="top:304px"><img src="img/p05_blk_1_over.png" alt=""></div>
+          <div class="p05-blk" id="p05B2" style="top:411px"><img src="img/p05_blk_2_over.png" alt=""></div>
+          <div class="p05-blk" id="p05B3" style="top:518px"><img src="img/p05_blk_3_over.png" alt=""></div>
+
+          <button type="button" class="p05-card is-off" data-n="3" style="left:957px"><img src="img/p05_btn_3.png" alt="3"></button>
+          <button type="button" class="p05-card is-off" data-n="5" style="left:1135px"><img src="img/p05_btn_5.png" alt="5"></button>
+          <button type="button" class="p05-card is-off" data-n="10" style="left:1313px"><img src="img/p05_btn_10.png" alt="10"></button>
+          <button type="button" class="p05-run is-off" id="p05Run"><img src="img/p05_btn_run_over.png" alt="실행"></button>
+
+          <div class="avatar-modal is-off" id="p05Done">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">프린터는 정한 횟수만큼 인쇄하면 멈춰요. 하지만 우리 심장은 몇 번 뛰고 멈추면 안되겠죠?</p>
+                  </div>
+                  <a href="page06.html" class="avatar-card-btn card-btn is-popup is-arrow js-nav-effect js-sfx" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">멈추지 않고 계속하는 반복은 어떻게 다른지 확인해 볼까요?</p>
+                  </div>
+                  <a href="page06.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="정해진 횟수만큼만 반복하는 프린터" data-next="page06.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const bubble = $('p05Bubble');
+    const set = $('p05Set');
+    const say = initGuideSay({ bubble, img: $('p05Char'), set, keep: true, poses: [] });
+    const clickSfx = makeSfx('sound/p05_click.mp3', true);
+    const printSnd = new Audio('sound/p05_print.mp3');
+    const stacks = [$('p05S1'), $('p05S2'), $('p05S3'), $('p05S4')];
+    const rep = $('p05Rep'), num = $('p05Num'), count = $('p05Count'), runBtn = $('p05Run');
+    const blks = [$('p05B1'), $('p05B2'), $('p05B3')];
+    const slots = [$('p05Slot1'), $('p05Slot2'), $('p05Slot3')];
+    const cards = Array.from(document.querySelectorAll('.p05-card'));
+    const TEXT = [
+      '프린터에게 몇 장을 인쇄할지 알려줘야 해요. 먼저 프린터가 어떤 순서로 일하는지 블록으로 확인해 봐요.',
+      '이 알고리즘은 프린터가 반복 상자 안에 있는 세 가지 일을 정해진 횟수만큼 순서대로 되풀이 하는 것을 의미해요.',
+      '아래 숫자카드 중 1개를 클릭 후, 실행 을 누르세요.',
+      '숫자를 설정한 만큼 종이가 출력됐어요! 반복 횟수를 정하면 컴퓨터는 그 숫자만큼만 일하고 멈춰요.'
+    ];
+    const BLK_IDLE = '_over', BLK_READY = '', BLK_RUN = '_on';
+    const GAP = 900, TOTAL = 18;
+    let step = 0, picked = null, running = false, done = 0, printed = 0;
+
+    const imgOf = (el) => el.querySelector('img');
+    const setBlocks = (suffix) => blks.forEach((b, i) => { imgOf(b).src = 'img/p05_blk_' + (i + 1) + suffix + '.png'; });
+    const cardImg = (c, state) => { imgOf(c).src = 'img/p05_btn_' + c.dataset.n + (state ? '_' + state : '') + '.png'; };
+    const setRun = (state) => { imgOf(runBtn).src = 'img/p05_btn_run' + (state ? '_' + state : '') + '.png'; };
+    const pulseCards = (on) => cards.forEach((c) => c.classList.toggle('hit-pulse', on && !c.classList.contains('is-used')));
+    const level = (n) => stacks.forEach((s, i) => s.classList.toggle('is-on', n > 0 && i + 1 === Math.ceil(n / TOTAL * 4)));
+    const say2 = (i, next) => {
+      say(TEXT[i], undefined, undefined, i === 3 ? true : undefined, next);
+      if (next) bubble.querySelector('.card-btn').classList.add('is-arrow');
+    };
+
+    const askNumber = () => {
+      picked = null;
+      num.textContent = '';
+      setBlocks(BLK_IDLE);
+      rep.classList.remove('is-glow');
+      cards.forEach((c) => { c.classList.toggle('is-off', c.classList.contains('is-used')); cardImg(c, ''); });
+      runBtn.classList.add('is-off');
+      runBtn.classList.remove('hit-pulse');
+      setRun('over');
+      pulseCards(true);
+    };
+
+    const pick = (c) => {
+      if (running) return;
+      playClick();
+      picked = c;
+      cards.forEach((o) => cardImg(o, o === c ? 'on' : ''));
+      num.textContent = c.dataset.n;
+      setBlocks(BLK_READY);
+      pulseCards(false);
+      runBtn.classList.remove('is-off');
+      runBtn.classList.add('hit-pulse');
+      setRun('');
+    };
+
+    const run = () => {
+      if (running || !picked) return;
+      running = true;
+      clickSfx();
+      const n = Number(picked.dataset.n);
+      const card = picked;
+      runBtn.classList.remove('hit-pulse');
+      runBtn.classList.add('is-off');
+      cards.forEach((c) => c.classList.add('is-off'));
+      setRun('on');
+      setBlocks(BLK_RUN);
+      rep.classList.add('is-glow');
+      count.textContent = '00장';
+      let k = 0;
+      const finish = () => {
+        printSnd.pause();
+        running = false;
+        card.classList.add('is-used');
+        done++;
+        if (done >= cards.length) {
+          num.textContent = '';
+          setBlocks(BLK_IDLE);
+          setRun('over');
+          rep.classList.remove('is-glow');
+          step = 4;
+          say2(3, '→');
+          return;
+        }
+        askNumber();
+      };
+      const tick = () => {
+        k++;
+        printSnd.currentTime = 0;
+        printSnd.play().catch(() => {});
+        const p = document.createElement('img');
+        p.className = 'p05-paper';
+        p.src = 'img/p05_paper.png';
+        p.style.setProperty('--p05-dur', Math.round(GAP * 1.1) + 'ms');
+        p.addEventListener('animationend', () => p.remove());
+        rep.parentNode.appendChild(p);
+        printed++;
+        count.textContent = String(k).padStart(2, '0') + '장';
+        level(printed);
+        if (k < n) { setTimeout(tick, GAP); return; }
+        setTimeout(finish, GAP + 200);
+      };
+      tick();
+    };
+
+    cards.forEach((c) => {
+      c.addEventListener('click', () => pick(c));
+      c.addEventListener('mouseenter', () => { if (!running && c !== picked && !c.classList.contains('is-off')) cardImg(c, 'over'); });
+      c.addEventListener('mouseleave', () => { if (c !== picked) cardImg(c, ''); });
+    });
+    runBtn.addEventListener('click', run);
+    runBtn.addEventListener('mouseenter', () => { if (!runBtn.classList.contains('is-off')) setRun('over'); });
+    runBtn.addEventListener('mouseleave', () => { if (!running && !runBtn.classList.contains('is-off')) setRun(''); });
+
+    const dropBlocks = () => {
+      blks.forEach((b, i) => setTimeout(() => {
+        if (typeof playDrag === 'function') playDrag();
+        b.classList.add('is-drop');
+        b.addEventListener('animationend', () => {
+          b.classList.remove('is-drop');
+          b.classList.add('is-set');
+          if (slots[i]) slots[i].classList.add('is-hidden');
+        }, { once: true });
+      }, 500 + i * 800));
+      setTimeout(() => { step = 2; say2(1, '→'); }, 500 + 3 * 800 + 300);
+    };
+
+    bubble.addEventListener('click', (e) => {
+      if (!e.target.closest('.card-btn')) return;
+      playClick();
+      if (step === 0) { step = 1; say('', undefined); dropBlocks(); return; }
+      if (step === 2) { step = 3; say2(2); cards.forEach((c) => c.classList.remove('is-off')); askNumber(); return; }
+      if (step === 4) { step = 5; say('', undefined); set.classList.add('is-hide'); $('p05Done').classList.remove('is-off'); }
+    });
+
+    setBlocks(BLK_IDLE);
+    say2(0, '→');
+  })();
+  </script>
+</body>
+</html>

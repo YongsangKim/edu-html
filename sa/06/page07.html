@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>경제Song! 가사 블록 조립하기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 디자인 7p(조각 판·조립대) + 기획서 19~25p. 가사 퍼즐 3판(정답 5 + 오답 2, 자리 무작위). 정답 블록을 누르면 아래 빈칸에 차례로 붙고,
+           오답이면 말풍선 2초 + 빈칸에 정답이 1초 흐릿하게 보임. 다 맞히면 반짝 효과와 함께 한 문장으로 바뀜.
+           2·3판 완성 말풍선은 기획서에 1판(재화)만 있어 같은 형식으로 맞춤. 완성 가사는 sessionStorage 'sa06_lyrics'(Suno 활동에서 씀) */
+
+        .p07-bubble{left:47px;bottom:720px;width:620px;padding:18px 10px;font-size:46px;z-index:5}
+        .p07-bubble:before{--tail-x:300px}
+        .p07-character{left:57px;top:164px;width:485px;height:516px;z-index:3}
+
+        .p07-boardbg{position:absolute;left:660px;top:15px;width:1210px;height:515px;box-sizing:border-box;background:var(--c-navy);border:solid 10px var(--c-sky);border-radius:40px}
+        #p07Board{z-index:2}
+        
+        .p07-tab{left:52px;top:444px;width:580px;min-width:0;height:107px;padding:8px 0 10px 66px;white-space:nowrap;z-index:6;background:var(--c-white);border-color:var(--c-blue);color:var(--c-blue);font-size:62px;border-width:10px}
+        .p07-tab:after{background:radial-gradient(circle 30px at 100% 0,transparent 20px,var(--c-blue) 20px 30px,var(--c-white) 30px);bottom:-3px}
+        .p07-tray{position:absolute;left:52px;top:535px;width:1818px;height:415px;box-sizing:border-box;background:var(--c-white);border:solid 10px var(--c-blue);border-radius:30px;border-top-left-radius:0;z-index:4}
+        #p07Slots{z-index:5}
+        #p07Slots .jig-label{font-size:60px}
+        .p07-sentence{position:absolute;z-index:5;left:92px;top:700px;width:1340px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:70px;color:var(--c-purple);letter-spacing:-0.04em;
+          animation:p07-shine 1s ease}
+        @keyframes p07-shine{0%{opacity:0;transform:scale(.9);filter:brightness(2)}60%{opacity:1;transform:scale(1.05)}100%{transform:none;filter:none}}
+        .p07-next{position:absolute;z-index:6;left:1450px;top:805px}
+
+        /* 마지막 스텝(디자인 7p-4): 큰 패널 + 리본 제목 + 알약 안내 + 하늘색 가사 상자 + 다음 */
+        .p07-sum-panel{position:absolute;left:57px;top:105px;width:1806px;height:803px;box-sizing:border-box;background:#f8f6f6;border:solid 5px var(--c-ink);border-radius:14px}
+        .p07-sum-ribbon{--rb-w:1514px;position:absolute;left:203px;top:45px;z-index:2}
+        .p07-sum-pill{position:absolute;left:320px;top:208px;width:1282px;height:104px;margin:0;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;background:#fdf9f6;border:solid 5px var(--c-ink);border-radius:52px;box-shadow:0 10px 0 0 rgba(86,148,231,.2);
+          font-family:'Cafe24 Ssurround';font-size:62px;color:var(--c-ink);letter-spacing:-0.05em;white-space:nowrap;z-index:2}
+        .p07-summary{position:absolute;left:193px;top:343px;width:1534px;height:387px;box-sizing:border-box;padding:0 30px;display:flex;flex-direction:column;justify-content:center;background:#dff6ff;border:solid 5px var(--c-navy);border-radius:14px;
+          font-family:'Cafe24 Ssurround';font-size:82px;line-height:117px;color:var(--c-ink);text-align:center;letter-spacing:-0.05em;white-space:nowrap;z-index:2}
+        .p07-summary-next{position:absolute;left:758px;top:758px;z-index:3}
+
+        .p07 .is-off{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default p07">
+          <div id="p07Play">
+            <p class="guide-bubble is-center p07-bubble" id="p07Bubble"></p>
+            <div class="char-box p07-character"><img src="img/r7.png" alt="메인 캐릭터"></div>
+            <div class="p07-boardbg"></div>
+            <div class="jig-layer" id="p07Board"></div>
+            <div class="jig-tray-label p07-tab">퍼즐 조각 조립대</div>
+            <div class="p07-tray"></div>
+            <div class="jig-layer" id="p07Slots"></div>
+            <p class="p07-sentence is-off" id="p07Sentence"></p>
+            <a href="javascript:;" class="js-sfx p07-next is-off" id="p07Next" data-sound="sound/click.mp3">
+              <img src="../../resources/img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../resources/img/common/btn_next_content_on.png" data-src-over="../../resources/img/common/btn_next_content_over.png" alt="다음">
+            </a>
+          </div>
+
+          <div class="is-off" id="p07Summary">
+            <div class="p07-sum-panel"></div>
+            <p class="ribbon is-title p07-sum-ribbon">재화와 서비스에 대한 노래 가사를 만들었어요!</p>
+            <p class="p07-sum-pill">조립한 가사들을 활용해서 노래를 만들어볼까요?</p>
+            <div class="p07-summary" id="p07SummaryList"></div>
+            <a href="page08.html" class="js-nav-effect p07-summary-next">
+              <img src="../../resources/img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../resources/img/common/btn_next_content_on.png" data-src-over="../../resources/img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+            </a>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="경제Song! 가사 블록 조립하기" data-next="page08.html"></script>
+  <script src="../../resources/js/toc.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const PUZZLES = [
+      { ask: '재화에 대한 알맞은<br>블록을 연결해서 가사를<br>만들어봐요!', wrong: '재화에 대한 설명을<br>찾아봐요.', done: '좋아요!<br>재화에 대한 가사를<br>완성했어요!',
+        answer: ['우리가', '입는 옷은', '사고', '파는', '재화'], extra: ['서비스', '편리함'] },
+      { ask: '서비스에 대한 알맞은<br>블록을 연결해서 가사를<br>만들어봐요!', wrong: '서비스에 대한 설명을<br>찾아봐요.', done: '좋아요!<br>서비스에 대한 가사를<br>완성했어요!',
+        answer: ['이동을', '도와주는', '택시 기사의', '운전은', '서비스'], extra: ['연필은', '재화'] },
+      { ask: '재화와 서비스에 대한<br>개념 설명 블록을 찾아<br>연결해서 가사를 만들어봐요!', wrong: '재화와 서비스의 개념에 대한<br>설명을 찾아봐요.', done: '좋아요!<br>재화와 서비스에 대한 가사를<br>완성했어요!',
+        answer: ['재화는', '눈에', '보이는 것,', '서비스는', '편리함'], extra: ['택배는', '들리는 것,'] }
+    ];
+    // 디자인 7p: 조각 크기(BS 판 위·TS 조립대)와 자리(판 위 7곳, 조각마다 무작위 배정). 정답 조각은 앞뒤가 맞물리는 모양(EDGES: 위·오른쪽·아래·왼쪽, 1 튀어나옴/-1 들어감)
+    const BS = 200;
+    const BM = 44;
+    const TS = 270;
+    const TM = 62;
+    const STEP = 268;
+    const TRAY_X = 92;
+    const TRAY_Y = 615;
+    const EDGES = [[1, 1, -1, 0], [-1, 1, 0, -1], [1, -1, 0, -1], [0, 1, -1, 1], [1, 0, 0, -1]];
+    const EXTRA_EDGES = [[1, 0, -1, -1], [-1, -1, 0, 1]];
+    const COLORS = [['#b463ca', '#a043ed'], ['#4bcc24', '#19aa73'], ['#ffcf0e', '#ffb70e'], ['#4e97ff', '#7272fe'], ['#fb8b16', '#ef6a59']];
+    const EXTRA_COLORS = [['#da5ba6', '#bf4573'], ['#3fe3e0', '#1fb6e8']];
+    const SPOTS = [[840, 75], [1160, 70], [1480, 66], [695, 305], [995, 305], [1325, 305], [1625, 305]];
+
+    const bubble = $('p07Bubble');
+    const board = $('p07Board');
+    const slotsBox = $('p07Slots');
+    const sentence = $('p07Sentence');
+    const nextBtn = $('p07Next');
+    const lines = [];
+
+    let index = 0;
+    let quiet = false;
+    let filled = 0;
+    let bubbleTimer = null;
+
+    function render() {
+      const p = PUZZLES[index];
+      filled = 0;
+      bubble.innerHTML = p.ask;
+      sentence.classList.add('is-off');
+      nextBtn.classList.add('is-off');
+      resetImageSwap(nextBtn);
+      slotsBox.classList.remove('is-off');
+      slotsBox.innerHTML = '';
+      p.answer.forEach((t, k) => {
+        jigAddSlot(slotsBox, TRAY_X + k * STEP, TRAY_Y, TS, TM, EDGES[k], t, 'p07-s' + k);
+      });
+      board.innerHTML = '';
+      const spots = shuffleArray(SPOTS);
+      const pieces = p.answer.map((t, i) => ({ t, i, edges: EDGES[i], color: COLORS[i] }))
+        .concat(p.extra.map((t, j) => ({ t, i: -1, edges: EXTRA_EDGES[j], color: EXTRA_COLORS[j] })));
+      shuffleArray(pieces).forEach((b, k) => {
+        const [x, y] = spots[k];
+        const el = jigAddPiece(board, x, y, BS, BM, b.edges, b.color, b.t, 'p07-b' + k, 'is-click');
+        el.addEventListener('click', () => pick(el, b));
+      });
+    }
+
+    function pick(el, b) {
+      const p = PUZZLES[index];
+      if (b.i < 0) {
+        playWrong();
+        el.classList.remove('is-wrong');
+        void el.offsetWidth;
+        el.classList.add('is-wrong');
+        bubble.innerHTML = p.wrong;
+        clearTimeout(bubbleTimer);
+        bubbleTimer = setTimeout(() => { bubble.innerHTML = p.ask; }, 2000);
+        const hints = Array.from(slotsBox.children).filter((s) => !s.classList.contains('is-filled')).map((s) => s.querySelector('.jig-label'));
+        hints.forEach((h) => h.classList.add('is-on'));
+        setTimeout(() => hints.forEach((h) => h.classList.remove('is-on')), 1000);
+        return;
+      }
+      if (!quiet) playClick();
+      el.classList.add('is-used');
+      const slot = slotsBox.children[b.i];
+      jigFillSlot(slot, TS, TM, b.edges, b.color, b.t, 'p07-f' + b.i);
+      filled += 1;
+      if (filled === p.answer.length) complete();
+    }
+
+    function complete() {
+      const p = PUZZLES[index];
+      const text = p.answer.join(' ');
+      lines.push(text);
+      clearTimeout(bubbleTimer);
+      if (!quiet) playCorrect();
+      setTimeout(() => {
+        slotsBox.classList.add('is-off');
+        sentence.textContent = text;
+        sentence.classList.remove('is-off');
+        bubble.innerHTML = p.done;
+        nextBtn.classList.remove('is-off');
+      }, 600);
+    }
+
+    nextBtn.addEventListener('click', () => {
+      setTimeout(() => {
+        index += 1;
+        if (index < PUZZLES.length) {
+          render();
+          return;
+        }
+        showSummary();
+      }, 300);
+    });
+
+    function showSummary() {
+      try { sessionStorage.setItem('sa06_lyrics', lines.join('\n')); } catch (e) {}
+      $('p07SummaryList').innerHTML = lines.map((l) => '<p style="margin:0">' + l + '</p>').join('');
+      $('p07Play').classList.add('is-off');
+      $('p07Summary').classList.remove('is-off');
+    }
+
+    // ?step=N 으로 단계별 보기: 1·3·5 재화/서비스/개념 퍼즐 맞추는 중 · 2·4·6 그 판을 완성한 화면 · 7 마지막 요약. 그 단계에서 시작해도 다음으로 이어짐
+    const wantStep = parseInt(new URLSearchParams(location.search).get('step'), 10);
+    if (wantStep >= 1 && wantStep <= 7) {
+      quiet = true;
+      const done = wantStep === 7 ? PUZZLES.length : Math.floor((wantStep - 1) / 2);
+      for (let k = 0; k < done; k++) lines.push(PUZZLES[k].answer.join(' '));
+      if (wantStep === 7) {
+        showSummary();
+      } else {
+        index = done;
+        render();
+        if (wantStep % 2 === 0) {
+          Array.from(board.children).forEach((el) => { if (PUZZLES[index].answer.includes(el.textContent.trim())) el.click(); });
+        }
+      }
+      setTimeout(() => { quiet = false; }, 1200);
+    } else {
+      render();
+    }
+  })();
+  </script>
+</body>
+</html>

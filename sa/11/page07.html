@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인권 존중 포스터 프롬프트</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 기획서 19~24p. 컨베이어 벨트 위 단어 블록(순서 무작위)을 [누가, 어디서, 무엇을 하는지] 칸으로 끌어 넣어 그림을 부탁하는 문장 만들기, 3라운드.
+           맞게 놓으면 벨트에서 사라지고 아래 칸에 조립, 틀리면(정위치가 아닌 곳·오답 블록) 벨트로 돌아감. 어디서 칸에는 정답 블록이 둘인 라운드가 있어(놀이터/운동장 · 교실/동아리실) 고른 쪽이 문장에 들어감.
+           세 칸이 다 차면 완성 팝업(문장 + 다음) */
+
+        .p07-ask{top:23px;line-height:1.2;z-index:2;width:1700px}
+        .p07-ask b{color:#2d5ee6}
+        .p07-photo{position:absolute;left:52px;top:106px;width:1824px;height:609px;box-sizing:border-box;border:solid 6px var(--c-navy);border-radius:30px;background:url('img/p07_bg.png') center / cover no-repeat}
+        .p07-belt{position:absolute;left:0;top:365px;width:1920px;height:220px;background:url('img/p07_belt.png') no-repeat}
+        .p07-panel{position:absolute;left:117px;top:540px;width:1686px;height:387px;box-sizing:border-box;border:solid 10px var(--c-white);border-radius:24px;background:var(--c-navy)}
+        .p07-blocks{position:absolute;left:70px;top:226px;width:1780px;height:280px}
+        .p07-blocks.is-slide{animation:p07-in .7s cubic-bezier(.2,.8,.2,1)}
+        @keyframes p07-in{from{transform:translateX(-1900px)}to{transform:none}}
+
+        .p07-block{--t:16px;position:absolute;top:26px;height:185px;box-sizing:border-box;padding:6px 14px 0;cursor:grab;touch-action:none;z-index:5;
+          display:flex;align-items:center;justify-content:center;text-align:center;font-family:'Cafe24 Ssurround';font-size:42px;line-height:1.2;color:#211d44;letter-spacing:-0.04em;word-break:keep-all;-webkit-text-stroke:10px #fff;paint-order:stroke fill}
+        .p07-block.is-dragging{cursor:grabbing;z-index:60}
+        .p07-block.is-wrong{animation:fix-word-shake .3s ease}
+        .p07-block > .jig,.p07-slot > .jig{left:-40px;top:-40px}
+        .p07-block > .jig{z-index:-1;filter:drop-shadow(0 6px 0 rgba(0,0,0,.2))}
+        .p07-block .jig path,.p07-slot .jig path{stroke:var(--c-ink);stroke-width:8}
+        .p07-slot:not(.is-filled) .jig path{fill:var(--sf)!important}
+        .p07-block{padding-left:calc(var(--t) + 14px)}
+
+        .p07-slots{position:absolute;left:227px;top:680px;width:1436px;height:216px;display:flex;gap:0}
+        .p07-slot{--t:30px;--sf:#476589;position:relative;flex:1 1 0}
+        .p07-slot.is-over{--sf:#7f9fd0;outline:0}
+        .p07-slot{transition:transform .4s}
+        .p07-slot + .p07-slot{margin-left:40px}
+        .p07-slots.is-joined .p07-slot:nth-child(1){transform:translateX(40px)}
+        .p07-slots.is-joined .p07-slot:nth-child(3){transform:translateX(-40px)}
+        .p07-slot > .jig{z-index:1}
+        .p07-slot > .p07-block{position:absolute;left:0!important;top:0!important;width:100%!important;height:100%;cursor:default;font-size:52px}
+        .p07-slot > .p07-block > .jig{display:none}
+        .p07-label{position:absolute;top:-118px;left:16px;width:420px;height:97px;margin:0;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;border-radius:49px;background:#dff6ff;font-family:'Cafe24 Ssurround';font-size:58px;color:#2d5ee6;letter-spacing:-0.05em}
+
+        #p07Done{z-index:120}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="ask-pill p07-ask"><span><b>[누가, 어디서, 무엇을 하는지]</b> 구조에 맞춰<br>단어 블록을 알맞은 위치에 드래그해 보세요.</span></p>
+          <div class="p07-photo"></div>
+          <div class="p07-belt"></div>
+          <div class="p07-panel"></div>
+          <div class="p07-blocks" id="p07Blocks"></div>
+          <div class="p07-slots" id="p07Slots">
+            <div class="p07-slot" data-slot="who"><p class="p07-label">누가</p></div>
+            <div class="p07-slot" data-slot="where"><p class="p07-label">어디서</p></div>
+            <div class="p07-slot" data-slot="what"><p class="p07-label">무엇을 하는지</p></div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p07Done">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body is-finish">
+                <p class="avatar-popup-text">인권 존중 포스터를 위한<br>프롬프트를 완성했어요!</p>
+                <p class="avatar-popup-sub" id="p07Sentence"></p>
+                <button class="avatar-popup-next card-btn is-popup js-sfx" id="p07Next" data-sound="sound/click.mp3">다음</button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="인권 존중 포스터 프롬프트" data-next="page08.html"></script>
+  <script src="../../resources/js/toc.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    // slot: 정답 칸(who·where·what), 없으면 오답 블록
+    const ROUNDS = [
+      [
+        { t: '놀이터에서', slot: 'where' },
+        { t: '싸우는<br>모습을' },
+        { t: '다양한<br>친구들이', slot: 'who' },
+        { t: '손잡고<br>웃는 모습을', slot: 'what' },
+        { t: '운동장에서', slot: 'where' }
+      ],
+      [
+        { t: '휠체어를 탄<br>학생과 친구들이', slot: 'who' },
+        { t: '경사로로', slot: 'where' },
+        { t: '서로 놀리는<br>모습을' },
+        { t: '함께 학교에<br>들어가는 모습을', slot: 'what' },
+        { t: '모른 척하는<br>모습을' }
+      ],
+      [
+        { t: '친구의 말을<br>무시하는 모습을' },
+        { t: '교실에서', slot: 'where' },
+        { t: '동아리실에서', slot: 'where' },
+        { t: '다양한<br>친구들이', slot: 'who' },
+        { t: '친구의 말을<br>잘 들어주는 모습을', slot: 'what' }
+      ]
+    ];
+    const plain = (t) => t.replace(/<br>/g, ' ');
+    const PAL = [['#ffcf0e', '#ffb70e'], ['#4e97ff', '#7272fe'], ['#b463ca', '#a043ed'], ['#fb8b16', '#ef6a59'], ['#4bcc24', '#19aa73'], ['#da5ba6', '#bf4573']];
+    // 모든 블록·칸 같은 모양: 위·오른쪽·아래·왼쪽 (1 튀어나옴, -1 들어감)
+    const EDGES = [0, 1, 0, -1];
+    const drawSlot = (sl, colors) => {
+      const old = sl.querySelector(':scope > .jig');
+      if (old) old.remove();
+      sl.insertAdjacentHTML('afterbegin', jigSvgRect(452, 216, 40, EDGES, colors || null, 'slot-' + sl.dataset.slot));
+    };
+    const box = $('p07Blocks');
+    const slots = Array.from(document.querySelectorAll('.p07-slot'));
+    let round = 0;
+    slots.forEach((sl) => drawSlot(sl));
+
+    function show() {
+      $('p07Slots').classList.remove('is-joined');
+      slots.forEach((s) => {
+        s.classList.remove('is-filled', 'is-over');
+        delete s.dataset.filled;
+        Array.from(s.querySelectorAll('.p07-block')).forEach((b) => b.remove());
+        drawSlot(s);
+      });
+      box.innerHTML = '';
+      const items = shuffleArray(ROUNDS[round]);
+      const gap = 1780 / items.length;
+      const pal = shuffleArray(PAL);
+      const cards = items.map((it, i) => {
+        const el = document.createElement('div');
+        el.className = 'p07-block';
+        el.innerHTML = it.t;
+        el.dataset.slot = it.slot || '';
+        const colors = pal[i];
+        el.dataset.colors = JSON.stringify(colors);
+        el.dataset.text = plain(it.t);
+        const w = Math.min(gap - 48, 380);
+        el.style.width = w + 'px';
+        el.style.left = Math.round(gap * i + (gap - w) / 2) + 'px';
+        el.insertAdjacentHTML('afterbegin', jigSvgRect(w, 185, 40, EDGES, colors, 'blk-' + i));
+        box.appendChild(el);
+        return el;
+      });
+      box.classList.remove('is-slide');
+      void box.offsetWidth;
+      box.classList.add('is-slide');
+      initMatchDrag({
+        cards, zones: slots, slop: 30,
+        match: (card, zone) => card.dataset.slot === zone.dataset.slot,
+        onRight: (card, zone) => {
+          zone.classList.add('is-filled');
+          drawSlot(zone, JSON.parse(card.dataset.colors));
+        },
+        onWrong: (card) => {
+          playWrong();
+          card.classList.remove('is-wrong');
+          void card.offsetWidth;
+          card.classList.add('is-wrong');
+        },
+        onDone: () => {
+          $('p07Slots').classList.add('is-joined');
+          const w = slots.map((s) => '[' + s.querySelector('.p07-block').dataset.text + ']');
+          $('p07Sentence').innerHTML = w[0] + '+' + w[1] + '<br>+' + w[2] + ' 그려줘';
+          setTimeout(() => $('p07Done').classList.remove('is-off'), 900);
+        }
+      });
+    }
+
+    $('p07Next').addEventListener('click', () => {
+      if (round === ROUNDS.length - 1) { navigateTo('page08.html'); return; }
+      $('p07Done').classList.add('is-off');
+      round += 1;
+      show();
+    });
+    show();
+  })();
+  </script>
+</body>
+</html>

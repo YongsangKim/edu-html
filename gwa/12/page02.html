@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>생일 축하해! 케이크 촛불 끄기</title>
+  <link rel="stylesheet" href="../../resources/css/common.css">
+  <style>
+    /* ============================================================
+       과학 12차시 2페이지 (생일 축하해! 케이크 촛불 끄기)
+       ============================================================ */
+
+    /* [배경: 고화질 생일 파티 룸 일러스트] */
+    .p02-bg-room {
+      position: absolute;
+      inset: 0;
+      background: url('img/p02_bg.jpg') no-repeat center / cover;
+      pointer-events: none;
+    }
+
+    /* [상단 UI: Level & 남은 초] */
+    .p02-lv {
+      position: absolute;
+      left: 50px;
+      top: 36px;
+      height: 90px;
+      margin: 0;
+      padding: 9px 40px 0;
+      box-sizing: border-box;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #3b5bdb 0%, #223fbf 100%);
+      border: 5px solid #ffffff;
+      border-radius: 45px;
+      box-shadow: 0 10px 20px rgba(34, 63, 191, 0.3);
+      font-family: 'Cafe24 Ssurround', sans-serif;
+      font-size: 60px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -1px;
+      z-index: 20;
+    }
+    .p02-cnt {
+      position: absolute;
+      right: 50px;
+      top: 30px;
+      height: 94px;
+      margin: 0;
+      padding: 2px 30px 0 30px;
+      box-sizing: border-box;
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      background: #ffffff;
+      border: 5px solid #2b3a55;
+      border-radius: 47px;
+      box-shadow: 0 10px 22px rgba(43, 58, 85, 0.16);
+      font-family: 'Cafe24 Ssurround', sans-serif;
+      font-size: 48px;
+      color: #2b3a55;
+      z-index: 20;
+    }
+    .p02-cnt small {
+      font-size: 42px;
+      color: #7b61ff;
+      margin-right: 6px;
+    }
+    .p02-cnt .candle-mini-icon {
+      width: 42px;
+      height: 58px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top:-10px;
+    }
+
+    /* [좌측: 고화질 생일 케이크 (스탠드와 윗면 일러스트)] */
+    .p02-cake-wrap {
+      position: absolute;
+      left: 80px;
+      top: 330px;
+      width: 530px;
+      height: 530px;
+      z-index: 10;
+      pointer-events: none;
+    }
+    .p02-cake-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 15px 25px rgba(43, 58, 85, 0.22));
+    }
+
+    /* [양초 컨테이너 & 아이템 (케이크 윗면에 정확히 꽂히는 지그재그 배치)] */
+    #p02Candles {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 15;
+    }
+    .p02-candle {
+      position: absolute;
+      pointer-events: none;
+      transition: transform 0.2s;
+    }
+    .p02-candle-stick {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: 70%;
+      height: 65%;
+      border-radius: 8px;
+      border: 4px solid #2b3a55;
+      box-sizing: border-box;
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+    }
+    .p02-candle:nth-child(5n+1) .p02-candle-stick { background: repeating-linear-gradient(135deg, #ff7597 0 10px, #ffffff 10px 20px); }
+    .p02-candle:nth-child(5n+2) .p02-candle-stick { background: repeating-linear-gradient(135deg, #ffd43b 0 10px, #ffffff 10px 20px); }
+    .p02-candle:nth-child(5n+3) .p02-candle-stick { background: repeating-linear-gradient(135deg, #38d9a9 0 10px, #ffffff 10px 20px); }
+    .p02-candle:nth-child(5n+4) .p02-candle-stick { background: repeating-linear-gradient(135deg, #4dabf7 0 10px, #ffffff 10px 20px); }
+    .p02-candle:nth-child(5n+5) .p02-candle-stick { background: repeating-linear-gradient(135deg, #b197fc 0 10px, #ffffff 10px 20px); }
+
+    .p02-candle-wick {
+      position: absolute;
+      left: 50%;
+      bottom: 65%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 12px;
+      background: #2b3a55;
+      border-radius: 2px;
+    }
+    .p02-flame {
+      position: absolute;
+      left: 50%;
+      bottom: 70%;
+      transform: translateX(-50%);
+      width: 26px;
+      height: 38px;
+      background: radial-gradient(ellipse at 50% 80%, #ffffff 0%, #ffe066 35%, #ff922b 75%, #f76707 100%);
+      border-radius: 50% 50% 40% 40% / 60% 60% 40% 40%;
+      border: 3px solid #f76707;
+      box-sizing: border-box;
+      filter: drop-shadow(0 0 10px rgba(255, 146, 43, 0.9));
+      animation: p02FlameFlicker 0.6s ease-in-out infinite alternate;
+      transform-origin: 50% 90%;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    @keyframes p02FlameFlicker {
+      0% { transform: translateX(-50%) scale(1) rotate(-2deg); }
+      50% { transform: translateX(-50%) scale(1.08, 0.96) rotate(3deg); }
+      100% { transform: translateX(-50%) scale(0.95, 1.05) rotate(-3deg); }
+    }
+    .p02-candle.is-out .p02-flame {
+      opacity: 0;
+      transform: translateX(-50%) scale(0.1) translateY(10px);
+    }
+    .p02-smoke-puff {
+      position: absolute;
+      left: 50%;
+      bottom: 75%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(180, 190, 205, 0.7);
+      pointer-events: none;
+      animation: p02SmokeRise 1.2s ease-out forwards;
+    }
+    @keyframes p02SmokeRise {
+      0% { opacity: 0.8; transform: translate(-50%, 0) scale(0.6); }
+      50% { opacity: 0.6; transform: translate(-70%, -40px) scale(1.5); }
+      100% { opacity: 0; transform: translate(-90%, -80px) scale(2.2); }
+    }
+
+    /* [중앙: 고화질 캐릭터 이미지 & 바람] */
+    .p02-girl-wrap {
+      position: absolute;
+      left: 540px;
+      top: 130px;
+      width: 670px;
+      height: 900px;
+      z-index: 12;
+      transition: transform 0.25s ease;
+      pointer-events: none;
+    }
+    .p02-girl-wrap.is-blowing {
+      transform: translateX(-15px) rotate(-3deg);
+    }
+    .p02-girl-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 12px 20px rgba(43, 58, 85, 0.15));
+    }
+    .p02-wind-stream {
+      position: absolute;
+      left: 390px;
+      top: 330px;
+      width: 320px;
+      height: 190px;
+      pointer-events: none;
+      z-index: 18;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .p02-wind-stream.is-on {
+      opacity: 1;
+      animation: p02WindFlow 0.5s ease-out infinite;
+    }
+    @keyframes p02WindFlow {
+      0% { transform: translateX(20px) scale(0.85); opacity: 0.2; }
+      40% { opacity: 0.95; }
+      100% { transform: translateX(-30px) scale(1.15); opacity: 0.1; }
+    }
+
+    /* [우측 중앙: 폐 모형 실험 기구] */
+    .p02-lung-apparatus {
+      position: absolute;
+      left: 1040px;
+      top: 190px;
+      width: 440px;
+      height: 640px;
+      z-index: 14;
+    }
+    .p02-dome-bottle {
+      position: absolute;
+      left: 30px;
+      top: 0px;
+      width: 380px;
+      height: 400px;
+      border-radius: 190px 190px 24px 24px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.92) 0%, rgba(235, 245, 255, 0.82) 100%);
+      border: 8px solid #2b3a55;
+      box-shadow: 0 16px 36px rgba(43, 58, 85, 0.14), inset 0 10px 20px rgba(255, 255, 255, 0.9), inset 0 -15px 25px rgba(200, 225, 250, 0.5);
+      box-sizing: border-box;
+      overflow: visible;
+    }
+    .p02-rubber-stopper {
+      position: absolute;
+      left: 50%;
+      top: -24px;
+      transform: translateX(-50%);
+      width: 90px;
+      height: 36px;
+      background: #7048e8;
+      border: 6px solid #2b3a55;
+      border-radius: 10px 10px 6px 6px;
+      box-sizing: border-box;
+      z-index: 5;
+    }
+    .p02-trachea-tube {
+      position: absolute;
+      left: 50%;
+      top: 6px;
+      transform: translateX(-50%);
+      width: 140px;
+      height: 130px;
+      pointer-events: none;
+      z-index: 6;
+    }
+    .p02-lungs-pair {
+      position: absolute;
+      left: 50%;
+      top: 110px;
+      transform: translateX(-50%);
+      width: 240px;
+      height: 200px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      pointer-events: none;
+      z-index: 7;
+    }
+    .p02-lung-balloon {
+      width: 105px;
+      height: 160px;
+      transform-origin: 50% 10%;
+      transition: transform 0.15s ease-out;
+      filter: drop-shadow(0 6px 12px rgba(230, 73, 128, 0.3));
+    }
+    .p02-lung-balloon.is-left { transform: rotate(8deg) scale(1); }
+    .p02-lung-balloon.is-right { transform: rotate(-8deg) scale(1); }
+
+    .p02-mem {
+      position: absolute;
+      left: -8px;
+      bottom: -8px;
+      width: 380px;
+      height: 36px;
+      background: #ff8787;
+      border: 8px solid #2b3a55;
+      border-top: none;
+      border-radius: 0 0 50% 50% / 0 0 100% 100%;
+      box-sizing: border-box;
+      transition: height 0.15s ease-out, border-radius 0.15s ease-out;
+      z-index: 12;
+    }
+
+    /* 손잡이 */
+    .p02-pull {
+      position: absolute;
+      left: 50%;
+      top: 396px;
+      transform: translateX(-50%);
+      width: 260px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      z-index: 25;
+    }
+    .p02-pull.is-drag {
+      cursor: grabbing;
+    }
+    .p02-pull-string {
+      width: 12px;
+      height: 50px;
+      background: #2b3a55;
+      border-radius: 6px;
+      box-shadow: 2px 0 0 rgba(255, 255, 255, 0.5);
+      z-index: 10;
+      transition: height 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .p02-pull.is-drag .p02-pull-string {
+      transition: none;
+    }
+    .p02-knob {
+      width: 150px;
+      height: 72px;
+      background: linear-gradient(180deg, #ffec99 0%, #ffd43b 50%, #fcc419 100%);
+      border: 6px solid #2b3a55;
+      border-radius: 36px;
+      box-shadow: 0 10px 18px rgba(43, 58, 85, 0.25), inset 0 5px 0 #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-family: 'Cafe24 Ssurround', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: #2b3a55;
+      box-sizing: border-box;
+      transition: transform 0.15s, background 0.15s;
+    }
+    .p02-pull:hover .p02-knob {
+      background: linear-gradient(180deg, #fff3bf 0%, #ffe066 100%);
+      transform: scale(1.04);
+    }
+
+    /* [우측 끝: 공기 게이지] */
+    .p02-gauge-wrap {
+      position: absolute;
+      left: 1540px;
+      top: 170px;
+      width: 180px;
+      height: 700px;
+      z-index: 15;
+    }
+    .p02-gauge-label {
+      position: absolute;
+      left: 50%;
+      top: -24px;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      text-align: center;
+      font-family: 'Cafe24 Ssurround', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: #2b3a55;
+    }
+    .p02-gauge-tube {
+      position: absolute;
+      left: 32%;
+      top: 30px;
+      transform: translateX(-50%);
+      width: 76px;
+      height: 590px;
+      background: #1c2738;
+      border: 6px solid #2b3a55;
+      border-radius: 38px;
+      box-shadow: inset 0 8px 16px rgba(0, 0, 0, 0.4), 0 10px 20px rgba(43, 58, 85, 0.15);
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+    .p02-gauge-fill {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 0%;
+      background: linear-gradient(180deg, #ff6b6b 0%, #ffa94d 40%, #ffd43b 75%, #38d9a9 100%);
+      border-radius: 0 0 32px 32px;
+      box-shadow: 0 0 16px rgba(255, 107, 107, 0.8);
+      transition: none;
+    }
+    .p02-mark {
+      position: absolute;
+      left: 8px;
+      top: 360px;
+      width: 98px;
+      height: 0;
+      border-top: 4px dashed #ff3b7a;
+      z-index: 25;
+      pointer-events: none;
+      filter: drop-shadow(0 2px 4px rgba(255, 59, 122, 0.5));
+      transition: top 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .p02-marker-tag {
+      position: absolute;
+      left: 112px;
+      top: -20px;
+      height: 40px;
+      padding: 0 14px;
+      background: #ff3b7a;
+      border: 3px solid #ffffff;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(255, 59, 122, 0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-family: 'Cafe24 Ssurround', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffffff;
+      white-space: nowrap;
+    }
+    .p02-marker-tag::before {
+      content: '';
+      position: absolute;
+      left: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-right: 8px solid #ff3b7a;
+    }
+    .p02-max {
+      position: absolute;
+      left: 104px;
+      top: 24px;
+      margin: 0;
+      font-family: 'Cafe24 Ssurround', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: #e03131;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      pointer-events: none;
+      filter: drop-shadow(0 2px 3px rgba(255, 255, 255, 0.9));
+    }
+    .p02-max[hidden] {
+      display: none !important;
+    }
+    .p02-max::before {
+      content: '';
+      display: inline-block;
+      width: 14px;
+      height: 4px;
+      background: #e03131;
+      border-radius: 2px;
+    }
+
+    .ox-result-wrong.is-avatar,
+    .avatar-modal,
+    #p02Wrong,
+    #p02Done {
+      z-index: 1000 !important;
+    }
+  </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default" id="p02Main">
+
+          <!-- 배경: 고화질 생일 파티 룸 일러스트 -->
+          <div class="p02-bg-room"></div>
+
+          <!-- 상단 UI: Level & 남은 초 -->
+          <p class="p02-lv" id="p02Lv">Level 1</p>
+          <p class="p02-cnt">
+            <small>남은 초</small>
+            <span class="candle-mini-icon">
+              <svg viewBox="0 0 40 55" width="42" height="58">
+                <rect x="10" y="22" width="20" height="32" rx="4" fill="#ff8787" stroke="#2b3a55" stroke-width="3"/>
+                <line x1="20" y1="15" x2="20" y2="22" stroke="#2b3a55" stroke-width="3"/>
+                <path d="M20,2 C26,8 26,16 20,18 C14,16 14,8 20,2 Z" fill="#ffd43b" stroke="#f76707" stroke-width="2"/>
+              </svg>
+            </span>
+            <span>X</span>
+            <span id="p02Cnt" style="color:#7b61ff; min-width:36px; text-align:center;">5</span>
+          </p>
+
+          <!-- 좌측: 고화질 생일 케이크 (PNG 이미지) -->
+          <div class="p02-cake-wrap">
+            <img src="img/p02_cake.png" class="p02-cake-img" alt="생일 케이크">
+          </div>
+
+          <!-- 케이크 위 양초들 (크림 윗면에 쏙 꽂히는 지그재그 배치) -->
+          <div id="p02Candles"></div>
+
+          <!-- 중앙: 측면 바람 부는 소녀 캐릭터 (고화질 PNG) & 바람 -->
+          <div class="p02-girl-wrap" id="p02GirlWrap">
+            <img src="img/p02_girl.png" class="p02-girl-img" id="p02Girl" alt="바람 부는 캐릭터">
+          </div>
+
+          <!-- 입에서 나가는 바람 이펙트 -->
+          <div class="p02-wind-stream" id="p02Wind">
+            <svg viewBox="0 0 250 160" width="100%" height="100%">
+              <path d="M240,80 Q160,50 90,80 T10,70" stroke="#74c0fc" stroke-width="8" stroke-linecap="round" fill="none" opacity="0.8"/>
+              <path d="M220,105 Q140,130 80,100 T15,115" stroke="#a5d8ff" stroke-width="6" stroke-linecap="round" fill="none" opacity="0.7"/>
+              <path d="M230,60 Q170,30 110,55 T30,45" stroke="#d0ebff" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.9"/>
+              <path d="M130,70 Q145,55 160,70 Q175,70 170,85 Q165,100 145,95 Q130,100 125,85 Q120,70 130,70 Z" fill="#e7f5ff" stroke="#74c0fc" stroke-width="4"/>
+              <path d="M60,75 Q75,60 90,75 Q105,75 100,90 Q95,105 75,100 Q60,105 55,90 Q50,75 60,75 Z" fill="#ffffff" stroke="#74c0fc" stroke-width="4"/>
+            </svg>
+          </div>
+
+          <!-- 우측 중앙: 폐 모형 실험 기구 -->
+          <div class="p02-lung-apparatus">
+            <div class="p02-dome-bottle">
+              <div class="p02-rubber-stopper"></div>
+              <svg class="p02-trachea-tube" viewBox="0 0 140 130">
+                <rect x="62" y="0" width="16" height="60" rx="4" fill="#ffd43b" stroke="#2b3a55" stroke-width="5"/>
+                <path d="M62,55 Q40,65 25,105" stroke="#ffd43b" stroke-width="14" stroke-linecap="round" fill="none"/>
+                <path d="M62,55 Q40,65 25,105" stroke="#2b3a55" stroke-width="4" stroke-linecap="round" fill="none"/>
+                <path d="M78,55 Q100,65 115,105" stroke="#ffd43b" stroke-width="14" stroke-linecap="round" fill="none"/>
+                <path d="M78,55 Q100,65 115,105" stroke="#2b3a55" stroke-width="4" stroke-linecap="round" fill="none"/>
+              </svg>
+              <div class="p02-lungs-pair" id="p02Lung">
+                <svg class="p02-lung-balloon is-left" id="p02LungL" viewBox="0 0 105 160">
+                  <path d="M65,15 Q95,50 85,115 Q75,155 35,145 Q5,135 15,75 Q20,25 65,15 Z" fill="url(#pinkLungGradL)" stroke="#2b3a55" stroke-width="6" stroke-linejoin="round"/>
+                  <path d="M35,45 Q40,95 30,120" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.6"/>
+                  <defs>
+                    <radialGradient id="pinkLungGradL" cx="35%" cy="35%" r="70%">
+                      <stop offset="0%" stop-color="#ffb6c1"/>
+                      <stop offset="60%" stop-color="#ff6b8b"/>
+                      <stop offset="100%" stop-color="#d6336c"/>
+                    </radialGradient>
+                  </defs>
+                </svg>
+                <svg class="p02-lung-balloon is-right" id="p02LungR" viewBox="0 0 105 160">
+                  <path d="M40,15 Q10,50 20,115 Q30,155 70,145 Q100,135 90,75 Q85,25 40,15 Z" fill="url(#pinkLungGradR)" stroke="#2b3a55" stroke-width="6" stroke-linejoin="round"/>
+                  <path d="M70,45 Q65,95 75,120" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.6"/>
+                  <defs>
+                    <radialGradient id="pinkLungGradR" cx="65%" cy="35%" r="70%">
+                      <stop offset="0%" stop-color="#ffb6c1"/>
+                      <stop offset="60%" stop-color="#ff6b8b"/>
+                      <stop offset="100%" stop-color="#d6336c"/>
+                    </radialGradient>
+                  </defs>
+                </svg>
+              </div>
+              <div class="p02-mem" id="p02Mem"></div>
+            </div>
+
+            <!-- 당김 손잡이 조립체 -->
+            <div class="p02-pull" id="p02Pull">
+              <div class="p02-pull-string" id="p02PullStr"></div>
+              <div class="p02-knob">
+                <span>당기기</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 우측 끝: 공기 게이지 -->
+          <div class="p02-gauge-wrap">
+            <!-- <div class="p02-gauge-label">공기 게이지</div> -->
+            <p class="p02-max" id="p02Max" hidden style="display:none">최대</p>
+            <div class="p02-gauge-tube">
+              <div class="p02-gauge-fill" id="p02Fill"></div>
+            </div>
+            <div class="p02-mark" id="p02Mark" hidden>
+              <div class="p02-marker-tag">
+                <span>여기까지</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 힌트 모달 팝업 -->
+          <div class="ox-result-wrong is-avatar is-off p02-wrong" id="p02Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body"><p class="avatar-popup-text">초가 아직 남아있어요!</p><span class="avatar-popup-sub">더 오래, 더 쎈 바람을 내보내려면<br>어떻게 해야 할까요?</span></div>
+            </div>
+          </div>
+
+          <!-- 전체 성공 모달 -->
+          <div class="avatar-modal is-off" id="p02Done">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-title">정말 잘했어요!</p>
+                    <p class="avatar-card-text">모든 촛불을 끄는데 성공했어요!</p>
+                  </div>
+                  <a href="javascript:;" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">손잡이를 깊게 당길수록 폐가 크게 부풀고, 공기가 더 많이 들어왔어요. 공기를 많이 들이마시면 더 길게 내쉴 수 있어요.</p>
+                  </div>
+                  <a href="javascript:;" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">숨쉬기는 공기를 들이마시고 내쉬는 순서가 계속 반복되는 활동이에요. 이 과정을 ‘순서도’로 나타내 볼까요?</p>
+                  </div>
+                  <a href="page03.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="생일 축하해! 케이크 촛불 끄기" data-next="page03.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const clearSfx = makeSfx('sound/12차시_클리어 효과음.mp3', true);
+    const HINT_AT = 2;
+    const HINT_ONCE = true;
+
+    // 양초 꽂힘 좌표 (50px 상향 조정)
+    // 케이크 중심: left 80 + 530/2 = 345px
+    const ROUNDS = [
+      {
+        n: 5,
+        scale: 0.85,
+        positions: [
+          { x: 425, y: 568, z: 16 }, // 1순위 (우측 앞열)
+          { x: 385, y: 525, z: 12 }, // 2순위 (우측 뒷열)
+          { x: 345, y: 572, z: 16 }, // 3순위 (중앙 앞열)
+          { x: 305, y: 525, z: 12 }, // 4순위 (좌측 뒷열)
+          { x: 265, y: 568, z: 16 }  // 5순위 (좌측 앞열)
+        ]
+      },
+      {
+        n: 10,
+        scale: 0.72,
+        positions: [
+          { x: 440, y: 570, z: 16 }, { x: 415, y: 530, z: 12 },
+          { x: 390, y: 572, z: 16 }, { x: 365, y: 525, z: 12 },
+          { x: 345, y: 575, z: 16 }, { x: 325, y: 525, z: 12 },
+          { x: 300, y: 572, z: 16 }, { x: 275, y: 530, z: 12 },
+          { x: 250, y: 570, z: 16 }, { x: 225, y: 535, z: 12 }
+        ]
+      },
+      {
+        n: 15,
+        scale: 0.62,
+        positions: [
+          { x: 450, y: 575, z: 17 }, { x: 430, y: 545, z: 14 }, { x: 410, y: 520, z: 11 },
+          { x: 395, y: 578, z: 17 }, { x: 375, y: 545, z: 14 }, { x: 355, y: 518, z: 11 },
+          { x: 345, y: 580, z: 17 }, { x: 330, y: 545, z: 14 }, { x: 315, y: 518, z: 11 },
+          { x: 295, y: 578, z: 17 }, { x: 275, y: 545, z: 14 }, { x: 255, y: 520, z: 11 },
+          { x: 240, y: 575, z: 17 }, { x: 220, y: 545, z: 14 }, { x: 200, y: 525, z: 11 }
+        ]
+      }
+    ];
+
+    const PULL_PX = 260, MIN_PULL = 0.08, BLOW_MIN = 550, BLOW_MAX = 2200;
+    const GAUGE_H = 590, GAUGE_TOP_BASE = 200;
+
+    const candlesEl = $('p02Candles');
+    const pull = $('p02Pull');
+    const pullStr = $('p02PullStr');
+    const mem = $('p02Mem');
+    const fill = $('p02Fill');
+    const lungL = $('p02LungL');
+    const lungR = $('p02LungR');
+    const girlWrap = $('p02GirlWrap');
+    const wind = $('p02Wind');
+    const mark = $('p02Mark');
+
+    let level = 0;
+    let candles = [];
+    let remain = 0;
+    let attempts = 0;
+    let hintShown = false;
+    let best = 0;
+    let busy = false;
+    let dragging = false;
+    let startY = 0;
+    let p = 0;
+
+    const draw = () => {
+      const r = ROUNDS[level];
+      candlesEl.innerHTML = '';
+      candles = [];
+
+      r.positions.forEach((pt) => {
+        const w = 38 * r.scale, h = 95 * r.scale;
+        const el = document.createElement('div');
+        el.className = 'p02-candle';
+        el.style.left = (pt.x - w / 2) + 'px';
+        el.style.top = (pt.y - h) + 'px';
+        el.style.width = w + 'px';
+        el.style.height = h + 'px';
+        el.style.zIndex = pt.z || 15;
+        el.innerHTML = '<div class="p02-candle-stick"></div><div class="p02-candle-wick"></div><div class="p02-flame"></div>';
+        candlesEl.appendChild(el);
+        candles.push({ el, pt, h, out: false });
+      });
+
+      remain = r.n;
+      attempts = 0;
+      hintShown = false;
+      best = 0;
+      $('p02Lv').textContent = 'Level ' + (level + 1);
+      $('p02Cnt').textContent = remain;
+      $('p02Max').hidden = level !== 2;
+      $('p02Max').style.display = level === 2 ? 'inline-flex' : 'none';
+      mark.hidden = true;
+      girlWrap.classList.remove('is-blowing');
+      fill.style.height = '0%';
+    };
+
+    const snuff = () => {
+      const c = candles.find((x) => !x.out);
+      if (!c) return;
+      c.out = true;
+      c.el.classList.add('is-out');
+
+      const s = document.createElement('div');
+      s.className = 'p02-smoke-puff';
+      c.el.appendChild(s);
+      setTimeout(() => s.remove(), 1200);
+
+      remain--;
+      $('p02Cnt').textContent = remain;
+    };
+
+    const setPull = (v) => {
+      p = v;
+      pullStr.style.height = (50 + v * PULL_PX) + 'px';
+      mem.style.height = (36 + v * PULL_PX * 0.45) + 'px';
+      mem.style.borderRadius = '0 0 ' + (50 + v * 30) + '% ' + (50 + v * 30) + '% / 0 0 100% 100%';
+
+      const s = 1 + v * 0.75;
+      lungL.style.transform = 'rotate(' + (8 - v * 4) + 'deg) scale(' + s + ')';
+      lungR.style.transform = 'rotate(' + (-8 + v * 4) + 'deg) scale(' + s + ')';
+
+      fill.style.height = (v * 100) + '%';
+    };
+
+    const afterBlow = () => {
+      wind.classList.remove('is-on');
+      girlWrap.classList.remove('is-blowing');
+      if (remain <= 0) {
+        playCorrect();
+        setTimeout(() => {
+          if (level >= ROUNDS.length - 1) {
+            clearSfx();
+            $('p02Done').classList.remove('is-off');
+          } else {
+            level++;
+            draw();
+            busy = false;
+          }
+        }, 1800);
+        return;
+      }
+      const hint = HINT_ONCE ? (attempts === HINT_AT && !hintShown) : attempts >= HINT_AT;
+      if (hint) {
+        hintShown = true;
+        playWrong();
+        flashLayer($('p02Wrong'), 'is-off', 2000);
+        setTimeout(() => { busy = false; }, 2000);
+        return;
+      }
+      busy = false;
+    };
+
+    const release = () => {
+      if (!dragging) return;
+      dragging = false;
+      pull.classList.remove('is-drag');
+      const depth = p;
+      if (depth < MIN_PULL) {
+        setPull(0);
+        return;
+      }
+      busy = true;
+      attempts++;
+      const r = ROUNDS[level];
+      const k = Math.min(remain, Math.max(1, Math.ceil(depth * r.n)));
+      const blowMs = BLOW_MIN + depth * (BLOW_MAX - BLOW_MIN);
+      if (depth > best) {
+        best = depth;
+        const topPx = 30 + GAUGE_H * (1 - depth);
+        mark.style.top = topPx + 'px';
+        mark.hidden = false;
+      }
+
+      pull.style.transform = 'translate(-50%, 0)';
+      pullStr.style.height = '50px';
+      mem.style.height = '36px';
+      mem.style.borderRadius = '0 0 50% 50% / 0 0 100% 100%';
+
+      lungL.style.transition = 'transform ' + blowMs + 'ms linear';
+      lungR.style.transition = 'transform ' + blowMs + 'ms linear';
+      fill.style.transition = 'height ' + blowMs + 'ms linear';
+
+      lungL.style.transform = 'rotate(8deg) scale(1)';
+      lungR.style.transform = 'rotate(-8deg) scale(1)';
+      fill.style.height = '0%';
+      p = 0;
+
+      wind.classList.add('is-on');
+      girlWrap.classList.add('is-blowing');
+
+      for (let i = 0; i < k; i++) {
+        setTimeout(snuff, 200 + (blowMs * 0.8) * (i / k));
+      }
+      setTimeout(() => {
+        lungL.style.transition = '';
+        lungR.style.transition = '';
+        fill.style.transition = 'none';
+        afterBlow();
+      }, blowMs + 300);
+    };
+
+    pull.addEventListener('pointerdown', (e) => {
+      if (busy) return;
+      dragging = true;
+      startY = e.clientY;
+      pull.classList.add('is-drag');
+      lungL.style.transition = 'none';
+      lungR.style.transition = 'none';
+      fill.style.transition = 'none';
+      pull.setPointerCapture(e.pointerId);
+      playClick();
+      e.preventDefault();
+    });
+
+    pull.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      const dy = (e.clientY - startY) / currentScale;
+      setPull(Math.max(0, Math.min(1, dy / PULL_PX)));
+    });
+
+    pull.addEventListener('pointerup', release);
+    pull.addEventListener('pointercancel', release);
+
+    draw();
+  })();
+  </script>
+</body>
+</html>

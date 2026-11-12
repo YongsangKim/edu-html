@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suno와 함께 뚝딱! 나도 경제 뮤지션</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 27~42p. 가운데 Suno 화면은 기획서 캡처를 보고 CSS로 직접 그림(.s6, 497x1075 좌표를 폰 화면 폭에 맞춰 축소), 노래 표지 img/p09_cover.png. 이전 캡처 이미지 방식: _backup_page09.html.
+           가사는 앞 활동(sessionStorage 'sa06_lyrics'), 없으면 기획서 30p 가사. 노래는 고른 가사와 상관없이 고른 장르의 두 곡(가사 버전 1·2) — 목록의 1번째 줄 = v1, 2번째 줄 = v2. 8곡 sound/p09_song_v{1|2}_{hiphop|kpop|trot|rock}.mp3. 노래가 길어서 다른 곡을 누르거나 다운로드 단계로 넘어가면 바로 멈춤. */
+
+        
+
+
+        /* Suno 앱 화면을 CSS로 다시 그림(기획서 캡처 기준 497x1075 좌표, 공용 폰 화면 폭 450px·높이 890px에 맞춰 가로 .905배·세로 .828배) */
+        .s6{position:absolute;inset:0;overflow:hidden;font-family:'Pretendard';color:#111;background:#f7f3ee}
+        .s6-ui{position:absolute;left:0;top:0;width:497px;height:1075px;transform:scale(.9054,.8279);transform-origin:0 0;letter-spacing:-0.01em;--pulse-w:5.8px}
+        .s6-ui .a{position:absolute;box-sizing:border-box}
+        .s6 svg{display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+        .s6-bg{background:#f7f4ef}
+        .s6-cream{background:#f7f3ee}
+        .s6-st{left:0;top:0;width:497px;height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 25px;font-size:19px;font-weight:500}
+        .s6-st .sys{display:flex;align-items:center;gap:7px}
+        .s6-st .sys svg{width:21px;height:21px}
+        .s6-st em{font-style:normal;font-size:14px;font-weight:700;padding:1px 9px;border-radius:12px;background:#7a7678;color:#fff}
+        .s6-pill{display:flex;align-items:center;justify-content:center;gap:6px;border-radius:24px;background:rgba(255,255,255,.32);border:1px solid rgba(0,0,0,.07);font-size:19px;font-weight:500}
+        .s6-pill svg{width:20px;height:20px}
+        .s6-card{border-radius:26px;background:#e5e2dc}
+        .s6-card .lab{position:absolute;left:47px;top:36px;font-size:20px;font-weight:500;color:#333}
+        .s6-card .chev{position:absolute;left:22px;top:38px;width:20px;height:20px;color:#444}
+        .s6-ic{position:absolute;width:48px;height:48px;border-radius:50%;background:rgba(0,0,0,.07);display:flex;align-items:center;justify-content:center;color:#222}
+        .s6-ic svg{width:23px;height:23px}
+        .s6-ic.is-wand{background:#14131a;color:#fff}
+        .s6-ic.is-lg{width:50px;height:50px}
+        .s6-ph{position:absolute;left:18px;width:420px;font-size:18px;line-height:26px;color:rgba(0,0,0,.27)}
+        .s6-tx{position:absolute;left:20px;width:420px;font-size:18px;line-height:26px;color:#1a1a1a;overflow:hidden;white-space:pre-line}
+        .s6-chip{position:absolute;height:48px;border-radius:24px;background:rgba(0,0,0,.065);display:flex;align-items:center;justify-content:center;gap:9px;font-size:14px;color:#333}
+        .s6-chip svg{width:22px;height:22px}
+        .s6-make{display:flex;align-items:center;justify-content:center;gap:9px;height:68px;border-radius:34px;font-size:20px;font-weight:500;border:0;padding:0}
+        .s6-make svg{width:40px;height:40px}
+        .s6-nav{left:0;top:944px;width:497px;height:76px}
+        .s6-nav i{position:absolute;top:21px;width:36px;height:34px;color:#444;display:flex;align-items:center;justify-content:center}
+        .s6-nav i svg{width:40px;height:40px}
+        .s6-nav .on{position:absolute;top:10px;width:66px;height:58px;border-radius:29px;background:rgba(0,0,0,.15)}
+        .s6-nav .me{position:absolute;left:431px;top:20px;width:38px;height:38px;border-radius:50%;background:conic-gradient(from 20deg,#f0457f,#f6a43a,#8d5ee8,#f0457f)}
+        .s6-sys{left:0;top:1018px;width:497px;height:57px;color:#444}
+        .s6-sys i{position:absolute;top:16px;width:2px;height:24px;border-radius:2px;background:#555}
+        .s6-sys b{position:absolute;left:236px;top:15px;width:22px;height:22px;box-sizing:border-box;border:solid 2px #555;border-radius:8px}
+        .s6-sys u{position:absolute;left:380px;top:18px;width:14px;height:14px;box-sizing:border-box;border:solid #555;border-width:0 0 2px 2px;transform:rotate(45deg)}
+        .p09-song{cursor:pointer}
+        .s6-sheet{left:0;top:43px;width:497px;height:1032px;border-radius:28px 28px 0 0;background:#f7f5f0}
+        .s6-fulltx{left:22px;top:165px;width:455px;height:748px;overflow-y:auto;scrollbar-width:none;font-size:22px;line-height:1.3;white-space:pre-line;color:#111}
+        .s6-fulltx::-webkit-scrollbar{display:none}
+        .s6-tb{left:33px;top:940px;width:366px;height:58px;border-radius:29px;background:#e8e5e3;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+        .s6-tb i{position:absolute;top:13px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:#222;border-radius:50%;cursor:pointer}
+        .s6-tb i svg{width:25px;height:25px}
+        .s6-tb i.is-dis{opacity:.3;pointer-events:none}
+        .s6-check{left:414px;top:944px;width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#f58a3b,#ee3b66);display:flex;align-items:center;justify-content:center;color:#fff;border:0;padding:0;cursor:pointer}
+        .s6-check svg{width:26px;height:26px;stroke-width:2.6}
+        .s6-banner{left:20px;top:53px;width:457px;height:87px;border-radius:44px;color:#fff;font-size:16px}
+        .s6-banner .tx{position:absolute;top:0;height:87px;display:flex;align-items:center;font-size:20px;width:60%;word-break:keep-all}
+        .s6-banner .ring{position:absolute;left:397px;top:23px;width:40px;height:40px;box-sizing:border-box;border-radius:50%;border:solid 4px #f0457f;border-top-color:transparent;animation:p09-spin 1s linear infinite}
+        .s6-banner .th{position:absolute;left:25px;top:18px;width:52px;height:52px;border-radius:10px;background:var(--c-purple) url('img/p09_cover.png') center / cover no-repeat}
+        .s6-banner{--grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .5 -.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+        .s6-banner.is-ready{background:var(--grain),linear-gradient(90deg,#862a1a 0,#80540a 22%,#866400 52%,#815008 80%,#852a19 100%)}
+        .s6-banner .pl{position:absolute;left:381px;top:15px;width:58px;height:58px;border-radius:50%;overflow:hidden;background:var(--grain),radial-gradient(circle at 12% 80%,#ff4527 0,transparent 50%),radial-gradient(circle at 94% 60%,#ff4025 0,transparent 42%),radial-gradient(circle at 50% 15%,#ffbc10 0,transparent 65%),#ffb30c;display:flex;align-items:center;justify-content:center}
+        .s6-banner .pl svg{width:30px;height:30px;fill:#fff;stroke:#fff;stroke-width:2;stroke-linejoin:round}
+        .s6-tile{top:155px;width:198px;height:158px;border-radius:24px;overflow:hidden;color:#fff;font-size:19px;font-weight:700}
+        .s6-tile span{position:absolute;left:15px;bottom:14px}
+        .s6-tile svg{position:absolute;left:68px;top:40px;width:64px;height:64px;fill:#fff;stroke:none}
+        .s6-row{left:10px;width:478px;height:87px}
+        .s6-row .th{position:absolute;left:20px;top:10px;width:67px;height:67px;border-radius:12px;background:var(--c-purple) url('img/p09_cover.png') center / cover no-repeat}
+        .s6-row .t{position:absolute;left:102px;top:18px;font-size:20px;font-weight:600;color:#1a1a1a;white-space:nowrap}
+        .s6-row .t small{margin-left:8px;font-size:11px;font-weight:500;letter-spacing:.06em;color:#9a9aa2}
+        .s6-row .d{position:absolute;left:102px;top:46px;font-size:14px;color:#8d8a90;white-space:nowrap}
+        .s6-row.is-playing .t{color:#e0327b}
+        .s6-row .eq{display:none;width:15px;height:15px;margin-right:6px;vertical-align:-1px;overflow:visible}
+        .s6-row.is-playing .eq{display:inline-block}
+        .s6-row .eq rect{fill:currentColor;stroke:none;transform-box:fill-box;transform-origin:50% 100%;animation:p09-eq .8s ease-in-out infinite alternate}
+        .s6-row .eq rect:nth-child(2){animation-delay:-.3s}
+        .s6-row .eq rect:nth-child(3){animation-delay:-.6s}
+        @keyframes p09-eq{from{transform:scaleY(.35)}to{transform:scaleY(1)}}
+        .s6-row .more{border-radius:50%;position:absolute;left:430px;top:20px;width:44px;height:44px;border:0;background:none;padding:0;color:#222;display:flex;align-items:center;justify-content:center;cursor:pointer}
+        .s6-row .more svg{width:22px;height:22px;fill:currentColor;stroke:none}
+        .s6-row .more.is-off{display:none}
+        .s6-sk{left:0;width:497px;height:87px}
+        .s6-sk i{position:absolute;left:20px;top:9px;width:67px;height:67px;border-radius:14px;background:#e4e1e1}
+        .s6-sk i:after{content:'';position:absolute;left:20px;top:20px;width:26px;height:26px;border-radius:50%;border:solid 4px #f0457f;border-right-color:transparent;box-sizing:border-box;animation:p09-spin .9s linear infinite}
+        @keyframes p09-spin{to{transform:rotate(360deg)}}
+        .s6-sk b{position:absolute;left:102px;top:19px;width:134px;height:14px;border-radius:7px;background:#e4e1e1}
+        .s6-sk u{position:absolute;left:102px;top:43px;width:226px;height:14px;border-radius:7px;background:#e4e1e1}
+        .s6-opt{left:20px;width:457px;height:67px;border-radius:14px;background:rgba(0,0,0,.045);display:flex;align-items:center;padding:0 20px;font-size:16.5px}
+        .s6-opt.is-on{background:#fff;border:solid 2px #1a1a1a;justify-content:space-between}
+        .s6-opt svg{width:22px;height:22px;stroke-width:2.6}
+        .s6-dl{left:20px;top:863px;width:457px;height:68px;border-radius:34px;background:#0c0c0e;color:#fff;font-size:20px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;border:0;padding:0}
+        .s6-dl svg{width:24px;height:24px;fill:currentColor;stroke:none}
+
+        .p09-load{position:absolute;width:480px;height:100px;padding:6px 30px;font-size:70px;white-space:nowrap}
+        .p09-genres{position:absolute;width:480px;display:flex;flex-direction:column;gap:40px}
+        .p09-genres .card-btn{width:100%;height:100px;padding:6px 30px;font-size:70px}
+
+
+        /* 마무리 화면(디자인 16p): 리본 제목 + 파란 부제 + 큰 흰 패널 안에 하늘색 상자(표지·재생 칸) + 다음 */
+        .p09-final{position:absolute;box-sizing:border-box;background:#f8f6f6;border:solid 5px var(--c-ink);border-radius:14px}
+        .p09-final-ribbon{--rb-w:852px;position:absolute;z-index:2}
+        .p09-final-sub{position:absolute;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:62px;letter-spacing:-0.05em;color:#266cc8;z-index:2}
+        .p09-final-box{position:absolute;box-sizing:border-box;background:#dff6ff;border:solid 5px var(--c-navy);border-radius:14px;z-index:2}
+        .p09-final-cover{position:absolute;box-sizing:border-box;border:solid 10px var(--c-white);border-radius:24px;background:var(--c-purple) url('img/p09_cover.png') center / cover no-repeat;box-shadow:0 10px 0 0 #bfe3f6;z-index:3}
+        .p09-player{position:absolute;background:#173a99;border-radius:20px;display:flex;align-items:center;justify-content:center;z-index:3}
+        .p09-final-next{position:absolute;z-index:3}
+
+        .p09 .is-off{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default p09">
+          <div id="p09Play">
+            <div class="guide-set is-main" id="p09Set">
+              <p class="guide-bubble is-center" id="p09Bubble"></p>
+              <div class="guide-character"><img id="p09Char" src="../img/character/sa_main.png" alt="메인 캐릭터"></div>
+            </div>
+
+            <div class="phone-frame has-cam"><div class="phone-screen">
+              <div class="s6" id="p09Screen"></div>
+              <div class="app-home is-sky is-off" id="p09Home">
+                <div class="phone-status is-dark"></div>
+                <button type="button" class="app-icon is-dark" id="p09App"><i><img src="../../resources/img/app/logo_suno.png" alt="" style="transform:scale(1.08)"></i>Suno</button>
+                <div class="phone-nav"></div>
+              </div>
+            </div></div>
+
+            <button type="button" class="card-btn p09-load is-off" id="p09Load">가사 불러오기</button>
+            <div class="p09-genres is-off" id="p09Genres">
+              <button type="button" class="card-btn" data-genre="hiphop">힙합</button>
+              <button type="button" class="card-btn" data-genre="kpop">K-POP</button>
+              <button type="button" class="card-btn" data-genre="trot">트로트</button>
+              <button type="button" class="card-btn" data-genre="rock">락</button>
+            </div>
+
+            <a href="javascript:;" class="js-sfx next-btn is-off" id="p09Next" data-sound="sound/click.mp3">
+              <img src="../../resources/img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../resources/img/common/btn_next_content_on.png" data-src-over="../../resources/img/common/btn_next_content_over.png" alt="다음">
+            </a>
+          </div>
+
+          <div class="is-off" id="p09FinalView">
+            <div class="p09-final"></div>
+            <p class="ribbon is-hero p09-final-ribbon">Suno와 함께 뚝딱!</p>
+            <p class="p09-final-sub">재화와 서비스를 노래로 만들었어요!</p>
+            <div class="p09-final-box"></div>
+            <div class="p09-final-cover"></div>
+            <div class="p09-player"><img class="video-play-btn" style="position:static;transform:none" src="../../resources/img/common/btn_play.png" id="p09FinalPlay" alt="재생"></div>
+            <a href="page10.html" class="js-nav-effect p09-final-next">
+              <img src="../../resources/img/common/btn_next_content.png" class="js-img-swap js-sfx" data-src-alt="../../resources/img/common/btn_next_content_on.png" data-src-over="../../resources/img/common/btn_next_content_over.png" data-sound="sound/click.mp3" alt="다음">
+            </a>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="Suno와 함께 뚝딱! 나도 경제 뮤지션" data-next="page10.html"></script>
+  <script src="../../resources/js/toc.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script src="../../resources/js/box-edit.js"></script>
+  <script>
+  (function () {
+    const DEFAULT_LYRICS = '우리가 입는 옷은 사고 파는 재화\n이동을 도와주는 택시기사의 운전은 서비스\n재화는 눈에 보이는 것, 서비스는 편리함';
+    const VERSIONS = [
+      '[Intro]\n재화! 서비스!\n우리 생활 속에서 찾아봐\n하나, 둘, 셋, Go!\n\n[Verse 1]\n우리가 입는 옷은 사고 파는 재화\n연필도 가방도 필요한 재화\n손으로 만지고 눈으로 보고\n우리에게 필요한 물건, 바로 재화\n\n[Verse 2]\n아플 때 우리를 도와주는 의사의 진료는 서비스\n머리를 다듬어 주는 미용도 서비스\n택배를 전해 주고 이동을 도와주는\n생활을 편리하게 만드는 서비스\n\n[Hook]\n재화는 눈에 보이는 것, 서비스는 편리함\n재화! 서비스! 구분해 봐\n눈에 보이는 물건은 재화\n도움을 주는 활동은 서비스\n\n[Outro]\n재화와 서비스, 이제 알겠지?\n우리 생활 속에서 찾아봐!',
+      '[Intro]\n주위를 둘러봐, 하나 둘 셋\n재화와 서비스 찾아볼래?\n\n[Verse 1]\n우리가 입는 옷은 사고 파는 재화\n맛있는 빵도 사고 파는 재화\n가방과 연필, 필요한 물건\n눈으로 보고 만질 수 있어\n\n[Verse 2]\n아플 때 우리를 도와주는 의사의 진료는 서비스\n머리를 멋지게, 미용도 서비스\n택시를 타고 원하는 곳으로\n우리 생활을 편리하게 해 줘\n\n[Hook]\n재화는 눈에 보이는 것, 서비스는 편리함\n물건이라면 재화\n도움을 주면 서비스\n재화와 서비스, 이제 구분해 봐\n\n[Outro]\n보고! 찾고! 구분해 봐!\n재화와 서비스, 바로 알아봐!'
+    ];
+    const GENRE_NAME = { hiphop: '힙합', kpop: 'K-POP', trot: '트로트', rock: '락' };
+    let lyrics = DEFAULT_LYRICS;
+    try { lyrics = sessionStorage.getItem('sa06_lyrics') || DEFAULT_LYRICS; } catch (e) {}
+
+    // 화면 요소 좌표 [x, y, 폭, 높이] (?edit 으로 열어 고친 값을 여기에 붙여 넣음). 말풍선 y 는 아래 가장자리, 폭·높이가 빠진 건 CSS 크기를 씀
+    const BOX = {
+      load: [1280, 430, 480],
+      genres: [1280, 220, 480],
+      final: [57, 105, 1806, 803],
+      ribbon: [534, 45],
+      sub: [0, 250],
+      finalBox: [285, 343, 1350, 387],
+      cover: [485, 370, 336, 336],
+      player: [1005, 427, 420, 212],
+      finalNext: [758, 758]
+    };
+    const BOX_EL = { load: 'p09Load', genres: 'p09Genres' };
+    const BOX_SEL = { final: '.p09-final', ribbon: '.p09-final-ribbon', sub: '.p09-final-sub', finalBox: '.p09-final-box', cover: '.p09-final-cover', player: '.p09-player', finalNext: '.p09-final-next' };
+    const BOX_NAME = { load: '가사 불러오기', genres: '장르 버튼', final: '마무리 패널', ribbon: '리본', sub: '부제', finalBox: '하늘색 상자', cover: '표지', player: '재생 칸', finalNext: '다음' };
+    function placeBox(el) {
+      const r = el._ref;
+      const st = el.style;
+      if (el._hot) { BoxEdit.padApply(el); return; }
+      if (el._base) { st.left = (el._base[0] + r[0]) + 'px'; st.top = (el._base[1] + r[1]) + 'px'; return; }
+      st.left = r[0] + 'px';
+      st.top = r[1] + 'px';
+      if (r.length > 2) st.width = r[2] + 'px';
+      if (r.length > 3) st.height = r[3] + 'px';
+      if (el._key === 'load' || el._key === 'genres') st.transform = 'none';
+    }
+    Object.keys(BOX).forEach((k) => {
+      const el = BOX_EL[k] ? $(BOX_EL[k]) : document.querySelector(BOX_SEL[k]);
+      el._key = k;
+      el._ref = BOX[k];
+      placeBox(el);
+    });
+
+    // 손가락 위치 보정 [dx, dy] — 단계의 눌러야 할 곳별. ?edit 로 손가락을 눌러 맞춘 뒤 표시줄 값을 옮겨 적음
+    const FG = { home: [15, -37], lyr: [120, -50], wand: [25, 0], expand: [25, -10], check: [25, -10], prev: [28, -3], style: [120, -50], make: [100, -25], more: [49, 15], download: [0, -25] };
+    // 클릭 영역 보정 [dx, dy, dw, dh] — 버튼 모양은 그대로, 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
+    const HOT = { lyr: [0, 0, 0, 0], wand: [0, 0, 0, 0], expand: [0, 0, 0, 0], wandRe: [0, 0, 0, 0], check: [0, 0, 0, 0], prev: [0, 0, 0, 0], next2: [0, 0, 0, 0], style: [0, 0, 0, 0], make: [0, 0, 0, 0], song: [0, 0, 0, 0], more: [0, 0, 0, 0], download: [0, 0, 0, 0] };
+    const fgo = (key, extra) => BoxEdit.fgo(FG, key, extra);
+    BoxEdit.fingerTag();
+
+    const bubble = $('p09Bubble');
+    const say = initGuideSay({ bubble, img: $('p09Char'), set: $('p09Set') });
+    const screen = $('p09Screen');
+    const nextBtn = $('p09Next');
+
+    const state = { ver: 0, shownVer: 0, genre: '' };
+    let audio = null;
+
+    const ALL = ['p09Load', 'p09Genres', 'p09Next'];
+    const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const IC = {
+      chev: ICONS.chev,
+      plus: ICONS.plus,
+      wand: ICONS.wand,
+      undo: ICONS.undo,
+      redo: ICONS.redo,
+      mark: ICONS.mark,
+      trash: ICONS.trash,
+      lib: ICONS.lib,
+      expand: ICONS.expand,
+      refresh: ICONS.refresh,
+      note: ICONS.note,
+      noteStar: ICONS.noteStar,
+      play: ICONS.playBox,
+      search: ICONS.search,
+      mute: ICONS.mute,
+      wifi: ICONS.wifi,
+      sig: ICONS.sig,
+      check: ICONS.check,
+      dots: ICONS.dotsV,
+      lock: ICONS.lock,
+      share: ICONS.share,
+      funnel: ICONS.funnel,
+      thumb: ICONS.thumb
+    };
+
+    const A = (cls, style, inner) => '<div class="a ' + (cls || '') + '" style="' + (style || '') + '">' + (inner || '') + '</div>';
+    const circ = (cls, left, top, ic, id) => '<button type="button" class="a s6-ic ' + cls + '" ' + (id ? 'id="' + id + '" ' : '') + 'style="left:' + left + 'px;top:' + top + 'px;border:0;padding:0">' + ic + '</button>';
+
+    function status(time) {
+      return A('s6-st', '', '<span>' + time + '</span><span class="sys">' + IC.mute + IC.wifi + IC.sig + '<em>64</em></span>');
+    }
+    function nav(active) {
+      const xs = [46, 147, 248, 349];
+      const icons = [IC.play, IC.search, IC.noteStar, IC.lib];
+      const pos = { create: 248, lib: 349 }[active];
+      let h = '<div class="a s6-nav">';
+      h += '<div class="on" style="left:' + (pos - 33) + 'px"></div>';
+      xs.forEach((x, k) => { h += '<i style="left:' + (x - 18) + 'px">' + icons[k] + '</i>'; });
+      return h + '<div class="me"></div></div>';
+    }
+    function sysnav() {
+      return A('s6-sys', '', '<i style="left:99px"></i><i style="left:107px"></i><i style="left:115px"></i><b></b><u></u>');
+    }
+
+    // 만들기 화면: o.lyr(가사 글), o.sty(스타일 글), o.dim(전체화면 가사 뒤 어둡게)
+    function createUI(o) {
+      o = o || {};
+      const filled = !!o.lyr;
+      const H1 = filled ? 348 : 270;
+      const T2 = 227 + H1 + 20;
+      const T3 = T2 + 250 + 20;
+      const hasSty = !!o.sty;
+      let h = status('13:13');
+      h += A('', 'left:145px;top:62px;width:200px;height:40px;display:flex;align-items:center;justify-content:center;gap:5px;font-size:21px;font-weight:600', '고급의' + IC.chev.replace('<svg', '<svg style="width:20px;height:20px"'));
+      h += A('s6-pill', 'left:370px;top:60px;width:105px;height:45px;font-size:14px;font-weight:500', 'v6-mini' + IC.chev.replace('<svg', '<svg style="width:16px;height:16px"'));
+      h += A('s6-pill', 'left:20px;top:140px;width:223px;height:67px', IC.plus + '오디오');
+      h += A('s6-pill', 'left:254px;top:140px;width:223px;height:67px', IC.plus + '목소리');
+
+      // 가사 카드
+      let c1 = '<div class="chev">' + IC.chev + '</div><div class="lab">가사</div>';
+      if (filled) {
+        c1 += circ('', 223, 24, IC.undo) + circ('', 279, 24, IC.mark) + circ('', 337, 24, IC.trash);
+        c1 += '<div class="s6-tx" id="s6LyrTx" style="top:93px;height:156px">' + esc(o.lyr) + '</div>';
+      } else {
+        c1 += '<div class="s6-ph" style="top:80px">가사나 주제를 적어보세요</div>';
+      }
+      c1 += circ('is-wand', 396, 24, IC.wand, 's6Wand1');
+      const br1 = filled ? 275 : 197;
+      c1 += A('s6-ic', 'left:22px;top:' + br1 + 'px;width:50px;height:50px', IC.lib);
+      c1 += A('s6-chip', 'left:87px;top:' + (br1 + 1) + 'px;width:146px;background:rgba(255,255,255,.4);border:1px solid rgba(0,0,0,.08)', '' + ic('checkCircle', 'style="fill:#111;stroke:none"') + '인스트루멘탈');
+      c1 += '<button type="button" id="s6Exp1" class="a s6-ic" style="left:388px;top:' + br1 + 'px;width:50px;height:50px;border:0;padding:0;background:none">' + IC.expand + '</button>';
+      h += A('s6-card s6-lyr', 'left:20px;top:227px;width:457px;height:' + H1 + 'px', c1).replace('class="a s6-card s6-lyr"', 'class="a s6-card' + (o.lyrHot ? ' hit-pulse' : '') + '" id="s6Lyr"');
+
+      // 스타일 카드
+      let c2 = '<div class="chev">' + IC.chev + '</div><div class="lab">스타일</div>';
+      if (hasSty) {
+        c2 += circ('', 223, 24, IC.undo) + circ('', 279, 24, IC.mark) + circ('', 337, 24, IC.trash);
+        c2 += '<div class="s6-tx" style="top:94px;height:80px">' + esc(o.sty) + '</div>';
+      } else {
+        c2 += '<div class="s6-ph" style="top:80px">당신이 만들고 싶은 노래가 어떤 느낌이었으면 좋겠는지 설명해주세요.</div>';
+      }
+      c2 += circ('is-wand', 396, 24, IC.wand);
+      c2 += A('s6-ic', 'left:22px;top:178px;width:50px;height:50px', IC.lib);
+      c2 += A('s6-ic', 'left:86px;top:178px;width:50px;height:50px', IC.refresh);
+      c2 += A('s6-chip', 'left:152px;top:179px;width:98px', 'hip hop');
+      c2 += A('s6-chip', 'left:262px;top:179px;width:123px', 'acoustic guitar');
+      c2 += A('s6-ic', 'left:388px;top:178px;width:50px;height:50px;background:none', IC.expand);
+      h += A('s6-card' + (o.styHot ? ' hit-pulse' : ''), 'left:20px;top:' + T2 + 'px;width:457px;height:250px', c2).replace('<div class="a s6-card', '<div id="s6Sty" class="a s6-card');
+
+      // 곡 제목
+      if (!filled) h += A('s6-card', 'left:20px;top:' + T3 + 'px;width:457px;height:58px;border-radius:22px;background:rgba(140,118,115,.07)', '<div style="position:absolute;left:22px;top:17px;width:24px;height:24px;color:#222">' + IC.note + '</div><div style="position:absolute;left:60px;top:0;height:58px;display:flex;align-items:center;font-size:18px;color:rgba(0,0,0,.35)">곡 제목</div>');
+
+      // 만들기 버튼
+      if (hasSty) {
+        h += circ('', 20, 872, IC.trash).replace('style="', 'style="width:68px;height:68px;background:#76757a;color:#111;');
+        h += '<button type="button" id="s6Make" class="a s6-make' + (o.makeHot ? ' hit-pulse' : '') + '" style="left:98px;top:872px;width:379px;background:linear-gradient(90deg,#f6b43a,#f58a3b 55%,#ee3b66);color:#fff">' + IC.noteStar + '만들기</button>';
+      } else {
+        h += A('s6-make', 'left:19px;top:872px;width:458px;background:#4c4c4f;color:#b6b6ba', IC.noteStar + '만들기');
+      }
+      h += nav('create') + sysnav();
+      if (o.dim) h += A('', 'left:0;top:0;width:497px;height:1075px;background:rgba(75,64,74,.6)');
+      return h;
+    }
+
+    // 전체화면 가사: v(0|1), 두 번째 버전을 비교할 때 이전·다음 버튼이 켜짐
+    function fullUI(v, o) {
+      o = o || {};
+      let h = A('', 'left:0;top:0;width:497px;height:1075px;background:#938b90') + status('13:13');
+      h += A('s6-sheet', '', '');
+      h += A('', 'left:230px;top:64px;width:38px;height:5px;border-radius:3px;background:#d4d0d0');
+      h += A('', 'left:22px;top:106px;font-size:28px;font-weight:600', '가사');
+      h += '<div class="a s6-fulltx" id="s6FullTx">' + esc(VERSIONS[v]) + '</div>';
+      const ic = [['s6Prev', IC.undo, 73], ['s6Next2', IC.redo, 130], [null, IC.lib, 188], [null, IC.mark, 246], [null, IC.trash, 304], ['s6Wand', IC.wand, 362]];
+      h += '<div class="a s6-tb">' + ic.map((t) => '<i ' + (t[0] ? 'id="' + t[0] + '" ' : '') + 'style="left:' + (t[2] - 33 - 16) + 'px">' + t[1] + '</i>').join('') + '</div>';
+      h += '<button type="button" id="s6Check" class="a s6-check">' + IC.check + '</button>';
+      h += A('', 'left:0;top:1018px;width:497px;height:57px;background:#fff') + sysnav();
+      return h;
+    }
+
+    function bannerUI(ready) {
+      let h = '<div class="a s6-banner' + (ready ? ' is-ready' : '') + '"' + (ready ? '' : ' style="background:#7a2517"') + '>';
+      if (ready) h += '<div class="th"></div><div class="tx" style="left:97px">노래가 준비되었습니다. 탭하여 재생하세요!</div><div class="pl">' + ICONS.play + '</div>';
+      else h += '<div class="tx" style="left:29px">멋진 그루브가 탄생하고 있어요</div><div class="ring"></div>';
+      return h + '</div>';
+    }
+
+    function songsUI(o) {
+      o = o || {};
+      let h = status('13:13') + bannerUI(!o.loading);
+      h += A('s6-tile', 'left:40px;background:radial-gradient(circle at 28% 22%,#33b86a 0,transparent 52%),radial-gradient(circle at 80% 90%,#2b80ee 0,transparent 62%),#1f6fe2', IC.thumb + '<span>좋아요</span>');
+      h += A('s6-tile', 'left:252px;background:linear-gradient(135deg,#6a1aa8,#a31f95);', '<div style="position:absolute;left:96px;top:30px;width:92px;height:140px;border-radius:14px;background:linear-gradient(135deg,rgba(255,150,120,.7),rgba(180,40,120,.5));transform:rotate(-12deg)"></div><span>플레이리스트</span>');
+      h += A('', 'left:20px;top:336px;font-size:19px;font-weight:500', '내 노래');
+      h += A('', 'left:416px;top:338px;display:flex;align-items:center;gap:5px;font-size:16px;color:#444', '필터' + IC.funnel.replace('<svg', '<svg style="width:18px;height:18px;fill:#444"'));
+      if (o.loading) {
+        [0, 1].forEach((k) => { h += A('s6-sk', 'top:' + (357 + k * 87) + 'px', '<i></i><b></b><u></u>'); });
+      } else {
+        const desc = GENRE_NAME[state.genre] || '';
+        [1, 2].forEach((n, k) => {
+          h += '<div class="a s6-row hit-pulse p09-song" data-n="' + n + '" style="top:' + (367 + k * 87) + 'px"><div class="th"></div><div class="t">' + ic('eqBars', 'class="eq"') + '재화와 서비스<small>V6-MINI</small></div><div class="d">' + esc(desc) + '</div><button type="button" class="more is-off" aria-label="더보기">' + IC.dots + '</button></div>';
+        });
+      }
+      h += nav('lib') + sysnav();
+      return h;
+    }
+
+    function downloadUI() {
+      let h = status('13:13') + bannerUI(true);
+      h += A('', 'left:166px;top:150px;width:168px;height:168px;border-radius:12px;background:var(--c-purple) url(img/p09_cover.png) center / cover no-repeat');
+      h += A('', 'left:0;top:332px;width:497px;text-align:center;font-size:19px;font-weight:500', '재화와 서비스');
+      h += A('', 'left:20px;top:389px;font-size:13.5px;color:#777', '다운로드 형식');
+      ['M4A', 'MP3', 'WAV', 'MP4 비디오'].forEach((t, k) => {
+        h += A('s6-opt' + (k === 0 ? ' is-on' : ''), 'top:' + (418 + k * 77) + 'px', t + (k === 0 ? IC.check : ''));
+      });
+      h += '<button type="button" id="s6Dl" class="a s6-dl hit-pulse">' + IC.lock + '잠금 해제 및 다운로드</button>';
+      h += A('', 'left:0;top:953px;width:497px;display:flex;align-items:center;justify-content:center;gap:9px;font-size:18px;color:#222', IC.share.replace('<svg', '<svg style="width:17px;height:17px"') + '노래 링크로 공유하기');
+      h += sysnav();
+      return h;
+    }
+
+    function show(bubbleHtml, ids, html, bg, pose) {
+      say(bubbleHtml, pose || 'main');
+      $('p09Home').classList.toggle('is-off', html !== null);
+      screen.innerHTML = html === null ? '' : '<div class="s6-ui ' + (bg || 's6-bg') + '">' + html + '</div>';
+      ALL.forEach((id) => $(id).classList.toggle('is-off', !ids.includes(id)));
+      clearFingers();
+      resetImageSwap(nextBtn);
+    }
+    function on(el, fn, fo, key) {
+      const k = key || BoxEdit.fgKey;
+      el.classList.add('hit-pulse');
+      el.dataset.hit = k;
+      BoxEdit.padEl(el, k, HOT);
+      el.onclick = (e) => { e.stopPropagation(); playClick(); fn(); };
+      if (fo !== false) pointFingerAt(el, Object.assign({ onMain: true }, fo));
+    }
+    function stepHome() {
+      cancelAppLaunch();
+      show('Suno를 클릭해요.', [], null);
+      $('p09App').onclick = () => { playClick(); $('p09App').onclick = null; clearFingers(); playAppLaunch({ icon: $('p09App'), text: 'SUNO', onMid: stepLyricsField }); };
+      pointFingerAt($('p09App'), fgo('home'));
+    }
+    function stepLyricsField() {
+      show('가사 입력창을 클릭해요.', [], createUI({}));
+      on($('s6Lyr'), stepLoad, fgo('lyr', { x: 0.5 }));
+    }
+    function stepLoad() {
+      show('재화와 서비스에 대한<br>가사를 만들어볼게요.<br>내가 조립한 가사를 불러와요.', ['p09Load'], createUI({}));
+      $('p09Load').onclick = () => { playClick(); stepWand(); };
+    }
+    function stepWand() {
+      show('마법봉을 클릭해요.<br>내가 입력한 내용에 맞게<br>Suno가 가사를 만들어줄 거예요.', [], createUI({ lyr: lyrics }));
+      on($('s6Wand1'), stepMade, fgo('wand', { x: 0.5 }));
+    }
+    function stepMade() {
+      state.shownVer = 0;
+      show('가사가 완성됐어요!<br>전체화면 버튼을 클릭해<br>가사를 자세히 읽어봐요.', [], createUI({ lyr: VERSIONS[0] }));
+      on($('s6Exp1'), stepReview, fgo('expand', { x: 0.5 }));
+    }
+    function showFull(v) {
+      state.shownVer = v;
+      const t = $('s6FullTx');
+      t.textContent = VERSIONS[v];
+      t.scrollTop = 0;
+      $('s6Prev').classList.toggle('is-dis', v === 0);
+      $('s6Next2').classList.toggle('is-dis', v === 1);
+    }
+    function stepReview() {
+      show('가사를 다시 만들고 싶다면<br>하단의 마법봉 버튼을, 그대로 사용하고 싶다면 체크 버튼을 클릭해요.', [], fullUI(0));
+      showFull(0);
+      on($('s6Wand'), stepSecond, false, 'wandRe');
+      on($('s6Check'), () => choose(0), false, 'check');
+      pointFingerAt($('s6Check'), fgo('check', { x: 0.5 }));
+    }
+    function stepSecond() {
+      show('두 번째 버전의 가사가<br>만들어졌어요!', ['p09Next'], fullUI(1));
+      showFull(1);
+      nextBtn.onclick = () => setTimeout(stepCompare, 300);
+    }
+    function stepCompare() {
+      show('아래의 화살표를 클릭해 가사를 비교해서 읽어보고, 체크 버튼을 눌러 무엇을 사용할 지 결정해요.', [], fullUI(1));
+      showFull(1);
+      on($('s6Prev'), () => { clearFingers(); showFull(0); }, false, 'prev');
+      on($('s6Next2'), () => { clearFingers(); showFull(1); }, false, 'next2');
+      on($('s6Check'), () => choose(state.shownVer), false, 'check');
+      pointFingerAt($('s6Prev'), fgo('prev', { x: 0.5 }));
+    }
+    function choose(v) {
+      state.ver = v;
+      show('이제 노래 스타일을<br>입력해볼까요?<br>스타일 입력창을 클릭해요.', [], createUI({ lyr: VERSIONS[v] }));
+      on($('s6Sty'), stepGenre, fgo('style', { x: 0.5 }));
+    }
+    function stepGenre() {
+      show('우리는 다양한 스타일의<br>노래를 만들 수있어요!<br>키워드를 클릭해봐요.', ['p09Genres'], createUI({ lyr: VERSIONS[state.ver] }));
+      $('p09Genres').querySelectorAll('.card-btn').forEach((b) => {
+        b.onclick = () => {
+          playClick();
+          state.genre = b.dataset.genre;
+          stepMake();
+        };
+      });
+    }
+    function stepMake() {
+      show('이제 모든 준비가 끝났어요.<br>만들기 버튼을 눌러<br>노래를 만들어봐요!', [], createUI({ lyr: VERSIONS[state.ver], sty: GENRE_NAME[state.genre] }));
+      on($('s6Make'), stepLoading, fgo('make', { x: 0.5 }));
+    }
+    function stepLoading() {
+      show('노래가 만들어지고 있어요.', [], songsUI({ loading: true }), 's6-cream');
+      const t = tok;
+      if (!BoxEdit.on) setTimeout(() => { if (t === tok) stepSongs(); }, 2000);
+    }
+    let songN = 1;
+    let tok = 0;
+    const songSrc = (n) => 'sound/p09_song_v' + n + '_' + state.genre + '.mp3';
+    function stopSong() {
+      if (audio) { audio.pause(); audio = null; }
+      screen.querySelectorAll('.p09-song.is-playing').forEach((r) => r.classList.remove('is-playing'));
+    }
+    function play(n) {
+      stopSong();
+      songN = n || songN;
+      audio = new Audio(songSrc(songN));
+      audio.play().catch(() => {});
+    }
+    function stepSongs() {
+      show('완성됐어요!<br>노래를 클릭해<br>하나씩 들어볼까요?', [], songsUI(), 's6-cream');
+      const rows = Array.from(screen.querySelectorAll('.p09-song'));
+      rows.forEach((row) => { row.dataset.hit = 'song'; BoxEdit.padEl(row, 'song', HOT); });
+      let played = false;
+      rows.forEach((row) => row.addEventListener('click', (e) => {
+        if (e.target.closest('.more')) return;
+        const n = +row.dataset.n;
+        if (row.classList.contains('is-playing')) { stopSong(); return; }
+        play(n);
+        rows.forEach((r) => r.classList.toggle('is-playing', r === row));
+        if (!played) {
+          played = true;
+          const t = tok;
+          setTimeout(() => { if (t === tok) stepChoose(rows); }, 1500);
+        }
+      }));
+    }
+    function stepChoose(rows) {
+      say('마음에 드는 노래를<br>선택해 다운로드 해봐요.', 'main');
+      clearFingers();
+      rows.forEach((row) => {
+        const more = row.querySelector('.more');
+        row.classList.remove('hit-pulse');
+        row.removeAttribute('data-hit');
+        row.querySelectorAll(':scope > hit-pad').forEach((p) => p.remove());
+        more.classList.remove('is-off');
+        more.classList.add('hit-pulse');
+        more.dataset.hit = 'more';
+        BoxEdit.padEl(more, 'more', HOT);
+        more.onclick = (e) => { e.stopPropagation(); playClick(); songN = +row.dataset.n; stopSong(); stepDownload(); };
+      });
+      pointFingerAt(rows[0].querySelector('.more'), fgo('more', { x: 0.5 }));
+    }
+    function stepDownload() {
+      stopSong();
+      show('다운로드 버튼을 클릭해요.', [], downloadUI(), 's6-cream');
+      on($('s6Dl'), stepFinal, fgo('download', { x: 0.8 }));
+    }
+    function stepFinal() {
+      stopSong();
+      clearFingers();
+      $('p09Play').classList.add('is-off');
+      $('p09FinalView').classList.remove('is-off');
+      $('p09FinalPlay').onclick = () => { if (audio) stopSong(); else play(songN); };
+    }
+
+    // ?step=N 으로 단계별 보기: 1 앱 클릭 · 2 가사 입력창 · 3 가사 불러오기 · 4 마법봉 · 5 가사 완성(전체화면) · 6 가사 확인 · 7 두 번째 가사 · 8 가사 비교 · 9 스타일 입력창 · 10 스타일 키워드 · 11 만들기 · 12 만드는 중(2초 뒤 13으로) · 13 노래 고르기 · 14 다운로드 선택 · 15 다운로드 · 16 마무리
+    const wantStep = parseInt(new URLSearchParams(location.search).get('step'), 10);
+    if (wantStep >= 11) state.genre = 'hiphop';
+    const STEPS = [stepHome, stepLyricsField, stepLoad, stepWand, stepMade, stepReview, stepSecond, stepCompare, () => choose(0), stepGenre, stepMake, stepLoading, stepSongs,
+      () => { stepSongs(); stepChoose(Array.from(screen.querySelectorAll('.p09-song'))); }, stepDownload, stepFinal];
+    const go = (n) => {
+      tok += 1;
+      stopSong();
+      $('p09Play').classList.remove('is-off');
+      $('p09FinalView').classList.add('is-off');
+      state.genre = n >= 10 ? 'hiphop' : '';
+      STEPS[n]();
+    };
+    let cur = wantStep >= 1 && wantStep <= STEPS.length ? wantStep - 1 : 0;
+    BoxEdit.stepEdit({
+      apply: placeBox, name: (el) => el._hot ? '[클릭 영역 → HOT.' + el._hot + '] ' : el._base ? '[손가락 → ' + el._fg + '] ' : '[' + (BOX_NAME[el._key] || el._name) + '] ',
+      count: STEPS.length + 1, get: () => cur + 1, set: (n) => { cur = Math.max(n, 1) - 1; }, go: (n) => { if (n < 1) return; cur = n - 1; BoxEdit.syncStep(n); go(cur); }, label: (n) => '단계 ' + n + ' / ' + STEPS.length,
+      say, bubble, img: $('p09Char')
+    });
+    go(cur);
+  })();
+  </script>
+</body>
+</html>

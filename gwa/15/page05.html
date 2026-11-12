@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>색의 진하기 따라 커피 사진 나누기</title>
+  <link rel="stylesheet" href="../../resources/css/common.css">
+  <style>
+    .p05-left-tray {
+      position: absolute;
+      left: 42px;
+      top: 174px;
+      width: 768px;
+      height: 777px;
+      background: url(img/p05_tray_left.png) no-repeat center / 100% 100%;
+      z-index: 10;
+    }
+    .p05-left-tray.is-dragging-active,
+    .p05-left-tray:has(.is-dragging) {
+      z-index: 100;
+    }
+    .p05-left-tray-grid {
+      position: absolute;
+      left: 80px;
+      top: 80px;
+      width: 608px;
+      height: 616px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 14px;
+      box-sizing: border-box;
+    }
+    .p05-cell {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .p05-cup-item {
+      position: relative;
+      top: -10px;
+      width: 112px;
+      height: 190px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+      animation:none;
+      z-index: 5;
+    }
+    .p05-cup-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      filter: drop-shadow(5px 0 0 #fff) drop-shadow(-5px 0 0 #fff) drop-shadow(0 5px 0 #fff) drop-shadow(0 -5px 0 #fff);
+    }
+    .p05-cup-item:hover img {
+      filter: drop-shadow(5px 0 0 #ff4ff9) drop-shadow(-5px 0 0 #ff4ff9) drop-shadow(0 5px 0 #ff4ff9) drop-shadow(0 -5px 0 #ff4ff9);
+    }
+    .p05-cup-item.is-dragging {
+      cursor: grabbing;
+      z-index: 1000;
+      transform: scale(1.1);
+      transition: none;
+    }
+    .p05-cup-item.is-done {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .p05-right-board {
+      position: absolute;
+      left: 852px;
+      top: 180px;
+      width: 1016px;
+      height: 750px;
+      border-radius: 20px;
+      background: #266cc8;
+      box-shadow: 0 12px 24px rgba(17, 45, 92, 0.24);
+      display: flex;
+      gap: 7px;
+      padding: 0 31px;
+      box-sizing: border-box;
+      z-index: 2;
+    }
+    .p05-box-tray {
+      position: relative;
+      width: 313px;
+      height: 761px;
+      top: 2px;
+      flex-shrink: 0;
+      transition: filter 0.15s ease, transform 0.15s ease;
+    }
+    .p05-box-tray.tray-1 {
+      background: url(img/p05_tray_right.png) no-repeat center / 100% 100%;
+    }
+    .p05-box-tray.tray-2 {
+      background: url(img/p05_tray_right2.png) no-repeat center / 100% 100%;
+    }
+    .p05-box-tray.tray-3 {
+      background: url(img/p05_tray_right3.png) no-repeat center / 100% 100%;
+    }
+    .p05-box-tray.is-over {
+      transform: translateY(-4px);
+      filter: drop-shadow(0 0 14px #ffeb6b) drop-shadow(0 0 6px #ffeb6b);
+    }
+
+    .p05-ref-card {
+      position: absolute;
+      left: 52px;
+      top: 96px;
+      width: 208px;
+      height: 212px;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.14);
+    }
+    .p05-ref-head {
+      height: 58px;
+      background: #96b4ff;
+      color: #fff;
+      font-family: 'Cafe24 Ssurround', sans-serif;
+      font-size: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-shadow: 0 2px 4px rgba(24, 64, 128, 0.25);
+    }
+    .p05-ref-body {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+    }
+    .p05-ref-body img {
+      height: 124px;
+      width: auto;
+      object-fit: contain;
+      pointer-events: none;
+      filter: drop-shadow(0 0 1px #fff) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+
+    .p05-drop-mat {
+      position: absolute;
+      left: 33px;
+      top: 408px;
+      width: 246px;
+      height: 246px;
+      box-sizing: border-box;
+    }
+    .p05-placed-cup {
+      position: absolute;
+      width: 102px;
+      height: 174px;
+      pointer-events: none;
+      animation: p05PopIn 0.24s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    }
+    .p05-placed-cup img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 0 1px #fff) drop-shadow(0 0 2px #fff) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.25));
+    }
+    .p05-placed-cup.slot-0 {
+      left: 8px;
+      top: 6px;
+      z-index: 1;
+    }
+    .p05-placed-cup.slot-1 {
+      right: 8px;
+      top: 6px;
+      z-index: 1;
+    }
+    .p05-placed-cup.slot-2 {
+      left: 72px;
+      top: 76px;
+      z-index: 2;
+    }
+    @keyframes p05PopIn {
+      from { transform: scale(0.6); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="ask-pill is-fit"><span id="p05Pill">진하기 지도학습을 위한 사진을 알맞은 쟁반에 놓아 주세요.</span></p>
+
+          <div class="p05-left-tray" id="p05LeftTray">
+            <div class="p05-left-tray-grid" id="p05Grid"></div>
+          </div>
+
+          <div class="p05-right-board">
+            <div class="p05-box-tray tray-1" data-target-shot="1">
+              <div class="p05-ref-card">
+                <div class="p05-ref-head">1샷</div>
+                <div class="p05-ref-body"><img src="img/p05_cup_1.png" alt="1샷 커피"></div>
+              </div>
+              <div class="p05-drop-mat" id="p05Drop1"></div>
+            </div>
+
+            <div class="p05-box-tray tray-2" data-target-shot="2">
+              <div class="p05-ref-card">
+                <div class="p05-ref-head">2샷</div>
+                <div class="p05-ref-body"><img src="img/p05_cup_2.png" alt="2샷 커피"></div>
+              </div>
+              <div class="p05-drop-mat" id="p05Drop2"></div>
+            </div>
+
+            <div class="p05-box-tray tray-3" data-target-shot="3">
+              <div class="p05-ref-card">
+                <div class="p05-ref-head">3샷</div>
+                <div class="p05-ref-body"><img src="img/p05_cup_3.png" alt="3샷 커피"></div>
+              </div>
+              <div class="p05-drop-mat" id="p05Drop3"></div>
+            </div>
+          </div>
+
+          <div class="ox-result-wrong is-avatar is-off" id="p05WrongModal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body"><p class="avatar-popup-text">커피 색을 다시 한 번 살펴볼까요?</p></div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p05FinishModal">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">커피 사진을 진하기 색깔에 따라 나누고, 정답 이름표를 붙였어요.</p>
+                  </div>
+                  <a href="javascript:;" class="avatar-card-btn card-btn is-popup is-arrow js-nav-effect js-sfx" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">AI는 이 활동을 통해서 샷 수에 따라 색의 진하기가 다르다는 정보를 입력했어요.</p>
+                  </div>
+                  <a href="javascript:;" class="avatar-card-btn card-btn is-popup is-arrow js-nav-effect js-sfx" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">정보를 입력한 AI가 새로운 커피 사진도 알아볼 수 있을까요?</p>
+                  </div>
+                  <a href="page06.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="색의 진하기 따라 커피 사진 나누기" data-next="page06.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+    (function () {
+      const shots = shuffleArray([1, 1, 1, 2, 2, 2, 3, 3, 3]);
+      const grid = $('p05Grid');
+      const leftTray = $('p05LeftTray');
+
+      shots.forEach((shot, idx) => {
+        const cell = document.createElement('div');
+        cell.className = 'p05-cell';
+        const item = document.createElement('div');
+        item.className = 'p05-cup-item';
+        item.dataset.shot = String(shot);
+        item.dataset.idx = String(idx);
+        item.innerHTML = '<img src="img/p05_cup_' + shot + '.png" alt="' + shot + '샷 커피">';
+        cell.appendChild(item);
+        grid.appendChild(cell);
+      });
+
+      const firstItem = grid.querySelector('.p05-cup-item');
+      if (firstItem) {
+        setTimeout(() => pointFingerAt(firstItem, { dy: -30, pulse: true }), 120);
+      }
+
+      const trayCounts = { 1: 0, 2: 0, 3: 0 };
+      let totalPlaced = 0;
+      const trays = Array.from(document.querySelectorAll('.p05-box-tray'));
+
+      grid.querySelectorAll('.p05-cup-item').forEach((item) => {
+        let startX = 0;
+        let startY = 0;
+        let dragging = false;
+
+        item.addEventListener('pointerdown', (e) => {
+          if (item.classList.contains('is-done')) return;
+          e.preventDefault();
+          clearFingers();
+          playClick();
+          dragging = true;
+          startX = e.clientX;
+          startY = e.clientY;
+          leftTray.classList.add('is-dragging-active');
+          item.classList.add('is-dragging');
+          item.setPointerCapture(e.pointerId);
+        });
+
+        item.addEventListener('pointermove', (e) => {
+          if (!dragging) return;
+          const scale = currentScale || 1;
+          const dx = (e.clientX - startX) / scale;
+          const dy = (e.clientY - startY) / scale;
+          item.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(1.1)';
+
+          trays.forEach((t) => {
+            const r = t.getBoundingClientRect();
+            const over = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+            t.classList.toggle('is-over', over);
+          });
+        });
+
+        const finishDrag = (e) => {
+          if (!dragging) return;
+          dragging = false;
+          leftTray.classList.remove('is-dragging-active');
+          item.classList.remove('is-dragging');
+          trays.forEach((t) => t.classList.remove('is-over'));
+
+          const hitTray = trays.find((t) => {
+            const r = t.getBoundingClientRect();
+            return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+          });
+
+          if (!hitTray) {
+            item.style.transform = '';
+            return;
+          }
+
+          const targetShot = Number(hitTray.dataset.targetShot);
+          const itemShot = Number(item.dataset.shot);
+
+          if (targetShot === itemShot) {
+            playCorrect();
+            item.classList.add('is-done');
+            item.style.transform = '';
+            const slotIdx = trayCounts[targetShot];
+            trayCounts[targetShot] += 1;
+            totalPlaced += 1;
+
+            const dropMat = $('p05Drop' + targetShot);
+            const placed = document.createElement('div');
+            placed.className = 'p05-placed-cup slot-' + slotIdx;
+            placed.innerHTML = '<img src="img/p05_cup_' + targetShot + '.png" alt="">';
+            dropMat.appendChild(placed);
+
+            if (totalPlaced === 9) {
+              setTimeout(() => {
+                $('p05FinishModal').classList.remove('is-off');
+              }, 600);
+            }
+          } else {
+            item.style.transform = '';
+            playWrong();
+            flashLayer($('p05WrongModal'), 'is-off', 2000);
+          }
+        };
+
+        item.addEventListener('pointerup', finishDrag);
+        item.addEventListener('pointercancel', finishDrag);
+      });
+    })();
+  </script>
+</body>
+</html>

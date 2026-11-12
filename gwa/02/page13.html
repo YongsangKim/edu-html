@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>그래프 해석 왕!</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .p13-q{position:absolute;left:40px;top:28px;width:1494px;height:178px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:100px;background:#fefbf9;box-shadow:0 12px 0 0 rgba(86,148,231,.2);overflow:hidden;font-family:'Cafe24 Ssurround';color:var(--c-ink)}
+        .p13-q b{position:absolute;left:0;top:0;bottom:0;width:234px;display:flex;align-items:center;justify-content:center;padding-top:4px;background:#91b9e7;color:var(--c-white);font-weight:normal;font-size:70px;letter-spacing:-0.04em}
+        .p13-q p{position:absolute;left:262px;right:30px;top:0;bottom:0;margin:0;display:flex;align-items:center;font-size:52px;line-height:1.15;letter-spacing:-0.08em;word-break:keep-all}
+
+        .p13-timer{position:absolute;left:1543px;top:20px;width:342px;height:195px;margin:0}
+        .p13-timer img{display:block;width:100%;height:100%}
+        .p13-timer span{position:absolute;left:112px;top:50px;width:200px;height:90px;display:flex;align-items:center;justify-content:center;padding-top:6px;font-family:'Cafe24 Ssurround';font-size:90px;line-height:1;color:var(--c-white);text-shadow:0 0 10px #4cc3ff,0 0 24px #1e8cff}
+        .p13-timer.is-hurry span{color:#ffd1d1;text-shadow:0 0 10px #ff5a5a,0 0 24px #e5252a;animation:p13-beat 1s ease infinite}
+        @keyframes p13-beat{50%{transform:scale(1.1)}}
+
+        .p13-side{position:absolute;left:40px;top:226px;width:232px;height:707px;box-sizing:border-box;border:solid 3px #053c85;border-radius:16px;background:#266cc8}
+        .gauge.is-vertical.p13-gauge{left:110px;top:235px;height:655px}
+
+        .p13-graph{position:absolute;left:287px;top:225px;width:956px;height:708px;box-sizing:border-box;border:solid 5px #266cc8;border-radius:16px;background:var(--c-white)}
+        .p13-graph svg{display:block;width:100%;height:100%}
+        .p13-graph .p13-star{position:absolute;width:80px;height:80px;background:url('../../resources/img/common/icon_star_on.png') center / contain no-repeat;transform:translate(-50%,-50%);animation:p13-star .8s ease-in-out infinite alternate;pointer-events:none}
+        @keyframes p13-star{to{transform:translate(-50%,-70%) scale(1.2)}}
+
+        .p13-opts{position:absolute;left:1260px;top:226px;width:623px;height:707px;box-sizing:border-box;padding-top:65px;display:flex;flex-direction:column;align-items:center;gap:40px;border-radius:16px;background:#266cc8}
+        .p13-opt.card-btn{width:486px;min-width:0;height:110px;padding:6px 0 0;font-size:62px;letter-spacing:-0.04em}
+        .p13-opts.is-locked{pointer-events:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p13-q"><b id="p13No"></b><p id="p13Ask"></p></div>
+          <div class="p13-timer" id="p13TimerBox"><img src="img/p13_timer.png" alt=""><span id="p13Timer">60</span></div>
+
+          <div class="p13-side"></div>
+          <div class="gauge is-vertical p13-gauge"><div class="gauge-fill" id="p13Gauge"></div></div>
+          <div class="p13-graph" id="p13Graph"></div>
+          <div class="p13-opts opts" id="p13Opts"></div>
+
+          <div class="ox-result-wrong is-avatar is-off" id="p13Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text" id="p13WrongText"></p>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="그래프 해석 왕!" data-next="page14.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const LIMIT = 60;
+    const DATA = [15, 15, 12, 20, 25, 30, 20, 15, 14].map((v, i) => ({ label: i * 3 + '시', value: v }));
+    const QUIZ = [
+      { ask: '하루 중 기온이 가장 높은 시간은 언제일까요?', type: 'bar', opts: ['오전 6시', '오전 9시', '오후 3시', '오후 9시'], answer: 2, mark: 5 },
+      { ask: '오전 9시부터 오후 3시까지 기온은 어떻게 변하고 있나요?', type: 'line', opts: ['올라간다', '내려간다', '그대로다', '알 수 없다'], answer: 0, ball: [3, 5] },
+      { ask: '오후 3시(30도)와 오후 9시(15도) 사이에 위치한|오후 6시의 기온으로 가장 알맞게 예측한 것은 무엇일까요?', type: 'line', opts: ['40도', '20도', '5도', '0도'], answer: 1, hide: 6, mark: 6 },
+      { ask: '기온이 두 번째로 높은 시간은?', type: 'bar', opts: ['오전 3시', '오전 6시', '낮 12시', '자정'], answer: 2, mark: 4 }
+    ];
+    const W = 946;
+    const H = 698;
+    const PAD = { l: 100, r: 20, t: 68, b: 94 };
+    const MAXV = 35;
+    const opts = $('p13Opts');
+    const graph = $('p13Graph');
+    const timerEl = $('p13Timer');
+    const timerBox = $('p13TimerBox');
+    const clock = new Audio('sound/p13_clock.mp3');
+    clock.loop = true;
+
+    let index = 0;
+    let score = 0;
+    let remain = LIMIT;
+    let tick = null;
+
+    const draw = (q, opt) => { graph.innerHTML = chartSvg(DATA, Object.assign({ type: q.type, width: W, height: H, color: '#ff7a1a', pad: PAD, max: MAXV, fs: 24, fsUnit: 22 }, opt)); };
+    const stopClock = () => { clearInterval(tick); clock.pause(); };
+
+    function start() {
+      const q = QUIZ[index];
+      $('p13No').textContent = '질문' + (index + 1);
+      $('p13Ask').innerHTML = q.ask.replace('|', '<br>');
+      draw(q, { hide: q.hide === undefined ? -1 : q.hide });
+      opts.innerHTML = q.opts.map((o, i) => '<button type="button" class="card-btn p13-opt" data-i="' + i + '">' + o + '</button>').join('');
+      opts.classList.remove('is-locked');
+      remain = LIMIT;
+      timerEl.textContent = remain;
+      timerBox.classList.remove('is-hurry');
+      clock.currentTime = 0;
+      clock.play().catch(() => {});
+      clearInterval(tick);
+      tick = setInterval(() => {
+        remain -= 1;
+        timerEl.textContent = remain;
+        timerBox.classList.toggle('is-hurry', remain <= 10);
+        if (remain <= 0) wrong();
+      }, 1000);
+    }
+
+    function next() {
+      index += 1;
+      if (index < QUIZ.length) { start(); return; }
+      try { sessionStorage.setItem('gwa02_score', String(score)); } catch (e) {}
+      navigateTo('page14.html');
+    }
+
+    function wrong() {
+      stopClock();
+      opts.classList.add('is-locked');
+      playWrong();
+      $('p13WrongText').textContent = (QUIZ[index].type === 'bar' ? '막대' : '꺾은선') + ' 그래프를 다시 살펴볼까요?';
+      flashLayer($('p13Wrong'));
+      setTimeout(next, 2200);
+    }
+
+    function effect(q) {
+      draw(q, { mark: q.mark === undefined ? -1 : q.mark });
+      const svg = graph.querySelector('svg');
+      const gap = (W - PAD.l - PAD.r) / DATA.length;
+      const px = (i) => PAD.l + gap * i + gap / 2;
+      const py = (v) => PAD.t + (H - PAD.t - PAD.b) * (1 - v / MAXV);
+      if (q.ball) {
+        const pts = [];
+        for (let i = q.ball[0]; i <= q.ball[1]; i++) pts.push(px(i) + ',' + py(DATA[i].value));
+        svg.insertAdjacentHTML('beforeend', '<circle r="16" fill="#ff8a1f" stroke="#fff" stroke-width="4"><animateMotion dur="1.6s" repeatCount="indefinite" path="M' + pts.join(' L') + '"/></circle>');
+      }
+      if (q.mark !== undefined) {
+        const star = document.createElement('span');
+        star.className = 'p13-star';
+        star.style.left = px(q.mark) + 'px';
+        star.style.top = (py(DATA[q.mark].value) - 50) + 'px';
+        graph.appendChild(star);
+      }
+    }
+
+    opts.addEventListener('click', (e) => {
+      const b = e.target.closest('.p13-opt');
+      if (!b) return;
+      const q = QUIZ[index];
+      if (Number(b.dataset.i) !== q.answer) { wrong(); return; }
+      stopClock();
+      opts.classList.add('is-locked');
+      b.classList.add('is-selected');
+      playCorrect();
+      score += 25;
+      $('p13Gauge').style.height = score + '%';
+      effect(q);
+      setTimeout(next, 3000);
+    });
+
+    start();
+  })();
+  </script>
+</body>
+</html>

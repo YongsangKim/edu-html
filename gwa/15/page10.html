@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>퀴즈 풀기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .q10-cocoa.quiz-graphs.is-4{left:210px;width:1500px;top:450px;grid-template-columns:repeat(3,1fr);gap:60px}
+        .q10-cocoa .quiz-graph{height:430px;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+        .q10-cocoa.quiz-graphs.is-4 .quiz-graph span,
+        .q10-cocoa .quiz-graph span{width:100%;height:100%;flex:1 1 auto;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;position:relative}
+        .q10-cocoa .quiz-graph img{max-width:300px;max-height:300px;object-fit:contain;display:block;margin:0 auto}
+        .q10-cocoa .quiz-graph svg{width:240px;height:260px;display:block;margin:0 auto}
+
+        .q10-pic{position:absolute;left:110px;top:435px;width:390px;height:460px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:30px;background:var(--c-white);box-shadow:0 10px 0 0 rgba(86,148,231,.2);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow:hidden}
+        .q10-pic img{width:300px;height:300px;object-fit:cover;display:block}
+        .q10-pic svg{width:260px;height:310px;display:block}
+        .q10-pic-tag{margin:10px 0 0;padding:8px 34px 4px;border-radius:30px;background:var(--c-pale);font-family:'Cafe24 Ssurround';font-size:38px;color:var(--c-navy)}
+
+        .q10-tm-classes.quiz-graphs.is-4{left:550px;width:1280px;top:480px;grid-template-columns:repeat(3,1fr);gap:20px}
+        .q10-tm-classes.quiz-graphs.is-4 .quiz-graph{height:307px;font-size:44px;text-align:center;padding:0;justify-content:space-between;border-radius:26px}
+        .q10-tm-view{flex:1 1 auto;width:100%;display:flex;align-items:center;justify-content:center;padding:12px;box-sizing:border-box;background:#f8f9fa}
+        .q10-tm-view img{width:100%;height:auto;max-height:100%;object-fit:contain;display:block}
+        .q10-tm-foot{width:100%;height:90px;display:flex;align-items:center;justify-content:center;background:#fff;border-top:solid 3px #dadce0;font-family:'Cafe24 Ssurround';font-size:42px;color:var(--c-purple);padding-top:6px}
+
+        .q10-fox-card{position:absolute;left:100px;top:435px;width:660px;height:460px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:30px;background:#fff;box-shadow:0 10px 0 0 rgba(86,148,231,.2);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center}
+        .q10-fox-card>img{width:100%;height:100%;object-fit:contain;display:block}
+        .q10-fox-fb{width:100%;height:100%;display:flex;flex-direction:column}
+        .q10-fox-head{height:78px;padding:6px 28px 0;background:#e8f0fe;border-bottom:solid 3px #c6dafc;display:flex;align-items:center;justify-content:space-between;font-family:'Cafe24 Ssurround';font-size:40px;color:#1967d2}
+        .q10-fox-head span{font-family:'Pretendard';font-size:24px;font-weight:700;color:#5f6368}
+        .q10-fox-body{flex:1 1 auto;padding:20px 26px;background:#f8f9fa;display:flex;flex-direction:column;justify-content:center;gap:14px}
+        .q10-fox-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+        .q10-fox-item{position:relative;height:140px;border-radius:16px;background:#fff;border:solid 3px #dadce0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-family:'Cafe24 Ssurround';font-size:24px;color:#3c4043}
+        .q10-fox-item svg{width:76px;height:76px;display:block}
+        .q10-fox-item.is-rabbit{border:solid 6px #ffb300;background:#fffdf0;box-shadow:0 0 0 4px rgba(255,179,0,.28);animation:blk-glow 1.2s ease-in-out infinite}
+        .q10-fox-item.is-rabbit::after{content:'토끼';position:absolute;right:8px;top:8px;padding:3px 10px 1px;border-radius:12px;background:#ffb300;color:#1b1738;font-size:20px}
+
+        .q10-split.quiz-opts.is-list{left:810px;width:1010px;top:510px;gap:50px}
+        .q10-split.quiz-opts.is-list .card-btn{width:1010px;height:130px;font-size:54px}
+
+        .q5-init{position:absolute;left:0;top:430px;width:1920px;display:flex;justify-content:center;gap:36px}
+        .q5-slot{width:190px;height:180px;display:flex;align-items:center;justify-content:center;font-size:84px;color:rgba(123,79,209,.4)}
+        .q5-slot .q5-card{position:absolute;left:0;top:0;width:100%;height:100%;margin:0;border:0;border-radius:0;background:none;cursor:default;font-size:92px}
+        .q5-slot.is-lit{--blk-c:#2fbf71;background:rgba(47,191,113,.2);color:transparent}
+        .q5-cards-wrap{position:absolute;left:0;top:645px;width:1920px;display:flex;flex-direction:column;align-items:center;gap:20px}
+        .q5-cards-row{display:flex;justify-content:center;gap:28px}
+        .q5-card{position:relative;width:146px;height:124px;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;cursor:grab;touch-action:none;
+          background:var(--c-white);border:solid 5px var(--c-purple);border-radius:24px;font-family:'Cafe24 Ssurround';font-size:66px;color:var(--c-ink)}
+        .q5-card.is-dragging{cursor:grabbing;z-index:60}
+        .q5-card.is-wrong{animation:fix-word-shake .3s ease}
+        .q5-card.is-hint{animation:blk-glow .5s ease-in-out 3}
+        .q5-hint{position:absolute;left:1660px;top:820px;min-width:0;width:210px;height:84px;font-size:44px;padding:8px 10px 0}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="quiz-stage">
+          <div class="step-flow">
+
+            <div class="step-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../resources/img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q1.</span>
+                  <p class="quiz-ask">다음 중 가장 진한 코코아는 무엇일까요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz quiz-graphs is-4 q10-cocoa">
+                <button class="answer-pick quiz-graph" data-correct="false" aria-label="1단계 연한 코코아">
+                  <span>
+                    <img src="img/p10_cocoa_1.png" alt="연한 코코아" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                    <svg viewBox="0 0 200 220" style="display:none">
+                      <ellipse cx="95" cy="198" rx="68" ry="12" fill="#d7dce6"/>
+                      <path d="M148 92h18a22 22 0 0 1 0 44h-18" fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round"/>
+                      <path d="M148 92h18a22 22 0 0 1 0 44h-18" fill="none" stroke="#5b6478" stroke-width="6" stroke-linecap="round"/>
+                      <path d="M38 56h114l-12 118a24 24 0 0 1-24 22H74a24 24 0 0 1-24-22Z" fill="#fff" stroke="#5b6478" stroke-width="6"/>
+                      <path d="M44 74h102l-10 96a18 18 0 0 1-18 16H72a18 18 0 0 1-18-16Z" fill="#dfc1a2"/>
+                      <ellipse cx="95" cy="74" rx="51" ry="12" fill="#ebd4bc" stroke="#c5a17e" stroke-width="3"/>
+                    </svg>
+                  </span>
+                </button>
+                <button class="answer-pick quiz-graph" data-correct="false" aria-label="2단계 갈색 코코아">
+                  <span>
+                    <img src="img/p10_cocoa_2.png" alt="갈색 코코아" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                    <svg viewBox="0 0 200 220" style="display:none">
+                      <ellipse cx="95" cy="198" rx="68" ry="12" fill="#d7dce6"/>
+                      <path d="M148 92h18a22 22 0 0 1 0 44h-18" fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round"/>
+                      <path d="M148 92h18a22 22 0 0 1 0 44h-18" fill="none" stroke="#5b6478" stroke-width="6" stroke-linecap="round"/>
+                      <path d="M38 56h114l-12 118a24 24 0 0 1-24 22H74a24 24 0 0 1-24-22Z" fill="#fff" stroke="#5b6478" stroke-width="6"/>
+                      <path d="M44 74h102l-10 96a18 18 0 0 1-18 16H72a18 18 0 0 1-18-16Z" fill="#9c5a2d"/>
+                      <ellipse cx="95" cy="74" rx="51" ry="12" fill="#b36d3d" stroke="#7d431d" stroke-width="3"/>
+                    </svg>
+                  </span>
+                </button>
+                <button class="answer-pick quiz-graph" data-correct="true" aria-label="3단계 진한 코코아">
+                  <span>
+                    <img src="img/p10_cocoa_3.png" alt="진한 코코아" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                    <svg viewBox="0 0 200 220" style="display:none">
+                      <ellipse cx="95" cy="198" rx="68" ry="12" fill="#d7dce6"/>
+                      <path d="M148 92h18a22 22 0 0 1 0 44h-18" fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round"/>
+                      <path d="M148 92h18a22 22 0 0 1 0 44h-18" fill="none" stroke="#5b6478" stroke-width="6" stroke-linecap="round"/>
+                      <path d="M38 56h114l-12 118a24 24 0 0 1-24 22H74a24 24 0 0 1-24-22Z" fill="#fff" stroke="#5b6478" stroke-width="6"/>
+                      <path d="M44 74h102l-10 96a18 18 0 0 1-18 16H72a18 18 0 0 1-18-16Z" fill="#421c0c"/>
+                      <ellipse cx="95" cy="74" rx="51" ry="12" fill="#592814" stroke="#2d1106" stroke-width="3"/>
+                    </svg>
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <div class="step-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../resources/img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q2.</span>
+                  <p class="quiz-ask is-tight">사람이 이름표를 붙여 정리한 사진을 많이 보고 AI가 스스로 배우는 방법은 무엇일까요?</p>
+                </div>
+              </div>
+              <div class="answer-pick-quiz quiz-opts is-row">
+                <button class="answer-pick card-btn is-quiz" data-correct="false">머신러닝</button>
+                <button class="answer-pick card-btn is-quiz" data-correct="true">지도학습</button>
+                <button class="answer-pick card-btn is-quiz" data-correct="false">질문 나무</button>
+              </div>
+            </div>
+
+            <div class="step-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../resources/img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q3.</span>
+                  <p class="quiz-ask is-tight">티처블머신 AI에게 가르칠 이 커피 사진은 어느 클래스에 넣어야 할까요?</p>
+                </div>
+              </div>
+              <div class="q10-pic">
+                <img src="img/p10_q3_coffee.png" alt="2샷 커피 사진" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                <svg viewBox="0 0 180 220" style="display:none">
+                  <ellipse cx="90" cy="202" rx="56" ry="10" fill="#d8dee8"/>
+                  <path d="M40 24h100l-12 166a16 16 0 0 1-16 14H68a16 16 0 0 1-16-14Z" fill="rgba(255,255,255,.7)" stroke="#6c788e" stroke-width="5"/>
+                  <path d="M44 50h92l-10 136a12 12 0 0 1-12 11H66a12 12 0 0 1-12-11Z" fill="#8b3e16"/>
+                  <ellipse cx="90" cy="50" rx="46" ry="9" fill="#a85325"/>
+                  <rect x="56" y="58" width="24" height="20" rx="5" fill="rgba(255,255,255,.45)" transform="rotate(-8 56 58)"/>
+                  <rect x="92" y="54" width="26" height="20" rx="5" fill="rgba(255,255,255,.4)" transform="rotate(10 92 54)"/>
+                </svg>
+                <p class="q10-pic-tag">2샷 커피 사진</p>
+              </div>
+              <div class="answer-pick-quiz quiz-graphs is-4 q10-tm-classes">
+                <button class="answer-pick quiz-graph" data-correct="false">
+                  <div class="q10-tm-view">
+                    <img src="img/p10_tm_card1.png" alt="1샷 클래스">
+                  </div>
+                  <div class="q10-tm-foot">1번 클래스</div>
+                </button>
+                <button class="answer-pick quiz-graph" data-correct="true">
+                  <div class="q10-tm-view">
+                    <img src="img/p10_tm_card2.png" alt="2샷 클래스">
+                  </div>
+                  <div class="q10-tm-foot">2번 클래스</div>
+                </button>
+                <button class="answer-pick quiz-graph" data-correct="false">
+                  <div class="q10-tm-view">
+                    <img src="img/p10_tm_card3.png" alt="3샷 클래스">
+                  </div>
+                  <div class="q10-tm-foot">3번 클래스</div>
+                </button>
+              </div>
+            </div>
+
+            <div class="step-panel">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../resources/img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q4.</span>
+                  <p class="quiz-ask is-tight">이대로 학습시킨 AI에게 토끼 사진을 보여 주면 어떻게 될까요?</p>
+                </div>
+              </div>
+              <div class="q10-fox-card">
+                <img src="img/p10_q4_fox_rabbit.png" alt="여우 클래스에 토끼 사진이 섞인 화면" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="q10-fox-fb" style="display:none">
+                  <div class="q10-fox-head"><b>여우 ✎</b><span>이미지 샘플 6개</span></div>
+                  <div class="q10-fox-body">
+                    <div class="q10-fox-grid">
+                      <div class="q10-fox-item">
+                        <svg viewBox="0 0 100 100"><polygon points="18,45 26,12 46,34" fill="#ea6a1f"/><polygon points="82,45 74,12 54,34" fill="#ea6a1f"/><ellipse cx="50" cy="56" rx="34" ry="28" fill="#f37c24"/><polygon points="22,60 50,84 50,56" fill="#fff"/><polygon points="78,60 50,84 50,56" fill="#fff"/><circle cx="38" cy="52" r="4" fill="#222"/><circle cx="62" cy="52" r="4" fill="#222"/><circle cx="50" cy="68" r="5" fill="#222"/></svg>
+                        여우
+                      </div>
+                      <div class="q10-fox-item is-rabbit">
+                        <svg viewBox="0 0 100 100"><ellipse cx="36" cy="26" rx="8" ry="22" fill="#f2f4f8" stroke="#c8d0de" stroke-width="3"/><ellipse cx="36" cy="26" rx="4" ry="15" fill="#ffb6c9"/><ellipse cx="64" cy="26" rx="8" ry="22" fill="#f2f4f8" stroke="#c8d0de" stroke-width="3"/><ellipse cx="64" cy="26" rx="4" ry="15" fill="#ffb6c9"/><ellipse cx="50" cy="62" rx="30" ry="26" fill="#fff" stroke="#c8d0de" stroke-width="3"/><circle cx="39" cy="58" r="4" fill="#e0315a"/><circle cx="61" cy="58" r="4" fill="#e0315a"/><ellipse cx="50" cy="67" rx="4" ry="3" fill="#ff85a2"/></svg>
+                        토끼
+                      </div>
+                      <div class="q10-fox-item">
+                        <svg viewBox="0 0 100 100"><polygon points="18,45 26,12 46,34" fill="#ea6a1f"/><polygon points="82,45 74,12 54,34" fill="#ea6a1f"/><ellipse cx="50" cy="56" rx="34" ry="28" fill="#f37c24"/><polygon points="22,60 50,84 50,56" fill="#fff"/><polygon points="78,60 50,84 50,56" fill="#fff"/><circle cx="38" cy="52" r="4" fill="#222"/><circle cx="62" cy="52" r="4" fill="#222"/><circle cx="50" cy="68" r="5" fill="#222"/></svg>
+                        여우
+                      </div>
+                      <div class="q10-fox-item">
+                        <svg viewBox="0 0 100 100"><polygon points="18,45 26,12 46,34" fill="#ea6a1f"/><polygon points="82,45 74,12 54,34" fill="#ea6a1f"/><ellipse cx="50" cy="56" rx="34" ry="28" fill="#f37c24"/><polygon points="22,60 50,84 50,56" fill="#fff"/><polygon points="78,60 50,84 50,56" fill="#fff"/><circle cx="38" cy="52" r="4" fill="#222"/><circle cx="62" cy="52" r="4" fill="#222"/><circle cx="50" cy="68" r="5" fill="#222"/></svg>
+                        여우
+                      </div>
+                      <div class="q10-fox-item">
+                        <svg viewBox="0 0 100 100"><polygon points="18,45 26,12 46,34" fill="#ea6a1f"/><polygon points="82,45 74,12 54,34" fill="#ea6a1f"/><ellipse cx="50" cy="56" rx="34" ry="28" fill="#f37c24"/><polygon points="22,60 50,84 50,56" fill="#fff"/><polygon points="78,60 50,84 50,56" fill="#fff"/><circle cx="38" cy="52" r="4" fill="#222"/><circle cx="62" cy="52" r="4" fill="#222"/><circle cx="50" cy="68" r="5" fill="#222"/></svg>
+                        여우
+                      </div>
+                      <div class="q10-fox-item is-rabbit">
+                        <svg viewBox="0 0 100 100"><ellipse cx="36" cy="26" rx="8" ry="22" fill="#f2f4f8" stroke="#c8d0de" stroke-width="3"/><ellipse cx="36" cy="26" rx="4" ry="15" fill="#ffb6c9"/><ellipse cx="64" cy="26" rx="8" ry="22" fill="#f2f4f8" stroke="#c8d0de" stroke-width="3"/><ellipse cx="64" cy="26" rx="4" ry="15" fill="#ffb6c9"/><ellipse cx="50" cy="62" rx="30" ry="26" fill="#fff" stroke="#c8d0de" stroke-width="3"/><circle cx="39" cy="58" r="4" fill="#e0315a"/><circle cx="61" cy="58" r="4" fill="#e0315a"/><ellipse cx="50" cy="67" rx="4" ry="3" fill="#ff85a2"/></svg>
+                        토끼
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="answer-pick-quiz quiz-opts is-list q10-split">
+                <button class="answer-pick card-btn is-quiz" data-correct="true">여우라고 틀리게 답할 수 있다</button>
+                <button class="answer-pick card-btn is-quiz" data-correct="false">언제나 토끼라고 답한다</button>
+              </div>
+            </div>
+
+            <div class="step-panel" id="p10Q5">
+              <div class="quiz-ask-box">
+                <div class="quiz-ask-row">
+                  <div class="quiz-avatar"><img src="../../resources/img/common/avatar_quiz.png" alt=""></div>
+                  <span class="quiz-qnum">Q5.</span>
+                  <p class="quiz-ask is-tight">간단하게 사진을 넣어 머신러닝을 체험할 수 있는 AI 도구는 무엇일까요?</p>
+                </div>
+              </div>
+              <div class="q5-init" id="q5Init">
+                <div class="q5-slot blk is-flat is-empty" data-key="a">ㅌ</div>
+                <div class="q5-slot blk is-flat is-empty" data-key="b">ㅊ</div>
+                <div class="q5-slot blk is-flat is-empty" data-key="c">ㅂ</div>
+                <div class="q5-slot blk is-flat is-empty" data-key="d">ㅁ</div>
+                <div class="q5-slot blk is-flat is-empty" data-key="e">ㅅ</div>
+              </div>
+              <div class="q5-cards-wrap" id="q5Cards">
+                <div class="q5-cards-row">
+                  <div class="q5-card" data-key="d">머</div>
+                  <div class="q5-card" data-key="x1">순</div>
+                  <div class="q5-card" data-key="a">티</div>
+                  <div class="q5-card" data-key="c">블</div>
+                  <div class="q5-card" data-key="x2">무</div>
+                </div>
+                <div class="q5-cards-row">
+                  <div class="q5-card" data-key="b">처</div>
+                  <div class="q5-card" data-key="x3">정</div>
+                  <div class="q5-card" data-key="x4">사</div>
+                  <div class="q5-card" data-key="e">신</div>
+                </div>
+              </div>
+              <button class="card-btn q5-hint js-sfx" id="q5Hint" data-sound="sound/click.mp3">힌트</button>
+            </div>
+
+          </div>
+
+          <div class="ox-result-correct is-avatar is-off" id="q10Right" data-sound="sound/correct.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_correct_gwa.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">정답이에요!</p>
+              </div>
+              <div class="avatar-popup-extra"><img src="../../resources/img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div>
+          <div class="ox-result-wrong is-avatar is-off" id="q10Wrong" data-sound="sound/incorrect.mp3">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">다시 한번 생각해볼까요?</p>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="퀴즈 풀기" data-next="page11.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const rightLayer = $('q10Right');
+    const wrongLayer = $('q10Wrong');
+    const q5Cards = Array.from(document.querySelectorAll('#q5Cards .q5-card'));
+    const q5Slots = Array.from(document.querySelectorAll('#q5Init .q5-slot'));
+
+    initMatchDrag({
+      cards: q5Cards,
+      zones: q5Slots,
+      slop: 30,
+      onRight: (card, zone) => {
+        zone.classList.remove('is-empty');
+        zone.classList.add('is-lit');
+      },
+      onWrong: (card, zone) => {
+        card.classList.remove('is-wrong');
+        void card.offsetWidth;
+        card.classList.add('is-wrong');
+        if (zone) {
+          playWrong();
+          flashLayer(wrongLayer);
+        }
+      },
+      onDone: () => {
+        playCorrect();
+        flashLayer(rightLayer);
+        setTimeout(() => navigateTo('page11.html'), 2000);
+      }
+    });
+
+    $('q5Hint').addEventListener('click', () => {
+      q5Cards.forEach((c) => {
+        if (c.dataset.placed || c.dataset.key.charAt(0) === 'x') return;
+        c.classList.remove('is-hint');
+        void c.offsetWidth;
+        c.classList.add('is-hint');
+      });
+    });
+  })();
+  </script>
+</body>
+</html>

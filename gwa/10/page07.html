@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>내 몸속 쿵쾅쿵쾅 순환 지도 완성하기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .p07-frame{position:absolute;left:75px;top:80px;width:1773px;height:852px;box-sizing:border-box;border:5px solid #0a3a8c;border-radius:22px;background:#fff;z-index:1}
+        .p07-frame.is-blue{background:#2b6dce}
+        .p07-scene{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none}
+        .p07-panel,.p07-printer,.p07-run,.p07-end{z-index:2}
+        .p07-scene.is-off,.p07-loop.is-off,.p07-drop.is-off,.p07-end.is-off{display:none}
+        .p07-panel{position:absolute;box-sizing:border-box}
+        .p07-bodypanel{left:143px;top:172px;width:696px;height:729px;border:5px solid #0a3a8c;border-radius:14px;background:radial-gradient(ellipse at 40% 45%,#fff 0%,#e3eefc 60%,#d6e6fa 100%)}
+        .p07-cardpanel{left:864px;top:170px;width:913px;height:731px;border-radius:14px;background:#2b6dce}
+        .p07-cmp-l,.p07-cmp-r{top:172px;height:727px;border:5px solid #0a3a8c;border-radius:14px;background:#e1eefc}
+        .p07-cmp-l{left:230px;width:693px}
+        .p07-cmp-r{left:1000px;width:691px}
+        .p07-card{position:absolute;left:913px;width:810px;height:220px;z-index:5;cursor:grab;touch-action:none;pointer-events:auto;-webkit-tap-highlight-color:transparent}
+        .p07-card img{display:block;width:100%;height:100%;pointer-events:none;-webkit-user-drag:none}
+        .p07-card.is-dragging{opacity:.4;cursor:grabbing}
+        .p07-ghost{position:absolute;width:130px;height:119px;box-sizing:border-box;border-radius:26px;background:#fff;border:4px solid #fff;box-shadow:0 6px 16px rgba(10,58,140,.5);z-index:50;pointer-events:none}
+        .p07-ghost i{position:absolute;left:0;top:11px;width:122px;height:90px;background-repeat:no-repeat;background-size:486px 132px;background-position:-18px -18px}
+        .p07-card.is-placed{opacity:.4;pointer-events:none;cursor:default}
+        .p07-group{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:3;pointer-events:none}
+        .p07-group.is-cmp{transform:translateX(854px)}
+        .p07-img{position:absolute;left:146px;top:176px;width:688px;height:721px}
+        .p07-vessel{clip-path:inset(0 0 100% 0);transition:clip-path 1s linear}
+        .p07-vessel.is-on{clip-path:inset(0 0 0 0)}
+        .p07-slot{position:absolute;width:130px;height:119px;border-radius:26px}
+        .p07-group.is-cmp .p07-slot{display:none}
+        .p07-heart{position:absolute;left:387px;top:350px;width:100px;height:100px;opacity:0;transform:scale(.6);transition:opacity .3s,transform .3s}
+        .p07-heart.is-on{opacity:1;transform:scale(1)}
+        .p07-heart img{width:100%;height:100%;object-fit:contain;display:block}
+        .p07-heart.is-small{transform:scale(.8)}
+        .p07-heart.is-big{transform:scale(1.15)}
+        .p07-drop{position:absolute;width:59px;height:68px}
+        .p07-drop-static{left:460px;top:316px}
+        .p07-flow{left:407px;top:366px;opacity:0;animation:p07-flow 3s ease-in-out infinite}
+        @keyframes p07-flow{
+            0%{opacity:0;transform:translate(0,0);filter:none}
+            8%{opacity:1}
+            46%{opacity:1;transform:translate(var(--dx),var(--dy));filter:none}
+            50%{transform:translate(var(--dx),var(--dy));filter:hue-rotate(-130deg)}
+            92%{opacity:1;transform:translate(0,0);filter:hue-rotate(-130deg)}
+            100%{opacity:0;transform:translate(0,0);filter:hue-rotate(-130deg)}
+        }
+        .p07-loop{position:absolute;left:614px;top:718px;width:208px;height:162px;border-radius:26px;cursor:pointer;pointer-events:auto}
+        .p07-loop.is-fixed{pointer-events:none;cursor:default}
+        .p07-printer{position:absolute;left:304px;top:224px;width:567px;height:646px;transition:filter .4s}
+        .p07-run{position:absolute;left:699px;top:718px;width:208px;height:162px;transition:filter .4s}
+        .is-gray{filter:grayscale(1)}
+        .p07-paper{position:absolute;left:420px;top:479px;width:368px;height:212px;opacity:0;animation:p07-paper 1.1s ease-in forwards}
+        @keyframes p07-paper{
+            0%{opacity:0;transform:translate(0,-30px) scale(.92);filter:blur(7px)}
+            18%{opacity:1;transform:translate(0,0) scale(1);filter:blur(4px)}
+            55%{opacity:1;filter:blur(3px)}
+            100%{opacity:0;transform:translate(-60px,130px) scale(.7);filter:blur(5px)}
+        }
+        .p07-end{position:absolute;left:420px;top:232px;box-sizing:border-box;padding:6px 40px 0;border:6px solid #0a3a8c;border-radius:36px;background:#fff;color:#0a3a8c;font-family:'Cafe24 Ssurround';font-size:76px;line-height:110px;white-space:nowrap}
+        .p07-end:after{content:'';position:absolute;left:70px;top:100%;margin-top:-1px;border:24px solid transparent;border-top:36px solid #0a3a8c;border-bottom:0}
+        .p07-loop.hit-pulse,.p07-slot.hit-pulse{--pulse-w:10px}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p07-frame" id="p07Frame"></div>
+
+          <div class="p07-scene" id="p07Puzzle">
+            <div class="p07-panel p07-bodypanel" id="p07BodyPanel"></div>
+            <div class="p07-panel p07-cardpanel"></div>
+            <div class="p07-card" data-key="heart" style="top:192px"><img src="img/p07_card_heart.png" alt="심장"></div>
+            <div class="p07-card" data-key="out" style="top:427px"><img src="img/p07_card_out.png" alt="심장에서 나오는 길"></div>
+            <div class="p07-card" data-key="in" style="top:662px"><img src="img/p07_card_in.png" alt="심장으로 돌아가는 길"></div>
+          </div>
+
+          <div class="p07-scene is-off" id="p07Compare">
+            <div class="p07-panel p07-cmp-l"></div>
+            <div class="p07-panel p07-cmp-r"></div>
+            <img class="p07-printer" id="p07Printer" src="img/p07_printer.png" alt="">
+            <img class="p07-run" id="p07Run" src="img/p07_btn_run.png" alt="">
+            <div class="p07-end is-off" id="p07End">반복 끝</div>
+          </div>
+
+          <div class="p07-group" id="p07Group">
+            <img class="p07-img" src="img/p07_body.png" alt="">
+            <img class="p07-img p07-vessel" id="p07Red" src="img/p07_vessel_red.png" alt="">
+            <img class="p07-img p07-vessel" id="p07Blue" src="img/p07_vessel_blue.png" alt="">
+            <img class="p07-slot" id="p07SlotHeart" src="img/p07_slot_heart.png" style="left:374px;top:339px" alt="">
+            <img class="p07-slot" id="p07SlotOut" src="img/p07_slot_out.png" style="left:403px;top:482px" alt="">
+            <img class="p07-slot" id="p07SlotIn" src="img/p07_slot_in.png" style="left:307px;top:624px" alt="">
+            <div class="p07-heart" id="p07Heart"><img src="img/p08_heart.png" alt="심장"></div>
+            <img class="p07-drop p07-drop-static is-off" id="p07DropStatic" src="img/p07_drop.png" alt="">
+            <img class="p07-drop p07-flow is-off" src="img/p07_drop.png" style="--dx:-10px;--dy:-190px;animation-delay:0s" alt="">
+            <img class="p07-drop p07-flow is-off" src="img/p07_drop.png" style="--dx:-190px;--dy:150px;animation-delay:.4s" alt="">
+            <img class="p07-drop p07-flow is-off" src="img/p07_drop.png" style="--dx:180px;--dy:150px;animation-delay:.8s" alt="">
+            <img class="p07-drop p07-flow is-off" src="img/p07_drop.png" style="--dx:-75px;--dy:440px;animation-delay:1.2s" alt="">
+            <img class="p07-drop p07-flow is-off" src="img/p07_drop.png" style="--dx:55px;--dy:440px;animation-delay:1.6s" alt="">
+            <img class="p07-loop is-off" id="p07Loop" src="img/p07_btn_loop.png" alt="계속 반복하기">
+          </div>
+
+          <p class="ask-pill is-fit"><span id="p07PillText">퍼즐조각을 인체의 올바른 위치에 놓아보세요.</span></p>
+
+          <div class="avatar-modal is-wrong is-off" id="p07Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small">심장은 가슴 왼쪽에, 혈관 길 퍼즐 조각은 몸통 위에 올려 볼까요?</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p07Done">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">정해진 횟수만큼 하는 반복과, 계속하는 반복! 반복은 이렇게 두 가지가 있어요.</p>
+                  </div>
+                  <a href="page08.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">이제 엔트리에서 직접 만들어 볼까요?</p>
+                  </div>
+                  <a href="page08.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="내 몸속 쿵쾅쿵쾅 순환 지도 완성하기" data-next="page08.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const stage = $('stage');
+    const pillText = $('p07PillText');
+    const frame = $('p07Frame'), puzzle = $('p07Puzzle'), compare = $('p07Compare'), group = $('p07Group');
+    const bodyPanel = $('p07BodyPanel');
+    const heart = $('p07Heart'), red = $('p07Red'), blue = $('p07Blue');
+    const slotHeart = $('p07SlotHeart'), slotVessels = [$('p07SlotOut'), $('p07SlotIn')];
+    const loopBtn = $('p07Loop'), dropStatic = $('p07DropStatic');
+    const printer = $('p07Printer'), runImg = $('p07Run'), endTag = $('p07End');
+    const cards = Array.from(document.querySelectorAll('.p07-card'));
+    const flows = Array.from(document.querySelectorAll('.p07-flow'));
+    const clickSfx = makeSfx('sound/p07_click.mp3', true);
+    const heartBeat = makeSfx('sound/p08_heart_beat.wav', true);
+    const printSnd = new Audio('sound/p05_print.mp3');
+    let heartDone = false, vesselCount = 0, beatTimer = null, beatNl = null, muted = false;
+
+    const mark = () => {
+      slotHeart.classList.toggle('hit-pulse', !heartDone);
+      slotVessels.forEach((s) => s.classList.toggle('hit-pulse', heartDone && !s.dataset.filled));
+    };
+    const beatOnce = () => {
+      heart.classList.remove('is-small', 'is-big');
+      heart.classList.add('is-small');
+      clearTimeout(beatNl);
+      beatNl = setTimeout(() => { heart.classList.remove('is-small'); heart.classList.add('is-big'); setTimeout(() => heart.classList.remove('is-big'), 220); }, 250);
+    };
+    const beat = () => { if (!muted) heartBeat(); beatOnce(); };
+
+    const hit = (r, x, y, pad) => x >= r.left - pad && x <= r.right + pad && y >= r.top - pad && y <= r.bottom + pad;
+    const wrong = () => {
+      playWrong();
+      flashLayer($('p07Wrong'));
+    };
+    const place = (card) => { card.classList.add('is-placed'); clickSfx(); };
+    const allDone = () => {
+      pillText.textContent = '계속 반복하기 버튼을 클릭해보세요.';
+      dropStatic.classList.remove('is-off');
+      loopBtn.classList.remove('is-off');
+      loopBtn.classList.add('hit-pulse');
+      mark();
+    };
+
+    const drop = (card, x, y) => {
+      const s = stage.getBoundingClientRect().width / 1920;
+      const pad = 30 * s;
+      const key = card.dataset.key;
+      if (key === 'heart' && hit(slotHeart.getBoundingClientRect(), x, y, pad)) {
+        place(card);
+        heartDone = true;
+        heart.classList.add('is-on');
+        setTimeout(() => { beat(); setTimeout(beat, 1000); }, 350);
+        mark();
+        return;
+      }
+      if (key !== 'heart' && heartDone) {
+        let target = null, best = Infinity;
+        slotVessels.forEach((sl) => {
+          const r = sl.getBoundingClientRect();
+          if (!hit(r, x, y, pad)) return;
+          const d = Math.hypot(x - (r.left + r.right) / 2, y - (r.top + r.bottom) / 2) + (sl.dataset.filled ? 1e6 : 0);
+          if (d < best) { best = d; target = sl; }
+        });
+        if (target && !target.dataset.filled) {
+          target.dataset.filled = '1';
+          place(card);
+          (key === 'out' ? red : blue).classList.add('is-on');
+          vesselCount++;
+          mark();
+          if (vesselCount >= 2) allDone();
+          return;
+        }
+      }
+      if (hit(bodyPanel.getBoundingClientRect(), x, y, 0)) wrong();
+    };
+
+    cards.forEach((card) => {
+      card.addEventListener('pointerdown', (e) => {
+        if (card.classList.contains('is-placed')) return;
+        e.preventDefault();
+        const s = stage.getBoundingClientRect().width / 1920;
+        card.setPointerCapture(e.pointerId);
+        card.classList.add('is-dragging');
+        const ghost = document.createElement('div');
+        ghost.className = 'p07-ghost';
+        ghost.innerHTML = '<i style="background-image:url(img/p07_card_' + card.dataset.key + '.png)"></i>';
+        const mainEl = card.closest('main');
+        mainEl.appendChild(ghost);
+        const move = (ev) => {
+          const mr = mainEl.getBoundingClientRect();
+          ghost.style.left = ((ev.clientX - mr.left) / s - 65) + 'px';
+          ghost.style.top = ((ev.clientY - mr.top) / s - 59.5) + 'px';
+        };
+        move(e);
+        const end = (ev, cancel) => {
+          card.removeEventListener('pointermove', move);
+          card.removeEventListener('pointerup', up);
+          card.removeEventListener('pointercancel', cc);
+          card.classList.remove('is-dragging');
+          ghost.remove();
+          if (!cancel) drop(card, ev.clientX, ev.clientY);
+        };
+        const up = (ev) => end(ev, false);
+        const cc = (ev) => end(ev, true);
+        card.addEventListener('pointermove', move);
+        card.addEventListener('pointerup', up);
+        card.addEventListener('pointercancel', cc);
+      });
+    });
+
+    const startPrint = () => {
+      pillText.textContent = '비교해볼까요?';
+      frame.classList.add('is-blue');
+      puzzle.classList.add('is-off');
+      compare.classList.remove('is-off');
+      group.classList.add('is-cmp');
+      loopBtn.src = 'img/p07_btn_loop.png';
+      runImg.src = 'img/p07_btn_run_on.png';
+      let k = 0;
+      const tick = () => {
+        k++;
+        printSnd.currentTime = 0;
+        printSnd.play().catch(() => {});
+        const p = document.createElement('img');
+        p.className = 'p07-paper';
+        p.src = 'img/p05_paper.png';
+        p.addEventListener('animationend', () => p.remove());
+        compare.appendChild(p);
+        if (k < 3) { setTimeout(tick, 900); return; }
+        setTimeout(() => {
+          printSnd.pause();
+          runImg.src = 'img/p07_btn_run.png';
+          printer.classList.add('is-gray');
+          runImg.classList.add('is-gray');
+          endTag.classList.remove('is-off');
+          setTimeout(() => {
+            muted = true;
+            clearInterval(beatTimer);
+            $('p07Done').classList.remove('is-off');
+          }, 3000);
+        }, 1100);
+      };
+      setTimeout(tick, 400);
+    };
+
+    loopBtn.addEventListener('mouseenter', () => { if (!loopBtn.classList.contains('is-fixed')) loopBtn.src = 'img/p07_btn_loop_over.png'; });
+    loopBtn.addEventListener('mouseleave', () => { if (!loopBtn.classList.contains('is-fixed')) loopBtn.src = 'img/p07_btn_loop.png'; });
+    loopBtn.addEventListener('click', () => {
+      if (loopBtn.classList.contains('is-fixed')) return;
+      playClick();
+      loopBtn.classList.add('is-fixed');
+      loopBtn.classList.remove('hit-pulse');
+      loopBtn.src = 'img/p07_btn_loop_on.png';
+      dropStatic.classList.add('is-off');
+      flows.forEach((f) => f.classList.remove('is-off'));
+      beat();
+      beatTimer = setInterval(beat, 1000);
+      setTimeout(startPrint, 3000);
+    });
+
+    mark();
+  })();
+  </script>
+</body>
+</html>

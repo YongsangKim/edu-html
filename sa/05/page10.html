@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1박 2일 수학여행 준비물 토너먼트</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 디자인 없음 - 기획서 32~58p. 준비물 그림 img/p10_item_{key}.png. 가운데 휴대폰 화면(홈 → Gemini 채팅 → Gemini Live)은 기획서 캡처를 CSS로 그린 것.
+           1라운드는 두 카드를 하나씩 Gemini에게 물어본 뒤 고르고, 2라운드·결승은 바로 고름. 결과 문구는 최종 선택에 따라 다름.
+           기획서 46p 접이식 우산 답변은 앞 문장이 빠져 있어 49p 요약 문구로 채움 */
+
+        .p10-character{display:none;left:0;top:130px;width:770px;height:791px;z-index:2}
+
+        .scr{display:none;position:absolute;inset:0;font-family:'Pretendard';color:var(--c-ink)}
+        .p10-phone[data-screen="home"] .scr-home, .p10-phone[data-screen="chat"] .scr-chat, .p10-phone[data-screen="live"] .scr-live, .p10-phone[data-screen="answer"] .scr-live{display:block}
+        .p10-phone[data-screen="answer"] .scr-hello{display:none}
+        .scr svg{display:block;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+        .scr-chat .phone-nav, .scr-live .phone-nav{background:none}
+        .scr-star{display:block}
+        .scr-home .app-icon i{background:var(--c-white)}
+        .scr-home .app-icon svg{width:68px;height:68px;stroke:none}
+        .scr-top{position:absolute;left:0;top:56px;width:100%;height:50px;padding:0 24px;box-sizing:border-box;display:flex;align-items:center;gap:20px}
+        .scr-top svg{width:34px;height:34px}
+        .scr-top .is-gap{flex:1}
+        .scr-model{display:flex;align-items:center;gap:2px;font-size:25px}
+        .scr-model b{font-weight:400;color:#5f6368;margin-left:7px}
+        .scr-dot{align-self:flex-start;width:9px;height:9px;margin:-2px 0 0 1px;border-radius:50%;background:#4285f4}
+        .scr-top .scr-model svg{width:26px;height:26px}
+        .scr-chat .scr-top > svg:last-child{width:40px;height:40px;margin-right:-4px}
+        .scr-hello{position:absolute;left:0;top:380px;width:100%;text-align:center;font-size:30px;line-height:1.4}
+        .scr-hello svg{margin:0 auto 18px;width:46px;height:46px;stroke:none}
+        .scr-input{position:absolute;left:22px;right:22px;top:755px;height:70px;border-radius:35px;background:var(--c-white);box-shadow:0 4px 14px rgba(27,23,56,.08);display:flex;align-items:center;gap:14px;padding:0 9px 0 24px;box-sizing:border-box;font-size:22px;color:#8d97a6}
+        .scr-input .is-gap{flex:1;white-space:nowrap;font-size:18px}
+        .scr-input svg{width:30px;height:30px;color:var(--c-ink)}
+        .scr-input .scr-wave svg{width:42px;height:42px}
+        .scr-wave{display:flex;align-items:center;justify-content:center;width:58px;height:58px;border-radius:50%;background:#dcebfa}
+        .scr-ctl{position:absolute;left:0;top:755px;width:100%;height:70px;padding:0 20px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:8px}
+        .scr-ctl i{display:flex;align-items:center;justify-content:center;width:56px;height:49px;border-radius:50%;background:var(--c-white)}
+        .scr-ctl i svg{width:34px;height:34px;stroke-width:1.7}
+        .scr-ctl b{width:134px;height:66px;border-radius:33px;background:linear-gradient(180deg,var(--c-white) 0,var(--c-white) 45%,#8fb4ee 100%)}
+        .p10-answer{position:absolute;left:751px;top:160px;width:420px;min-height:208px;box-sizing:border-box;padding:26px 28px;background:var(--c-pale);border-radius:28px;
+          font-family:'Pretendard';font-size:32px;line-height:1.5;font-weight:600;color:var(--c-ink);letter-spacing:-0.02em;word-break:keep-all}
+        .p10-acts{display:flex;gap:30px;margin-top:22px;color:var(--c-ink)}
+        .p10-acts svg{width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+        .p10-side{position:absolute;left:1285px;top:102px;width:505px;height:818px;box-sizing:border-box;background:#2a6bd0;border:solid 5px #1d55b8;border-radius:14px;box-shadow:14px 14px 0 0 rgba(140,170,220,.5)}
+        .p10-side-title{position:absolute;left:77px;top:-64px;--rb-w:341px}
+        .p10-side-list{position:absolute;left:0;top:48px;width:100%;display:flex;flex-direction:column;align-items:center;gap:20px}
+        .p10-side .p10-item{width:415px;height:362px;padding:0;gap:0;border:solid 6px var(--c-white);border-radius:14px;font-size:58px;line-height:86px;color:var(--c-ink)}
+        .p10-side .p10-item i{flex:0 0 264px;border-radius:6px 6px 0 0}
+        .p10-side .p10-item:hover{border-color:var(--c-violet)}
+        .p10-side .p10-item:active{border-color:var(--c-orchid)}
+        .p10-side .p10-item:disabled{opacity:.5;border-color:var(--c-white)}
+        .p10-item{width:285px;height:309px;padding:0 0 16px;box-sizing:border-box;border:solid 6px #eae0fd;border-radius:28px;background:var(--c-white);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:10px;
+          font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-indigo);letter-spacing:-0.04em}
+        .p10-item i{flex:1 1 auto;width:100%;border-radius:20px 20px 0 0;background:var(--c-pale) center / cover no-repeat}
+        .p10-item:hover{border-color:var(--c-violet)}
+        .p10-item.is-selected{border-color:#ff4ff9}
+        .p10-item:disabled{opacity:.4;cursor:default;border-color:#eae0fd}
+
+        .p10-panel{position:absolute;left:703px;top:100px;width:1087px;height:820px;box-sizing:border-box;background:#2a6bd0;border:solid 5px #1d55b8;border-radius:14px;box-shadow:14px 14px 0 0 rgba(140,170,220,.5)}
+        .p10-round{position:absolute;left:892px;top:52px;width:705px;height:103px;box-sizing:border-box;display:flex;overflow:hidden;z-index:2;
+          background:#8db7e9;border:solid 5px #8db7e9;border-radius:52px;box-shadow:0 12px 0 0 #2059c4;font-family:'Cafe24 Ssurround';font-size:72px;letter-spacing:-0.03em}
+        .p10-round i{flex:1 1 auto;display:flex;align-items:center;justify-content:center;padding-top:8px;font-style:normal;color:var(--c-white)}
+        .p10-round span{flex:0 0 345px;display:flex;align-items:center;justify-content:center;padding-top:8px;background:#fdf9f5;border-radius:0 46px 46px 0;color:var(--c-ink)}
+        .p10-vs{position:absolute;left:800px;top:227px;width:888px;display:flex;justify-content:space-between;transition:top .3s ease}
+        .p10-vs.has-next{top:177px}
+        .p10-vs .p10-item{width:418px;height:620px;padding:0 0 20px;gap:0;border:solid 6px var(--c-white);border-radius:14px;background:#f8f7fb;font-size:58px;line-height:80px;color:var(--c-ink)}
+        .p10-vs .p10-item i{flex:0 0 295px;border-radius:6px 6px 0 0}
+        .p10-vs .p10-item:hover{border-color:var(--c-white)}
+        .p10-vs .p10-item.is-selected{border:solid 8px #f44cf4}
+        .p10-vs .p10-item small{padding:0 18px;font-family:'Cafe24 Ssurround';font-size:30px;line-height:1.3;color:#1b2d8a;letter-spacing:-0.05em;word-break:keep-all;text-align:left}
+        .p10.is-vs .next-btn img, .p10.is-result .next-btn img{width:330px}
+
+        .p10-overview{position:absolute;left:0;top:0;width:1920px;height:960px}
+        .p10-overview:before{content:'';position:absolute;left:142px;top:100px;width:1636px;height:820px;box-sizing:border-box;background:#f7f6f9;border:solid 5px var(--c-ink);border-radius:14px}
+        .p10-overview-title{position:absolute;left:505px;top:37px;--rb-w:910px}
+        .p10-overview-grid{position:absolute;left:233px;top:238px;display:grid;grid-template-columns:repeat(4,355px);gap:8px 11px}
+        .p10-overview-grid .p10-item{width:355px;height:249px;padding:0;gap:0;border:solid 5px var(--c-ink);border-radius:12px;background:var(--c-white);cursor:default;
+          font-size:50px;line-height:64px;color:var(--c-ink);padding-top:6px}
+        .p10-overview-grid .p10-item i{flex:0 0 172px;margin-top:-6px;border-radius:7px 7px 0 0}
+        .p10-overview-grid .p10-item:hover{border-color:var(--c-ink)}
+
+        .p10-result{position:absolute;left:660px;top:100px;width:1172px;height:820px;box-sizing:border-box;background:var(--c-white);border:solid 4px #8db7e9;border-radius:10px;box-shadow:14px 14px 0 0 rgba(140,170,220,.5)}
+        .p10-result-title{position:absolute;left:189px;top:-67px;--rb-w:792px}
+        .p10-result .p10-item{position:absolute;left:46px;top:206px;width:408px;height:358px;padding:0;gap:0;border:solid 4px #2a6bd0;border-radius:10px;background:#f8f7fb;cursor:default;font-size:56px;line-height:86px;color:var(--c-ink)}
+        .p10-result .p10-item i{flex:0 0 265px;border-radius:6px 6px 0 0}
+        .p10-result .p10-item:hover{border-color:#2a6bd0}
+        .p10-result-type{position:absolute;left:474px;top:224px;width:680px;margin:0;text-align:left;font-family:'Cafe24 Ssurround';font-size:54px;line-height:1;color:#1f5fd0;letter-spacing:-0.05em;word-break:keep-all}
+        .p10-result-type small{display:block;margin-top:48px;font-size:48px;line-height:1.15;color:var(--c-ink)}
+        .p10.is-result .p10-character{display:flex}
+
+
+        .p10.is-overview .guide-set, .p10.is-result .guide-set{display:none}
+        .p10 .scr-home .app-icon.is-static, .scr-wave{cursor:pointer}
+
+        .p10 .is-off{display:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default p10">
+          <div class="guide-set is-main" id="p10Set">
+            <p class="guide-bubble is-center" id="p10Bubble"></p>
+            <div class="guide-character"><img id="p10Char" src="../img/character/sa_main.png" alt="메인 캐릭터"></div>
+          </div>
+          <div class="char-box p10-character"><img src="img/p10_character08.png" alt="메인 캐릭터"></div>
+
+          <div class="p10-overview" id="p10Overview">
+            <p class="ribbon is-title p10-overview-title">어떤 준비물을 챙겨갈까요?</p>
+            <div class="p10-overview-grid" id="p10OverviewGrid"></div>
+          </div>
+
+          <div class="phone-frame has-cam p10-phone is-off" id="p10Phone" data-screen="home"><div class="phone-screen">
+            <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gstar" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fb4b4b"/><stop offset=".25" stop-color="#f6b40e"/><stop offset=".5" stop-color="#3b82f6"/><stop offset=".8" stop-color="#2f7df6"/><stop offset="1" stop-color="#12b866"/></linearGradient></defs></svg>
+
+            <div class="scr scr-home app-home is-purple">
+              <div class="phone-status is-dark" data-time="17:58"></div>
+              <div class="app-icon is-static"><i><i data-ic="gemini" style="fill:url(#gstar)"></i></i>Gemini</div>
+              <div class="phone-nav"></div>
+            </div>
+
+            <div class="scr scr-chat phone-bg-chat">
+              <div class="phone-status is-dark" data-time="17:58"></div>
+              <div class="scr-top"><i data-ic="menuEq"></i><span class="scr-model">Gemini <b>Flash</b><i class="scr-dot"></i><i data-ic="chev"></i></span><span class="is-gap"></span><i data-ic="tempChat"></i></div>
+              <div class="scr-hello"><i data-ic="gemini" style="fill:url(#gstar)"></i>안녕하세요.<br>시작해 볼까요?</div>
+              <div class="scr-input"><i data-ic="plus"></i><span class="is-gap">Gemini에게 물어보세요</span><i data-ic="micG"></i><span class="scr-wave"><i data-ic="voice"></i></span></div>
+              <div class="phone-nav"></div>
+            </div>
+
+            <div class="scr scr-live phone-bg-chat">
+              <div class="phone-status is-dark" data-time="17:58"></div>
+              <div class="scr-top"><i data-ic="menuEq"></i><span class="is-gap"></span><i data-ic="msg"></i><i data-ic="dotsH"></i></div>
+              <div class="scr-hello"><i data-ic="gemini" style="fill:url(#gstar)"></i>안녕하세요.<br>시작해 볼까요?</div>
+              <div class="scr-ctl"><i><i data-ic="battery"></i></i><i><i data-ic="sendBox"></i></i><b></b><i><i data-ic="mic"></i></i><i><i data-ic="x"></i></i></div>
+              <div class="phone-nav"></div>
+            </div>
+          </div></div>
+          <div class="p10-answer is-off" id="p10Answer"></div>
+          <div class="p10-side is-off" id="p10Side">
+            <p class="ribbon is-tag p10-side-title">준비물 카드</p>
+            <div class="p10-side-list" id="p10SideList"></div>
+          </div>
+
+          <div class="is-off" id="p10VsView">
+            <div class="p10-panel"></div>
+            <div class="p10-round" id="p10Round"></div>
+            <div class="p10-vs" id="p10Vs"></div>
+          </div>
+
+          <div class="p10-result is-off" id="p10Result">
+            <p class="ribbon is-title p10-result-title">최종 선택 결과!</p>
+            <div id="p10ResultItem"></div>
+            <p class="p10-result-type" id="p10ResultType"></p>
+          </div>
+
+          <a href="javascript:;" class="js-sfx next-btn is-off" id="p10Next" data-sound="sound/click.mp3">
+            <img src="../../resources/img/common/btn_next_content.png" class="js-img-swap" data-src-alt="../../resources/img/common/btn_next_content_on.png" data-src-over="../../resources/img/common/btn_next_content_over.png" alt="다음">
+          </a>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="1박 2일 수학여행 준비물 토너먼트" data-next="page11.html"></script>
+  <script src="../../resources/js/toc.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script src="../../resources/js/box-edit.js"></script>
+  <script>
+  (function () {
+    const ITEMS = {
+      charger: { name: '충전기', obj: '충전기를',
+        answer: '핸드폰 배터리 방전 걱정 없이 마음껏 사용할 수 있습니다. 다만, 한정된 숙소 콘센트 때문에 먼저 충전하겠다고 다투는 갈등이 생길 수도 있습니다.',
+        summary: '핸드폰 배터리 방전 걱정 없이 마음껏 사용할 수 있지만, 먼저 충전하겠다고 친구들과 다투는 갈등이 생길 수도 있습니다.',
+        type: '중요한 순간에 끊기지 않는<br>확실한 신뢰의 여행가 타입!' },
+      battery: { name: '보조배터리', obj: '보조배터리를',
+        answer: '야외 활동 중에도 장소에 구애받지 않고 언제든 충전할 수 있습니다. 다만, 잃어버리지 않게 잘 챙겨야 하며 과열로 인한 화재 위험이 존재합니다.',
+        summary: '장소에 구애받지 않고 언제든 충전할 수 있지만, 잃어버리지 않게 잘 챙겨야 하며 과열로 인한 화재 위험이 존재합니다.',
+        type: '어디서든 100%를 확보하는<br>안전한 여행가 타입!' },
+      carrier: { name: '캐리어', obj: '캐리어를',
+        answer: '차곡차곡 정리하여 수납하기 쉽고, 이동할 때 바퀴로 굴릴 수 있습니다. 다만, 계단에서는 이동이 어렵고 이동 중에는 필요한 물건을 바로 꺼내 쓰지 못합니다.',
+        summary: '차곡차곡 정리하여 수납하기 쉽고 이동할 때 바퀴로 쉽게 굴릴 수 있지만, 이동 중에 필요한 물건을 바로 꺼내 쓰지 못합니다.',
+        type: '몸의 피로를 최소화할 줄 아는<br>현명한 여행가 타입!' },
+      backpack: { name: '배낭', obj: '배낭을',
+        answer: '양손이 자유로워 이동 중에 다양한 활동을 하기 편리합니다. 다만, 모든 짐의 무게를 직접 감당해야 해서 체력적 부담이 커집니다.',
+        summary: '양손이 자유로워 이동 중에 다양한 활동을 하기 편리하지만, 모든 짐의 무게를 직접 감당해야 해서 체력적 부담이 커집니다.',
+        type: '거침없이 어디든 누비는<br>자유로운 탐험가 타입!' },
+      umbrella: { name: '접이식 우산', obj: '접이식 우산을',
+        answer: '갑작스러운 비를 피할 수 있어 야외 활동 중에도 일정이 중단되지 않아요. 다만, 손으로 들고 다녀야 해서 불편하고 분실 위험이 있어요.',
+        summary: '갑작스러운 비를 피할 수 있어 야외 활동 중에도 일정이 중단되지 않지만, 보관이 불편하고 분실 위험이 있어요.',
+        type: '작지만 대비는 확실하게 하는<br>실속파 타입!' },
+      raincoat: { name: '우비', obj: '우비를',
+        answer: '두 손을 자유롭게 사용할 수 있어서 활동할 때 훨씬 편해요. 다만, 사용 후 젖은 우비를 보관하기 번거로워요.',
+        summary: '두 손을 자유롭게 사용할 수 있어서 활동할 때 훨씬 편하지만, 사용 후 젖은 우비를 보관하기 번거로워요.',
+        type: '비바람이 불어도 활동을 멈추지 않는 정면돌파 행동파 타입!' },
+      tablet: { name: '태블릿PC', obj: '태블릿PC를',
+        answer: '여행 중 촬영한 사진이나 영상을 큰 화면으로 확인하고 편집하기에 유용합니다. 다만, 야외 활동 중 파손되거나 잃어버릴 위험이 있습니다.',
+        summary: '여행 중 촬영한 사진이나 영상을 큰 화면으로 확인하고 편집하기에 유용하지만, 야외 활동 중 파손되거나 잃어버릴 위험이 있습니다.',
+        type: '친구들과 추억을 모아 보고 공유하는 분위기 메이커 타입!' },
+      game: { name: '휴대용 게임기', obj: '휴대용 게임기를',
+        answer: '이동 시간이나 숙소에서 친구들과 함께 게임을 즐길 수 있습니다. 다만, 게임이 너무 몰입하다 보면 수학여행 본연의 목적에 소홀해질 수 있습니다.',
+        summary: '이동 시간이나 숙소에서 친구들과 함께 게임을 즐길 수 있지만, 게임이 너무 몰입하다 보면 수학여행 본연의 목적에 소홀해질 수 있습니다.',
+        type: '틈새 시간까지 즐거움으로 가득 채우는 재미 추구 타입!' }
+    };
+    const ROUND1 = [['charger', 'battery'], ['carrier', 'backpack'], ['umbrella', 'raincoat'], ['tablet', 'game']];
+    const PICK_ASK = '질문하고 싶은<br>준비물 카드를 클릭해요.';
+
+    const bubble = $('p10Bubble');
+    const phone = $('p10Phone');
+    const answer = $('p10Answer');
+    const sideList = $('p10SideList');
+    const vs = $('p10Vs');
+    const nextBtn = $('p10Next');
+
+    let onNext = null;
+    let stopType = null;
+    let chosen = null;
+
+    function itemBtn(key, withSummary) {
+      const it = ITEMS[key];
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'p10-item';
+      btn.innerHTML = '<i style="background-image:url(\'img/p10_item_' + key + '.png\')"></i>' + it.name + (withSummary ? '<small>' + it.summary + '</small>' : '');
+      return btn;
+    }
+
+    function show(ids) {
+      ['p10Overview', 'p10Phone', 'p10Answer', 'p10Side', 'p10VsView', 'p10Result', 'p10Next'].forEach((id) => $(id).classList.toggle('is-off', !ids.includes(id)));
+      document.querySelector('.p10').classList.remove('is-overview', 'is-result');
+      document.querySelector('.p10').classList.toggle('is-vs', ids.includes('p10VsView'));
+      // 다음 버튼: 큰 패널 화면은 패널 안 가운데 빈 공간에, 나머지는 기본(오른쪽 아래)
+      const at = ids.includes('p10Overview') ? [758, 767] : ids.includes('p10VsView') ? [1080, 808] : ids.includes('p10Result') ? [1080, 765] : null;
+      nextBtn.style.cssText = at ? 'left:' + at[0] + 'px;top:' + at[1] + 'px;right:auto;bottom:auto' : '';
+      clearFingers();
+    }
+
+    function nextThen(fn) {
+      onNext = fn;
+      nextBtn.classList.remove('is-off');
+      resetImageSwap(nextBtn);
+    }
+
+    const say = initGuideSay({ bubble, img: $('p10Char'), set: $('p10Set') });
+    const POSE = { home: 'point_front', live: 'wink_point4', pick: 'wink_open', ask: 'smile_present', round: 'main' };
+
+    // 눌러야 할 곳은 폰 화면 속 실제 요소. 눌리는 범위 보정은 HOT, 손가락 보정은 FG (?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
+    const TARGET = { app: document.querySelector('.scr-home .app-icon > i'), live: document.querySelector('.scr-chat .scr-wave') };
+    const HOT = { app: [0, 0, 0, 0], live: [0, 0, 0, 0] };
+    const FG = { app: [0, 0], live: [0, 0] };
+    BoxEdit.fingerTag();
+
+    function clickGuide(bubbleHtml, screen, key, then) {
+      show(['p10Phone']);
+      say(bubbleHtml, key === 'app' ? POSE.home : POSE.live);
+      phone.dataset.screen = screen;
+      Object.values(TARGET).forEach((t) => { t.onclick = null; });
+      const el = TARGET[key];
+      BoxEdit.padEl(el, key, HOT);
+      pointFingerAt(el, BoxEdit.fgo(FG, key, key === 'app' ? {} : { pulse: true }));
+      el.onclick = () => { playClick(); el.onclick = null; then(); };
+    }
+
+    function overview() {
+      show(['p10Overview']);
+      document.querySelector('.p10').classList.add('is-overview');
+      Object.keys(ITEMS).forEach((k) => $('p10OverviewGrid').appendChild(itemBtn(k)));
+      nextThen(step2);
+    }
+
+    function step2() {
+      clickGuide('Gemini 앱을 클릭해요.', 'home', 'app', step3);
+    }
+
+    function step3() {
+      clickGuide('Gemini Live 모드<br>버튼을 클릭해요.', 'chat', 'live', () => match(0));
+    }
+
+    function match(m, asked) {
+      asked = asked || [];
+      const pair = ROUND1[m];
+      show(['p10Phone', 'p10Side']);
+      phone.dataset.screen = 'live';
+      say(PICK_ASK, POSE.pick);
+      sideList.innerHTML = '';
+      pair.forEach((key) => {
+        const btn = itemBtn(key);
+        btn.disabled = asked.includes(key);
+        btn.addEventListener('click', () => {
+          playClick();
+          askGemini(m, key, asked.concat(key));
+        });
+        sideList.appendChild(btn);
+      });
+    }
+
+    const ACTS = '<div class="p10-acts">'
+      + ic('thumb')
+      + ic('thumbDown')
+      + ic('out')
+      + ic('copy')
+      + ic('dotsH')
+      + '</div>';
+
+    function askGemini(m, key, asked) {
+      show(['p10Phone', 'p10Answer']);
+      phone.dataset.screen = 'answer';
+      say('수학여행에 ' + ITEMS[key].obj + '<br>가져가면 좋은 점은<br>무엇인가요?', POSE.ask);
+      answer.innerHTML = '<span></span>';
+      stopType = typeText(answer.firstChild, ITEMS[key].answer, { speed: 50, clear: true, onDone: () => { answer.insertAdjacentHTML('beforeend', ACTS); nextThen(() => {
+        if (asked.length < 2) match(m, asked);
+        else round1(m);
+      }); } });
+    }
+
+    function round1(m) {
+      choose('<i>ROUND 1</i><span>' + (m + 1) + '/4</span>', '어떤 준비물을<br>가져가는 게 좋을까?', ROUND1[m], true, (w) => {
+        round1Winners.push(w);
+        if (m < 3) match(m + 1);
+        else round2(0);
+      });
+    }
+
+    const round1Winners = [];
+    const round2Winners = [];
+    const NEED_ASK = '나에게 가장 필요할 것 같은 준비물을 골라봐요.';
+
+    function round2(i) {
+      choose('<i>ROUND 2</i><span>' + (i + 1) + '/2</span>', NEED_ASK, round1Winners.slice(i * 2, i * 2 + 2), true, (w) => {
+        round2Winners.push(w);
+        if (i === 0) round2(1);
+        else finalRound();
+      });
+    }
+
+    function finalRound() {
+      choose('<i>FINAL ROUND</i>', NEED_ASK, round2Winners, true, result);
+    }
+
+    function choose(roundText, ask, pair, withSummary, done) {
+      show(['p10VsView']);
+      vs.classList.remove('has-next');
+      $('p10Round').innerHTML = roundText;
+      say(ask, POSE.round);
+      vs.innerHTML = '';
+      chosen = null;
+      pair.forEach((key) => {
+        const btn = itemBtn(key, withSummary);
+        btn.addEventListener('click', () => {
+          playClick();
+          vs.querySelectorAll('.p10-item').forEach((b) => b.classList.toggle('is-selected', b === btn));
+          chosen = key;
+          vs.classList.add('has-next');
+          nextThen(() => done(chosen));
+        });
+        vs.appendChild(btn);
+      });
+    }
+
+    function result(key) {
+      show(['p10Result']);
+      document.querySelector('.p10').classList.add('is-result');
+      const btn = itemBtn(key);
+      btn.disabled = false;
+      $('p10ResultItem').replaceChildren(btn);
+      $('p10ResultType').innerHTML = ITEMS[key].type + '<small>Gemini Live의 도움을 받아<br>나에게 꼭 필요한 준비물을 골랐어요!</small>';
+      nextThen(() => navigateTo('page11.html'));
+    }
+
+    nextBtn.addEventListener('click', () => {
+      if (!onNext) return;
+      const fn = onNext;
+      onNext = null;
+      setTimeout(() => { nextBtn.classList.add('is-off'); fn(); }, 400);
+    });
+
+    const STEPS = [
+      ['준비물 안내', overview], ['앱 클릭', step2], ['Live 버튼 클릭', step3], ['질문할 카드 고르기', () => match(0)],
+      ['Gemini 답변', () => askGemini(0, 'charger', ['charger'])], ['ROUND 1', () => round1(0)], ['ROUND 2', () => round2(0)],
+      ['FINAL', finalRound], ['결과', () => result('charger')]
+    ];
+    let cur = 1;
+    function gotoStep(n) {
+      cur = n;
+      if (stopType) stopType();
+      onNext = null;
+      Object.values(TARGET).forEach((t) => { t.onclick = null; });
+      sideList.innerHTML = '';
+      $('p10OverviewGrid').innerHTML = '';
+      round1Winners.length = 0;
+      round2Winners.length = 0;
+      if (n >= 7) round1Winners.push('charger', 'carrier', 'umbrella', 'tablet');
+      if (n >= 8) round2Winners.push('charger', 'umbrella');
+      STEPS[n - 1][1]();
+    }
+
+    // 좌표 수정 모드(?edit): 눌러야 할 곳(점선 박스)과 손가락을 눌러 방향키(1px, Shift 10px)로 맞추고 표시줄 값을 HOT·FG 표에 붙여 넣음. ?step=N 으로 단계 바로 보기
+    const want = parseInt(new URLSearchParams(location.search).get('step'), 10);
+    if (want >= 1 && want <= STEPS.length) cur = want;
+    BoxEdit.stepEdit({
+      unit: 1,
+      count: STEPS.length + 1, get: () => cur, set: (n) => { cur = n; }, go: (n) => { if (n < 1) return; BoxEdit.syncStep(n); gotoStep(n); },
+      label: (n) => '단계 ' + n + ' / ' + STEPS.length + ' (' + STEPS[n - 1][0] + ')',
+      say, bubble, img: $('p10Char')
+    });
+    gotoStep(cur);
+  })();
+  </script>
+</body>
+</html>

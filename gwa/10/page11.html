@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>도전! 춤추는 로봇 코딩 마스터!</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .p11-main {
+            position: relative;
+            width: 1920px;
+            height: 960px;
+            background: url('img/p11_bg.jpg') center / 1920px 960px no-repeat;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .p11-mission-wrap {
+            position: absolute;
+            left: 194px;
+            top: 12px;
+            width: 1532px;
+            height: 115px;
+            box-sizing: border-box;
+            background: #ffffff;
+            border: 4px solid #1c1836;
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            box-shadow: 0 15px 0 0 rgba(12,65,137,0.2);
+            z-index: 10;
+        }
+        .p11-stage-badge {
+            flex: 0 0 276px;
+            height: 100%;
+            background: #8ebae5;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Cafe24 Ssurround';
+            font-size: 70px;
+            padding-top:8px;
+            color: #ffffff;
+            letter-spacing: -0.02em;
+        }
+        .p11-mission-text {
+            flex: 1;
+            margin: 0;
+            padding: 0 28px;
+            text-align: center;
+            font-family: 'Cafe24 Ssurround';
+            font-size: 50px;
+            line-height: 1.0;
+            color: #1c1836;
+            letter-spacing: -0.03em;
+            word-break: keep-all;
+        }
+
+        .p11-robot-box {
+            position: absolute;
+            left: 171px;
+            top: 146px;
+            width: 414px;
+            height: 404px;
+            z-index: 5;
+            pointer-events: none;
+        }
+        .p11-robot-box img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .p11-board {
+            position: absolute;
+            left: 745px;
+            top: 210px;
+            width: 1096px;
+            height: 422px;
+            z-index: 6;
+        }
+
+        .p11-blk-start {
+            position: absolute;
+            left: 38px;
+            top: 0;
+            width: 1020px;
+            height: 74px;
+            background: linear-gradient(180deg, #8cd746 0%, #4eb124 100%);
+            border: 5px solid #1c1836;
+            border-radius: 18px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Cafe24 Ssurround';
+            font-size: 40px;
+            color: #1c1836;
+            -webkit-text-stroke: 8px #ffffff;
+            paint-order: stroke fill;
+            text-shadow: 0 2px 0 #ffffff;
+            box-shadow: none;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .p11-slot-area {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .p11-loop-slot {
+            position: absolute;
+            box-sizing: border-box;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .p11-loop-slot.is-hover path {
+            fill: #fbf5d5 !important;
+            stroke: #ffcc00 !important;
+        }
+        .p11-loop-slot.is-filled path {
+            display: none !important;
+        }
+
+        .p11-loop-block {
+            position: relative;
+            box-sizing: border-box;
+            cursor: grab;
+            touch-action: none;
+            filter: none;
+        }
+        .p11-loop-block:active {
+            cursor: grabbing;
+        }
+        .p11-loop-block.is-dragging {
+            cursor: grabbing !important;
+            z-index: 1000 !important;
+            filter: drop-shadow(0 14px 20px rgba(0,0,0,0.35)) brightness(1.08) !important;
+        }
+        .p11-loop-block.is-placed {
+            position: absolute;
+            cursor: default !important;
+            filter: none !important;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .p11-loop-svg {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: visible;
+        }
+        .p11-loop-label {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Cafe24 Ssurround';
+            color: #1c1836;
+            -webkit-text-stroke: 8px #ffffff;
+            paint-order: stroke fill;
+            text-shadow: 0 2px 0 #ffffff;
+            pointer-events: none;
+        }
+
+        .p11-slot {
+            position: absolute;
+            box-sizing: border-box;
+            z-index: 3;
+            border: 5px solid #bdbdbd;
+            background: #e1e1e1;
+            border-radius: 16px;
+            pointer-events: none;
+            transition: border-color 0.15s ease, background 0.15s ease;
+        }
+        .p11-slot.is-hover {
+            border-color: #ffcc00 !important;
+            background: #fbf5d5 !important;
+        }
+        .p11-slot.is-filled {
+            border-color: transparent !important;
+            background: transparent !important;
+        }
+
+        .p11-blk {
+            box-sizing: border-box;
+            border: 5px solid #1c1836;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Cafe24 Ssurround';
+            color: #1c1836;
+            -webkit-text-stroke: 8px #ffffff;
+            paint-order: stroke fill;
+            text-shadow: 0 2px 0 #ffffff;
+            cursor: grab;
+            touch-action: none;
+            box-shadow: none;
+            transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+        }
+        .p11-blk:active {
+            cursor: grabbing;
+        }
+        .p11-blk.is-dragging {
+            cursor: grabbing !important;
+            z-index: 1000 !important;
+            transform: scale(1.04);
+            box-shadow: 0 16px 26px rgba(0,0,0,0.35) !important;
+            filter: brightness(1.08);
+        }
+        .p11-blk.is-placed {
+            position: absolute;
+            z-index: 4;
+            cursor: default !important;
+            box-shadow: none !important;
+        }
+
+        .p11-c-orange {
+            background: linear-gradient(180deg, #ff8c3a 0%, #f16410 100%);
+        }
+        .p11-c-purple {
+            background: linear-gradient(180deg, #9955ee 0%, #7d35dc 100%);
+        }
+        .p11-c-yellow {
+            background: linear-gradient(180deg, #ffc736 0%, #ea9f0e 100%);
+        }
+
+        .p11-tray {
+            position: absolute;
+            left: 70px;
+            top: 665px;
+            width: 1780px;
+            height: 265px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 30px;
+        }
+        .p11-tray-col-left {
+            flex: 0 0 870px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .p11-tray-col-right {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .p11-tray-list-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            gap: 14px;
+        }
+        .p11-tray-grid-2x2 {
+            display: grid;
+            grid-template-columns: repeat(2, 430px);
+            gap: 14px 20px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .p11-blk.is-active, .p11-loop-block.is-active, .p11-blk-start.is-active {
+            animation: p11-pulse-border 0.5s infinite alternate !important;
+        }
+        @keyframes p11-pulse-border {
+            from { filter: drop-shadow(0 0 8px #ffea00) brightness(1.18); }
+            to { filter: drop-shadow(0 0 22px #ffea00) brightness(1.35); }
+        }
+
+        .p11-blk.is-executing {
+            box-shadow: 0 0 22px #ffea00, inset 0 0 12px rgba(255,255,255,0.7) !important;
+            transform: scale(1.03);
+            filter: brightness(1.28);
+        }
+
+        .p11-toast {
+            position: absolute;
+            left: 50%;
+            top: 45%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: rgba(29, 42, 102, 0.95);
+            border: 5px solid #ffd642;
+            border-radius: 40px;
+            color: #ffffff;
+            font-family: 'Cafe24 Ssurround';
+            font-size: 46px;
+            padding: 24px 52px;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            white-space: pre-line;
+        }
+        .p11-toast.is-show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="p11-main" id="p11Main">
+
+          <div class="p11-mission-wrap">
+            <div class="p11-stage-badge" id="p11Badge">1단계</div>
+            <p class="p11-mission-text" id="p11Mission"></p>
+          </div>
+
+          <div class="p11-robot-box">
+            <img id="p11Robot" src="img/p11_robot_idle.png" alt="댄스 로봇">
+          </div>
+
+          <div class="p11-board" id="p11Board">
+            <div class="p11-blk-start" id="p11StartBlk">시작하기 버튼을 클릭했을 때</div>
+            <div id="p11SlotArea" class="p11-slot-area"></div>
+          </div>
+
+          <div class="p11-tray" id="p11Tray">
+            <div class="p11-tray-col-left" id="p11TrayLeft"></div>
+            <div class="p11-tray-col-right" id="p11TrayRight"></div>
+          </div>
+
+          <div class="p11-toast" id="p11Toast"></div>
+
+          <div class="avatar-modal is-off" id="p11DoneModal">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">반복 블록을 사용해 로봇의 춤을 멋지게 완성했어요! 정해진 횟수만큼 동작을 정확히 되풀이했네요.</p>
+                  </div>
+                  <a href="page12.html" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup is-arrow" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">이제 이번 차시에서 배운 반복 알고리즘을 함께 정리해 볼까요?</p>
+                  </div>
+                  <a href="page12.html" class="js-nav-effect js-sfx avatar-card-btn card-btn is-popup" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="도전! 춤추는 로봇 코딩 마스터!" data-next="page12.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const robot = $('p11Robot');
+    const badge = $('p11Badge');
+    const mission = $('p11Mission');
+    const slotArea = $('p11SlotArea');
+    const trayLeft = $('p11TrayLeft');
+    const trayRight = $('p11TrayRight');
+    const toast = $('p11Toast');
+    const doneModal = $('p11DoneModal');
+    const startBlk = $('p11StartBlk');
+
+    const ROBOT_IMGS = [
+      'img/p11_robot_idle.png',
+      'img/p11_robot_step_l.png',
+      'img/p11_robot_step_r.png',
+      'img/p11_robot_step_stop.png',
+      'img/p11_robot_hand_up_r.png',
+      'img/p11_robot_hand_down_r.png',
+      'img/p11_robot_hand_up_l.png',
+      'img/p11_robot_hand_down_l.png',
+      'img/p11_robot_turn_l.png',
+      'img/p11_robot_kick.png',
+      'img/p11_robot_bow.png'
+    ];
+    const preloadedImages = {};
+    ROBOT_IMGS.forEach(src => {
+      const img = new Image();
+      img.src = src;
+      preloadedImages[src] = img;
+    });
+
+    function getCPath(w, h, topH, botH, leftW, r, ir, nSlots) {
+      const s = 2.5;
+      const x0 = s, y0 = s;
+      const x1 = w - s, y1 = h - s;
+      const topBarY = topH - s;
+      const botBarY = h - botH + s;
+      const spineX = leftW - s;
+      const rBot = Math.min(r, Math.max(4, Math.floor((y1 - botBarY) / 2)));
+
+      const path = [
+        `M ${x0 + r} ${y0}`,
+        `L ${x1 - r} ${y0}`,
+        `A ${r} ${r} 0 0 1 ${x1} ${y0 + r}`,
+        `L ${x1} ${topBarY - r}`,
+        `A ${r} ${r} 0 0 1 ${x1 - r} ${topBarY}`
+      ];
+
+      const slots = nSlots || 1;
+      const innerH = botBarY - topBarY;
+      const slotH = innerH / slots;
+      const curIr = Math.min(ir, Math.max(4, slotH / 2 - 2));
+
+      for (let i = 0; i < slots; i++) {
+        const sTop = topBarY + i * slotH;
+        const sBot = topBarY + (i + 1) * slotH;
+        if (i === 0) {
+          path.push(`L ${spineX + curIr} ${topBarY}`);
+        }
+        path.push(`A ${curIr} ${curIr} 0 0 0 ${spineX} ${sTop + curIr}`);
+        path.push(`L ${spineX} ${sBot - curIr}`);
+        path.push(`A ${curIr} ${curIr} 0 0 0 ${spineX + curIr} ${sBot}`);
+      }
+
+      path.push(
+        `L ${x1 - rBot} ${botBarY}`,
+        `A ${rBot} ${rBot} 0 0 1 ${x1} ${botBarY + rBot}`,
+        `L ${x1} ${y1 - rBot}`,
+        `A ${rBot} ${rBot} 0 0 1 ${x1 - rBot} ${y1}`,
+        `L ${x0 + r} ${y1}`,
+        `A ${r} ${r} 0 0 1 ${x0} ${y1 - r}`,
+        `L ${x0} ${y0 + r}`,
+        `A ${r} ${r} 0 0 1 ${x0 + r} ${y0}`,
+        'Z'
+      );
+
+      return path.join(' ');
+    }
+
+    function renderLoopSvg(el, w, h, topH, botH, leftW, r, ir, isSlot, gradId, nSlots) {
+      const d = getCPath(w, h, topH, botH, leftW, r, ir, nSlots);
+      let defs = '';
+      let fill = '#e1e1e1';
+      let stroke = '#bdbdbd';
+      if (!isSlot) {
+        defs = `<defs><linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6c8ef8"/><stop offset="100%" stop-color="#466fe9"/></linearGradient></defs>`;
+        fill = `url(#${gradId})`;
+        stroke = '#1c1836';
+      }
+      let svg = el.querySelector('svg.p11-loop-svg');
+      if (!svg) {
+        svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('class', 'p11-loop-svg');
+        el.insertBefore(svg, el.firstChild);
+      }
+      svg.setAttribute('width', w);
+      svg.setAttribute('height', h);
+      svg.innerHTML = `
+        ${defs}
+        <path d="${d}" fill="${fill}" stroke="${stroke}" stroke-width="5" stroke-linejoin="round" />
+      `;
+    }
+
+    const STAGES = [
+      {
+        stageNum: 1,
+        startH: 74,
+        missionHtml: '시작 버튼을 누르면 로봇이 왼쪽으로 한발짝,<br>오른쪽으로 한발짝 움직이는 것을 3번 반복한다.',
+        loop: { count: 3, text: '3번 반복한다', top: 76, h: 318, topH: 72, botH: 38, leftW: 84 },
+        actions: [
+          { id: 'step_l', text: '왼쪽으로 한발 짝 움직임', color: 'p11-c-orange', order: 0, h: 104 },
+          { id: 'step_r', text: '오른쪽으로 한발 짝 움직임', color: 'p11-c-purple', order: 1, h: 104 }
+        ],
+        dancing: async function () {
+          const blkL = slotArea.querySelector('.p11-blk[data-action-id="step_l"]');
+          const blkR = slotArea.querySelector('.p11-blk[data-action-id="step_r"]');
+          for (let r = 0; r < 3; r++) {
+            if (blkR) blkR.classList.remove('is-executing');
+            if (blkL) blkL.classList.add('is-executing');
+            robot.src = 'img/p11_robot_step_l.png';
+            await wait(500);
+
+            if (blkL) blkL.classList.remove('is-executing');
+            robot.src = 'img/p11_robot_step_stop.png';
+            await wait(420);
+
+            if (blkR) blkR.classList.add('is-executing');
+            robot.src = 'img/p11_robot_step_r.png';
+            await wait(500);
+
+            if (blkR) blkR.classList.remove('is-executing');
+            robot.src = 'img/p11_robot_idle.png';
+            await wait(450);
+          }
+          robot.src = 'img/p11_robot_idle.png';
+        }
+      },
+      {
+        stageNum: 2,
+        startH: 62,
+        missionHtml: '시작 버튼을 누르면 로봇이 오른손을 들었다가 내리고,<br>왼손을 들었다가 내리는 동작을 2번 반복한다.',
+        loop: { count: 2, text: '2번 반복한다', top: 64, h: 348, topH: 58, botH: 30, leftW: 84 },
+        actions: [
+          { id: 'hand_up_r', text: '오른손을 든다', color: 'p11-c-orange', order: 0, h: 65 },
+          { id: 'hand_down_r', text: '오른손을 내린다', color: 'p11-c-purple', order: 1, h: 65 },
+          { id: 'hand_up_l', text: '왼손을 든다', color: 'p11-c-orange', order: 2, h: 65 },
+          { id: 'hand_down_l', text: '왼손을 내린다', color: 'p11-c-purple', order: 3, h: 65 }
+        ],
+        dancing: async function () {
+          const blks = {
+            hur: slotArea.querySelector('.p11-blk[data-action-id="hand_up_r"]'),
+            hdr: slotArea.querySelector('.p11-blk[data-action-id="hand_down_r"]'),
+            hul: slotArea.querySelector('.p11-blk[data-action-id="hand_up_l"]'),
+            hdl: slotArea.querySelector('.p11-blk[data-action-id="hand_down_l"]')
+          };
+          const setExec = (k) => {
+            Object.values(blks).forEach(b => b && b.classList.remove('is-executing'));
+            if (k && blks[k]) blks[k].classList.add('is-executing');
+          };
+          for (let r = 0; r < 2; r++) {
+            setExec('hur');
+            robot.src = 'img/p11_robot_hand_up_r.png';
+            await wait(500);
+            setExec('hdr');
+            robot.src = 'img/p11_robot_hand_down_r.png';
+            await wait(450);
+            setExec('hul');
+            robot.src = 'img/p11_robot_hand_up_l.png';
+            await wait(500);
+            setExec('hdl');
+            robot.src = 'img/p11_robot_hand_down_l.png';
+            await wait(450);
+            setExec(null);
+            robot.src = 'img/p11_robot_idle.png';
+            await wait(350);
+          }
+          setExec(null);
+          robot.src = 'img/p11_robot_idle.png';
+        }
+      },
+      {
+        stageNum: 3,
+        startH: 68,
+        missionHtml: '시작 버튼을 누르면 로봇이 왼쪽으로 돌았다가 발차기 하는 동작을 2회 반복한 뒤, 인사를 한다.',
+        loop: { count: 2, text: '2번 반복한다', top: 70, h: 268, topH: 64, botH: 32, leftW: 84 },
+        actions: [
+          { id: 'turn_l', text: '왼쪽으로 돈다', color: 'p11-c-orange', order: 0, h: 86 },
+          { id: 'kick', text: '발차기를 한다', color: 'p11-c-purple', order: 1, h: 86 }
+        ],
+        outerAction: { id: 'bow', text: '인사를 한다', color: 'p11-c-yellow', order: 2, top: 340, h: 68 },
+        dancing: async function () {
+          const blks = {
+            turn: slotArea.querySelector('.p11-blk[data-action-id="turn_l"]'),
+            kick: slotArea.querySelector('.p11-blk[data-action-id="kick"]'),
+            bow: slotArea.querySelector('.p11-blk[data-action-id="bow"]')
+          };
+          const setExec = (k) => {
+            Object.values(blks).forEach(b => b && b.classList.remove('is-executing'));
+            if (k && blks[k]) blks[k].classList.add('is-executing');
+          };
+          for (let r = 0; r < 2; r++) {
+            setExec('turn');
+            robot.src = 'img/p11_robot_turn_l.png';
+            await wait(550);
+            setExec(null);
+            robot.src = 'img/p11_robot_idle.png';
+            await wait(250);
+            setExec('kick');
+            robot.src = 'img/p11_robot_kick.png';
+            await wait(550);
+            setExec(null);
+            robot.src = 'img/p11_robot_idle.png';
+            await wait(350);
+          }
+          setExec('bow');
+          robot.src = 'img/p11_robot_bow.png';
+          await wait(800);
+          setExec(null);
+          robot.src = 'img/p11_robot_idle.png';
+          await wait(400);
+        }
+      }
+    ];
+
+    let currentStageIndex = 0;
+    let placedState = {};
+    let isDancing = false;
+
+    function wait(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function showToast(msg, duration = 1500) {
+      toast.innerHTML = msg;
+      toast.classList.add('is-show');
+      setTimeout(() => { toast.classList.remove('is-show'); }, duration);
+    }
+
+    function loadStage(index) {
+      currentStageIndex = index;
+      placedState = {};
+      const data = STAGES[index];
+
+      badge.textContent = data.stageNum + '단계';
+      mission.innerHTML = data.missionHtml;
+      robot.src = 'img/p11_robot_idle.png';
+
+      slotArea.innerHTML = '';
+      trayLeft.innerHTML = '';
+      trayRight.innerHTML = '';
+
+      startBlk.style.left = '38px';
+      startBlk.style.width = '1020px';
+      startBlk.style.height = data.startH + 'px';
+
+      const leftCol = 38;
+      const w = 1020;
+
+      const loopSlot = document.createElement('div');
+      loopSlot.className = 'p11-loop-slot';
+      loopSlot.dataset.slotType = 'loop';
+      loopSlot.dataset.stage = data.stageNum;
+      loopSlot.style.left = leftCol + 'px';
+      loopSlot.style.top = data.loop.top + 'px';
+      loopSlot.style.width = w + 'px';
+      loopSlot.style.height = data.loop.h + 'px';
+      renderLoopSvg(loopSlot, w, data.loop.h, data.loop.topH, data.loop.botH, data.loop.leftW, 18, 16, true, 'slotGrad_' + index, data.actions.length);
+      slotArea.appendChild(loopSlot);
+
+      const cutLeft = leftCol + data.loop.leftW - 2;
+      const cutW = w - data.loop.leftW + 2;
+      const cutTop = data.loop.top + data.loop.topH;
+
+      data.actions.forEach((act, i) => {
+        const slot = document.createElement('div');
+        slot.className = 'p11-slot';
+        slot.dataset.slotType = 'action';
+        slot.dataset.actionId = act.id;
+        slot.style.left = cutLeft + 'px';
+        slot.style.top = (cutTop + i * act.h) + 'px';
+        slot.style.width = cutW + 'px';
+        slot.style.height = act.h + 'px';
+        slotArea.appendChild(slot);
+      });
+
+      if (data.outerAction) {
+        const outerSlot = document.createElement('div');
+        outerSlot.className = 'p11-slot';
+        outerSlot.dataset.slotType = 'action';
+        outerSlot.dataset.actionId = data.outerAction.id;
+        outerSlot.style.left = leftCol + 'px';
+        outerSlot.style.top = data.outerAction.top + 'px';
+        outerSlot.style.width = w + 'px';
+        outerSlot.style.height = data.outerAction.h + 'px';
+        slotArea.appendChild(outerSlot);
+      }
+
+      createTrayLoopBlock(data, loopSlot);
+
+      let actionList = [...data.actions];
+      if (data.outerAction) actionList.push(data.outerAction);
+      actionList.sort(() => Math.random() - 0.5);
+
+      if (data.stageNum === 2) {
+        const grid = document.createElement('div');
+        grid.className = 'p11-tray-grid-2x2';
+        actionList.forEach(act => {
+          createTrayActionBlock(act, data, grid);
+        });
+        trayRight.appendChild(grid);
+      } else {
+        const col = document.createElement('div');
+        col.className = 'p11-tray-list-col';
+        actionList.forEach(act => {
+          createTrayActionBlock(act, data, col);
+        });
+        trayRight.appendChild(col);
+      }
+
+      if (new URLSearchParams(window.location.search).get('placed') === '1') {
+        const loop = trayLeft.querySelector('.p11-loop-block');
+        if (loop) {
+          loop.classList.add('is-placed');
+          loop.style.position = 'absolute';
+          loop.style.left = loopSlot.style.left;
+          loop.style.top = loopSlot.style.top;
+          loop.style.width = loopSlot.style.width;
+          loop.style.height = loopSlot.style.height;
+          renderLoopSvg(loop, w, data.loop.h, data.loop.topH, data.loop.botH, data.loop.leftW, 18, 16, false, 'placedLoopGrad_' + data.stageNum, data.actions.length);
+          const lbl = loop.querySelector('.p11-loop-label');
+          if (lbl) {
+            lbl.style.height = data.loop.topH + 'px';
+            lbl.style.fontSize = (data.stageNum === 2 ? '36px' : '40px');
+          }
+          slotArea.appendChild(loop);
+          loopSlot.classList.add('is-filled');
+        }
+        const acts = Array.from(trayRight.querySelectorAll('.p11-blk'));
+        acts.forEach(el => {
+          const id = el.dataset.actionId;
+          const targetSlot = slotArea.querySelector(`.p11-slot[data-action-id="${id}"]`);
+          if (targetSlot) {
+            el.classList.add('is-placed');
+            el.style.position = 'absolute';
+            el.style.left = targetSlot.style.left;
+            el.style.top = targetSlot.style.top;
+            el.style.width = targetSlot.style.width;
+            el.style.height = targetSlot.style.height;
+            el.style.fontSize = (data.stageNum === 2 ? '36px' : '40px');
+            slotArea.appendChild(el);
+            targetSlot.classList.add('is-filled');
+          }
+        });
+      }
+    }
+
+    function createTrayLoopBlock(data, targetSlot) {
+      const loop = document.createElement('div');
+      loop.className = 'p11-loop-block';
+      loop.dataset.blkType = 'loop';
+      loop.dataset.stage = data.stageNum;
+
+      const trayW = 860;
+      const trayH = 220;
+      const topH = 54;
+      const botH = 24;
+      const leftW = 76;
+      loop.style.width = trayW + 'px';
+      loop.style.height = trayH + 'px';
+      renderLoopSvg(loop, trayW, trayH, topH, botH, leftW, 18, 16, false, 'trayLoopGrad_' + data.stageNum, data.actions.length);
+
+      const lbl = document.createElement('div');
+      lbl.className = 'p11-loop-label';
+      lbl.style.height = topH + 'px';
+      lbl.style.fontSize = '36px';
+      lbl.textContent = data.loop.text;
+      loop.appendChild(lbl);
+
+      trayLeft.appendChild(loop);
+
+      makeDraggable(loop, targetSlot, () => {
+        loop.classList.add('is-placed');
+        loop.style.position = 'absolute';
+        loop.style.left = targetSlot.style.left;
+        loop.style.top = targetSlot.style.top;
+        loop.style.width = targetSlot.style.width;
+        loop.style.height = targetSlot.style.height;
+
+        const w = parseInt(targetSlot.style.width, 10);
+        const h = parseInt(targetSlot.style.height, 10);
+        renderLoopSvg(loop, w, h, data.loop.topH, data.loop.botH, data.loop.leftW, 18, 16, false, 'placedLoopGrad_' + data.stageNum, data.actions.length);
+
+        lbl.style.height = data.loop.topH + 'px';
+        lbl.style.fontSize = (data.stageNum === 2 ? '36px' : '40px');
+        slotArea.appendChild(loop);
+        targetSlot.classList.add('is-filled');
+        placedState['loop'] = true;
+        checkComplete();
+      }, () => {
+        renderLoopSvg(loop, trayW, trayH, topH, botH, leftW, 18, 16, false, 'trayLoopGrad_' + data.stageNum, data.actions.length);
+        lbl.style.height = topH + 'px';
+        lbl.style.fontSize = '36px';
+      });
+    }
+
+    function createTrayActionBlock(act, data, container) {
+      const el = document.createElement('div');
+      el.className = 'p11-blk ' + act.color;
+      el.dataset.blkType = 'action';
+      el.dataset.actionId = act.id;
+      el.textContent = act.text;
+
+      if (data.stageNum === 2) {
+        el.style.width = '430px';
+        el.style.height = '54px';
+        el.style.fontSize = '30px';
+      } else {
+        el.style.width = '820px';
+        el.style.height = (data.stageNum === 3 ? '58px' : '64px');
+        el.style.fontSize = '38px';
+      }
+
+      container.appendChild(el);
+
+      const targetSlot = slotArea.querySelector(`.p11-slot[data-action-id="${act.id}"]`);
+
+      makeDraggable(el, targetSlot, () => {
+        el.classList.add('is-placed');
+        el.style.position = 'absolute';
+        el.style.left = targetSlot.style.left;
+        el.style.top = targetSlot.style.top;
+        el.style.width = targetSlot.style.width;
+        el.style.height = targetSlot.style.height;
+        el.style.fontSize = (data.stageNum === 2 ? '36px' : '40px');
+        slotArea.appendChild(el);
+        targetSlot.classList.add('is-filled');
+        placedState[act.id] = true;
+        checkComplete();
+      });
+    }
+
+    function makeDraggable(el, targetSlot, onSnap, onCancel) {
+      let isDragging = false;
+      let startX, startY;
+      let initLeft, initTop;
+      let parentOriginal;
+      let placeholder;
+
+      const isLoop = el.classList.contains('p11-loop-block');
+
+      function checkLoopMatch(elRect, clientX) {
+        if (!targetSlot || targetSlot.classList.contains('is-filled')) return false;
+        const stageRect = $('stage').getBoundingClientRect();
+        const scale = stageRect.width / 1920;
+        const sRect = targetSlot.getBoundingClientRect();
+
+        const overlap = !(
+          elRect.right < sRect.left ||
+          elRect.left > sRect.right ||
+          elRect.bottom < sRect.top ||
+          elRect.top > sRect.bottom
+        );
+        if (overlap) return true;
+
+        const elCenterX = elRect.left + elRect.width / 2;
+        const elCenterY = elRect.top + elRect.height / 2;
+        const sCenterX = sRect.left + sRect.width / 2;
+        const sCenterY = sRect.top + sRect.height / 2;
+
+        const dx = Math.abs(elCenterX - sCenterX) / scale;
+        const dy = Math.abs(elCenterY - sCenterY) / scale;
+        const dTop = Math.abs(elRect.top - sRect.top) / scale;
+        const pointerXNear = clientX != null && (clientX >= sRect.left - 80 && clientX <= sRect.right + 80);
+
+        return (dx <= 500 || pointerXNear) && (dy <= 220 || dTop <= 180);
+      }
+
+      function findActionSlot(elRect, clientX) {
+        const stageRect = $('stage').getBoundingClientRect();
+        const scale = stageRect.width / 1920;
+        const elCenterX = elRect.left + elRect.width / 2;
+        const elCenterY = elRect.top + elRect.height / 2;
+
+        const candidates = Array.from(slotArea.querySelectorAll('.p11-slot:not(.is-filled)'));
+        let nearest = null;
+        let minDy = Infinity;
+
+        candidates.forEach(s => {
+          const sRect = s.getBoundingClientRect();
+          const sCenterX = sRect.left + sRect.width / 2;
+          const sCenterY = sRect.top + sRect.height / 2;
+
+          const dx = Math.abs(elCenterX - sCenterX) / scale;
+          const pointerXNear = clientX != null && (clientX >= sRect.left - 80 && clientX <= sRect.right + 80);
+          const xPass = dx <= 480 || pointerXNear;
+
+          if (xPass) {
+            const dy = Math.abs(elCenterY - sCenterY) / scale;
+            if (dy < minDy) {
+              minDy = dy;
+              nearest = s;
+            }
+          }
+        });
+
+        let targetDx = Infinity;
+        let targetDy = Infinity;
+        let targetXPass = false;
+        if (targetSlot && !targetSlot.classList.contains('is-filled')) {
+          const tRect = targetSlot.getBoundingClientRect();
+          const tCenterX = tRect.left + tRect.width / 2;
+          const tCenterY = tRect.top + tRect.height / 2;
+          targetDx = Math.abs(elCenterX - tCenterX) / scale;
+          const tPointerXNear = clientX != null && (clientX >= tRect.left - 80 && clientX <= tRect.right + 80);
+          targetXPass = targetDx <= 480 || tPointerXNear;
+          targetDy = Math.abs(elCenterY - tCenterY) / scale;
+        }
+
+        return { nearest, minDy, targetXPass, targetDy };
+      }
+
+      const onPointerMove = (e) => {
+        if (!isDragging) return;
+        const stageRect = $('stage').getBoundingClientRect();
+        const scale = stageRect.width / 1920;
+
+        const dx = (e.clientX - startX) / scale;
+        const dy = (e.clientY - startY) / scale;
+
+        el.style.left = (initLeft + dx) + 'px';
+        el.style.top = (initTop + dy) + 'px';
+
+        const allSlots = Array.from(slotArea.querySelectorAll('.p11-slot, .p11-loop-slot'));
+        allSlots.forEach(s => s.classList.remove('is-hover'));
+
+        const elRect = el.getBoundingClientRect();
+        if (isLoop) {
+          if (checkLoopMatch(elRect, e.clientX)) {
+            targetSlot.classList.add('is-hover');
+          }
+        } else {
+          const { nearest, minDy } = findActionSlot(elRect, e.clientX);
+          if (nearest && minDy <= 95) {
+            nearest.classList.add('is-hover');
+          }
+        }
+      };
+
+      const onPointerUp = (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+        window.removeEventListener('pointercancel', onPointerUp);
+
+        const allSlots = Array.from(slotArea.querySelectorAll('.p11-slot, .p11-loop-slot'));
+        allSlots.forEach(s => s.classList.remove('is-hover'));
+
+        el.classList.remove('is-dragging');
+
+        const elRect = el.getBoundingClientRect();
+        let isCorrect = false;
+
+        if (isLoop) {
+          if (checkLoopMatch(elRect, e.clientX)) {
+            isCorrect = true;
+          }
+        } else {
+          const { nearest, targetXPass, targetDy } = findActionSlot(elRect, e.clientX);
+          if (targetSlot && !targetSlot.classList.contains('is-filled') && targetXPass) {
+            if ((nearest === targetSlot && targetDy <= 105) || targetDy <= 75) {
+              isCorrect = true;
+            }
+          }
+        }
+
+        if (isCorrect) {
+          if (placeholder && placeholder.parentNode) placeholder.remove();
+          playDrag();
+          onSnap();
+        } else {
+          playWrong();
+          el.style.transition = 'left 0.25s ease, top 0.25s ease';
+          el.style.left = initLeft + 'px';
+          el.style.top = initTop + 'px';
+          setTimeout(() => {
+            el.style.transition = '';
+            el.style.position = '';
+            el.style.left = '';
+            el.style.top = '';
+            if (placeholder && placeholder.parentNode) {
+              parentOriginal.insertBefore(el, placeholder);
+              placeholder.remove();
+            } else {
+              parentOriginal.appendChild(el);
+            }
+            if (onCancel) onCancel();
+          }, 250);
+        }
+      };
+
+      const onPointerDown = (e) => {
+        if (el.classList.contains('is-placed') || isDancing) return;
+        e.preventDefault();
+        isDragging = true;
+
+        parentOriginal = el.parentNode;
+        const mainRect = $('p11Main').getBoundingClientRect();
+        const stageRect = $('stage').getBoundingClientRect();
+        const scale = stageRect.width / 1920;
+        const rect = el.getBoundingClientRect();
+
+        startX = e.clientX;
+        startY = e.clientY;
+
+        placeholder = document.createElement('div');
+        placeholder.style.width = el.offsetWidth + 'px';
+        placeholder.style.height = el.offsetHeight + 'px';
+        placeholder.style.visibility = 'hidden';
+        placeholder.style.pointerEvents = 'none';
+        parentOriginal.insertBefore(placeholder, el);
+
+        initLeft = (rect.left - mainRect.left) / scale;
+        initTop = (rect.top - mainRect.top) / scale;
+
+        el.style.position = 'absolute';
+        el.style.left = initLeft + 'px';
+        el.style.top = initTop + 'px';
+        el.style.width = placeholder.style.width;
+        el.style.height = placeholder.style.height;
+
+        $('p11Main').appendChild(el);
+        el.classList.add('is-dragging');
+
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
+        window.addEventListener('pointercancel', onPointerUp);
+
+        playClick();
+      };
+
+      el.addEventListener('pointerdown', onPointerDown);
+    }
+
+    async function checkComplete() {
+      const data = STAGES[currentStageIndex];
+      const required = ['loop', ...data.actions.map(a => a.id)];
+      if (data.outerAction) required.push(data.outerAction.id);
+
+      const allFilled = required.every(key => placedState[key]);
+      if (!allFilled) return;
+
+      isDancing = true;
+      playCorrect();
+      showToast('알고리즘 완성!\n로봇이 춤을 춥니다!', 1500);
+
+      startBlk.classList.add('is-active');
+      const placedBlks = Array.from(slotArea.querySelectorAll('.p11-blk.is-placed, .p11-loop-block.is-placed'));
+      placedBlks.forEach(b => b.classList.add('is-active'));
+
+      await wait(1200);
+
+      await data.dancing();
+
+      startBlk.classList.remove('is-active');
+      placedBlks.forEach(b => b.classList.remove('is-active'));
+      isDancing = false;
+
+      if (currentStageIndex + 1 < STAGES.length) {
+        showToast(data.stageNum + '단계 성공!\n다음 단계로 이동합니다.', 1600);
+        await wait(1800);
+        loadStage(currentStageIndex + 1);
+      } else {
+        await wait(600);
+        doneModal.classList.remove('is-off');
+      }
+    }
+
+    const initialStageParam = new URLSearchParams(window.location.search).get('stage');
+    const initialStage = parseInt(initialStageParam, 10);
+    loadStage(!isNaN(initialStage) && initialStage >= 1 && initialStage <= STAGES.length ? initialStage - 1 : 0);
+  })();
+  </script>
+</body>
+</html>

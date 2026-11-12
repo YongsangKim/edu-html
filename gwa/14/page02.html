@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>예/아니오로 체육관 공 정리하기</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+      .p02-gym{position:absolute;left:0;top:0;width:1920px;height:960px;background:url('img/p02_bg.jpg') no-repeat center/cover;overflow:hidden;z-index:1}
+      .p02-bsk-front{position:absolute;left:0;top:0;width:1920px;height:960px;background:url('img/p02_bsk_front.png') no-repeat center/cover;z-index:3;pointer-events:none}
+      .p02-title.ask-pill.has-stage{top:48px;z-index:6}
+      .p02-title.ask-pill.has-stage>span{white-space:pre}
+      .p02-bsk-items{position:absolute;top:668px;width:448px;height:144px;display:flex;align-items:flex-end;justify-content:flex-start;gap:6px;padding:0 10px;box-sizing:border-box;z-index:2;pointer-events:none}
+      .p02-bsk-items.is-yes{left:206px}
+      .p02-bsk-items.is-no{left:1266px;justify-content:flex-end}
+      .p02-bsk-items img{width:136px;height:136px;object-fit:contain;flex-shrink:1;min-width:0;filter:drop-shadow(0 8px 10px rgba(0,0,0,.28));animation:p02PopIn .3s ease}
+      .p02-bsk-items.is-crowded img{width:106px;height:106px}
+      @keyframes p02PopIn{0%{transform:scale(0) translateY(-40px);opacity:0}100%{transform:scale(1) translateY(0);opacity:1}}
+      .p02-bsk{position:absolute;top:446px;width:548px;height:445px;display:flex;align-items:flex-end;justify-content:center;box-sizing:border-box;cursor:pointer;z-index:4}
+      .p02-bsk.is-yes{left:172px}
+      .p02-bsk.is-no{left:1201px}
+      .p02-bsk-tag{width:372px;height:98px;margin-bottom:5px;padding:8px 24px 0;box-sizing:border-box;border-radius:49px;background:var(--c-white);display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:54px;color:var(--c-ink);letter-spacing:-0.04em;box-shadow:0 8px 16px rgba(0,0,0,.15);transition:transform .2s ease,box-shadow .2s ease}
+      .p02-bsk.is-yes .p02-bsk-tag{border:solid 6px #78a9f2;margin-left:-26px}
+      .p02-bsk.is-no .p02-bsk-tag{border:solid 6px #f77897;margin-left:28px}
+      .p02-bsk.is-yes .p02-bsk-tag b{color:#2a7de1;font-weight:400;margin-right:10px}
+      .p02-bsk.is-no .p02-bsk-tag b{color:#eb3f67;font-weight:400;margin-right:10px}
+      .p02-bsk.is-drag-over .p02-bsk-tag{transform:scale(1.06);box-shadow:0 0 0 6px rgba(255,216,61,.75),0 10px 20px rgba(0,0,0,.22)}
+      .p02-ball-stage{position:absolute;left:739px;top:184px;width:442px;height:448px;z-index:5}
+      .p02-ball-pad{position:relative;width:100%;height:100%;box-sizing:border-box;border-radius:26px;border:solid 5px #4a7fd4;background:rgba(255,251,242,.86);box-shadow:0 12px 24px rgba(0,0,0,.16);display:flex;flex-direction:column;user-select:none}
+      .p02-ball-img-wrap{position:relative;flex:1;width:100%;display:flex;align-items:center;justify-content:center;padding:14px;box-sizing:border-box;cursor:grab;user-select:none;touch-action:none;z-index:2}
+      .p02-ball-img-wrap.is-dragging{cursor:grabbing;z-index:30;opacity:.92;filter:drop-shadow(0 16px 26px rgba(0,0,0,.32))}
+      .p02-ball-img-wrap img{max-width:280px;max-height:265px;width:auto;height:auto;object-fit:contain;filter:drop-shadow(0 10px 14px rgba(0,0,0,.22));pointer-events:none}
+      .p02-ball-nm{width:100%;height:124px;margin:0;padding:8px 16px 0;box-sizing:border-box;background:rgba(74,132,214,.92);border-bottom-left-radius:20px;border-bottom-right-radius:20px;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:60px;color:#fff;letter-spacing:-0.04em;pointer-events:none}
+      .p02-ball-nm.is-long{font-size:48px}
+      .p02-queue{position:absolute;left:701px;top:796px;width:505px;height:142px;box-sizing:border-box;border-radius:71px;border:solid 4px #5a8ee0;background:rgba(255,255,255,.58);box-shadow:0 8px 18px rgba(0,0,0,.12);display:flex;align-items:stretch;overflow:hidden;z-index:4}
+      .p02-queue>span{width:134px;flex:none;background:rgba(114,148,204,.82);display:flex;align-items:center;justify-content:center;padding-top:4px;font-family:'Cafe24 Ssurround';font-size:34px;color:#fff;letter-spacing:-0.04em;text-shadow:0 2px 4px rgba(0,0,0,.2)}
+      .p02-queue-items{flex:1;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 14px;box-sizing:border-box}
+      .p02-queue-items img{width:62px;height:62px;object-fit:contain;filter:drop-shadow(0 4px 6px rgba(0,0,0,.18))}
+      .p02-fg{position:absolute;left:1080px;top:490px;width:120px;z-index:10;pointer-events:none}
+      .p02-shaking{animation:p02Shake .4s ease}
+      @keyframes p02Shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-14px)}40%,80%{transform:translateX(14px)}}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="p02-gym"></div>
+
+          <p class="ask-pill has-stage is-fit p02-title">
+            <i id="p02RoundBadge">1 ROUND</i>
+            <span id="p02Qboard">공이 동그란 모양인가요?</span>
+          </p>
+
+          <div class="p02-bsk-items is-yes" id="yesItems"></div>
+          <div class="p02-bsk-items is-no" id="noItems"></div>
+
+          <div class="p02-bsk-front"></div>
+
+          <div class="p02-bsk is-yes" id="bskYes" data-target="yes">
+            <div class="p02-bsk-tag"><b>예</b>바구니</div>
+          </div>
+
+          <div class="p02-bsk is-no" id="bskNo" data-target="no">
+            <div class="p02-bsk-tag"><b>아니오</b>바구니</div>
+          </div>
+
+          <div class="p02-ball-stage" id="ballStage">
+            <div class="p02-ball-pad" id="ballPad">
+              <div class="p02-ball-img-wrap" id="ballImgWrap">
+                <img id="currentBallImg" src="img/p02_ball_soccer.png" alt="축구공" draggable="false">
+              </div>
+              <p class="p02-ball-nm" id="currentBallName">축구공</p>
+            </div>
+          </div>
+
+          <div class="p02-queue">
+            <span>남은공</span>
+            <div class="p02-queue-items" id="queueItems"></div>
+          </div>
+
+          <img class="p02-fg" id="fingerGuide" src="../../resources/img/common/img_finger01.png" alt="">
+
+          <div class="ox-result-wrong is-avatar is-off" id="wrongModal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body"><p class="avatar-popup-text">다시 한번 생각해볼까요?</p></div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="r1DoneModal">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <p class="avatar-card-text">공 나누기 완료! 다음 레벨로 이동해볼까요?</p>
+              </div>
+              <a href="javascript:;" class="avatar-card-btn card-btn is-popup js-sfx" id="btnStartR2" data-sound="sound/click.mp3">시작하기</a>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="r2DoneModal">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">정말 잘했어요! 질문이 바뀌면 같은 공도 다른 바구니로 갈 수 있어요.</p>
+                  </div>
+                  <a href="javascript:;" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">인공지능도 이렇게 ‘예’, ‘아니오’ 질문으로 나누면서 무엇인지 알아낼 수 있어요.</p>
+                  </div>
+                  <a href="javascript:;" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">여러가지 액체도 질문으로 나눌 수 있는지 함께 알아볼까요?</p>
+                  </div>
+                  <a href="page03.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="예/아니오로 체육관 공 정리하기" data-prev="page01.html" data-next="page03.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+    (function () {
+      var r1Data = [
+        { name: '축구공', img: 'img/p02_ball_soccer.png', ans: 'yes' },
+        { name: '럭비공', img: 'img/p02_ball_rugby.png', ans: 'no' },
+        { name: '야구공', img: 'img/p02_ball_baseball.png', ans: 'yes' },
+        { name: '농구공', img: 'img/p02_ball_basketball.png', ans: 'yes' },
+        { name: '탁구공', img: 'img/p02_ball_pingpong.png', ans: 'yes' }
+      ];
+
+      var r2Data = [
+        { name: '탁구공과 탁구채', img: 'img/p02_ball_pingpong.png', ans: 'yes' },
+        { name: '농구공', img: 'img/p02_ball_basketball.png', ans: 'no' },
+        { name: '볼링공', img: 'img/p02_ball_bowling.png', ans: 'no' },
+        { name: '야구공', img: 'img/p02_ball_baseball_bat.png', ans: 'yes' },
+        { name: '축구공', img: 'img/p02_ball_soccer.png', ans: 'no' },
+        { name: '럭비공', img: 'img/p02_ball_rugby.png', ans: 'no' }
+      ];
+
+      var curRound = 1;
+      var curList = r1Data;
+      var curIdx = 0;
+
+      var roundBadge = document.getElementById('p02RoundBadge');
+      var qboard = document.getElementById('p02Qboard');
+      var ballPad = document.getElementById('ballPad');
+      var ballImgWrap = document.getElementById('ballImgWrap');
+      var ballImg = document.getElementById('currentBallImg');
+      var ballNm = document.getElementById('currentBallName');
+      var queueBox = document.getElementById('queueItems');
+      var yesItems = document.getElementById('yesItems');
+      var noItems = document.getElementById('noItems');
+      var bskYes = document.getElementById('bskYes');
+      var bskNo = document.getElementById('bskNo');
+      var fg = document.getElementById('fingerGuide');
+      var btnStartR2 = document.getElementById('btnStartR2');
+      var wrongModal = document.getElementById('wrongModal');
+      var r1DoneModal = document.getElementById('r1DoneModal');
+      var r2DoneModal = document.getElementById('r2DoneModal');
+
+      function updateBasketCrowd() {
+        yesItems.classList.toggle('is-crowded', yesItems.children.length >= 4);
+        noItems.classList.toggle('is-crowded', noItems.children.length >= 4);
+      }
+
+      function updateQueue() {
+        queueBox.innerHTML = '';
+        for (var i = curIdx + 1; i < curList.length; i++) {
+          var item = document.createElement('img');
+          item.src = curList[i].img;
+          item.alt = curList[i].name;
+          queueBox.appendChild(item);
+        }
+      }
+
+      function showBall() {
+        if (curIdx >= curList.length) {
+          if (curRound === 1) {
+            if (btnStartR2) btnStartR2.classList.remove('is-pressed');
+            r1DoneModal.classList.remove('is-off');
+          } else {
+            r2DoneModal.classList.remove('is-off');
+          }
+          return;
+        }
+        var cur = curList[curIdx];
+        ballImg.src = cur.img;
+        ballImg.alt = cur.name;
+        ballNm.textContent = cur.name;
+        ballNm.classList.toggle('is-long', cur.name.length > 4);
+        updateQueue();
+        if (curIdx === 0 && curRound === 1) {
+          fg.style.display = 'block';
+        } else {
+          fg.style.display = 'none';
+        }
+      }
+
+      var SFX = window.SFX || {
+        play: function (name) {
+          if (name === 'correct' && typeof playCorrect === 'function') playCorrect();
+          else if (name === 'wrong' && typeof playWrong === 'function') playWrong();
+          else if (name === 'click' && typeof playClick === 'function') playClick();
+        }
+      };
+
+      var lastAnswerTime = 0;
+      function handleAnswer(choice) {
+        if (curIdx >= curList.length) return;
+        var now = Date.now();
+        if (now - lastAnswerTime < 350) return;
+        lastAnswerTime = now;
+
+        var cur = curList[curIdx];
+        if (choice === cur.ans) {
+          SFX.play('correct');
+          var ballMini = document.createElement('img');
+          ballMini.src = cur.img;
+          ballMini.alt = cur.name;
+          if (choice === 'yes') {
+            yesItems.appendChild(ballMini);
+          } else {
+            noItems.appendChild(ballMini);
+          }
+          updateBasketCrowd();
+          curIdx++;
+          showBall();
+        } else {
+          SFX.play('wrong');
+          ballPad.classList.add('p02-shaking');
+          setTimeout(function () {
+            ballPad.classList.remove('p02-shaking');
+          }, 450);
+          flashLayer(wrongModal);
+        }
+      }
+
+      bskYes.addEventListener('click', function () { handleAnswer('yes'); });
+      bskNo.addEventListener('click', function () { handleAnswer('no'); });
+
+      var startX = 0;
+      var startY = 0;
+      var padX = 0;
+      var padY = 0;
+      var isDragging = false;
+
+      function onPointerDown(e) {
+        if (curIdx >= curList.length) return;
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        padX = 0;
+        padY = 0;
+        fg.style.display = 'none';
+        ballImgWrap.classList.add('is-dragging');
+        try {
+          ballImgWrap.setPointerCapture(e.pointerId);
+        } catch (err) {}
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
+        window.addEventListener('pointercancel', onPointerUp);
+      }
+
+      function onPointerMove(e) {
+        if (!isDragging) return;
+        var scale = (typeof currentScale !== 'undefined' && currentScale > 0) ? currentScale : 1;
+        padX = (e.clientX - startX) / scale;
+        padY = (e.clientY - startY) / scale;
+        ballImgWrap.style.transform = 'translate(' + padX + 'px, ' + padY + 'px)';
+
+        var padRect = ballImgWrap.getBoundingClientRect();
+        var yesRect = bskYes.getBoundingClientRect();
+        var noRect = bskNo.getBoundingClientRect();
+
+        var overYes = (padRect.left < yesRect.right && padRect.right > yesRect.left && padRect.top < yesRect.bottom && padRect.bottom > yesRect.top) ||
+                      (e.clientX >= yesRect.left && e.clientX <= yesRect.right && e.clientY >= yesRect.top && e.clientY <= yesRect.bottom);
+        var overNo = (padRect.left < noRect.right && padRect.right > noRect.left && padRect.top < noRect.bottom && padRect.bottom > noRect.top) ||
+                     (e.clientX >= noRect.left && e.clientX <= noRect.right && e.clientY >= noRect.top && e.clientY <= noRect.bottom);
+
+        if (overYes) {
+          bskYes.classList.add('is-drag-over');
+          bskNo.classList.remove('is-drag-over');
+        } else if (overNo) {
+          bskNo.classList.add('is-drag-over');
+          bskYes.classList.remove('is-drag-over');
+        } else {
+          bskYes.classList.remove('is-drag-over');
+          bskNo.classList.remove('is-drag-over');
+        }
+      }
+
+      function onPointerUp(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        try {
+          ballImgWrap.releasePointerCapture(e.pointerId);
+        } catch (err) {}
+        ballImgWrap.classList.remove('is-dragging');
+        ballImgWrap.style.transform = '';
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+        window.removeEventListener('pointercancel', onPointerUp);
+
+        var padRect = ballImgWrap.getBoundingClientRect();
+        var yesRect = bskYes.getBoundingClientRect();
+        var noRect = bskNo.getBoundingClientRect();
+
+        var overYes = bskYes.classList.contains('is-drag-over') ||
+          (padRect.left < yesRect.right && padRect.right > yesRect.left && padRect.top < yesRect.bottom && padRect.bottom > yesRect.top) ||
+          (e.clientX >= yesRect.left && e.clientX <= yesRect.right && e.clientY >= yesRect.top && e.clientY <= yesRect.bottom);
+
+        var overNo = bskNo.classList.contains('is-drag-over') ||
+          (padRect.left < noRect.right && padRect.right > noRect.left && padRect.top < noRect.bottom && padRect.bottom > noRect.top) ||
+          (e.clientX >= noRect.left && e.clientX <= noRect.right && e.clientY >= noRect.top && e.clientY <= noRect.bottom);
+
+        bskYes.classList.remove('is-drag-over');
+        bskNo.classList.remove('is-drag-over');
+
+        if (overYes) {
+          handleAnswer('yes');
+        } else if (overNo) {
+          handleAnswer('no');
+        }
+      }
+
+      ballImgWrap.addEventListener('pointerdown', onPointerDown);
+
+      btnStartR2.addEventListener('click', function () {
+        btnStartR2.classList.remove('is-pressed');
+        r1DoneModal.classList.add('is-off');
+        curRound = 2;
+        curList = r2Data;
+        curIdx = 0;
+        roundBadge.textContent = '2 ROUND';
+        qboard.innerHTML = '공을 방망이나 라켓으로 치나요?';
+        yesItems.innerHTML = '';
+        noItems.innerHTML = '';
+        updateBasketCrowd();
+        showBall();
+      });
+
+      showBall();
+    })();
+  </script>
+</body>
+</html>

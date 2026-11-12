@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>커피주문 확인 AI가 틀리는 이유</title>
+  <link rel="stylesheet" href="../../resources/css/common.css">
+  <style>
+    .p07-board-bg {
+      position: absolute;
+      left: 18px;
+      top: 88px;
+      width: 1884px;
+      height: 856px;
+      background: #266cc8;
+      border-radius: 24px;
+      box-shadow: inset 0 4px 12px rgba(8, 28, 68, 0.25);
+      z-index: 1;
+    }
+    .p07-ask {
+      z-index: 4;
+    }
+    .p07-wood-panel {
+      position: absolute;
+      left: 40px;
+      top: 155px;
+      width: 1147px;
+      height: 768px;
+      background: url('img/p07_board.png') no-repeat 0 0 / 1147px 768px;
+      display: grid;
+      grid-template-columns: repeat(3, 296px);
+      grid-template-rows: repeat(2, 354px);
+      justify-content: space-evenly;
+      align-content: space-evenly;
+      box-sizing: border-box;
+      z-index: 10;
+    }
+    .p07-wood-panel.has-dragging,
+    .p07-wood-panel:has(.is-dragging) {
+      z-index: 100;
+    }
+    .p07-slot {
+      position: relative;
+      width: 296px;
+      height: 354px;
+    }
+    .p07-polaroid {
+      position: relative;
+      width: 296px;
+      height: 354px;
+      user-select: none;
+      touch-action: none;
+      cursor: grab;
+      transition: transform 0.15s ease, filter 0.15s ease;
+      z-index: 5;
+    }
+    .p07-polaroid:hover:not(.is-checked) {
+      transform: translateY(-4px) scale(1.03);
+      filter: drop-shadow(0 0 10px rgba(255, 79, 216, 0.85));
+    }
+    .p07-polaroid.is-dragging {
+      cursor: grabbing;
+      z-index: 80;
+      transform: scale(1.06) rotate(-2deg);
+      filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.45));
+      transition: none;
+    }
+    .p07-polaroid.is-checked {
+      cursor: default;
+    }
+    .p07-photo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      display: block;
+    }
+    .p07-stamp {
+      position: absolute;
+      right: 0px;
+      bottom: 0px;
+      width: 154px;
+      height: 150px;
+      pointer-events: none;
+      z-index: 10;
+      animation: p07StampPop 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.3);
+    }
+    .p07-stamp img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      display: block;
+    }
+    @keyframes p07StampPop {
+      0% { transform: scale(2) rotate(-20deg); opacity: 0; }
+      100% { transform: scale(1) rotate(-6deg); opacity: 1; }
+    }
+    .p07-machine {
+      position: absolute;
+      left: 1143px;
+      top: 122px;
+      width: 777px;
+      height: 838px;
+      z-index: 3;
+      transition: filter 0.15s ease;
+    }
+    .p07-machine.is-over {
+      filter: drop-shadow(0 0 18px rgba(255, 235, 107, 0.95));
+    }
+    .p07-machine-base {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 777px;
+      height: 838px;
+      object-fit: contain;
+      pointer-events: none;
+      z-index: 1;
+      display: block;
+    }
+    .p07-screen-textbox {
+      position: absolute;
+      left: 160px;
+      top: 232px;
+      width: 472px;
+      height: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-family: 'Cafe24 Ssurround', 'Pretendard', sans-serif;
+      font-size: 54px;
+      font-weight: bold;
+      line-height: 1.3;
+      color: #fff;
+      text-shadow: 0 0 12px #d946ef, 0 0 24px #a855f7, 0 0 42px #7e22ce;
+      z-index: 2;
+      pointer-events: none;
+      box-sizing: border-box;
+      padding: 10px;
+    }
+    .p07-screen-textbox.is-ok {
+      font-size: 62px;
+      text-shadow: 0 0 14px #60a5fa, 0 0 28px #3b82f6, 0 0 42px #1d4ed8;
+    }
+    .p07-screen-textbox.is-fail {
+      font-size: 50px;
+      text-shadow: 0 0 14px #d946ef, 0 0 28px #a855f7, 0 0 42px #7e22ce;
+    }
+    .p07-insert-overlay {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 777px;
+      height: 838px;
+      object-fit: contain;
+      pointer-events: none;
+      z-index: 3;
+      display: block;
+    }
+    .p07-insert-overlay.is-off {
+      display: none;
+    }
+    .p07-drag-finger {
+      position: absolute;
+      width: 100px;
+      z-index: 999;
+      pointer-events: none;
+    }
+    .p07-drag-move {
+      transition: left 2.0s ease-in-out, top 2.0s ease-in-out, opacity 0.4s ease-out;
+    }
+  </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="p07-ask ask-pill is-fit"><span>커피 사진을 AI 확인 창에 올려서 결과를 볼까요?</span></p>
+
+          <div class="p07-board-bg"></div>
+
+          <div class="p07-wood-panel" id="p07Grid"></div>
+
+          <div class="p07-machine" id="p07Machine">
+            <img src="img/p07_machine.png" alt="AI 확인 단말기" class="p07-machine-base" draggable="false">
+            <div class="p07-screen-textbox" id="p07ScreenText"></div>
+            <img src="img/p07_insert_1.png" alt="" class="p07-insert-overlay is-off" id="p07Insert1" draggable="false">
+            <img src="img/p07_insert_2.png" alt="" class="p07-insert-overlay is-off" id="p07Insert2" draggable="false">
+          </div>
+
+          <div class="avatar-modal is-off" id="p07FinishModal">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <p class="avatar-card-text">흐리거나 가려진 사진은 AI가 확인하기 어려워요. 어떻게 해야 할까요?</p>
+              </div>
+              <a href="page08.html" class="avatar-card-btn card-btn is-popup is-arrow js-nav-effect js-sfx" data-sound="sound/click.mp3" aria-label="다음">→</a>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="커피주문 확인 AI가 틀리는 이유" data-next="page08.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+    (function () {
+      const PHOTOS = [
+        { id: 1, shot: 2, ok: true, res: '2샷 이에요!', label: '선명하게 찍힌 2샷 아이스 커피' },
+        { id: 2, shot: 1, ok: false, res: '몇 샷인지<br>잘 모르겠어요...', label: '흐리게 찍힌 1샷 아이스 커피' },
+        { id: 3, shot: 2, ok: false, res: '몇 샷인지<br>잘 모르겠어요...', label: '손가락이 같이 찍힌 2샷 아이스 커피' },
+        { id: 4, shot: 1, ok: false, res: '몇 샷인지<br>잘 모르겠어요...', label: '확대해서 일부만 찍힌 1샷 아이스 커피' },
+        { id: 5, shot: 3, ok: true, res: '3샷 이에요!', label: '선명하게 찍힌 3샷 아이스 커피' },
+        { id: 6, shot: 1, ok: true, res: '1샷 이에요!', label: '선명하게 찍힌 1샷 아이스 커피' }
+      ];
+
+      const grid = $('p07Grid');
+      const machine = $('p07Machine');
+      const screenText = $('p07ScreenText');
+      const ins1 = $('p07Insert1');
+      const ins2 = $('p07Insert2');
+      ['img/p07_insert_1.png', 'img/p07_insert_2.png', 'img/p07_stamp_ok.png', 'img/p07_stamp_fail.png'].forEach((src) => {
+        const im = new Image();
+        im.src = src;
+      });
+      const finishModal = $('p07FinishModal');
+
+      let busy = false;
+      let checkedCount = 0;
+      let fingerStop = false;
+      let fingerTimer = null;
+
+      function stopFinger() {
+        fingerStop = true;
+        if (fingerTimer) {
+          clearTimeout(fingerTimer);
+          fingerTimer = null;
+        }
+        document.querySelectorAll('.p07-drag-finger').forEach((v) => v.remove());
+      }
+
+      function playDragFinger() {
+        if (fingerStop) return;
+        const firstCard = grid.querySelector('.p07-polaroid:not(.is-checked)');
+        if (!firstCard) return;
+
+        document.querySelectorAll('.p07-drag-finger').forEach((v) => v.remove());
+
+        const main = document.querySelector('main');
+        const mainRect = main.getBoundingClientRect();
+        const cardRect = firstCard.getBoundingClientRect();
+        const machineRect = machine.getBoundingClientRect();
+        const scale = mainRect.width / main.offsetWidth || 1;
+
+        const startX = (cardRect.left - mainRect.left + cardRect.width * 0.65) / scale;
+        const startY = (cardRect.top - mainRect.top + cardRect.height * 0.6) / scale;
+        const targetX = (machineRect.left - mainRect.left + machineRect.width * 0.5) / scale - 30;
+        const targetY = (machineRect.top - mainRect.top + machineRect.height * 0.72) / scale + 30;
+
+        const fingerEl = document.createElement('img');
+        fingerEl.src = '../../resources/img/common/img_finger01.png';
+        fingerEl.className = 'p07-drag-finger';
+        fingerEl.style.left = startX + 'px';
+        fingerEl.style.top = startY + 'px';
+        main.appendChild(fingerEl);
+
+        setTimeout(() => { fingerEl.src = '../../resources/img/common/img_finger02.png'; }, 300);
+        setTimeout(() => { fingerEl.src = '../../resources/img/common/img_finger01.png'; }, 650);
+        setTimeout(() => { fingerEl.src = '../../resources/img/common/img_finger02.png'; }, 1000);
+        setTimeout(() => { fingerEl.src = '../../resources/img/common/img_finger01.png'; }, 1350);
+
+        setTimeout(() => {
+          fingerEl.classList.add('p07-drag-move');
+          fingerEl.style.left = targetX + 'px';
+          fingerEl.style.top = targetY + 'px';
+        }, 1500);
+
+        setTimeout(() => { fingerEl.style.opacity = '0'; }, 3600);
+        setTimeout(() => { fingerEl.remove(); }, 4050);
+
+        fingerTimer = setTimeout(() => {
+          if (!fingerStop) playDragFinger();
+        }, 4400);
+      }
+
+      window.addEventListener('pointerdown', () => {
+        stopFinger();
+      }, { once: true });
+
+      setTimeout(playDragFinger, 500);
+
+      PHOTOS.forEach((item) => {
+        const slot = document.createElement('div');
+        slot.className = 'p07-slot';
+
+        const card = document.createElement('div');
+        card.className = 'p07-polaroid';
+        card.dataset.id = String(item.id);
+        card.innerHTML = `<img src="img/p07_photo_${item.id}.png" alt="${item.label}" class="p07-photo-img" draggable="false">`;
+        slot.appendChild(card);
+        grid.appendChild(slot);
+
+        let startX = 0;
+        let startY = 0;
+        let dragging = false;
+
+        card.addEventListener('pointerdown', (e) => {
+          if (busy || card.classList.contains('is-checked')) return;
+          stopFinger();
+          playClick();
+          dragging = true;
+          startX = e.clientX;
+          startY = e.clientY;
+          grid.classList.add('has-dragging');
+          card.classList.add('is-dragging');
+          card.setPointerCapture(e.pointerId);
+        });
+
+        card.addEventListener('pointermove', (e) => {
+          if (!dragging) return;
+          const scale = (typeof currentScale !== 'undefined' && currentScale) ? currentScale : 1;
+          const dx = (e.clientX - startX) / scale;
+          const dy = (e.clientY - startY) / scale;
+          card.style.transform = `translate(${dx}px, ${dy}px) scale(1.06) rotate(-2deg)`;
+
+          const mr = machine.getBoundingClientRect();
+          const over = e.clientX >= mr.left && e.clientX <= mr.right && e.clientY >= mr.top && e.clientY <= mr.bottom;
+          machine.classList.toggle('is-over', over);
+        });
+
+        const endDrag = (e) => {
+          if (!dragging) return;
+          dragging = false;
+          grid.classList.remove('has-dragging');
+          card.classList.remove('is-dragging');
+          machine.classList.remove('is-over');
+
+          const mr = machine.getBoundingClientRect();
+          const over = e.clientX >= mr.left && e.clientX <= mr.right && e.clientY >= mr.top && e.clientY <= mr.bottom;
+
+          card.style.transform = '';
+          if (!over) return;
+
+          busy = true;
+          card.classList.add('is-checked');
+
+          ins1.classList.remove('is-off');
+          ins2.classList.add('is-off');
+
+          setTimeout(() => {
+            ins1.classList.add('is-off');
+            ins2.classList.remove('is-off');
+          }, 200);
+
+          setTimeout(() => {
+            ins2.classList.add('is-off');
+
+            if (item.ok) {
+              playCorrect();
+              screenText.className = 'p07-screen-textbox is-ok';
+            } else {
+              playWrong();
+              screenText.className = 'p07-screen-textbox is-fail';
+            }
+            screenText.innerHTML = item.res;
+
+            const stampImg = item.ok ? 'img/p07_stamp_ok.png' : 'img/p07_stamp_fail.png';
+            const stampAlt = item.ok ? '확인 완료' : '확인 실패';
+            card.insertAdjacentHTML('beforeend', `<div class="p07-stamp"><img src="${stampImg}" alt="${stampAlt}" draggable="false"></div>`);
+
+            checkedCount += 1;
+            busy = false;
+
+            if (checkedCount === PHOTOS.length) {
+              setTimeout(() => {
+                if (finishModal) finishModal.classList.remove('is-off');
+              }, 1100);
+            }
+          }, 450);
+        };
+
+        card.addEventListener('pointerup', endDrag);
+        card.addEventListener('pointercancel', endDrag);
+      });
+    })();
+  </script>
+</body>
+</html>

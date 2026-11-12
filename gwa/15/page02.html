@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>오늘은 내가 바리스타!</title>
+  <link rel="stylesheet" href="../../resources/css/common.css">
+  <style>
+    .p02-stage {
+      position: relative;
+      width: 1920px;
+      height: 960px;
+      overflow: hidden;
+      font-family: 'Cafe24 Ssurround';
+    }
+    .p02-bg-img {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 960px;
+      object-fit: cover;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .p02-guest-wrap {
+      position: absolute;
+      left: 100px;
+      top: -33px;
+      width: 620px;
+      height: 780px;
+      z-index: 2;
+      transition: transform .45s cubic-bezier(.22,.9,.32,1), opacity .35s;
+    }
+    .p02-guest-wrap.is-enter {
+      transform: translateX(-140px);
+      opacity: 0;
+    }
+    .p02-guest-card {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    .p02-guest-card img {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: bottom center;
+    }
+    .p02-order-bubble {
+      position: absolute;
+      left: 690px;
+      top: 250px;
+      width: 520px;
+      min-height: 210px;
+      padding: 34px 40px 28px;
+      box-sizing: border-box;
+      background: #fff;
+      border: 6px solid #266cc8;
+      border-radius: 24px;
+      box-shadow: 0 10px 0 rgba(0,0,0,.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: left;
+      color: #2068c5;
+      font-size: 48px;
+      line-height: 1.32;
+      letter-spacing: -0.04em;
+      word-break: keep-all;
+      z-index: 4;
+      transition: transform .2s;
+    }
+    .p02-order-bubble.is-center {
+      justify-content: center;
+      text-align: center;
+      font-size: 54px;
+    }
+    .p02-order-bubble::before {
+      content: '';
+      position: absolute;
+      left: -46px;
+      top: 92px;
+      border-width: 20px 46px 20px 0;
+      border-style: solid;
+      border-color: transparent #266cc8 transparent transparent;
+    }
+    .p02-order-bubble::after {
+      content: '';
+      position: absolute;
+      left: -34px;
+      top: 96px;
+      border-width: 16px 38px 16px 0;
+      border-style: solid;
+      border-color: transparent #fff transparent transparent;
+    }
+    .p02-shot-pill {
+      position: absolute;
+      left: 1038px;
+      top: 32px;
+      width: 800px;
+      height: 124px;
+      box-sizing: border-box;
+      border: 6px solid #266cc8;
+      border-radius: 64px;
+      background: #fff;
+      display: flex;
+      overflow: hidden;
+      box-shadow: 0 8px 18px rgba(0,0,0,.12);
+      z-index: 5;
+    }
+    .p02-shot-label {
+      width: 324px;
+      height: 100%;
+      background: #7fb2f0;
+      color: #fff;
+      font-size: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: -0.04em;
+      padding-top: 6px;
+    }
+    .p02-shot-beans {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-evenly;
+      padding: 0 24px;
+    }
+    .p02-bean {
+      width: 91px;
+      height: 96px;
+      object-fit: contain;
+      transition: transform .25s;
+    }
+    .p02-bean.is-on {
+      transform: scale(1.06);
+    }
+    .p02-recipe-open.card-btn.is-popup {
+      position: absolute;
+      left: 30px;
+      top: 20px;
+      height: 94px;
+      padding: 8px 34px 0;
+      font-size: 38px;
+      border-radius: 47px;
+      line-height: 1em;
+      min-width: 0;
+      z-index: 5;
+    }
+    .p02-deliver-btn {
+      position: absolute;
+      left: 200px;
+      top: 800px;
+      width: 420px;
+      height: 100px;
+      font-size: 60px;
+      border-radius: 26px;
+      padding: 12px 20px 8px;
+      z-index: 6;
+    }
+    .p02-glass-zone {
+      position: absolute;
+      left: 800px;
+      top: 580px;
+      width: 210px;
+      height: 356px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      z-index: 5;
+      transition: transform .25s, opacity .25s;
+    }
+    .p02-glass-zone.is-over {
+      transform: scale(1.05);
+      filter: drop-shadow(0 0 18px #ffe600);
+    }
+    .p02-glass-zone.is-delivered {
+      opacity: 0;
+      transform: translateY(-30px) scale(.92);
+      pointer-events: none;
+    }
+    .p02-glass-zone img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+    }
+    .p02-machine {
+      position: absolute;
+      left: 1327px;
+      top: 223px;
+      width: 541px;
+      height: 742px;
+      z-index: 5;
+    }
+    .p02-machine-img {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 541px;
+      height: 742px;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .p02-brew-btn {
+      position: absolute;
+      left: 214px;
+      top: 170px;
+      width: 140px;
+      height: 137px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      z-index: 3;
+    }
+    .p02-brew-btn img {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .p02-shot-cup {
+      position: absolute;
+      left: 1541px;
+      top: 734px;
+      width: 173px;
+      height: 129px;
+      z-index: 12;
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      transition: transform .28s ease, left .28s ease, top .28s ease, opacity .2s;
+    }
+    .p02-shot-cup.is-off {
+      display: none;
+    }
+    .p02-shot-cup.is-ready {
+      filter: drop-shadow(0 0 14px #ffe600);
+    }
+    .p02-shot-cup.is-dragging {
+      transition: none;
+      cursor: grabbing;
+      z-index: 40;
+    }
+    .p02-shot-cup.is-pouring {
+      transform: rotate(-48deg) translate(-15px, -15px);
+    }
+    .p02-shot-cup img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      display: block;
+    }
+    .p02-recipe-modal {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1920px;
+      height: 960px;
+      background: rgba(15,12,28,.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 35;
+    }
+    .p02-recipe-modal.is-off {
+      display: none;
+    }
+    .p02-recipe-card {
+      position: relative;
+      width: 1400px;
+      height: 752px;
+      background: #fff;
+      border: 6px solid #48159c;
+      border-radius: 42px;
+      box-sizing: border-box;
+      padding: 52px 70px 46px;
+      box-shadow: 0 20px 44px rgba(0,0,0,.28);
+    }
+    .p02-recipe-head {
+      margin: -16px -30px 0;
+      text-align: left;
+      font-size: 66px;
+      color: #48159c;
+      letter-spacing: -0.04em;
+    }
+    .p02-recipe-close {
+      position: absolute;
+      right: 30px;
+      top: 30px;
+      width: 90px;
+      cursor: pointer;
+      transition: transform .15s ease, filter .15s ease;
+    }
+    .p02-recipe-close:hover {
+      transform: scale(1.08);
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,.2));
+    }
+    .p02-recipe-close:active {
+      transform: scale(0.92);
+      filter: none;
+    }
+    .p02-recipe-box {
+      position: absolute;
+      left: 220px;
+      top: 156px;
+      width: 1000px;
+      height: 520px;
+      border: 5px solid #48159c;
+      border-radius: 32px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .p02-recipe-box-tit {
+      height: 106px;
+      background: #e5d8ff;
+      color: #7a3ee0;
+      font-size: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: -0.03em;
+    }
+    .p02-recipe-rows {
+      padding: 10px 120px 0 280px;
+    }
+    .p02-recipe-row {
+      height: 128px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 3px solid #e6def5;
+      font-size: 56px;
+      color: #48159c;
+      letter-spacing: -0.03em;
+      padding: 0 30px;
+    }
+    .p02-recipe-row:last-child {
+      border-bottom: none;
+    }
+    .p02-recipe-row span {
+      display: inline-block;
+      min-width: 270px;
+      padding-top:20px;
+    }
+    .p02-recipe-cup {
+      width: 100px;
+      height: 115px;
+      object-fit: contain;
+    }
+    .p02-recipe-aro {
+      position: absolute;
+      left: 50px;
+      bottom: 0;
+      width: 421px;
+      height: 570px;
+      pointer-events: none;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .p02-recipe-aro img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: bottom;
+    }
+    .p02-limit-modal,
+    .p02-done {
+      z-index: 45;
+    }
+  </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default p02-stage" id="p02Stage">
+          <img class="p02-bg-img" src="img/p02_bg.jpg" alt="">
+
+          <button type="button" class="card-btn is-popup p02-recipe-open js-sfx" id="p02RecipeBtn" data-sound="sound/click.mp3">레시피<br>다시 보기</button>
+
+          <div class="p02-shot-pill">
+            <div class="p02-shot-label">넣은 샷 수</div>
+            <div class="p02-shot-beans" id="p02Beans"></div>
+          </div>
+
+          <div class="p02-guest-wrap" id="p02GuestWrap">
+            <div class="p02-guest-card" id="p02GuestCard">
+              <img id="p02GuestImg" src="img/p02_guest_1.png" alt="손님">
+            </div>
+          </div>
+
+          <div class="p02-order-bubble" id="p02Bubble"></div>
+
+          <button type="button" class="card-btn p02-deliver-btn js-sfx" id="p02DeliverBtn" data-sound="sound/click.mp3">커피 전달하기</button>
+
+          <div class="p02-glass-zone" id="p02GlassZone">
+            <img id="p02GlassImg" src="img/p02_cup_0.png" alt="커피 컵">
+          </div>
+
+          <div class="p02-machine" id="p02Machine">
+            <img id="p02MachineImg" src="img/p02_machine.png" alt="커피 머신" class="p02-machine-img">
+            <button type="button" class="p02-brew-btn js-sfx" id="p02BrewBtn" data-sound="sound/click.mp3" aria-label="커피 샷 추출">
+              <img class="js-img-swap" src="img/p02_btn_extract.png" data-src-alt="img/p02_btn_extract_on.png" data-src-over="img/p02_btn_extract_over.png" data-swap-reset="300" alt="추출">
+            </button>
+          </div>
+
+          <div class="p02-shot-cup is-off" id="p02ShotCup">
+            <img src="img/p02_shot_full.png" alt="에스프레소 샷 잔">
+          </div>
+
+          <div class="p02-recipe-modal" id="p02RecipeModal">
+            <div class="p02-recipe-card">
+              <p class="p02-recipe-head">레시피를 잘 기억해서 커피를 만들어 볼까요?</p>
+              <img class="p02-recipe-close js-img-swap js-sfx" id="p02RecipeClose" src="../../resources/img/common/pop_btn_close.png" data-src-alt="../../resources/img/common/pop_btn_close_on.png" data-src-over="../../resources/img/common/pop_btn_close_over.png" data-swap-reset="true" data-sound="sound/click.mp3" alt="닫기">
+              <div class="p02-recipe-box">
+                <div class="p02-recipe-box-tit">레시피</div>
+                <div class="p02-recipe-rows">
+                  <div class="p02-recipe-row">
+                    <span>연하게 1샷</span>
+                    <img class="p02-recipe-cup" src="img/p02_recipe_1.png" alt="1샷">
+                  </div>
+                  <div class="p02-recipe-row">
+                    <span>기본 &nbsp;&nbsp;&nbsp;2샷</span>
+                    <img class="p02-recipe-cup" src="img/p02_recipe_2.png" alt="2샷">
+                  </div>
+                  <div class="p02-recipe-row">
+                    <span>진하게 3샷</span>
+                    <img class="p02-recipe-cup" src="img/p02_recipe_3.png" alt="3샷">
+                  </div>
+                </div>
+              </div>
+              <div class="p02-recipe-aro">
+                <img src="img/p02_barista_aro.png" alt="바리스타 아로">
+              </div>
+            </div>
+          </div>
+
+          <div class="ox-result-wrong is-avatar is-off p02-limit-modal" id="p02LimitModal">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body"><p class="avatar-popup-text">커피 샷은 최대 3번만 가능해요.</p></div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off p02-done" id="p02Done">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-title">정말 잘했어요!</p>
+                    <p class="avatar-card-text">손님이 원하는 진하기에 맞게 세 잔의 커피를 모두 완성했어요.</p>
+                  </div>
+                  <a href="javascript:;" class="avatar-card-btn card-btn is-popup is-arrow js-nav-effect js-sfx" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">샷을 많이 넣을수록 커피 색이 진해졌어요. 커피 뿐만 아니라 물감이나 주스도 똑같아요.</p>
+                  </div>
+                  <a href="javascript:;" class="avatar-card-btn card-btn is-popup is-arrow js-nav-effect js-sfx" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel is-hidden">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">AI는 사진으로 배워서 액체의 진하기를 알 수 있는지 알아볼까요?</p>
+                  </div>
+                  <a href="page03.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="오늘은 내가 바리스타!" data-next="page03.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const GUESTS = shuffleArray([
+      {
+        id: 1,
+        order: '차가운 커피 한 잔<br>기본 2샷으로 주세요.',
+        target: 2
+      },
+      {
+        id: 2,
+        order: '차가운 커피 연하게<br>1샷으로 한 잔 주세요.',
+        target: 1
+      },
+      {
+        id: 3,
+        order: '차가운 커피 진하게<br>3샷으로 한 잔 주세요.',
+        target: 3
+      }
+    ]);
+
+    const HOME_LEFT = 1541;
+    const HOME_TOP = 734;
+
+    const beansEl = $('p02Beans');
+    const guestWrap = $('p02GuestWrap');
+    const guestImg = $('p02GuestImg');
+    const bubbleEl = $('p02Bubble');
+    const glassZone = $('p02GlassZone');
+    const glassImg = $('p02GlassImg');
+    const machineImg = $('p02MachineImg');
+    const brewBtn = $('p02BrewBtn');
+    const shotCup = $('p02ShotCup');
+    const deliverBtn = $('p02DeliverBtn');
+    const recipeModal = $('p02RecipeModal');
+    const recipeBtn = $('p02RecipeBtn');
+    const recipeClose = $('p02RecipeClose');
+    const limitModal = $('p02LimitModal');
+    const doneModal = $('p02Done');
+
+    let idx = 0;
+    let shots = 0;
+    let shotReady = false;
+    let busy = false;
+    let dragging = false;
+    let startX = 0;
+    let startY = 0;
+
+    const renderBeans = () => {
+      let html = '';
+      for (let i = 0; i < 3; i++) {
+        const on = i < shots;
+        html += '<img class="p02-bean' + (on ? ' is-on' : '') + '" src="img/p02_bean_' + (on ? 'on' : 'off') + '.png" alt="">';
+      }
+      beansEl.innerHTML = html;
+    };
+
+    const renderGuest = () => {
+      const g = GUESTS[idx];
+      guestImg.src = 'img/p02_guest_' + g.id + '.png';
+    };
+
+    const renderGlass = () => {
+      glassImg.src = 'img/p02_cup_' + shots + '.png';
+    };
+
+    const startGuest = (animateIn) => {
+      const g = GUESTS[idx];
+      shots = 0;
+      shotReady = false;
+      busy = false;
+      shotCup.classList.remove('is-ready', 'is-pouring');
+      shotCup.classList.add('is-off');
+      shotCup.style.left = HOME_LEFT + 'px';
+      shotCup.style.top = HOME_TOP + 'px';
+      machineImg.src = 'img/p02_machine.png';
+      glassZone.classList.remove('is-delivered');
+      bubbleEl.classList.remove('is-center');
+      bubbleEl.innerHTML = g.order;
+      renderBeans();
+      renderGuest();
+      renderGlass();
+      if (animateIn) {
+        guestWrap.classList.add('is-enter');
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => guestWrap.classList.remove('is-enter'));
+        });
+      }
+    };
+
+    brewBtn.addEventListener('click', () => {
+      if (busy) return;
+      if (shotReady) {
+        pointFingerAt(shotCup, { dx: -20, dy: -20 });
+        return;
+      }
+      if (shots >= 3) {
+        playWrong();
+        flashLayer(limitModal, 'is-off', 2000);
+        return;
+      }
+      busy = true;
+      clearFingers();
+      machineImg.src = 'img/p02_machine_on.png';
+      setTimeout(() => {
+        machineImg.src = 'img/p02_machine.png';
+        shotReady = true;
+        shotCup.classList.remove('is-off');
+        shotCup.classList.add('is-ready');
+        busy = false;
+      }, 600);
+    });
+
+    shotCup.addEventListener('pointerdown', (e) => {
+      if (busy || !shotReady) return;
+      e.preventDefault();
+      clearFingers();
+      dragging = true;
+      shotCup.setPointerCapture(e.pointerId);
+      shotCup.classList.add('is-dragging');
+      startX = e.clientX;
+      startY = e.clientY;
+    });
+
+    shotCup.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      const s = (typeof currentScale !== 'undefined' && currentScale) ? currentScale : 1;
+      const dx = (e.clientX - startX) / s;
+      const dy = (e.clientY - startY) / s;
+      shotCup.style.left = (HOME_LEFT + dx) + 'px';
+      shotCup.style.top = (HOME_TOP + dy) + 'px';
+
+      const cRect = shotCup.getBoundingClientRect();
+      const gRect = glassZone.getBoundingClientRect();
+      const hit = !(cRect.right < gRect.left || cRect.left > gRect.right || cRect.bottom < gRect.top || cRect.top > gRect.bottom);
+      glassZone.classList.toggle('is-over', hit);
+    });
+
+    const endCupDrag = () => {
+      if (!dragging) return;
+      dragging = false;
+      shotCup.classList.remove('is-dragging');
+      const cRect = shotCup.getBoundingClientRect();
+      const gRect = glassZone.getBoundingClientRect();
+      const hit = !(cRect.right < gRect.left || cRect.left > gRect.right || cRect.bottom < gRect.top || cRect.top > gRect.bottom);
+      glassZone.classList.remove('is-over');
+
+      if (hit && shots < 3) {
+        busy = true;
+        shotCup.style.left = '880px';
+        shotCup.style.top = '520px';
+        shotCup.classList.add('is-pouring');
+        setTimeout(() => {
+          shots += 1;
+          shotReady = false;
+          shotCup.classList.remove('is-ready', 'is-pouring');
+          shotCup.classList.add('is-off');
+          shotCup.style.left = HOME_LEFT + 'px';
+          shotCup.style.top = HOME_TOP + 'px';
+          renderBeans();
+          renderGlass();
+          setTimeout(() => { busy = false; }, 200);
+        }, 450);
+      } else {
+        shotCup.style.left = HOME_LEFT + 'px';
+        shotCup.style.top = HOME_TOP + 'px';
+      }
+    };
+
+    shotCup.addEventListener('pointerup', endCupDrag);
+    shotCup.addEventListener('pointercancel', endCupDrag);
+
+    deliverBtn.addEventListener('click', () => {
+      if (busy) return;
+      clearFingers();
+      const g = GUESTS[idx];
+      busy = true;
+      if (shots === g.target) {
+        playCorrect();
+        bubbleEl.classList.add('is-center');
+        bubbleEl.innerHTML = '감사합니다!';
+        glassZone.classList.add('is-delivered');
+        setTimeout(() => {
+          if (idx >= GUESTS.length - 1) {
+            doneModal.classList.remove('is-off');
+          } else {
+            idx += 1;
+            startGuest(true);
+          }
+        }, 2000);
+      } else {
+        playWrong();
+        bubbleEl.classList.remove('is-center');
+        bubbleEl.innerHTML = '이건 제가 주문한<br>커피가 아니에요.';
+        setTimeout(() => {
+          startGuest(false);
+        }, 2000);
+      }
+    });
+
+    recipeBtn.addEventListener('click', () => {
+      recipeClose.classList.remove('is-swapped');
+      recipeClose.src = recipeClose.dataset.originalSrc || '../../resources/img/common/pop_btn_close.png';
+      recipeModal.classList.remove('is-off');
+    });
+    recipeClose.addEventListener('click', () => {
+      setTimeout(() => {
+        recipeModal.classList.add('is-off');
+      }, 100);
+    });
+
+    startGuest(false);
+  })();
+  </script>
+</body>
+</html>

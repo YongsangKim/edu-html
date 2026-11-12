@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오늘의 선택 미션</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        /* 디자인 반영(02p) - 기획서 3~9p. 3 STAGE: 메모지 조건 보고 방법 선택 → 정답이면 그 방법의 장단점 2개 고르기.
+           선택지 삽화는 img/p02_opt_{stage}{번호}.png(없으면 보라 칸) */
+
+
+        .p02-board{position:absolute;left:76px;top:194px;width:1768px;height:703px;box-sizing:border-box;background:var(--c-navy);border-radius:12px}
+        .p02-memo{position:absolute;left:128px;top:247px;width:485px;height:598px;box-sizing:border-box;padding:56px 20px 30px 24px;background:#fff0b3;border-radius:8px 8px 100px 8px / 8px 8px 115px 8px;box-shadow:0 12px 0 0 #022a78;
+          font-family:'Cafe24 Ssurround';color:var(--c-navy);letter-spacing:-0.04em;word-break:keep-all}
+        .p02-memo:after{content:"";position:absolute;right:0;bottom:0;width:100px;height:115px;border-bottom-right-radius:100px 115px;background:radial-gradient(ellipse 130px 89px at -20px 0px,#fff0b3 99%,#ffe45c 100%)}
+        .p02-memo-pin{position:absolute;left:231px;top:-72px;width:100px;height:auto;pointer-events:none}
+        .p02-memo-ask{margin:0 0 22px;padding:0;font-size:50px;line-height:76px;color:#1f5fd0;text-align:left;background:repeating-linear-gradient(to bottom,transparent 0 72px,#c9a24a 72px 74px);letter-spacing:-0.08em}
+        /* .p02-memo-ask br{display:none} */
+        .p02-memo-text{margin:0;font-size:32px;line-height:1.3}
+        .p02-memo-text p{position:relative;margin:0 0 20px;padding-left:60px;line-height:1.25em;letter-spacing:-0.08em;z-index:1}
+        .p02-memo-text p:before{content:'';position:absolute;left:0;top:-10px;width:52px;height:52px;background:url('img/icon_star.png') center / contain no-repeat}
+
+        .p02-opts{position:absolute;left:656px;top:247px;width:1141px;display:flex;justify-content:space-between}
+        .p02-opt{width:355px;padding:0;border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:26px}
+        .p02-opt-img{width:355px;height:450px;box-sizing:border-box;border:solid 4px var(--c-white);border-radius:8px;background: center / cover no-repeat}
+        .p02-opt .card-btn{display:flex;align-items:center;justify-content:center;min-width:0;width:358px;height:118px;padding:10px 10px 6px;font-size:56px;pointer-events:none}
+        .p02-opt:hover .p02-opt-img{border-color:var(--c-violet)}
+        .p02-opt:hover .card-btn{color:var(--c-violet)}
+        .p02-opt.is-selected .p02-opt-img{border-color:#ff4ff9}
+        .p02-opt.is-selected .card-btn{color:var(--c-orchid);box-shadow:0 4px 0 0 #a9a2ff,0 3px 0 10px #035fd3;transform:translateY(9px)}
+        .p02-opt.is-wrong{animation:fix-word-shake .3s ease}
+
+        /* .avatar-card.p02-pc{width:1580px;padding:50px 90px 60px}
+        .p02-pc .avatar-card-text{padding-left:225px;margin-bottom:40px;text-align:left} */
+        .avatar-card.p02-pc{padding:90px 50px 46px}
+        .p02-pc .avatar-card-title{margin-bottom:40px}
+        .p02-pc-ask{position:relative;z-index:1;width:max-content;max-width:100%;margin:0 auto -50px;padding:6px 50px 0;box-sizing:border-box;background:var(--c-white);border:solid 5px #7d42f5;border-radius:50px;box-shadow:0 8px 0 0 rgba(92,61,240,.25);font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.3;color:#5c24ce;letter-spacing:-0.06em;text-align:center}
+        .p02-pc-ask.is-small{font-size:50px}
+        .p02-pc-opts{display:grid;grid-template-columns:1fr 1fr;gap:30px 40px;padding:70px 36px 36px;background:#a589ff;border:solid 5px #7d42f5;border-radius:50px}
+        .p02-pc-opt{min-width:0;width:100%;height:100px;font-size:36px;padding:10px 20px 8px;line-height:1.1em;text-align:left;box-shadow:0 10px 0 0 #a9a2ff, 0 10px 0 10px #6009c3;color:#48159c}
+        .p02-pc-opt.is-selected{translate:0 8px;box-shadow:0 2px 0 0 #a9a2ff, 0 2px 0 10px #6009c3}
+        .p02-pc-opt:not(.is-selected):not(:disabled):not(.is-disabled):active{translate:0 8px;box-shadow:0 2px 0 0 #a9a2ff, 0 2px 0 10px #6009c3}
+        .p02-pc-opt.is-wrong{animation:fix-word-shake .3s ease}
+
+        #p02Wrong, #p02Good{z-index:120}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <div class="step-head">
+            <div class="prompt-steps"><span class="step-dot">1</span><span class="step-dot">2</span><span class="step-dot">3</span></div>
+            <p class="ask-pill has-stage" id="p02Title"></p>
+          </div>
+
+          <div class="p02-board"></div>
+          <div class="p02-memo">
+            <img class="p02-memo-pin" src="img/p02_pin.png" alt="">
+            <p class="p02-memo-ask" id="p02Ask"></p>
+            <div class="p02-memo-text" id="p02Memo"></div>
+          </div>
+          <div class="p02-opts" id="p02Opts"></div>
+
+          <div class="avatar-modal is-off" id="p02Pc">
+            <div class="avatar-card p02-pc">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_correct.png" alt="">
+              <p class="avatar-card-title">정답이에요!</p>
+              <p class="p02-pc-ask" id="p02PcText"></p>
+              <div class="p02-pc-opts" id="p02PcOpts"></div>
+            </div>
+          </div>
+
+          <div class="ox-result-wrong is-avatar is-off p02-wrong" id="p02Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text is-small" id="p02WrongText"></p>
+              </div>
+            </div>
+          </div>
+          <div class="ox-result-correct is-avatar is-off p02-good" id="p02Good">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_correct.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text" id="p02GoodTitle"></p>
+                <p class="avatar-popup-sub" id="p02GoodText"></p>
+              </div>
+              <div class="avatar-popup-extra"><img src="../../resources/img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="오늘의 선택 미션" data-next="page03.html"></script>
+  <script src="../../resources/js/toc.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const MEMO_WRONG = '메모지에 적힌 상황 조건을<br>다시 한 번 읽어봐요.';
+    // 기획서 7p의 STAGE2 장단점 오답 문구가 STAGE3 것("개별 활동, 모둠 활동…")으로 적혀 있어 STAGE2 선택지로 맞춤
+    const STAGES = [
+      { title: 'STAGE1 박물관까지 어떻게 갈까?', ask: '어떤 방법으로<br>박물관에 가야 할까요?',
+        memo: ['오전 10시까지 늦지 않게 박물관에 가야 해요.', '지금은 아침 9시 40분이에요.', '걸어서는 50분, 버스는 15분, 지하철은 30분이 걸려요.'],
+        options: ['버스 타기', '지하철 타기', '걸어가기'], answer: 0,
+        pcText: '다음 중, 버스 타기의 장점과 단점을 선택해봐요.',
+        pcOpts: [
+          { text: '시간을 절약할 수 있다. 지하철이 다니지 않는 곳까지도 이동할 수 있다.', right: true },
+          { text: '비용을 절약할 수 있고 운동 효과가 있다.' },
+          { text: '정확한 시간에 갈 수 있다.' },
+          { text: '교통 체증이 발생하면 약속한 시간에 가기 어렵다.', right: true },
+          { text: '시간이 오래 걸린다, 체력이 소모된다.' },
+          { text: '주변에 지하철역이 없으면 이용하기 어렵다.' }
+        ],
+        pcWrong: '걸어 가기, 버스 타기, 지하철 타기 중<br>어떤 것의 장단점인지 다시 한 번 생각해봐요.' },
+      { title: 'STAGE2 식사는 어떻게 해결할까?', ask: '점심식사는<br>어떻게 해야 할까요?',
+        memo: ['점심시간은 1시간이에요.', '박물관 안에 식당이 있어요.', '도시락을 챙기지 않았어요.', '급식을 먹으려면 학교로 돌아가야 하고 왕복 1시간이에요.'],
+        options: ['도시락', '학교 급식', '박물관 식당'], answer: 2,
+        pcText: '다음 중, 식당에서 식사를 할 때의 장점과 단점을 선택해봐요.',
+        pcOpts: [
+          { text: '내가 원하는 음식점을 선택할 수 있다. 편리하다.', right: true },
+          { text: '직접 만들어야 한다. 쉽게 상할 수 있다.' },
+          { text: '돈이 들지 않고 균형 잡힌 식단이다.' },
+          { text: '비싸다. 식당을 가기 위해 이동해야 할 수도 있다.', right: true },
+          { text: '간편하게 먹을 수 있고 저렴한 편이다.' },
+          { text: '내가 메뉴를 선택할 수 없다.' }
+        ],
+        pcWrong: '도시락, 학교 급식, 박물관 식당 중<br>어떤 것의 장단점인지 다시 한 번 생각해봐요.' },
+      { title: 'STAGE3 어떻게 활동할까?', ask: '박물관에서 어떻게 관람해야 할까요?',
+        memo: ['전교생이 함께 박물관에 왔어요.', '안전상의 이유로 선생님께서 개별 활동을 허락하지 않았어요.', '학교에서 모둠별 활동지를 받아서 챙겨왔어요.'],
+        options: ['단체 활동', '모둠 활동', '개별 활동'], answer: 1,
+        pcText: '다음 중, 모둠 활동의 장점과 단점을 선택해봐요.',
+        pcOpts: [
+          { text: '많은 친구들과 함께 어울리며 즐거움을 나눌 수 있다.' },
+          { text: '내가 원하는 친구와 모둠이 되지 않을 수 있다.', right: true },
+          { text: '자유롭다. 내가 원하는 대로 활동할 수 있다.' },
+          { text: '문제가 발생했을 때 도움을 받기 어렵다.' },
+          { text: '같이 힘을 합쳐서 문제를 해결할 수 있다. 비교적 자유롭다.', right: true },
+          { text: '내가 원하는 대로 활동할 수 없다.' }
+        ],
+        pcWrong: '개별 활동, 모둠 활동, 단체 활동 중<br>어떤 것의 장단점인지 다시 한 번 생각해봐요.' }
+    ];
+
+    const dots = Array.from(document.querySelectorAll('.step-head .step-dot'));
+    const optsBox = $('p02Opts');
+    const pc = $('p02Pc');
+    const pcOpts = $('p02PcOpts');
+    const wrong = $('p02Wrong');
+    const good = $('p02Good');
+
+    let index = 0;
+
+    function showWrong(html) {
+      playWrong();
+      $('p02WrongText').innerHTML = html;
+      flashLayer(wrong);
+    }
+
+    // 메모지 안 내용이 넘치면 글자 크기를 한 단계씩 줄임
+    function fitMemo() {
+      const box = document.querySelector('.p02-memo');
+      const text = $('p02Memo');
+      let size = 32;
+      text.style.fontSize = size + 'px';
+      while (size > 24 && box.scrollHeight > box.clientHeight) {
+        size -= 1;
+        text.style.fontSize = size + 'px';
+      }
+    }
+
+    function render() {
+      const s = STAGES[index];
+      dots.forEach((d, i) => d.classList.toggle('is-active', i === index));
+      const cut = s.title.indexOf(' ');
+      $('p02Title').innerHTML = '<i>' + s.title.slice(0, cut) + '</i><span>' + s.title.slice(cut + 1) + '</span>';
+      $('p02Ask').innerHTML = s.ask;
+      $('p02Memo').innerHTML = s.memo.map((m) => '<p>' + m + '</p>').join('');
+      fitMemo();
+      optsBox.innerHTML = '';
+      s.options.forEach((label, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'p02-opt';
+        btn.innerHTML = '<span class="p02-opt-img" style="background-image:url(\'img/p02_opt_' + (index + 1) + (i + 1) + '.png\')"></span><span class="card-btn">' + label + '</span>';
+        btn.addEventListener('click', () => pickOption(btn, i));
+        optsBox.appendChild(btn);
+      });
+    }
+
+    function openPc() {
+      const s = STAGES[index];
+      $('p02PcText').textContent = s.pcText;
+      $('p02PcText').classList.toggle('is-small', index === 1);
+      pcOpts.innerHTML = '';
+      s.pcOpts.forEach((o) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'card-btn p02-pc-opt';
+        btn.textContent = o.text;
+        btn.addEventListener('click', () => {
+          if (btn.classList.contains('is-right')) return;
+          if (!o.right) {
+            btn.classList.remove('is-wrong');
+            void btn.offsetWidth;
+            btn.classList.add('is-wrong');
+            showWrong(s.pcWrong);
+            return;
+          }
+          playClick();
+          btn.classList.add('is-right', 'is-selected');
+          if (pcOpts.querySelectorAll('.is-right').length === s.pcOpts.filter((x) => x.right).length) finishStage();
+        });
+        pcOpts.appendChild(btn);
+      });
+      pc.classList.remove('is-off');
+    }
+
+    let finishing = false;
+    function finishStage() {
+      if (finishing) return;
+      finishing = true;
+      const last = index === STAGES.length - 1;
+      setTimeout(() => {
+        playCorrect();
+        $('p02GoodTitle').textContent = last ? '좋아요!' : '잘했어요!';
+        $('p02GoodText').textContent = last ? '모든 문제를 맞혔어요.' : '문제를 계속 풀어봐요.';
+        pc.classList.add('is-off');
+        flashLayer(good);
+        setTimeout(() => {
+          finishing = false;
+          if (last) {
+            navigateTo('page03.html');
+            return;
+          }
+          index += 1;
+          render();
+        }, 2000);
+      }, 500);
+    }
+
+    // 기획서 화면에 다음 버튼이 없어 보기를 누르면 바로 확인
+    function pickOption(btn, i) {
+      if (optsBox.classList.contains('is-busy')) return;
+      optsBox.querySelectorAll('.p02-opt').forEach((b) => b.classList.toggle('is-selected', b === btn));
+      if (i !== STAGES[index].answer) {
+        btn.classList.remove('is-wrong');
+        void btn.offsetWidth;
+        btn.classList.add('is-wrong');
+        showWrong(MEMO_WRONG);
+        setTimeout(() => btn.classList.remove('is-selected'), 2000);
+        return;
+      }
+      playCorrect();
+      optsBox.classList.add('is-busy');
+      setTimeout(() => {
+        optsBox.classList.remove('is-busy');
+        openPc();
+      }, 500);
+    }
+
+    render();
+  })();
+  </script>
+</body>
+</html>

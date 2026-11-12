@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>생선 무게를 재고 블록으로 나타내요</title>
+    <link rel="stylesheet" href="../../resources/css/common.css">
+    <style>
+        .p02-ask{left:1235px;top:35px;padding-left:38px;padding-right:38px;font-size:64px;letter-spacing:-0.1em}
+        .p02-gauge{left:62px;top:40px;width:503px}
+        .p02-gauge:before{left:-61px;top:-19px;width:115px;height:124px;background-image:url('img/icon_fish.png')}
+
+        .p02-photo{position:absolute;left:30px;top:165px;width:1863px;height:795px;box-sizing:border-box;border:solid 4px #0a3f8f;border-radius:22px 22px 0 0;background:#dfeaf6 url('img/p02_bg.jpg') 0 0 / 1855px 772px no-repeat}
+        .p02-char{position:absolute;left:0;top:193px;width:539px;height:725px}
+        .p02-char img{display:block;width:100%;height:100%}
+        .p02-counter{position:absolute;left:0;top:734px;width:1920px;height:226px;z-index:3}
+        .p02-counter img{display:block}
+
+        .p02-scale{position:absolute;left:600px;top:324px;width:394px;height:455px;z-index:2}
+        .p02-scale>img{display:block}
+        .p02-scale svg{position:absolute;left:0;top:0;width:394px;height:455px}
+        .p02-needle{transform-origin:196.5px 240.5px;transition:transform 1s cubic-bezier(.3,1.4,.6,1)}
+        .p02-scale.is-hint .p02-needle line, .p02-scale.is-hint .p02-tick.is-on{animation:p02-hint .4s ease-in-out 5}
+        @keyframes p02-hint{50%{stroke:var(--c-yellow);fill:#ff9f1a}}
+        .p02-plate{position:absolute;left:40px;top:-130px;width:314px;height:170px}
+        .p02-plate .p02-fish{position:absolute;left:50%;bottom:0;width:260px;transform:translateX(-50%);cursor:default}
+        .p02-drop{position:absolute;left:600px;top:180px;width:394px;height:190px}
+
+        .p02-rec{position:absolute;left:1088px;top:185px;width:774px;height:533px;box-sizing:border-box;border:solid 5px #0a3f8f;border-radius:18px;background:var(--c-white);overflow:hidden;z-index:2;font-family:'Cafe24 Ssurround';color:var(--c-ink)}
+        .p02-rec h2{margin:0;height:108px;display:flex;align-items:center;justify-content:center;padding-top:6px;background:#2a6dd0;font-weight:normal;font-size:64px;letter-spacing:-0.06em;color:var(--c-white)}
+        .p02-rows{padding:10px 5px 0;display:flex;flex-direction:column;gap:8px}
+        .p02-row{height:94px;display:grid;grid-template-columns:202px 170px 43px 270px 1fr;align-items:center;border-radius:12px;background:#dff6ff;font-size:64px;letter-spacing:-0.04em}
+        .p02-ico{width:150px;height:86px;margin-left:26px;background:center / contain no-repeat}
+        .p02-row input{grid-column:4;width:270px;height:84px;box-sizing:border-box;border:solid 4px #1b57c2;border-radius:24px;background:var(--c-white);font:inherit;font-size:56px;text-align:center;color:var(--c-ink)}
+        .p02-row input:focus{outline:0;box-shadow:0 0 0 6px rgba(42,109,208,.35)}
+        .p02-row input.is-ok{border-color:transparent;background:transparent}
+        .p02-row b{grid-column:5;font-weight:normal;font-size:56px;padding-left:8px}
+
+        .p02-shelf{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:4;pointer-events:none}
+        .p02-hold{position:absolute}
+        .p02-hold.is-dom{left:33px;top:705px;width:474px;height:214px}
+        .p02-hold.is-gwang{left:514px;top:697px;width:497px;height:237px}
+        .p02-hold.is-urok{left:1038px;top:708px;width:449px;height:224px}
+        .p02-hold.is-mung{left:1509px;top:710px;width:359px;height:220px}
+        .p02-fish{filter:url(#p02Ol);touch-action:none;cursor:grab;pointer-events:auto}
+        .p02-fish img{display:block;width:100%;pointer-events:none;user-select:none}
+        .p02-fish.is-dragging{position:relative;z-index:50;cursor:grabbing}
+        .p02-fish.is-done{opacity:.35;cursor:default;pointer-events:none}
+    </style>
+</head>
+<body>
+  <div id="page-fade"></div>
+  <div id="viewport" class="viewport">
+    <div id="stage-spacer">
+      <div id="stage" class="stage">
+        <main class="bg-default">
+          <p class="ask-pill is-fit p02-ask"><span>생선을 접시저울에 하나씩 올려 무게를 재어 보세요!</span></p>
+          <div class="gauge p02-gauge"><div class="gauge-fill" id="p02Fill"></div></div>
+
+          <div class="p02-photo"></div>
+          <div class="p02-char"><img src="img/p02_character.png" alt="메인 캐릭터"></div>
+          <div class="p02-scale" id="p02Scale"><img src="img/p02_scale.png" alt=""></div>
+          <div class="p02-drop" id="p02Drop" data-key="fish"></div>
+          <div class="p02-counter"><img src="img/p02_counter.png" alt=""></div>
+
+          <div class="p02-rec">
+            <h2>무게기록표 (g)</h2>
+            <div class="p02-rows" id="p02Rows"></div>
+          </div>
+
+          <div class="p02-shelf" id="p02Shelf"></div>
+
+          <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+            <filter id="p02Ol" x="-10%" y="-10%" width="120%" height="125%" color-interpolation-filters="sRGB">
+              <feMorphology in="SourceAlpha" operator="dilate" radius="7" result="d"/>
+              <feFlood flood-color="#fff"/><feComposite in2="d" operator="in" result="w"/>
+              <feDropShadow in="w" dx="0" dy="6" stdDeviation="3" flood-color="#000" flood-opacity=".3" result="s"/>
+              <feMerge><feMergeNode in="s"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs></svg>
+
+          <div class="ox-result-correct is-avatar is-off" id="p02Right">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_correct_gwa.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="avatar-popup-text">딩동!</p>
+                <p class="avatar-popup-sub" id="p02RightText"></p>
+              </div>
+              <div class="avatar-popup-extra"><img src="../../resources/img/common/icon_correct.png" alt=""></div>
+            </div>
+          </div>
+          <div class="ox-result-wrong is-avatar is-off" id="p02Wrong">
+            <div class="avatar-popup-panel">
+              <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
+              <div class="avatar-popup-body">
+                <p class="hint-title">힌트</p>
+                <p class="avatar-popup-text is-small" id="p02HintText">저울의 바늘이 가리키는<br>눈금의 숫자를 정확히 읽어 보세요.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="avatar-modal is-off" id="p02Done">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="step-flow">
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-title">측정과 기록 완료!</p>
+                    <p class="avatar-card-text">도구를 사용해 무게나 수치를 확인하는 것을 ‘측정’이라고 해요.</p>
+                  </div>
+                  <a href="page03.html" class="avatar-card-btn card-btn is-popup is-arrow js-nav-effect js-sfx" data-sound="sound/click.mp3">→</a>
+                </div>
+                <div class="step-panel">
+                  <div class="avatar-card-body">
+                    <p class="avatar-card-text">이번에는 생선의 무게만큼 블록을 쌓아 올려 한눈에 알기 쉽게 표현해볼까?</p>
+                  </div>
+                  <a href="page03.html" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">시작하기</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+  <div class="zoom-info" id="zoomInfo"></div>
+
+  <script src="../../resources/js/header.js" data-title="생선 무게를 재고 블록으로 나타내요" data-next="page03.html"></script>
+  <script src="../../resources/js/toc-gwa.js"></script>
+  <script src="../../resources/js/common.js"></script>
+  <script>
+  (function () {
+    const FISH = [
+      { key: 'dom', name: '도미', g: 200 },
+      { key: 'gwang', name: '광어', g: 500 },
+      { key: 'urok', name: '우럭', g: 300 },
+      { key: 'mung', name: '멍게', g: 100 }
+    ];
+    const MAX = 600;
+    const CX = 196.5;
+    const CY = 240.5;
+    const scale = $('p02Scale');
+
+    let ticks = '';
+    for (let v = 0; v <= MAX; v += 20) {
+      const a = (-120 + (v / MAX) * 240) * Math.PI / 180;
+      const big = v % 100 === 0;
+      const r1 = big ? 112 : 122;
+      ticks += '<line class="p02-tick' + (big ? ' is-big' : '') + '" data-v="' + v + '" x1="' + (CX + r1 * Math.sin(a)) + '" y1="' + (CY - r1 * Math.cos(a)) + '" x2="' + (CX + 132 * Math.sin(a)) + '" y2="' + (CY - 132 * Math.cos(a)) + '" stroke="#1b1738" stroke-width="' + (big ? 5 : 3) + '"/>';
+      if (big) ticks += '<text class="p02-tick" data-v="' + v + '" x="' + (CX + 88 * Math.sin(a)) + '" y="' + (CY - 88 * Math.cos(a) + 9) + '" text-anchor="middle" font-size="25" fill="#1b1738" font-family="Cafe24 Ssurround">' + v + '</text>';
+    }
+    scale.insertAdjacentHTML('beforeend', '<svg viewBox="0 0 394 455" aria-hidden="true">' + ticks +
+      '<text x="' + CX + '" y="' + (CY + 64) + '" text-anchor="middle" font-size="26" fill="#5b5e6e" font-family="Cafe24 Ssurround">g</text>' +
+      '<g class="p02-needle" id="p02Needle"><line x1="' + CX + '" y1="' + CY + '" x2="' + CX + '" y2="' + (CY - 112) + '" stroke="#e84b4b" stroke-width="7" stroke-linecap="round"/></g>' +
+      '<circle cx="' + CX + '" cy="' + CY + '" r="14" fill="#1b1738"/></svg>' +
+      '<div class="p02-plate" id="p02Plate"></div>');
+    const needle = $('p02Needle');
+    const setNeedle = (g) => { needle.style.transform = 'rotate(' + (-120 + (g / MAX) * 240) + 'deg)'; };
+    setNeedle(0);
+
+    function fishEl(f) {
+      const el = document.createElement('div');
+      el.className = 'p02-fish';
+      el.dataset.key = 'fish';
+      el.dataset.id = f.key;
+      el.innerHTML = '<img src="img/p02_fish_' + f.key + '.png" alt="' + f.name + '" draggable="false">';
+      return el;
+    }
+
+    const rows = $('p02Rows');
+    FISH.forEach((f) => {
+      const row = document.createElement('div');
+      row.className = 'p02-row';
+      row.dataset.id = f.key;
+      row.innerHTML = '<i class="p02-ico" style="background-image:url(img/p02_fish_' + f.key + '.png)"></i><span>' + f.name + '</span><i></i><input type="text" inputmode="numeric" maxlength="3" disabled><b>g</b>';
+      rows.appendChild(row);
+    });
+    const shelf = $('p02Shelf');
+    const holds = FISH.map((f) => {
+      const hold = document.createElement('div');
+      hold.className = 'p02-hold is-' + f.key;
+      shelf.appendChild(hold);
+      return hold;
+    });
+    const cards = FISH.map((f, i) => { const el = fishEl(f); holds[i].appendChild(el); return el; });
+
+    let current = null;
+    let solved = 0;
+
+    rows.addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/[^0-9]/g, '');
+      if (e.target.value.length === 3) check(e.target);
+    });
+    rows.addEventListener('keydown', (e) => { if (e.key === 'Enter') check(e.target); });
+
+    function place(card) {
+      current = FISH.find((f) => f.key === card.dataset.id);
+      const plate = $('p02Plate');
+      plate.innerHTML = '';
+      plate.appendChild(fishEl(current));
+      card.classList.add('is-done');
+      setNeedle(current.g);
+      rows.querySelectorAll('.p02-row').forEach((row) => {
+        const on = row.dataset.id === current.key;
+        row.classList.toggle('is-now', on);
+        const input = row.querySelector('input');
+        if (on) { input.disabled = false; setTimeout(() => input.focus(), 1000); }
+      });
+      dropZone.dataset.filled = '1';
+    }
+
+    function check(input) {
+      if (!current || input.disabled || !input.value) return;
+      if (Number(input.value) !== current.g) {
+        playWrong();
+        flashLayer($('p02Wrong'));
+        input.value = '';
+        scale.querySelectorAll('.p02-tick').forEach((t) => t.classList.toggle('is-on', Number(t.dataset.v) === current.g));
+        scale.classList.remove('is-hint');
+        void scale.offsetWidth;
+        scale.classList.add('is-hint');
+        return;
+      }
+      input.disabled = true;
+      input.classList.add('is-ok');
+      input.closest('.p02-row').classList.remove('is-now');
+      playCorrect();
+      $('p02RightText').textContent = current.name + ' ' + current.g + 'g!';
+      flashLayer($('p02Right'));
+      solved += 1;
+      $('p02Fill').style.width = (solved * 25) + '%';
+      current = null;
+      setTimeout(() => {
+        $('p02Plate').innerHTML = '';
+        setNeedle(0);
+        delete dropZone.dataset.filled;
+        if (solved === FISH.length) {
+          $('p02Done').classList.remove('is-off');
+        }
+      }, 2000);
+    }
+
+    const dropZone = $('p02Drop');
+    initMatchDrag({ cards: cards, zones: [dropZone], slop: 60, onRight: (card) => { holds[cards.indexOf(card)].appendChild(card); place(card); } });
+  })();
+  </script>
+</body>
+</html>
