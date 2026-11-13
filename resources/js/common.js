@@ -1131,8 +1131,14 @@ function initFindQuiz() {
 function initVideoPlay() {
   document.querySelectorAll('.video-box').forEach((box) => {
     const video = box.querySelector('.video-el');
-    const btn = box.querySelector('.video-play-btn');
+    let btn = box.querySelector('.video-play-btn');
     if (!video || !btn) return;
+    if (box.dataset.pause === 'on' && btn.tagName === 'IMG') {
+      const div = document.createElement('div');
+      div.className = btn.className;
+      btn.replaceWith(div);
+      btn = div;
+    }
 
     const showBtn = () => btn.classList.remove('is-hidden');
     const hideBtn = () => btn.classList.add('is-hidden');
@@ -1142,7 +1148,9 @@ function initVideoPlay() {
     });
 
     // 영상 자체를 클릭해도 재생/일시정지 토글되게
+    let skipToggle = false;
     video.addEventListener('click', () => {
+      if (skipToggle) { skipToggle = false; return; }
       if (video.paused) {
         video.play();
       } else {
@@ -1153,6 +1161,49 @@ function initVideoPlay() {
     video.addEventListener('play', hideBtn);
     video.addEventListener('pause', showBtn);
     video.addEventListener('ended', showBtn);
+
+    if (box.dataset.pause !== 'on') return;
+    video.controls = false;
+    const pauseBtn = document.createElement('div');
+    pauseBtn.className = 'video-pause-btn is-hidden';
+    pauseBtn.innerHTML = '<i></i><i></i>';
+    box.appendChild(pauseBtn);
+    const isPlaying = () => !video.paused && !video.ended;
+    pauseBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      playClick();
+      video.pause();
+    });
+    btn.addEventListener('click', playClick);
+    let isTouch = false;
+    let hideTimer = null;
+    const hidePause = () => {
+      clearTimeout(hideTimer);
+      pauseBtn.classList.add('is-hidden');
+    };
+    const showPauseTimed = () => {
+      pauseBtn.classList.remove('is-hidden');
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(hidePause, 2000);
+    };
+    const markPointer = (e) => { isTouch = e.pointerType === 'touch'; };
+    box.addEventListener('pointerenter', markPointer);
+    box.addEventListener('pointerdown', (e) => {
+      markPointer(e);
+      if (!isTouch) return;
+      skipToggle = e.target === video && isPlaying() && pauseBtn.classList.contains('is-hidden');
+      if (isPlaying()) showPauseTimed();
+    });
+    box.addEventListener('mouseenter', () => {
+      if (isTouch) return;
+      if (isPlaying()) pauseBtn.classList.remove('is-hidden');
+    });
+    box.addEventListener('mouseleave', hidePause);
+    video.addEventListener('play', () => {
+      if (isTouch) showPauseTimed();
+      else if (box.matches(':hover')) pauseBtn.classList.remove('is-hidden');
+    });
+    ['pause', 'ended'].forEach((ev) => video.addEventListener(ev, hidePause));
   });
 }
 
