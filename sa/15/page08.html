@@ -221,23 +221,33 @@
       say('믿을 수 있는 자료 2개를<br>골라 주세요.', 'main');
       setSide('<div class="p07-tip"><h4>자료를 고를 때 확인해요!</h4><p><b>누가 만들었나요?</b>만든 기관, 출처를 확인해요.</p><p><b>올바른 행동을 알려 주나요?</b>개인정보를 지키고, 다른 사람을 존중하는 내용인지 살펴봐요.</p><p><b>겁을 주거나 공유를 강요 하나요?</b>확인되지 않은 소문이나 공유를 강요하는 내용은 의심해요.</p><p><b>개인정보 입력이나 모르는 파일 다운로드를 요구하나요?</b>모르는 링크를 누르라는 내용은 주의해요.</p></div><div id="p07PickMsg"></div>');
       let okCount = 0;
+      let pickDone = false;
       const pop = $('p07Pop');
       pop.classList.remove('is-on');
+      const setPickMsg = (html, cls) => {
+        const msg = $('p07PickMsg');
+        if (msg) msg.innerHTML = msgTip(html, cls);
+      };
       const choose = (b, f) => {
+        if (pickDone) return;
         if (!f.ok) {
           playWrong();
           b.classList.remove('is-wrong'); void b.offsetWidth; b.classList.add('is-wrong');
-          $('p07PickMsg').innerHTML = msgTip('믿을 수 없는 정보가 섞여 있어요. 다시 한 번 살펴볼까요?<br><small style="font-size:28px">제작자, 출처, 내용을 꼼꼼하게 살펴보세요.</small>', 'is-wrong');
+          setPickMsg('믿을 수 없는 정보가 섞여 있어요. 다시 한 번 살펴볼까요?<br><small style="font-size:28px">제작자, 출처, 내용을 꼼꼼하게 살펴보세요.</small>', 'is-wrong');
           return;
         }
         playCorrect();
         b.classList.add('is-on');
         okCount += 1;
-        $('p07PickMsg').innerHTML = msgTip('믿을 수 있는 정보를 잘 골랐어요!', 'is-right');
-        if (okCount === 2) setTimeout(() => go(s5), 1200);
+        setPickMsg('믿을 수 있는 정보를 잘 골랐어요!', 'is-right');
+        if (okCount === 2) {
+          pickDone = true;
+          $('p07Pick').style.pointerEvents = 'none';
+          setTimeout(() => go(s5), 1200);
+        }
       };
       Array.from($('p07Pick').children).forEach((b) => b.addEventListener('click', () => {
-        if (b.classList.contains('is-on')) return;
+        if (pickDone || b.classList.contains('is-on')) return;
         playClick();
         const f = FILES.find((x) => x.k === b.dataset.k);
         $('p07PopPic').src = 'img/p08_src_' + f.img + '.jpg';
@@ -249,6 +259,7 @@
     }
     /* 5 업로드 */
     function s5() {
+      $('p07Pop').classList.remove('is-on');
       setSide('');
       say('PDF 자료가<br>업로드 중이에요..', 'main');
       scr.innerHTML = ST('9:42') + topbar('제목 없는 노트북') + '<div class="gn-sec"><b>소스</b>' + ICON.more + '</div><div class="gn-srcs"><div class="gn-src"><i class="gn-spin"></i>' + FILES[0].org + '</div><div class="gn-src"><i class="gn-spin"></i>교육청</div></div>' + fab('소스 추가') + tabs('source') + NAV;

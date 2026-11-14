@@ -394,14 +394,21 @@
           ctx.fillStyle = '#fff';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          try {
-            const a = document.createElement('a');
-            a.download = '하루_기온_그래프.png';
-            a.href = canvas.toDataURL('image/png');
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-          } catch (err) { console.warn('그래프 저장 실패:', err); }
+          if (location.protocol !== 'file:') {
+            canvas.toBlob((blob) => {
+              if (!blob) return;
+              try {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.download = '하루_기온_그래프.png';
+                a.href = url;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+              } catch (err) { console.warn('그래프 저장 실패:', err); }
+            }, 'image/png');
+          }
           talk('saved');
           setTimeout(() => { if (my === tok) $('p10Done').classList.remove('is-off'); }, 1200);
         };

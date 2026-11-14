@@ -132,18 +132,16 @@
       shorts: { name: '반바지', cat: 'bottom' },
       padding: { name: '패딩', cat: 'outer' },
       raincoat: { name: '우비', cat: 'outer' },
-      cardigan: { name: '얇은 여름용 가디건', cat: 'outer' },
       umbrella: { name: '우산', cat: 'acc' },
-      fan: { name: '손 선풍기', cat: 'acc' },
       beanie: { name: '털모자', cat: 'acc' }
     };
     const CATS = ['top', 'bottom', 'outer', 'acc'];
     const days = (from, weather, temps) => weather.map((w, i) => ({ day: from + i, w: w, temp: temps ? temps[i] : null }));
-    const ROUNDS = [
-      { cards: days(15, ['rain', 'rain', 'rain', 'cloud', 'cloud', 'rain', 'rain']),
-        slots: { top1: 'sweater', top2: 'tank', bottom1: 'pants', bottom2: 'shorts', outer1: 'padding', outer2: 'raincoat', acc1: 'umbrella', acc2: 'beanie' },
-        answer: ['tank', 'shorts', 'raincoat', 'umbrella'] }
-    ];
+    const ROUND = {
+      cards: days(15, ['rain', 'rain', 'rain', 'cloud', 'cloud', 'rain', 'rain']),
+      slots: { top1: 'sweater', top2: 'tank', bottom1: 'pants', bottom2: 'shorts', outer1: 'padding', outer2: 'raincoat', acc1: 'umbrella', acc2: 'beanie' },
+      answer: ['tank', 'shorts', 'raincoat', 'umbrella']
+    };
 
     const board = $('p13Board');
     const front = $('p13CardFront');
@@ -155,46 +153,37 @@
     CATS.forEach((c) => { wears[c] = document.querySelector('.p13-wear-' + c); });
     // 입히는 그림을 미리 받아 두고, 새 그림이 준비된 뒤에 바꿔서 갈아입을 때 캐릭터가 잠깐 사라지지 않게 함
     const wearImgs = {};
-    Object.keys(ITEMS).forEach((id) => { const im = new Image(); im.src = 'img/p13_wear_' + id + '.png'; wearImgs[id] = im; });
+    ROUND.answer.forEach((id) => { const im = new Image(); im.src = 'img/p13_wear_' + id + '.png'; wearImgs[id] = im; });
 
-    const order = shuffleArray(ROUNDS);
-    let roundNo = 0;
-    let round = null;
     let cardIdx = 0;
     let step = 0;
 
     function showCard() {
-      const c = round.cards[cardIdx];
+      const c = ROUND.cards[cardIdx];
       front.querySelector('.p13-card-icon').src = 'img/p13_weather_' + c.w + '.png';
       front.querySelector('.p13-card-temp').textContent = c.temp ? c.temp + '℃' : '';
       front.querySelector('.p13-card-date').textContent = c.day + '일';
-      const after = round.cards[cardIdx + 1];
+      const after = ROUND.cards[cardIdx + 1];
       back.querySelector('.p13-card-date').textContent = after ? after.day + '일' : '';
       prev.classList.toggle('is-disabled', cardIdx === 0);
-      next.classList.toggle('is-disabled', cardIdx === round.cards.length - 1);
+      next.classList.toggle('is-disabled', cardIdx === ROUND.cards.length - 1);
       front.classList.remove('is-flip');
       void front.offsetWidth;
       front.classList.add('is-flip');
     }
     prev.addEventListener('click', () => { if (cardIdx > 0) { cardIdx -= 1; showCard(); } });
-    next.addEventListener('click', () => { if (cardIdx < round.cards.length - 1) { cardIdx += 1; showCard(); } });
+    next.addEventListener('click', () => { if (cardIdx < ROUND.cards.length - 1) { cardIdx += 1; showCard(); } });
 
-    function startRound() {
-      round = order[roundNo];
-      cardIdx = 0;
-      step = 0;
+    function init() {
       showCard();
-      CATS.forEach((c) => { wears[c].hidden = true; });
-      document.querySelector('.p13-char-base').hidden = false;
-      board.innerHTML = '';
-      Object.keys(round.slots).forEach((slot) => {
-        const id = round.slots[slot];
+      Object.keys(ROUND.slots).forEach((slot) => {
+        const id = ROUND.slots[slot];
         const item = ITEMS[id];
         const el = document.createElement('div');
         el.className = 'p13-item p13-slot-' + slot;
         el.dataset.cat = item.cat;
         el.dataset.id = id;
-        el.dataset.key = round.answer.includes(id) ? item.cat : 'x';
+        el.dataset.key = ROUND.answer.includes(id) ? item.cat : 'x';
         el.innerHTML = '<img src="img/p13_item_' + id + '.png" alt="' + item.name + '">';
         board.appendChild(el);
       });
@@ -256,17 +245,10 @@
     });
 
     $('p13RightNext').addEventListener('click', () => {
-      roundNo += 1;
-      if (roundNo >= order.length) {
-        navigateTo('page14.html');
-        return;
-      }
-      resetImageSwap($('p13Right'));
-      $('p13Right').classList.add('is-off');
-      startRound();
+      navigateTo('page14.html');
     });
 
-    startRound();
+    init();
   })();
   </script>
 </body>
