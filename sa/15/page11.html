@@ -20,6 +20,25 @@
         #p10Slots .jig-slot:nth-child(1) .jig-label.is-hint,#p10Slots .jig-slot:nth-child(4) .jig-label.is-hint{transform:translateY(16.5px)}
         #p10Slots .jig-slot:nth-child(2) .jig-label.is-hint{transform:translate(-16.5px,-16.5px)}
         #p10Wrong,#p10Done{z-index:120}
+        .p11-fin{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:10;pointer-events:none}
+        .p11-fin{opacity:0;transition:opacity .35s ease}
+        .p11-fin.is-on{opacity:1}
+        .p11-fin.is-off{display:none}
+        .p11-old{transition:opacity .35s ease}
+        .p11-old.is-fade{opacity:0}
+        .p11-old.is-off{display:none}
+        .p11-wb{position:absolute;left:97px;top:25px;width:1721px;height:560px;box-sizing:border-box;background:var(--c-white);border:solid 5px var(--c-navy);border-radius:14px}
+        .p11-panel{position:absolute;left:435px;top:34px;width:1045px;height:543px;background:var(--c-navy);border-radius:24px}
+        .p11-slides{position:absolute;left:574px;top:43px;display:grid;grid-template-columns:380px 380px;gap:10px 12px}
+        .p11-slides img{display:block;width:380px;height:auto}
+        .p11-bubble{left:1400px;top:18px;bottom:auto;width:424px;height:147px;padding:0;font-size:46px;white-space:nowrap;--tail-x:70px;z-index:2}
+        .p11-bubble::before{transform:scaleX(-1)}
+        .p11-char{left:1363px;top:155px;width:500px;height:426px;z-index:1}
+        .p11-sky{position:absolute;left:97px;top:591px;width:1721px;height:357px;box-sizing:border-box;background:var(--c-sky);border:solid 5px var(--c-navy);border-radius:12px;z-index:3}
+        .p11-fin .p11-next{position:absolute;left:1496px;top:704px;width:280px;margin:0;z-index:5;pointer-events:auto}
+        #p11Pieces{z-index:4}
+        #p11Pieces .jig-free{pointer-events:none}
+        #p11Pieces .jig-label{font-size:36px;line-height:1.2;white-space:nowrap}
     </style>
 </head>
 <body>
@@ -52,9 +71,19 @@
               <div class="avatar-popup-body is-finish">
                 <p class="avatar-popup-text">정답이에요!</p>
                 <p class="avatar-popup-sub">Gemini Notebook을 이용하면 내 자료로 슬라이드를 만들 수 있어요.</p>
-                <a href="page12.html" class="avatar-popup-next card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
+                <button type="button" class="avatar-popup-next card-btn is-popup" id="p11DoneNext">다음</button>
               </div>
             </div>
+          </div>
+          <div class="p11-fin is-off" id="p11Fin">
+            <div class="p11-wb"></div>
+            <div class="p11-panel"></div>
+            <div class="p11-slides" id="p11Slides"></div>
+            <p class="guide-bubble is-center p11-bubble">자~ 완성 되었어요.</p>
+            <div class="char-box p11-char"><img src="img/p11_character_done.png" alt="메인 캐릭터"></div>
+            <div class="p11-sky"></div>
+            <div class="jig-layer" id="p11Pieces"></div>
+            <a href="page12.html" class="js-nav-effect js-sfx card-btn is-start p11-next" data-sound="sound/click.mp3">다음</a>
           </div>
         </main>
       </div>
@@ -143,6 +172,30 @@
       });
     });
     $('p10WrongOk').addEventListener('click', () => $('p10Wrong').classList.add('is-off'));
+
+    function comboKey() {
+      try {
+        const v = JSON.parse(sessionStorage.getItem('sa15Combo'));
+        if (/^(teen|senior)_(neat|kind)_(text|pic)$/.test(v)) return v;
+      } catch (e) {}
+      return 'teen_neat_text';
+    }
+    $('p11DoneNext').addEventListener('click', () => {
+      playClick();
+      $('p10Done').classList.add('is-off');
+      const key = comboKey();
+      $('p11Slides').innerHTML = ['cover', '1', '2', '3'].map((n) => '<img src="img/p08_slide_' + key + '_' + n + '.png" alt="">').join('');
+      STEPS.forEach((st, k) => {
+        jigAddPiece($('p11Pieces'), 463 + 240 * k, 658, BS, BM, EDGES[k], COLORS[k], st.t, 'p11-d' + k, '');
+      });
+      const olds = Array.from(document.querySelectorAll('main > :not(#p11Fin):not(.avatar-modal)'));
+      olds.forEach((el) => el.classList.add('p11-old'));
+      $('p11Fin').classList.remove('is-off');
+      void $('p11Fin').offsetWidth;
+      $('p11Fin').classList.add('is-on');
+      olds.forEach((el) => el.classList.add('is-fade'));
+      setTimeout(() => olds.forEach((el) => el.classList.add('is-off')), 400);
+    });
   })();
   </script>
 </body>

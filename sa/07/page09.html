@@ -9,12 +9,12 @@
         /* 디자인 없음 - 기획서 24~43p. 지도에서 장소 5곳(순서 자유) → 장소마다 같은 흐름:
            미션 말풍선 → 휴대폰을 끌어 간판에 맞추기(가까이 놓으면 자석처럼 붙음) → 렌즈 버튼 → 결과 창 끌어올리기 → 더보기 →
            알맞은 정보 줄 클릭 → 추가 질문 입력(입력창 → 질문 버튼 → 보내기 → 2초 로딩 → 답변 타이핑) → 지도로(노란 별).
-           5곳 다 하면 완료 팝업 → 퀴즈. 지도 img/p09_map.png, 장소 그림 img/p09_scene_{key}.png
+           5곳 다 하면 완료 팝업 → 퀴즈. 지도 img/p09_map.jpg, 장소 그림 img/p09_scene_{key}.jpg
            휴대폰 결과 화면은 HTML로 그림. 캐릭터는 임시로 sa/06 캐릭터 복사본 */
         .p09-view.is-off, .is-hide{display:none!important}
 
         /* 지도 */
-        .p09-map{position:absolute;left:58px;top:182px;width:1806px;height:730px;box-sizing:border-box;border:solid 5px var(--c-navy);border-radius:14px;background:var(--c-pale) url('img/p09_map.png') center / cover no-repeat}
+        .p09-map{position:absolute;left:58px;top:182px;width:1806px;height:730px;box-sizing:border-box;border:solid 5px var(--c-navy);border-radius:14px;background:var(--c-pale) url('img/p09_map.jpg') center / cover no-repeat}
         .p09-spot{position:absolute;width:300px;height:320px;padding:0;border:0;background:none;cursor:pointer;transition:transform .2s}
         .p09-spot:hover{transform:scale(1.06)}
         .p09-spot i{position:absolute;left:-25px;bottom:20px;width:300px;height:300px;border-radius:24px;background:transparent center / contain no-repeat}
@@ -75,6 +75,9 @@
         .p09-fold{position:relative;max-height:430px;overflow:hidden;transition:max-height .4s ease}
         .p09-fold:after{content:'';position:absolute;left:0;right:0;bottom:0;height:130px;background:linear-gradient(rgba(255,255,255,0),var(--c-white));pointer-events:none;transition:opacity .3s}
         .p09-fold.is-expanded{max-height:1600px}
+        .p09-fold.is-preview{max-height:none}
+        .p09-fold.is-preview:after{display:none}
+        .p09-fold.is-preview .p09-pick-card{pointer-events:none}
         .p09-fold.is-expanded:after{opacity:0}
         .p09-sheet h4{margin:0 0 10px;font-size:25px;font-weight:600;line-height:1.4}
         .p09-sheet h5{margin:0 0 8px;font-size:25px;font-weight:800}
@@ -103,7 +106,7 @@
         .p09-ask{position:absolute;left:18px;right:18px;bottom:18px;height:74px;display:flex;align-items:center;gap:10px;padding:0 10px 0 22px;box-sizing:border-box;border-radius:37px;background:var(--c-pale);font:500 22px 'Pretendard';color:#5f6368;cursor:pointer;z-index:3}
         .p09-ask span{flex:1 1 auto}
         .p09-ask.is-typed span{color:var(--c-ink)}
-        .p09-send{width:54px;height:54px;border:0;border-radius:50%;background:#1a73e8;color:var(--c-white);font-size:26px;padding-bottom:8px;cursor:pointer}
+        .p09-send{flex:0 0 54px;width:54px;height:54px;border:0;border-radius:50%;background:#1a73e8;color:var(--c-white);font-size:26px;padding-bottom:8px;cursor:pointer}
         .p09-chat{position:absolute;inset:0;padding:60px 26px 110px;box-sizing:border-box;background:#fff;display:flex;flex-direction:column;gap:18px;overflow-y:auto;z-index:2}
         .p09-me{align-self:flex-end;max-width:80%;padding:14px 20px;border-radius:22px 22px 4px 22px;background:#e3edff;font:600 22px/1.4 'Pretendard'}
         .p09-ans{max-width:92%;padding:16px 20px;border-radius:22px 22px 22px 4px;background:var(--c-white);box-shadow:0 2px 10px rgba(0,0,0,.2);font:500 23px/1.5 'Pretendard';white-space:pre-wrap}
@@ -177,7 +180,7 @@
   (function () {
     // spot: 지도 위 위치, lines: [머리말, 내용], key: 정답 줄 번호
     const PLACES = [
-      { key: 'pharmacy', name: '약국', spot: [146, 42], target: [1140, 120, 320, 600],
+      { key: 'pharmacy', name: '약국', spot: [146, 42], target: [1020, 120, 320, 600],
         mission: '약국에서는 어떤 도움을<br>받을 수 있을까요?<br>구글렌즈로 알아봐요!',
         title: '사진에 나타난 곳은 행복약국으로 보입니다.', sub: '행복약국 정보',
         lines: [['위치', '충청남도 천안시 한솔구 가온길 27'], ['하는 일', '약을 사고, 약 복용 방법을 안내 받을 수 있습니다.'], ['방문 후기', '친절하고 약에 대해 설명을 잘해 준다는 후기가 있습니다.']], answer: 1,
@@ -187,7 +190,7 @@
         right: '좋아요!<br>약국에서는 약을 사고,<br>복용 방법을 안내 받을 수 있어요.', more: '약국의 영업 시간 정보를<br>추가로 확인해볼까요?',
         question: '약국의 영업 시간을 알려줘.', done: '좋아요! 약국의<br>영업 시간도 확인했어요!',
         answerText: '행복약국의 영업 시간은 오전 9시~오후 6시입니다. 일요일은 휴무일 수 있으니 실제 운영 시간을 확인 후 방문하는 걸 권장합니다.' },
-      { key: 'park', name: '공원', spot: [710, 10], target: [1000, 230, 320, 600],
+      { key: 'park', name: '공원', spot: [710, 10], target: [1000, 270, 320, 600],
         mission: '공원의 운영 시간은<br>언제일까요?<br>구글렌즈로 알아봐요!',
         title: '사진에 나타난 곳은 달빛공원으로 보입니다.', sub: '달빛공원 정보',
         lines: [['위치', '서울특별시 한빛구 새봄로 123'], ['운영 시간', '오전 5시 ~ 오후 10시<br>계절과 날씨에 따라 운영 시간이 달라질 수 있습니다.'], ['하는 일', '산책, 운동, 휴식을 즐기며 자연을 만날 수 있습니다.'], ['방문 후기', '산책하기 좋고 아이들과 함께 방문하기 좋다는 후기가 있습니다.']], answer: 1,
@@ -197,7 +200,7 @@
         right: '좋아요! 공원의 운영 시간은<br>오전 5시부터 오후 10시까지예요!', more: '공원에는 어떤 시설이 있는지<br>추가로 확인해볼까요?',
         question: '공원에는 어떤 시설이 있는지 알려줘.', done: '좋아요! 공원에서<br>이용할 수 있는<br>시설을 확인했어요!',
         answerText: '공원에는 운동을 할 수 있는 기구들과 휴식을 취할 수 있는 벤치가 있어요. 모든 사람들이 함께 이용하는 공공 기물이기 때문에 깨끗하게 사용해야 해요.' },
-      { key: 'store', name: '편의점', spot: [1290, 40], target: [1010, 70, 320, 600],
+      { key: 'store', name: '편의점', spot: [1290, 40], target: [920, 70, 320, 600],
         mission: '편의점에서는<br>무엇을 할 수 있을까요?<br>구글렌즈로 알아봐요!',
         pickPlace: {
           say: '내가 검색한<br>장소는 무엇인가요?',
@@ -215,7 +218,7 @@
         right: '좋아요! 편의점에서는 내가 필요한 물건을 구매할 수 있어요!', more: '편의점의 위치를<br>추가로 확인해볼까요?',
         question: '우리동네 편의점이 어디 있는지 알려줘.', done: '좋아요! 편의점의<br>위치를 확인했어요!',
         answerText: '우리동네 편의점은 부산광역시 푸른구 해솔길 45에 위치해 있습니다.' },
-      { key: 'library', name: '도서관', spot: [420, 340], target: [950, 10, 320, 600],
+      { key: 'library', name: '도서관', spot: [420, 340], target: [960, 10, 320, 600],
         mission: '도서관에서 어떻게<br>책을 빌릴 수 있을까요?<br>구글렌즈로 알아봐요!',
         title: '사진에 나타난 곳은 시립도서관으로 보입니다.', sub: '시립도서관 정보',
         lines: [['위치', '전라북도 전주시 새롬구 한들길 17'], ['운영 시간', '오전 9시 ~ 오후 10시<br>월요일은 휴관일 수 있습니다.'], ['하는 일', '책을 빌려 읽고, 다양한 자료를 이용할 수 있습니다.'], ['대여 방법', '빌리고 싶은 책과 회원 카드를 사서에게 보여주면 대여할 수 있습니다.'], ['방문 후기', '조용해서 공부하기 좋고 책 종류가 많다는 후기가 있습니다.']], answer: 3,
@@ -295,17 +298,47 @@
     }
 
     // 1) 미션 → 2) 휴대폰 맞추기 → 3) 렌즈 버튼
+    const FG = {
+      app: { dx: 0, dy: 0 },
+      shutter: { dx: 0, dy: 0 },
+      more: { dx: 0, dy: 0 },
+      ask: { dx: 0, dy: -30 },
+      send: { dx: 5, dy: -18 }
+    };
+    let fgName = '';
+    function fgo(name, o) {
+      fgName = name;
+      return Object.assign({}, o, { dx: FG[name].dx, dy: FG[name].dy });
+    }
+    if (new URLSearchParams(location.search).has('fg')) {
+      const bar = document.createElement('div');
+      bar.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:99999;background:rgba(0,0,0,.8);color:#fff;font:14px monospace;padding:6px 10px;border-radius:6px;pointer-events:none';
+      document.body.appendChild(bar);
+      document.addEventListener('keydown', (e) => {
+        const k = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+        const f = document.querySelector('.js-point-finger');
+        if (!k || !f || !FG[fgName]) return;
+        e.preventDefault();
+        const st = e.shiftKey ? 10 : 1;
+        FG[fgName].dx += k[0] * st;
+        FG[fgName].dy += k[1] * st;
+        f.style.left = (parseFloat(f.style.left) + k[0] * st) + 'px';
+        f.style.top = (parseFloat(f.style.top) + k[1] * st) + 'px';
+        bar.textContent = fgName + ': { dx:' + FG[fgName].dx + ', dy:' + FG[fgName].dy + ' },';
+      });
+    }
+
     function start(p) {
       place = p;
       view('p09SceneView');
-      $('p09Scene').style.backgroundImage = "url('img/p09_scene_" + p.key + ".png')";
+      $('p09Scene').style.backgroundImage = "url('img/p09_scene_" + p.key + ".jpg')";
       $('p09SceneName').textContent = p.name;
       show($('p09Target'), false);
       show($('p09Cam'), false);
       show($('p09Shutter'), false);
       show($('p09Home'), true);
       say(p.mission);
-      pointFingerAt($('p09App'), { onMain: true });
+      pointFingerAt($('p09App'), fgo('app', { onMain: true }));
     }
 
     $('p09App').addEventListener('click', () => {
@@ -332,7 +365,7 @@
       const sh = el.clientHeight * SHOT_H / 890;
       const c = Math.max(sw / 1880, sh / 920) * SHOT_ZOOM;
       const clamp = (v, box, img) => Math.min(0, Math.max(box - img, v));
-      el.style.backgroundImage = "url('img/p09_scene_" + p.key + ".png')";
+      el.style.backgroundImage = "url('img/p09_scene_" + p.key + ".jpg')";
       el.style.backgroundRepeat = 'no-repeat';
       el.style.backgroundSize = 1880 * c + 'px ' + 920 * c + 'px';
       el.style.backgroundPosition = clamp(sw / 2 - cx * c, sw, 1880 * c) + 'px ' + clamp(sh / 2 - cy * c, sh, 920 * c) + 'px';
@@ -407,7 +440,7 @@
           show($('p09Shutter'), true);
           say('검색 아이콘을 클릭해보세요.');
           // 휴대폰이 간판 자리로 붙는 애니메이션(0.3초) 뒤에 위치를 재야 검색 아이콘을 정확히 가리킴
-          setTimeout(() => pointFingerAt($('p09Shutter'), { onMain: true }), 350);
+          setTimeout(() => pointFingerAt($('p09Shutter'), fgo('shutter', { onMain: true })), 350);
         }
       };
       cam.addEventListener('pointermove', move);
@@ -435,19 +468,26 @@
       sheet.style.top = SHEET_CLOSED + 'px';
       findMode = false;
       $('p09Scroll').scrollTop = 0;
-      $('p09Scroll').innerHTML = '<div class="p09-fold" id="p09Fold"><p class="p09-ai">AI 개요</p><div class="p09-photo" style="background-image:url(img/p07_place_' + place.key + '.png)"></div><h4>' + place.title + '</h4><h5>' + place.sub + '</h5>' +
-        '<div class="p09-lines" id="p09Lines">' + place.lines.map((l, i) => '<button class="p09-line" data-i="' + i + '"><b>' + l[0] + ':</b> ' + l[1] + '</button>').join('') + '</div></div>' +
+      const photoHtml = '<div class="p09-photo" style="background-image:url(img/p07_place_' + place.key + '.png)"></div>';
+      const pickCardsHtml = (place.pickPlace ? place.pickPlace.items : []).map((item) => '<button class="p09-pick-card" data-ok="' + (item.ok ? '1' : '') + '"><b>' + item.name + '</b><span>' + item.addr + '</span></button>').join('');
+      const aiLabelHtml = '<p class="p09-ai">AI 개요</p>';
+      const overviewHtml = aiLabelHtml + photoHtml + '<h4>' + place.title + '</h4><h5>' + place.sub + '</h5>' +
+        '<div class="p09-lines" id="p09Lines">' + place.lines.map((l, i) => '<button class="p09-line" data-i="' + i + '"><b>' + l[0] + ':</b> ' + l[1] + '</button>').join('') + '</div>';
+      $('p09Scroll').innerHTML = '<div class="p09-fold' + (place.pickPlace ? ' is-preview' : '') + '" id="p09Fold">' +
+        (place.pickPlace ? aiLabelHtml + photoHtml + '<h4>' + place.pickPlace.desc + '</h4><div class="p09-pick-list">' + pickCardsHtml + '</div>' : overviewHtml) + '</div>' +
         '<button class="p09-more" id="p09More">더보기</button>' +
         '<div class="p09-extra is-hide" id="p09Extra"><p>' + place.extraHead + '</p><ul>' + place.extra.map((t) => '<li>' + t + '</li>').join('') + '</ul></div>' +
         (place.pickPlace
-          ? '<div class="p09-pick is-hide" id="p09Pick"><div class="p09-photo" style="background-image:url(img/p07_place_' + place.key + '.png)"></div><h4>' + place.pickPlace.desc + '</h4><div class="p09-pick-list">' +
-            place.pickPlace.items.map((item) => '<button class="p09-pick-card" data-ok="' + (item.ok ? '1' : '') + '"><b>' + item.name + '</b><span>' + item.addr + '</span></button>').join('') +
-            '</div></div>'
+          ? '<div class="p09-pick is-hide" id="p09Pick">' + aiLabelHtml + photoHtml + '<h4>' + place.pickPlace.desc + '</h4><div class="p09-pick-list">' + pickCardsHtml + '</div></div>'
           : '');
       say('화면을 끌어 올려봐요.',null,'03');
       swipeFinger(sheet.querySelector('.p09-handle'));
       const expandOverview = () => {
         show($('p09More'), false);
+        if (place.pickPlace) {
+          $('p09Fold').classList.remove('is-preview');
+          $('p09Fold').innerHTML = overviewHtml;
+        }
         show($('p09Fold'), true);
         $('p09Fold').classList.add('is-expanded');
         show($('p09Extra'), true);
@@ -509,7 +549,7 @@
           show($('p09Ask'), true);
           say('더보기 버튼을 눌러<br>내용을 자세히 확인해봐요.',null,'04');
           // 결과 창이 올라가는 애니메이션(0.35초)이 끝난 뒤 위치를 재야 더보기 버튼을 정확히 가리킴
-          setTimeout(() => pointFingerAt($('p09More'), { onMain: true }), 400);
+          setTimeout(() => pointFingerAt($('p09More'), fgo('more', { onMain: true })), 400);
         } else {
           sheet.style.top = SHEET_CLOSED + 'px';
         }
@@ -564,7 +604,7 @@
     function askStep() {
       askPhase = 'input';
       say('질문하기 입력창을 클릭해요.',null,'07');
-      pointFingerAt($('p09Ask'), { onMain: true, x: 0.45 });
+      pointFingerAt($('p09Ask'), fgo('ask', { onMain: true, x: 0.45, noClamp: true }));
     }
     $('p09Ask').addEventListener('click', (e) => {
       if (e.target.closest('.p09-send')) return;
@@ -587,7 +627,7 @@
       $('p09AskText').textContent = place.question;
       $('p09Ask').classList.add('is-typed');
       say('보내기 버튼을 클릭해요.',null,'09');
-      pointFingerAt($('p09Send'), { onMain: true });
+      pointFingerAt($('p09Send'), fgo('send', { onMain: true, noClamp: true }));
     });
     $('p09Send').addEventListener('click', () => {
       if (askPhase !== 'send') return;
@@ -620,7 +660,7 @@
       if (ep) {
         place = ep;
         view('p09SceneView');
-        $('p09Scene').style.backgroundImage = "url('img/p09_scene_" + ep.key + ".png')";
+        $('p09Scene').style.backgroundImage = "url('img/p09_scene_" + ep.key + ".jpg')";
         $('p09SceneName').textContent = ep.name;
         cam.style.left = CAM_HOME[0] + 'px';
         cam.style.top = CAM_HOME[1] + 'px';

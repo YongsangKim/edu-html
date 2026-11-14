@@ -8,10 +8,12 @@
     <style>
         /* 디자인 없음 - 기획서 46~61p. 손님 5명의 주문을 보고 재화/서비스 선반에서 알맞은 것 고르기.
            맞으면 웃는 손님 + 감사 말풍선 2초 뒤 다음 손님(게이지 20%씩), 틀리면 힌트 팝업 3초(기획서 5초는 너무 길어 줄임).
-           가게 배경 img/p12_bg.png, 물건 img/p12_item_{key}.png */
-        main{background:url('img/p12_bg.png') center / cover no-repeat, linear-gradient(180deg,#d9ddeb 0%,#cddcea 50%,#c2d9e9 100%)}
+           가게 배경 img/p12_bg.jpg, 물건 img/p12_item_{key}.png */
+        main{background:url('img/p12_bg.jpg') center / cover no-repeat, linear-gradient(180deg,#d9ddeb 0%,#cddcea 50%,#c2d9e9 100%)}
 
-        /* 디자인 12p: 가게 배경(img/p12_bg.png, 손님·선반 포함) 위에 게이지 · 주문 말풍선 · 질문 알약 · 재화/서비스 이름표 · 동그란 물건 4개 */
+        /* 디자인 12p: 가게 배경(img/p12_bg.jpg, 손님·선반 포함) 위에 게이지 · 주문 말풍선 · 질문 알약 · 재화/서비스 이름표 · 동그란 물건 4개 */
+        .p12-guest{position:absolute;pointer-events:none}
+        .p12-front{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none}
         .p12-gauge{left:333px;top:36px;width:1292px}
 
         .p12-order{position:absolute;left:1103px;top:170px;margin:0;width:547px;min-height:218px;box-sizing:border-box;padding:24px 30px 18px;display:flex;align-items:center;justify-content:center;text-align:center;
@@ -48,6 +50,8 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="p12">
+          <img class="p12-guest" id="p12Guest" src="img/p12_guest_1.png" alt="">
+          <img class="p12-front" src="img/p12_front.png" alt="">
           <div class="gauge is-thin p12-gauge"><div class="gauge-fill" id="p12GaugeFill"></div></div>
           <p class="p12-order" id="p12Order"></p>
 
@@ -76,19 +80,19 @@
   <script>
   (function () {
     const GUESTS = [
-      { order: '배가 너무 고파요.<br>달콤한 빵 주세요!', answer: 'bread', type: 'goods',
+      { order: '배가 너무 고파요.<br>달콤한 빵 주세요!', img: ['img/p12_guest_1.png', 755, 117], ok: ['img/p12_guest_1_ok.png', 712, 110], answer: 'bread', type: 'goods',
         goods: [['umbrella', '우산'], ['bread', '빵']], service: [['haircut', '미용사의 이발'], ['doctor', '의사의 진료']],
         hint: '배가 고픈 손님에게 필요한 것은 누군가의 기술과 도움일까요, 맛있게 먹을 수 있는 물건일까요?' },
-      { order: '앞머리가 눈을 가려요.', answer: 'haircut', type: 'service',
+      { order: '앞머리가 눈을 가려요.', img: ['img/p12_guest_2.png', 766, 140], ok: ['img/p12_guest_2_ok.png', 756, 131], answer: 'haircut', type: 'service',
         goods: [['shoes', '신발'], ['snack', '과자']], service: [['haircut', '미용사의 이발'], ['taxi', '택시기사의 운전']],
         hint: '긴 머리카락 때문에 불편한 손님에게 필요한 것은 미용사의 기술과 도움일까요, 가방에 쏙 들어가는 물건일까요?' },
-      { order: '내일 미술 시간인데<br>알록달록 그림 그릴 도구가 없어요!', answer: 'crayon', type: 'goods',
+      { order: '내일 미술 시간인데<br>알록달록 그림 그릴 도구가 없어요!', img: ['img/p12_guest_3.png', 755, 220], ok: ['img/p12_guest_3_ok.png', 696, 203], answer: 'crayon', type: 'goods',
         goods: [['crayon', '색연필'], ['paper', '색종이']], service: [['haircut', '미용사의 이발'], ['doctor', '의사의 진료']],
         hint: '준비물이 없는 손님에게 필요한 것은 손으로 잡고 그림을 그리는 물건일까요, 누군가의 기술과 도움일까요?' },
-      { order: '콜록콜록! 기침이 나고<br>열이 나서 몸이 아파요.', answer: 'doctor', type: 'service',
+      { order: '콜록콜록! 기침이 나고<br>열이 나서 몸이 아파요.', img: ['img/p12_guest_4.png', 746, 231], ok: ['img/p12_guest_4_ok.png', 760, 186], answer: 'doctor', type: 'service',
         goods: [['bread', '빵'], ['crayon', '색연필']], service: [['doctor', '의사의 진료'], ['taxi', '택시기사의 운전']],
         hint: '몸이 아픈 손님에게 필요한 것은 가방에 쏙 넣을 수 있는 물건일까요, 의사 선생님의 기술과 도움일까요?' },
-      { order: '집에 가야 하는데 멀어서<br>걸어가기 힘들어요.', answer: 'taxi', type: 'service',
+      { order: '집에 가야 하는데 멀어서<br>걸어가기 힘들어요.', img: ['img/p12_guest_5.png', 646, 113], ok: ['img/p12_guest_5_ok.png', 679, 52], answer: 'taxi', type: 'service',
         goods: [['shoes', '신발'], ['snack', '과자']], service: [['taxi', '택시기사의 운전'], ['haircut', '미용사의 이발']],
         hint: '집에 가는 길이 먼 손님에게 필요한 것은 손으로 잡을 수 있는 물건일까요, 택시 기사님의 기술과 도움일까요?' }
     ];
@@ -97,6 +101,15 @@
     const shelves = { goods: $('p12Goods'), service: $('p12Service') };
     const thanks = $('p12Thanks');
     const gaugeFill = $('p12GaugeFill');
+    const guestImg = $('p12Guest');
+
+    GUESTS.forEach((g) => { [g.img, g.ok].forEach((v) => { new Image().src = v[0]; }); });
+
+    function showGuest(v) {
+      guestImg.src = v[0];
+      guestImg.style.left = v[1] + 'px';
+      guestImg.style.top = v[2] + 'px';
+    }
 
     let index = 0;
     let busy = false;
@@ -117,6 +130,7 @@
     function render() {
       const g = GUESTS[index];
       busy = false;
+      showGuest(g.img);
       setOrder(g.order);
       thanks.classList.add('is-off');
       $('p12Ask').classList.remove('is-off');
@@ -152,6 +166,7 @@
       playCorrect();
       btn.classList.add('is-selected');
       setTimeout(() => {
+        showGuest(g.ok);
         setOrder('감사합니다!');
         shelves.goods.classList.add('is-off');
         shelves.service.classList.add('is-off');

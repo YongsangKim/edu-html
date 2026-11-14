@@ -240,7 +240,7 @@
         if (b.classList.contains('is-on')) return;
         playClick();
         const f = FILES.find((x) => x.k === b.dataset.k);
-        $('p07PopPic').src = 'img/p07_src_' + f.img + '.png';
+        $('p07PopPic').src = 'img/p08_src_' + f.img + '.jpg';
         pop.classList.add('is-on');
         $('p07PopScroll').scrollTop = 0;
         $('p07PopAdd').onclick = () => { pop.classList.remove('is-on'); choose(b, f); };
@@ -301,11 +301,22 @@
       { q: '어떤 말투로 만들까요?', opts: [{ t: '핵심만 깔끔하게 전하는 말투', p: '핵심만 깔끔하게 전하는 말투로 작성해주고,' }, { t: '쉽고 친절한 말투', p: '쉽고 친절한 말투로 작성해주고,' }] },
       { q: '글과 그림은 어떻게 넣을까요?', opts: [{ t: '그림 최소화, 글은 많이', p: '그림은 최소화하고 글은 많이 넣어서 만들어줘.' }, { t: '그림을 많이, 글은 짧게', p: '글은 적게 그림은 많이 넣어서 만들어줘.' }] },
     ];
+    const COMBO_DEF = ['teen', 'neat', 'text'];
+    const COMBO_OPT = [null, ['teen', 'senior'], ['neat', 'kind'], ['text', 'pic']];
+    function comboKey() {
+      try {
+        const v = JSON.parse(sessionStorage.getItem('sa15Combo'));
+        if (/^(teen|senior)_(neat|kind)_(text|pic)$/.test(v)) return v;
+      } catch (e) {}
+      return COMBO_DEF.join('_');
+    }
+    const slideSrc = (s) => 'img/p08_slide_' + comboKey() + '_' + s[0] + '.png';
     function s9() {
       scr.innerHTML = ST('9:45') + '<div class="gn-set">' + ic('x', 'class="gn-set-x"') + '<div class="gn-set-ico">' + ic('wandS') + '</div><p class="gn-set-title">슬라이드 맞춤설정</p><p class="gn-set-lab">언어</p><div class="gn-chips"><span class="gn-chip is-fill">한국어(기본)</span></div><p class="gn-set-lab">소스</p><div class="gn-chips"><span class="gn-chip is-fill">2</span></div><p class="gn-set-lab">프롬프트</p><div class="gn-text" id="p07Prompt" style="min-height:230px">질문에 답하면 프롬프트가 여기에 만들어져요.</div></div>';
       say('질문에 답하며,<br>프롬프트를 입력해볼까요?', 'main');
       setSide(QS.map((x, i) => '<div class="p07-q" data-i="' + i + '"' + (i ? ' style="display:none"' : '') + '><h5>' + x.q + '</h5><div>' + (x.opts.some((o) => o.wrong) ? shuffleArray(x.opts) : x.opts).map((o) => '<button type="button" data-o="' + x.opts.indexOf(o) + '">' + o.t + '</button>').join('') + '</div></div>').join(''));
       const parts = [];
+      const combo = COMBO_DEF.slice();
       Array.from(side.querySelectorAll('.p07-q')).forEach((box, i) => {
         Array.from(box.querySelectorAll('button')).forEach((b) => b.addEventListener('click', () => {
           const o = QS[i].opts[+b.dataset.o];
@@ -319,6 +330,10 @@
           box.classList.add('is-done');
           Array.from(box.querySelectorAll('button')).forEach((x) => { x.disabled = true; });
           parts[i] = o.p;
+          if (i > 0) {
+            combo[i - 1] = COMBO_OPT[i][+b.dataset.o];
+            try { sessionStorage.setItem('sa15Combo', JSON.stringify(combo.join('_'))); } catch (e) {}
+          }
           $('p07Prompt').textContent = parts.filter(Boolean).join(' ');
           const n = side.querySelector('.p07-q[data-i="' + (i + 1) + '"]');
           if (n) setTimeout(() => { box.style.display = 'none'; n.style.display = ''; }, 700);
@@ -348,9 +363,9 @@
       finger('#p07Out', 'open');
     }
     /* 13 검수 */
-    const SLIDES = [['p07_slide_cover', '표지 – 디지털 안전 수칙'], ['p07_slide_1', '페이지 1'], ['p07_slide_2', '페이지 2'], ['p07_slide_3', '페이지 3 – 우리의 약속']];
+    const SLIDES = [['cover', '표지 – 디지털 안전 수칙'], ['1', '페이지 1'], ['2', '페이지 2'], ['3', '페이지 3 – 우리의 약속']];
     function s13() {
-      scr.innerHTML = '<div class="gn-view">' + ST('9:57') + '<div class="gn-view-bar">' + ICON.back + '<i></i>' + ICON.share + ICON.more + '</div><div class="gn-view-body">' + SLIDES.map((s, i) => '<div class="gn-view-slide" data-i="' + i + '" role="button"><span>' + s[1] + '</span><img src="img/' + s[0] + '.png" alt="" onerror="this.remove()"></div>').join('') + '</div><div class="gn-view-meta"><b>우리 동네 안전 PPT 발표자료</b><small>소스 2개 • 방금</small></div></div>' + NAV;
+      scr.innerHTML = '<div class="gn-view">' + ST('9:57') + '<div class="gn-view-bar">' + ICON.back + '<i></i>' + ICON.share + ICON.more + '</div><div class="gn-view-body">' + SLIDES.map((s, i) => '<div class="gn-view-slide" data-i="' + i + '" role="button"><span>' + s[1] + '</span><img src="' + slideSrc(s) + '" alt="" onerror="this.remove()"></div>').join('') + '</div><div class="gn-view-meta"><b>우리 동네 안전 PPT 발표자료</b><small>소스 2개 • 방금</small></div></div>' + NAV;
       say('발표자료가 완성되었어요.<br>AI가 잘 만들었는지<br>검수해봐야 해요.', 'wink_point3');
       Array.from(scr.querySelectorAll('.gn-view-slide')).forEach((el) => el.addEventListener('click', () => {
         playClick();
@@ -359,7 +374,7 @@
         const pic = $('p07MdPic');
         pic.style.display = '';
         pic.onerror = () => { pic.style.display = 'none'; $('p07MdPh').textContent = s[1]; };
-        pic.src = 'img/' + s[0] + '.png';
+        pic.src = slideSrc(s);
         $('p07Md').classList.add('is-on');
       }));
       const CH = ['내가 제공한 자료와 내용이 일치하나요?', '듣는 사람을 고려하여 작성되었나요?', '잘못된 정보는 없나요?'];

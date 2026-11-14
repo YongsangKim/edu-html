@@ -11,7 +11,7 @@
            앱 첫 화면·검색 화면은 공용 .cv-app 부품, 편집 화면은 기획서 캡처를 540x1170 좌표(.cu-ui, 화면에 맞춰 줄임)로 그린 것.
            아이콘·썸네일처럼 그리기 어려운 조각만 캡처에서 오려 img/ui/ 에 둠. 고른 값(프롬프트 · 초안 이미지 · 문구 · 글꼴)은 화면 안에 그대로 그려짐.
            흐름: 홈에서 Canva → 포스터(세로형 A2) → Magic Media 세로형 → 프롬프트(3가지 중 선택) → 이미지 생성(2초) → 초안 4장 보기(화살표)·고르기(프롬프트에 맞는 2장만 통과) → 포스터 제작 확인 → 크기 조정 → 문구 넣기(3가지 중 선택, 글꼴 바꾸기, 위로 옮기기) → AI 문구 넣기(아래로 옮기기) → 완성 → 다운로드 → 완성 포스터(68p).
-           초안 이미지 img/p09_draft_{1~4}.png(1·2번이 프롬프트에 맞는 초안, 3·4번은 맞지 않는 초안 — 3·4는 임시 그림, 실제 이미지가 오면 같은 파일명으로 덮어쓰기). 이전 버전: _backup_page09_before_cv.html */
+           초안 이미지 img/{p09_wc_|p09_pg_|p09_cl_}{1~4}.jpg(CASES 의 d 접두사로 선택, 1·2번이 프롬프트에 맞는 초안, 3·4번은 맞지 않는 초안). 이전 버전: _backup_page09_before_cv.html */
         [hidden]{display:none!important}
 
         .p09-set{--gb-left:110px;--gb-w:610px}
@@ -98,7 +98,7 @@
         .p09-right.is-off{display:none}
         .p09-right .card-btn{width:100%;min-width:0;height:auto;min-height:100px;padding:14px 30px 10px;font-size:44px;line-height:1.2}
         .p09-right .card-btn.is-small{font-size:38px;padding-left:0;padding-right:0;letter-spacing:-0.1em}
-        .p09-next.card-btn{display:flex;align-items:center;justify-content:center;min-width:0;width:300px;height:110px;margin-bottom:20px;padding:8px 10px 0;font-size:56px;z-index:7}
+        .p09-next.card-btn{z-index:7}
 
         .p09-poster{position:absolute;left:674px;top:135px;width:572px;height:790px;box-sizing:border-box;border:solid 4px var(--c-ink);background:#fff center / cover no-repeat;overflow:hidden;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17)}
         .p09-poster b{position:absolute;left:0;width:100%;text-align:center;font-family:'Pretendard';font-weight:800;letter-spacing:-0.03em;line-height:1.2}
@@ -123,7 +123,7 @@
             <div class="phone-status"></div>
 
             <div class="cv-home app-home is-purple" data-k="home">
-              <button type="button" class="app-icon" data-hit="canva"><i><img src="img/p09_canva_icon.png" alt=""></i>Canva</button>
+              <button type="button" class="app-icon" data-hit="canva"><i><img src="../../resources/img/app/logo_canva.png" alt=""></i>Canva</button>
             </div>
 
             <div class="cv-app" data-k="app">
@@ -246,7 +246,7 @@
 
           <img class="p09-swipe is-hide" id="p09Swipe" src="../../resources/img/common/img_finger01.png" alt="">
           <div class="p09-right is-off" id="p09Right"></div>
-          <button class="card-btn js-sfx next-btn p09-next is-hide" id="p09Next" data-sound="sound/click.mp3">다음</button>
+          <button class="card-btn is-start next-btn-activity js-sfx p09-next is-hide" id="p09Next" data-sound="sound/click.mp3">다음</button>
 
           <p class="p09-end-title is-hide" id="p09EndTitle">AI의 도움을 받아 나만의 인권 존중 포스터를 만들었어요!</p>
           <div class="p09-poster is-hide" id="p09Poster"><b class="is-top" id="p09PosterTop"></b><b class="is-bot">AI로 만든 그림을 사용했어요.</b></div>
@@ -368,7 +368,7 @@
     let i = 0;
 
     const POSTER_T = () => st.phrase || PHRASES[1];
-    const dsrc = (n) => 'img/' + ((st.c && st.c.d) || 'p09_draft_') + n + '.png';
+    const dsrc = (n) => 'img/' + st.c.d + n + '.jpg';
     const fsPhrase = () => (st.font ? 44 : 41);
     const tw = (t, fs) => Math.round([...t].reduce((a, c) => a + (c === ' ' ? fs * 0.32 : /[A-Za-z0-9.]/.test(c) ? fs * 0.58 : fs * 0.97), 0) + 16);
 

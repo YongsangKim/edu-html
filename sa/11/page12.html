@@ -9,7 +9,7 @@
         /* 기획서 73~81p. 도입(2초 뒤 출발!) → 생활 속 상황 7개: 두 보기 중 배려하고 존중하는 쪽을 고르면 정답 효과음과 함께 왼쪽 지도 위 메인 캐릭터가 길을 따라 한 칸 이동, 틀리면 카드 흔들림(오답 효과음). 마지막 정답 뒤 도착(2초) → page13.
            지도는 기획서처럼 건물 12칸(4×3) 사이의 길(교차점 5×4). 출발(왼쪽 아래) → 도착(오른쪽 위), 정답 보기 카드의 화살표(위쪽 카드 ↑, 아래쪽 카드 →)가 이동 방향. 정답 위치는 기획서 슬라이드 순서대로 고정 */
 
-        .p12-board{position:absolute;left:41px;top:48px;width:1074px;height:857px;box-sizing:border-box;border-radius:10px;background:#cfe8b5 center / 100% 100% no-repeat}
+        .p12-board{position:absolute;left:41px;top:48px;width:1074px;height:857px;box-sizing:border-box;border-radius:15px;background:#cfe8b5 center / 100% 100% no-repeat}
         .p12-board.is-fallback{border:solid 6px var(--c-purple)}
         .p12-road{position:absolute;left:0;top:0;width:100%;height:100%}
         .p12-board:not(.is-fallback) .p12-flag{display:none}
@@ -79,7 +79,7 @@
   <script src="../../resources/js/common.js"></script>
   <script>
   (function () {
-    /* 지도 통이미지 img/p12_map.png (1074x857, 캐릭터·길 선 없는 배경). 점선 교차점 5x4 의 보드 안 좌표(px)는 디자인에서 잰 값 — 지도 그림이 바뀌면 여기만 맞춤.
+    /* 지도 통이미지 img/p12_map.jpg (1074x857, 캐릭터·길 선 없는 배경). 점선 교차점 5x4 의 보드 안 좌표(px)는 디자인에서 잰 값 — 지도 그림이 바뀌면 여기만 맞춤.
        캐릭터 3종 img/p12_char_start.png(출발) · p12_char_move.png(움직이는 중) · p12_char_goal.png(도착). 높이 h, 기준점(교차점)에서 가로 dx · 세로 dy 만큼 옮겨 놓음(아래 가운데가 기준).
        이미지가 없으면 지도는 직접 그린 길로, 캐릭터는 메인 캐릭터로 대신 보임 */
     const NX = 5, NY = 4, DX = 217, DY = 185, ROAD = 84;
@@ -195,9 +195,9 @@
     }
 
     const mapImg = new Image();
-    mapImg.onload = () => { board.style.backgroundImage = "url('img/p12_map.png')"; road.innerHTML = '<g id="p12Trail"></g><g id="p12Dots"></g>'; };
+    mapImg.onload = () => { board.style.backgroundImage = "url('img/p12_map.jpg')"; road.innerHTML = '<g id="p12Trail"></g><g id="p12Dots"></g>'; };
     mapImg.onerror = () => { board.classList.add('is-fallback'); drawRoad(); };
-    mapImg.src = 'img/p12_map.png';
+    mapImg.src = 'img/p12_map.jpg';
     setChar('start', node(...PTS[0]));
     const s = $('p12Start'), g = $('p12Goal');
     place(s, [node(...PTS[0])[0] + 30, node(...PTS[0])[1] + ROAD / 2 + 8]);

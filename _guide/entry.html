@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI 가이드 - 엔트리 실습</title>
+    <link rel="stylesheet" href="../resources/css/common.css">
+    <link rel="stylesheet" href="guide.css">
+    <style>
+        .g-view .g-stage{background:none}
+    </style>
+</head>
+<body>
+  <div class="g-wrap">
+    <h1>엔트리 실습</h1>
+    <p class="g-note">블록 코딩(엔트리) 실습 화면의 공용 틀과 도구를 모아둔 가이드입니다.</p>
+
+    <ul class="g-toc"></ul>
+
+    <h2>엔트리 실습 화면 — 공용 <code>.en-*</code> + <code>Entry</code></h2>
+    <p class="g-note">블록 코딩 실습 화면 틀. 창 <code>.en-win</code> 위에 칸 4개(<code>.en-stage</code> 실행 화면 · <code>.en-objs</code> 오브젝트 · <code>.en-pal</code> 꾸러미 · <code>.en-ws</code> 조립소)와 아래 안내 줄 <code>.en-guide</code>. 블록은 두 가지: 직사각 블록 <code>.en-blk</code>(gwa/09, 시작 블록은 <code>.is-start</code>)와 SVG 블록 <code>.cb</code>(gwa/10·11, 모양은 <code>Entry.path</code>·<code>Entry.ifBlock</code>이 그림). 끌기 도구 <code>Entry.trackDrag</code> · <code>trashZone</code> · <code>trashHint</code> · <code>hinter</code>는 페이지 스크립트에서 호출. 쓰는 곳: <span data-usage="entry" data-usage-subj="gwa" data-usage-show="list">gwa/09:13·14 · gwa/10:08 · gwa/11:08</span></p>
+    <div class="g-list">
+      <div class="g-item">
+        <p class="g-meta"><b>gwa/09:14 직사각 블록 <code>.en-blk</code></b><br>꾸러미에서 조립소로 끌어 끼움 · 지금 끌 블록은 <code>.hit-pulse</code> · 쓰는 곳: <span data-usage="entryBlk" data-usage-subj="gwa" data-usage-show="list">gwa/09:13·14</span></p>
+        <div class="g-view"><div class="g-stage"><div class="bg-default g-fill">
+          <div class="en-win"></div>
+          <div class="en-area en-stage"><div class="en-view" style="background-image:url('../gwa/09/img/p13_stage_bg.png');background-size:cover"></div>
+            <div class="en-bot" style="left:100px;top:75px;background-image:url('../gwa/09/img/p13_bot.svg')"></div>
+            <div class="en-btns"><button class="en-btn" type="button">+ 오브젝트 추가하기</button><button class="en-btn is-run" type="button">시작하기</button></div>
+          </div>
+          <div class="en-area en-objs"><div class="en-objlist"><div class="en-obj"><i style="background-image:url('../gwa/09/img/p13_bot.svg')"></i>엔트리봇</div></div></div>
+          <div class="en-area en-pal">
+            <div class="en-cats"><button class="en-cat">시작</button><button class="en-cat">흐름</button><button class="en-cat is-on">움직임</button><button class="en-cat">생김새</button><button class="en-cat">소리</button><button class="en-cat">판단</button><button class="en-cat">계산</button></div>
+            <div class="en-list">
+              <div class="en-blk blk"><i class="en-num">1</i>초 동안 입 위치로 이동하기</div>
+              <div class="en-blk blk hit-pulse"><i class="en-num">1</i>초 동안 위 위치로 이동하기</div>
+              <div class="en-blk blk"><i class="en-num">1</i>초 동안 장 위치로 이동하기</div>
+            </div>
+          </div>
+          <div class="en-area en-ws">
+            <div class="en-blk blk is-start" style="top:70px">시작하기 버튼을 클릭했을 때</div>
+            <div class="en-blk blk" style="top:144px">입으로 이동하기</div>
+            <div class="en-trash" style="background-image:url('../gwa/09/img/p14_trash.png')"></div>
+          </div>
+          <div class="en-guide">
+            <div class="en-char"><img src="../gwa/img/character/gwa_main_point.png" alt=""></div>
+            <p class="en-text">‘위 위치로 이동하기’ 블록을 가져와 ‘입으로 이동하기’ 바로 아래에 연결해보세요.</p>
+            <button class="card-btn is-popup en-next is-off" type="button">다음</button>
+          </div>
+        </div></div></div>
+      </div>
+      <div class="g-item">
+        <p class="g-meta"><b>gwa/10:08 SVG 블록 <code>.cb</code> + 휴지통 안내</b><br>꾸러미 <code>.en-pal.is-glow</code>(<code>.en-del</code> 노란 덮개) · 휴지통 <code>.en-trash.is-hint</code> · 쓰는 곳: <span data-usage="entryCb" data-usage-subj="gwa" data-usage-show="list">gwa/10:08·09 · gwa/11:08</span></p>
+        <div class="g-view"><div class="g-stage"><div class="bg-default g-fill">
+          <div class="en-win"></div>
+          <div class="en-area en-stage"><div class="en-view" style="display:flex;align-items:center;justify-content:center"><img src="../gwa/10/img/p08_heart.png" alt="" style="width:300px;height:300px;object-fit:contain"></div>
+            <div class="en-btns"><button class="en-btn" type="button">+ 오브젝트 추가하기</button><button class="en-btn is-run" type="button">시작하기</button></div>
+          </div>
+          <div class="en-area en-objs" style="background:#d6e9f4"><div class="en-objlist"><div class="en-obj"><i style="background-image:url('../gwa/10/img/p08_heart.png')"></i>심장</div></div></div>
+          <div class="en-area en-pal is-glow is-hint">
+            <div class="en-cats"><button class="en-cat">시작</button><button class="en-cat is-on" data-cat="흐름">흐름</button><button class="en-cat">움직임</button><button class="en-cat">생김새</button><button class="en-cat">소리</button><button class="en-cat">판단</button><button class="en-cat">계산</button></div>
+            <div class="en-list" id="demoList" style="gap:18px"></div>
+            <div class="en-del"><img src="../gwa/10/img/p08_trash.png" alt=""><p>여기로 옮겨 버리기</p></div>
+          </div>
+          <div class="en-area en-ws"><div id="demoBlocks" style="position:absolute;left:0;top:0;width:100%;height:100%"></div><div class="en-trash is-hint" style="background-image:url('../gwa/10/img/p08_trash.png')"></div></div>
+          <div class="en-guide">
+            <div class="en-char"><img src="../gwa/img/character/gwa_main_point.png" alt=""></div>
+            <p class="en-text">’10번 반복하기’ 블록을 왼쪽 휴지통에 넣어 삭제해보세요.</p>
+          </div>
+        </div></div></div>
+      </div>
+    </div>
+
+  </div>
+  <script src="../resources/js/common.js"></script>
+  <script src="../resources/js/entry.js"></script>
+  <script>
+  (function () {
+    const BL = enColor('flow'), GR = enColor('start');
+    const ST = 'stroke="rgba(20,10,60,.38)" stroke-width="2.5" stroke-linejoin="round"';
+    const mk = (cls, w, h, d, fill, lb, x, y) => '<div class="cb ' + cls + '" style="' + (x === undefined ? '' : 'left:' + x + 'px;top:' + y + 'px;') + 'width:' + w + 'px;height:' + h + 'px"><svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '"><path d="' + d + '" fill="' + fill + '" ' + ST + '/></svg><div class="lb" style="font-size:25px">' + lb + '</div></div>';
+    document.getElementById('demoBlocks').innerHTML =
+      mk('', 360, 88, Entry.path.spath(360, true), GR, '<span class="pl"></span>시작하기 버튼을 클릭했을 때', 60, 70) +
+      mk('is-del hit-pulse', 360, 162, Entry.path.cpath(360, 44), BL, '<i class="en-num">10</i>번 반복하기', 60, 144);
+    document.getElementById('demoList').innerHTML = mk('is-flow', 360, 88, Entry.path.spath(360), BL, '계속 반복하기');
+  })();
+  </script>
+  <script src="guide.js"></script>
+  <script>if (window.scaleGuideViews) window.scaleGuideViews();</script>
+</body>
+</html>

@@ -16,6 +16,7 @@
     { file: 'characters.html', label: '안내 캐릭터·말풍선' },
     { file: 'steps.html', label: '단계형 실습 표준' },
     { file: 'phone.html', label: '폰 화면 틀' },
+    { file: 'entry.html', label: '엔트리 실습' },
     { file: 'icons.html', label: '공용 아이콘' }
   ];
 

@@ -127,15 +127,11 @@
   <script src="../../resources/js/common.js"></script>
   <script>
     (function () {
-      var positions = [
+      var positions = shuffleArray([
         [245, 180], [535, 180], [825, 180], [1115, 180], [1405, 180],
         [245, 420], [535, 420], [825, 420], [1115, 420], [1405, 420],
         [245, 660], [535, 660], [825, 660], [1115, 660], [1405, 660]
-      ];
-      for (var i = positions.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var tmp = positions[i]; positions[i] = positions[j]; positions[j] = tmp;
-      }
+      ]);
       var cards = document.querySelectorAll('#p06Quiz .weather-card');
       cards.forEach(function (card, i) {
         card.style.left = positions[i][0] + 'px';
@@ -158,9 +154,7 @@
             setTimeout(function () {
               var popup = document.querySelector('.p07-popup');
               popup.classList.remove('is-off');
-              new Audio(ASSET_BASE + popup.dataset.sound).play().catch(function (err) {
-                console.warn('사운드 재생 실패:', err);
-              });
+              makeSfx(popup.dataset.sound)();
             }, 600);
           }
         });
