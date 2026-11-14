@@ -9,7 +9,7 @@
         main{overflow:hidden}
         .p11-rule{position:absolute;left:34px;top:58px;width:815px;height:854px;box-sizing:border-box;border:solid 5px #266cc8;border-radius:36px;background:#dff6ff}
         .p11-ttl{position:absolute;left:299px;top:125px;--rb-w:286px;--rb-h:82px;--rb-fs:54px;--rb-bdw:6px;--rb-bg:#7ba7f8;--rb-tail:#a9c4ea;--rb-fold:#8aa9e4;--rb-ext:64px;--rb-tw:120px;--rb-th:100px;--rb-drop:48px;--rb-notch:30px}
-        .p11-game{position:absolute;left:880px;top:58px;width:1006px;height:856px;background-size:100% 100%;border-radius:20px;overflow:hidden;touch-action:none;cursor:grab}
+        .p11-game{position:absolute;left:880px;top:58px;width:1006px;height:856px;background-size:1009px 859px;background-position:-1px -1px;border-radius:24px;overflow:hidden;touch-action:none;cursor:grab}
         .p11-code{position:absolute;left:49px;top:249px;width:560px;transform:scale(1.25);transform-origin:0 0}
         .p11-code .lb.is-c{left:0;width:100%;justify-content:center;padding:4px 0 0;height:100%}
         .p11-lv{position:absolute;left:2px;top:0;pointer-events:none;z-index:2}
@@ -81,6 +81,14 @@
       { centers: [217, 508, 800], bw: 278, rule: { c: '빨간색 그리고 동그란 모양', a: '1번 바구니로', e: { c: '노란색 그리고 길쭉한 모양', a: '2번 바구니로', e: '3번 바구니로' } },
         items: [['img/p11_apple.png', 0], ['img/p11_tomato.png', 0], ['img/p11_banana.png', 1], ['img/p11_corn.png', 1], ['img/p11_chili.png', 2], ['img/p11_lemon.png', 2], ['img/p11_grape.png', 2]] }
     ];
+    const PRELOAD = {};
+    LEVELS.forEach(L => L.items.forEach(it => {
+      if (PRELOAD[it[0]]) return;
+      const im = new Image();
+      im.src = it[0];
+      if (im.decode) im.decode().catch(() => {});
+      PRELOAD[it[0]] = im;
+    }));
 
     const fall = $('p11Fall');
     const fallImg = $('p11FallImg');
@@ -133,8 +141,14 @@
     function nextItem() {
       const L = LEVELS[level];
       cur = L.items[Math.floor(Math.random() * L.items.length)];
+      fall.style.opacity = 0;
       fallImg.src = cur[0];
-      fall.style.opacity = 1;
+      const pim = PRELOAD[cur[0]];
+      const shown = cur;
+      const reveal = () => { if (cur === shown) fall.style.opacity = 1; };
+      if (pim && pim.complete) reveal();
+      else if (pim) { pim.addEventListener('load', reveal, { once: true }); pim.addEventListener('error', reveal, { once: true }); }
+      else reveal();
       x = START_X;
       y = CLIP[level][0] - 113;
       place();

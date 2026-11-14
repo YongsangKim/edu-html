@@ -6,7 +6,7 @@
     <title>내가 바로 스마트홈 AI!</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 54~60p. 미션 5개, 미션마다 15초 타임어택(배경 시계 소리 sound/p13_clock.mp3). 왼쪽 센서 대시보드를 보고 아래 5개 AI 실행 버튼 중 알맞은 것 누르기.
+        /* 디자인 없음 - 기획서 54~60p. 미션 5개, 미션마다 15초 타임어택. 왼쪽 센서 대시보드를 보고 아래 5개 AI 실행 버튼 중 알맞은 것 누르기.
            맞으면 집 그림이 작동 모습(img/p13_scene_m{n}_on.jpg)으로 바뀌고 미션 성공 팝업, 틀리거나 시간이 끝나면 오답 팝업 → 확인 시 그 미션 다시.
            집 그림 img/p13_scene_m{1~5}.jpg, 버튼 그림 img/p13_btn_{key}.png */
 
@@ -118,16 +118,12 @@
     const timerBox = $('p13TimerBox');
     const btns = $('p13Btns');
     const scene = $('p13Scene');
-    const clock = new Audio('sound/p13_clock.mp3');
-    clock.loop = true;
-
     let index = 0;
     let remain = LIMIT;
     let tick = null;
 
     function stopClock() {
       clearInterval(tick);
-      clock.pause();
     }
 
     function start() {
@@ -142,8 +138,6 @@
       remain = LIMIT;
       timerEl.textContent = remain;
       timerBox.classList.remove('is-hurry');
-      clock.currentTime = 0;
-      clock.play().catch(() => {});
       clearInterval(tick);
       tick = setInterval(() => {
         remain -= 1;

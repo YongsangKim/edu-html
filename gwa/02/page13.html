@@ -78,16 +78,13 @@
     const graph = $('p13Graph');
     const timerEl = $('p13Timer');
     const timerBox = $('p13TimerBox');
-    const clock = new Audio('sound/p13_clock.mp3');
-    clock.loop = true;
-
     let index = 0;
     let score = 0;
     let remain = LIMIT;
     let tick = null;
 
     const draw = (q, opt) => { graph.innerHTML = chartSvg(DATA, Object.assign({ type: q.type, width: W, height: H, color: '#ff7a1a', pad: PAD, max: MAXV, fs: 24, fsUnit: 22 }, opt)); };
-    const stopClock = () => { clearInterval(tick); clock.pause(); };
+    const stopClock = () => { clearInterval(tick); };
 
     function start() {
       const q = QUIZ[index];
@@ -99,8 +96,6 @@
       remain = LIMIT;
       timerEl.textContent = remain;
       timerBox.classList.remove('is-hurry');
-      clock.currentTime = 0;
-      clock.play().catch(() => {});
       clearInterval(tick);
       tick = setInterval(() => {
         remain -= 1;
