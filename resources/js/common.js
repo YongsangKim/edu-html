@@ -943,8 +943,8 @@ function initLineMatchQuiz() {
         if (
           e.clientX >= rect.left - 50 &&
           e.clientX <= rect.right + 50 &&
-          e.clientY >= rect.top - 50 &&
-          e.clientY <= rect.bottom + 50
+          e.clientY >= rect.top &&
+          e.clientY <= rect.bottom
         ) {
           rightDot = rd;
           break;
