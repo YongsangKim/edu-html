@@ -26,7 +26,6 @@
 
         .p13-opts{position:absolute;left:1260px;top:226px;width:623px;height:707px;box-sizing:border-box;padding-top:65px;display:flex;flex-direction:column;align-items:center;gap:40px;border-radius:16px;background:#266cc8}
         .p13-opt.card-btn{width:486px;min-width:0;height:110px;padding:6px 0 0;font-size:62px;letter-spacing:-0.04em}
-        .p13-opts.is-locked{pointer-events:none}
     </style>
 </head>
 <body>
@@ -36,7 +35,7 @@
       <div id="stage" class="stage">
         <main class="bg-default">
           <div class="p13-q"><b id="p13No"></b><p id="p13Ask"></p></div>
-          <div class="p13-timer" id="p13TimerBox"><img src="img/p13_timer.png" alt=""><span id="p13Timer">60</span></div>
+          <div class="p13-timer" id="p13TimerBox"><img src="img/p13_timer.png" alt=""><span id="p13Timer">15</span></div>
 
           <div class="p13-side"></div>
           <div class="gauge is-vertical p13-gauge"><div class="gauge-fill" id="p13Gauge"></div></div>
@@ -62,7 +61,7 @@
   <script src="../../resources/js/common.js"></script>
   <script>
   (function () {
-    const LIMIT = 60;
+    const LIMIT = 15;
     const DATA = [15, 15, 12, 20, 25, 30, 20, 15, 14].map((v, i) => ({ label: i * 3 + '시', value: v }));
     const QUIZ = [
       { ask: '하루 중 기온이 가장 높은 시간은 언제일까요?', type: 'bar', opts: ['오전 6시', '오전 9시', '오후 3시', '오후 9시'], answer: 2, mark: 5 },
@@ -82,9 +81,11 @@
     let score = 0;
     let remain = LIMIT;
     let tick = null;
+    let lockTimer = null;
 
     const draw = (q, opt) => { graph.innerHTML = chartSvg(DATA, Object.assign({ type: q.type, width: W, height: H, color: '#ff7a1a', pad: PAD, max: MAXV, fs: 24, fsUnit: 22 }, opt)); };
     const stopClock = () => { clearInterval(tick); };
+    const setDisabled = (on) => { opts.querySelectorAll('.p13-opt').forEach((b) => b.classList.toggle('is-disabled', on)); };
 
     function start() {
       const q = QUIZ[index];
@@ -92,7 +93,7 @@
       $('p13Ask').innerHTML = q.ask.replace('|', '<br>');
       draw(q, { hide: q.hide === undefined ? -1 : q.hide });
       opts.innerHTML = q.opts.map((o, i) => '<button type="button" class="card-btn p13-opt" data-i="' + i + '">' + o + '</button>').join('');
-      opts.classList.remove('is-locked');
+      setDisabled(false);
       remain = LIMIT;
       timerEl.textContent = remain;
       timerBox.classList.remove('is-hurry');
@@ -100,8 +101,8 @@
       tick = setInterval(() => {
         remain -= 1;
         timerEl.textContent = remain;
-        timerBox.classList.toggle('is-hurry', remain <= 10);
-        if (remain <= 0) wrong();
+        timerBox.classList.toggle('is-hurry', remain <= 5);
+        if (remain <= 0) wrong(true);
       }, 1000);
     }
 
@@ -112,13 +113,18 @@
       navigateTo('page14.html');
     }
 
-    function wrong() {
-      stopClock();
-      opts.classList.add('is-locked');
+    function wrong(timeout) {
+      setDisabled(true);
+      clearTimeout(lockTimer);
       playWrong();
+      if (timeout) {
+        stopClock();
+        setTimeout(next, 2000);
+        return;
+      }
       $('p13WrongText').textContent = (QUIZ[index].type === 'bar' ? '막대' : '꺾은선') + ' 그래프를 다시 살펴볼까요?';
       flashLayer($('p13Wrong'));
-      setTimeout(next, 2200);
+      lockTimer = setTimeout(() => { setDisabled(false); }, 2000);
     }
 
     function effect(q) {
@@ -145,9 +151,10 @@
       const b = e.target.closest('.p13-opt');
       if (!b) return;
       const q = QUIZ[index];
-      if (Number(b.dataset.i) !== q.answer) { wrong(); return; }
+      if (Number(b.dataset.i) !== q.answer) { wrong(false); return; }
+      clearTimeout(lockTimer);
       stopClock();
-      opts.classList.add('is-locked');
+      setDisabled(true);
       b.classList.add('is-selected');
       playCorrect();
       score += 25;

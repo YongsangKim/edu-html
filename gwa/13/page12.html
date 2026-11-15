@@ -8,27 +8,22 @@
     <style>
         /* === [기존 필수 UI 컴포넌트 보존] === */
         .p12-lv{position:absolute;left:50px;top:40px;height:84px;margin:0;padding:6px 36px 0;box-sizing:border-box;display:flex;align-items:center;border-radius:42px;background:var(--c-navy);font-family:'Cafe24 Ssurround';font-size:50px;color:#fff;z-index:20}
-        .p12-gauge{left:400px;top:50px;width:1200px;z-index:20}
-        .p12-mg{position:absolute;right:50px;top:30px;width:110px;height:110px;padding:0;border-radius:50%;border:solid 6px var(--c-ink);background:#fff;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-size:60px;line-height:1;cursor:pointer;z-index:20;transition:opacity .2s,filter .2s}
+        .p12-gauge{left:350px;top:50px;width:900px;z-index:20}
+        .p12-mg{position:absolute;right:50px;top:30px;width:120px;height:120px;padding:0;border-radius:50%;border:0;background:transparent;box-sizing:border-box;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:20;transition:opacity .2s,filter .2s}
+        .p12-mg img{width:120px;height:120px;object-fit:contain;display:block;pointer-events:none}
         .p12-mg.is-off{opacity:.35;filter:grayscale(1);cursor:default}
 
         /* === [식품 공장 배경] === */
-        .factory-bg{position:absolute;left:0;top:0;width:1920px;height:690px;pointer-events:none;background:linear-gradient(180deg,#e5eef8 0%,#f5f9fd 65%,#d8e6f5 100%)}
-        .factory-pipes{position:absolute;left:0;top:150px;width:100%;height:50px;opacity:.6}
-        .factory-window{position:absolute;left:80px;top:210px;width:340px;height:160px;background:rgba(255,255,255,.55);border:4px solid #b3cbe8;border-radius:18px;display:flex;gap:10px;padding:10px;box-sizing:border-box}
-        .factory-window span{flex:1;background:linear-gradient(180deg,#d2e5fc,#bddaf7);border-radius:8px}
+        .factory-bg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;background:url('img/p12_factory_bg.jpg') center top/cover no-repeat}
 
         /* === [컨베이어 벨트] === */
-        .conveyor-wrap{position:absolute;left:0;top:550px;width:1380px;height:140px;pointer-events:none}
-        .conveyor-belt{position:absolute;left:0;top:10px;width:100%;height:80px;background:repeating-linear-gradient(90deg,#3e4756 0 20px,#28303b 20px 40px);border:6px solid #1a2028;border-left:none;border-radius:0 40px 40px 0;box-shadow:0 14px 20px rgba(0,0,0,.22);box-sizing:border-box}
-        .conveyor-rollers{position:absolute;left:0;top:90px;width:100%;height:40px;display:flex;justify-content:space-around;padding:0 40px;box-sizing:border-box}
-        .conveyor-leg{width:32px;height:35px;background:linear-gradient(90deg,#707f94,#4e5b6d);border-radius:4px;box-shadow:inset 0 2px 4px rgba(255,255,255,.3)}
+        .conveyor-wrap{position:absolute;left:0;top:465px;width:1920px;height:220px;background:url('img/p12_belt.png') 0 0/100% 100% no-repeat;pointer-events:none;z-index:3}
 
         /* === [음료 병 아이템] === */
-        .p12-bt{--h:314px;position:absolute;top:246px;width:180px;height:314px;display:flex;align-items:flex-end;justify-content:center;transform-origin:bottom center;transition:left .9s ease,top .9s ease,transform .9s ease,opacity .9s ease;z-index:5}
+        .p12-bt{--h:314px;position:absolute;top:241px;width:180px;height:314px;display:flex;align-items:flex-end;justify-content:center;transform-origin:bottom center;transition:left .9s ease,top .9s ease,transform .9s ease,opacity .9s ease;z-index:5}
         .p12-bt.is-view{position:relative;top:auto;left:auto;transition:none}
         .p12-bt.is-wait{transform:scale(.8);opacity:.6}
-        .p12-bt.is-drop{z-index:2;transform:scale(.45);opacity:0;transition:left .5s ease-in,top .6s ease-in .35s,transform .6s ease-in .35s,opacity .3s ease-in .65s}
+        .p12-bt.is-drop{z-index:12;transform:scale(.45);opacity:0;transition:left .5s ease-in,top .55s ease-in .3s,transform .55s ease-in .3s,opacity .25s ease-in .55s}
 
         /* 병 뒤의 별 그림 종이 (과학 학습용 투명도 검사판) */
         .bt-star-sheet{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:210px;height:245px;background:#ffffff;border:3px solid #c8d8ec;border-radius:20px;box-shadow:0 8px 18px rgba(35,80,165,.12);display:flex;align-items:center;justify-content:center;box-sizing:border-box;z-index:1}
@@ -45,46 +40,49 @@
         @keyframes p12Stick{0%{opacity:0;transform:translateX(-50%) translateY(-50px) scale(0.6)}100%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
 
         /* === [스마트 로봇 팔] === */
-        .p12-arm-wrap{position:absolute;left:880px;top:0;width:340px;height:250px;z-index:6;pointer-events:none;transition:transform .4s cubic-bezier(0.2, 0.8, 0.3, 1)}
-        .p12-arm-wrap.is-down{transform:translateY(80px)}
+        .p12-arm-wrap{position:absolute;left:1200px;top:0;width:340px;height:250px;z-index:6;pointer-events:none;transition:transform .4s cubic-bezier(0.2, 0.8, 0.3, 1)}
+        .p12-arm-wrap.is-down{transform:translateY(110px)}
         .arm-base{position:absolute;left:50%;top:0;transform:translateX(-50%);width:160px;height:34px;background:#2a3442;border-radius:0 0 14px 14px;border:3px solid #161c24;border-top:none;display:flex;align-items:center;justify-content:center}
         .arm-led{width:16px;height:16px;border-radius:50%;background:#00e862;box-shadow:0 0 12px #00e862}
         .arm-mech{position:absolute;left:50%;top:34px;transform:translateX(-50%);width:180px;height:210px}
 
         /* === [완성품 상자] === */
-        .box-station{position:absolute;left:1340px;top:380px;width:440px;height:270px;z-index:4}
-        .box-crate{position:absolute;left:0;bottom:0;width:100%;height:250px;background:linear-gradient(135deg,#db9346,#be742c);border:6px solid #57300c;border-radius:20px;box-shadow:0 16px 24px rgba(0,0,0,.22),inset 0 4px 10px rgba(255,255,255,.25);display:flex;flex-direction:column;align-items:center;justify-content:center}
-        .box-stamp{border:4px dashed #733f11;border-radius:12px;padding:10px 36px;background:rgba(255,255,255,.22);font-family:'Cafe24 Ssurround';font-size:38px;color:#3b1e05;letter-spacing:-0.04em}
-        .box-flap-l{position:absolute;left:-10px;top:30px;width:80px;height:34px;background:#be742c;border:5px solid #57300c;border-radius:8px 0 0 8px;transform:rotate(-24deg)}
-        .box-flap-r{position:absolute;right:-10px;top:30px;width:80px;height:34px;background:#be742c;border:5px solid #57300c;border-radius:0 8px 8px 0;transform:rotate(24deg)}
+        .box-station{position:absolute;left:1410px;top:625px;width:450px;height:286px;pointer-events:none}
+        .box-back,.box-front{position:absolute;inset:0}
+        .box-back{z-index:11}
+        .box-front{z-index:13}
+        .box-img{width:100%;height:100%;display:block;object-fit:contain}
+        .box-back .box-img{filter:drop-shadow(0 12px 18px rgba(0,0,0,.28))}
+        .box-front .box-img{clip-path:inset(53.5% 0 0 0)}
+        .box-stamp{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);border:3px dashed #733f11;border-radius:10px;padding:4px 20px 2px;background:rgba(255,248,235,.78);font-family:'Cafe24 Ssurround';font-size:26px;line-height:1.2;color:#4a2507;letter-spacing:-0.04em;white-space:nowrap}
 
         /* === [하단 라벨 스티커 트레이] === */
-        .p12-tray{position:absolute;left:0;top:690px;width:1920px;height:270px;background:linear-gradient(180deg,#193b70 0%,#0c2142 100%);border-top:8px solid #3775de;box-shadow:0 -10px 30px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;gap:40px;padding:10px 60px 20px;box-sizing:border-box;z-index:10}
-        .tray-pill{position:absolute;left:60px;top:-28px;background:#ff9900;border:4px solid #fff;border-radius:24px;padding:4px 28px;font-family:'Cafe24 Ssurround';font-size:26px;color:#fff;box-shadow:0 6px 12px rgba(0,0,0,.2);pointer-events:none}
+        .p12-tray{position:absolute;left:0;top:685px;width:1920px;height:275px;background:linear-gradient(180deg,#193b70 0%,#0c2142 100%);border-top:8px solid #3775de;box-shadow:0 -10px 30px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:flex-start;gap:26px;padding:12px 55px 20px;box-sizing:border-box;z-index:10}
 
         /* 스티커 카드 */
-        .p12-st{width:530px;height:220px;box-sizing:border-box;background:#fff;border:6px solid #2d5ec7;border-radius:26px;box-shadow:0 10px 0 0 #13337a,0 16px 20px rgba(0,0,0,.25);display:flex;flex-direction:column;cursor:grab;padding:16px 26px;transition:transform .15s,box-shadow .15s;user-select:none;touch-action:none}
+        .p12-st{width:415px;height:215px;box-sizing:border-box;background:#fff;border:6px solid #2d5ec7;border-radius:24px;box-shadow:0 10px 0 0 #13337a,0 16px 20px rgba(0,0,0,.25);display:flex;flex-direction:column;cursor:grab;padding:14px 22px;transition:transform .15s,box-shadow .15s;user-select:none;touch-action:none}
         .p12-st:hover{transform:translateY(-6px)}
         .p12-st.is-home{opacity:.35}
         .p12-st.is-lift{position:absolute;margin:0;transform:rotate(-3deg) scale(.95);z-index:50;box-shadow:0 20px 32px rgba(0,0,0,.35);cursor:grabbing;pointer-events:none}
         .p12-lock .p12-st{pointer-events:none}
 
-        .sticker-head{display:flex;align-items:center;justify-content:space-between;border-bottom:3px dashed #d5e0ee;padding-bottom:10px;margin-bottom:10px}
-        .sticker-name{font-family:'Cafe24 Ssurround';font-size:42px;color:#1c3d7e;letter-spacing:-0.04em}
-        .sticker-badge{background:#edf3fc;border:2px solid #ccdcee;border-radius:14px;padding:3px 14px;font-family:'Cafe24 Ssurround';font-size:20px;color:#3b66b2}
-        .sticker-traits{display:flex;flex-direction:column;gap:6px}
-        .trait-row{display:flex;align-items:center;gap:10px;font-family:'Cafe24 Ssurround';font-size:26px;color:#2d3848;letter-spacing:-0.04em}
+        .sticker-head{display:flex;align-items:center;justify-content:space-between;border-bottom:3px dashed #d5e0ee;padding-bottom:8px;margin-bottom:8px}
+        .sticker-name{font-family:'Cafe24 Ssurround';font-size:36px;color:#1c3d7e;letter-spacing:-0.04em}
+        .sticker-badge{background:#edf3fc;border:2px solid #ccdcee;border-radius:12px;padding:2px 12px;font-family:'Cafe24 Ssurround';font-size:18px;color:#3b66b2;white-space:nowrap}
+        .sticker-traits{display:flex;flex-direction:column;gap:5px}
+        .trait-row{display:flex;align-items:center;gap:8px;font-family:'Cafe24 Ssurround';font-size:23px;color:#2d3848;letter-spacing:-0.04em}
         .trait-dot{width:12px;height:12px;border-radius:50%;background:#3b74db;flex-shrink:0}
 
         /* === [힌트 팝업 모달] === */
-        .p12-hm{width:1400px;padding:50px 60px}
+        .p12-hm{width:1400px;padding:50px 60px;border-radius:30px}
         .p12-hm .hint-title{width:max-content;margin:0 auto 20px}
         .p12-hm-t{font-size:52px}
         .p12-hm-x{position:absolute;right:30px;top:30px;width:90px;cursor:pointer}
         .p12-hm-b{display:flex;align-items:center;justify-content:center;gap:80px;margin-top:30px}
-        .p12-hm-big{position:relative;width:420px;height:460px;border-radius:50%;background:#eef3fb;display:flex;align-items:center;justify-content:center;overflow:hidden;border:solid 8px var(--c-sky)}
+        .p12-hm-big{position:relative;width:420px;height:460px;border-radius:60px;background:#eef3fb;display:flex;align-items:center;justify-content:center;overflow:hidden;border:solid 8px var(--c-sky)}
         .p12-hm-big .p12-bt{transition:none;z-index:auto;position:relative;top:auto;left:auto;transform:scale(1.28)}
-        .p12-hm-big i{position:absolute;right:20px;bottom:20px;font-style:normal;font-size:70px}
+        .p12-hm-big i{position:absolute;right:26px;bottom:26px;font-style:normal;line-height:0}
+        .p12-hm-big i img{width:76px;height:76px;object-fit:contain;display:block;pointer-events:none}
         .p12-hm-l{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:24px;counter-reset:n}
         .p12-hm-l li{counter-increment:n;display:flex;align-items:center;gap:20px;font-family:"Cafe24 Ssurround";font-size:44px;color:var(--c-purple);letter-spacing:-0.04em}
         .p12-hm-l li:before{content:counter(n);width:64px;height:64px;border-radius:50%;background:var(--c-violet);color:#fff;display:flex;align-items:center;justify-content:center;padding-top:4px;box-sizing:border-box;font-size:38px}
@@ -100,32 +98,15 @@
         <main class="bg-default" id="p12Main">
 
           <!-- 1. 공장 배경 -->
-          <div class="factory-bg">
-            <svg class="factory-pipes" viewBox="0 0 1920 50" preserveAspectRatio="none">
-              <path d="M0,15 L1920,15 M0,38 L1920,38" stroke="#a6bfdc" stroke-width="8" fill="none" />
-              <rect x="250" y="8" width="30" height="16" rx="3" fill="#7599c4" />
-              <rect x="750" y="8" width="30" height="16" rx="3" fill="#7599c4" />
-              <rect x="1350" y="8" width="30" height="16" rx="3" fill="#7599c4" />
-            </svg>
-            <div class="factory-window"><span></span><span></span><span></span></div>
-          </div>
+          <div class="factory-bg"></div>
 
           <!-- [기존 UI 보존] Level 1 표시, gauge is-thin 게이지 바, 돋보기 -->
           <p class="p12-lv" id="p12Lv">Level 1</p>
           <div class="gauge is-thin p12-gauge"><div class="gauge-fill" id="p12Fill" style="width:0%"></div></div>
-          <button type="button" class="p12-mg is-off" id="p12Mg">🔍</button>
+          <button type="button" class="p12-mg is-off" id="p12Mg"><img src="img/p12_magnifier.png" alt="돋보기"></button>
 
           <!-- 2. 컨베이어 벨트 -->
-          <div class="conveyor-wrap">
-            <div class="conveyor-belt"></div>
-            <div class="conveyor-rollers">
-              <div class="conveyor-leg"></div>
-              <div class="conveyor-leg"></div>
-              <div class="conveyor-leg"></div>
-              <div class="conveyor-leg"></div>
-              <div class="conveyor-leg"></div>
-            </div>
-          </div>
+          <div class="conveyor-wrap"></div>
 
           <!-- 3. 음료 병 컨테이너 -->
           <div id="p12Bottles"></div>
@@ -147,10 +128,10 @@
 
           <!-- 5. 완성품 상자 -->
           <div class="box-station">
-            <div class="box-crate">
-              <div class="box-flap-l"></div>
-              <div class="box-flap-r"></div>
-              <div class="box-stamp">📦 완성품 상자</div>
+            <div class="box-back"><img class="box-img" src="img/p12_box.png" alt="완성품 상자"></div>
+            <div class="box-front">
+              <img class="box-img" src="img/p12_box.png" alt="">
+              <div class="box-stamp">완성품 상자</div>
             </div>
           </div>
 
@@ -161,8 +142,7 @@
           <div class="avatar-modal is-off p12-modal" id="p12Hint">
             <div class="avatar-card p12-hm">
               <img class="p12-hm-x js-sfx" id="p12HintX" data-sound="sound/click.mp3" src="../../resources/img/common/pop_btn_close.png" alt="">
-              <p class="hint-title">힌트</p>
-              <p class="avatar-card-text p12-hm-t">액체를 가까이에서 자세히 살펴 보세요.</p>
+              <p class="avatar-card-text">액체를 가까이에서 자세히 살펴 보세요.</p>
               <div class="p12-hm-b">
                 <div class="p12-hm-big" id="p12Zoom"></div>
                 <ol class="p12-hm-l"><li><b>색깔</b>어떤 색인가요?</li><li><b>투명</b>별이 보이나요?</li><li><b>공기 방울</b>공기 방울이 있나요?</li></ol>
@@ -244,7 +224,7 @@
     ];
 
     const HINT_AT = 2;
-    const STOP_X = 960, WAIT_X = 400, START_X = -260, BOX_X = 1450;
+    const STOP_X = 1280, WAIT_X = 480, START_X = -260, BOX_X = 1635;
 
     const main = $('p12Main');
     const bottlesEl = $('p12Bottles');
@@ -280,7 +260,7 @@
       html += '<svg viewBox="0 0 180 314">';
       html += '<defs>';
       html += '<clipPath id="' + clipId + '">';
-      html += '<path d="M 72,26 L 72,68 C 72,92 24,102 24,124 L 24,292 Q 24,308 42,308 L 138,308 Q 156,308 156,292 L 156,124 C 156,102 108,92 108,68 L 108,26 Z" />';
+      html += '<path d="M 75,50 L 75,68 C 75,90 40,98 40,118 L 40,292 Q 40,308 54,308 L 126,308 Q 140,308 140,292 L 140,118 C 140,98 105,90 105,68 L 105,50 Z" />';
       html += '</clipPath>';
       html += '<linearGradient id="glassGloss_' + clipId + '" x1="0" y1="0" x2="1" y2="0">';
       html += '<stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"/>';
@@ -292,9 +272,9 @@
 
       // 액체 채움 (불투명/투명)
       html += '<g clip-path="url(#' + clipId + ')">';
-      html += '<rect x="0" y="80" width="180" height="235" fill="' + d.liq + '"/>';
+      html += '<rect x="0" y="84" width="180" height="231" fill="' + d.liq + '"/>';
       if (!d.clear && d.surf) {
-        html += '<ellipse cx="90" cy="80" rx="35" ry="5" fill="' + d.surf + '" />';
+        html += '<ellipse cx="90" cy="84" rx="25" ry="4.5" fill="' + d.surf + '" />';
       }
       if (d.air) {
         html += '<circle cx="50" cy="270" r="4.5" fill="#ffffff" opacity="0.9"/>';
@@ -310,20 +290,20 @@
       html += '</g>';
 
       // 일체형 유리 외곽선
-      html += '<path d="M 72,26 L 72,68 C 72,92 24,102 24,124 L 24,292 Q 24,308 42,308 L 138,308 Q 156,308 156,292 L 156,124 C 156,102 108,92 108,68 L 108,26 Z" fill="url(#glassGloss_' + clipId + ')" stroke="#225bbd" stroke-width="5" />';
+      html += '<path d="M 75,50 L 75,68 C 75,90 40,98 40,118 L 40,292 Q 40,308 54,308 L 126,308 Q 140,308 140,292 L 140,118 C 140,98 105,90 105,68 L 105,50 Z" fill="url(#glassGloss_' + clipId + ')" stroke="#225bbd" stroke-width="5" />';
 
       // 도톰한 유리 바닥층
-      html += '<path d="M 28,294 Q 90,301 152,294" stroke="#ffffff" stroke-width="5" fill="none" opacity="' + (d.clear ? '0.8' : '0.6') + '" />';
-      html += '<path d="M 34,301 Q 90,305 146,301" stroke="#225bbd" stroke-width="2.5" fill="none" opacity="0.45" />';
+      html += '<path d="M 44,294 Q 90,301 136,294" stroke="#ffffff" stroke-width="5" fill="none" opacity="' + (d.clear ? '0.8' : '0.6') + '" />';
+      html += '<path d="M 48,301 Q 90,305 132,301" stroke="#225bbd" stroke-width="2.5" fill="none" opacity="0.45" />';
 
       // 세로 유리 반사광
-      html += '<path d="M 38,130 L 38,280" stroke="#ffffff" stroke-width="7" stroke-linecap="round" opacity="0.8" />';
-      html += '<path d="M 50,140 L 50,260" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" opacity="0.55" />';
-      html += '<path d="M 80,34 L 80,64" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" opacity="0.75" />';
+      html += '<path d="M 52,126 L 52,280" stroke="#ffffff" stroke-width="7" stroke-linecap="round" opacity="0.8" />';
+      html += '<path d="M 62,136 L 62,260" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" opacity="0.55" />';
+      html += '<path d="M 81,55 L 81,66" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" opacity="0.75" />';
 
       // 병 뚜껑
-      html += '<rect x="64" y="6" width="52" height="22" rx="6" fill="#1b4fb8" stroke="#0f3075" stroke-width="3" />';
-      html += '<line x1="74" y1="12" x2="106" y2="12" stroke="#6898f5" stroke-width="2" stroke-linecap="round" />';
+      html += '<rect x="68" y="32" width="44" height="20" rx="6" fill="#1b4fb8" stroke="#0f3075" stroke-width="3" />';
+      html += '<line x1="77" y1="38" x2="103" y2="38" stroke="#6898f5" stroke-width="2" stroke-linecap="round" />';
 
       html += '</svg></div>';
 
@@ -347,7 +327,7 @@
 
     const renderTray = () => {
       const labels = LEVELS[level].bottles[idx][1];
-      tray.innerHTML = '<div class="tray-pill">알맞은 라벨 스티커를 병으로 드래그하세요!</div>';
+      tray.innerHTML = '';
       labels.forEach((k) => {
         const d = DRINKS[k];
         const st = document.createElement('div');
@@ -438,14 +418,13 @@
         const old = cur;
         old.classList.add('is-drop');
         old.style.left = (BOX_X - 90) + 'px';
-        old.style.top = '400px';
+        old.style.top = '570px';
         setTimeout(() => old.remove(), 1400);
         setTimeout(advance, 700);
       }, 1500);
     };
 
     const onCorrect = () => {
-      playCorrect();
       stickAndDrop();
     };
 
@@ -499,10 +478,10 @@
       playClick();
       const key = LEVELS[level].bottles[idx][0];
       const z = $('p12Zoom');
-      z.innerHTML = '<i>🔍</i>';
+      z.innerHTML = '';
       const b = makeBottle(key);
       b.classList.add('is-view');
-      z.insertBefore(b, z.firstChild);
+      z.appendChild(b);
       $('p12Hint').classList.remove('is-off');
     });
 

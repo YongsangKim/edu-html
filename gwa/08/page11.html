@@ -6,7 +6,8 @@
     <title>퀴즈 풀기</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 47~52p. Q1 3지선다, Q2·Q4 맞아요/아니에요, Q3 '중심 두뇌' 카드를 빈칸에 끌어 놓기, Q5 A/B/C. 오답은 문항별 힌트(data-wrong) */
+        #p11Q3 .quiz-flow{top:430px}
+        #p11Q3 .quiz-opts.is-row{top:700px}
     </style>
 </head>
 <body>
@@ -51,17 +52,17 @@
                 <div class="quiz-ask-row">
                   <div class="quiz-avatar"><img src="../../resources/img/common/avatar_quiz.png" alt=""></div>
                   <span class="quiz-qnum">Q3.</span>
-                  <p class="quiz-ask">센서가 보낸 정보를 모아서 상황을 판단하고 스마트 가전에 명령을 내리는 '중심 두뇌' 카드를 빈칸에 끌어다 놓아보세요!</p>
+                  <p class="quiz-ask">빈칸에 들어갈 센서가 보낸 정보를 모아서 상황을 판단하고 스마트 가전에 명령을 내리는 '중심 두뇌' 카드는 무엇일까요?</p>
                 </div>
               </div>
               <div class="quiz-flow">
                 <div class="quiz-slot">센서</div>
-                <div class="quiz-slot quiz-blank drop-zone" id="p11Blank"></div>
+                <div class="quiz-slot quiz-blank"></div>
                 <div class="quiz-slot">스마트 가전</div>
               </div>
-              <div class="quiz-cards">
-                <div class="multi-option quiz-card" data-correct="true">AI 허브</div>
-                <div class="multi-option quiz-card">허브 화분</div>
+              <div class="answer-pick-quiz quiz-opts is-row" data-wrong="집 안의 모든 스마트 가전제품을 조종하는 똑똑한 중심 두뇌는 'AI 허브'랍니다!">
+                <button class="answer-pick card-btn is-quiz" data-correct="true">AI 허브</button>
+                <button class="answer-pick card-btn is-quiz" data-correct="false">허브 화분</button>
               </div>
             </div>
 
@@ -88,9 +89,9 @@
                 </div>
               </div>
               <div class="answer-pick-quiz quiz-opts is-list is-left" data-next="page12.html" data-wrong="AI에게는 [언제(조건)]와 [무엇을 할지(동작)]를 구체적이고 명확하게 알려주어야 정확하게 움직여요!">
-                <button class="answer-pick card-btn" data-correct="true">A : 방 온도가 28도가 넘어가면 에어컨을 켜줘!</button>
-                <button class="answer-pick card-btn" data-correct="false">B : 에어컨</button>
-                <button class="answer-pick card-btn" data-correct="false">C : 내일 에어컨을 켜줘!</button>
+                <button class="answer-pick card-btn" data-correct="true">방 온도가 28도가 넘어가면 에어컨을 켜줘!</button>
+                <button class="answer-pick card-btn" data-correct="false">에어컨</button>
+                <button class="answer-pick card-btn" data-correct="false">내일 에어컨을 켜줘!</button>
               </div>
             </div>
 
@@ -123,36 +124,5 @@
   <script src="../../resources/js/header.js" data-title="퀴즈 풀기" data-next="page12.html"></script>
   <script src="../../resources/js/toc-gwa.js"></script>
   <script src="../../resources/js/common.js"></script>
-  <script>
-  (function () {
-    const HINT = "집 안의 모든 스마트 가전제품을 조종하는 똑똑한 중심 두뇌는 'AI 허브'랍니다!";
-    const rightLayer = document.querySelector('.ox-result-correct');
-    const wrongLayer = document.querySelector('.ox-result-wrong');
-    const wrongText = wrongLayer.querySelector('.avatar-popup-text');
-    const blank = document.getElementById('p11Blank');
-
-    initMatchDrag({
-      cards: Array.from(document.querySelectorAll('.quiz-card')),
-      zones: [blank],
-      silent: true,
-      match: (card) => !!card.dataset.correct,
-      onRight: () => {
-        playCorrect();
-        flashLayer(rightLayer);
-        setTimeout(() => advancePanelOrNavigate(blank, null), 2000);
-      },
-      onWrong: (card, zone) => {
-        if (!zone) return;
-        playWrong();
-        card.classList.remove('is-wrong');
-        void card.offsetWidth;
-        card.classList.add('is-wrong');
-        wrongText.textContent = HINT;
-        wrongText.className = 'avatar-popup-text';
-        flashLayer(wrongLayer);
-      }
-    });
-  })();
-  </script>
 </body>
 </html>

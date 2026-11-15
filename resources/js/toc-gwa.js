@@ -122,11 +122,11 @@ var TOC_HTML = `<div class="toc-layer">
               <div class="toc-accordion-panel">
                 <a href="${ROOT}gwa/08/page01.html" class="toc-sub-item">1) 삼촌의 이사를 도와라!</a>
                 <a href="${ROOT}gwa/08/page04.html" class="toc-sub-item">2) 개념 이해 영상</a>
-                <a href="${ROOT}gwa/08/page05.html" class="toc-sub-item">3) 스마트 기기 역할 분류하기</a>
-                <a href="${ROOT}gwa/08/page07.html" class="toc-sub-item">4) AI 허브의 생각상자! 조건문 코딩하기</a>
-                <a href="${ROOT}gwa/08/page09.html" class="toc-sub-item">5) 상호작용형 실습 콘텐츠</a>
+                <a href="${ROOT}gwa/08/page05.html" class="toc-sub-item">3) 센서·AI·허브·스마트 가전 분류하기</a>
+                <a href="${ROOT}gwa/08/page07.html" class="toc-sub-item">4) AI 허브의 생각 상자! 조건문 코딩</a>
+                <a href="${ROOT}gwa/08/page09.html" class="toc-sub-item">5) 스마트홈 앱으로 AI자동화 만들기</a>
                 <a href="${ROOT}gwa/08/page11.html" class="toc-sub-item">6) 퀴즈 풀기</a>
-                <a href="${ROOT}gwa/08/page12.html" class="toc-sub-item">7) 내가 바로 스마트홈 AI!</a>
+                <a href="${ROOT}gwa/08/page12.html" class="toc-sub-item">7) 스마트홈! 실시간 위기 해결 미션</a>
               </div>
             </div>
 
