@@ -15,6 +15,7 @@
         .p02-box{position:absolute;box-sizing:border-box}
         .p02-box.is-circle:after{content:'';position:absolute;left:-10%;top:-18%;width:120%;height:136%;background:url(img/p02_circle.png) center / 100% 100% no-repeat;mix-blend-mode:multiply;pointer-events:none}
         .p02-box.is-glow{background:rgba(255,216,61,.35);outline:6px solid #ffb400;outline-offset:-3px;border-radius:12px;pointer-events:none}
+        .p02-photo.is-locked{cursor:default}
         body.is-edit .p02-photo{cursor:default}
         body.is-edit .p02-box{outline:3px dashed #e60000;background:rgba(255,0,0,.12);cursor:pointer;pointer-events:auto;z-index:20}
         body.is-edit .p02-box.is-decoy{outline-color:#1b78d0;background:rgba(27,120,208,.15)}
@@ -114,6 +115,7 @@
       siren.classList.remove('is-on');
       found = [];
       locked = false;
+      photo.classList.remove('is-locked');
       els = [];
       r.targets.forEach((b, i) => {
         const el = document.createElement('div');
@@ -152,7 +154,7 @@
       const mr = document.querySelector('main').getBoundingClientRect();
       const pr = photo.getBoundingClientRect();
       const inside = e.clientX >= pr.left && e.clientX <= pr.right && e.clientY >= pr.top && e.clientY <= pr.bottom;
-      lens.style.display = inside ? 'block' : 'none';
+      lens.style.display = inside && !locked ? 'block' : 'none';
       if (!inside) { siren.classList.remove('is-on'); return; }
       lens.style.transformOrigin = '0 0';
       lens.style.transform = 'translate(' + ((e.clientX - mr.left) / s - 136) + 'px,' + ((e.clientY - mr.top) / s - 142) + 'px)';
@@ -176,6 +178,8 @@
         els[ti].classList.add('is-circle');
         if (found.length === r.targets.length) {
           locked = true;
+          lens.style.display = 'none';
+          photo.classList.add('is-locked');
           siren.classList.remove('is-on');
           setTimeout(() => {
             els.slice(0, r.targets.length).forEach((el) => el.classList.add('is-glow'));

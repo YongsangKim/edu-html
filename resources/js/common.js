@@ -3988,7 +3988,7 @@ initIdlePreload();
 initWrongPopupAutoSize();
 /* 직업 힌트 퀴즈 — sa/01 page02 · sa/09 page02. 페이지는 <main class="bg-default"></main> 안에 아무것도 없이 두고 호출하면 안에 모두 그려 줌
    initJobHintQuiz({ question: '어떤 직업일까?', next: 'page03.html', jobs: [{ id: 'police', label: '경찰관', hints: ['경광등', '호루라기', '순찰'], sounds: { 2: 'sound/p02_whistle.mp3' }, text: '정답 사진 아래 설명' }, …6개] })
-   그림(페이지 img/): 힌트 p02_hint_{id}_{1~3}.png · 보기 카드 p02_card_{id}.png · 정답 사진 p02_photo_{id}.png · 가림 버튼 p02_hint.png.
+   그림(페이지 img/): 힌트 p02_hint_{id}_{1~3}.png · 보기 카드 p02_card_{id}.png · 가림 버튼 p02_hint.png.
    6개 중 3개를 무작위로 STAGE1~3 출제, 보기 카드 순서도 스테이지마다 섞음. sounds {2|3}: 그 번째 힌트를 열 때(클릭음 뒤 0.4초) 재생 */
 function initJobHintQuiz(opts) {
   const main = document.querySelector('main');
@@ -4023,7 +4023,8 @@ function initJobHintQuiz(opts) {
     fillStars(stage);
     hintsBox.innerHTML = job.hints.map((t, k) => '<div class="jh-hint slot' + (k + 1) + '"><i style="background-image:url(\x27img/p02_hint_' + job.id + '_' + (k + 1) + '.png\x27)"></i><span>' + t + '</span></div>').join('');
     const ph = $('jhPhoto');
-    ph.style.backgroundImage = "url('img/p02_photo_" + job.id + ".png')";
+    const photoFile = job.photo || ('p02_photo_' + job.id + '.jpg');
+    ph.style.backgroundImage = "url('img/" + photoFile + "')"; new Image().src = 'img/' + photoFile;
     ph.style.backgroundPosition = 'center';
     ph.style.backgroundSize = 'cover';
     $('jhText').textContent = job.text;

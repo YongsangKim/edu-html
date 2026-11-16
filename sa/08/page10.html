@@ -71,7 +71,6 @@
         .p10-input.card-btn{position:absolute;left:1290px;top:50%;transform:translateY(-50%);width:560px;height:auto;min-height:100px;padding:14px 30px 10px;display:flex;align-items:center;justify-content:center;font-size:44px;line-height:1.2}
         .p10-opts.cf-opts{top:50%;transform:translateY(-50%);gap:30px}
         .p10-opts.cf-opts .card-btn{height:150px;padding:10px 10px 4px;font-size:50px;line-height:1.2}
-        .p10-next.card-btn{display:flex;align-items:center;justify-content:center;min-width:0;width:300px;height:110px;margin-bottom:20px;padding:8px 10px 0;font-size:56px;z-index:7}
     </style>
 </head>
 <body>
@@ -87,7 +86,7 @@
           <div class="phone-frame has-cam p10-phone"><div class="phone-screen" id="p10Screen"></div></div>
           <button class="card-btn p10-input is-hide" id="p10Input"></button>
           <div class="cf-opts p10-opts is-hide" id="p10Opts"></div>
-          <button class="card-btn js-sfx next-btn p10-next is-hide" id="p10Next" data-sound="sound/click.mp3">다음</button>
+          <button class="card-btn is-start next-btn-activity js-sfx is-hide" id="p10Next" data-sound="sound/click.mp3">다음</button>
 
           <div class="avatar-modal is-off" id="p10Done">
             <div class="avatar-card">
@@ -246,7 +245,7 @@
       { s: 45, bubble: '식당 방문을 희망하는<br>인원, 날짜, 시간을 순서대로 선택해요.', form: 'reserve', pose: '' },
       { s: 46, bubble: '내가 선택한 내용을 확인하고<br>화면을 아래로 내려<br>개인정보 수집 및 제공에 동의함 버튼을 클릭해요.', form: 'confirm', pose: 'wink_present' },
       { s: 47, bubble: '예약을 완료했어요!<br>남은 여행 계획을 마저 세워봐요.', next: true, pose: '' },
-      { s: 48, bubble: '뒤로 가기를 눌러 주변에 함께 가볼 만한 곳을 찾아봐요.', hot: ['topBack', 'navBack'], pose: 'wink_open' },
+      { s: 48, bubble: '뒤로 가기를 눌러 주변에 함께 가볼 만한 곳을 찾아봐요.', hot: ['navBack'], pose: 'wink_open' },
       { s: 49, bubble: '놀거리 버튼을 클릭해요.', hot: ['play'], pose: 'wink_point' },
       { s: 50, bubble: '다양한 곳이 있어요!<br>각 장소의 정보를 확인해 1시간 이내로 이동할 수 있는 곳을 찾아볼까요?', next: true, pose: '' },
       { s: 51, bubble: '하회마을 나룻배부터<br>확인해봐요. 장소를 클릭해요.', rows: [{ r: 'row1' }, { r: 'row2', off: true }], pose: 'wink_point2' },
@@ -260,7 +259,7 @@
       { s: 59, bubble: '별 모양 버튼을 클릭해<br>장소를 저장해요.', hot: ['star'], pose: 'wink_point2' },
       { s: 60, bubble: '저장 버튼을 클릭해요.', hot: ['save'], pose: 'wink_point4' },
       { s: 61, bubble: '좋아요!<br>이제 마지막으로 장소 별 이동 시간을 확인해봐요.', next: true, pose: '' },
-      { s: 62, bubble: '뒤로가기 버튼을 클릭해요.', hot: ['topBack', 'navBack'], pose: 'wink_present' },
+      { s: 62, bubble: '뒤로가기 버튼을 클릭해요.', hot: ['navBack'], pose: 'wink_present' },
       { s: 63, bubble: '홈 버튼을 클릭해요.', hot: ['homeBtn'], pose: 'wink_open' },
       { s: 64, bubble: '안동역에서 안동 하회마을까지의<br>이동 경로를 알아봐요.<br>도착 버튼을 클릭해요.', hot: ['arrive3'], pose: 'wink_point' },
       { s: 65, bubble: '출발지 입력창을 클릭해요.', hot: ['depart'], pose: 'wink_present' },
@@ -430,7 +429,7 @@
 
       if (st.hot && !st.home) {
         const hs = st.hot.map((n) => hot(n, () => { playClick(); go(); }, 'hit-pulse'));
-        pointFingerAt(hs[0], fgo(st.hot[0]));
+        pointFingerAt(hs[0], fgo(st.hot[0], { noClamp: true }));
       }
       if (st.rows) {
         st.rows.forEach((row) => {
