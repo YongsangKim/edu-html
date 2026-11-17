@@ -1128,12 +1128,56 @@ function initFindQuiz() {
      </div>
    - 다른 기능(js-sfx 등)을 몰라도 되는 완전히 독립적인 모듈
 ========================================================== */
+function attachVideoFullscreen(box, video) {
+  if (box.querySelector('.video-fs-btn')) return;
+  const ICON_ENTER = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>';
+  const ICON_EXIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>';
+  const fsBtn = document.createElement('button');
+  fsBtn.type = 'button';
+  fsBtn.className = 'video-fs-btn';
+  fsBtn.setAttribute('aria-label', '전체화면');
+  fsBtn.innerHTML = ICON_ENTER;
+  box.appendChild(fsBtn);
+
+  const isFsNow = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+  let fsTimer = null;
+  const hideFsUi = () => { clearTimeout(fsTimer); box.classList.remove('is-fs-ui'); };
+  const showFsUi = () => {
+    box.classList.add('is-fs-ui');
+    clearTimeout(fsTimer);
+    fsTimer = setTimeout(hideFsUi, 3000);
+  };
+  const syncIcon = () => {
+    const isFs = isFsNow();
+    fsBtn.innerHTML = isFs ? ICON_EXIT : ICON_ENTER;
+    fsBtn.setAttribute('aria-label', isFs ? '전체화면 나가기' : '전체화면');
+    showFsUi();
+  };
+  box.addEventListener('pointerdown', showFsUi);
+  fsBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (isFsNow()) {
+      (document.exitFullscreen || document.webkitExitFullscreen).call(document).catch(() => {});
+    } else if (box.requestFullscreen) {
+      box.requestFullscreen().catch(() => {});
+    } else if (box.webkitRequestFullscreen) {
+      box.webkitRequestFullscreen();
+    } else if (video.webkitEnterFullscreen) {
+      video.webkitEnterFullscreen();
+    }
+  });
+  document.addEventListener('fullscreenchange', syncIcon);
+  document.addEventListener('webkitfullscreenchange', syncIcon);
+  showFsUi();
+}
+
 function initVideoPlay() {
   document.querySelectorAll('.video-box').forEach((box) => {
     const video = box.querySelector('.video-el');
     let btn = box.querySelector('.video-play-btn');
     if (!video || !btn) return;
-    if (box.dataset.pause === 'on' && btn.tagName === 'IMG') {
+    attachVideoFullscreen(box, video);
+    if (box.dataset.pause !== 'off' && btn.tagName === 'IMG') {
       const div = document.createElement('div');
       div.className = btn.className;
       btn.replaceWith(div);
@@ -1162,7 +1206,7 @@ function initVideoPlay() {
     video.addEventListener('pause', showBtn);
     video.addEventListener('ended', showBtn);
 
-    if (box.dataset.pause !== 'on') return;
+    if (box.dataset.pause === 'off') return;
     video.controls = false;
     const pauseBtn = document.createElement('div');
     pauseBtn.className = 'video-pause-btn is-hidden';

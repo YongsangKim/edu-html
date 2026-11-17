@@ -165,7 +165,7 @@
     }
     .p02-glass-zone {
       position: absolute;
-      left: 800px;
+      left: 820px;
       top: 580px;
       width: 210px;
       height: 356px;
@@ -226,10 +226,10 @@
     }
     .p02-shot-cup {
       position: absolute;
-      left: 1541px;
-      top: 734px;
-      width: 173px;
-      height: 129px;
+      left: 1552px;
+      top: 729px;
+      width: 122px;
+      height: 134px;
       z-index: 12;
       cursor: grab;
       touch-action: none;
@@ -275,12 +275,12 @@
     .p02-recipe-card {
       position: relative;
       width: 1400px;
-      height: 752px;
+      height: 820px;
       background: #fff;
       border: 6px solid #48159c;
       border-radius: 42px;
       box-sizing: border-box;
-      padding: 52px 70px 46px;
+      padding: 44px 70px 36px;
       box-shadow: 0 20px 44px rgba(0,0,0,.28);
     }
     .p02-recipe-head {
@@ -308,33 +308,34 @@
     }
     .p02-recipe-box {
       position: absolute;
-      left: 220px;
-      top: 156px;
-      width: 1000px;
-      height: 520px;
+      left: 240px;
+      top: 132px;
+      width: 1040px;
+      height: 640px;
       border: 5px solid #48159c;
       border-radius: 32px;
       overflow: hidden;
       background: #fff;
     }
     .p02-recipe-box-tit {
-      height: 106px;
+      height: 86px;
       background: #e5d8ff;
       color: #7a3ee0;
-      font-size: 56px;
+      font-size: 50px;
       display: flex;
       align-items: center;
       justify-content: center;
       letter-spacing: -0.03em;
     }
     .p02-recipe-rows {
-      padding: 10px 120px 0 280px;
+      padding: 6px 100px 0 250px;
     }
     .p02-recipe-row {
-      height: 128px;
+      height: 178px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
+      gap: 56px;
       border-bottom: 3px solid #e6def5;
       font-size: 56px;
       color: #48159c;
@@ -350,8 +351,8 @@
       padding-top:20px;
     }
     .p02-recipe-cup {
-      width: 100px;
-      height: 115px;
+      width: 108px;
+      height: 168px;
       object-fit: contain;
     }
     .p02-recipe-aro {
@@ -374,6 +375,19 @@
     .p02-limit-modal,
     .p02-done {
       z-index: 45;
+    }
+    .p02-drag-guide {
+      position: absolute;
+      left: 1590px;
+      top: 770px;
+      width: 110px;
+      pointer-events: none;
+      z-index: 30;
+      opacity: 0;
+      transition: left .95s ease-in-out, top .95s ease-in-out, opacity .25s ease;
+    }
+    .p02-drag-guide.is-off {
+      display: none;
     }
   </style>
 </head>
@@ -414,8 +428,9 @@
           </div>
 
           <div class="p02-shot-cup is-off" id="p02ShotCup">
-            <img src="img/p02_shot_full.png" alt="에스프레소 샷 잔">
+            <img src="img/p02_recipe_3.png" alt="에스프레소 샷 잔">
           </div>
+          <img class="p02-drag-guide is-off" id="p02DragGuide" src="../../resources/img/common/img_finger01.png" alt="">
 
           <div class="p02-recipe-modal" id="p02RecipeModal">
             <div class="p02-recipe-card">
@@ -426,15 +441,15 @@
                 <div class="p02-recipe-rows">
                   <div class="p02-recipe-row">
                     <span>연하게 1샷</span>
-                    <img class="p02-recipe-cup" src="img/p02_recipe_1.png" alt="1샷">
+                    <img class="p02-recipe-cup" src="img/p02_cup_1.png" alt="1샷">
                   </div>
                   <div class="p02-recipe-row">
                     <span>기본 &nbsp;&nbsp;&nbsp;2샷</span>
-                    <img class="p02-recipe-cup" src="img/p02_recipe_2.png" alt="2샷">
+                    <img class="p02-recipe-cup" src="img/p02_cup_2.png" alt="2샷">
                   </div>
                   <div class="p02-recipe-row">
                     <span>진하게 3샷</span>
-                    <img class="p02-recipe-cup" src="img/p02_recipe_3.png" alt="3샷">
+                    <img class="p02-recipe-cup" src="img/p02_cup_3.png" alt="3샷">
                   </div>
                 </div>
               </div>
@@ -506,8 +521,8 @@
       }
     ]);
 
-    const HOME_LEFT = 1541;
-    const HOME_TOP = 734;
+    const HOME_LEFT = 1552;
+    const HOME_TOP = 729;
 
     const beansEl = $('p02Beans');
     const guestWrap = $('p02GuestWrap');
@@ -530,8 +545,42 @@
     let shotReady = false;
     let busy = false;
     let dragging = false;
+    let dragGuided = false;
+    let dragGuideTimers = [];
     let startX = 0;
     let startY = 0;
+    const dragGuide = $('p02DragGuide');
+    const hideDragGuide = () => {
+      dragGuideTimers.forEach(clearTimeout);
+      dragGuideTimers = [];
+      dragGuide.style.opacity = '0';
+      dragGuide.classList.add('is-off');
+    };
+    const playDragGuideOnce = () => {
+      if (dragGuided) return;
+      dragGuided = true;
+      dragGuideTimers.forEach(clearTimeout);
+      dragGuideTimers = [];
+      dragGuide.src = '../../resources/img/common/img_finger01.png';
+      dragGuide.style.transition = 'none';
+      dragGuide.style.left = '1590px';
+      dragGuide.style.top = '770px';
+      dragGuide.classList.remove('is-off');
+      void dragGuide.offsetWidth;
+      dragGuide.style.transition = '';
+      dragGuide.style.opacity = '1';
+      dragGuideTimers.push(setTimeout(() => {
+        dragGuide.src = '../../resources/img/common/img_finger02.png';
+        dragGuide.style.left = '900px';
+        dragGuide.style.top = '640px';
+      }, 260));
+      dragGuideTimers.push(setTimeout(() => {
+        dragGuide.style.opacity = '0';
+      }, 1450));
+      dragGuideTimers.push(setTimeout(() => {
+        dragGuide.classList.add('is-off');
+      }, 1750));
+    };
 
     const renderBeans = () => {
       let html = '';
@@ -595,6 +644,7 @@
         shotCup.classList.remove('is-off');
         shotCup.classList.add('is-ready');
         busy = false;
+        playDragGuideOnce();
       }, 600);
     });
 
@@ -602,6 +652,7 @@
       if (busy || !shotReady) return;
       e.preventDefault();
       clearFingers();
+      hideDragGuide();
       dragging = true;
       shotCup.setPointerCapture(e.pointerId);
       shotCup.classList.add('is-dragging');
@@ -634,7 +685,7 @@
 
       if (hit && shots < 3) {
         busy = true;
-        shotCup.style.left = '880px';
+        shotCup.style.left = '900px';
         shotCup.style.top = '520px';
         shotCup.classList.add('is-pouring');
         setTimeout(() => {

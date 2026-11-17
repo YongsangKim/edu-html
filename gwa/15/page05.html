@@ -21,14 +21,14 @@
     }
     .p05-left-tray-grid {
       position: absolute;
-      left: 80px;
-      top: 80px;
-      width: 608px;
-      height: 616px;
+      left: 72px;
+      top: 36px;
+      width: 624px;
+      height: 660px;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(3, 1fr);
-      gap: 14px;
+      gap: 10px;
       box-sizing: border-box;
     }
     .p05-cell {
@@ -39,9 +39,9 @@
     }
     .p05-cup-item {
       position: relative;
-      top: -10px;
-      width: 112px;
-      height: 190px;
+      top: -4px;
+      width: 122px;
+      height: 214px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -58,7 +58,8 @@
       pointer-events: none;
       filter: drop-shadow(5px 0 0 #fff) drop-shadow(-5px 0 0 #fff) drop-shadow(0 5px 0 #fff) drop-shadow(0 -5px 0 #fff);
     }
-    .p05-cup-item:hover img {
+    .p05-cup-item:hover img,
+    .p05-cup-item.is-dragging img {
       filter: drop-shadow(5px 0 0 #ff4ff9) drop-shadow(-5px 0 0 #ff4ff9) drop-shadow(0 5px 0 #ff4ff9) drop-shadow(0 -5px 0 #ff4ff9);
     }
     .p05-cup-item.is-dragging {
@@ -271,7 +272,13 @@
   <script src="../../resources/js/common.js"></script>
   <script>
     (function () {
-      const shots = shuffleArray([1, 1, 1, 2, 2, 2, 3, 3, 3]);
+      let shots;
+      do {
+        shots = shuffleArray([1, 1, 1, 2, 2, 2, 3, 3, 3]);
+      } while (
+        [0, 3, 6].some((i) => shots[i] === shots[i + 1] && shots[i] === shots[i + 2]) ||
+        [0, 1, 2].some((i) => shots[i] === shots[i + 3] && shots[i] === shots[i + 6])
+      );
       const grid = $('p05Grid');
       const leftTray = $('p05LeftTray');
 

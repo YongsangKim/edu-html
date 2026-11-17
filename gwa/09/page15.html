@@ -10,20 +10,30 @@
            Q4 엔트리 캡처 + 3지선다, Q5 알고리즘 그림 + 3지선다. 오답은 문항별 힌트(data-wrong). 이미지 Q1 장기 없는 인체 img/p15_body.png(page02 몸 그림에서 장기를 지운 것) + 입·위·장 그림 조각 img/p15_mouth·p15_stomach·p15_intestine.png(글자 없이 그림만 보고 맞춤, 위·장은 page02 몸 그림에서 잘라냄, 입은 직접 넣을 이미지), Q4 엔트리 캡처 img/p15_entry.jpg */
         .quiz-ask-box{padding:30px 60px 30px 30px}
 
-        .q1-body{position:absolute;left:410px;top:440px;width:560px;height:480px;border-radius:30px;background:var(--c-white) url('img/p15_body.png') center / contain no-repeat;box-shadow:0 8px 0 0 var(--c-sky-pale)}
-        .q1-piece{position:absolute;width:100px;height:100px;box-sizing:border-box;background:center / contain no-repeat;cursor:grab;touch-action:none}
-        .q1-piece[data-key="mouth"]{background-image:url('img/p15_mouth.png');left:190px;top:185px}
-        .q1-piece[data-key="stomach"]{background-image:url('img/p15_stomach.png');left:212px;top:306px}
-        .q1-piece[data-key="intestine"]{background-image:url('img/p15_intestine.png');left:269px;top:234px}
-        .q1-piece.is-dragging{cursor:grabbing;z-index:60}
+        .q1-body{position:absolute;left:360px;top:440px;width:620px;height:480px;border-radius:30px;background:var(--c-white) url('img/p15_body.png') 16px 20px / 420px 440px no-repeat;box-shadow:0 8px 0 0 var(--c-sky-pale);transition:opacity .5s ease}
+        .q1-body.is-hide{opacity:0;pointer-events:none}
+        .q1-lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+        .q1-callout-ghost{position:absolute;left:456px;width:120px;height:120px;box-sizing:border-box;border-radius:50%;border:3px dashed #d4dff0;background:#f7f9fe;pointer-events:none}
+        .q1-piece{position:absolute;width:120px;height:120px;box-sizing:border-box;border-radius:50%;border:4px solid var(--c-purple);background:var(--c-white) center / 76% 76% no-repeat;box-shadow:0 6px 14px rgba(123,79,209,.18);cursor:grab;touch-action:none;transition:transform .16s ease,box-shadow .16s ease}
+        .q1-piece:hover:not(.is-dragging){transform:scale(1.06)}
+        .q1-piece[data-key="mouth"]{background-image:url('img/p15_mouth.png');left:456px;top:38px}
+        .q1-piece[data-key="stomach"]{background-image:url('img/p15_stomach.png');left:456px;top:180px}
+        .q1-piece[data-key="intestine"]{background-image:url('img/p15_intestine.png');left:456px;top:322px}
+        .q1-piece.is-dragging{cursor:grabbing;z-index:60;box-shadow:0 12px 24px rgba(123,79,209,.28);transition:none}
         .q1-piece.is-wrong{animation:fix-word-shake .3s ease}
-        .q1-slots{position:absolute;left:1070px;top:470px;width:440px;--blk-hole:#d4dff0}
+        .q1-slots{position:absolute;left:1070px;top:470px;width:440px;--blk-hole:#d4dff0;transition:left .6s ease}
+        .q1-slots.is-center{left:740px}
         .q1-slot{height:140px;display:block}
+        .q1-slot.is-lit{--blk-c:#2fbf71}
+        .q1-slot.is-pass{animation:q1-green-glow 1s ease-in-out infinite}
+        @keyframes q1-green-glow{0%,100%{filter:drop-shadow(0 2px 0 rgba(0,0,0,.2))}50%{filter:drop-shadow(0 0 12px rgba(47,191,113,1)) drop-shadow(0 0 4px rgba(47,191,113,1))}}
         .q1-no{position:absolute;left:40px;top:50%;transform:translateY(-46%);font-family:'Cafe24 Ssurround';font-size:52px;color:var(--c-violet)}
-        .q1-slot .q1-piece{position:absolute;left:250px;top:15px;width:110px;height:110px;margin:0;border:0;cursor:default}
-        .q1-food{position:absolute;left:270px;top:35px;width:70px;height:70px;z-index:30;display:flex;align-items:center;justify-content:center;font-size:62px;line-height:1;opacity:0;pointer-events:none;filter:drop-shadow(0 6px 4px rgba(0,0,0,.25));transition:top 1.2s ease,opacity .5s}
+        .q1-slot .q1-piece{position:absolute;left:250px;top:15px;width:110px;height:110px;margin:0;border:0;border-radius:0;background-color:transparent;background-size:contain;box-shadow:none;cursor:default;transform:none}
+        .q1-food{position:absolute;left:264px;top:29px;width:82px;height:82px;box-sizing:border-box;padding:10px;border-radius:50%;background:rgba(255,255,255,.95);border:4px solid #2fbf71;box-shadow:0 6px 18px rgba(47,191,113,.45);z-index:30;display:flex;align-items:center;justify-content:center;font-size:56px;line-height:1;opacity:0;pointer-events:none;transition:top 1.2s ease,opacity .5s,transform .28s ease}
+        .q1-food.is-pop{transform:scale(1.22)}
         .q1-food img{display:block;width:100%;height:100%;object-fit:contain}
         .q1-link{position:absolute;left:300px;width:10px;height:0;background:#2fbf71;z-index:25;transition:height .4s ease}
+        .q1-link.is-on::after{content:'';position:absolute;left:-8px;bottom:-10px;border-left:13px solid transparent;border-right:13px solid transparent;border-top:14px solid #2fbf71}
 
         .q2-opt1,.q2-opt2{position:absolute;top:600px;margin-left:10px}
         .q2-opt1{left:456px}
@@ -70,9 +80,20 @@
                 </div>
               </div>
               <div class="q1-body" id="q1Body">
-                <div class="q1-piece" data-key="intestine" aria-label="장"></div>
+                <svg class="q1-lines" viewBox="0 0 620 480" aria-hidden="true">
+                  <line x1="226" y1="139" x2="456" y2="98" stroke="#7b4fd1" stroke-width="4" stroke-dasharray="8 6"/>
+                  <circle cx="226" cy="139" r="8" fill="#7b4fd1"/>
+                  <line x1="236" y1="266" x2="456" y2="240" stroke="#7b4fd1" stroke-width="4" stroke-dasharray="8 6"/>
+                  <circle cx="236" cy="266" r="8" fill="#7b4fd1"/>
+                  <line x1="226" y1="363" x2="456" y2="382" stroke="#7b4fd1" stroke-width="4" stroke-dasharray="8 6"/>
+                  <circle cx="226" cy="363" r="8" fill="#7b4fd1"/>
+                </svg>
+                <div class="q1-callout-ghost" style="top:38px"></div>
+                <div class="q1-callout-ghost" style="top:180px"></div>
+                <div class="q1-callout-ghost" style="top:322px"></div>
                 <div class="q1-piece" data-key="mouth" aria-label="입"></div>
                 <div class="q1-piece" data-key="stomach" aria-label="위"></div>
+                <div class="q1-piece" data-key="intestine" aria-label="장"></div>
               </div>
               <div class="q1-slots blk-col" id="q1Slots">
                 <div class="q1-slot blk is-empty" data-key="mouth"><span class="q1-no">1단계</span></div>
@@ -106,10 +127,10 @@
                 </div>
               </div>
               <div class="q3-init" id="q3Init">
-                <div class="q3-slot blk is-flat is-empty" data-key="a">ㅇ</div>
-                <div class="q3-slot blk is-flat is-empty" data-key="b">ㄱ</div>
-                <div class="q3-slot blk is-flat is-empty" data-key="c">ㄹ</div>
-                <div class="q3-slot blk is-flat is-empty" data-key="d">ㅈ</div>
+                <div class="q3-slot blk is-flat is-empty" data-key="a"></div>
+                <div class="q3-slot blk is-flat is-empty" data-key="b"></div>
+                <div class="q3-slot blk is-flat is-empty" data-key="c"></div>
+                <div class="q3-slot blk is-flat is-empty" data-key="d"></div>
               </div>
               <div class="q3-cards" id="q3Cards">
                 <div class="q3-card" data-key="b">고</div>
@@ -230,23 +251,38 @@
       stomach: '맞아요! 입에서 잘게 씹힌 음식물은 위로 이동해요.',
       intestine: '맞아요! 위를 지난 음식물은 장으로 이동해요.'
     };
-    /* 3개를 모두 맞히면 입→위→장 경로가 차례로 초록색으로 이어지고 음식물(사과)이 단계 칸을 따라 내려감 */
+    /* 3개를 모두 맞히면 왼쪽 인체는 사라지고 단계 칸이 가운데로 이동한 뒤, 사과가 강조되며 입→위→장으로 내려감 */
     function foodDown(done) {
       const food = $('q1Food');
+      const body = $('q1Body');
+      const slotsBox = $('q1Slots');
       const links = document.querySelectorAll('#q1Slots .q1-link');
       const at = (ms, fn) => setTimeout(fn, ms);
-      const top = (n) => (35 + 140 * n) + 'px';
-      links.forEach((l, i) => at(i * 500, () => { l.style.height = '30px'; }));
-      const t0 = links.length * 500 + 600;
+      const top = (n) => (29 + 140 * n) + 'px';
+      const stepTo = (n) => {
+        q1Slots.forEach((s, idx) => s.classList.toggle('is-pass', idx === n));
+        food.style.top = top(n);
+        at(n === 0 ? 150 : 950, () => {
+          food.classList.add('is-pop');
+          at(320, () => food.classList.remove('is-pop'));
+        });
+      };
+      body.classList.add('is-hide');
+      slotsBox.classList.add('is-center');
+      links.forEach((l, i) => at(600 + i * 450, () => { l.style.height = '26px'; l.classList.add('is-on'); }));
+      const t0 = 600 + links.length * 450 + 400;
       food.style.transition = 'none';
-      food.style.top = '-30px';
+      food.style.top = '-36px';
       void food.offsetWidth;
       food.style.transition = '';
-      at(t0, () => { food.style.opacity = 1; food.style.top = top(0); });
-      at(t0 + 1700, () => { food.style.top = top(1); });
-      at(t0 + 3400, () => { food.style.top = top(2); });
-      at(t0 + 5200, () => { food.style.opacity = 0; });
-      at(t0 + 6000, done);
+      at(t0, () => { food.style.opacity = 1; stepTo(0); });
+      at(t0 + 1700, () => stepTo(1));
+      at(t0 + 3400, () => stepTo(2));
+      at(t0 + 5200, () => {
+        q1Slots.forEach((s) => s.classList.remove('is-pass'));
+        food.style.opacity = 0;
+      });
+      at(t0 + 5900, done);
     }
     let q1 = 0;
     const q1Slots = Array.from(document.querySelectorAll('#q1Slots .q1-slot'));
@@ -258,17 +294,20 @@
       onRight: (card, zone) => {
         zone.classList.remove('is-now', 'is-empty');
         zone.classList.add('is-lit');
-        $('qRightText').className = 'avatar-popup-text is-small';
-        $('qRightText').textContent = RIGHT1[ORDER[q1]];
-        playCorrect();
-        flashLayer(rightLayer, 'is-off', 3000);
+        const msg = RIGHT1[ORDER[q1]];
         q1 += 1;
         if (q1 < ORDER.length) q1Slots[q1].classList.add('is-now');
+        setTimeout(() => {
+          $('qRightText').className = 'avatar-popup-text is-small';
+          $('qRightText').textContent = msg;
+          playCorrect();
+          flashLayer(rightLayer, 'is-off', 3000);
+        }, 500);
       },
       onWrong: (card) => wrongPop(card, '다시 해볼까요?'),
       onDone: () => {
         q1Slots.forEach((s) => s.classList.remove('is-now'));
-        setTimeout(() => foodDown(() => next(q1Slots[0])), 3200);
+        setTimeout(() => foodDown(() => next(q1Slots[0])), 3700);
       }
     });
 

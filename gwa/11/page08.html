@@ -14,10 +14,9 @@
         .kd-tag.is-blood{left:12px;top:8px}
         .kd-tag.is-urine{left:12px;bottom:8px;color:#8a7220}
         .kd.is-red .kd-tag.is-urine{color:#7a2020}
-        .kd-seg{position:absolute;top:150px;width:40px;height:12px;border-radius:4px;background:#5a4a8a}
+        .kd-seg{position:absolute;top:150px;width:72px;height:12px;border-radius:4px;background:#5a4a8a}
         .kd-wall{position:absolute;top:150px;height:12px;background:#5a4a8a}
-        .kd-pt{position:absolute;left:0;top:0;border-radius:50%;will-change:transform}
-        .kd-pt.is-wbc{background:#fff;border:solid 3px #b9c4d8;box-sizing:border-box}
+        .kd-pt{position:absolute;left:0;top:0;background:center / contain no-repeat;will-change:transform}
         .kd-warn{position:absolute;right:14px;top:14px;width:44px;height:44px;border-radius:50%;background:#ff2d2d;display:none;box-shadow:0 0 0 0 rgba(255,45,45,.7);animation:kd-warn .7s ease-in-out infinite;z-index:2}
         .kd.is-red .kd-warn{display:block}
         @keyframes kd-warn{0%,100%{box-shadow:0 0 0 0 rgba(255,45,45,.8);opacity:1}50%{box-shadow:0 0 0 14px rgba(255,45,45,0);opacity:.5}}
@@ -226,20 +225,20 @@
 
     const HOLES = [50, 150, 250, 350, 450], SEGS = [100, 200, 300, 400];
     const KINDS = {
-      water: { c: '#6ec6ff', s: 16, small: true }, waste: { c: '#b9812c', s: 16, small: true },
-      rbc: { c: '#d63b3b', s: 34 }, wbc: { c: '#ffffff', s: 38, cls: 'is-wbc' }, prot: { c: '#8b5cf6', s: 26 }
+      water: { img: 'img/p02_water.png', s: 22, small: true }, waste: { img: 'img/p02_waste.png', s: 22, small: true },
+      rbc: { img: 'img/p02_rbc.png', s: 42 }, wbc: { img: 'img/p02_wbc.png', s: 46 }, prot: { img: 'img/p02_protein.png', s: 36 }
     };
     const SEQ = ['water', 'rbc', 'waste', 'prot', 'water', 'wbc', 'waste', 'rbc'];
     (function buildFilter() {
       const w = (l, wd) => { const d = document.createElement('div'); d.className = 'kd-wall'; d.style.cssText = `left:${l}px;width:${wd}px`; kid.appendChild(d); };
-      SEGS.forEach((c) => { const d = document.createElement('div'); d.className = 'kd-seg'; d.style.left = (c - 20) + 'px'; kid.appendChild(d); });
-      w(0, 30); w(470, 30);
+      SEGS.forEach((c) => { const d = document.createElement('div'); d.className = 'kd-seg'; d.style.left = (c - 36) + 'px'; kid.appendChild(d); });
+      w(0, 36); w(464, 36);
     })();
     const idleParts = () => {
       [['rbc', 100, 60], ['wbc', 200, 90], ['prot', 300, 50], ['rbc', 400, 100], ['water', 50, 40], ['waste', 150, 80], ['water', 350, 70], ['waste', 450, 110]].forEach(([k, x, y]) => {
         const K = KINDS[k], d = document.createElement('div');
-        d.className = 'kd-pt is-idle ' + (K.cls || '');
-        d.style.cssText = `background:${K.c};width:${K.s}px;height:${K.s}px;transform:translate(${x - K.s / 2}px,${y - K.s / 2}px)`;
+        d.className = 'kd-pt is-idle';
+        d.style.cssText = `background-image:url('${K.img}');width:${K.s}px;height:${K.s}px;transform:translate(${x - K.s / 2}px,${y - K.s / 2}px)`;
         kid.appendChild(d);
       });
     };
@@ -253,8 +252,8 @@
       const K = KINDS[kind], pass = K.small || passAll;
       const x = pass ? HOLES[Math.floor(Math.random() * 5)] : SEGS[Math.floor(Math.random() * 4)];
       const d = document.createElement('div');
-      d.className = 'kd-pt ' + (K.cls || '');
-      d.style.cssText = `background:${K.c};width:${K.s}px;height:${K.s}px`;
+      d.className = 'kd-pt';
+      d.style.cssText = `background-image:url('${K.img}');width:${K.s}px;height:${K.s}px`;
       kid.appendChild(d);
       const X = x - K.s / 2, y = (v) => v - K.s / 2;
       const frames = pass

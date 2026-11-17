@@ -24,7 +24,7 @@
 .p05-res{position:absolute;box-sizing:border-box;border:solid 6px var(--c-navy);border-radius:30px;left:1060px;top:190px;width:800px;height:580px;background:#dff0ff}
 .p05-bk{position:absolute;top:80px;width:300px;height:240px;box-sizing:border-box;border:solid 6px var(--c-ink);border-radius:20px 20px 60px 60px;background:#fff;display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;align-content:center;padding:0 20px}
 .p05-bn{position:absolute;top:-36px;left:50%;margin-left:-34px;width:68px;height:68px;border-radius:50%;background:var(--c-purple);color:#fff;border:solid 5px var(--c-ink);display:flex;align-items:center;justify-content:center;font-family:"Cafe24 Ssurround";font-size:42px;padding-top:4px;box-sizing:border-box}
-.p05-ball{width:78px;height:78px;border-radius:50%;border:solid 5px var(--c-ink);box-sizing:border-box;flex:none}
+.p05-ball{position:relative;width:78px;height:78px;border-radius:50%;border:solid 5px var(--c-ink);box-sizing:border-box;flex:none;transition:transform .65s cubic-bezier(.22,1,.36,1)}
 .p05-ball.is-b{background:#4e97ff}
 .p05-ball.is-y{background:#ffc80d}
 .p05-ball.is-r{background:#ee4a3c}
@@ -105,20 +105,53 @@
   const next = $('p05Next');
   const seen = new Set();
   let finStep = 0;
+  let timers = [];
 
-  const balls = (keys) => keys.map((k) => '<i class="p05-ball is-' + k + '"></i>').join('');
+  const balls = (keys, hidden) => keys.map((k) => '<i class="p05-ball is-' + k + '" data-ball="' + k + '"' + (hidden ? ' style="opacity:0"' : '') + '></i>').join('');
 
   function place(key) {
+    timers.forEach(clearTimeout);
+    timers = [];
     const c = COLORS[key];
     blank.className = 'p05-blank drop-zone is-filled ' + c.cls;
     blank.textContent = c.label;
     cards.forEach((card) => card.classList.toggle('is-used', card.dataset.color === key));
-    $('p05Pool').innerHTML = '';
-    $('p05B1').innerHTML = balls([key]);
-    $('p05B2').innerHTML = balls(['b', 'y', 'r'].filter((k) => k !== key));
-    $('p05Text').innerHTML = c.name + ' 공은 1번 바구니에,<br>나머지 공들은 2번 바구니에 담겼어요.';
-    seen.add(key);
-    if (seen.size === 3) next.classList.remove('is-dim');
+
+    const pool = $('p05Pool');
+    const b1 = $('p05B1');
+    const b2 = $('p05B2');
+    const txt = $('p05Text');
+    pool.innerHTML = balls(['b', 'y', 'r'], false);
+    b1.innerHTML = balls([key], true);
+    b2.innerHTML = balls(['b', 'y', 'r'].filter((k) => k !== key), true);
+    txt.innerHTML = '';
+
+    const s = scale();
+    const order = [key, ...['b', 'y', 'r'].filter((k) => k !== key)];
+    order.forEach((k, i) => {
+      const t1 = setTimeout(() => {
+        const src = pool.querySelector('[data-ball="' + k + '"]');
+        const dst = (k === key ? b1 : b2).querySelector('[data-ball="' + k + '"]');
+        if (!src || !dst) return;
+        const sr = src.getBoundingClientRect();
+        const dr = dst.getBoundingClientRect();
+        src.style.zIndex = '10';
+        src.style.transform = 'translate(' + (dr.left - sr.left) / s + 'px,' + (dr.top - sr.top) / s + 'px)';
+        const t2 = setTimeout(() => {
+          dst.style.opacity = '1';
+          src.style.visibility = 'hidden';
+        }, 650);
+        timers.push(t2);
+      }, 300 + i * 700);
+      timers.push(t1);
+    });
+
+    const tDone = setTimeout(() => {
+      txt.innerHTML = c.name + ' 공은 1번 바구니에,<br>나머지 공들은 2번 바구니에 담겼어요.';
+      seen.add(key);
+      if (seen.size === 3) next.classList.remove('is-dim');
+    }, 300 + (order.length - 1) * 700 + 700);
+    timers.push(tDone);
   }
 
   const scale = () => $('stage').getBoundingClientRect().width / 1920;

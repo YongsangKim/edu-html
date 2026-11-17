@@ -25,6 +25,11 @@
       .p11-cart-inner{position:relative;width:100%;height:100%;animation:p11KartVibe .32s ease-in-out infinite}
       .p11-cart-vehicle{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;display:block;z-index:1}
       .p11-cart-item{position:absolute;left:50%;top:155px;transform:translateX(-50%);width:135px;height:180px;object-fit:contain;z-index:2;filter:drop-shadow(0 4px 8px rgba(0,0,0,.45))}
+      .p11-cart-item.is-pulse{animation:p11ItemPulse .75s ease-in-out 3}
+      @keyframes p11ItemPulse{
+        0%,100%{transform:translateX(-50%) scale(1);filter:drop-shadow(0 4px 8px rgba(0,0,0,.45))}
+        50%{transform:translateX(-50%) scale(1.14);filter:drop-shadow(0 0 18px rgba(255,216,61,1)) drop-shadow(0 0 8px rgba(255,200,0,1))}
+      }
       .p11-cart-guard{position:absolute;left:50%;top:155px;transform:translateX(-50%);width:135px;height:180px;object-fit:contain;display:block;z-index:3;pointer-events:none}
       .p11-station{position:absolute;left:50%;top:290px;transform:translateX(-50%);width:220px;z-index:3;pointer-events:none;transition:opacity .25s ease}
       .p11-station.is-sink{top:275px;width:190px}
@@ -294,8 +299,17 @@
         pinAnimId = requestAnimationFrame(step);
       }
 
+      function pulseCartItem() {
+        cartItem.classList.remove('is-pulse');
+        void cartItem.offsetWidth;
+        cartItem.classList.add('is-pulse');
+      }
+      cartItem.addEventListener('animationend', function (e) {
+        if (e.animationName === 'p11ItemPulse') cartItem.classList.remove('is-pulse');
+      });
+
       function playGoalIn(callback) {
-        cartItem.classList.remove('fly-to-bin');
+        cartItem.classList.remove('is-pulse', 'fly-to-bin');
         void cartItem.offsetWidth;
         cartItem.classList.add('fly-to-bin');
         setTimeout(function () {
@@ -320,6 +334,7 @@
         cartItem.className = 'p11-cart-item';
         cartItem.src = 'img/p11_item_pet.png';
         cartItem.style.opacity = '1';
+        pulseCartItem();
         flightBottle.style.display = 'none';
         juiceWrap.style.display = 'none';
         sinkRipple.style.display = 'none';
@@ -348,6 +363,7 @@
         cartItem.className = 'p11-cart-item';
         cartItem.src = 'img/p11_item_glass_full.png';
         cartItem.style.opacity = '1';
+        pulseCartItem();
         flightBottle.style.display = 'none';
         juiceWrap.style.display = 'none';
         sinkRipple.style.display = 'none';
@@ -379,6 +395,7 @@
         cartItem.className = 'p11-cart-item';
         cartItem.src = 'img/p11_item_carton.png';
         cartItem.style.opacity = '1';
+        pulseCartItem();
         flightBottle.style.display = 'none';
         juiceWrap.style.display = 'none';
         sinkRipple.style.display = 'none';

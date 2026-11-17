@@ -16,6 +16,16 @@
         .p02-flow{position:absolute;left:930px;top:430px;width:60px;height:60px;border-radius:50%;background:radial-gradient(circle,rgba(229,72,77,.55),rgba(229,72,77,0) 70%);opacity:0;pointer-events:none}
         .p02-flow.is-go{animation:p02-flow .9s ease-out}
         @keyframes p02-flow{from{transform:scale(.5);opacity:.9}to{transform:scale(8);opacity:0}}
+        .p02-drop{position:absolute;left:937px;top:433px;width:46px;height:53px;opacity:0;pointer-events:none;animation:p02-drop-flow 3s ease-in-out infinite}
+        .p02-drop.is-off{display:none}
+        @keyframes p02-drop-flow{
+            0%{opacity:0;transform:translate(0,0);filter:none}
+            8%{opacity:1}
+            46%{opacity:1;transform:translate(var(--dx),var(--dy));filter:none}
+            50%{transform:translate(var(--dx),var(--dy));filter:hue-rotate(-130deg)}
+            92%{opacity:1;transform:translate(0,0);filter:hue-rotate(-130deg)}
+            100%{opacity:0;transform:translate(0,0);filter:hue-rotate(-130deg)}
+        }
         .p02-btns{position:absolute;left:0;right:0;top:770px;display:flex;justify-content:center;gap:60px}
         .p02-btns .card-btn{min-width:0;width:340px;height:110px;padding:10px 0 6px;font-size:54px}
         .p02-btns .card-btn.hit-pulse{--pulse-w:20px;--pulse-y:10px;--pulse-c:#ffc21a}
@@ -32,6 +42,11 @@
 
           <div class="p02-body" id="p02Body"></div>
           <div class="p02-flow" id="p02Flow"></div>
+          <img class="p02-drop is-off" src="img/p07_drop.png" style="--dx:-5px;--dy:-165px;animation-delay:0s" alt="">
+          <img class="p02-drop is-off" src="img/p07_drop.png" style="--dx:-160px;--dy:170px;animation-delay:.4s" alt="">
+          <img class="p02-drop is-off" src="img/p07_drop.png" style="--dx:160px;--dy:170px;animation-delay:.8s" alt="">
+          <img class="p02-drop is-off" src="img/p07_drop.png" style="--dx:-45px;--dy:225px;animation-delay:1.2s" alt="">
+          <img class="p02-drop is-off" src="img/p07_drop.png" style="--dx:45px;--dy:225px;animation-delay:1.6s" alt="">
           <div class="p02-heart" id="p02Heart"><img src="img/p08_heart.png" alt="심장"></div>
 
           <div class="p02-btns">
@@ -77,6 +92,7 @@
     const pillText = $('p02PillText');
     const heart = $('p02Heart');
     const flow = $('p02Flow');
+    const drops = Array.from(document.querySelectorAll('.p02-drop'));
     const body = $('p02Body');
     const btn = { og: $('p02Og'), nl: $('p02Nl') };
     const set = $('p02Set');
@@ -116,6 +132,7 @@
       btn.nl.classList.add('is-disabled');
       mark();
       body.classList.add('is-clear');
+      drops.forEach((d) => d.classList.remove('is-off'));
       heartFull.currentTime = 0;
       heartFull.play().catch(() => {});
       let k = 0;

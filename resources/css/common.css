@@ -142,11 +142,11 @@ html:not(.is-shown) *,html:not(.is-shown) *:before,html:not(.is-shown) *:after{a
   .video-play-btn.is-hidden {
     display: none;
   }
-  .video-box[data-pause="on"] .video-play-btn {
+  .video-box:not([data-pause="off"]) .video-play-btn {
     border-radius: 50%;
     background: var(--c-violet);
   }
-  .video-box[data-pause="on"] .video-play-btn::before {
+  .video-box:not([data-pause="off"]) .video-play-btn::before {
     content: "";
     position: absolute;
     top: 50%; left: 50%;
@@ -174,6 +174,44 @@ html:not(.is-shown) *,html:not(.is-shown) *:before,html:not(.is-shown) *:after{a
   }
   .video-pause-btn.is-hidden {
     display: none;
+  }
+  .video-fs-btn {
+    position: absolute;
+    right: 28px;
+    top: 28px;
+    width: 68px;
+    height: 68px;
+    border: 3px solid rgba(255, 255, 255, .85);
+    border-radius: 16px;
+    background: var(--c-violet);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .28);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform .15s ease, opacity .2s ease;
+  }
+  .video-box.is-fs-ui .video-fs-btn {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .video-fs-btn:hover { transform: scale(1.06); }
+  .video-fs-btn svg { width: 34px; height: 34px; display: block; pointer-events: none; }
+  .video-box:fullscreen, .video-box:-webkit-full-screen {
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+  }
+  .video-box:fullscreen .video-el, .video-box:-webkit-full-screen .video-el {
+    border: 0;
+    border-radius: 0;
+    object-fit: contain;
   }
 
   /* ---------------- 커스텀 스크롤바 ---------------- */

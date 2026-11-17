@@ -134,7 +134,7 @@ var TOC_HTML = `<div class="toc-layer">
               <button class="toc-accordion-toggle js-sfx" data-sound="sound/click.mp3">9차시</button>
               <div class="toc-accordion-panel">
                 <a href="${ROOT}gwa/09/page01.html" class="toc-sub-item">1) 차례대로 맞추는 몸속 퍼즐 게임</a>
-                <a href="${ROOT}gwa/09/page04.html" class="toc-sub-item">2) 순서대로 차례차례, 순차와 알고리즘</a>
+                <a href="${ROOT}gwa/09/page04.html" class="toc-sub-item">2) 개념 이해 영상</a>
                 <a href="${ROOT}gwa/09/page05.html" class="toc-sub-item">3) 일상생활 속 순차 찾기</a>
                 <a href="${ROOT}gwa/09/page08.html" class="toc-sub-item">4) 컴퓨터도 알고리즘 순차대로</a>
                 <a href="${ROOT}gwa/09/page13.html" class="toc-sub-item">5) 첫 블록 코딩, 엔트리로 배우는 순차</a>
@@ -147,7 +147,7 @@ var TOC_HTML = `<div class="toc-layer">
               <button class="toc-accordion-toggle js-sfx" data-sound="sound/click.mp3">10차시</button>
               <div class="toc-accordion-panel">
                 <a href="${ROOT}gwa/10/page01.html" class="toc-sub-item">1) 쿵쾅쿵쾅! 힘차게 뛰는 심장 펌프</a>
-                <a href="${ROOT}gwa/10/page03.html" class="toc-sub-item">2) 멈춤없이 계속 반복하는 심장과 컴퓨터</a>
+                <a href="${ROOT}gwa/10/page03.html" class="toc-sub-item">2) 개념 이해 영상</a>
                 <a href="${ROOT}gwa/10/page04.html" class="toc-sub-item">3) 정해진 횟수만큼만 반복하는 프린터</a>
                 <a href="${ROOT}gwa/10/page06.html" class="toc-sub-item">4) 내 몸속 쿵쾅쿵쾅 순환 지도 완성하기</a>
                 <a href="${ROOT}gwa/10/page08.html" class="toc-sub-item">5) 엔트리 반복 블록으로 심장 코딩하기</a>

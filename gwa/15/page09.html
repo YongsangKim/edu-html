@@ -864,9 +864,14 @@
       height: 100%;
       object-fit: cover;
     }
-    .tm-inspect-cell.is-bad {
+    .tm-inspect-cell.is-bad.is-hint {
       border: solid 4px #ff3b6b;
       box-shadow: 0 0 0 4px rgba(255, 59, 107, 0.28);
+      animation: tmBadPulse 1.1s ease-in-out infinite;
+    }
+    @keyframes tmBadPulse {
+      0%, 100% { box-shadow: 0 0 0 2px rgba(255, 59, 107, 0.25); }
+      50% { box-shadow: 0 0 0 8px rgba(255, 59, 107, 0.55); }
     }
     .tm-inspect-cell.is-deleted {
       visibility: hidden;
@@ -885,6 +890,10 @@
       padding: 2px 4px;
       border-radius: 6px;
       line-height: 1.15;
+      display: none;
+    }
+    .tm-inspect-cell.is-bad.is-hint .tm-bad-tag {
+      display: block;
     }
 
     .tm-zoom-popup {
@@ -1802,12 +1811,31 @@
         }
       }
 
+      var badHintTimer = null;
+      function clearBadHint() {
+        clearTimeout(badHintTimer);
+        badHintTimer = null;
+        document.querySelectorAll('.tm-inspect-cell.is-bad').forEach(function (c) {
+          c.classList.remove('is-hint');
+        });
+      }
+      function scheduleBadHint() {
+        clearBadHint();
+        badHintTimer = setTimeout(function () {
+          if (step !== 's41') return;
+          document.querySelectorAll('.tm-inspect-cell.is-bad:not(.is-deleted)').forEach(function (c) {
+            c.classList.add('is-hint');
+          });
+        }, 5000);
+      }
+
       function openInspectModal() {
         step = 's41';
         buildInspectGrid();
         document.getElementById('modalInspect').classList.add('is-open');
         setGuide('각 폴더에서 정확하지 않은 사진을 찾아 클릭하세요.');
-        pointNextBadCell();
+        focusTarget(null);
+        scheduleBadHint();
       }
 
       function onInspectCellClick() {
@@ -1819,6 +1847,7 @@
           setGuide('이 사진은 색이 잘 보이고 이름표도 맞아요.');
           return;
         }
+        clearBadHint();
         playClick();
         step = 's42';
         activeBadShot = Number(badShot);
@@ -1847,7 +1876,8 @@
         if (!allDeleted) {
           step = 's41';
           setGuide('각 폴더에서 정확하지 않은 사진을 찾아 클릭하세요.');
-          pointNextBadCell();
+          focusTarget(null);
+          scheduleBadHint();
         } else {
           step = 's43';
           document.getElementById('modalInspect').classList.remove('is-open');
