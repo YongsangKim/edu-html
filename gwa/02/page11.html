@@ -127,9 +127,13 @@
   <script src="../../resources/js/common.js"></script>
   <script>
     // Q3 보기 그래프: 하루 기온 자료를 막대/꺾은선으로
-    var DATA = [15, 15, 12, 20, 25, 30, 20, 15, 14].map(function (v, i) { return { label: i * 3 + '시', value: v }; });
+    function formatTime(h) {
+      var m = h % 24;
+      return (m < 12 ? '오전 ' : '오후 ') + (m % 12 || 12) + '시';
+    }
+    var DATA = [15, 15, 12, 20, 25, 30, 20, 15, 14].map(function (v, i) { return { label: formatTime(i * 3), value: v }; });
     document.querySelectorAll('.quiz-graph').forEach(function (btn) {
-      btn.querySelector(':scope > span').innerHTML = chartSvg(DATA, { type: btn.dataset.type, width: 740, height: 340 });
+      btn.querySelector(':scope > span').innerHTML = chartSvg(DATA, { type: btn.dataset.type, width: 740, height: 340, fs: 15 });
     });
   </script>
 </body>

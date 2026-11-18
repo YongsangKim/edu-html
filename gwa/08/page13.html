@@ -50,7 +50,7 @@
           <p class="ask-pill has-stage p13-step"><i id="p13Mission"></i><span id="p13Title"></span></p>
           <p class="p13-timer" id="p13TimerBox">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13.5" r="8"/><path d="M12 13.5V9.5M9.5 2.5h5M12 2.5v3M18.5 6l1.5-1.5"/></svg>
-            <span id="p13Timer">15</span>
+            <span id="p13Timer">20</span>
           </p>
 
           <div class="p13-dash" id="p13Dash">
@@ -65,7 +65,7 @@
             <button class="p13-btn" data-key="cool"><i style="background-image:url('img/p13_btn_cool.png')"></i>스마트 에어컨 및 서큘레이터 가동</button>
             <button class="p13-btn" data-key="alarm"><i style="background-image:url('img/p13_btn_alarm.png')"></i>경보음 울리기 및 스마트폰 알림 발송</button>
             <button class="p13-btn" data-key="purifier"><i style="background-image:url('img/p13_btn_purifier.png')"></i>스마트 공기청정기 강풍 가동</button>
-            <button class="p13-btn" data-key="sleep"><i style="background-image:url('img/p13_btn_sleep.png')"></i>수면 조명 켜기</button>
+            <button class="p13-btn" data-key="sleep"><i style="background-image:url('img/p13_btn_sleep.png')"></i>수면 조명 켜기 및 커튼 닫기</button>
           </div>
 
           <div class="avatar-modal is-off" id="p13Right">
@@ -83,7 +83,8 @@
             <div class="avatar-popup-panel">
               <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_incorrect.png" alt=""></div>
               <div class="avatar-popup-body is-finish">
-                <p class="avatar-popup-sub">AI 판단 오류! 센서가 보낸 실시간 데이터를 <br>다시 분석해 보세요.</p>
+                <p class="avatar-popup-text" id="p13WrongTitle">시간 초과!</p>
+                <p class="avatar-popup-sub" id="p13WrongText">IoT는 센서의 정보를 바탕으로 빠르게 환경을 조정하여 우리 삶을 편리하게 해줘요! 조금만 더 빠르게 다시 도전 해 볼까요?</p>
                 <button class="avatar-popup-next card-btn is-popup js-sfx p13-ok" id="p13WrongOk" data-sound="sound/click.mp3">확인</button>
               </div>
             </div>
@@ -99,19 +100,19 @@
   <script src="../../resources/js/common.js"></script>
   <script>
   (function () {
-    const LIMIT = 15;
-    const MISSIONS = [
-      { sensor: '가스 센서', alert: '가스 누출 감지!', key: 'gas',
+    const LIMIT = 20;
+    const MISSIONS = shuffleArray([
+      { n: 1, sensor: '가스 센서', alert: '가스 누출 감지!', key: 'gas',
         right: '가스 센서가 가스 누출을 감지해서 가스 밸브가 잠기고 환기팬이 켜졌네. 이제 안전해요!' },
-      { sensor: '거실 온도 센서', alert: '실내 온도 33도 돌파!', key: 'cool',
+      { n: 2, sensor: '거실 온도 센서', alert: '실내 온도 33도 돌파!', key: 'cool',
         right: '온도 센서가 높은 온도를 감지해서 에어컨과 서큘레이터가 켜졌어요. 거실이 시원해졌어요!' },
-      { sensor: '현관 CCTV', alert: '외출 중 낯선 움직임 포착!', key: 'alarm',
+      { n: 3, sensor: '현관 CCTV', alert: '외출 중 낯선 움직임 포착!', key: 'alarm',
         right: '현관 CCTV가 낯선 움직임을 감지해서 경보음이 울리고 스마트폰 알림이 전송됐어요. 이제 안심이에요!' },
-      { sensor: '침실 미세먼지 센서', alert: '공기 오염도 ‘최악’!', key: 'purifier',
+      { n: 4, sensor: '침실 미세먼지 센서', alert: '공기 오염도 ‘최악’!', key: 'purifier',
         right: '미세먼지 센서가 나쁜 공기를 감지해서 공기청정기가 강하게 작동했어요. 공기가 깨끗해졌어요!' },
-      { sensor: '조도 센서', alert: '밤 10시, 주변 매우 어두움!', key: 'sleep',
+      { n: 5, sensor: '조도 센서', alert: '밤 10시, 주변 매우 어두움!', key: 'sleep',
         right: '조도 센서가 어두운 방을 감지해서 수면 조명이 켜지고 커튼이 닫혔어요. 편안한 잠자리가 되었어요!' }
-    ];
+    ]);
 
     const timerEl = $('p13Timer');
     const timerBox = $('p13TimerBox');
@@ -132,7 +133,7 @@
       $('p13Sensor').textContent = m.sensor;
       $('p13Alert').textContent = m.alert;
       $('p13Dash').classList.remove('is-safe');
-      scene.style.backgroundImage = 'url(\'img/p13_scene_m' + (index + 1) + '.jpg\')';
+      scene.style.backgroundImage = 'url(\'img/p13_scene_m' + m.n + '.jpg\')';
       btns.classList.remove('is-locked');
       remain = LIMIT;
       timerEl.textContent = remain;
@@ -142,14 +143,18 @@
         remain -= 1;
         timerEl.textContent = remain;
         timerBox.classList.toggle('is-hurry', remain <= 5);
-        if (remain <= 0) fail();
+        if (remain <= 0) fail(true);
       }, 1000);
     }
 
-    function fail() {
+    function fail(timeout) {
       stopClock();
       btns.classList.add('is-locked');
       playWrong();
+      $('p13WrongTitle').textContent = timeout ? '시간 초과!' : 'AI 판단 오류!';
+      $('p13WrongText').innerHTML = timeout
+        ? 'IoT는 센서의 정보를 바탕으로 빠르게 환경을 조정하여 우리 삶을 편리하게 해줘요! 조금만 더 빠르게 다시 도전 해 볼까요?'
+        : '센서가 보낸 실시간 데이터를 <br>다시 분석해 보세요.';
       $('p13Wrong').classList.remove('is-off');
     }
 
@@ -157,14 +162,14 @@
       const btn = e.target.closest('.p13-btn');
       if (!btn) return;
       if (btn.dataset.key !== MISSIONS[index].key) {
-        fail();
+        fail(false);
         return;
       }
       stopClock();
       btns.classList.add('is-locked');
       playCorrect();
       $('p13Dash').classList.add('is-safe');
-      scene.style.backgroundImage = 'url(\'img/p13_scene_m' + (index + 1) + '_on.jpg\')';
+      scene.style.backgroundImage = 'url(\'img/p13_scene_m' + MISSIONS[index].n + '_on.jpg\')';
       $('p13RightText').textContent = MISSIONS[index].right;
       setTimeout(() => $('p13Right').classList.remove('is-off'), 800);
     });

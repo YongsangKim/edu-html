@@ -22,6 +22,7 @@
         .p08-hide{display:none!important}
         .p08-next:disabled{opacity:.4;pointer-events:none}
         .mc-ghost{position:absolute;display:none;pointer-events:none;z-index:9;background-repeat:no-repeat;filter:drop-shadow(0 6px 8px rgba(0,0,0,.35))}
+        .mc-num{position:absolute;left:1371px;top:166px;width:36px;height:30px;box-sizing:border-box;padding:0;border:2px solid #fff;border-radius:15px;background:#fff;color:#575e75;font-family:'Pretendard',sans-serif;font-size:16px;font-weight:700;text-align:center;outline:none;z-index:6;box-shadow:0 0 0 3px #ffd633}
 
 .mc-led{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
 .mc-led i{position:absolute;width:14px;height:20px;border-radius:5px;background:#ff3d3d;box-shadow:0 0 8px 3px rgba(255,50,50,.65);opacity:0}
@@ -58,6 +59,7 @@
             <div class="mc-ov" id="mcOv"><img id="mcOvImg" alt=""></div>
             <div class="mc-led" id="mcLed"></div>
             <div class="mc-ghost" id="mcGhost"></div>
+            <input type="text" inputmode="numeric" maxlength="3" class="mc-num p08-hide" id="mcNum" value="0" aria-label="숫자 26 입력">
             <button type="button" class="mc-hit" id="mcHit" data-hit=""></button>
           </div>
 
@@ -126,7 +128,7 @@
       cmp: ['[0<0] 블록을 클릭해 ‘참’ 블록 안으로 드래그 하세요.', 'wink_point2'],
       temp2: ['‘입력’에서 [온도]를 클릭해 판으로 드래그 하세요.', 'wink_point3'],
       ge: ['부호를 ‘<span>≥</span>’로 변경해 주세요.', 'wink_point2'],
-      num: ['숫자 26을 입력해 볼까요?', 'wink_point3'],
+      num: ['숫자칸을 누르고 26을 입력해 볼까요?', 'wink_point3'],
       led: ['‘기본’에서 [LED 출력]을 클릭해 판으로 드래그 하세요.', 'wink_point2'],
       done: ['완성됐어요! 이제 온도에 따라 달라지는 결과를 확인해볼까요?', 'wink_present'],
       result: ['완성됐어요! 이제 온도에 따라 달라지는 결과를 확인해볼까요?', 'smile_present']
@@ -151,7 +153,7 @@
       { img: 20, say: 'temp2', type: 'drag', key: 'blkTemp', hover: 21, ghost: 21, fd: 'blkTemp2' },
       { img: 22, say: 'ge', type: 'click', key: 'cmpArrow' },
       { img: 23, say: 'ge', type: 'click', key: 'geOpt' },
-      { img: 24, say: 'num', type: 'num', key: 'numSlot', btn: '숫자 입력하기' },
+      { img: 24, say: 'num', type: 'num', key: 'numSlot', btn: '다음' },
       { img: 25, say: 'led', type: 'click', key: 'catBasic' },
       { img: 26, say: 'led', type: 'drag', key: 'blkLed', hover: 27, ghost: 27 },
       { img: 28, ov: { img: 26, rect: FLY }, say: 'led', type: 'drag', key: 'blkLed', ghost: 27, ghostSrc: 27, fd: 'blkLed2' },
@@ -162,7 +164,7 @@
     const HOT = {};
     Object.keys(R).forEach((k) => { HOT[k] = [0, 0, 0, 0]; });
 
-    const mc = $('mc'), base = $('mcBase'), over = $('mcOver'), ov = $('mcOv'), ovImg = $('mcOvImg'), ghost = $('mcGhost'), hit = $('mcHit');
+    const mc = $('mc'), base = $('mcBase'), over = $('mcOver'), ov = $('mcOv'), ovImg = $('mcOvImg'), ghost = $('mcGhost'), hit = $('mcHit'), mcNum = $('mcNum');
     const bubble = $('p08Bubble'), modal = $('p08Modal');
     const say = initGuideSay({ bubble: bubble, img: $('p08Char'), poses: [] });
     const btn = $('p08Btn');
@@ -285,6 +287,8 @@
       stopAnim();
       drag = null;
       ghost.style.display = 'none';
+      mcNum.classList.add('p08-hide');
+      mcNum.value = '0';
       modal.classList.add('is-off');
       base.src = IMG(f.img);
       over.style.opacity = 0;
@@ -321,6 +325,7 @@
         stopFingers();
         stopAnim();
         placeHit('');
+        mcNum.classList.add('p08-hide');
         say('');
         btn.classList.add('p08-hide');
         modal.classList.remove('is-off');
@@ -375,12 +380,25 @@
         playClick();
         stopFingers();
         placeHit('');
-        btn.disabled = false;
+        mcNum.value = '0';
+        mcNum.classList.remove('p08-hide');
+        mcNum.focus();
+        mcNum.select();
       } else if (f.type === 'result') {
         playClick();
         base.src = IMG(33);
         stopFingers();
       }
+    });
+
+    mcNum.addEventListener('input', () => {
+      mcNum.value = mcNum.value.replace(/[^0-9]/g, '');
+      const f = FR[cur];
+      if (!f || f.type !== 'num') return;
+      btn.disabled = !(mcNum.value !== '' && Number(mcNum.value) === 26);
+    });
+    mcNum.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !btn.disabled) btn.click();
     });
 
     btn.addEventListener('click', () => {

@@ -87,9 +87,12 @@
     const doorsBox = $('p11Doors');
     let round = 0;
     let voice = null;
+    let voiceTimer = null;
     let activeSound = null;
     // 다른 소리를 켜거나 문을 고르면 재생 중인 소리를 멈추고, 눌려 있던 소리 아이콘도 다시 켜 줌
     function stopVoice() {
+      clearTimeout(voiceTimer);
+      voiceTimer = null;
       if (voice) { voice.pause(); voice = null; }
       if (activeSound) { delete activeSound.dataset.busy; activeSound.style.opacity = ''; activeSound = null; }
     }
@@ -122,11 +125,20 @@
             activeSound = sound;
             sound.dataset.busy = '1';
             sound.style.opacity = '.5';
-            voice = new Audio('sound/p11_' + (d.sound || d.key) + '.mp3');
-            const done = () => { delete sound.dataset.busy; sound.style.opacity = ''; if (activeSound === sound) activeSound = null; };
+            const key = d.sound || d.key;
+            voice = new Audio('sound/p11_' + key + '.mp3');
+            const done = () => {
+              clearTimeout(voiceTimer);
+              voiceTimer = null;
+              delete sound.dataset.busy;
+              sound.style.opacity = '';
+              if (activeSound === sound) activeSound = null;
+            };
             voice.addEventListener('ended', done);
             voice.addEventListener('error', done);
-            voice.play().catch(done);
+            voice.play().then(() => {
+              if (key === 'whisper') voiceTimer = setTimeout(stopVoice, 3000);
+            }).catch(done);
           });
         }
         door.addEventListener('click', () => pick(door, d.right));

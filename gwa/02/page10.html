@@ -20,7 +20,7 @@
 
         .gpt-thumb table{width:100%;border-collapse:collapse;text-align:center}
         .gpt-thumb th{background:#cfe3fb;font-weight:700}
-        .gpt-thumb td, .gpt-thumb th{border:solid 1px #9cc2ee;padding:1px 0}
+        .gpt-thumb td, .gpt-thumb th{border:solid 1px #9cc2ee;padding:1px 2px;white-space:nowrap}
         .gpt-ai .p10-chart{position:relative;margin:4px 0 10px;border-radius:8px;background:var(--c-white);cursor:pointer;touch-action:none}
         .gpt-ai .p10-chart svg{display:block;width:100%;height:auto}
         .gpt-ai .p10-chart.is-press{outline:4px solid var(--c-blue)}
@@ -97,7 +97,7 @@
                 <div class="gpt-gallery-head"><svg class="ic" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>최근 항목<span style="width:28px"></span></div>
                 <div class="gpt-gallery-grid" id="p10Grid">
                   <button type="button" data-pick="photo" aria-label="바다 사진">🏖️</button>
-                  <button type="button" data-pick="table" data-hit="table" aria-label="하루 기온 표"><div class="gpt-thumb" id="p10TableBig"></div></button>
+                  <button type="button" data-pick="table" data-hit="table" aria-label="하루 기온표"><div class="gpt-thumb" id="p10TableBig"></div></button>
                   <button type="button" data-pick="photo" aria-label="강아지 사진">🐶</button>
                   <button type="button" data-pick="photo" aria-label="케이크 사진">🍰</button>
                 </div>
@@ -108,7 +108,7 @@
 
           <div class="p10-cards is-off" id="p10Cards">
             <h3>프롬프트 카드</h3>
-            <div class="p10-row"><button type="button" class="p10-card y" data-color="y">첨부한 기온 표 이미지를</button></div>
+            <div class="p10-row"><button type="button" class="p10-card y" data-color="y">첨부한 기온표 이미지를</button></div>
             <div class="p10-row"><button type="button" class="p10-card r" data-color="r" data-kind="line">꺾은선 그래프로</button><button type="button" class="p10-card r" data-color="r" data-kind="bar">막대 그래프로</button></div>
             <div class="p10-row"><button type="button" class="p10-card b" data-color="b">시각화해 줘<br>(그려줘).</button><button type="button" class="p10-card b" data-color="b" data-wrong="1">읽어줘.</button></div>
             <button type="button" class="card-btn p10-hint js-sfx" id="p10Hint" data-sound="sound/click.mp3">힌트</button>
@@ -118,7 +118,7 @@
             <div class="avatar-popup-panel">
               <div class="avatar-popup-avatar"><img src="../../resources/img/common/avatar_quiz.png" alt=""></div>
               <div class="avatar-popup-body">
-                <p class="avatar-popup-text is-small">첨부한 기온 표 이미지를 막대 그래프로 시각화해 줘(그려줘).</p>
+                <p class="avatar-popup-text is-small">첨부한 기온표 이미지를 막대 그래프로 시각화해 줘(그려줘).</p>
               </div>
             </div>
           </div>
@@ -165,17 +165,21 @@
   <script src="../../resources/js/box-edit.js"></script>
   <script>
   (function () {
-    const DATA = [15, 15, 12, 20, 25, 30, 20, 15, 14].map((v, i) => ({ label: i * 3 + '시', value: v }));
+    const formatTime = (h) => {
+      const m = h % 24;
+      return (m < 12 ? '오전 ' : '오후 ') + (m % 12 || 12) + '시';
+    };
+    const DATA = [15, 15, 12, 20, 25, 30, 20, 15, 14].map((v, i) => ({ label: formatTime(i * 3), value: v }));
     const RESULT = {
-      bar: { name: '막대 그래프', text: '기온표를 막대그래프로 시각화했어요. 막대의 높이를 비교하면 15시의 기온이 30도로 가장 높고, 6시의 기온이 12도로 가장 낮다는 것을 확인할 수 있어요.' },
-      line: { name: '꺾은선 그래프', text: '요청하신 기온 표 이미지를 분석하여 꺾은선그래프로 시각화했습니다. 낮 동안 기온이 올라갔다가 저녁에 내려가는 패턴을 확인할 수 있습니다.' }
+      bar: { name: '막대 그래프', text: '기온표를 막대그래프로 시각화했어요. 막대의 높이를 비교하면 오후 3시의 기온이 30도로 가장 높고, 오전 6시의 기온이 12도로 가장 낮다는 것을 확인할 수 있어요.' },
+      line: { name: '꺾은선 그래프', text: '요청하신 기온표 이미지를 분석하여 꺾은선그래프로 시각화했습니다. 낮 동안 기온이 올라갔다가 저녁에 내려가는 패턴을 확인할 수 있습니다.' }
     };
     const SAYS = {
       start: ['기온표 이미지를 ChatGPT에 첨부하고, 원하는 그래프를 만들어 달라고 부탁해 보세요!', 'smile_present'],
       plus: ['아래의 + 버튼을 클릭해보세요.', 'wink_point4'],
-      photo: ['‘사진’ 버튼을 눌러, 하루 기온 표 파일을 선택해주세요.', 'wink_point3'],
-      table: ['‘사진’ 버튼을 눌러, 하루 기온 표 파일을 선택해주세요.', 'wink_present'],
-      uploaded: ['기온 표 이미지가 ChatGPT 입력창에 업로드되었어! 이제 표 데이터를 그림으로 시각화해 달라고 명령을 입력해 볼까?', 'smile_point'],
+      photo: ['‘사진’ 버튼을 눌러, 하루 기온표 파일을 선택해주세요.', 'wink_point3'],
+      table: ['‘사진’ 버튼을 눌러, 하루 기온표 파일을 선택해주세요.', 'wink_present'],
+      uploaded: ['기온표 이미지가 ChatGPT 입력창에 업로드되었어! 이제 표 데이터를 그림으로 시각화해 달라고 명령을 입력해 볼까?', 'smile_point'],
       cards: ['카드 중 노란색, 빨간색, 파란색 카드를 각각 하나씩 골라 문장을 만들고, 전송 버튼을 눌러봐!', 'wink_present'],
       download: ['완성된 그래프를 핸드폰에 저장해 볼까요? 그래프를 꾹 눌러 저장을 하거나, 그래프 아래에 있는 다운로드 아이콘을 눌러보세요', 'wink_present'],
       analyzing: ['이미지 분석 중 …', ''],
@@ -259,7 +263,7 @@
         const b = e.target.closest('button');
         if (!b || b.dataset.pick !== 'photo' || $('p10Gallery').classList.contains('is-off')) return;
         playWrong();
-        $('p10WrongText').innerHTML = '하루 기온 표 파일을 선택해주세요.';
+        $('p10WrongText').innerHTML = '하루 기온표 파일을 선택해주세요.';
         flashLayer($('p10Wrong'), 'is-off', 3000);
       });
       onHit('table', () => {
@@ -318,7 +322,7 @@
         log.appendChild(wait);
         talk('analyzing');
         const r = RESULT[kind];
-        chartSvgText = chartSvg(DATA, { type: kind, width: 900, height: 560, title: '하루 기온 변화', color: kind === 'line' ? '#1f77b4' : '#ff7a1a' });
+        chartSvgText = chartSvg(DATA, { type: kind, width: 900, height: 560, title: '하루 기온 변화', color: kind === 'line' ? '#1f77b4' : '#ff7a1a', fs: 18 });
         later(() => {
           wait.remove();
           const ans = document.createElement('div');
@@ -385,34 +389,8 @@
         done = true;
         clearFingers();
         click();
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          canvas.width = 1800;
-          canvas.height = 1120;
-          const ctx = canvas.getContext('2d');
-          ctx.fillStyle = '#fff';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          if (location.protocol !== 'file:') {
-            canvas.toBlob((blob) => {
-              if (!blob) return;
-              try {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.download = '하루_기온_그래프.png';
-                a.href = url;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                setTimeout(() => URL.revokeObjectURL(url), 1000);
-              } catch (err) { console.warn('그래프 저장 실패:', err); }
-            }, 'image/png');
-          }
-          talk('saved');
-          setTimeout(() => { if (my === tok) $('p10Done').classList.remove('is-off'); }, 1200);
-        };
-        img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(chartSvgText.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" width="900" height="560" '));
+        talk('saved');
+        setTimeout(() => { if (my === tok) $('p10Done').classList.remove('is-off'); }, 1200);
       }
 
       if (BoxEdit.on) {

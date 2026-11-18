@@ -14,6 +14,7 @@
         .temp-table th:first-child{width:237px}
         .temp-table th + th{background:#69a0e8}
         .temp-table td{padding:2px 0 0;font-size:48px;line-height:1;letter-spacing:-0.04em;color:var(--c-ink);background:#b7d9f7}
+        .temp-table td:first-child{font-size:42px;white-space:nowrap}
         .temp-table td + td{background:#dff6ff;color:#266cc8}
         .temp-table tr:nth-child(even) td{background:#b7dff5}
         .temp-table tr:nth-child(even) td + td{background:#dffffb}
@@ -42,7 +43,7 @@
         .p08-col.is-answer .p08-fill{background:var(--c-yellow)}
         .p08-col.is-answer .p08-bar{border-width:0;box-shadow:0 0 0 5px #ff7a1a}
         .p08-val{position:absolute;left:-20px;width:118px;text-align:center;font-family:'Cafe24 Ssurround';font-size:28px;line-height:1;color:var(--c-ink);letter-spacing:-0.04em}
-        .p08-x{position:absolute;bottom:-46px;left:-20px;width:118px;text-align:center;font-family:'Cafe24 Ssurround';font-size:28px;color:var(--c-ink);letter-spacing:-0.04em}
+        .p08-x{position:absolute;bottom:-46px;left:-20px;width:118px;text-align:center;font-family:'Cafe24 Ssurround';font-size:23px;color:var(--c-ink);letter-spacing:-0.06em;white-space:nowrap}
         .deg{font-family:'Pretendard', sans-serif;line-height:1;font-weight:500}
 
         .p08-band{position:absolute;left:100px;top:632px;width:1062px;height:110px;box-sizing:border-box;border-radius:18px;background:#2a6dd0}
@@ -98,7 +99,7 @@
               <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
               <div class="step-flow">
                 <div class="step-panel">
-                  <div class="avatar-card-body"><p class="avatar-card-text">막대의 높이를 비교하니 15시가 가장 덥고, 6시가 가장 춥다는 것을 한눈에 알 수 있어요!</p></div>
+                  <div class="avatar-card-body"><p class="avatar-card-text">막대의 높이를 비교하니 오후 3시가 가장 덥고, 오전 6시가 가장 춥다는 것을 한눈에 알 수 있어요!</p></div>
                   <a href="page09.html" class="avatar-card-btn card-btn is-popup is-arrow js-nav-effect js-sfx" data-sound="sound/click.mp3">→</a>
                 </div>
                 <div class="step-panel">
@@ -150,9 +151,14 @@
       plot.appendChild(l);
     }
 
+    const formatTime = (h) => {
+      const m = h % 24;
+      return (m < 12 ? '오전 ' : '오후 ') + (m % 12 || 12) + '시';
+    };
+
     const rows = TEMPS.map((t, i) => {
       const tr = document.createElement('tr');
-      tr.innerHTML = '<td>' + i * 3 + '시</td><td>' + t + '</td>';
+      tr.innerHTML = '<td>' + formatTime(i * 3) + '</td><td>' + t + '</td>';
       $('p08Rows').appendChild(tr);
       return tr;
     });
@@ -162,7 +168,7 @@
       col.className = 'p08-col';
       col.style.left = (56 + PITCH * i) + 'px';
       col.style.height = '532px';
-      col.innerHTML = '<div class="p08-bar" style="height:' + t * PX + 'px"><div class="p08-fill"></div></div><span class="p08-val"></span><span class="p08-x">' + i * 3 + '시</span>';
+      col.innerHTML = '<div class="p08-bar" style="height:' + t * PX + 'px"><div class="p08-fill"></div></div><span class="p08-val"></span><span class="p08-x">' + formatTime(i * 3) + '</span>';
       plot.appendChild(col);
       return { el: col, fill: col.querySelector('.p08-fill'), val: col.querySelector('.p08-val'), now: i < FIXED ? t : 0, target: t };
     });
