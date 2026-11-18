@@ -312,6 +312,12 @@
       background: var(--cv-purple-soft);
       color: var(--cv-purple);
     }
+    .cv-rail-item.is-target-pulse {
+      background: #fff7ed;
+      color: #d97706;
+      box-shadow: inset 0 0 0 2px #f59e0b, 0 0 14px rgba(245, 158, 11, 0.45);
+      animation: cvGlowPulse 1.4s infinite ease-in-out;
+    }
     .cv-canvas-wrap {
       flex: 1;
       position: relative;
@@ -330,19 +336,19 @@
       -webkit-user-select: none;
       -webkit-touch-callout: none;
     }
-    .cv-rpanel {
-      width: 240px;
+    .cv-lpanel {
+      width: 260px;
       background: #fff;
-      border-left: 1px solid var(--cv-border);
+      border-right: 1px solid var(--cv-border);
       padding: 18px 16px;
       display: flex;
       flex-direction: column;
       gap: 12px;
       flex-shrink: 0;
-      box-shadow: -4px 0 16px rgba(0, 0, 0, 0.03);
+      box-shadow: 4px 0 16px rgba(0, 0, 0, 0.04);
       z-index: 5;
     }
-    .cv-rpanel-hd {
+    .cv-lpanel-hd {
       margin: 0;
       font-size: 20px;
       font-weight: 700;
@@ -350,6 +356,29 @@
       display: flex;
       align-items: center;
       gap: 6px;
+    }
+    .cv-tcard-main {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .cv-tcard-thumb {
+      width: 44px;
+      height: 52px;
+      border-radius: 8px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      padding: 2px;
+    }
+    .cv-tcard-thumb svg {
+      width: 36px;
+      height: 44px;
+      display: block;
     }
     .cv-tcard {
       border: 2px solid #e2e4ea;
@@ -396,6 +425,39 @@
     .cv-tcard.is-now .cv-tcard-badge {
       background: #7d2ae8;
       color: #fff;
+    }
+    .cv-tcard.is-draggable {
+      cursor: grab;
+      touch-action: none;
+    }
+    .cv-tcard.is-dragging-src {
+      opacity: 0.35;
+    }
+    .cv-elem-ghost {
+      position: absolute;
+      z-index: 40;
+      pointer-events: none;
+      width: 96px;
+      height: 112px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 2.5px solid #7d2ae8;
+      box-shadow: 0 12px 28px rgba(125, 42, 232, 0.32);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      will-change: transform;
+    }
+    .cv-elem-ghost svg {
+      width: 76px;
+      height: 92px;
+      display: block;
+    }
+    .p08-elem-target {
+      transition: filter 0.12s ease;
+    }
+    .p08-elem-target.is-drag-over {
+      filter: drop-shadow(0 0 20px rgba(125, 42, 232, 0.9)) brightness(1.04);
     }
     .cv-tcard.is-done .cv-tcard-badge {
       background: #10b981;
@@ -601,7 +663,7 @@
 
             <div class="p08-gd">
               <p class="p08-gd-tx" id="p08GuideText">‘캔바’를 클릭하세요.</p>
-              <button type="button" class="card-btn is-popup p08-gd-btn" id="p08NextBtn" onclick="nextStep()">다음</button>
+              <button type="button" class="card-btn is-popup p08-gd-btn" id="p08NextBtn" onclick="nextStep()" style="display:none;">완료</button>
             </div>
             <img class="p08-gd-ch" src="../img/character/gwa_main_point.png" alt="캐릭터">
             <img class="p08-fg" id="p08Finger" src="../../resources/img/common/img_finger01.png" alt="손가락">
@@ -631,7 +693,7 @@
       var paramStep = parseInt(urlParams.get('step'), 10);
       var currentStep = (!isNaN(paramStep) && paramStep >= 0 && paramStep <= 6) ? paramStep : 0;
       var paramSub = parseInt(urlParams.get('sub'), 10);
-      var step5Sub = (!isNaN(paramSub) && paramSub >= 1 && paramSub <= 3) ? paramSub : 1;
+      var step5Sub = (!isNaN(paramSub) && paramSub >= 1 && paramSub <= 7) ? paramSub : 2;
       var stageEl = document.getElementById('p08View');
       var gdTextEl = document.getElementById('p08GuideText');
       var nextBtnEl = document.getElementById('p08NextBtn');
@@ -685,8 +747,8 @@
         },
         {
           step: 4,
-          guide: '오른쪽 자리에 딱 맞게 붙었어요! 이제 내용을 수정해 볼까요?',
-          finger: { left: 1560, top: 600 }
+          guide: '오른쪽 자리에 딱 맞게 붙었어요! ‘공기 방울이 있나요?’를 눌러 내용을 수정해 볼까요?',
+          finger: { left: 1420, top: 410 }
         },
         {
           step: 5,
@@ -865,7 +927,7 @@
 
           fourthSlotHtml = '<g id="p08TargetSlot">' +
             '<rect id="p08SlotRect" x="905" y="246" width="345" height="244" rx="18" fill="' + slotFill + '" stroke="' + slotStroke + '" stroke-width="' + slotWidth + '" stroke-dasharray="8 6" ' + slotFilter + '/>' +
-            '<text x="1077" y="348" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-size:22px;font-weight:700;fill:#64748b;">한 가지 자리</text>' +
+            '<text x="1077" y="348" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-size:22px;font-weight:700;fill:#64748b;">의사결정 나무 질문 자리</text>' +
             '<text x="1077" y="384" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-size:18px;font-weight:600;fill:#94a3b8;">꿀, 식용유</text>' +
             targetBadge +
           '</g>';
@@ -894,8 +956,8 @@
           var card1Html = '';
           var card2Html = '';
 
-          if (step5Sub === 1) {
-            diaHtml = '<g style="cursor:pointer;" onclick="handleStep5Sub(1)">' +
+          if (step5Sub === 1 || step5Sub === 2) {
+            diaHtml = '<g>' +
               '<polygon points="1077,254 1172,288 1077,322 982,288" fill="#fffbe6" stroke="#f59e0b" stroke-width="3.2" stroke-dasharray="6 4" filter="drop-shadow(0 0 14px rgba(245,158,11,0.6))"/>' +
               '<text x="1077" y="288" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-weight:700;font-size:16px;fill:#b45309;">공기 방울이 있나요?</text>' +
               '<g transform="translate(1022, 230)" pointer-events="none">' +
@@ -905,24 +967,48 @@
             '</g>';
             card1Html = getCardSvg(940, 345, '사이다', 'cider', false, true);
             card2Html = getCardSvg(1096, 345, '물', 'water', false, true);
-          } else if (step5Sub === 2) {
+          } else if (step5Sub === 3) {
             diaHtml = getDiamondSvg(1077, 288, '아주 천천히 흐르나요?', false, false, false, 95, 34);
-            card1Html = '<g style="cursor:pointer;" onclick="handleStep5Sub(2)">' +
-              getCardSvg(940, 345, '꿀 자리', null, true, true) +
+            card1Html = '<g>' +
+              getCardSvg(940, 345, '사이다', 'cider', true, true) +
               '<g transform="translate(942, 320)" pointer-events="none">' +
                 '<rect width="120" height="24" rx="11" fill="#f59e0b"/>' +
-                '<text x="60" y="14" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-size:15px;font-weight:800;fill:#fff;">꿀 카드로 교체</text>' +
+                '<text x="60" y="14" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-size:15px;font-weight:800;fill:#fff;">꿀 글자 수정</text>' +
               '</g>' +
             '</g>';
             card2Html = getCardSvg(1096, 345, '물', 'water', false, true);
-          } else if (step5Sub === 3) {
+          } else if (step5Sub === 4) {
             diaHtml = getDiamondSvg(1077, 288, '아주 천천히 흐르나요?', false, false, false, 95, 34);
-            card1Html = getCardSvg(940, 345, '꿀', 'honey', false, false);
-            card2Html = '<g style="cursor:pointer;" onclick="handleStep5Sub(3)">' +
-              getCardSvg(1096, 345, '식용유 자리', null, true, true) +
+            card1Html = getCardSvg(940, 345, '꿀', null, false, false);
+            card2Html = '<g>' +
+              getCardSvg(1096, 345, '물', 'water', true, true) +
               '<g transform="translate(1098, 320)" pointer-events="none">' +
                 '<rect width="120" height="24" rx="11" fill="#f59e0b"/>' +
-                '<text x="60" y="14" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-size:15px;font-weight:800;fill:#fff;">식용유로 교체</text>' +
+                '<text x="60" y="14" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-size:15px;font-weight:800;fill:#fff;">식용유 글자 수정</text>' +
+              '</g>' +
+            '</g>';
+          } else if (step5Sub === 5) {
+            diaHtml = getDiamondSvg(1077, 288, '아주 천천히 흐르나요?', false, false, false, 95, 34);
+            card1Html = getCardSvg(940, 345, '꿀', null, false, false);
+            card2Html = getCardSvg(1096, 345, '식용유', null, false, false);
+          } else if (step5Sub === 6) {
+            diaHtml = getDiamondSvg(1077, 288, '아주 천천히 흐르나요?', false, false, false, 95, 34);
+            card1Html = '<g id="p08ElemTarget6" class="p08-elem-target">' +
+              getCardSvg(940, 345, '꿀', null, true, true) +
+              '<g transform="translate(942, 320)" pointer-events="none">' +
+                '<rect width="120" height="24" rx="11" fill="#f59e0b"/>' +
+                '<text x="60" y="14" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-size:15px;font-weight:800;fill:#fff;">꿀 그림 넣기</text>' +
+              '</g>' +
+            '</g>';
+            card2Html = getCardSvg(1096, 345, '식용유', null, false, false);
+          } else if (step5Sub === 7) {
+            diaHtml = getDiamondSvg(1077, 288, '아주 천천히 흐르나요?', false, false, false, 95, 34);
+            card1Html = getCardSvg(940, 345, '꿀', 'honey', false, false);
+            card2Html = '<g id="p08ElemTarget7" class="p08-elem-target">' +
+              getCardSvg(1096, 345, '식용유', null, true, true) +
+              '<g transform="translate(1098, 320)" pointer-events="none">' +
+                '<rect width="120" height="24" rx="11" fill="#f59e0b"/>' +
+                '<text x="60" y="14" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-size:15px;font-weight:800;fill:#fff;">식용유 그림 넣기</text>' +
               '</g>' +
             '</g>';
           }
@@ -932,7 +1018,7 @@
             '<line x1="1077" y1="322" x2="1158" y2="345" stroke="#888c99" stroke-width="2.5"/>' +
             getLineLabel(1128, 332, '아니오');
 
-          var subBadgeText = (step5Sub === 1) ? '질문 문구 수정' : ((step5Sub === 2) ? '꿀 카드 수정' : '식용유 카드 수정');
+          var subBadgeText = (step5Sub <= 4) ? '텍스트 수정' : '요소 그림 넣기';
 
           fourthSlotHtml = '<g>' +
             '<rect x="905" y="246" width="345" height="244" rx="18" fill="rgba(125,42,232,0.03)" stroke="#7d2ae8" stroke-width="2.5"/>' +
@@ -1115,35 +1201,71 @@
           '</div>' +
         '</div>';
 
+        var elemRailClass = 'cv-tab cv-rail-item';
+        var elemRailClick = '';
+        var textRailClass = 'cv-tab cv-rail-item';
+        var textRailClick = '';
+
+        if (stepIdx === 5) {
+          if (step5Sub === 1) {
+            textRailClass += ' is-target-pulse';
+            textRailClick = 'onclick="handleStep5Sub(1)"';
+          } else if (step5Sub >= 2 && step5Sub <= 4) {
+            textRailClass += ' is-active';
+          } else if (step5Sub === 5) {
+            elemRailClass += ' is-target-pulse';
+            elemRailClick = 'onclick="handleStep5Sub(5)"';
+          } else if (step5Sub >= 6) {
+            elemRailClass += ' is-active';
+          }
+        }
+
         var rail = '<div class="cv-rail">' +
           '<button type="button" class="cv-tab cv-rail-item"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></i>디자인</button>' +
-          '<button type="button" class="cv-tab cv-rail-item is-active"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="3"/><path d="M14 10l3.5-6 3.5 6z"/><rect x="4" y="14" width="6" height="6" rx="1"/><circle cx="17.5" cy="17" r="3"/></svg></i>요소</button>' +
-          '<button type="button" class="cv-tab cv-rail-item"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg></i>텍스트</button>' +
+          '<button type="button" class="' + elemRailClass + '" ' + elemRailClick + '><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7" cy="7" r="3"/><path d="M14 10l3.5-6 3.5 6z"/><rect x="4" y="14" width="6" height="6" rx="1"/><circle cx="17.5" cy="17" r="3"/></svg></i>요소</button>' +
+          '<button type="button" class="' + textRailClass + '" ' + textRailClick + '><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg></i>텍스트</button>' +
           '<button type="button" class="cv-tab cv-rail-item"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4.5 2 7-6.5-4.5-6.5 4.5 2-7L2 9h7z"/></svg></i>브랜드</button>' +
           '<button type="button" class="cv-tab cv-rail-item"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v13m0-13l-4 4m4-4l4 4M4 17v4h16v-4"/></svg></i>업로드</button>' +
           '<button type="button" class="cv-tab cv-rail-item"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></i>그리기</button>' +
         '</div>';
 
-        var rightPanel = '';
-        if (stepIdx === 5) {
-          var card1Class = (step5Sub === 1) ? 'cv-tcard is-now' : 'cv-tcard is-done';
-          var card1Badge = (step5Sub === 1) ? '<span class="cv-tcard-badge">교체</span>' : '<span class="cv-tcard-badge">✓</span>';
-          var card1Click = (step5Sub === 1) ? 'onclick="handleStep5Sub(1)"' : '';
+        var leftPanel = '';
+        if (stepIdx === 5 && step5Sub >= 2 && step5Sub <= 4) {
+          var t1Class = (step5Sub === 2) ? 'cv-tcard is-now' : 'cv-tcard is-done';
+          var t1Badge = (step5Sub === 2) ? '<span class="cv-tcard-badge">적용</span>' : '<span class="cv-tcard-badge">✓</span>';
+          var t1Click = (step5Sub === 2) ? 'onclick="handleStep5Sub(2)"' : '';
 
-          var card2Class = (step5Sub === 2) ? 'cv-tcard is-now' : ((step5Sub > 2) ? 'cv-tcard is-done' : 'cv-tcard is-pending');
-          var card2Badge = (step5Sub === 2) ? '<span class="cv-tcard-badge">교체</span>' : ((step5Sub > 2) ? '<span class="cv-tcard-badge">✓</span>' : '');
-          var card2Click = (step5Sub === 2) ? 'onclick="handleStep5Sub(2)"' : '';
+          var t2Class = (step5Sub === 3) ? 'cv-tcard is-now' : ((step5Sub > 3) ? 'cv-tcard is-done' : 'cv-tcard is-pending');
+          var t2Badge = (step5Sub === 3) ? '<span class="cv-tcard-badge">적용</span>' : ((step5Sub > 3) ? '<span class="cv-tcard-badge">✓</span>' : '');
+          var t2Click = (step5Sub === 3) ? 'onclick="handleStep5Sub(3)"' : '';
 
-          var card3Class = (step5Sub === 3) ? 'cv-tcard is-now' : 'cv-tcard is-pending';
-          var card3Badge = (step5Sub === 3) ? '<span class="cv-tcard-badge">교체</span>' : '';
-          var card3Click = (step5Sub === 3) ? 'onclick="handleStep5Sub(3)"' : '';
+          var t3Class = (step5Sub === 4) ? 'cv-tcard is-now' : 'cv-tcard is-pending';
+          var t3Badge = (step5Sub === 4) ? '<span class="cv-tcard-badge">적용</span>' : '';
+          var t3Click = (step5Sub === 4) ? 'onclick="handleStep5Sub(4)"' : '';
 
-          rightPanel = '<div class="cv-rpanel">' +
-            '<p class="cv-rpanel-hd">내용 수정</p>' +
-            '<div class="' + card1Class + '" ' + card1Click + '><span>아주 천천히 흐르나요?</span>' + card1Badge + '</div>' +
-            '<div class="' + card2Class + '" ' + card2Click + '><span>꿀</span>' + card2Badge + '</div>' +
-            '<div class="' + card3Class + '" ' + card3Click + '><span>식용유</span>' + card3Badge + '</div>' +
-            '<div class="cv-tnote"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="vertical-align:-2px;margin-right:4px;"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7zm-4 17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-1H8v1z"/></svg>카드를 차례대로 눌러<br>나무의 내용을 바꿔요!</div>' +
+          leftPanel = '<div class="cv-lpanel">' +
+            '<p class="cv-lpanel-hd">텍스트 수정</p>' +
+            '<div class="' + t1Class + '" ' + t1Click + '><span>아주 천천히 흐르나요?</span>' + t1Badge + '</div>' +
+            '<div class="' + t2Class + '" ' + t2Click + '><span>꿀</span>' + t2Badge + '</div>' +
+            '<div class="' + t3Class + '" ' + t3Click + '><span>식용유</span>' + t3Badge + '</div>' +
+            '<div class="cv-tnote"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="vertical-align:-2px;margin-right:4px;"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7zm-4 17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-1H8v1z"/></svg>글자를 차례대로 눌러<br>나무의 내용을 바꿔요!</div>' +
+          '</div>';
+        } else if (stepIdx === 5 && (step5Sub === 6 || step5Sub === 7)) {
+          var searchWord = (step5Sub === 6) ? '꿀' : '식용유';
+          var e1Class = (step5Sub === 6) ? 'cv-tcard is-now is-draggable' : 'cv-tcard is-done';
+          var e1Badge = (step5Sub === 6) ? '<span class="cv-tcard-badge">드래그</span>' : '<span class="cv-tcard-badge">✓</span>';
+          var e1Id = (step5Sub === 6) ? 'id="p08ElemDrag"' : '';
+
+          var e2Class = (step5Sub === 7) ? 'cv-tcard is-now is-draggable' : 'cv-tcard is-pending';
+          var e2Badge = (step5Sub === 7) ? '<span class="cv-tcard-badge">드래그</span>' : '';
+          var e2Id = (step5Sub === 7) ? 'id="p08ElemDrag"' : '';
+
+          leftPanel = '<div class="cv-lpanel">' +
+            '<p class="cv-lpanel-hd">요소</p>' +
+            '<div style="border:1.5px solid #cbd5e1;border-radius:999px;padding:7px 14px;font-size:16px;font-weight:700;color:#1e293b;background:#f8fafc;">🔍 ' + searchWord + '</div>' +
+            '<div class="' + e1Class + '" ' + e1Id + '><span class="cv-tcard-main"><span class="cv-tcard-thumb">' + getCupSvg('honey') + '</span><span>꿀</span></span>' + e1Badge + '</div>' +
+            '<div class="' + e2Class + '" ' + e2Id + '><span class="cv-tcard-main"><span class="cv-tcard-thumb">' + getCupSvg('oil') + '</span><span>식용유</span></span>' + e2Badge + '</div>' +
+            '<div class="cv-tnote"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="vertical-align:-2px;margin-right:4px;"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7zm-4 17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-1H8v1z"/></svg>원하는 그림을 알맞은<br>자리에 끌어 놓으세요!</div>' +
           '</div>';
         }
 
@@ -1171,11 +1293,11 @@
           topBar +
           '<div class="cv-editor-layout">' +
             rail +
+            leftPanel +
             '<div class="cv-canvas-wrap p08-wb">' +
               getTreeSvgForStep(stepIdx) +
               congratsBanner +
             '</div>' +
-            rightPanel +
           '</div>' +
         '</div>';
       }
@@ -1189,14 +1311,26 @@
 
         if (currentStep === 5) {
           if (step5Sub === 1) {
-            guideText = '새 질문 카드로 교체해 보세요.';
-            fingerPos = { left: 1730, top: 180 };
+            guideText = '왼쪽 ‘텍스트’를 눌러 글자를 수정해 보세요.';
+            fingerPos = { left: 48, top: 205 };
           } else if (step5Sub === 2) {
-            guideText = '‘꿀’ 카드를 알맞은 자리에 넣어 보세요.';
-            fingerPos = { left: 1730, top: 240 };
+            guideText = '‘아주 천천히 흐르나요?’를 눌러 질문 글자를 바꾸세요.';
+            fingerPos = { left: 260, top: 140 };
           } else if (step5Sub === 3) {
-            guideText = '‘식용유’ 카드를 알맞은 자리에 넣어 보세요.';
-            fingerPos = { left: 1730, top: 300 };
+            guideText = '‘꿀’을 눌러 첫 번째 카드의 글자를 바꾸세요.';
+            fingerPos = { left: 260, top: 210 };
+          } else if (step5Sub === 4) {
+            guideText = '‘식용유’를 눌러 두 번째 카드의 글자를 바꾸세요.';
+            fingerPos = { left: 260, top: 280 };
+          } else if (step5Sub === 5) {
+            guideText = '이제 왼쪽 ‘요소’를 눌러 꿀과 식용유 그림을 넣어 보세요.';
+            fingerPos = { left: 48, top: 195 };
+          } else if (step5Sub === 6) {
+            guideText = '왼쪽 요소에서 ‘꿀’ 그림을 꿀 자리로 끌어 놓으세요.';
+            fingerPos = { left: 260, top: 215 };
+          } else if (step5Sub === 7) {
+            guideText = '왼쪽 요소에서 ‘식용유’ 그림을 식용유 자리로 끌어 놓으세요.';
+            fingerPos = { left: 260, top: 310 };
           }
         }
 
@@ -1216,9 +1350,10 @@
         }
 
         if (currentStep === 6) {
+          nextBtnEl.style.display = '';
           nextBtnEl.textContent = '완료';
         } else {
-          nextBtnEl.textContent = '다음';
+          nextBtnEl.style.display = 'none';
         }
 
         if (currentStep === 3) {
@@ -1342,6 +1477,128 @@
             }
           }
         }
+
+        if (currentStep === 5 && (step5Sub === 6 || step5Sub === 7)) {
+          var elemDrag = document.getElementById('p08ElemDrag');
+          var elemTarget = document.getElementById('p08ElemTarget' + step5Sub);
+          if (elemDrag && elemTarget) {
+            var isElemDragging = false;
+            var isElemDone = false;
+            var elemStart = { x: 0, y: 0 };
+            var elemScale = 1;
+            var elemGhost = null;
+
+            function getElemPos(e) {
+              if (e.touches && e.touches[0]) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+              if (e.changedTouches && e.changedTouches[0]) return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY };
+              return { x: e.clientX, y: e.clientY };
+            }
+
+            function isElemOver(clientX, clientY) {
+              var tr = elemTarget.getBoundingClientRect();
+              var pad = 50 * elemScale;
+              if (clientX >= tr.left - pad && clientX <= tr.right + pad && clientY >= tr.top - pad && clientY <= tr.bottom + pad) {
+                return true;
+              }
+              if (elemGhost) {
+                var gr = elemGhost.getBoundingClientRect();
+                return !(gr.right < tr.left - pad * 0.5 || gr.left > tr.right + pad * 0.5 || gr.bottom < tr.top - pad * 0.5 || gr.top > tr.bottom + pad * 0.5);
+              }
+              return false;
+            }
+
+            function detachElemEvents() {
+              window.removeEventListener('pointermove', onElemMove);
+              window.removeEventListener('pointerup', onElemEnd);
+              window.removeEventListener('pointercancel', onElemEnd);
+              window.removeEventListener('touchmove', onElemMove, { passive: false });
+              window.removeEventListener('touchend', onElemEnd);
+              window.removeEventListener('touchcancel', onElemEnd);
+            }
+
+            function onElemMove(e) {
+              if (!isElemDragging || isElemDone) return;
+              if (e.cancelable) e.preventDefault();
+              var cur = getElemPos(e);
+              var dx = (cur.x - elemStart.x) / elemScale;
+              var dy = (cur.y - elemStart.y) / elemScale;
+              if (elemGhost) {
+                elemGhost.style.transform = 'translate3d(' + dx + 'px, ' + dy + 'px, 0)';
+              }
+              if (isElemOver(cur.x, cur.y)) {
+                elemTarget.classList.add('is-drag-over');
+              } else {
+                elemTarget.classList.remove('is-drag-over');
+              }
+            }
+
+            function onElemEnd(e) {
+              if (!isElemDragging || isElemDone) return;
+              isElemDragging = false;
+              detachElemEvents();
+              var endPos = getElemPos(e);
+              var over = isElemOver(endPos.x, endPos.y);
+              elemTarget.classList.remove('is-drag-over');
+
+              if (over) {
+                isElemDone = true;
+                if (elemGhost && elemGhost.parentNode) elemGhost.parentNode.removeChild(elemGhost);
+                elemGhost = null;
+                if (typeof playDrag === 'function') playDrag();
+                handleStep5Sub(step5Sub);
+              } else {
+                if (elemGhost) {
+                  elemGhost.style.transition = 'transform 0.16s ease-out';
+                  elemGhost.style.transform = 'translate3d(0, 0, 0)';
+                  setTimeout(function () {
+                    if (elemGhost && elemGhost.parentNode) elemGhost.parentNode.removeChild(elemGhost);
+                    elemGhost = null;
+                    if (elemDrag) elemDrag.classList.remove('is-dragging-src');
+                    if (fingerEl) fingerEl.style.display = 'block';
+                  }, 170);
+                } else {
+                  elemDrag.classList.remove('is-dragging-src');
+                  if (fingerEl) fingerEl.style.display = 'block';
+                }
+              }
+            }
+
+            function onElemStart(e) {
+              if (isElemDragging || isElemDone) return;
+              if (e.cancelable) e.preventDefault();
+              isElemDragging = true;
+              elemStart = getElemPos(e);
+
+              var viewRect = stageEl.getBoundingClientRect();
+              elemScale = (viewRect.width / stageEl.offsetWidth) || 1;
+              var thumbEl = elemDrag.querySelector('.cv-tcard-thumb') || elemDrag;
+              var thumbRect = thumbEl.getBoundingClientRect();
+              var startLeft = (thumbRect.left + thumbRect.width / 2 - viewRect.left) / elemScale - 48;
+              var startTop = (thumbRect.top + thumbRect.height / 2 - viewRect.top) / elemScale - 56;
+
+              elemGhost = document.createElement('div');
+              elemGhost.className = 'cv-elem-ghost';
+              elemGhost.style.left = startLeft + 'px';
+              elemGhost.style.top = startTop + 'px';
+              elemGhost.innerHTML = getCupSvg(step5Sub === 6 ? 'honey' : 'oil');
+              stageEl.appendChild(elemGhost);
+
+              elemDrag.classList.add('is-dragging-src');
+              if (fingerEl) fingerEl.style.display = 'none';
+              if (window.SFX) window.SFX.play('click');
+
+              window.addEventListener('pointermove', onElemMove);
+              window.addEventListener('pointerup', onElemEnd);
+              window.addEventListener('pointercancel', onElemEnd);
+              window.addEventListener('touchmove', onElemMove, { passive: false });
+              window.addEventListener('touchend', onElemEnd);
+              window.addEventListener('touchcancel', onElemEnd);
+            }
+
+            elemDrag.addEventListener('pointerdown', onElemStart);
+            elemDrag.addEventListener('touchstart', onElemStart, { passive: false });
+          }
+        }
       }
 
       window.handleStep5Sub = function (subIdx) {
@@ -1349,13 +1606,10 @@
         if (subIdx !== step5Sub) return;
         if (window.SFX) window.SFX.play('click');
 
-        if (step5Sub === 1) {
-          step5Sub = 2;
+        if (step5Sub < 7) {
+          step5Sub = step5Sub + 1;
           renderStep();
-        } else if (step5Sub === 2) {
-          step5Sub = 3;
-          renderStep();
-        } else if (step5Sub === 3) {
+        } else {
           currentStep = 6;
           renderStep();
         }
@@ -1365,34 +1619,21 @@
         if (window.SFX) window.SFX.play('click');
         currentStep = stepIdx;
         if (currentStep === 5) {
-          step5Sub = 1;
+          step5Sub = 2;
         }
         renderStep();
       };
 
       window.nextStep = function () {
-        if (currentStep === 5) {
-          if (step5Sub < 3) {
-            if (window.SFX) window.SFX.play('click');
-            step5Sub = step5Sub + 1;
-            renderStep();
-            return;
-          }
-        }
         if (currentStep < 6) {
-          if (window.SFX) {
-            window.SFX.play('click');
-          }
-          currentStep = currentStep + 1;
-          renderStep();
-        } else {
-          if (window.SFX) {
-            window.SFX.play('click');
-          }
-          var doneModal = document.getElementById('p08DoneModal');
-          if (doneModal) {
-            doneModal.classList.remove('is-off');
-          }
+          return;
+        }
+        if (window.SFX) {
+          window.SFX.play('click');
+        }
+        var doneModal = document.getElementById('p08DoneModal');
+        if (doneModal) {
+          doneModal.classList.remove('is-off');
         }
       };
 

@@ -18,6 +18,9 @@
         .p06-tb td{background:#fff;color:var(--c-purple)}
         .p06-tb tr>*:last-child{border-right:0}
         .p06-tb tr:last-child>*{border-bottom:0}
+        .p06-tb th.is-hl{background:var(--c-yellow);color:var(--c-ink);box-shadow:inset 0 0 0 7px var(--c-yellow)}
+        .p06-tb td.is-hl{background:#fff4b8;box-shadow:inset 0 0 0 7px var(--c-yellow)}
+        .p06-tb th,.p06-tb td{transition:background .25s ease,color .25s ease,box-shadow .25s ease}
         .p06-opts.quiz-opts.is-row{top:720px}
     </style>
 </head>
@@ -82,13 +85,17 @@
   <script>
   (function () {
     const QUIZ = [
-      { pic: 'img/p06_oj.png', answer: '오렌지 주스' },
-      { pic: 'img/p06_water.png', answer: '물' }
+      { pic: 'img/p06_oj.png', answer: '오렌지 주스', col: 4 },
+      { pic: 'img/p06_water.png', answer: '물', col: 2 }
     ];
     const opts = Array.from(document.querySelectorAll('#p06Opts .card-btn'));
     const tag = $('p06Tag');
     const pic = $('p06Pic');
     const wrong = $('p06Wrong');
+    const hlCol = (col) => {
+      document.querySelectorAll('.p06-tb .is-hl').forEach((el) => el.classList.remove('is-hl'));
+      if (col) document.querySelectorAll(`.p06-tb tr > *:nth-child(${col})`).forEach((el) => el.classList.add('is-hl'));
+    };
     let q = 0;
     let busy = false;
 
@@ -99,16 +106,18 @@
           busy = true;
           playCorrect();
           tag.textContent = QUIZ[q].answer;
+          hlCol(QUIZ[q].col);
           setTimeout(() => {
             q += 1;
             if (q < QUIZ.length) {
+              hlCol(0);
               tag.textContent = '?';
               pic.src = QUIZ[q].pic;
               busy = false;
             } else {
               $('p06Fin').classList.remove('is-off');
             }
-          }, 1000);
+          }, 1500);
         } else {
           playWrong();
           btn.classList.remove('is-wrong');

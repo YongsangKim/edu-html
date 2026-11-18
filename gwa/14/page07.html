@@ -13,8 +13,13 @@
       .p07-cup#cupCider{left:365px;top:37px}
       .p07-cup#cupMilk{left:48px;top:235px}
       .p07-cup#cupGrape{left:365px;top:235px}
+      @keyframes p07SlotPulse{
+        0%,100%{transform:scale(1);box-shadow:0 0 14px rgba(255,200,0,.7)}
+        50%{transform:scale(1.04);box-shadow:0 0 28px rgba(255,190,0,1),0 0 8px rgba(255,230,80,.9)}
+      }
       .p07-cup.is-hl img{filter:drop-shadow(5px 0 0 #ff4ff9) drop-shadow(-5px 0 0 #ff4ff9) drop-shadow(0 5px 0 #ff4ff9) drop-shadow(0 -5px 0 #ff4ff9)}
-      .p07-cup.is-dim{opacity:1;filter:none}
+      .p07-cup.is-hl b{border-color:#ff4ff9;box-shadow:0 0 14px rgba(255,79,249,.45)}
+      .p07-cup.is-dim{opacity:.45;filter:none}
       .p07-cup.is-dim img{filter:none}
       .p07-cup img{display:block;height:124px;width:auto;object-fit:contain;pointer-events:none;transition:filter .25s ease}
       .p07-cup b{display:flex;align-items:center;justify-content:center;width:150px;height:44px;box-sizing:border-box;margin-top:4px;border-radius:999px;background:#fff;border:solid 5px #6898fb;font-family:'Cafe24 Ssurround';font-weight:400;font-size:30px;color:var(--c-ink);letter-spacing:-0.04em;padding-top:2px}
@@ -22,7 +27,7 @@
       .p07-rbox-in{position:relative;width:100%;height:100%}
       .p07-rbox-svg{position:absolute;left:0;top:0;width:1112px;height:488px;display:block}
       .p07-qslot{position:absolute;width:370px;height:86px;box-sizing:border-box;border-radius:20px;border:dashed 5px var(--c-violet);background:#f8f6ff;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:38px;color:var(--c-violet);letter-spacing:-0.04em;transition:all .3s ease}
-      .p07-qslot.is-now{background:#fff8cc;border:solid 6px var(--c-yellow);box-shadow:0 0 18px rgba(255,200,0,.75);color:var(--c-ink)}
+      .p07-qslot.is-now{background:#fff8cc;border:solid 6px var(--c-yellow);box-shadow:0 0 18px rgba(255,200,0,.75);color:var(--c-ink);animation:p07SlotPulse 1.3s ease-in-out infinite}
       .p07-qslot.is-done{background:#e8e4f8;border:solid 5px #7c6fc4;color:#1b1640;font-size:38px}
       .p07-qslot.is-dim{opacity:.45}
       .p07-leaf{position:absolute;top:338px;width:210px;height:108px;box-sizing:border-box;border-radius:22px;background:#f3f5fa;border:dashed 4px #9aa3b5;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:40px;color:#7b86a8;transition:all .3s ease}
@@ -192,6 +197,10 @@
 
       function renderStep() {
         if (curStep >= stepData.length) {
+          allCupIds.forEach(function (id) {
+            var el = document.getElementById(id);
+            el.classList.remove('is-hl', 'is-dim');
+          });
           cardTray.innerHTML = '';
           var nextBtn = document.createElement('button');
           nextBtn.type = 'button';
