@@ -758,7 +758,7 @@
       lungL.style.transform = 'rotate(' + (8 - v * 4) + 'deg) scale(' + s + ')';
       lungR.style.transform = 'rotate(' + (-8 + v * 4) + 'deg) scale(' + s + ')';
 
-      fill.style.height = (v * 100) + '%';
+      fill.style.height = ((v * 5) / 15 * 100) + '%';
     };
 
     const afterBlow = () => {
@@ -800,12 +800,12 @@
       }
       busy = true;
       attempts++;
-      const r = ROUNDS[level];
-      const k = Math.min(remain, Math.max(1, Math.ceil(depth * r.n)));
+      const k = Math.min(remain, Math.max(1, Math.ceil(depth * 5)));
       const blowMs = BLOW_MIN + depth * (BLOW_MAX - BLOW_MIN);
-      if (depth > best) {
-        best = depth;
-        const topPx = 30 + GAUGE_H * (1 - depth);
+      const gaugeRatio = (depth * 5) / 15;
+      if (gaugeRatio > best) {
+        best = gaugeRatio;
+        const topPx = 30 + GAUGE_H * (1 - gaugeRatio);
         mark.style.top = topPx + 'px';
         mark.hidden = false;
       }
