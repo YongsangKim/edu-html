@@ -9,9 +9,9 @@
         /* 디자인 없음 - 기획서 16~18p. 5단계 중 빈칸(점선 블록)에 알맞은 카드를 끌어 놓기(순서 자유). 맞으면 딸깍 소리와 함께 붙고 단계 번호에 초록불,
            틀리면 카드가 제자리로 돌아가고 그 빈칸의 힌트 팝업 2초. 다 맞추면 단계가 차례로 반짝이고 장면 연출 뒤 완료 모달(스텝 3개).
            배경 img/p10_bg.jpg(거실 · TV와 인공지능 스피커), 장면 소품 img/p10_*.png */
-        .fi-ask{position:absolute;left:50%;top:20px;transform:translateX(-50%);min-height:100px;margin:0;box-sizing:border-box;padding:12px 60px 6px;display:flex;align-items:center;justify-content:center;white-space:nowrap;
-          background:var(--c-cream);border:solid 6px var(--c-ink);border-radius:56px;box-shadow:0 14px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:64px;line-height:1.2;color:var(--c-ink);text-align:center;letter-spacing:-0.05em}
-        .fi-scene{position:absolute;left:40px;top:150px;width:1190px;height:590px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:30px;background:var(--c-mist) url('img/p10_bg.jpg') center / cover no-repeat;overflow:hidden}
+        main.bg-default .ask-pill{z-index:20}
+        .fi-board{position:absolute;left:40px;top:90px;width:1840px;height:666px;box-sizing:border-box;background:#276cc9;border:solid 4px var(--c-ink);border-radius:24px;pointer-events:none;z-index:1}
+        .fi-scene{position:absolute;left:64px;top:168px;width:1190px;height:590px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:30px;background:var(--c-mist) url('img/p10_bg.jpg') center / cover no-repeat;overflow:hidden;transform:scale(.95);transform-origin:top left;z-index:2}
         .fi-scene-name{position:absolute;left:20px;top:16px;margin:0;padding:6px 20px 0;border-radius:20px;background:rgba(255,255,255,.8);font-family:'Cafe24 Ssurround';font-size:28px;color:var(--c-purple);z-index:2}
 
         .fi-tv{position:absolute;left:0;top:0;width:370px;height:230px;transform-origin:0 0;transform:matrix3d(0.569882,-0.095418,0,-0.000381,0,0.876087,0,0,0,0,1,0,761.6,95.6,0,1);box-sizing:border-box;border-radius:6px;background:#4a4f63;display:flex;align-items:center;justify-content:center;
@@ -28,14 +28,15 @@
         .fi-tablet.is-glow{animation:fi-glow .8s ease-in-out 3}
         @keyframes fi-glow{0%,100%{box-shadow:0 0 0 0 rgba(255,216,61,0)}50%{box-shadow:0 0 40px 14px rgba(255,216,61,.9)}}
 
-        .fi-slots{position:absolute;left:1290px;top:150px;width:590px;--blk-hole:#d4dff0}
+        .fi-slots{position:absolute;left:1275px;top:164px;width:590px;--blk-hole:#d4dff0;transform:scale(.92);transform-origin:top left;z-index:2}
         .fi-slot{height:124px}
         .fi-no{position:absolute;left:36px;top:50%;transform:translateY(-46%);width:130px;font-family:'Cafe24 Ssurround';font-size:34px;color:var(--c-violet);white-space:nowrap}
         .fi-txt{position:absolute;left:176px;right:30px;top:50%;transform:translateY(-46%);font-family:'Cafe24 Ssurround';font-size:28px;line-height:1.15;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all}
         .fi-slot .fi-card{position:absolute;left:176px;top:0;right:26px;bottom:0;width:auto;min-height:0;border:0;background:none;padding:0;display:flex;align-items:center;justify-content:flex-start;text-align:left;cursor:default;box-shadow:none;filter:none;font-size:28px;line-height:1.15}
         .fi-slot .fi-card:after{display:none}
         .fi-slot.is-lit .fi-no:after{content:'';display:inline-block;width:22px;height:22px;margin-left:10px;border-radius:50%;background:#2fbf71;vertical-align:middle}
-        .fi-slot.is-now{animation:blk-glow .6s ease-in-out}
+        .fi-slot.is-now{z-index:30 !important;animation:fi-pulse .9s ease-in-out}
+        @keyframes fi-pulse{0%,100%{transform:scale(1);filter:brightness(1) drop-shadow(0 2px 0 rgba(0,0,0,.2))}45%{transform:scale(1.045);filter:brightness(1.12) drop-shadow(0 0 18px rgba(255,212,59,1)) drop-shadow(0 0 6px rgba(255,169,43,1))}}
 
         .fi-cards{position:absolute;left:40px;top:792px;width:1190px;display:flex;gap:10px;justify-content:space-between}
         .fi-cell{flex:1 1 0;height:124px}
@@ -52,8 +53,9 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <p class="fi-ask" id="fiAsk">인공지능 스피커가 작동하는 순서에 맞게 빈칸을 채워 보세요.</p>
+          <p class="ask-pill is-fit is-tight"><span id="fiAsk">인공지능 스피커가 작동하는 순서에 맞게 빈칸을 채워 보세요.</span></p>
 
+          <div class="fi-board"></div>
           <div class="fi-scene">
             <p class="fi-scene-name">거실 · TV와 인공지능 스피커</p>
             <div class="fi-tv" id="fiTv"><span id="fiTvText"></span></div>
@@ -138,15 +140,30 @@
       },
       onDone: () => {
         slots.forEach((s) => s.classList.add('is-lit'));
-        slots.forEach((s, i) => setTimeout(() => { s.classList.remove('is-now'); void s.offsetWidth; s.classList.add('is-now'); }, 500 + i * 650));
-        const t = 500 + slots.length * 650 + 300;
-        setTimeout(() => $('fiSpeaker').classList.add('is-talk'), t);
+        const okGoogleSfx = makeSfx('sound/9차시_조작2_오케이_구글_티비_켜줘.mp3', true);
+        const tvOnSfx = makeSfx('sound/9차시_조작2_티비를_켭니다.mp3', true);
+        const pulse = (i) => {
+          slots.forEach((x) => x.classList.remove('is-now'));
+          const s = slots[i];
+          void s.offsetWidth;
+          s.classList.add('is-now');
+        };
+        setTimeout(() => { pulse(0); okGoogleSfx(); }, 500);
+        setTimeout(() => pulse(1), 1500);
+        setTimeout(() => pulse(2), 2500);
         setTimeout(() => {
+          pulse(3);
+          $('fiSpeaker').classList.add('is-talk');
           $('fiVoice').classList.add('is-on');
-          makeSfx('sound/9차시_ TV를 켭니다.mp3', true)();
-        }, t + 600);
-        setTimeout(() => { $('fiSpeaker').classList.remove('is-talk'); $('fiTv').classList.add('is-on'); $('fiTvText').textContent = 'ON'; }, t + 2400);
-        setTimeout(finish, t + 4200);
+          tvOnSfx();
+        }, 3500);
+        setTimeout(() => {
+          pulse(4);
+          $('fiSpeaker').classList.remove('is-talk');
+          $('fiTv').classList.add('is-on');
+          $('fiTvText').textContent = 'ON';
+        }, 5000);
+        setTimeout(finish, 6400);
       }
     });
 

@@ -11,7 +11,10 @@
         .p14-weather{left:1144px;top:247px;width:730px;height:490px}
         .p14-subject{position:absolute;left:365px;top:327px;height:50px;display:flex;align-items:center;gap:22px;font-family:'Pretendard';font-size:27px;font-weight:700;color:#202124;white-space:nowrap}
         .p14-subject em{display:inline-flex;align-items:center;gap:8px;height:26px;padding:0 9px;border-radius:5px;background:#e8eaed;font-style:normal;font-size:16px;color:#444}
+        .p14-sender{position:absolute;left:365px;top:404px;height:40px;display:flex;align-items:center;font-family:'Pretendard';font-size:26px;font-weight:700;color:#202124;white-space:nowrap}
+        .p14-mail-body{position:absolute;left:365px;top:495px;width:700px;margin:0;font-family:'Pretendard';font-size:32px;font-weight:700;color:#e03131;line-height:1.45;word-break:keep-all}
         .card-btn.p14-ans{position:absolute;top:765px;width:862px;height:130px;box-sizing:border-box;margin:0;cursor:pointer;padding:12px 20px 6px;display:flex;align-items:center;justify-content:center;min-width:0;font-size:58px;line-height:1.2;word-break:keep-all}
+        .card-btn.p14-ans em{font-family:'Pretendard';font-weight:700;font-style:normal}
         .card-btn.p14-ans.is-wrong{animation:fix-word-shake .3s ease}
         .p14-ans-1{left:80px}
         .p14-ans-2{left:1010px}
@@ -27,7 +30,9 @@
           <p class="ask-pill p14-pill">어떤 답을 알려줘야 할까요?</p>
 
           <div class="gm-frame p14-mail"><img src="img/p14_mail.jpg" alt="의뢰 메일"></div>
-          <div class="p14-subject"><span id="p14Subject"></span><em>받은편지함 <span>×</span></em></div>
+          <div class="p14-subject"><span>안녕하세요! 날씨 탐정님!</span><em>받은편지함 <span>×</span></em></div>
+          <div class="p14-sender" id="p14Sender"></div>
+          <p class="p14-mail-body" id="p14Body"></p>
           <div class="gm-frame p14-weather"><img src="img/p14_weather.jpg" alt="전국 날씨"></div>
 
           <div class="gm-time" id="p14Clock"><div><span class="gm-ampm">AM</span><b class="gm-digits"><i>09:00</i></b></div></div>
@@ -55,27 +60,30 @@
   <script>
   (function () {
     const MAILS = [
-      { q: '부산의 기온은 어떻게 될까요?',
-        answers: ['20도입니다.', '27도입니다.'], correct: 0 },
-      { q: '서울의 날씨는 어떻게 될까요?',
+      { sender: '김지훈', q: '부산의 기온은 어떻게 될까요?',
+        answers: ['20<em>℃</em>입니다.', '27<em>℃</em>입니다.'], correct: 0 },
+      { sender: '박다온', q: '서울의 날씨는 어떻게 될까요?',
         answers: ['맑아요.', '비가 와요.'], correct: 0 },
-      { q: '제주도로 소풍을 가려고 하는데, 우산이 필요할까요?',
+      { sender: '최유진', q: '제주도로 소풍을 가려고 하는데, 우산이 필요할까요?',
         answers: ['아니요. 우산이 필요 없어요.', '비가 올 예정이라 우산이 필요해요.'], correct: 0 },
-      { q: '대구와 제주 중 더 따뜻한 곳은 어디일까요?',
+      { sender: '정민우', q: '대구와 제주 중 더 따뜻한 곳은 어디일까요?',
         answers: ['대구입니다.', '제주입니다.'], correct: 0 },
-      { q: '기온이 가장 낮은 곳은 어디일까요?',
+      { sender: '이하늘', q: '기온이 가장 낮은 곳은 어디일까요?',
         answers: ['부산입니다.', '서울입니다.'], correct: 0 },
     ];
 
     const CLOCK = [['AM', '09:00'], ['AM', '11:00'], ['PM', '01:00'], ['PM', '03:00'], ['PM', '05:00'], ['PM', '06:00']];
 
-    const subjectEl = document.getElementById('p14Subject');
+    const senderEl = document.getElementById('p14Sender');
+    const bodyEl = document.getElementById('p14Body');
     const clockEl = document.getElementById('p14Clock');
     const ans1 = document.getElementById('p14Ans1');
     const ans2 = document.getElementById('p14Ans2');
     const wrongModal = document.getElementById('p14Wrong');
 
-    const queue = shuffleArray(MAILS);
+    const queue = shuffleArray(MAILS).map((m) => (
+      Math.random() < 0.5 ? m : { ...m, answers: [m.answers[1], m.answers[0]], correct: 1 - m.correct }
+    ));
     let index = 0;
     let locked = false;
 
@@ -85,9 +93,10 @@
       ans1.classList.remove('is-selected');
       ans2.classList.remove('is-selected');
       const m = queue[index];
-      subjectEl.textContent = m.q;
-      ans1.textContent = m.answers[0];
-      ans2.textContent = m.answers[1];
+      senderEl.textContent = m.sender;
+      bodyEl.textContent = m.q;
+      ans1.innerHTML = m.answers[0];
+      ans2.innerHTML = m.answers[1];
       locked = false;
     }
 

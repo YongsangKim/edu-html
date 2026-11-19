@@ -23,6 +23,12 @@
         @keyframes p09Pop{0%{opacity:0;transform:scale(.7)}100%{opacity:1;transform:scale(1)}}
         .p09-start{position:absolute;left:0;top:0;right:0;bottom:0;background:#fdd13a;z-index:2;text-align:center;color:#111}
         .p09-start[hidden]{display:none}
+        .p09-intro{position:absolute;left:0;top:0;right:0;bottom:200px;background:#fff;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:20px 80px;box-sizing:border-box;text-align:center}
+        .p09-intro[hidden]{display:none}
+        .p09-intro-logo{height:390px;width:auto;object-fit:contain;display:block}
+        .p09-intro-title{margin:8px 0 0;font-size:38px;font-weight:700;color:#222;letter-spacing:-0.02em}
+        .p09-intro-desc{margin:0;font-size:26px;line-height:1.5;color:#333;letter-spacing:-0.02em}
+        .p09-intro-desc span{color:#e6a800;font-weight:700;border-bottom:2px solid #e6a800;padding-bottom:1px}
         .p09-start .n{position:absolute;left:0;right:0;top:60px;margin:0;font-size:34px;color:#a07a1a}
         .p09-start .m{position:absolute;left:0;right:0;top:180px;margin:0;font-size:44px}
         .p09-start .it{position:absolute;left:0;right:0;top:260px;margin:0;font-size:96px;line-height:1.1}
@@ -40,7 +46,7 @@
         .p09-pk .avatar-card-text{font-size:66px}
         .p09-row{display:flex;flex-wrap:wrap;justify-content:center;gap:40px;margin-top:50px}
         .p09-row .card-btn{margin:0;min-width:0;width:500px;height:100px;font-size:60px;display:flex;align-items:center;justify-content:center;padding:5px 0 0 0}
-        .p09-wrong{z-index:120}
+        .ox-result-wrong.is-avatar.p09-wrong{z-index:120}
     </style>
 </head>
 <body>
@@ -59,6 +65,11 @@
             </svg>
             <div class="p09-ai" id="p09Ai" hidden></div>
             <div id="p09Cards"></div>
+            <div class="p09-intro" id="p09Intro">
+              <img class="p09-intro-logo" src="img/p09_qd_logo.png" alt="QUICK, DRAW!">
+              <p class="p09-intro-title">머신 러닝 기술이 학습을 통해 낙서를 인식할 수 있을까요?</p>
+              <p class="p09-intro-desc">여러분의 그림으로 머신 러닝의 학습을 도와주세요. Google은 머신 러닝 연구를 위해<br><span>세계 최대의 낙서 데이터 세트</span>를 오픈소스로 공유합니다</p>
+            </div>
             <div class="p09-start" id="p09Start" hidden>
               <p class="n" id="p09StartN"></p>
               <p class="m">다음을 그리세요</p>
@@ -128,13 +139,13 @@
         title: '사과',
         text: 'AI가 사과인 걸 알아보려면 어떤 특징을 그려야 할까요? 알맞은 특징 카드를 2장 골라보세요.',
         cards: [['동그란 모양', 1], ['줄무늬', 0], ['위에 짧은 꼭지', 1], ['길쭉한 모양', 0], ['콕콕 박힌 씨앗', 0]],
-        wrong: '다시 한번 생각해볼까요?', next: 3
+        wrong: '사과가 어떻게 생겼을까요?<br>사과의 모양과 특징을 생각해 보세요.', next: 3
       },
       banana: {
         title: '바나나',
         text: 'AI가 바나나인 걸 알아보려면 어떤 특징을 그려야 할까요? 알맞은 특징 카드를 2장 골라보세요.',
         cards: [['길쭉한 모양', 1], ['똑바로 된 모양', 0], ['휘어진 모양', 1], ['점박이', 0], ['별 모양', 0]],
-        wrong: '다시 한번 생각해 볼까요?', next: 9
+        wrong: '바나나가 어떻게 생겼을까요?<br>바나나의 모양과 특징을 생각해 보세요.', next: 9
       }
     };
     const STEPS = {
@@ -277,7 +288,7 @@
           } else {
             locked = true;
             playWrong();
-            $('p09WrongTx').textContent = d.wrong;
+            $('p09WrongTx').innerHTML = d.wrong;
             flashLayer($('p09Wrong'), 'is-off', 2000);
             later(() => { locked = false; }, 2000);
           }
@@ -350,6 +361,7 @@
       if (n === 3 || n === 9 || n === 12 || n === 0 || !STEPS[n].ai) tmLeft = 20;
       showTm();
       if (n === 0) {
+        $('p09Intro').hidden = false;
         $('p09Start').hidden = true;
         $('p09Title').textContent = '';
         setAi(null);
@@ -357,6 +369,7 @@
         setBtn(INTRO_BTN[0], introNext);
         return;
       }
+      $('p09Intro').hidden = true;
       const s = STEPS[n];
       if (s.pick) {
         $('p09Start').hidden = true;

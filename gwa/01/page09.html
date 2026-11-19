@@ -20,7 +20,8 @@
         .p09-plain{font-family:'Cafe24 Ssurround';font-size:70px;color:var(--c-white);letter-spacing:-0.04em;
           display:flex;align-items:center}
 
-        .p09-word{min-width:0;padding:6px 20px 6px;height:100px;margin:0 10px 10px}
+        .p09-word{min-width:0;padding:0 20px;height:100px;margin:0 10px 10px}
+        .p09-word em{font-family:'Pretendard';font-weight:700;font-style:normal;vertical-align:-3px}
         .p09-word.is-done{cursor:default;pointer-events:none}
 
         .p09-tray{position:absolute;left:47px;top:677px;width:1827px;height:246px;box-sizing:border-box;background:var(--c-ink);border-radius:18px}
@@ -105,11 +106,11 @@
     const QUESTIONS = [
       { parts: [
           { w: '오늘' }, { w: '서울', cat: 'area' }, '의', { w: '날씨' }, '는',
-          { w: '맑음', cat: 'sky' }, '이며,', { br: true }, { w: '기온' }, '은', { w: '25도', cat: 'temp' }, '입니다.',
+          { w: '맑음', cat: 'sky' }, '이며,', { br: true }, { w: '기온' }, '은', { w: '25<em>℃</em>', cat: 'temp' }, '입니다.',
         ] },
       { parts: [
           { w: '부산', cat: 'area' }, '에는', { w: '내일' }, { w: '비', cat: 'sky' }, '가 내리고,',
-          { w: '18도', cat: 'temp' }, '로', { w: '선선한' }, { w: '날씨' }, '입니다.',
+          { w: '18<em>℃</em>', cat: 'temp' }, '로', { w: '선선한' }, { w: '날씨' }, '입니다.',
         ] },
     ];
 
@@ -163,7 +164,7 @@
         }
         const b = document.createElement('button');
         b.className = 'card-btn p09-word';
-        b.textContent = p.w;
+        b.innerHTML = p.w;
         if (p.cat) b.dataset.cat = p.cat;
         b.addEventListener('click', () => onPick(b));
         sentence.appendChild(b);

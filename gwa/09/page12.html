@@ -9,27 +9,43 @@
         /* 디자인 없음 - 기획서 20~22p. 5단계 중 빈칸(점선 블록)에 알맞은 카드를 끌어 놓기(순서 자유). 맞으면 딸깍 소리와 함께 붙고 단계 번호에 초록불,
            틀리면 카드가 제자리로 돌아가고 그 빈칸의 힌트 팝업 2초. 다 맞추면 단계가 차례로 반짝이고 장면 연출 뒤 완료 모달(스텝 3개).
            배경 img/p12_bg.jpg(방 안 · 태블릿 PC), 장면 소품 img/p12_*.png */
-        .fi-ask{position:absolute;left:50%;top:20px;transform:translateX(-50%);min-height:100px;margin:0;box-sizing:border-box;padding:12px 60px 6px;display:flex;align-items:center;justify-content:center;white-space:nowrap;
-          background:var(--c-cream);border:solid 6px var(--c-ink);border-radius:56px;box-shadow:0 14px 0 0 var(--c-sky-pale);font-family:'Cafe24 Ssurround';font-size:64px;line-height:1.2;color:var(--c-ink);text-align:center;letter-spacing:-0.05em}
-        .fi-scene{position:absolute;left:40px;top:150px;width:1190px;height:590px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:30px;background:var(--c-mist) url('img/p12_bg.jpg') center / cover no-repeat;overflow:hidden}
+        main.bg-default .ask-pill{z-index:20}
+        .fi-board{position:absolute;left:40px;top:90px;width:1840px;height:666px;box-sizing:border-box;background:#276cc9;border:solid 4px var(--c-ink);border-radius:24px;pointer-events:none;z-index:1}
+        .fi-scene{position:absolute;left:64px;top:168px;width:1190px;height:590px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:30px;background:var(--c-mist) url('img/p12_bg.jpg') center / cover no-repeat;overflow:hidden;transform:scale(.95);transform-origin:top left;z-index:2}
         .fi-scene-name{position:absolute;left:20px;top:16px;margin:0;padding:6px 20px 0;border-radius:20px;background:rgba(255,255,255,.8);font-family:'Cafe24 Ssurround';font-size:28px;color:var(--c-purple);z-index:2}
 
         .fi-voice{position:absolute;left:420px;top:490px;margin:0;padding:12px 28px 6px;border-radius:30px;background:var(--c-white);border:solid 4px var(--c-purple);font-family:'Cafe24 Ssurround';font-size:36px;color:var(--c-purple);opacity:0;transition:opacity .4s}
         .fi-voice.is-on{opacity:1}
-        .fi-tablet{position:absolute;left:350px;top:110px;width:470px;height:340px;box-sizing:border-box;border:solid 14px var(--c-ink);border-radius:30px;background:#dfe6f5;display:flex;align-items:center;justify-content:center;transition:box-shadow .5s}
-        .fi-tablet.is-glow{animation:fi-glow .8s ease-in-out 3}
-        @keyframes fi-glow{0%,100%{box-shadow:0 0 0 0 rgba(255,216,61,0)}50%{box-shadow:0 0 40px 14px rgba(255,216,61,.9)}}
-        .fi-canvas{width:90%;height:84%;border-radius:14px;background:var(--c-white) center / cover no-repeat;opacity:0;transition:opacity .8s}
-        .fi-canvas.is-on{opacity:1;background-image:url('img/p12_cat.jpg')}
+        .fi-tablet{position:absolute;left:0;top:0;width:400px;height:280px;transform-origin:0 0;transform:matrix3d(0.386450,-0.100034,0.000000,-0.000400,-0.289653,0.720613,0.000000,-0.000107,0.000000,0.000000,1.000000,0.000000,669.514247,180.410576,0.000000,1.000000);box-sizing:border-box;border-radius:14px;overflow:hidden}
+        .fi-ai{position:absolute;inset:0;box-sizing:border-box;padding:22px 24px;display:flex;flex-direction:column;gap:14px;background:linear-gradient(180deg,#f7faff 0%,#e9f1ff 100%);font-family:'Cafe24 Ssurround';opacity:0;transition:opacity .35s}
+        .fi-ai.is-on{opacity:1}
+        .fi-ai-head{align-self:flex-start;padding:5px 14px 2px;border-radius:999px;background:var(--c-purple);color:#fff;font-size:16px;letter-spacing:-0.03em}
+        .fi-prompt{min-height:46px;box-sizing:border-box;padding:10px 14px 6px;border-radius:12px;background:#fff;border:solid 2px #c8daf8;font-size:21px;line-height:1.25;color:var(--c-ink);letter-spacing:-0.04em;white-space:nowrap;overflow:hidden}
+        .fi-prompt.is-typing:after{content:'';display:inline-block;width:2px;height:20px;margin-left:3px;vertical-align:-3px;background:var(--c-purple);animation:fi-caret .6s steps(2) infinite}
+        @keyframes fi-caret{0%{opacity:1}100%{opacity:0}}
+        .fi-prompt mark{padding:1px 6px 0;border-radius:6px;background:#ffe27a;color:var(--c-ink)}
+        .fi-tags{display:flex;gap:10px;opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s}
+        .fi-tags.is-on{opacity:1;transform:none}
+        .fi-tag{padding:5px 14px 2px;border-radius:999px;background:#dceaff;color:#1e56a8;font-size:18px}
+        .fi-prog{margin-top:auto;opacity:0;transition:opacity .35s}
+        .fi-prog.is-on{opacity:1}
+        .fi-prog-txt{margin:0 0 8px;font-size:17px;color:#4a5d7c}
+        .fi-prog-bar{height:12px;border-radius:999px;background:#d6e4fb;overflow:hidden}
+        .fi-prog-fill{width:0;height:100%;border-radius:999px;background:linear-gradient(90deg,#4d8ef7,#7c5dfa);transition:width 1s ease}
+        .fi-prog.is-go .fi-prog-fill{width:100%}
+        .fi-canvas{position:absolute;inset:0;border-radius:10px;background:var(--c-white) url('img/p12_cat.jpg') center / cover no-repeat;opacity:0;filter:blur(18px);transform:scale(1.06);transition:opacity 1s ease,filter 1.1s ease,transform 1.1s ease;z-index:2}
+        .fi-canvas.is-gen{opacity:.78;filter:blur(9px);transform:scale(1.03)}
+        .fi-canvas.is-on{opacity:1;filter:blur(0);transform:scale(1)}
 
-        .fi-slots{position:absolute;left:1290px;top:150px;width:590px;--blk-hole:#d4dff0}
+        .fi-slots{position:absolute;left:1275px;top:164px;width:590px;--blk-hole:#d4dff0;transform:scale(.92);transform-origin:top left;z-index:2}
         .fi-slot{height:124px}
         .fi-no{position:absolute;left:36px;top:50%;transform:translateY(-46%);width:130px;font-family:'Cafe24 Ssurround';font-size:34px;color:var(--c-violet);white-space:nowrap}
         .fi-txt{position:absolute;left:176px;right:30px;top:50%;transform:translateY(-46%);font-family:'Cafe24 Ssurround';font-size:28px;line-height:1.15;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all}
         .fi-slot .fi-card{position:absolute;left:176px;top:0;right:26px;bottom:0;width:auto;min-height:0;border:0;background:none;padding:0;display:flex;align-items:center;justify-content:flex-start;text-align:left;cursor:default;box-shadow:none;filter:none;font-size:28px;line-height:1.15}
         .fi-slot .fi-card:after{display:none}
         .fi-slot.is-lit .fi-no:after{content:'';display:inline-block;width:22px;height:22px;margin-left:10px;border-radius:50%;background:#2fbf71;vertical-align:middle}
-        .fi-slot.is-now{animation:blk-glow .6s ease-in-out}
+        .fi-slot.is-now{z-index:30 !important;animation:fi-pulse .9s ease-in-out}
+        @keyframes fi-pulse{0%,100%{transform:scale(1);filter:brightness(1) drop-shadow(0 2px 0 rgba(0,0,0,.2))}45%{transform:scale(1.045);filter:brightness(1.12) drop-shadow(0 0 18px rgba(255,212,59,1)) drop-shadow(0 0 6px rgba(255,169,43,1))}}
 
         .fi-cards{position:absolute;left:40px;top:792px;width:1840px;display:flex;gap:35px;justify-content:space-between}
         .fi-cell{flex:1 1 0;height:124px}
@@ -46,11 +62,23 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
-          <p class="fi-ask" id="fiAsk">AI 그림 그리기가 작동하는 순서에 맞게 빈칸을 채워 보세요.</p>
+          <p class="ask-pill is-fit"><span id="fiAsk">AI 그림 그리기가 작동하는 순서에 맞게 빈칸을 채워 보세요.</span></p>
 
+          <div class="fi-board"></div>
           <div class="fi-scene">
             <p class="fi-scene-name">방 안 · 태블릿 PC</p>
-            <div class="fi-tablet" id="fiTablet"><div class="fi-canvas" id="fiCanvas"></div></div>
+            <div class="fi-tablet" id="fiTablet">
+              <div class="fi-ai" id="fiAi">
+                <span class="fi-ai-head">AI 그림 그리기</span>
+                <div class="fi-prompt" id="fiPrompt"></div>
+                <div class="fi-tags" id="fiTags"><span class="fi-tag">#모자</span><span class="fi-tag">#고양이</span></div>
+                <div class="fi-prog" id="fiProg">
+                  <p class="fi-prog-txt" id="fiProgTxt">고양이 형태 검색 중...</p>
+                  <div class="fi-prog-bar"><div class="fi-prog-fill"></div></div>
+                </div>
+              </div>
+              <div class="fi-canvas" id="fiCanvas"></div>
+            </div>
           </div>
           <div class="fi-slots blk-col" id="fiSlots">
             <div class="fi-slot blk is-empty" data-key="input"><span class="fi-no">1단계</span></div>
@@ -131,11 +159,47 @@
       },
       onDone: () => {
         slots.forEach((s) => s.classList.add('is-lit'));
-        slots.forEach((s, i) => setTimeout(() => { s.classList.remove('is-now'); void s.offsetWidth; s.classList.add('is-now'); }, 500 + i * 650));
-        const t = 500 + slots.length * 650 + 300;
-        setTimeout(() => $('fiTablet').classList.add('is-glow'), t);
-        setTimeout(() => $('fiCanvas').classList.add('is-on'), t + 2600);
-        setTimeout(finish, t + 4600);
+        const pulse = (i) => {
+          slots.forEach((x) => x.classList.remove('is-now'));
+          const s = slots[i];
+          void s.offsetWidth;
+          s.classList.add('is-now');
+        };
+        setTimeout(() => {
+          pulse(0);
+          $('fiAi').classList.add('is-on');
+          const el = $('fiPrompt');
+          const txt = '모자를 쓴 고양이 그려줘';
+          el.classList.add('is-typing');
+          let k = 0;
+          const t = setInterval(() => {
+            el.textContent = txt.slice(0, ++k);
+            if (k >= txt.length) clearInterval(t);
+          }, 55);
+        }, 500);
+        setTimeout(() => {
+          pulse(1);
+          const el = $('fiPrompt');
+          el.classList.remove('is-typing');
+          el.innerHTML = '<mark>모자</mark>를 쓴 <mark>고양이</mark> 그려줘';
+          $('fiTags').classList.add('is-on');
+        }, 1700);
+        setTimeout(() => {
+          pulse(2);
+          const p = $('fiProg');
+          p.classList.add('is-on');
+          requestAnimationFrame(() => p.classList.add('is-go'));
+        }, 2900);
+        setTimeout(() => {
+          pulse(3);
+          $('fiProgTxt').textContent = '그림 생성 중...';
+          $('fiCanvas').classList.add('is-gen');
+        }, 4100);
+        setTimeout(() => {
+          pulse(4);
+          $('fiCanvas').classList.add('is-on');
+        }, 5500);
+        setTimeout(finish, 7000);
       }
     });
 
