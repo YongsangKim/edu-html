@@ -6,8 +6,6 @@
     <title>정보를 깔끔하게 데이터로 정리하기</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        
-
         .p09-guide{position:absolute;left:358px;top:50px;width:1210px;height:112px;box-sizing:border-box;
           background:var(--c-cream);border:solid 5px var(--c-ink);border-radius:56px;box-shadow:0 10px 0 0 var(--c-sky-pale);
           display:flex;align-items:center;justify-content:center;text-align:center}
@@ -25,14 +23,11 @@
         .p09-word.is-done{cursor:default;pointer-events:none}
 
         .p09-tray{position:absolute;left:47px;top:677px;width:1827px;height:246px;box-sizing:border-box;background:var(--c-ink);border-radius:18px}
-        /* 디자인의 사진 칸(테두리·글자 포함)을 원래 배경 이미지에서 같은 좌표로 잘라 씀 */
         .p09-cat{position:absolute;top:700px;width:570px;height:201px;border-radius:18px;pointer-events:none;background:url('img/p09_bg.png') no-repeat}
         .p09-cat.is-on{outline:10px solid var(--c-yellow);outline-offset:-10px;box-shadow:0 0 40px rgba(255,216,61,.9)}
         .p09-cat-area{left:72px;background-position:-72px -700px}
         .p09-cat-sky{left:675px;background-position:-675px -700px}
         .p09-cat-temp{left:1278px;background-position:-1278px -700px}
-
-        /* 오답/종료 모달 — 배경은 각각 다른 이미지로 교체할 수 있게 분리 */
     </style>
 </head>
 <body>
@@ -162,12 +157,7 @@
           sentence.appendChild(br);
           return;
         }
-        const b = document.createElement('button');
-        b.className = 'card-btn p09-word';
-        b.innerHTML = p.w;
-        if (p.cat) b.dataset.cat = p.cat;
-        b.addEventListener('click', () => onPick(b));
-        sentence.appendChild(b);
+        const b = makeCardBtn(p.w, 'p09-word', () => onPick(b), { html: true, data: p.cat ? { cat: p.cat } : null, parent: sentence });
       });
 
       order = shuffleArray(Object.keys(CATS));
@@ -203,9 +193,7 @@
       }
 
       playWrong();
-      btn.classList.remove('is-wrong');
-      void btn.offsetWidth;
-      btn.classList.add('is-wrong');
+      restartAnim(btn, 'is-wrong');
 
       wrongText.innerHTML = '문장 속에서 ' + withObjectParticle(CATS[want].label) + ' 나타내는 낱말을<br>찾아볼까요?';
       wrongModal.classList.remove('is-off');

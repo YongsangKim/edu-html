@@ -6,9 +6,6 @@
     <title>컴퓨터도 순서대로, 알고리즘 순차 따라</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 20~22p. 5단계 중 빈칸(점선 블록)에 알맞은 카드를 끌어 놓기(순서 자유). 맞으면 딸깍 소리와 함께 붙고 단계 번호에 초록불,
-           틀리면 카드가 제자리로 돌아가고 그 빈칸의 힌트 팝업 2초. 다 맞추면 단계가 차례로 반짝이고 장면 연출 뒤 완료 모달(스텝 3개).
-           배경 img/p12_bg.jpg(방 안 · 태블릿 PC), 장면 소품 img/p12_*.png */
         main.bg-default .ask-pill{z-index:20}
         .fi-board{position:absolute;left:40px;top:90px;width:1840px;height:666px;box-sizing:border-box;background:#276cc9;border:solid 4px var(--c-ink);border-radius:24px;pointer-events:none;z-index:1}
         .fi-scene{position:absolute;left:64px;top:168px;width:1190px;height:590px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:30px;background:var(--c-mist) url('img/p12_bg.jpg') center / cover no-repeat;overflow:hidden;transform:scale(.95);transform-origin:top left;z-index:2}
@@ -37,20 +34,23 @@
         .fi-canvas.is-gen{opacity:.78;filter:blur(9px);transform:scale(1.03)}
         .fi-canvas.is-on{opacity:1;filter:blur(0);transform:scale(1)}
 
-        .fi-slots{position:absolute;left:1275px;top:164px;width:590px;--blk-hole:#d4dff0;transform:scale(.92);transform-origin:top left;z-index:2}
-        .fi-slot{height:124px}
-        .fi-no{position:absolute;left:36px;top:50%;transform:translateY(-46%);width:130px;font-family:'Cafe24 Ssurround';font-size:34px;color:var(--c-violet);white-space:nowrap}
-        .fi-txt{position:absolute;left:176px;right:30px;top:50%;transform:translateY(-46%);font-family:'Cafe24 Ssurround';font-size:28px;line-height:1.15;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all}
-        .fi-slot .fi-card{position:absolute;left:176px;top:0;right:26px;bottom:0;width:auto;min-height:0;border:0;background:none;padding:0;display:flex;align-items:center;justify-content:flex-start;text-align:left;cursor:default;box-shadow:none;filter:none;font-size:28px;line-height:1.15}
-        .fi-slot .fi-card:after{display:none}
-        .fi-slot.is-lit .fi-no:after{content:'';display:inline-block;width:22px;height:22px;margin-left:10px;border-radius:50%;background:#2fbf71;vertical-align:middle}
+        .fi-slots{position:absolute;left:1275px;top:164px;width:590px;display:flex;flex-direction:column;transform:scale(.92);transform-origin:top left;z-index:2}
+        .fi-slot{position:relative;width:590px;height:118px}
+        .fi-slot:nth-child(1){z-index:9}.fi-slot:nth-child(2){z-index:8}.fi-slot:nth-child(3){z-index:7}.fi-slot:nth-child(4){z-index:6}.fi-slot:nth-child(5){z-index:5}
+        .fi-slot.is-empty{z-index:1}
+        .fi-slot .pz-svg,.fi-card .pz-svg{position:absolute;left:0;top:0;width:590px;height:146px;pointer-events:none;z-index:0}
+        .fi-slot.is-over .pz-body{fill:#fff8d6;stroke:var(--c-yellow);stroke-width:7}
+        .fi-no{position:absolute;left:36px;top:50%;transform:translateY(-46%);width:130px;font-family:'Cafe24 Ssurround';font-size:34px;color:var(--c-violet);-webkit-text-stroke:6px #ffffff;paint-order:stroke fill;white-space:nowrap;z-index:3;pointer-events:none}
+        .fi-txt{position:absolute;left:176px;right:30px;top:50%;transform:translateY(-46%);font-family:'Cafe24 Ssurround';font-size:28px;line-height:1.15;color:#141539;-webkit-text-stroke:6px #ffffff;paint-order:stroke fill;letter-spacing:-0.05em;word-break:keep-all;z-index:2;pointer-events:none}
+        .fi-slot .fi-card{position:absolute;left:0;top:0;width:590px;height:118px;padding:8px 30px 4px 176px;justify-content:flex-start;text-align:left;cursor:default;filter:none;font-size:28px;line-height:1.15}
         .fi-slot.is-now{z-index:30 !important;animation:fi-pulse .9s ease-in-out}
         @keyframes fi-pulse{0%,100%{transform:scale(1);filter:brightness(1) drop-shadow(0 2px 0 rgba(0,0,0,.2))}45%{transform:scale(1.045);filter:brightness(1.12) drop-shadow(0 0 18px rgba(255,212,59,1)) drop-shadow(0 0 6px rgba(255,169,43,1))}}
 
         .fi-cards{position:absolute;left:40px;top:792px;width:1840px;display:flex;gap:35px;justify-content:space-between}
-        .fi-cell{flex:1 1 0;height:124px}
-        .fi-card{width:100%;height:124px;box-sizing:border-box;padding:8px 40px 4px;display:flex;align-items:center;justify-content:center;text-align:center;cursor:grab;touch-action:none;font-size:30px;line-height:1.15;letter-spacing:-0.05em;word-break:keep-all}
-        .fi-card.is-dragging{cursor:grabbing;z-index:60}
+        .fi-cell{flex:1 1 0;height:118px}
+        .fi-card{position:relative;width:590px;height:118px;box-sizing:border-box;padding:8px 40px 4px;display:flex;align-items:center;justify-content:center;text-align:center;cursor:grab;touch-action:none;font-family:'Cafe24 Ssurround';font-size:30px;line-height:1.15;letter-spacing:-0.05em;word-break:keep-all;color:#141539;-webkit-text-stroke:6px #ffffff;paint-order:stroke fill;filter:drop-shadow(0 6px 0 rgba(20,21,57,.16))}
+        .fi-card-txt{position:relative;z-index:2;pointer-events:none}
+        .fi-card.is-dragging{cursor:grabbing;z-index:60;filter:drop-shadow(0 14px 12px rgba(20,21,57,.28))}
         .fi-card.is-wrong{animation:fix-word-shake .3s ease}
 
         .fi-sum{margin:24px 0 0;padding:0 0 0 40px;font-family:'Cafe24 Ssurround';font-size:30px;line-height:1.35;color:var(--c-ink);letter-spacing:-0.05em}
@@ -80,17 +80,17 @@
               <div class="fi-canvas" id="fiCanvas"></div>
             </div>
           </div>
-          <div class="fi-slots blk-col" id="fiSlots">
-            <div class="fi-slot blk is-empty" data-key="input"><span class="fi-no">1단계</span></div>
-            <div class="fi-slot blk is-fixed"><span class="fi-no">2단계</span><span class="fi-txt">입력된 글자의 핵심 단어(모자, 고양이) 분석하기</span></div>
-            <div class="fi-slot blk is-empty" data-key="search"><span class="fi-no">3단계</span></div>
-            <div class="fi-slot blk is-fixed"><span class="fi-no">4단계</span><span class="fi-txt">단어에 맞는 고양이 그림 생성하기</span></div>
-            <div class="fi-slot blk is-empty" data-key="show"><span class="fi-no">5단계</span></div>
+          <div class="fi-slots" id="fiSlots">
+            <div class="fi-slot is-empty" data-key="input"><span class="fi-no">1단계</span></div>
+            <div class="fi-slot is-fixed"><span class="fi-no">2단계</span><span class="fi-txt">입력된 글자의 핵심 단어(모자, 고양이) 분석하기</span></div>
+            <div class="fi-slot is-empty" data-key="search"><span class="fi-no">3단계</span></div>
+            <div class="fi-slot is-fixed"><span class="fi-no">4단계</span><span class="fi-txt">단어에 맞는 고양이 그림 생성하기</span></div>
+            <div class="fi-slot is-empty" data-key="show"><span class="fi-no">5단계</span></div>
           </div>
           <div class="fi-cards" id="fiCards">
-            <div class="fi-cell"><div class="fi-card blk" style="--blk-c:#9cc8f5" data-key="show">완성된 모자 쓴 고양이 그림을 화면에 보여주기</div></div>
-            <div class="fi-cell"><div class="fi-card blk" style="--blk-c:#ffd56a" data-key="input">“모자를 쓴 고양이 그려줘” 글자 입력하기</div></div>
-            <div class="fi-cell"><div class="fi-card blk" style="--blk-c:#8fdcb8" data-key="search">AI가 알고 있는 수많은 고양이 사진 형태 검색하기</div></div>
+            <div class="fi-cell"><div class="fi-card" data-key="show"><span class="fi-card-txt">완성된 모자 쓴 고양이 그림을 화면에 보여주기</span></div></div>
+            <div class="fi-cell"><div class="fi-card" data-key="input"><span class="fi-card-txt">“모자를 쓴 고양이 그려줘” 글자 입력하기</span></div></div>
+            <div class="fi-cell"><div class="fi-card" data-key="search"><span class="fi-card-txt">AI가 알고 있는 수많은 고양이 사진 형태 검색하기</span></div></div>
           </div>
 
           <div class="ox-result-wrong is-avatar is-off" id="fiWrong">
@@ -135,23 +135,33 @@
   <script src="../../resources/js/common.js"></script>
   <script>
   (function () {
+    const SLOT_THEMES = [null, PUZZLE_THEMES.coral, null, PUZZLE_THEMES.purple, null];
+    const CARD_THEMES = { input: PUZZLE_THEMES.yellow, search: PUZZLE_THEMES.green, show: PUZZLE_THEMES.blue };
+
     const HINTS = {"input":"가장 먼저 AI에게 원하는 그림을 글자로 입력해야 해요.","search":"핵심 단어를 분석한 다음에는 AI가 알고 있는 고양이 사진의 형태를 찾아야 해요.","show":"고양이 그림을 만든 다음에는 완성된 그림을 화면에 보여 줘야 해요."};
     const slots = Array.from(document.querySelectorAll('#fiSlots .fi-slot'));
     const blanks = slots.filter((s) => s.dataset.key);
+    const snapSfx = makeSfx('sound/9차시_딸각 효과음(엔트리용).mp3', true);
+
+    slots.forEach((slot, i) => slot.prepend(makePuzzleSvg('fis' + i, SLOT_THEMES[i])));
+    document.querySelectorAll('#fiCards .fi-card').forEach((card) => {
+      const key = card.dataset.key;
+      card.prepend(makePuzzleSvg('fic_' + key, CARD_THEMES[key]));
+    });
 
     initMatchDrag({
       cards: Array.from(document.querySelectorAll('#fiCards .fi-card')),
       zones: blanks,
       slop: 40,
+      silent: true,
       onRight: (card, zone) => {
+        snapSfx();
         zone.classList.remove('is-empty');
         zone.classList.add('is-lit');
       },
       onWrong: (card, zone) => {
         playWrong();
-        card.classList.remove('is-wrong');
-        void card.offsetWidth;
-        card.classList.add('is-wrong');
+        restartAnim(card, 'is-wrong');
         if (zone) {
           $('fiWrongText').textContent = HINTS[zone.dataset.key];
           flashLayer($('fiWrong'));

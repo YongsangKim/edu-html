@@ -6,28 +6,19 @@
     <title>인권 존중 포스터 제작소</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* ?edit&step=N 으로 단계를 바로 열고 캐릭터 포즈를 골라 볼 수 있음. 캐릭터 포즈는 STEPS 각 줄의 pose(sa/img/character/sa_*.png 의 * 부분) */
-        /* 기획서 26~68p. Canva로 인권 존중 포스터 만들기 실습. 가운데 휴대폰은 sa/02 page08·10과 같은 공용 .cv 틀 + 같은 방식(화면은 마크업에 모두 있고 단계마다 data-k로 보이기 · 누를 곳은 data-hit + .hit-pulse 깜빡임 · 손가락은 pointFingerAt).
-           앱 첫 화면·검색 화면은 공용 .cv-app 부품, 편집 화면은 기획서 캡처를 540x1170 좌표(.cu-ui, 화면에 맞춰 줄임)로 그린 것.
-           아이콘·썸네일처럼 그리기 어려운 조각만 캡처에서 오려 img/ui/ 에 둠. 고른 값(프롬프트 · 초안 이미지 · 문구 · 글꼴)은 화면 안에 그대로 그려짐.
-           흐름: 홈에서 Canva → 포스터(세로형 A2) → Magic Media 세로형 → 프롬프트(3가지 중 선택) → 이미지 생성(2초) → 초안 4장 보기(화살표)·고르기(프롬프트에 맞는 2장만 통과) → 포스터 제작 확인 → 크기 조정 → 문구 넣기(3가지 중 선택, 글꼴 바꾸기, 위로 옮기기) → AI 문구 넣기(아래로 옮기기) → 완성 → 다운로드 → 완성 포스터(68p).
-           초안 이미지 img/{p09_wc_|p09_pg_|p09_cl_}{1~4}.jpg(CASES 의 d 접두사로 선택, 1·2번이 프롬프트에 맞는 초안, 3·4번은 맞지 않는 초안). 이전 버전: _backup_page09_before_cv.html */
         [hidden]{display:none!important}
 
         .p09-set{--gb-left:110px;--gb-w:610px}
         .p09-set .guide-bubble,.p09-set .guide-bubble.is-long{font-size:40px}
         .p09-set .guide-bubble img{height:1em;vertical-align:-0.15em;margin:0 6px}
 
-        /* 540x1170 좌표로 그린 편집 화면: 화면(522x1053)에 맞춰 가로 .967 · 세로 .9로 줄임 */
         .p09-ui{transform:scale(.967,.9);background:none;--pulse-w:5.4px}
         .p09-ui>.a,.p09-ui>div,.p09-ui>img{max-width:none}
         .p09-ui .u-tabs.hit-pulse{animation:cv-target-in 1.2s ease-in-out infinite;touch-action:none;cursor:grab}
         .p09-ui .u-tabs.hit-pulse .u-tab{pointer-events:none}
         .p09-ui .u-track.is-drag{transition:none}
         .p09-ui .u-tab.hit-pulse{animation:none}
-        /* 줄어든 그림(가로 .967 · 세로 .9) 안이라 sa/02 하단 탭과 같은 화면 크기가 되도록 크기·테두리 굵기를 보정 */
         .p09-ui .u-tab.hit-pulse i{width:49.7px;height:46.7px;border-radius:13px;animation:cv-target 1.2s ease-in-out infinite}
-        /* 하단 도구 막대(편집·글꼴·텍스트 스타일·글꼴 크기·색상·확인) — 500x84 그림 좌표로 맞춤 */
         .tbx{position:absolute;left:18px;top:1010px;width:500px;height:80px;border-radius:24px;background:#fff;box-shadow:0 6px 20px rgba(27,23,56,.16);padding:0}
         .tbx-in{position:absolute;left:0;top:-4px;width:500px;height:84px;font-family:'Pretendard';display:flex;align-items:center}
         .tbx-t{height:84px;padding:0;border:0;border-radius:18px;background:none;color:#14161f;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
@@ -44,12 +35,10 @@
         .tbx-t .tbi.is-col i{display:block;flex:none;width:26px;height:5px;margin-top:-5px;border-radius:3px;background:linear-gradient(90deg,#f0622a,#f5c93a,#8ee05a,#4cc4e8,#2b5be3)}
         .tbx-ok{width:52px;height:52px;box-sizing:border-box;padding:0;border:1px solid #e4e6ec;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:2px 2px 5px 2px #e4e6ec}
         .tbx-ok svg{width:28px;height:28px;fill:none;stroke:#14161f;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
-        /* 글꼴 고르기 위쪽 칩(현재 글꼴 이름 + 더보기 화살표) */
         .tbx-chip{position:absolute;left:22px;top:930px;width:251px;height:73px;border-radius:24px;background:#fff}
         .tbx-chip .nm{position:absolute;left:11px;top:10px;width:154px;height:53px;box-sizing:border-box;border:3px solid #7a3aee;border-radius:27px;background:#f4f5f8;display:flex;align-items:center;justify-content:center;font:500 19px 'Pretendard';color:#14161f;white-space:nowrap}
         .tbx-chip .up{position:absolute;left:186.5px;top:9.5px;width:54px;height:54px;box-sizing:border-box;padding:0;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 7px rgba(27,23,56,.22);display:flex;align-items:center;justify-content:center}
         .tbx-chip .up svg{width:24px;height:24px;fill:none;stroke:#14161f;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
-        /* 위쪽 막대의 다운로드 아이콘 버튼 */
         .u-bar .tbx-ib{position:absolute;top:14px;width:31px;height:31px;padding:0;border:0;background:none;color:inherit}
         .u-bar .tbx-ib svg{position:static;top:auto;width:31px;height:31px}
         .p09-ph{position:absolute;left:197px;top:517px;width:146px;height:36px;background:#d9e8ff;border-radius:3px;font-size:16px;color:#2b4a8a;display:flex;align-items:center;justify-content:center}
@@ -286,8 +275,6 @@
     const TAB_MAX = 527;
     const st = { c: null, phrase: '', draft: 0, car: 0, font: false, credit: false };
 
-    // 한 화면에 모든 부품이 마크업으로 있고, 단계마다 show에 적은 것만 보임(data-k).
-    // hit = 눌러야 하는 곳(data-hit) — 분홍으로 깜빡이고 손가락이 가리킴. 나머지 필드는 포스터·탭·오른쪽 버튼 등 그 단계의 상태.
     const POS_NONE = { };
     const STEPS = [
       { pose: 'wink_point2', bubble: 'Canva를 클릭해요.', show: 'home', hit: 'canva' },
@@ -316,9 +303,7 @@
       { pose: 'wink_point4', bubble: '확인 버튼을 눌러<br>문구를 입력해요.', show: 'ed pg pbar', typing: 'phrase', hit: 'check' },
       { pose: 'wink_point2', bubble: '위치를 포스터의 상단으로<br>옮겨 봐요. 문구를 클릭해요.', show: 'ed pg dots tabs', pg: { draft: 1, t: 334 }, hit: 'ptext' },
       { pose: 'wink_present', bubble: MOVE + '이동 버튼을 꾹 눌러<br>위쪽으로 드래그 해보세요.', show: 'ed pg tbar tobj', pg: { draft: 1 }, drag: { text: () => st.phrase || PHRASES[1], fs: () => fsPhrase(), cx: 50, top: 45.8, end: 21.9, zone: [17, 27] }, hit: 'move' },
-      //
       { pose: 'wink_point4', bubble: '좋아요! 이번에는<br>문구의 글씨체를 바꿔봐요.<br>글꼴을 클릭해요.', show: 'ed pg sel tbar', pg: { draft: 1, t: 52 }, sel: { yc: 256 }, hit: 'tbfont' },
-      //
       { pose: 'wink_point4', bubble: UP + '더보기 버튼을 클릭해요.', show: 'ed pg sel tbarfont', pg: { draft: 1, t: 52 }, sel: { yc: 256 }, hit: 'more' },
       { pose: 'wink_point4', bubble: '포스터를 만들 때는 대부분<br>눈에 잘 띄는 굵은 글씨를 사용해요.<br>추천 폰트를 사용해볼까요?', show: 'ed pg selS flist', pg: { draft: 1, t: 36, style: 'left:115px;top:128px;width:310px;height:440px', small0: true }, selS: true, hit: 'han', setFont: true },
       { pose: 'wink_point2', bubble: '좋아요! 확인 버튼을 클릭해<br>편집을 완료해요.', show: 'ed pg selS fpick', pg: { draft: 1, t: 36, style: 'left:115px;top:128px;width:310px;height:440px', small0: true }, selS: true, hit: 'fontok' },
@@ -328,10 +313,8 @@
       { pose: 'wink_point4', bubble: '확인 버튼을 클릭해요.', show: 'ed pg pbar', typing: 'credit', hit: 'check' },
       { pose: 'wink_point2', bubble: '위치를 포스터의 하단으로<br>옮겨 봐요. 문구를 클릭해요.', show: 'ed pg dots tabs', pg: { draft: 1, t: 52, c: 334 }, hit: 'ctext' },
       { pose: 'wink_present', bubble: MOVE + '이동 버튼을 꾹 눌러<br>아래쪽으로 드래그 해보세요.', show: 'ed pg tbar tobj', pg: { draft: 1, t: 52 }, drag: { cred: true, text: () => CREDIT, fs: () => 24, cx: 50, top: 45.8, end: 73.2, zone: [68, 78] }, hit: 'move' },
-      // 
       { pose: 'wink_point4', bubble: '좋아요! 확인 버튼을 클릭해<br>포스터 만들기를 완료해요.', show: 'ed pg tbar', pg: { draft: 1, t: 52, c: 660 }, hit: 'tbok' },
       { pose: 'main', bubble: '인권 존중 포스터를<br>완성했어요!', show: 'ed pg dots tabs', pg: { draft: 1, t: 52, c: 660 }, next: true },
-      //
       { pose: 'wink_point', bubble: '오른쪽 위의 버튼을 클릭해<br>포스터를 다운로드 해봐요.', show: 'ed pg dots tabs dlbtn', pg: { draft: 1, t: 52, c: 660 }, hit: 'download' },
       { pose: 'wink_point4', bubble: '아래의 다운로드 버튼을<br>클릭해요.', show: 'ed share', dark: true, hit: 'dl1' },
       { pose: 'wink_point4', bubble: '아래의 다운로드 버튼을<br>클릭해요.', show: 'ed dl', dark: true, hit: 'dl2' },
@@ -350,7 +333,6 @@
     const status = phone.querySelector('.phone-status');
     const parts = Array.from(phone.querySelectorAll('[data-k]'));
     const hits = Array.from(phone.querySelectorAll('[data-hit]'));
-    // 클릭 영역 보정 [dx, dy, dw, dh] — 버튼 모양은 그대로, 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
     const HOT = {
       canva: [0, 0, 0, 0], search: [0, 0, 0, 0], poster: [0, 0, 0, 0], mmtab: [0, 0, 0, 0], ratio: [0, 0, 0, 0],
       tall: [0, 0, 0, 0], prompt: [0, 0, 0, 0], generate: [0, 0, 0, 0], arrow: [0, 0, 0, 0], pick: [0, 0, 0, 0],
@@ -372,7 +354,6 @@
     const fsPhrase = () => (st.font ? 44 : 41);
     const tw = (t, fs) => Math.round([...t].reduce((a, c) => a + (c === ' ' ? fs * 0.32 : /[A-Za-z0-9.]/.test(c) ? fs * 0.58 : fs * 0.97), 0) + 16);
 
-    // 고른 값을 화면 곳곳에 반영(프롬프트·초안 이미지·문구)
     function applyChoice() {
       if (st.c) {
         ui.querySelectorAll('.js-prompt').forEach((el) => { el.textContent = st.c.v; });
@@ -382,7 +363,6 @@
       ui.querySelectorAll('.js-phrase').forEach((el) => { el.textContent = POSTER_T(); });
     }
 
-    // 포스터 캔버스: o.draft(초안 그림), o.t(문구 위치 px), o.c(AI 문구 위치), o.small, o.style
     function setPoster(o) {
       o = o || {};
       pg.className = 'u-page p09-pg' + (o.small ? ' is-small' : '') + (st.font ? ' is-f' : '');
@@ -395,7 +375,6 @@
       if (!pgC.hidden) pgC.style.cssText = 'top:' + o.c + 'px;font-size:' + (o.cfs || (small ? 14 : 24)) + 'px;color:' + (o.draft ? '#fff' : '#111') + ';' + (o.draft ? 'text-shadow:0 1px 4px rgba(0,0,0,.7);' : '');
     }
 
-    // 문구를 고른 텍스트 상자(선택 표시): yc = 세로 가운데, w = 상자 폭
     function setSel(yc, w, ctx) {
       const set = (id, css) => { $(id).style.cssText = css; };
       const sel = $('p09Sel');
@@ -408,7 +387,6 @@
       set('p09SelMv', 'left:277px;top:' + (yc + 64) + 'px');
       $('p09SelCtx').hidden = !!ctx;
     }
-    // 글꼴 고르는 단계: 줄어든 포스터 위 작은 선택 표시
     function setSelSmall() {
       const w = tw(POSTER_T(), 26);
       $('p09Sel').style.cssText = '';
@@ -420,7 +398,6 @@
       $('p09SelMv').style.cssText = 'left:277px;top:229px';
     }
 
-    // 손가락 위치 보정 [dx, dy] — 눌러야 할 곳(data-hit 이름, 그 밖에는 next·btn·mv·arrow)별, 표에 없으면 [0, 0]. ?edit 로 손가락을 눌러 맞춘 뒤 표시줄 값을 옮겨 적음
     const FG = {
       canva: [15, -37], search: [20, -30], poster: [0, 0], mmtab: [0, 0], ratio: [0, 0],
       tall: [0, 0], prompt: [0, -60], generate: [50, -20], arrow: [0, 0], pick: [0, 0],
@@ -437,7 +414,6 @@
         fgKey = key || '?';
         const fg = FG[fgKey] || [0, 0];
         pointFingerAt(el, Object.assign({ onMain: true, beside: true }, opt || {}, { dx: fg[0], dy: fg[1] }));
-        // 하단 탭·버튼을 가리킬 때 손가락이 화면(960px) 아래로 잘리지 않게(편집 모드에서는 끔)
         if (!BoxEdit.on) document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.top = Math.min(parseFloat(f.style.top), 850) + 'px'; });
       }, delay || 350);
     }
@@ -446,16 +422,11 @@
       right.innerHTML = '';
       right.classList.toggle('is-off', !list.length);
       list.forEach((o) => {
-        const b = document.createElement('button');
-        b.className = 'card-btn ' + (o.cls || '');
-        b.innerHTML = o.t;
-        b.addEventListener('click', () => { playClick(); o.fn(); });
-        right.appendChild(b);
+        const b = makeCardBtn(o.t, o.cls, () => { playClick(); o.fn(); }, { html: true, parent: right });
       });
       return right.firstChild;
     }
 
-    // 문구 입력 화면: 아직 안 넣었으면 "단락 텍스트" 자리 표시, 넣었으면 포스터에 문구가 보임
     function typingPoster(s) {
       if (s.typing === 'phrase') {
         if (st.phrase) return { draft: 1, t: 334 };
@@ -488,12 +459,10 @@
       $('p09Head').firstElementChild.classList.toggle('is-dark', !!s.dark);
       ui.querySelectorAll('#p09Head .u-bar svg')[1].classList.toggle('dim', i < 19);
 
-      // 탭 막대: 밀려난 정도와 선택된 탭
       const tb = s.tabs || {};
       track.style.transform = 'translateX(' + (-(tb.off || 0)) + 'px)';
       ui.querySelectorAll('.u-tab').forEach((t) => { t.classList.toggle('is-on', t.dataset.tab === tb.on); });
 
-      // 포스터와 선택 표시
       const pgState = s.typing ? typingPoster(s) : s.pg;
       setPoster(pgState);
       $('p09Ph').hidden = !(s.typing && !(s.typing === 'phrase' ? st.phrase : st.credit));
@@ -503,7 +472,6 @@
       applyChoice();
 
       if (s.car) setupCar(s.car);
-      // 눌러야 할 곳: 깜빡임 + 손가락 (sa/02와 같은 방식)
       hits.forEach((h) => h.classList.toggle('hit-pulse', h.dataset.hit === s.hit && !h.closest('[hidden]')));
       const target = hits.find((h) => h.dataset.hit === s.hit && !h.closest('[hidden]'));
       let first = null;
@@ -511,7 +479,7 @@
         swipeAt(tabsEl);
       } else if (target) {
         first = target;
-        if (s.noFinger) { /* 손가락 없음 */ }
+        if (s.noFinger) { }
         else if (target.closest('.u-track')) fingerTo(target, null, 750, s.hit);
         else fingerTo(target, s.hit === 'canva' ? { beside: false } : null, 0, s.hit);
       }
@@ -570,7 +538,6 @@
       go();
     }));
 
-    // 아래 메뉴 탭 슬라이드(포인터): 끄는 만큼 따라오고 35% 넘게 밀면 끝까지
     let dragTab = null;
     tabsEl.addEventListener('pointerdown', (e) => {
       if (STEPS[i].hit !== 'swipe') return;
@@ -618,7 +585,6 @@
       }, 350);
     }
 
-    // 이동 버튼을 끌어 문구 옮기기(위쪽/아래쪽 알맞은 칸에 놓아야 통과)
     const tobj = $('p09Tobj');
     const mv = tobj.querySelector('.mv');
     let dragObj = null;
@@ -673,7 +639,6 @@
     mv.addEventListener('pointerup', endDrag);
     mv.addEventListener('pointercancel', endDrag);
 
-    // 초안 4장 넘겨 보기(화살표)·고르기
     const cards = Array.from(ui.querySelectorAll('.p09-card'));
     const prev = $('p09Prev');
     const nxt = $('p09Next2');
@@ -703,7 +668,6 @@
       st.car = n;
       seen.add(n);
       layoutCar();
-      // 4장을 다 볼 때까지 다음 화살표가 계속 깜빡이고 손가락이 따라감
       const more = carMode === 'view' && !nxt.hidden;
       nxt.classList.toggle('hit-pulse', more);
       if (more) fingerTo(nxt, null, 0, 'arrow');
@@ -740,8 +704,6 @@
     st.c = CASES[1];
     initPhoneBars();
 
-    /* ?edit&step=N : 단계 N 으로 바로 열기(] [ 또는 아래 버튼으로 이동). 그 앞 단계에서 정해지는 값(문구·초안·글꼴·AI 문구)은 미리 채워 둠.
-       화면 오른쪽 아래 포즈 선택판에서 그 단계 캐릭터 포즈를 눌러 보고, 이름을 STEPS 의 해당 줄 pose 에 옮겨 적음 */
     if (BoxEdit.on) {
       const prep = (idx) => {
         const at = (f) => STEPS.findIndex(f);

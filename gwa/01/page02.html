@@ -7,26 +7,16 @@
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
         main{background:url('img/p02_bg.jpg') no-repeat}
-
-        /* 배경에 구워진 게이지/주문 문구는 회차마다 바뀌어야 해서 같은 자리에 실시간 DOM을 덮어 그림 */
         .p02-gauge{left:62px;top:36px;width:757px}
-
         .p02-order{position:absolute;left:210px;top:753px;width:1100px;height:124px;display:flex;align-items:center;justify-content:center;padding:0;box-sizing:border-box}
         .p02-order span{font-family:'Cafe24 Ssurround';font-size:65px;color:var(--c-ink);letter-spacing:-0.08em;text-align:center}
-
-        /* 과일이 깔리는 판(배경 통이미지의 어두운 패널 안쪽) */
         .p02-field{position:absolute;left:0;top:0;width:1920px;height:960px}
-
-        /* 과일마다 원본 비율이 달라서, 같은 크기의 칸을 먼저 놓고 그 안에서
-           가로·세로 모두 가운데 정렬함(좌상단 기준으로 붙이면 줄이 안 맞아 보임) */
         .p02-fruit{position:absolute;padding:0;margin:0;border:none;background:none;cursor:grab;touch-action:none;
           width:300px;height:210px;display:flex;align-items:center;justify-content:center}
         .p02-fruit img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;pointer-events:none}
         .p02-fruit.is-dragging{cursor:grabbing;z-index:50}
         .p02-fruit.is-collected{opacity:0;transform:scale(.35);transition:opacity .35s ease,transform .35s ease;pointer-events:none}
         .p02-fruit.is-wrong{animation:fix-word-shake .3s ease}
-
-        /* 바구니(드롭 영역) — 배경 통이미지의 바구니 위에 투명하게 겹침 */
         .p02-basket{position:absolute;left:1306px;top:576px;width:588px;height:332px;border-radius:40px}
     </style>
 </head>
@@ -234,9 +224,7 @@
           // 오답: 바구니에 들어갔다가 다시 포대자루(원래 자리)로 돌아감
           playWrong();
           goHome(el);
-          el.classList.remove('is-wrong');
-          void el.offsetWidth;
-          el.classList.add('is-wrong');
+          restartAnim(el, 'is-wrong');
         }
       };
 

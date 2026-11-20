@@ -6,30 +6,30 @@
 <title>순서도대로 일하는 AI</title>
 <link rel="stylesheet" href="../../resources/css/common.css">
 <style>
-.ask-pill {
-  font-size: 52px !important;
-  white-space: nowrap !important;
-  padding: 10px 50px 6px !important;
+.ask-pill.p07-ask {
+  box-shadow: 0 15px 0 0 rgba(10, 30, 90, 0.22);
 }
 
 .p07-panel {
   position: absolute;
-  left: 60px;
-  top: 180px;
-  width: 1800px;
-  height: 760px;
+  left: 50px;
+  top: 89px;
+  width: 1815px;
+  height: 827px;
   box-sizing: border-box;
-  border-radius: 30px;
-  background: #266cc8;
+  border: 4px solid var(--c-ink);
+  border-radius: 16px;
+  background: #1060c8;
+  z-index: 1;
 }
 .p07-fcard {
   position: absolute;
   left: 40px;
-  top: 40px;
-  width: 600px;
-  height: 680px;
+  top: 90px;
+  width: 610px;
+  height: 690px;
   box-sizing: border-box;
-  border-radius: 24px;
+  border-radius: 20px;
   background: var(--c-white);
   display: flex;
   align-items: center;
@@ -38,15 +38,15 @@
 .p07-ill {
   position: absolute;
   left: 680px;
-  top: 40px;
-  width: 1080px;
-  height: 400px;
+  top: 90px;
+  width: 1100px;
+  height: 408px;
   box-sizing: border-box;
-  border-radius: 24px;
-  border: 4px solid var(--c-blue);
+  border-radius: 20px;
+  border: 6px solid var(--c-white);
   background: var(--c-white);
   overflow: hidden;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
 }
 .p07-ill-img {
   width: 100%;
@@ -56,10 +56,10 @@
 }
 .p07-ring {
   position: absolute;
-  left: 45px;
-  bottom: 35px;
-  width: 160px;
-  height: 100px;
+  left: 115px;
+  bottom: 14px;
+  width: 310px;
+  height: 175px;
   box-sizing: border-box;
   border: dashed 5px #ff3b6b;
   border-radius: 50%;
@@ -74,50 +74,53 @@
 
 .p07-opts {
   position: absolute;
-  left: 680px;
-  top: 470px;
-  width: 1080px;
-  height: 250px;
+  left: 685px;
+  top: 524px;
+  width: 1088px;
+  height: 242px;
   display: flex;
-  gap: 30px;
+  gap: 34px;
 }
-.p07-opts .quiz-graph {
+.p07-opts .card-btn {
   flex: 1;
-  height: 250px;
-  box-sizing: border-box;
-  border: 4px solid #cbd5e1;
-  border-radius: 24px;
-  background: #ffffff;
+  min-width: 0;
+  height: 238px;
+  padding: 14px 12px 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 16px 12px 14px;
-  cursor: pointer;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-  user-select: none;
+  gap: 10px;
 }
-.p07-opts .quiz-graph:hover {
-  transform: translateY(-4px);
-  border-color: #339af0;
-  box-shadow: 0 16px 30px rgba(51, 154, 240, 0.25);
-  background: #f8fbff;
-}
-.p07-opt-img {
-  width: 125px;
-  height: 125px;
-  object-fit: contain;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.08));
+.p07-opt-ico {
+  position: relative;
+  width: 170px;
+  height: 144px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   pointer-events: none;
 }
-.p07-opts .quiz-graph b {
+.p07-opt-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.p07-opts .card-btn:hover .p07-opt-img {
+  filter: url(#p07ScrHover);
+}
+.p07-opts .card-btn:active .p07-opt-img,
+.p07-opts .card-btn.is-selected .p07-opt-img,
+.p07-opts .card-btn.is-pressed .p07-opt-img {
+  filter: url(#p07ScrActive) drop-shadow(0 0 10px #ecbeff) drop-shadow(0 0 4px #ecbeff);
+}
+.p07-opts .card-btn b {
   font-family: 'Cafe24 Ssurround', sans-serif;
   font-weight: 700;
-  font-size: 34px;
-  color: #1e293b;
-  letter-spacing: -0.04em;
+  font-size: 36px;
+  line-height: 1.1;
+  letter-spacing: -0.05em;
   white-space: nowrap;
   pointer-events: none;
 }
@@ -126,16 +129,30 @@
 </head>
 <body>
 <div id="page-fade"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <filter id="p07ScrHover" color-interpolation-filters="sRGB">
+      <feFlood flood-color="#8278ff" flood-opacity="0.5" result="c"/>
+      <feComposite in="c" in2="SourceAlpha" operator="in" result="m"/>
+      <feBlend in="SourceGraphic" in2="m" mode="screen"/>
+    </filter>
+    <filter id="p07ScrActive" color-interpolation-filters="sRGB">
+      <feFlood flood-color="#d168fb" flood-opacity="0.5" result="c"/>
+      <feComposite in="c" in2="SourceAlpha" operator="in" result="m"/>
+      <feBlend in="SourceGraphic" in2="m" mode="screen"/>
+    </filter>
+  </defs>
+</svg>
 <div id="viewport" class="viewport">
   <div id="stage-spacer">
     <div id="stage" class="stage">
       <main class="bg-default">
-        <p class="ask-pill is-fit"><span id="p07Ask"></span></p>
+        <p class="ask-pill is-fit is-tight p07-ask"><span id="p07Ask"></span></p>
 
         <div class="p07-panel">
           <div class="p07-fcard" id="p07Chart"></div>
           <div class="p07-ill" id="p07Ill"></div>
-          <div class="p07-opts" id="p07Opts"></div>
+          <div class="p07-opts opts" id="p07Opts"></div>
         </div>
 
         <div class="ox-result-wrong is-avatar is-off" id="p07Wrong">
@@ -170,7 +187,7 @@
   const INK = '#1b1640';
   const T = (x, y, s, fs, c) => '<text x="' + x + '" y="' + y + '" text-anchor="middle" dominant-baseline="middle" style="' + F + ';font-size:' + (fs || 34) + 'px;fill:' + (c || INK) + ';letter-spacing:-1px">' + s + '</text>';
   const glow = (svg) => '<g filter="url(#gl)">' + svg + '</g>';
-  const stroke = (hl) => 'stroke="' + (hl ? '#ffcc00' : INK) + '" stroke-width="' + (hl ? 10 : 5) + '"';
+  const stroke = (hl) => 'stroke="' + (hl ? '#ff3be6' : INK) + '" stroke-width="' + (hl ? 10 : 5) + '"';
   const oval = (cx, y, w, s) => '<rect x="' + (cx - w / 2) + '" y="' + y + '" width="' + w + '" height="64" rx="50%" fill="#6dd36f" ' + stroke(0) + '/>' + T(cx, y + 35, s);
   const rect = (cx, y, w, s, hl) => '<rect x="' + (cx - w / 2) + '" y="' + y + '" width="' + w + '" height="64" rx="10" fill="#4a83c6" ' + stroke(hl) + '/>' + T(cx, y + 35, s, 34, '#fff');
   const dia = (cx, y, w, h, l1, l2, hl) => '<polygon points="' + cx + ',' + y + ' ' + (cx + w / 2) + ',' + (y + h / 2) + ' ' + cx + ',' + (y + h) + ' ' + (cx - w / 2) + ',' + (y + h / 2) + '" fill="#ffd34d" ' + stroke(hl) + ' stroke-linejoin="round"/>' + T(cx, y + h / 2 - 18, l1, 30) + T(cx, y + h / 2 + 13, l2, 30);
@@ -179,7 +196,7 @@
   function chart(hl) {
     const cx = 250, w = 340;
     const pick = (n, svg) => (hl.includes(n) ? glow(svg(1)) : svg(0));
-    let s = '<svg width="560" height="640" viewBox="0 0 560 640"><defs><filter id="gl" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#ffd400" flood-opacity="1"/></filter></defs>';
+    let s = '<svg width="560" height="640" viewBox="0 0 560 640"><defs><filter id="gl" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#ff3be6" flood-opacity="1"/></filter></defs>';
     s += oval(cx, 20, 200, '시작') + arrow(cx, 84, 112);
     s += pick(1, (h) => rect(cx, 112, w, '이동하며 청소하기', h)) + arrow(cx, 176, 204);
     s += pick(2, (h) => rect(cx, 204, w, '바닥 살펴보기', h)) + arrow(cx, 268, 296);
@@ -229,14 +246,20 @@
     wrap.innerHTML = '';
     ACTS.forEach((act, i) => {
       const b = document.createElement('button');
-      b.className = 'quiz-graph';
-      b.innerHTML = '<img src="' + act.icon + '" class="p07-opt-img" alt=""><b>' + act.title + '</b>';
+      b.className = 'card-btn';
+      b.innerHTML = '<span class="p07-opt-ico"><img src="' + act.icon + '" class="p07-opt-img" alt=""></span><b>' + act.title + '</b>';
       b.addEventListener('click', () => {
         if (locked) return;
         if (i === q.ok) {
           locked = true;
           playCorrect();
-          setTimeout(next, 600);
+          if (qi === QUIZ.length - 1) {
+            const imgEl = $('p07Ill').querySelector('.p07-ill-img');
+            if (imgEl) imgEl.src = 'img/p07_room_stage4.jpg';
+            setTimeout(next, 1200);
+          } else {
+            setTimeout(next, 600);
+          }
         } else {
           playWrong();
           flashLayer($('p07Wrong'), 'is-off', 2000);

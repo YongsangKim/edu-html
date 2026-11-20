@@ -271,11 +271,7 @@
       const row = $('p09PkRow');
       row.innerHTML = '';
       d.cards.forEach((c, i) => {
-        const a = document.createElement('a');
-        a.href = 'javascript:;';
-        a.className = 'card-btn';
-        a.textContent = c[0];
-        a.addEventListener('click', () => {
+        const a = makeCardBtn(c[0], '', () => {
           if (locked || picked[i]) return;
           if (c[1]) {
             picked[i] = true;
@@ -292,8 +288,8 @@
             flashLayer($('p09Wrong'), 'is-off', 2000);
             later(() => { locked = false; }, 2000);
           }
-        });
-        row.appendChild(a);
+        }, { tag: 'a', parent: row });
+        a.href = 'javascript:;';
       });
       $('p09Pick').classList.remove('is-off');
     };

@@ -6,10 +6,6 @@
     <title>AI의 실수를 직접 확인하고 수정하기</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 기획서 20~35p(Summery 표 반영), 시안 디자인/과학4차시/시안/p10_*.png. 가운데 폰(Gemini 채팅 공용 .gc-*) · 왼쪽 안내 말풍선+캐릭터 · 오른쪽 프롬프트 버튼.
-           흐름(3회 반복): 프롬프트 버튼 → 입력창에 글자가 써짐 → 보내기 → 생성 중(3초) → 생성됨 [다음] → 이미지 누르기 → 크게 보기 [다음] → 다음 수정 / 마지막은 3장 비교 → page11.
-           이미지는 img/p10_gen1~3.jpg 를 넣으면 자리표시자(원) 대신 보임 */
-
         .p10-side{position:absolute;left:1253px;top:0;width:595px;height:960px;display:flex;flex-direction:column;justify-content:center;gap:24px}
         .p10-side:empty{display:none}
         .p10-side .card-btn{width:100%;min-width:0;height:auto;min-height:100px;padding:22px 26px 14px;font-size:44px;line-height:1.2;letter-spacing:-0.05em;word-break:keep-all}
@@ -130,12 +126,7 @@
       base(r);
       gc.kb(true);
       sy('prompt');
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'card-btn js-sfx';
-      b.dataset.sound = 'sound/click.mp3';
-      b.textContent = R[r].prompt;
-      b.addEventListener('click', () => { playClick(); setSide(); gc.typePrompt(R[r].prompt, () => stepSend(r)); });
+      const b = makeCardBtn(R[r].prompt, '', () => { playClick(); setSide(); gc.typePrompt(R[r].prompt, () => stepSend(r)); });
       setSide(b);
     }
     function stepSend(r, edit) {

@@ -6,10 +6,6 @@
     <title>마음을 전하는 빙고 게임</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 3~17p. 3x3 빙고판에서 상황 카드를 골라 알맞은 말을 고르면 그 칸 완료(색 바뀜·다시 못 누름).
-           가로·세로·대각선 한 줄이 되면 BINGO + 팡파레 → 완료 팝업. 상황 삽화 img/p02_sit_{key}.jpg */
-
-
         .p02-board{position:absolute;left:58px;top:167px;width:1805px;height:743px;box-sizing:border-box;background:#faf7fb;border:solid 5px var(--c-navy);border-radius:20px}
         .p02-grid-bg{position:absolute;left:57px;top:161px;width:1806px;height:775px;background:var(--c-navy);border-radius:20px}
         .p02-cells{position:absolute;left:127px;top:180px;width:1663px;display:grid;grid-template-columns:repeat(3,541px);gap:10px 20px}
@@ -17,7 +13,7 @@
         .p02-cell img{display:block;width:100%;height:165px;object-fit:cover;object-position:50% 25%;border-radius:15px 15px 0 0}
         .p02-cell span{box-sizing:border-box;position:absolute;left:0;right:0;bottom:0;height:70px;display:flex;align-items:center;justify-content:center;padding-top:10px}
         .p02-cell.is-done{pointer-events:none;border-color:#ff4ff9;box-shadow:0 0 0 5px #ff4ff9}
-        .p02-cell .p02-star{height:auto;object-fit:fill;border-radius:0;position:absolute;left:50%;top:132px;width:130px;height:auto;translate:-50% -50%;z-index:2}
+        .p02-cell .p02-star{object-fit:fill;border-radius:0;position:absolute;left:50%;top:132px;width:130px;height:auto;translate:-50% -50%;z-index:2}
         .p02-line{position:absolute;height:28px;margin-top:-14px;background:#ff4ff9;border-radius:14px;z-index:1}
         .p02.is-grid .p02-board{display:none}
         .p02-bingo{position:absolute;left:739px;top:20px;width:458px;height:161px;margin:0;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:130px;
@@ -98,7 +94,6 @@
   <script src="../../resources/js/common.js"></script>
   <script>
   (function () {
-    // 빙고판 칸 순서(기획서 3p 배치): 왼쪽 위부터 가로로
     const CELLS = [
       { key: 'testgood', label: '시험을 잘 본 친구', text: '친구가 시험에서 좋은 점수를 받았어요.<br>어떤 말을 해주면 좋을까요?',
         opts: ['괜찮아,<br>다음에 잘하면 돼.', '정말 잘했어!<br>대단해!', '왜 맨날<br>잘 보는 거야?'], answer: 1 },
@@ -154,12 +149,7 @@
       $('p02SitText').innerHTML = c.text;
       optsBox.innerHTML = '';
       c.opts.forEach((o, k) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'card-btn';
-        btn.innerHTML = o;
-        btn.addEventListener('click', () => answer(i, k, btn));
-        optsBox.appendChild(btn);
+        const btn = makeCardBtn(o, '', () => answer(i, k, btn), { html: true, parent: optsBox });
       });
       $('p02BoardView').classList.add('is-off');
       $('p02SitView').classList.remove('is-off');

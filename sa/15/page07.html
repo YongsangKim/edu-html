@@ -6,9 +6,6 @@
     <title>Notebook으로 자료 정리하기</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 기획서 10~13p(와이어프레임 구조): 왼쪽 '내 컴퓨터-문서 폴더' 파일 4개, 가운데 공용 폰 틀(Gemini Notebook 소스 화면), 오른쪽 말풍선 + 캐릭터.
-           1단계: 믿을 수 있는 문서 2개를 소스 창으로 끌어 넣기(오답 파일은 흔들리며 제자리 + 오답 화면, 정답 시 '신뢰할 수 있는 문서입니다!' 1초 후 원래 문구)
-           2단계: 제작 기능 버튼 4개를 모두 눌러 안내 확인 → 종료 팝업 */
         .p06-files{position:absolute;left:82px;top:240px;width:561px;height:580px;box-sizing:border-box;padding:26px 32px 20px;background:var(--c-white);border:solid 5px var(--c-ink);border-radius:20px;box-shadow:0 10px 0 0 rgba(86,148,231,.2)}
         .p06-files.is-off,.p06-info.is-off{display:none}
         .p06-files h3{margin:0 0 14px;text-align:center;font-family:'Cafe24 Ssurround';font-size:42px;color:var(--c-ink);letter-spacing:-0.05em}
@@ -21,10 +18,7 @@
         .p06-ext{flex:0 0 auto;width:62px;height:62px;display:flex;align-items:center;justify-content:center;border-radius:10px;color:#fff;font-weight:800;font-size:20px;letter-spacing:-.02em}
         .p06-ext.is-pdf{background:#d93a35}
         .p06-ext.is-img{background:#8a6bd8}
-        .p06-ext.is-zip{background:#e0a21b}
         .p06-file small{display:block;font-weight:500;font-size:24px;color:#555}
-
-        /* #p06Ask{left:65px;transform:none;padding:20px 60px} */
 
         .p06-phone{top:180px;height:760px;border-bottom:0;border-bottom-right-radius:0;border-bottom-left-radius:0}
         .p06-phone .gn-screen{background:#fff;border-bottom-right-radius:0;border-bottom-left-radius:0}
@@ -32,7 +26,6 @@
         .p06-phone .gn-src.is-in{opacity:1}
         .p06-title{position:absolute;left:0;right:0;top:600px;text-align:center;font-size:22px;font-weight:700;color:#1a7f37}
 
-        /* 오른쪽 캐릭터 말풍선 세트: 공용 .guide-set 을 오른쪽으로 옮겨 씀(말풍선·캐릭터 좌표는 공용 포즈 값 그대로) */
         .p06-set{left:1150px;top:60px}
         .p06-set .guide-bubble small{display:block;width:100%;box-sizing:border-box;margin-top:14px;padding:12px 14px 6px;border:solid 4px var(--c-purple);border-radius:20px;background:#fff;font-size:32px}
 
@@ -58,7 +51,7 @@
         .p06-tip p{margin:0 0 8px;font-family:'Pretendard';font-weight:600;font-size:25px;line-height:1.35;color:#222;letter-spacing:-0.03em;word-break:keep-all}
         .p06-tip p b{display:block;font-size:27px;color:#1f5fd0}
         .p06-tip.is-off{display:none!important}
-        .p06-pop{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:100;background:rgba(27,23,56,.6);display:none}
+        .p06-pop{display:none}
         .p06-pop.is-on{display:block}
         .p06-pop-panel{position:absolute;left:360px;top:24px;width:1200px;box-sizing:border-box;padding:20px 40px 24px;background:var(--c-white);border:solid 6px var(--c-purple);border-radius:36px;box-shadow:0 12px 0 0 rgba(60,20,120,.35);display:flex;flex-direction:column;align-items:center;gap:14px}
         .p06-pop-panel h3{margin:0;font-family:'Cafe24 Ssurround';font-size:50px;color:var(--c-purple);letter-spacing:-0.05em}
@@ -74,7 +67,6 @@
         .p06-doc-body p{margin:0 0 8px;font-size:27px;line-height:1.4;font-weight:500;letter-spacing:-0.03em;word-break:keep-all}
         .p06-doc-body p.is-link{color:#1f5fd0;font-weight:800;text-decoration:underline}
         .p06-pop-btns{display:flex;gap:24px}
-        /* 미리보기(디자인 06p-1): 남색 판 + 위쪽 '미리보기' 알약 + 가운데 예시 그림. 그림 img/p07_prev_{slide|info|report|audio}.png (없으면 회색 임시 칸) */
         .p06-prev{position:absolute;left:1255px;top:237px;width:613px;height:640px;box-sizing:border-box;background:#02307f;border:solid 4px #7ba7e6;border-radius:14px;z-index:6;display:flex;align-items:center;justify-content:center}
         .p06-prev.is-off{display:none}
         .p06-prev.is-left{left:82px;top:267px}
@@ -127,7 +119,7 @@
 
           <div class="p06-prev is-off" id="p06Prev"><p class="p06-prev-tag">미리보기</p><div id="p06PrevB"></div></div>
 
-          <div class="p06-pop" id="p06Pop">
+          <div class="p06-pop dim-layer" id="p06Pop">
             <div class="p06-pop-panel">
               <h3>원문 내용을 확인하세요.</h3>
               <div class="p06-doc" id="p06Doc"></div>
@@ -279,7 +271,6 @@
       });
     }
 
-    /* 정리 화면(기획서 16p): 질문에 맞는 자료 버튼을 순서대로 고르면 다음 질문으로. 버튼을 누르면 오른쪽에 미리보기 예시 */
     const QZ = [
       { k: 'slide', q: '여러 그림을 한 장씩 나누어 설명하는 방식은 어떤 자료에 대한 설명일까요?' },
       { k: 'info', q: '중요한 내용을 한 장의 포스터로 정리해서 게시하려면 어떤 자료를 사용해야 할까요?' },
@@ -314,7 +305,7 @@
         const b = btns[k];
         if (k !== QZ[n].k) {
           playWrong();
-          b.classList.remove('is-shake'); void b.offsetWidth; b.classList.add('is-shake');
+          restartAnim(b, 'is-shake');
           return;
         }
         playCorrect();

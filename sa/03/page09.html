@@ -6,14 +6,11 @@
     <title>마음을 전하는 카드 만들기</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 47~49p. 상황 고르기 → 표현 고르기(틀리면 오답 팝업). 맞으면 선택(상황·문구)을 sessionStorage 'sa03p09'에 저장하고 page10(Canva 카드 만들기)으로 이동.
-           상황 그림 img/p09_sit_{key}.png, 오답 표현을 골랐을 때 안내는 기획서에 없어 빙고 게임 오답 문구를 씀. */
-
         .p09 .ask-pill.is-fit{max-width:none;letter-spacing:-0.1em}
         .p09-sits{position:absolute;left:57px;top:165px;width:1806px;height:612px;box-sizing:border-box;padding:0 38px;display:flex;align-items:center;gap:42px;
           background:#266cc8;border:solid 4px var(--c-ink);border-radius:24px}
         .p09-sit{flex:1 1 0;min-width:0;height:556px;padding:0;box-sizing:border-box;border:0;border-radius:12px;background:#faf8f9;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;align-items:center;
-          font-family:'Cafe24 Ssurround';font-size:48px;line-height:1.1;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all;box-shadow:0 0 0 6px rgba(255,255,2555,1)}
+          font-family:'Cafe24 Ssurround';font-size:48px;line-height:1.1;color:var(--c-ink);letter-spacing:-0.05em;word-break:keep-all;box-shadow:0 0 0 6px rgba(255,255,255,1)}
         .p09-sit i{flex:1 1 auto;width:100%;background:var(--c-purple) center / cover no-repeat}
         .p09-sit span{flex:0 0 133px;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 16px}
         .p09-sit:not(.is-selected):hover{box-shadow:0 0 0 6px color-mix(in srgb,var(--c-violet) 50%,transparent)}
@@ -35,12 +32,10 @@
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default p09">
-          <!-- 1. 상황 고르기 -->
           <div id="p09SitView">
             <p class="ask-pill is-fit">다음 중 한 가지의 상황을 고르세요.</p>
             <div class="p09-sits" id="p09Sits"></div>
           </div>
-          <!-- 2. 표현 고르기 -->
           <div class="is-off" id="p09ExprView">
             <p class="ask-pill is-fit" id="p09ExprHead"></p>
             <div class="p09-exprs" id="p09Exprs"></div>
@@ -104,7 +99,6 @@
       setTimeout(() => { stepNext.classList.add('is-disabled'); resetImageSwap(stepNext); fn(); }, 300);
     });
 
-    // 1. 상황
     Object.keys(SITUATIONS).forEach((key) => {
       const b = document.createElement('button');
       b.type = 'button';
@@ -119,7 +113,6 @@
       $('p09Sits').appendChild(b);
     });
 
-    // 2. 표현
     function showExpr() {
       const s = SITUATIONS[sitKey];
       $('p09SitView').classList.add('is-off');
@@ -128,17 +121,12 @@
       const box = $('p09Exprs');
       box.innerHTML = '';
       shuffleArray(s.right.map((t) => ({ t, ok: true })).concat(s.wrong.map((t) => ({ t, ok: false })))).forEach((o) => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'card-btn';
-        b.innerHTML = o.t;
-        b.addEventListener('click', () => {
+        const b = makeCardBtn(o.t, '', () => {
           playClick();
           box.querySelectorAll('.card-btn').forEach((x) => x.classList.toggle('is-selected', x === b));
           expr = o;
           if (!onStepNext) waitStepNext(checkExpr);
-        });
-        box.appendChild(b);
+        }, { html: true, parent: box });
       });
     }
     function checkExpr() {

@@ -6,9 +6,6 @@
     <title>경제Song! 가사 블록 조립하기</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 7p(조각 판·조립대) + 기획서 19~25p. 가사 퍼즐 3판(정답 5 + 오답 2, 자리 무작위). 정답 블록을 누르면 아래 빈칸에 차례로 붙고,
-           오답이면 말풍선 2초 + 빈칸에 정답이 1초 흐릿하게 보임. 다 맞히면 반짝 효과와 함께 한 문장으로 바뀜.
-           2·3판 완성 말풍선은 기획서에 1판(재화)만 있어 같은 형식으로 맞춤. 완성 가사는 sessionStorage 'sa06_lyrics'(Suno 활동에서 씀) */
 
         .p07-bubble{left:47px;bottom:720px;width:620px;padding:18px 10px;font-size:46px;z-index:5}
         .p07-bubble:before{--tail-x:300px}
@@ -16,7 +13,7 @@
 
         .p07-boardbg{position:absolute;left:660px;top:15px;width:1210px;height:515px;box-sizing:border-box;background:var(--c-navy);border:solid 10px var(--c-sky);border-radius:40px}
         #p07Board{z-index:2}
-        
+
         .p07-tab{left:52px;top:444px;width:580px;min-width:0;height:107px;padding:8px 0 10px 66px;white-space:nowrap;z-index:6;background:var(--c-white);border-color:var(--c-blue);color:var(--c-blue);font-size:62px;border-width:10px}
         .p07-tab:after{background:radial-gradient(circle 30px at 100% 0,transparent 20px,var(--c-blue) 20px 30px,var(--c-white) 30px);bottom:-3px}
         .p07-tray{position:absolute;left:52px;top:535px;width:1818px;height:415px;box-sizing:border-box;background:var(--c-white);border:solid 10px var(--c-blue);border-radius:30px;border-top-left-radius:0;z-index:4}
@@ -27,7 +24,6 @@
         @keyframes p07-shine{0%{opacity:0;transform:scale(.9);filter:brightness(2)}60%{opacity:1;transform:scale(1.05)}100%{transform:none;filter:none}}
         .p07-next{position:absolute;z-index:6;left:1450px;top:805px}
 
-        /* 마지막 스텝(디자인 7p-4): 큰 패널 + 리본 제목 + 알약 안내 + 하늘색 가사 상자 + 다음 */
         .p07-sum-panel{position:absolute;left:57px;top:105px;width:1806px;height:803px;box-sizing:border-box;background:#f8f6f6;border:solid 5px var(--c-ink);border-radius:14px}
         .p07-sum-ribbon{--rb-w:1514px;position:absolute;left:203px;top:45px;z-index:2}
         .p07-sum-pill{position:absolute;left:320px;top:208px;width:1282px;height:104px;margin:0;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;background:#fdf9f6;border:solid 5px var(--c-ink);border-radius:52px;box-shadow:0 10px 0 0 rgba(86,148,231,.2);
@@ -87,7 +83,6 @@
       { ask: '재화와 서비스에 대한<br>개념 설명 블록을 찾아<br>연결해서 가사를 만들어봐요!', wrong: '재화와 서비스의 개념에 대한<br>설명을 찾아봐요.', done: '좋아요!<br>재화와 서비스에 대한 가사를<br>완성했어요!',
         answer: ['재화는', '눈에', '보이는 것,', '서비스는', '편리함'], extra: ['택배는', '들리는 것,'] }
     ];
-    // 디자인 7p: 조각 크기(BS 판 위·TS 조립대)와 자리(판 위 7곳, 조각마다 무작위 배정). 정답 조각은 앞뒤가 맞물리는 모양(EDGES: 위·오른쪽·아래·왼쪽, 1 튀어나옴/-1 들어감)
     const BS = 200;
     const BM = 44;
     const TS = 270;
@@ -140,9 +135,7 @@
       const p = PUZZLES[index];
       if (b.i < 0) {
         playWrong();
-        el.classList.remove('is-wrong');
-        void el.offsetWidth;
-        el.classList.add('is-wrong');
+        restartAnim(el, 'is-wrong');
         bubble.innerHTML = p.wrong;
         clearTimeout(bubbleTimer);
         bubbleTimer = setTimeout(() => { bubble.innerHTML = p.ask; }, 2000);
@@ -192,7 +185,6 @@
       $('p07Summary').classList.remove('is-off');
     }
 
-    // ?step=N 으로 단계별 보기: 1·3·5 재화/서비스/개념 퍼즐 맞추는 중 · 2·4·6 그 판을 완성한 화면 · 7 마지막 요약. 그 단계에서 시작해도 다음으로 이어짐
     const wantStep = parseInt(new URLSearchParams(location.search).get('step'), 10);
     if (wantStep >= 1 && wantStep <= 7) {
       quiet = true;

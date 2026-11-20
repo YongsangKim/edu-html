@@ -6,13 +6,6 @@
     <title>우리 동네 안전 지킴이 인터뷰</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 기획서 21~46p. 가운데 공용 폰 틀(.phone-frame.has-cam) 안에 Gemini 화면(홈 → 채팅), 왼쪽 메인 캐릭터 + 말풍선, 오른쪽에는 누를 버튼.
-           흐름: Gemini 앱 → 입력창 클릭 → 프롬프트 불러오기 → 블록 6개를 순서대로 클릭해 입력 → 보내기 → 로딩 3초 → 안전 지킴이 인사
-                 → (질문 3개 × [질문 버튼 → 보내기 → 로딩 3초 → 답변 → 팩트체크 팝업 2개 → 말풍선 피드백])
-           page07에서 저장한 sa09_job · sa09_style(sessionStorage)로 프롬프트·답변을 고르고, 맞힌 팩트체크 수는 sa09_score로 page10에 넘김 */
-
-
-
         .p09-side{position:absolute;left:1253px;top:83px;width:595px;height:763px;box-sizing:border-box;padding:0 24px;display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:26px}
         .p09-side:empty{display:none}
         .p09-side .card-btn{width:100%;min-width:0;height:auto;min-height:100px;padding:8px 16px 4px;font-size:54px;line-height:1.2;letter-spacing:-0.05em}
@@ -26,7 +19,6 @@
         .p09-fc-opts .card-btn{min-width:0;width:auto;height:150px;padding:8px 20px 4px;font-size:50px;letter-spacing:-0.05em;line-height:1.2}
         .p09-fc-ox{flex-direction:row;justify-content:center;gap:150px}
         .p09-fc-ox .ox-pick{position:static;width:260px;height:260px;flex:0 0 auto}
-        .p09-fc .avatar-popup-extra{display:none}
     </style>
 </head>
 <body>
@@ -85,7 +77,6 @@
   <script src="../../resources/js/box-edit.js"></script>
   <script>
   (function () {
-    /* 기획서 27p 인사 · 34p 질문별 답변(쉽게/예시)과 팩트체크 정답(true=사실 O) · 35p 거짓일 때 피드백 */
     const JOBS = {
       police: {
         name: '경찰관',
@@ -155,13 +146,11 @@
     const fc = $('p09Fc');
     let score = 0;
 
-    /* 말풍선이 바뀔 때마다 상황에 맞는 포즈로 캐릭터도 바뀜(공용 sa/img/sa_*.png) */
     const charImg = $('p09Char');
     const charSet = $('p09Set');
     const POSES = ['main', 'wink_point', 'wink_point2', 'wink_point3', 'wink_point4', 'wink_present', 'main_wave', 'happy_jump', 'point_front'];
     POSES.forEach((p) => { new Image().src = '../img/character/sa_' + p + '.png'; });
     const say = initGuideSay({ bubble: bubble, img: charImg, set: charSet, keep: true });
-    // 상황별 말풍선 문구·포즈 한 곳(세 번째 true 는 넓은 말풍선). 포즈는 ?edit 포즈판에서 골라 이름만 바꿔 적음. 실제 진행과 ?edit 단계 보기가 같은 표를 씀
     const SAYS = {
       app: ['Gemini를 클릭해요.', 'wink_point2'],
       input: ['먼저, 프롬프트를 입력하여<br>안전 지킴이 역할을 부여해봐요.<br>입력창을 클릭해요.', 'wink_point4', true],
@@ -180,9 +169,7 @@
       fbLie: ['AI의 거짓말을 확인했어요!<br>', 'wink_present']
     };
     const sy = (key, tail) => { const t = SAYS[key]; say(t[0] + (tail || ''), t[1], !!t[2]); };
-    // 손가락 위치 보정 [dx, dy] — 눌러야 할 곳별. ?edit 로 손가락을 눌러 맞춘 뒤 표시줄 값을 옮겨 적음
     const FG = { app: [15, -37], input: [-142, -18], send: [22, -5] };
-    // 클릭 영역 보정 [dx, dy, dw, dh] — 버튼 모양은 그대로, 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
     const HOT = { app: [0, 0, 0, 0], input: [0, 0, 0, 0], send: [0, 0, 0, 0] };
     let fgKey = '?';
     const guide = (el, key, o) => {
@@ -229,13 +216,7 @@
       });
     }
     function btn(label, onclick, cls) {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'card-btn js-sfx ' + (cls || '');
-      b.dataset.sound = 'sound/click.mp3';
-      b.textContent = label;
-      b.addEventListener('click', () => { playClick(); clearFingers(); onclick(); });
-      return b;
+      return makeCardBtn(label, cls, () => { playClick(); clearFingers(); onclick(); });
     }
     const nextBtn = $('p09Next');
     function showNext(fn) {
@@ -249,7 +230,6 @@
       els.forEach((e) => side.appendChild(e));
     }
 
-    /* 21 Gemini 앱 */
     function stepApp() {
       phone.dataset.screen = 'home';
       sy('app');
@@ -258,36 +238,27 @@
       guide(app, 'app', { pulse: false });
       app.onclick = () => { playClick(); clearFingers(); stepOpen(); };
     }
-    /* 22 입력창 클릭 */
     function stepOpen() {
       phone.dataset.screen = 'chat';
       sy('input');
       guide(input, 'input');
       input.onclick = () => { input.onclick = null; playClick(); clearFingers(); kb(true); stepLoad(); };
     }
-    /* 23 프롬프트 불러오기 */
     function stepLoad() {
       sy('load');
       const b = btn('안전 지킴이 프롬프트 불러오기', stepBlocks);
       setSide(b);
     }
-    /* 24 블록 순서대로 클릭 */
     function stepBlocks() {
       sy('blocks');
       const grid = document.createElement('div');
       grid.className = 'p09-blocks';
       let next = 0;
       shuffleArray(BLOCKS.map((b, i) => ({ t: b[0], c: b[1], i }))).forEach((b) => {
-        const el = document.createElement('button');
-        el.type = 'button';
-        el.className = 'card-btn p09-block';
-        el.textContent = b.t;
-        el.addEventListener('click', () => {
+        const el = makeCardBtn(b.t, 'p09-block', () => {
           if (b.i !== next) {
             playWrong();
-            el.classList.remove('is-wrong');
-            void el.offsetWidth;
-            el.classList.add('is-wrong');
+            restartAnim(el, 'is-wrong');
             return;
           }
           playClick();
@@ -295,12 +266,10 @@
           next += 1;
           setInput(BLOCKS.slice(0, next).map((x) => x[0]).join(' '));
           if (next === BLOCKS.length) setTimeout(stepSend1, 500);
-        });
-        grid.appendChild(el);
+        }, { parent: grid });
       });
       setSide(grid);
     }
-    /* 25 보내기 → 26 로딩 → 27 인사 */
     function stepSend1() {
       setSide();
       sy('send');
@@ -323,17 +292,11 @@
       };
     }
 
-    /* 28~46 질문 3회 */
     function ask(q) {
       setSide();
       const go = () => {
         sy('askBtn');
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'card-btn p09-ask js-sfx';
-        b.dataset.sound = 'sound/click.mp3';
-        b.textContent = asks[q];
-        b.addEventListener('click', () => { playClick(); clearFingers(); setInput(asks[q]); stepSend(q); });
+        const b = makeCardBtn(asks[q], 'p09-ask', () => { playClick(); clearFingers(); setInput(asks[q]); stepSend(q); });
         setSide(b);
       };
       if (q === 0) { kb(true); go(); return; }
@@ -391,11 +354,8 @@
       }); opts.appendChild(b); });
     }
 
-    /* ?edit : 클릭 영역(HOT)과 손가락(FG)을 클릭해 방향키로 맞춤(Alt+방향키 = 영역 폭·높이). 표시줄 값을 코드의 HOT·FG 표에 옮겨 적을 것.
-       ?edit&step=1 홈(앱 아이콘) · 2 입력창 클릭 · 3 보내기 클릭 (질문 2·3회째도 같은 FG 값을 씀) */
     if (BoxEdit.on) {
       const think = () => { phone.classList.add('is-wait'); const ai = addAi(); ai.innerHTML = '<span class="gc-think"><i></i><i></i><i></i></span>'; };
-      /* 처음 프롬프트부터 q 번째 질문까지의 대화를 타이머 없이 바로 채움 */
       const convo = (q) => {
         chat.innerHTML = '';
         phone.dataset.screen = 'chat';

@@ -38,8 +38,8 @@
         .p08-cats>div{padding:6px 0 4px;border-radius:16px}
         .p08-cats>div[data-hit]{cursor:pointer}
 
-        .p08-rp{position:absolute;left:1300px;top:60px;width:560px;height:840px;box-sizing:border-box;border-radius:30px;background:#266cc8;padding:30px}
-        .p08-rp-in{position:relative;width:100%;height:100%;border-radius:24px;background:var(--c-white)}
+        .p08-rp{position:absolute;left:1300px;top:60px;width:560px;height:840px;box-sizing:border-box;border:4px solid var(--c-ink);border-radius:16px;background:#1060c8;padding:30px}
+        .p08-rp-in{position:relative;width:100%;height:100%;border-radius:20px;background:var(--c-white)}
         .p08-head{position:absolute;left:22px;top:16px;margin:0;display:flex;align-items:center;gap:8px;font-family:'Pretendard';font-size:24px;color:#6b6d7c}
         .p08-head svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
         .p08-list{position:absolute;left:0;right:0;top:64px;display:flex;flex-direction:column;align-items:center;gap:24px}
@@ -49,9 +49,9 @@
         .p08-ghost{position:absolute;z-index:60;pointer-events:none;filter:drop-shadow(0 8px 10px rgba(0,0,0,.3))}
         .p08-ghost.is-text{position:absolute}
 
-        .p08-track{position:absolute;left:50px;top:170px;width:400px;height:440px;box-sizing:border-box;border:solid 60px #e9774f;border-radius:200px;box-shadow:inset 0 0 0 4px #fff,0 0 0 4px #fff}
-        .p08-track:after{content:'';position:absolute;inset:-34px;border:dashed 4px #fff;border-radius:230px}
-        .p08-runner{position:absolute;left:0;top:0;width:110px;height:110px;display:flex;align-items:center;justify-content:center;pointer-events:none}
+        .p08-track{position:absolute;left:36px;top:120px;width:420px;height:530px;box-sizing:border-box;border:solid 64px #f77e3c;border-radius:210px;box-shadow:inset 0 0 0 4px #fff,0 0 0 4px #fff}
+        .p08-track:after{content:'';position:absolute;inset:-34px;border:dashed 4px #fff;border-radius:180px}
+        .p08-runner{position:absolute;left:0;top:0;width:120px;height:150px;display:flex;align-items:center;justify-content:center;pointer-events:none}
         .p08-runner img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 6px 10px rgba(0,0,0,0.2))}
 
         .p08-tags{position:absolute;left:0;right:0;top:120px;display:flex;flex-direction:column;align-items:center;gap:80px}
@@ -324,19 +324,19 @@
       const SEQ = ['start', 'a1', 'run', 'a2', 'dia', 'loop', 'run', 'a2', 'dia', 'loop', 'run', 'a2', 'dia', 'a3', 'walk', 'a4', 'end'];
       const runner = $('p08Runner');
       const runnerImg = $('p08RunnerImg');
-      const L = 80 + 2 * Math.PI * 170, ARC = Math.PI * 170;
+      const L = 220 + 2 * Math.PI * 178, ARC = Math.PI * 178;
       let pos = 0, speed = 0, last = 0;
       const place = () => {
         const d = pos * L;
         let x, y, a;
-        if (d < 40) { x = 80; y = 410 - d; }
-        else if (d < 40 + ARC) { a = Math.PI + (d - 40) / 170; x = 250 + 170 * Math.cos(a); y = 370 + 170 * Math.sin(a); }
-        else if (d < 80 + ARC) { x = 420; y = 370 + (d - 40 - ARC); }
-        else { a = (d - 80 - ARC) / 170; x = 250 + 170 * Math.cos(a); y = 410 + 170 * Math.sin(a); }
-        runner.style.left = (x - 55) + 'px';
-        runner.style.top = (y - 55) + 'px';
+        if (d < 110) { x = 68; y = 440 - d; }
+        else if (d < 110 + ARC) { a = Math.PI + (d - 110) / 178; x = 246 + 178 * Math.cos(a); y = 330 + 178 * Math.sin(a); }
+        else if (d < 220 + ARC) { x = 424; y = 330 + (d - 110 - ARC); }
+        else { a = (d - 220 - ARC) / 178; x = 246 + 178 * Math.cos(a); y = 440 + 178 * Math.sin(a); }
+        runner.style.left = (x - 60) + 'px';
+        runner.style.top = (y - 85) + 'px';
         if (runnerImg) {
-          runnerImg.style.transform = (d >= 80 + ARC) ? 'scaleX(-1)' : 'scaleX(1)';
+          runnerImg.style.transform = (d >= 220 + ARC) ? 'scaleX(-1)' : 'scaleX(1)';
         }
       };
       const frame = (ts) => {
@@ -351,8 +351,8 @@
       SEQ.forEach((id, i) => later(() => {
         setHl([id]);
         if (i === 2) speed = 0.28;
-        if (i === 12) { if (runnerImg) runnerImg.src = 'img/p08_runner_tired.png'; speed = 0.1; }
-        if (i === 14) { if (runnerImg) runnerImg.src = 'img/p08_runner_walk.png'; speed = 0.07; }
+        if (i === 12) { if (runnerImg) runnerImg.src = 'img/p08_runner_walk.png'; speed = 0.1; }
+        if (i === 14) { if (runnerImg) runnerImg.src = 'img/p08_runner_tired.png'; speed = 0.07; }
         if (i === 16) speed = 0;
       }, 500 + i * 800, my));
       later(() => {

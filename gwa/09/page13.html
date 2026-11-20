@@ -6,7 +6,6 @@
     <title>첫 블록 코딩, 엔트리로 배우는 순차</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 23p. 엔트리 기본 화면(개발 기능 없는 그림)을 보여 주고, 안내 창의 [다음]을 누르면 문구가 바뀌고 [시작하기] 버튼이 나옴(블록 3개가 위에서 차례로 쌓이는 연출). 엔트리 화면 그림은 HTML 모형, 이미지 img/p13_*.png, 캐릭터는 gwa/08 캐릭터 임시 복사본 */
         .en-view{background-image:url('img/p13_stage_bg.png');background-size:cover}
         .en-bot{background-image:url('img/p13_bot.svg')}
 
@@ -69,10 +68,13 @@
 
     $('enNext').addEventListener('click', () => {
       $('enNext').classList.add('is-off');
-      $('enGo').classList.remove('is-off');
+      const goBtn = $('enGo');
+      goBtn.classList.remove('is-off');
+      goBtn.classList.add('is-disabled');
       $('enText').textContent = '어려운 글자를 쓰지 않아도, 블록을 끼우기만 하면 컴퓨터가 그 순서대로 움직여요. 한번 같이 알아볼까요?';
       const ws = $('enWs');
-      ['입으로 이동하기', '위로 이동하기', '장으로 이동하기'].forEach((n, i) => {
+      const steps = ['입으로 이동하기', '위로 이동하기', '장으로 이동하기'];
+      steps.forEach((n, i) => {
         const b = document.createElement('div');
         b.className = 'en-blk blk';
         b.textContent = n;
@@ -80,6 +82,7 @@
         ws.appendChild(b);
         setTimeout(() => { b.style.opacity = '1'; b.style.transform = 'none'; }, 400 + i * 700);
       });
+      setTimeout(() => { goBtn.classList.remove('is-disabled'); }, 400 + (steps.length - 1) * 700 + 500);
     });
   })();
   </script>

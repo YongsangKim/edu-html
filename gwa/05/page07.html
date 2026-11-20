@@ -119,15 +119,11 @@
       show($('p07Obj'), true); show($('p07Tiles'), false);
       $('p07Cards').innerHTML = '';
       LABELS.forEach((t, i) => {
-        const b = document.createElement('button');
-        b.className = 'card-btn';
-        b.textContent = t;
-        b.addEventListener('click', () => {
+        const b = makeCardBtn(t, '', () => {
           playClick();
           $('p07Text').textContent = QS[q].texts[i];
           Array.from($('p07Cards').children).forEach((o) => o.classList.toggle('is-selected', o === b));
-        });
-        $('p07Cards').appendChild(b);
+        }, { parent: $('p07Cards') });
       });
       show($('p07Next'), true);
     }
@@ -140,11 +136,7 @@
       Array.from($('p07Tiles').querySelectorAll('b')).forEach(fit);
       $('p07Cards').innerHTML = '';
       d.opts.forEach((o, i) => {
-        const b = document.createElement('button');
-        b.className = 'card-btn';
-        b.innerHTML = img('c' + (i + 1)) + '<span>' + o[0] + '</span>';
-        b.addEventListener('click', () => pick(!!o[1]));
-        $('p07Cards').appendChild(b);
+        const b = makeCardBtn(img('c' + (i + 1)) + '<span>' + o[0] + '</span>', '', () => pick(!!o[1]), { html: true, parent: $('p07Cards') });
       });
     }
 

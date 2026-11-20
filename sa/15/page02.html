@@ -6,9 +6,6 @@
     <title>진짜? 가짜? 뉴스 판별기!</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 기획서 3~4p. 기사 5장(제목·출처만)을 한 장씩 가운데에 보여 주고, [원문확인]으로 원문 팝업을 본 뒤에만 분류 가능(안 보고 놓으면 안내 문구), 오른쪽 저장(정보 수집 가방) / 왼쪽 휴지통 칸으로 끌어 놓아 분류.
-           구조는 사회 6차시 page05(두 상자에 끌어 넣기)와 같음. 맞으면 칸으로 들어가고 다음 기사, 틀리면 제자리로 돌아오며 말풍선 문구 */
-        /* 디자인 02p: 가운데 남색 판 + 하얀 기사 카드, 아래 알림 줄(로봇+문구), 양옆 휴지통·저장 + 말풍선. 휴지통·저장 그림은 img/p02_trash.png · p02_save.png (없으면 임시 도형) */
         .p02-board{position:absolute;left:340px;top:226px;width:1240px;height:681px;box-sizing:border-box;background:#052a5e;border-radius:0 0 94px 94px;box-shadow:0 15px 0 0 rgba(52,39,94,0.3)}
         .p02-paper{position:absolute;left:388px;top:249px;width:1143px;height:433px;box-sizing:border-box;padding:34px 60px 110px;background:var(--c-white);border-radius:24px;
           cursor:url("../../resources/img/common/cursor_hand.png") 46 48,grab;touch-action:none;user-select:none;z-index:5;display:flex;flex-direction:column;gap:16px}
@@ -39,7 +36,7 @@
         .p02-tip.is-trash{left:8px;top:372px}
         .p02-tip.is-save{left:1545px;top:410px}
         .p02-tip.is-save::before{transform:scaleX(-1)}
-        .p02-pop{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:100;background:rgba(27,23,56,.6);display:none}
+        .p02-pop{display:none}
         .p02-pop.is-on{display:block}
         .p02-pop-panel{position:absolute;left:360px;top:24px;width:1200px;box-sizing:border-box;padding:20px 40px 24px;background:var(--c-white);border:solid 6px var(--c-purple);border-radius:36px;box-shadow:0 12px 0 0 rgba(60,20,120,.35);display:flex;flex-direction:column;align-items:center;gap:14px}
         .p02-pop-panel h3{margin:0;font-family:'Cafe24 Ssurround';font-size:50px;color:var(--c-purple);letter-spacing:-0.05em}
@@ -80,7 +77,7 @@
           <img class="p02-bar-av is-off" id="p02Av" src="../../resources/img/common/avatar_smile.png" alt="">
           <p class="p02-bar" id="p02Msg"></p>
 
-          <div class="p02-pop" id="p02Pop">
+          <div class="p02-pop dim-layer" id="p02Pop">
             <div class="p02-pop-panel">
               <h3>원문 내용을 확인하세요.</h3>
               <div class="p02-site" id="p02Site"></div>
@@ -149,7 +146,6 @@
       paper.innerHTML = '<h3>' + a.title + '</h3><p class="p02-src">' + a.src + '</p><button type="button" class="card-btn is-popup p02-open js-sfx" data-sound="sound/click.mp3">원문 확인</button>';
     }
 
-    /* 마우스 위치가 아니라 끄는 기사(paper)가 칸에 조금이라도 닿으면 그 칸(겹친 면적이 가장 큰 칸) */
     const zoneAt = () => {
       const p = paper.getBoundingClientRect();
       let best = null, bestArea = 0;
@@ -165,7 +161,7 @@
     paper.addEventListener('pointerdown', (e) => {
       if (busy || e.target.closest('.p02-open')) return;
       e.preventDefault();
-      const s = stage.getBoundingClientRect().width / 1920;
+      const s = currentScale;
       const sx = e.clientX, sy = e.clientY;
       let tx = 0, ty = 0;
       paper.setPointerCapture(e.pointerId);

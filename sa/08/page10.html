@@ -6,11 +6,6 @@
     <title>오늘은 내가 여행 플래너!</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 기획서 32~73p. 네이버 지도 실습(안동 하회마을). 휴대폰 화면은 기획서에 들어 있는 실제 네이버 지도 앱 캡처(img/p10_img{번호}.jpg, 기획서 그림 번호)를 그대로 쓰고,
-           식당 이름 가림·새 글자·사진 자리는 기획서 슬라이드의 위치·크기·색을 따라 위에 얹음(좌표는 휴대폰 화면 기준 %). 예약 폼·확인 화면은 실제 앱 모양을 HTML로 그림.
-           누를 곳(.p10-hot)은 투명 — 위치는 HIT 표(기본)+HOT 표(보정), 손가락은 FG 표. 사진 자리는 임시 이모지 이미지(img/p10_ph_*.png) — 실제 사진이 오면 같은 파일명으로 덮어쓰면 됨.
-           고른 식당·인원·날짜·시간은 예약 확인(46p)·완료(47p) 화면에 그대로 보여줌. 캐릭터는 임시로 sa/06 캐릭터 복사본 */
-
         .p10-pic{position:absolute;overflow:hidden}
         .p10-pic img{position:absolute;display:block;max-width:none}
         .p10-shp{position:absolute}
@@ -19,12 +14,10 @@
         .p10-chip44{position:absolute;top:64.4%;width:21.5%;height:5.4%;border:1px solid #d6d9df;border-radius:12px;background:#fff}
         .p10-d44{top:64.4%;width:21.5%;height:5.4%;padding:0;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:500;color:#222}
 
-        /* 누를 곳: 투명(깜빡임은 공용 .hit-pulse) */
         .p10-hot{z-index:7;position:absolute;box-sizing:border-box;padding:0;border:0;border-radius:14px;background:transparent;cursor:pointer}
         .p10-hot.is-off{pointer-events:none}
         .p10-hot.is-wrong{animation:fix-word-shake .3s ease}
 
-        /* 예약 폼·확인 화면: 실제 앱(1080x2340) 크기로 그린 뒤 화면 폭에 맞춰 축소 */
         .f{position:absolute;left:0;top:0;width:1080px;height:2340px;transform:scale(.4159,.37995);transform-origin:0 0;background:#fff;font-family:'Pretendard';color:#111;overflow:hidden}
         .f *{box-sizing:border-box}
         .f-stat{position:absolute;left:0;top:0;width:100%;height:107px;background:url('img/p10_img28.jpg') top / 100% auto no-repeat;z-index:4}
@@ -66,7 +59,6 @@
         .f-sm{position:absolute;margin:0;font:400 36px/1.3 'Pretendard';color:#444}
         .f-chev{position:absolute;right:34px;width:28px;height:28px;margin-top:20px;border:solid #444;border-width:0 5px 5px 0;transform:rotate(45deg)}
         .f-chv{display:inline-block;width:14px;height:14px;margin:0 0 6px 18px;border:solid #444;border-width:0 3px 3px 0;vertical-align:middle;transform:rotate(45deg)}
-        .p10-toast{display:none}
 
         .p10-input.card-btn{position:absolute;left:1290px;top:50%;transform:translateY(-50%);width:560px;height:auto;min-height:100px;padding:14px 30px 10px;display:flex;align-items:center;justify-content:center;font-size:44px;line-height:1.2}
         .p10-opts.cf-opts{top:50%;transform:translateY(-50%);gap:30px}
@@ -219,7 +211,6 @@
           ["s",0,31.7,100.1,62.8,"#ffffff",0]];
     LAY[72] = [["p",49,0,0,100.1,100,0,0,0,0]];
 
-    // 눌러야 할 곳의 기본 위치 [x%, y%, 폭%, 높이%] — 지도 캡처 위라 기준 요소가 없어서 이 표가 기준. 같은 자리는 같은 이름으로 씀
     const HIT = {
       search: [2.7, 4.8, 80.6, 5.9], star: [75, 52, 13, 5.5], save: [3.7, 88.1, 92.7, 5.8], topBack: [4, 5.4, 10, 4.8], navBack: [70, 94.7, 17, 4.7],
       info: [0.7, 56.7, 98.6, 8.8], hours: [0, 68.5, 99.2, 5.9], nearbyTab: [68, 49.8, 14, 5.2], reserve: [38, 65.8, 19.6, 6.1], searchOpt: [3.4, 16.7, 93.1, 4.9],
@@ -275,7 +266,6 @@
     const screen = $('p10Screen');
     const bubble = $('p10Bubble');
     const say = initGuideSay({ bubble, img: $('p10Char'), set: $('p10Set') });
-    // 손가락 위치 보정 [dx, dy] — 눌러야 할 곳 이름별. ?edit 로 손가락을 눌러 맞춘 뒤 표시줄 값을 옮겨 적음. 포즈는 STEPS 각 줄에 pose: '…' 를 적음('' 이면 main)
     const FG = {
       app: [15, -37], search: [-140, -20], star: [0, 0], save: [-150, -30],
       topBack: [0, 0], navBack: [10, -30], info: [-210, -40], hours: [-80, -30],
@@ -284,7 +274,6 @@
       depart2: [0, 0], save2: [0, 0], homeBtn: [20, -10], agree: [0, 0],
       book: [0, 0]
     };
-    // 클릭 영역 보정 [dx, dy, dw, dh] — HIT 기본 위치에서 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
     const HOT = {
       search: [0, 0, 0, 0], star: [0, 0, 0, 0], save: [0, 0, 0, 0],
       topBack: [0, 0, 0, 0], navBack: [0, 0, 0, 0], info: [0, 0, 0, 0],
@@ -301,8 +290,8 @@
     const input = $('p10Input');
     const nextBtn = $('p10Next');
     const picked = { restaurant: '국특원 찜닭', people: '', date: '', time: '' };
-    const PT = 3.1; // 기획서 1pt = 화면 3.1px
-    const LISTS = [42, 49, 50, 51, 54, 57, 63]; // 목록 화면: 기획서 글자가 실제 앱보다 커서 줄임
+    const PT = 3.1;
+    const LISTS = [42, 49, 50, 51, 54, 57, 63];
     const IC_P = ic('userFill', 'width="46" height="46" style="vertical-align:-8px;margin-right:14px"');
     const IC_C = ic('calendarFill', 'width="46" height="46" style="vertical-align:-8px;margin-right:14px"');
     let i = 0;
@@ -311,7 +300,6 @@
     const pct = (v) => v + '%';
     const isNoodle = () => picked.restaurant === '에듀국시';
 
-    // 기획서의 글자 중 고른 값으로 바뀌는 부분
     function dyn(t, s) {
       let o = t.replace(/〮/g, '·').replace('국특원 찜닭', picked.restaurant);
       if (s === 49 && o === '한식' && isNoodle()) o = '국수';
@@ -319,7 +307,6 @@
       return o;
     }
 
-    // 사진 자리(임시 이모지 이미지): 슬라이드·순서마다 어떤 사진을 넣을지
     function phImg(s, k) {
       if (s === 42) return ['chicken_a', 'chicken_b', 'noodle_a', 'noodle_b'][k];
       if (s === 49) return (isNoodle() ? ['noodle_a', 'noodle_b', 'chicken_b', 'chicken_a'] : ['chicken_a', 'chicken_b', 'noodle_b', 'noodle_a'])[k];
@@ -384,7 +371,6 @@
           }
           d.style.cssText = 'left:' + pct(e[10] === 'l' ? e[2] + 2.3 + (s === 42 ? 1.3 : 0) : e[2]) + ';top:' + pct(e[3]) + ';width:' + pct(e[4]) + ';height:' + pct(e[5]) + ';font-size:' + (e[7] * PT * (LISTS.includes(s) && e[7] >= 8 ? 0.55 : (s === 44 && e[7] >= 6 ? 0.82 : 1))) + 'px;font-weight:' + (e[8] ? 700 : 500) +
             (e[6] ? ';background:' + e[6] : '') + (e[9] ? ';color:' + e[9] : '') + (e[10] === 'ctr' ? ';text-align:center' : '') + (e[6] === '#999999' ? ';color:#111' : '');
-          // 식당 이름(제목)은 가운데 정렬이 아니라 원래 앱 제목처럼 한 줄 왼쪽 정렬 (기획서의 가운데 정렬은 잘못)
           if (e[10] === 'ctr' && e[1] === '국특원 찜닭' && e[6] !== '#F7F7F7') {
             d.style.textAlign = 'left';
             d.style.whiteSpace = 'nowrap';
@@ -437,9 +423,7 @@
             const b = ev.currentTarget;
             if (row.wrong) {
               playWrong();
-              b.classList.remove('is-wrong');
-              void b.offsetWidth;
-              b.classList.add('is-wrong');
+              restartAnim(b, 'is-wrong');
               say(row.wrong, st.pose || 'main');
               return;
             }
@@ -452,17 +436,11 @@
       }
       if (st.opts) {
         st.opts.forEach((t) => {
-          const b = document.createElement('button');
-          b.type = 'button';
-          b.className = 'card-btn js-sfx';
-          b.dataset.sound = 'sound/click.mp3';
-          b.innerHTML = t;
-          b.addEventListener('click', () => {
+          const b = makeCardBtn(t, '', () => {
             if (st.last) { playCorrect(); $('p10Done').classList.remove('is-off'); return; }
             playClick();
             go();
-          });
-          $('p10Opts').appendChild(b);
+          }, { html: true, parent: $('p10Opts') });
         });
       }
       if (st.input) {
@@ -481,7 +459,6 @@
     const HOL = { 3: '개천절', 5: '대체휴일', 9: '한글날' };
     const fdate = (d) => '10. ' + d + '. (' + DOW[(d + 3) % 7] + ')';
 
-    // 45p: 인원 → 날짜 → 시간 순서로 처음 선택(그 뒤 변경은 자유), 셋 다 고르면 다음 활성
     function reserveForm() {
       let cal = DOW.map((d, c) => '<div class="f-wd" style="left:' + (113 + 142.4 * c) + 'px">' + d + '</div>').join('');
       for (let d = 1; d <= 31; d++) {
@@ -537,7 +514,6 @@
       $('fNext').addEventListener('click', () => { playClick(); go(); });
     }
 
-    // 46p: 선택 내용 확인 → 동의 체크 → 예약하기
     function confirmForm() {
       const f = document.createElement('div');
       f.className = 'f';
@@ -577,7 +553,6 @@
       $('fBook').addEventListener('click', () => { playCorrect(); go(); });
     }
 
-    // 좌표 수정 모드(?edit): 눌러야 할 곳(점선 박스)과 손가락을 눌러 방향키(1px, Shift 10px)로 맞추고 표시줄 값을 HOT·FG 표에 붙여 넣음
     BoxEdit.stepEdit({
       unit: 1,
       count: STEPS.length + 1, get: () => i + 1, set: (n) => { i = n - 1; }, go: (n) => { if (n < 1) return; BoxEdit.syncStep(n); i = n - 1; render(); },

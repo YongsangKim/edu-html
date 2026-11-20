@@ -6,23 +6,13 @@
     <title>여행 계획 순서 맞추기</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 8차시 08p(휴대폰 화면 제외) · 기획서 23~30p. 여행 계획 카드 6장(순서 무작위) 중 지금 할 일을 차례로 고르기(6단계).
-           맞으면 다음 단계, 틀리면 흔들림 + 정답 카드 2초 반짝임. 오른쪽 휴대폰은 1단계엔 빈 화면에 네이버 지도 아이콘(../../resources/img/app/logo_navermap.png), 2단계부터 그 단계의 네이버 지도 화면(img/p08_map_{2~6}.jpg).
-           다 끝나면 마무리 안내(캐릭터 + 다음) → 단계 순서 정리 + 'AI 추천 장소는 참고하고...' 안내(30p). ?step=7 마무리 안내, ?step=8 단계 순서 정리 */
-
         .p08-phone{left:1400px}
         .p08-screen{width:100%;height:100%;background:var(--c-white) url('../../resources/img/app/logo_navermap.png') center / 220px 220px no-repeat}
         .p08-screen[style*=p08_map]{background-color:var(--c-pale);background-size:100% 100%}
 
         .p08-ask{position:absolute;left:75px;top:50px;width:1252px;height:360px;margin:0;box-sizing:border-box;padding:20px 40px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;
           background:#dff4ff;border:solid 5px #0b3a8f;border-radius:14px;font-family:'Cafe24 Ssurround';font-size:70px;line-height:1.2;color:var(--c-ink);text-align:center;letter-spacing:-0.05em;word-break:keep-all}
-        .p08-ask.is-q1{font-size:70px}
-        .p08-ask.is-q2{font-size:50px}
-        .p08-ask.is-q3{font-size:50px}
-        .p08-ask.is-q4{font-size:50px}
-        .p08-ask.is-q5{font-size:50px}
-        .p08-ask.is-q6{font-size:50px}
-        .p08-ask.is-end{font-size:50px}
+        .p08-ask.is-q2,.p08-ask.is-q3,.p08-ask.is-q4,.p08-ask.is-q5,.p08-ask.is-q6,.p08-ask.is-end{font-size:50px}
         .p08-ok{display:block;margin-bottom:6px;font-size:72px;line-height:1.1;font-weight:normal;color:#2a6bd0}
         .p08-cards{position:absolute;left:75px;top:437px;width:1252px;height:475px;box-sizing:border-box;padding:45px 48px 0;display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:175px;gap:30px 25px;align-content:start;background:#2a6bd0;border-radius:14px}
         .p08-card.card-btn{min-width:0;width:100%;height:175px;padding:0 12px;display:flex;align-items:center;justify-content:center;font-size:50px;line-height:1.15;word-break:keep-all}
@@ -103,12 +93,7 @@
       box.innerHTML = '';
       box.classList.remove('is-locked');
       shuffleArray(Object.keys(CARDS)).forEach((key) => {
-        const btn = document.createElement('button');
-        btn.className = 'card-btn p08-card';
-        btn.dataset.key = key;
-        btn.innerHTML = CARDS[key];
-        btn.addEventListener('click', () => pick(btn, key === s.answer));
-        box.appendChild(btn);
+        const btn = makeCardBtn(CARDS[key], 'p08-card', () => pick(btn, key === s.answer), { html: true, data: { key: key }, parent: box });
       });
     }
 
@@ -131,9 +116,7 @@
     function pick(btn, right) {
       if (!right) {
         playWrong();
-        btn.classList.remove('is-wrong');
-        void btn.offsetWidth;
-        btn.classList.add('is-wrong');
+        restartAnim(btn, 'is-wrong');
         const hint = box.querySelector('[data-key="' + STEPS[step].answer + '"]');
         hint.classList.add('is-hint');
         setTimeout(() => hint.classList.remove('is-hint'), 2000);
@@ -149,7 +132,6 @@
       }, 1000);
     }
 
-    // ?step=N : 1~6 질문 단계 · 7 마무리 안내 · 8 단계 순서 정리
     const wantStep = parseInt(new URLSearchParams(location.search).get('step'), 10);
     if (wantStep >= 7) { finish(); if (wantStep >= 8) summary(); }
     else { step = wantStep >= 1 ? wantStep - 1 : 0; show(); }

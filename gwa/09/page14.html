@@ -6,7 +6,6 @@
     <title>첫 블록 코딩, 엔트리로 배우는 순차</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 24~31p. 엔트리 실습창 한 화면에서 단계(phase)가 바뀜: 1. 4구역 살펴보기(마우스를 올리면 밝아지고 누르면 체크, 순서 자유) → 2. 움직임 누르기 → 3. 이동하기 블록을 시작 블록 아래에 끼우기 → 4. 끼운 블록 끌어 보기 → ⑤ 휴지통에 버리기 → ⑥ 입→위→장 안내 → ⑦ 블록 3개를 순서대로 끼우기 → ⑧ 시작하기로 엔트리봇 실행. 블록은 위에서 아래로 착 붙고, 틀리면 놓은 자리에 남아 노랗게 깜빡임. 이미지 img/p13_*.png·p14_*.png */
         .en-view{background-image:url('img/p13_stage_bg.png')}
         .en-star{width:30px;height:30px}
         .en-bot{background-image:url('img/p13_bot.svg');transition:left 1s ease,top 1s ease,width .6s ease,height .6s ease,margin .6s ease}
@@ -336,7 +335,7 @@
           let el = b;
           if (Number(b.dataset.idx) !== step) { b.remove(); el = list.querySelector('.en-blk[data-idx="' + b.dataset.idx + '"]'); }
           if (el) {
-            el.classList.remove('is-blink'); void el.offsetWidth; el.classList.add('is-blink');
+            restartAnim(el, 'is-blink');
             el.addEventListener('animationend', () => el.classList.remove('is-blink'), { once: true });
           }
           playWrong();

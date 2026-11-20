@@ -6,7 +6,6 @@
     <title>오늘은 무슨 옷을 입을까?</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 48p-ok-1~13, 기획서 최종본 46~51p + 수정2(옷장 구성). 배경 p13_bg.jpg는 안내 문구·날씨 판(리본)·방·빈 옷장만 든 통이미지 */
         main{background:url('img/p13_bg.jpg') no-repeat}
 
         .p13-cards{position:absolute;left:225px;top:452px;width:370px;height:310px}
@@ -26,12 +25,10 @@
         .p13-arrow.is-prev:hover{background-image:url('../../resources/img/common/btn_arrow_left_over.png')}
         .p13-arrow.is-next{left:608px;background-image:url('../../resources/img/common/btn_arrow_right.png')}
         .p13-arrow.is-next:hover{background-image:url('../../resources/img/common/btn_arrow_right_over.png')}
-        /* 처음/마지막 카드에서 막힌 쪽은 분홍(_on) 모양 — 디자인 15일 화면 기준 */
         .p13-arrow.is-prev.is-disabled{background-image:url('../../resources/img/common/btn_arrow_left_on.png');pointer-events:none}
         .p13-arrow.is-next.is-disabled{background-image:url('../../resources/img/common/btn_arrow_right_on.png');pointer-events:none}
 
         .p13-char{position:absolute;left:840px;top:160px;width:400px;height:800px;z-index:5;pointer-events:none}
-        /* 캐릭터 이미지는 그 단계까지 입은 옷이 다 그려진 전신 한 장씩(크기 제각각) → 원본 크기로 발끝·가운데 맞춤, 마지막에 입힌 한 장만 보임 */
         .p13-char img{position:absolute;left:50%;bottom:15px;transform:translateX(-50%)}
         .p13-char img[hidden]{display:none}
         .p13-wear-top{z-index:1} .p13-wear-bottom{z-index:2} .p13-wear-outer{z-index:3} .p13-wear-acc{z-index:4}
@@ -167,9 +164,7 @@
       back.querySelector('.p13-card-date').textContent = after ? after.day + '일' : '';
       prev.classList.toggle('is-disabled', cardIdx === 0);
       next.classList.toggle('is-disabled', cardIdx === ROUND.cards.length - 1);
-      front.classList.remove('is-flip');
-      void front.offsetWidth;
-      front.classList.add('is-flip');
+      restartAnim(front, 'is-flip');
     }
     prev.addEventListener('click', () => { if (cardIdx > 0) { cardIdx -= 1; showCard(); } });
     next.addEventListener('click', () => { if (cardIdx < ROUND.cards.length - 1) { cardIdx += 1; showCard(); } });

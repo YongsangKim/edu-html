@@ -183,12 +183,7 @@
     let built = 0;
     const starts = cols.slice(FIXED).map((c, k) => {
       const i = FIXED + k;
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'card-btn p08-start';
-      b.textContent = '시작';
-      b.style.left = (56 + PITCH * i + 4) + 'px';
-      b.addEventListener('click', () => {
+      const b = makeCardBtn('시작', 'p08-start', () => {
         playClick();
         active = c;
         b.classList.add('is-selected');
@@ -197,8 +192,8 @@
         starts.forEach((s) => { if (!s.classList.contains('is-selected')) s.disabled = true; });
         plus.disabled = false;
         minus.disabled = false;
-      });
-      band.appendChild(b);
+      }, { parent: band });
+      b.style.left = (56 + PITCH * i + 4) + 'px';
       return b;
     });
 

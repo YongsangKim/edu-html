@@ -6,9 +6,6 @@
     <title>AI 허브의 생각 상자! 조건문 코딩</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 20~27p. 캐릭터 말풍선(요구사항)을 보고 조건문 빈칸에 알맞은 카드를 골라 넣기, 5라운드(5라운드는 빈칸 2개 심화).
-           맞으면 빈칸이 채워지고 정답 그림 팝업(img/p08_illust_r{1~5}.png), 틀리면 흔들림 + 오답 팝업 2초. 끝나면 완료 안내 2단계. 과학 캐릭터 gwa_main */
-
         .p08-bubble{position:absolute;margin:0;left:75px;bottom:520px;width:500px;min-height:200px;box-sizing:border-box;padding:30px;display:flex;align-items:center;justify-content:center;text-align:center;
           background:var(--c-cream);border:solid 5px var(--c-purple);border-radius:30px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
           font-family:'Cafe24 Ssurround';font-size:40px;line-height:1.3;color:var(--c-purple);letter-spacing:-0.05em;word-break:keep-all;z-index:2}
@@ -169,20 +166,14 @@
       optionsBox.innerHTML = '';
       optionsBox.className = 'p08-options' + (r.grid ? ' is-grid' : '');
       r.options.forEach((o) => {
-        const btn = document.createElement('button');
-        btn.className = 'card-btn p08-opt';
-        btn.textContent = o.text;
-        btn.addEventListener('click', () => pick(btn, o));
-        optionsBox.appendChild(btn);
+        const btn = makeCardBtn(o.text, 'p08-opt', () => pick(btn, o), { parent: optionsBox });
       });
     }
 
     function pick(btn, o) {
       if (o.slot === undefined) {
         playWrong();
-        btn.classList.remove('is-wrong');
-        void btn.offsetWidth;
-        btn.classList.add('is-wrong');
+        restartAnim(btn, 'is-wrong');
         flashLayer($('p08Wrong'));
         return;
       }

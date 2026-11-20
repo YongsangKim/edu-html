@@ -6,20 +6,11 @@
     <title>나의 자랑거리를 소개하는 뉴스</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* --desk(이미지 url)는 공용 CSS에서 var()로 쓰면 css/ 기준으로 풀려 깨지므로 이 규칙들은 페이지에 둠 */
         .cv-canvas, .cv-clips i{background:var(--desk,var(--c-white))}
         .cv-design b{display:block;width:150px;height:84px;background:var(--desk)}
-        /* 디자인 없음 - 기획서 27~41p(40~41p 개인정보 확인은 완성하기 뒤 모달). 가운데 휴대폰은 기획서 Canva 캡처를 CSS로 그린 것(공용 .cv, page08과 같은 틀).
-           꾸민 뉴스데스크는 page08 템플릿+스티커를 겹쳐서 표시. 앱 아이콘·AI 음성 아바타(img/p10_canva_icon, p10_voice_*)는 기획서 이미지에서 잘라낸 것.
-           앞 활동 결과는 sessionStorage(sa02_article, sa02_desk), 목차로 바로 들어오면 기획서 기본 조합. 음성 예시는 sound/p10_tts_{minjun|yuna}.m4a */
         .p10 .is-off{display:none}
 
-        /* 앱 아이콘 크기·위치는 sa/07 page09(Google 렌즈 앱)와 같게 */
-
         .cv[data-screen="typing"]>.phone-screen>.phone-nav{background:#dfe2e8}
-
-
-
 
         .cv-home, .cv-app, .cv-sheet, .kbd-db, .cv-textbar, .cv-txt{display:none}
         .cv[data-screen="phone"] .cv-home{display:block}
@@ -27,7 +18,7 @@
         .cv[data-screen="phone"]>.phone-screen>.phone-status em,.cv[data-screen="app"]>.phone-screen>.phone-status em{background:#333;color:#fff}
         .cv[data-screen="app"] .cv-app{display:block}
         .cv[data-screen="text"] .cv-tsheet, .cv[data-screen="voice"] .cv-vsheet{display:block}
-        .cv[data-screen="typing"] .kbd-db, .cv[data-screen="typing"] .cv-textbar{display:block}
+        .cv[data-screen="typing"] .kbd-db{display:block}
         .cv[data-screen="typing"] .cv-textbar{display:flex}
         .cv[data-screen="typing"] .cv-tabs{display:none}
         .cv[data-screen="phone"] .cv-tabs, .cv[data-screen="app"] .cv-tabs{display:none}
@@ -40,7 +31,6 @@
         .p10-load-btn{position:absolute;left:1302px;top:344px;width:515px;height:228px;font-size:56px;line-height:1.15}
         .p10-finish-btn{position:absolute;right:90px;bottom:60px;display:flex;align-items:center;justify-content:center;text-decoration:none}
 
-        .p10-privacy{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:100;background:rgba(27,23,56,.5)}
         .p10-privacy-panel{position:absolute;left:353px;top:80px;width:1214px;height:760px;box-sizing:border-box;background:var(--c-cream);border:solid 6px var(--c-purple);border-radius:60px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
           font-family:'Cafe24 Ssurround';color:var(--c-purple);letter-spacing:-0.04em}
         .p10-privacy-title{position:absolute;left:0;top:-50px;width:100%;margin:0;text-align:center}
@@ -182,7 +172,7 @@
           </a>
           <button type="button" class="card-btn is-popup p10-finish-btn is-off" id="p10Finish">완성하기</button>
 
-          <div class="p10-privacy privacy-modal is-off" id="p10Privacy">
+          <div class="p10-privacy privacy-modal is-off dim-layer" id="p10Privacy">
             <div class="p10-privacy-panel">
               <p class="p10-privacy-title"><span><img src="img/p10_icon_search.png" alt="">개인정보 탐지 중입니다</span></p>
               <p class="p10-privacy-sub">조합한 블록 내용 중에 민감한 개인정보가 섞여 있지 않나요?</p>
@@ -218,7 +208,6 @@
   <script>document.getElementById('kbdHost').outerHTML = kbdDbHtml();</script>
   <script>
   (function () {
-    // 기획서 28p: 앞 활동 없이 목차로 들어오면 기본 기사문 + 아침 뉴스·여자 아나운서 조합
     const DEFAULT_ARTICLE = '오늘의 주인공은 매일 꾸준히 연습해서 스스로 세운 목표를 이뤘다고 합니다. 매우 자랑스러운 기분이라고 전해왔습니다.';
     const DEFAULT_DESK = 'a1';
     const read = (k) => { try { return sessionStorage.getItem(k); } catch (e) { return null; } };
@@ -264,9 +253,7 @@
     phone.style.setProperty('--desk', "url('img/p08_sticker_" + desk.charAt(1) + ".png') 0 36% / 66% auto no-repeat, url('img/p08_tpl_" + desk.charAt(0) + ".jpg') center / cover no-repeat");
     phone.classList.add('is-edited');
 
-    // 손가락 위치 보정 [dx, dy] — 단계의 눌러야 할 곳(hit)별. ?edit 로 손가락을 눌러 맞춘 뒤 표시줄 값을 옮겨 적음
     const FG = { canva: [15, -37], design: [0, 0], text: [0, 0], textbox: [80, -30], check: [0, 0], voice: [0, 0], make: [40, -30] };
-    // 클릭 영역 보정 [dx, dy, dw, dh] — 버튼 모양은 그대로, 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
     const HOT = { canva: [0, 0, 0, 0], design: [0, 0, 0, 0], text: [0, 0, 0, 0], textbox: [0, 0, 0, 0], check: [0, 0, 0, 0], voice: [0, 0, 0, 0], make: [0, 0, 0, 0] };
     BoxEdit.hitPad(hits, HOT);
     let index = 0;
@@ -302,7 +289,6 @@
           if (index !== at) return;
           const fg = FG[step.hit] || [0, 0];
           pointFingerAt(target, step.hit === 'canva' ? { onMain: true, dx: fg[0], dy: fg[1] } : { onMain: true, beside: true, dx: fg[0], dy: fg[1] });
-          // 하단 탭·버튼을 가리킬 때 손가락이 화면(960px) 아래로 잘리지 않게
           if (!BoxEdit.on) document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.top = Math.min(parseFloat(f.style.top), 850) + 'px'; });
         };
         if (target.closest('.cv-track')) setTimeout(point, 450); else point();
@@ -321,14 +307,13 @@
       go();
     }));
 
-    // 편집 도구창 슬라이드: 마우스·손가락 모두(pointer + touch-action:none). 끄는 만큼 따라오고 40px 넘게 밀면 끝까지 넘어감
     const stage = document.getElementById('stage');
     let drag = null;
     tabs.addEventListener('pointerdown', (e) => {
       if (STEPS[index].hit !== 'swipe') return;
       e.preventDefault();
       tabs.setPointerCapture(e.pointerId);
-      drag = { x: e.clientX, scale: stage.getBoundingClientRect().width / 1920, dx: 0 };
+      drag = { x: e.clientX, scale: currentScale, dx: 0 };
       track.classList.add('is-drag');
       swipeFinger.classList.add('is-off');
     });
@@ -397,7 +382,6 @@
       }
     });
 
-    /* ?edit&step=N : 단계 N 으로 바로 열기(] [ 로 이동). 손가락(FG)·버튼 클릭 영역(HOT)을 클릭해 방향키로 조정(Alt+방향키 = 폭·높이). 오른쪽 아래 포즈판에서 캐릭터 포즈를 눌러 본 뒤 STEPS 줄의 pose 에 옮겨 적음 */
     BoxEdit.stepEdit({
       key: () => STEPS[index].hit || '?',
       count: STEPS.length + 1,

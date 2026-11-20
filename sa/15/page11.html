@@ -6,8 +6,6 @@
     <title>제미나이 Notebook 정복 퍼즐</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 기획서 18~19p. 섞여 있는 퍼즐 조각 4개를 끌어 위쪽 판에 1번부터 4번까지 일자로 놓기(디자인·배치는 사회 5차시 page05, 조각 모양은 공용 jigSvg).
-           맞는 자리에 놓으면 붙고, 틀리면 조각이 제자리로 돌아오며 그 단계의 오답 문구 팝업. 다 맞추면 마무리 팝업 */
         .p10-bubble{left:92px;bottom:691px;width:480px;padding:26px 10px;font-size:40px;margin:0;z-index:5}
         .p10-character{left:137px;top:272px;width:310px;height:300px;z-index:3}
         .p10-jigboard{left:640px;top:30px;width:1240px;height:500px}
@@ -20,8 +18,7 @@
         #p10Slots .jig-slot:nth-child(1) .jig-label.is-hint,#p10Slots .jig-slot:nth-child(4) .jig-label.is-hint{transform:translateY(16.5px)}
         #p10Slots .jig-slot:nth-child(2) .jig-label.is-hint{transform:translate(-16.5px,-16.5px)}
         #p10Wrong,#p10Done{z-index:120}
-        .p11-fin{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:10;pointer-events:none}
-        .p11-fin{opacity:0;transition:opacity .35s ease}
+        .p11-fin{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:10;pointer-events:none;opacity:0;transition:opacity .35s ease}
         .p11-fin.is-on{opacity:1}
         .p11-fin.is-off{display:none}
         .p11-old{transition:opacity .35s ease}
@@ -125,7 +122,7 @@
       el.addEventListener('pointerdown', (e) => {
         if (el.dataset.placed) return;
         e.preventDefault();
-        const s = stage.getBoundingClientRect().width / 1920;
+        const s = currentScale;
         const sx = e.clientX, sy = e.clientY;
         el.setPointerCapture(e.pointerId);
         el.classList.remove('is-back');

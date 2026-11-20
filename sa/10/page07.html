@@ -1,11 +1,4 @@
 <!DOCTYPE html>
-<!--
-  [편집 모드 사용법] 주소 뒤에 ?edit&scene=N (N=1~5) 을 붙여 열 때만 동작(평소 화면은 그대로) — 얼굴 따라가기 좌표(size·keys)를 영상을 멈춰 가며 맞춤
-    위쪽 막대 아래 편집 막대: 장면 선택 · ▶재생/❚❚멈춤(스페이스) · ◀▶ 1프레임(, .) · 시간 슬라이더 · 0초 0.82초… 링크(그 키로 이동)
-    영상 위를 클릭·드래그 = 얼굴 중심 위치 · 방향키 1px(Shift 10px) · Alt+방향키 크기(Shift 더 크게)
-    [이 시점 저장] 그 시간의 키를 바꾸거나 추가 · [이 시점 키 지우기] · [처음 값으로] · [복사] → 'size: …, keys: […]' 두 줄을 아래 SCENES 의 그 장면에 붙여 넣음(자동 저장 아님)
-    9페이지 PLACES 에도 같은 값을 붙여 넣어야 같게 보임 (scene 1=library · 2=mart · 3=post · 4=park, 5는 9페이지에서 안 씀)
--->
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -13,24 +6,14 @@
     <title>초상권을 지켜라!</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 기획서 34~45p. 장면 5장 중 하나 고르기 → 편집 화면: 안내 문구(▶로 넘김) → 모자이크/스티커 고르기 → 가리기 도구를 끌어 이웃 얼굴(빨간 영역)에 놓으면 달라붙음
-           → 얼굴 트래킹(처음엔 오류: 스티커가 얼굴을 놓침 → [다시 수정]으로 정상 트래킹) → [공유 준비 완료] → 모자이크된 영상 재생 확인 → 다음.
-           스티커 img/stk_*.png(기획서 그림 5) */
-
         .p07-ask{width:1135px}
-        .p07-pick{position:absolute;left:72px;top:172px;width:1777px;height:732px;box-sizing:border-box;background:#266cc8;border-radius:10px}
-        .p07-card{position:absolute;width:504px;height:322px;display:flex;flex-direction:column;justify-content:flex-start;box-sizing:border-box;padding:0;overflow:hidden;background:var(--c-white);border:solid 5px var(--c-white);border-radius:10px;box-shadow:10px 10px 0 0 rgba(24,45,152,.25);cursor:pointer;font-family:'Cafe24 Ssurround'}
-        .p07-pick .p07-card:nth-child(1){left:71px;top:30px}
-        .p07-pick .p07-card:nth-child(2){left:636px;top:30px}
-        .p07-pick .p07-card:nth-child(3){left:1200px;top:30px}
-        .p07-pick .p07-card:nth-child(4){left:355px;top:380px}
-        .p07-pick .p07-card:nth-child(5){left:919px;top:380px}
+        .p07-pick{position:absolute;left:72px;top:172px;width:1777px;height:732px;box-sizing:border-box;display:flex;flex-wrap:wrap;justify-content:center;align-content:flex-start;gap:28px 60px;padding:30px 40px;background:#266cc8;border-radius:10px}
+        .p07-card{position:relative;width:504px;height:322px;display:flex;flex-direction:column;justify-content:flex-start;box-sizing:border-box;padding:0;overflow:hidden;background:var(--c-white);border:solid 5px var(--c-white);border-radius:10px;box-shadow:10px 10px 0 0 rgba(24,45,152,.25);cursor:pointer;font-family:'Cafe24 Ssurround'}
         .p07-card img{display:block;width:100%;height:232px;object-fit:cover}
-        .p07-card span{position:absolute;left:0;right:0;bottom:0;height:80px;box-sizing:border-box;padding:8px 6px 0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:38px;line-height:1.2;letter-spacing:-0.1em;color:var(--c-ink);white-space:nowrap}
+        .p07-card span{flex:1;box-sizing:border-box;padding:8px 6px 0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:38px;line-height:1.2;letter-spacing:-0.1em;color:var(--c-ink);white-space:nowrap}
         @media (hover:hover){.p07-card:hover{border-color:var(--c-violet);box-shadow:10px 10px 0 0 rgba(24,45,152,.25),0 0 0 4px var(--c-violet)}}
         .p07-card:active{border-color:var(--c-orchid);box-shadow:10px 10px 0 0 rgba(24,45,152,.25),0 0 0 4px var(--c-orchid)}
 
-        /* 편집 화면(디자인 [STB사회]_10차시_07p-1-2~8): 왼쪽 네이비 판 안에 영상 + 말풍선, 오른쪽 파란 판에 도구 */
         .p07-frame{position:absolute;left:44px;top:27px;width:1104px;height:825px;box-sizing:border-box;background:#052f6e;border-radius:30px;display:none}
         .p07-scene{position:absolute;left:72px;top:52px;width:1048px;height:662px;box-sizing:border-box;background:#000;border-radius:18px;overflow:hidden}
         .p07-vid{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:1;background:#000}
@@ -154,8 +137,6 @@
   <script src="../../resources/js/common.js"></script>
   <script>
   (function () {
-    // 영상 5개(sa/10/video/v1~v5.mp4, 5초)와 첫 화면 썸네일(img/p07_thumb_N.jpg). 영상마다 가려야 할 사람 얼굴 위치를 keys=[초, 좌우, 상하]로 적음(영상 폭·높이에 대한 0~1 비율, 얼굴 중심).
-    // size=가리개 지름(영상 폭에 대한 비율). 얼굴이 화면 밖으로 나가면 가리개도 같이 나감. 어긋나면 이 숫자만 고치면 됨
     const SCENES = [
       { thumb: 'p07_thumb_1', video: 'video/v1.mp4', label: '대출대에서 책을 빌리는 장면', size: .115,
         keys: [[0, .534, .226], [.82, .521, .226], [1.6, .525, .23], [2.4, .457, .231], [3.2, .252, .233], [3.64, .114, .2], [4, .004, .3], [4.6, -.12, .32], [5, -.2, .32]] },
@@ -168,7 +149,7 @@
       { thumb: 'p07_thumb_5', video: 'video/v5.mp4', label: '‘2관’ 표시와 출입문이 보이는 장면', size: 0.095,
         keys: [[0, .4, .258], [.84, .412, .246], [1.6, .463, .265], [2.4, .544, .31], [3.2, .631, .346], [4, .7, .353], [4.6, .745, .347], [5, .8, .4]] }
     ];
-    const LOST = 1.4;                      // 오류 때 스티커가 얼굴을 놓치고 그 자리에 멈추는 영상 시간(초)
+    const LOST = 1.4;
     let KEYS = [], CS = 150, HEAD = { x: 0, y: 0 }, override = null;
     const TEXTS = [
       '내가 찍은 사진이나 영상에 모르는 사람의<br>얼굴이 함께 찍혔다면,<br>인터넷에 올리기 전에 꼭 얼굴을 가려야 해요.',
@@ -187,7 +168,6 @@
     function setMore(fn) { moreAction = fn; more.classList.toggle('is-off', !fn); }
     more.addEventListener('click', () => { if (moreAction) moreAction(); });
 
-    // 1) 장면 고르기
     const grid = $('p07Pick');
     SCENES.forEach((s) => {
       const b = document.createElement('button');
@@ -198,7 +178,6 @@
       grid.appendChild(b);
     });
 
-    // 영상은 상자를 꽉 채우게(cover) 깔려 있어서, 영상 안 위치(0~1)를 상자 안 픽셀로 바꿈
     function toBox(fx, fy) {
       const W = scene.clientWidth, H = scene.clientHeight, dw = Math.max(W, H * 16 / 9), dh = dw * 9 / 16;
       return { x: (W - dw) / 2 + fx * dw, y: (H - dh) / 2 + fy * dh, dw: dw };
@@ -244,7 +223,6 @@
       if (st.ti === 2) { setMore(null); tools(true); }
     }
 
-    // 2) 도구 패널
     function tools(active, only) {
       list.innerHTML = '';
       $('p07Back').style.display = 'none';
@@ -300,13 +278,13 @@
 
     function guide(el) {
       const hand = $('p07Hand');
-      const sr = scene.getBoundingClientRect(), s = main.getBoundingClientRect().width / 1920, mr = main.getBoundingClientRect();
+      const sr = scene.getBoundingClientRect(), s = currentScale, mr = main.getBoundingClientRect();
       const er = el.getBoundingClientRect();
       const sx = (er.left - mr.left) / s + er.width / s / 2 - 20, sy = (er.top - mr.top) / s + er.height / s / 2 - 10;
       const tx = (sr.left - mr.left) / s + HEAD.x - 20, ty = (sr.top - mr.top) / s + HEAD.y - 10;
       hand.style.left = sx + 'px'; hand.style.top = sy + 'px';
       hand.style.setProperty('--hx', (tx - sx) + 'px'); hand.style.setProperty('--hy', (ty - sy) + 'px');
-      hand.classList.remove('is-run'); void hand.offsetWidth; hand.classList.add('is-run');
+      restartAnim(hand, 'is-run');
     }
     function stopGuide() { $('p07Hand').classList.remove('is-run'); }
     $('p07Hand').addEventListener('animationend', stopGuide);
@@ -348,7 +326,6 @@
       cover.style.backgroundPosition = it.src ? 'center' : '';
       st.item = it;
     }
-    // 모자이크: 영상(재생 전엔 첫 장면 썸네일)에서 얼굴 칸을 CELLS×CELLS 로 줄여 그린 뒤 늘려 보여 줌
     const CELLS = 10;
     const mos = $('p07Mos'), mosCtx = mos.getContext('2d');
     let thumbImg = null;
@@ -376,7 +353,6 @@
       setMore(() => { setMore(null); setText('얼굴 트래킹 기능을 클릭해보세요.'); tools(true, 'track'); });
     }
 
-    // 3) 영상 재생(트래킹 / 확인): 영상이 5초 한 번 재생되는 동안 가리개가 얼굴 위치(KEYS)를 따라감. 오류 모드는 LOST초에 얼굴을 놓치고 그 자리에 멈춤
     function run(mode, onEnd, bar) {
       cancelAnimationFrame(st.anim);
       const vid = $('p07Vid');
@@ -444,7 +420,6 @@
     });
     $('p07PopOk').addEventListener('click', () => hide($('p07Pop')));
 
-    // ---- 좌표 편집 모드: 주소 뒤에 ?edit&scene=1~5 — 영상을 멈춘 채 얼굴 위치(keys)·크기(size)를 맞추고 복사 ----
     function editMode() {
       const mm = location.search.match(/[?&]scene=([0-9]+)/);
       const idx = Math.min(Math.max((mm ? parseInt(mm[1], 10) : 1) - 1, 0), SCENES.length - 1);

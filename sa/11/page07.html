@@ -6,10 +6,6 @@
     <title>인권 존중 포스터 프롬프트</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 기획서 19~24p. 컨베이어 벨트 위 단어 블록(순서 무작위)을 [누가, 어디서, 무엇을 하는지] 칸으로 끌어 넣어 그림을 부탁하는 문장 만들기, 3라운드.
-           맞게 놓으면 벨트에서 사라지고 아래 칸에 조립, 틀리면(정위치가 아닌 곳·오답 블록) 벨트로 돌아감. 어디서 칸에는 정답 블록이 둘인 라운드가 있어(놀이터/운동장 · 교실/동아리실) 고른 쪽이 문장에 들어감.
-           세 칸이 다 차면 완성 팝업(문장 + 다음) */
-
         .p07-ask{top:23px;line-height:1.2;z-index:2;width:1700px}
         .p07-ask b{color:#2d5ee6}
         .p07-photo{position:absolute;left:52px;top:106px;width:1824px;height:609px;box-sizing:border-box;border:solid 6px var(--c-navy);border-radius:30px;background:url('img/p07_bg.jpg') center / cover no-repeat}
@@ -82,7 +78,6 @@
   <script src="../../resources/js/common.js"></script>
   <script>
   (function () {
-    // slot: 정답 칸(who·where·what), 없으면 오답 블록
     const ROUNDS = [
       [
         { t: '놀이터에서', slot: 'where' },
@@ -108,7 +103,6 @@
     ];
     const plain = (t) => t.replace(/<br>/g, ' ');
     const PAL = [['#ffcf0e', '#ffb70e'], ['#4e97ff', '#7272fe'], ['#b463ca', '#a043ed'], ['#fb8b16', '#ef6a59'], ['#4bcc24', '#19aa73'], ['#da5ba6', '#bf4573']];
-    // 모든 블록·칸 같은 모양: 위·오른쪽·아래·왼쪽 (1 튀어나옴, -1 들어감)
     const EDGES = [0, 1, 0, -1];
     const drawSlot = (sl, colors) => {
       const old = sl.querySelector(':scope > .jig');
@@ -147,9 +141,7 @@
         box.appendChild(el);
         return el;
       });
-      box.classList.remove('is-slide');
-      void box.offsetWidth;
-      box.classList.add('is-slide');
+      restartAnim(box, 'is-slide');
       initMatchDrag({
         cards, zones: slots, slop: 30,
         match: (card, zone) => card.dataset.slot === zone.dataset.slot,
@@ -159,9 +151,7 @@
         },
         onWrong: (card) => {
           playWrong();
-          card.classList.remove('is-wrong');
-          void card.offsetWidth;
-          card.classList.add('is-wrong');
+          restartAnim(card, 'is-wrong');
         },
         onDone: () => {
           $('p07Slots').classList.add('is-joined');

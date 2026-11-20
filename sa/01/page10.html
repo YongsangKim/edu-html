@@ -6,24 +6,17 @@
     <title>나의 미래 모습 만들기</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 폰 틀은 공용 .phone-frame, 폰 속 ChatGPT 화면·키보드는 CSS. 안내 로봇은 공용 sa/img/character/sa_wink_point3.png(.guide-set), 손가락은 공용 pointFingerAt */
-        /* .phone-screen{z-index:10} */
         .p10-hide{display:none}
-        /* .p10-phone{left:735px;top:21px;width:450px;height:895px} */
-        /* .p12-bw-wide{--gb-left:115px;--gb-w:642px;--tail-x:297px} */
-        .p12-bw-gen{--gb-left:155px;--gb-w:560px;--tail-x:257px}
 
-        .p12-card{left:1257px;width:581px;height:148px;padding:0 24px;border:solid 5px #1d1850;border-radius:42px;background:#f4f6fb;overflow:visible;display:flex;align-items:center;justify-content:center;
+        .p12-g2,.p12-g3,.p12-g4{position:absolute;left:1257px;display:flex;flex-direction:column}
+        .p12-g2{top:252px;gap:56px}
+        .p12-g3{top:136px;gap:43px}
+        .p12-g4{top:72px;gap:21px}
+        .p12-card{position:static;width:581px;height:148px;padding:0 24px;border:solid 5px #1d1850;border-radius:42px;background:#f4f6fb;overflow:visible;display:flex;align-items:center;justify-content:center;
           font-family:'Cafe24 Ssurround';font-size:66px;letter-spacing:-0.07em;color:#1f64d0;white-space:nowrap}
         .p12-card:hover{border-color:var(--c-violet)}
         .p12-card:active{border-color:var(--c-orchid)}
         .p12-card.is-selected{border-color:#ff2fc2;box-shadow:inset 0 0 0 5px #ff2fc2}
-        .p12-g2 .p12-card:nth-child(1){top:252px}
-        .p12-g2 .p12-card:nth-child(2){top:456px}
-        .p12-g4 .p12-card:nth-child(1){top:72px}
-        .p12-g4 .p12-card:nth-child(2){top:241px}
-        .p12-g4 .p12-card:nth-child(3){top:410px}
-        .p12-g4 .p12-card:nth-child(4){top:579px}
         .p12-g3 .p12-card{display:none}
         .p12-g3 .p12-card.is-show{display:flex}
         .p12-actions{position:absolute;left:1370px;top:800px;width:530px}
@@ -33,7 +26,8 @@
         .phone-screen.has-kb .phone-nav{display:none}
         .p12-prompt-bubble{position:absolute;right:20px;top:120px;max-width:300px;box-sizing:border-box;padding:16px 18px;border-radius:26px;background:#e6effa;font-family:'Pretendard';font-size:17px;line-height:1.4;font-weight:500;color:#1a2a4a;text-align:left;z-index:3}
         .p12-prompt-bubble .prompt-value{color:inherit}
-        .p12-gen{position:absolute;left:20px;top:315px;width:290px;height:290px;box-sizing:border-box;border-radius:34px;background:#f2f2f2;z-index:3;overflow:hidden;font-family:'Pretendard';font-size:16px;font-weight:600;color:#444}
+        .p12-gen,.p12-result{position:absolute;left:20px;top:315px;z-index:3}
+        .p12-gen{width:290px;height:290px;box-sizing:border-box;border-radius:34px;background:#f2f2f2;overflow:hidden;font-family:'Pretendard';font-size:16px;font-weight:600;color:#444}
         .p12-gen b{position:absolute;left:26px;top:26px;font-weight:600;letter-spacing:-0.02em}
         .p12-gen i{position:absolute;left:0;top:0;width:100%;height:100%;
           background:radial-gradient(circle,#b9b9b9 2.4px,transparent 2.8px) 3px 3px/15px 15px;
@@ -43,8 +37,7 @@
           animation:p12-wave 1.6s ease-out infinite}
         @property --w0{syntax:'<length>';inherits:false;initial-value:0px}
         @keyframes p12-wave{from{--w0:0px;opacity:1}to{--w0:120px;opacity:0}}
-        .p12-result{position:absolute;left:20px;top:315px;width:330px;z-index:3}
-        .p12-result{border-radius:24px}
+        .p12-result{width:330px;border-radius:24px}
         .p12-result img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:24px}
         .p12-send{display:none}
     </style>
@@ -290,7 +283,6 @@
     ['barista', 'food', 'store'], ['food', 'care', 'barista'], ['food', 'pack', 'barista'], ['pack', 'barista', 'food'],
     ['store', 'library', 'stage'], ['stage', 'care', 'food'], ['craft', 'stage', 'pack'], ['pack', 'store', 'stage']
   ];
-  var TOPS = [136, 327, 518];
   var like = 1, good = 1;
   document.querySelectorAll('.step-panel[data-step="2"] .p12-card').forEach(function (c) { c.addEventListener('click', function () { like = Number(c.dataset.pick); }); });
   document.querySelectorAll('.step-panel[data-step="3"] .p12-card').forEach(function (c) { c.addEventListener('click', function () { good = Number(c.dataset.pick); }); });
@@ -299,7 +291,7 @@
     document.querySelectorAll('.p12-g3 .p12-card').forEach(function (c) {
       var i = keys.indexOf(c.dataset.job);
       c.classList.toggle('is-show', i >= 0);
-      c.style.top = i >= 0 ? TOPS[i] + 'px' : '';
+      c.style.order = i >= 0 ? i : '';
     });
   });
   whenVisible(gen, function () { if (wantStep) return; setTimeout(function () { advancePanelOrNavigate(gen, 'page11.html'); }, 3000); });

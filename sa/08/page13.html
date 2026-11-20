@@ -6,10 +6,6 @@
     <title>여행 정보를 찾아라!</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 8차시 13p(휴대폰 화면 제외) · 기획서 78~82p. 5문제, 한 문제마다 게이지 20%. 왼쪽 휴대폰 네이버 지도 화면 img/p13_q{1~5}.jpg, 보기 순서 무작위.
-           틀리면 흔들림 + 휴대폰 화면 정답 부분 2초 강조(좌표는 화면 그림이 들어오면 맞춤), 다 맞히면 질문 상자에 '정답이에요!' 2초 뒤 다음 문제.
-           Q3은 정답 2개 모두 고르기. Q5 보기는 버튼 그림 img/p13_q5_opt{1~4}.jpg(기획서에 보기 목록이 없어 opt1=별 모양 버튼만 정답으로 둠) */
-
         .p13-gauge{left:768px;top:45px;width:1050px}
         .p13-gauge.is-thin:before{left:-116px;top:-32px;width:166px;height:158px;background-image:url('img/p13_flag.png')}
 
@@ -53,7 +49,6 @@
   <script src="../../resources/js/common.js"></script>
   <script>
   (function () {
-    // opts: [보기, 정답 여부], hl: 휴대폰 화면 안 강조 칸 [x%, y%, w%, h%] (실제 캡처 위치 기준)
     const QS = [
       { ask: '어느 곳으로 여행을 가나요?',
         opts: [['서울 국립중앙박물관', 1], ['부산 광안리 해수욕장'], ['안동 하회마을'], ['수원 화성']], hl: [[2, 52, 60, 5], [2, 62, 45, 4]] },
@@ -96,7 +91,6 @@
       layer.innerHTML = '';
       screen.style.backgroundImage = "url('img/p13_q" + (n + 1) + ".jpg')";
       if (q.tiles) {
-        // 실제 사진이 비치지 않게 사진 줄을 흰색으로 덮고, 그 위에 임시 사진 자리를 얹음
         [36.5, 62.5].forEach((y) => {
           const bg = document.createElement('div');
           bg.className = 'p13-bg';
@@ -116,11 +110,7 @@
       opts.classList.remove('is-locked');
       left = q.opts.filter((o) => o[1]).length;
       shuffleArray(q.opts).forEach(([label, right]) => {
-        const btn = document.createElement('button');
-        btn.className = 'card-btn p13-opt';
-        btn.innerHTML = q.img ? '<img src="img/p13_q5_opt' + label + '.jpg" alt="">' : label;
-        btn.addEventListener('click', () => pick(btn, !!right));
-        opts.appendChild(btn);
+        const btn = makeCardBtn(q.img ? '<img src="img/p13_q5_opt' + label + '.jpg" alt="">' : label, 'p13-opt', () => pick(btn, !!right), { html: true, parent: opts });
       });
     }
 
@@ -128,9 +118,7 @@
       if (btn.classList.contains('is-selected')) return;
       if (!right) {
         playWrong();
-        btn.classList.remove('is-wrong');
-        void btn.offsetWidth;
-        btn.classList.add('is-wrong');
+        restartAnim(btn, 'is-wrong');
         hint();
         return;
       }

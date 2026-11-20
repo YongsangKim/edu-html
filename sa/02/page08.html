@@ -6,17 +6,11 @@
     <title>나만의 뉴스데스크 꾸미기</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* --desk(이미지 url)는 공용 CSS에서 var()로 쓰면 css/ 기준으로 풀려 깨지므로 이 규칙들은 페이지에 둠 */
         .cv-canvas, .cv-clips i{background:var(--desk,var(--c-white))}
-        /* 디자인 없음 - 기획서 16~25p. 가운데 휴대폰은 기획서 Canva 앱 캡처를 CSS로 그린 것(캡처 이미지 없이 동작).
-           템플릿 img/p08_tpl_{a|b|c}.jpg, 스티커 img/p08_sticker_{1|2}.png는 기획서에 든 이미지. 완성 화면은 템플릿 위에 스티커를 겹침(page10·11도 같은 방식) */
         .p08 .is-off{display:none}
-
-
 
         .cv[data-screen="stickers"] .cv-h{top:226px}
         .cv[data-screen="stickers"] .cv-body{top:264px}
-
 
         .cv-sheet, .kbd-db, .cv-chips, .cv-h, .cv-body > *{display:none}
         .cv[data-screen="list"] .cv-sheet, .cv[data-screen="elements"] .cv-sheet, .cv[data-screen="search"] .cv-sheet, .cv[data-screen="stickers"] .cv-sheet{display:block}
@@ -34,7 +28,6 @@
         .cv[data-screen="list"] .cv-actions, .cv[data-screen="elements"] .cv-actions{display:none}
         .cv[data-screen="list"] .cv-h, .cv[data-screen="elements"] .cv-h{top:116px}
         .cv[data-screen="list"] .cv-body, .cv[data-screen="elements"] .cv-body{top:154px}
-
 
         .p08-type-btn{position:absolute;left:1374px;top:392px;width:367px;height:161px;font-size:56px;line-height:1.15}
     </style>
@@ -185,9 +178,7 @@
     const picks = Array.from(phone.querySelectorAll('.cv-pick'));
 
     const chosen = { tpl: '', sticker: '' };
-    // 손가락 위치 보정 [dx, dy] — 단계의 눌러야 할 곳(hit)별. ?edit 로 손가락을 눌러 맞춘 뒤 표시줄 값을 옮겨 적음
     const FG = { template: [0, 0], elements: [0, 0], searchbar: [-30, -30], search: [0, 0] };
-    // 클릭 영역 보정 [dx, dy, dw, dh] — 버튼 모양은 그대로, 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
     const HOT = { template: [0, 0, 0, 0], elements: [0, 0, 0, 0], searchbar: [0, 0, 0, 0], search: [0, 0, 0, 0] };
     BoxEdit.hitPad(hits, HOT);
     let index = 0;
@@ -226,7 +217,6 @@
       if (target) {
         const fg = FG[step.hit] || [0, 0];
         pointFingerAt(target, { onMain: true, beside: true, x: target === search ? 0.5 : 1, dx: fg[0], dy: fg[1] });
-        // 하단 탭을 가리킬 때 손가락이 화면(960px) 아래로 잘리지 않게
         if (!BoxEdit.on) document.querySelectorAll('.js-point-finger').forEach((f) => { f.style.top = Math.min(parseFloat(f.style.top), 850) + 'px'; });
       }
     }
@@ -264,7 +254,6 @@
       setTimeout(go, 300);
     });
 
-    /* ?edit&step=N : 단계 N 으로 바로 열기(] [ 로 이동). 손가락(FG)·버튼 클릭 영역(HOT)을 클릭해 방향키로 조정(Alt+방향키 = 폭·높이). 앞 단계에서 고르는 값(템플릿 a · 스티커 1)은 미리 채움. 오른쪽 아래 포즈판에서 캐릭터 포즈를 눌러 본 뒤 STEPS 줄의 pose 에 옮겨 적음 */
     const prep = () => { chosen.tpl = chosen.tpl || 'a'; chosen.sticker = index >= 7 ? (chosen.sticker || '1') : chosen.sticker; };
     BoxEdit.stepEdit({
       key: () => STEPS[index].hit || '?',

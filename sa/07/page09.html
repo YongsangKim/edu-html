@@ -6,14 +6,8 @@
     <title>우리 동네 이웃 지도 탐험하기</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 24~43p. 지도에서 장소 5곳(순서 자유) → 장소마다 같은 흐름:
-           미션 말풍선 → 휴대폰을 끌어 간판에 맞추기(가까이 놓으면 자석처럼 붙음) → 렌즈 버튼 → 결과 창 끌어올리기 → 더보기 →
-           알맞은 정보 줄 클릭 → 추가 질문 입력(입력창 → 질문 버튼 → 보내기 → 2초 로딩 → 답변 타이핑) → 지도로(노란 별).
-           5곳 다 하면 완료 팝업 → 퀴즈. 지도 img/p09_map.jpg, 장소 그림 img/p09_scene_{key}.jpg
-           휴대폰 결과 화면은 HTML로 그림. 캐릭터는 임시로 sa/06 캐릭터 복사본 */
         .p09-view.is-off, .is-hide{display:none!important}
 
-        /* 지도 */
         .p09-map{position:absolute;left:58px;top:182px;width:1806px;height:730px;box-sizing:border-box;border:solid 5px var(--c-navy);border-radius:14px;background:var(--c-pale) url('img/p09_map.jpg') center / cover no-repeat}
         .p09-spot{position:absolute;width:300px;height:320px;padding:0;border:0;background:none;cursor:pointer;transition:transform .2s}
         .p09-spot:hover{transform:scale(1.06)}
@@ -24,7 +18,6 @@
         .p09-spot.is-done b{background-image:url('../../resources/img/common/icon_star_on.png')}
         .p09-spot.is-done{pointer-events:none}
 
-        /* 장소 장면 */
         .p09-scene{position:absolute;left:20px;top:20px;width:1880px;height:920px;box-sizing:border-box;border:solid 8px var(--c-ink);border-radius:36px;overflow:hidden;background:#cfd8e8 center / cover no-repeat}
         .p09-scene-name{position:absolute;left:0;top:30px;height:90px;padding:6px 70px 0 60px;box-sizing:border-box;display:flex;align-items:center;background:var(--c-white);border-radius:0 45px 45px 0;
           font-family:'Cafe24 Ssurround';font-size:52px;color:var(--c-ink);z-index:3}
@@ -53,20 +46,17 @@
         .p09-float svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
         .p09-float .is-hw{color:#8b3fe0}
 
-        /* 말풍선 + 캐릭터 */
         .p09-bubble{position:absolute;left:70px;top:auto;bottom:545px;width:550px;margin:0;box-sizing:border-box;padding:30px;background:var(--c-cream);border:solid 5px var(--c-purple);border-radius:30px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);
           font-family:'Cafe24 Ssurround';font-size:40px;line-height:1.35;color:var(--c-purple);text-align:center;letter-spacing:-0.05em;word-break:keep-all;z-index:6}
         .p09-bubble:before{content:'';position:absolute;left:220px;bottom:-58px;width:100px;height:70px;background:url('../../resources/img/common/p_guide_tail.png') 0 0 / contain no-repeat}
         .p09-character{left:60px;top:470px;width:520px;height:420px;z-index:6}
 
-        /* 결과 휴대폰 */
         .p09-screen{position:relative;width:100%;height:100%;overflow:hidden;background:#111 73% center / cover no-repeat;font-family:'Pretendard';color:var(--c-ink)}
         .p09-sheet{position:absolute;left:0;top:560px;width:100%;height:100%;box-sizing:border-box;padding:18px 26px 120px;border-radius:30px 30px 0 0;background:var(--c-white);box-shadow:0 -6px 20px rgba(0,0,0,.25);touch-action:none;cursor:grab}
         .p09-sheet.is-anim{transition:top .35s ease}
         .p09-sheet.is-open{cursor:default}
         .p09-handle{display:block;width:80px;height:8px;margin:0 auto 16px;border-radius:4px;background:#c4c9d4}
         .p09-scroll{height:calc(100% - 74px);box-sizing:border-box;overflow-y:auto}
-        /* 닫힌 동안엔 안쪽 스크롤 칸도 손가락 끌기를 브라우저 스크롤로 넘기지 않게(모바일에서 끌어올리기가 취소되던 문제) */
         .p09-sheet:not(.is-open) .p09-scroll{overflow:hidden;touch-action:none}
         .p09-ai{margin:0 0 10px;font-size:25px;font-weight:700;color:#1a73e8}
         .p09-ai:before{content:'✦ '}
@@ -88,7 +78,7 @@
         .p09-lines.is-pick .p09-line:hover{background:#e3edff}
         .p09-line.is-right{box-shadow:0 0 0 4px var(--c-pink)}
         .p09-line.is-wrong{animation:fix-word-shake .3s ease}
-        .p09-more{display:block;width:100%;height:56px;margin:8px 0;border:solid 2px #1a73e8;border-radius:28px;background:var(--c-white);font:600 22px 'Pretendard';color:#1a73e8;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px}
+        .p09-more{width:100%;height:56px;margin:8px 0;border:solid 2px #1a73e8;border-radius:28px;background:var(--c-white);font:600 22px 'Pretendard';color:#1a73e8;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px}
         .p09-more:after{content:'';width:12px;height:12px;margin-top:-6px;border-right:solid 3px currentColor;border-bottom:solid 3px currentColor;transform:rotate(45deg)}
         .p09-swipe{position:absolute;width:110px;z-index:30;pointer-events:none;animation:p09-swipe 1.6s ease-in-out infinite}
         @keyframes p09-swipe{0%{transform:translateY(0);opacity:0}15%{opacity:1}70%{transform:translateY(-300px);opacity:1}85%,100%{transform:translateY(-300px);opacity:0}}
@@ -177,7 +167,6 @@
   <script src="../../resources/js/box-edit.js"></script>
   <script>
   (function () {
-    // spot: 지도 위 위치, lines: [머리말, 내용], key: 정답 줄 번호
     const PLACES = [
       { key: 'pharmacy', name: '약국', spot: [146, 42], target: [1020, 120, 320, 600],
         mission: '약국에서는 어떤 도움을<br>받을 수 있을까요?<br>구글렌즈로 알아봐요!',
@@ -275,7 +264,6 @@
       }, 300);
     });
 
-    // 지도
     PLACES.forEach((p) => {
       const btn = document.createElement('button');
       btn.className = 'p09-spot';
@@ -296,7 +284,6 @@
       if (done.size === PLACES.length) setTimeout(() => $('p09Done').classList.remove('is-off'), 400);
     }
 
-    // 1) 미션 → 2) 휴대폰 맞추기 → 3) 렌즈 버튼
     const FG = {
       app: { dx: 0, dy: 0 },
       shutter: { dx: 0, dy: 0 },
@@ -388,7 +375,6 @@
       dragFinger(cam, target);
     }
 
-    // 휴대폰에서 간판 자리(점선 상자)로 끌고 가는 손가락(반복). clearFingers로 같이 지워지게 js-point-finger를 붙임
     function dragFinger(from, to) {
       clearFingers();
       const main = from.closest('main');
@@ -410,7 +396,7 @@
       if (BoxEdit.on || cam.dataset.locked || e.target.closest('.p09-shutter')) return;
       e.preventDefault();
       clearFingers();
-      const s = stage.getBoundingClientRect().width / 1920;
+      const s = currentScale;
       const sx = e.clientX;
       const sy = e.clientY;
       const x0 = parseFloat(cam.style.left);
@@ -438,7 +424,6 @@
           playCorrect();
           show($('p09Shutter'), true);
           say('검색 아이콘을 클릭해보세요.');
-          // 휴대폰이 간판 자리로 붙는 애니메이션(0.3초) 뒤에 위치를 재야 검색 아이콘을 정확히 가리킴
           setTimeout(() => pointFingerAt($('p09Shutter'), fgo('shutter', { onMain: true })), 350);
         }
       };
@@ -453,7 +438,6 @@
       openResult();
     });
 
-    // 4) 결과 창 끌어올리기 → 5) 더보기 → 6) 알맞은 줄 클릭
     const sheet = $('p09Sheet');
     function openResult() {
       view('p09ResultView');
@@ -512,9 +496,7 @@
           if (!card) return;
           if (!card.dataset.ok) {
             playWrong();
-            card.classList.remove('is-wrong');
-            void card.offsetWidth;
-            card.classList.add('is-wrong');
+            restartAnim(card, 'is-wrong');
             return;
           }
           playCorrect();
@@ -527,7 +509,7 @@
     sheet.addEventListener('pointerdown', (e) => {
       if (sheet.classList.contains('is-open')) return;
       e.preventDefault();
-      const s = stage.getBoundingClientRect().width / 1920;
+      const s = currentScale;
       const sy = e.clientY;
       sheet.setPointerCapture(e.pointerId);
       sheet.classList.remove('is-anim');
@@ -540,14 +522,12 @@
         sheet.removeEventListener('pointerup', up);
         sheet.removeEventListener('pointercancel', up);
         sheet.classList.add('is-anim');
-        // 기획서: 어느 정도(3분의 1쯤)만 올리면 나머지는 자동으로 올라감
         if (parseFloat(sheet.style.top) < SHEET_CLOSED - 150) {
           sheet.style.top = SHEET_OPEN + 'px';
           sheet.classList.add('is-open');
           clearFingers();
           show($('p09Ask'), true);
           say('더보기 버튼을 눌러<br>내용을 자세히 확인해봐요.',null,'04');
-          // 결과 창이 올라가는 애니메이션(0.35초)이 끝난 뒤 위치를 재야 더보기 버튼을 정확히 가리킴
           setTimeout(() => pointFingerAt($('p09More'), fgo('more', { onMain: true })), 400);
         } else {
           sheet.style.top = SHEET_CLOSED + 'px';
@@ -558,7 +538,6 @@
       sheet.addEventListener('pointercancel', up);
     });
 
-    // 결과 창 손잡이에서 위로 끌어올리는 손가락(반복). clearFingers로 같이 지워지게 js-point-finger를 붙임
     function swipeFinger(el) {
       clearFingers();
       const main = el.closest('main');
@@ -584,9 +563,7 @@
       if (!findMode || !line) return;
       if (Number(line.dataset.i) !== place.answer) {
         playWrong();
-        line.classList.remove('is-wrong');
-        void line.offsetWidth;
-        line.classList.add('is-wrong');
+        restartAnim(line, 'is-wrong');
         $('p09Lines').children[place.answer].classList.add('is-key');
         say(place.wrong);
         return;
@@ -598,7 +575,6 @@
       say(place.right, () => say(place.more, askStep, '06'), '05');
     });
 
-    // 7) 추가 질문: 입력창 → 질문 버튼 → 보내기 → 로딩 2초 → 답변 타이핑
     let askPhase = '';
     function askStep() {
       askPhase = 'input';

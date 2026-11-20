@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
         .gm-panel{position:absolute;left:30px;top:115px;width:1860px;height:823px;box-sizing:border-box;background:#e4f3fb;border:4px solid var(--c-ink);border-radius:14px}
-        .ask-pill.gm-msg{left:150px;top:30px;width:1620px;height:165px;max-width:none;transform:none;padding:10px 40px 4px;font-size:58px;letter-spacing:-0.05em;background:var(--c-cream)}
+        .ask-pill.gm-msg{left:150px;top:30px;width:1620px;height:165px;max-width:none;transform:none;padding:4px 40px;font-size:58px;letter-spacing:-0.05em;background:var(--c-cream)}
         .gm-msg img{width:64px;height:64px;vertical-align:-14px}
 
         .gm-board{position:absolute;left:45px;top:198px;width:940px;height:732px}
@@ -19,14 +19,14 @@
         @keyframes gm-cheer{0%,100%{transform:translateY(0)}50%{transform:translateY(-30px)}}
 
         .gm-device{position:absolute;left:1040px;top:210px;width:810px;height:718px}
-        .gm-blocks{position:absolute;left:1208px;top:242px;width:475px}
-        .gm-block{position:relative;box-sizing:border-box;height:85px;margin-bottom:-2px;padding:0 20px 0 100px;display:flex;align-items:center;font-family:'Cafe24 Ssurround';font-size:40px;letter-spacing:-0.05em;color:var(--c-ink);-webkit-text-stroke:7px #fff;paint-order:stroke fill;border:4px solid var(--c-ink);border-radius:18px;white-space:nowrap;box-shadow:inset 3px 5px 7px rgba(255,255,255,.3),inset -3px -9px 9px rgba(0,0,0,.1)}
-        .gm-block:nth-child(1){background:#ffc70e;z-index:3}
-        .gm-block:nth-child(2){background:#6489ff;z-index:2}
-        .gm-block:nth-child(3){background:#f57b3a;z-index:1}
-        .gm-block:after{content:'';position:absolute;left:50%;bottom:-22px;width:36px;height:22px;margin-left:-18px;box-sizing:border-box;background:inherit;border:4px solid var(--c-ink);border-top:0;border-radius:0 0 18px 18px;background-image:linear-gradient(to bottom,rgba(0,0,0,.07),rgba(0,0,0,.07))}
-        .gm-block:before{content:'';position:absolute;left:50%;bottom:-4px;width:28px;height:4px;margin-left:-14px;background-color:inherit;background-image:linear-gradient(to bottom,rgba(0,0,0,.07),rgba(0,0,0,.07));z-index:1}
-        .gm-block .gm-no{position:absolute;left:28px;top:50%;width:52px;height:52px;margin-top:-26px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:50%;font-size:40px;padding-top:4px;color:#2a6fd6;-webkit-text-stroke:0}
+        .gm-blocks{position:absolute;left:1208px;top:242px;width:475px;display:flex;flex-direction:column}
+        .gm-block{position:relative;box-sizing:border-box;width:475px;height:85px;padding:0 20px 0 100px;display:flex;align-items:center;font-family:'Cafe24 Ssurround';font-size:40px;letter-spacing:-0.05em;color:var(--c-ink);-webkit-text-stroke:7px #fff;paint-order:stroke fill;white-space:nowrap}
+        .gm-block:nth-child(1){z-index:3}
+        .gm-block:nth-child(2){z-index:2}
+        .gm-block:nth-child(3){z-index:1}
+        .gm-block .pz-svg{position:absolute;left:0;top:0;width:475px;height:110px;pointer-events:none;z-index:0}
+        .gm-block-txt{position:relative;z-index:2;pointer-events:none}
+        .gm-block .gm-no{position:absolute;left:28px;top:50%;width:52px;height:52px;margin-top:-26px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:50%;font-size:40px;padding-top:4px;color:#2a6fd6;-webkit-text-stroke:0;z-index:2}
         .gm-star{position:absolute;left:1128px;top:287px;z-index:20;pointer-events:none;width:70px;height:70px;margin-top:-35px;background:url('../../resources/img/common/icon_star_on.png') center / contain no-repeat;filter:drop-shadow(0 6px 0 #d6dee8);transition:top .5s ease-in-out,opacity .3s}
         .gm-block.is-now{animation:blk-glow 1s ease-in-out infinite}
         .gm-block.is-blink{animation:blk-glow .35s ease-in-out 3}
@@ -53,9 +53,9 @@
           <img class="gm-device" src="img/p18_device.png" alt="">
           <i class="gm-star" id="gmStar"></i>
           <div class="gm-blocks" id="gmBlocks">
-            <div class="gm-block" data-dir="right"><span class="gm-no">1</span>오른쪽으로 1칸 가기</div>
-            <div class="gm-block" data-dir="up"><span class="gm-no">2</span>위로 1칸 가기</div>
-            <div class="gm-block" data-dir="right"><span class="gm-no">3</span>오른쪽으로 1칸 가기</div>
+            <div class="gm-block" data-dir="right"><span class="gm-no">1</span><span class="gm-block-txt">오른쪽으로 1칸 가기</span></div>
+            <div class="gm-block" data-dir="up"><span class="gm-no">2</span><span class="gm-block-txt">위로 1칸 가기</span></div>
+            <div class="gm-block" data-dir="right"><span class="gm-no">3</span><span class="gm-block-txt">오른쪽으로 1칸 가기</span></div>
           </div>
 
           <div class="gm-aro" id="gmAro"><img src="img/p18_aro.png" alt="아로"></div>
@@ -82,6 +82,12 @@
     const DIR = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
     const aro = $('gmAro');
     const blocks = Array.from(document.querySelectorAll('#gmBlocks .gm-block'));
+    const GM_OPTS = {
+      w: 475, h: 110,
+      path: 'M 20,4 L 220,4 A 18,18 0 0,0 255,4 L 455,4 Q 471,4 471,20 L 471,32 A 14.5,14.5 0 0,0 471,61 L 471,73 Q 471,89 455,89 L 255,89 A 18,18 0 0,1 220,89 L 20,89 Q 4,89 4,73 L 4,61 A 14.5,14.5 0 0,0 4,32 L 4,20 Q 4,4 20,4 Z'
+    };
+    const GM_THEMES = [PUZZLE_THEMES.yellow, PUZZLE_THEMES.blue, PUZZLE_THEMES.coral];
+    blocks.forEach((b, i) => b.prepend(makePuzzleSvg('gmb' + i, GM_THEMES[i], GM_OPTS)));
     let pos = [0, 2];
     let step = 0;
     let busy = false;
@@ -103,8 +109,8 @@
       if (busy || step >= blocks.length) return;
       if (dir !== blocks[step].dataset.dir) {
         playWrong();
-        aro.classList.remove('is-no'); void aro.offsetWidth; aro.classList.add('is-no');
-        blocks[step].classList.remove('is-blink'); void blocks[step].offsetWidth; blocks[step].classList.add('is-blink');
+        restartAnim(aro, 'is-no');
+        restartAnim(blocks[step], 'is-blink');
         msg('우리는 블록에 적힌 순서대로 가야 해요!<br>별이 있는 블록이 가리키는 방향으로 가 볼까요?', true);
         return;
       }

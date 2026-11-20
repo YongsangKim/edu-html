@@ -6,8 +6,6 @@
     <title>Papago로 한국 문화 안내하기</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 기획서(실습만) 2~15p. 지하철(임산부 배려석) → 올림픽 공원(잔디밭) 두 장면이 같은 형식: 이야기 → Papago 켜기 → 음성 → 안내문 문장 2개 고르면 번역(한글·영어 TTS) → 이야기.
-           이야기 삽화는 img/p11_story_{1..6}.jpg (없으면 설명 글자). 앱 화면은 js/papago.js(PP), 안내 소리는 sound/sa12_tts_*.mp3 가 있으면 그것, 없으면 브라우저 음성 */
         .p11-panel{left:1214px;top:35px;width:692px;height:915px}
         .p11-panel:before{content:'';position:absolute;left:5px;top:3px;width:683px;height:267px;background:var(--c-white);border-radius:10px}
         .p11-sign{position:absolute;left:45px;top:50px;width:601px;height:167px;box-sizing:border-box;padding:26px 20px 0;text-align:center;background:#ff86bd;border-radius:14px;box-shadow:0 8px 0 0 #cfe0f7}
@@ -17,7 +15,6 @@
         .p11-opts{position:absolute;left:38px;top:322px;width:614px;display:flex;flex-direction:column;gap:47px}
         .p11-opts .card-btn{height:143px;font-size:48px;line-height:1.15;letter-spacing:-0.075em;padding:10px 12px 6px}
         .card-btn.is-selected{pointer-events:none}
-        /* 단계마다 #p11Panel 에 is-subway(지하철)·is-lawn(잔디밭)이 붙음 — 예) .p11-panel.is-lawn{top:80px} */
         .p11-next.is-off,.p11-panel.is-off{display:none}
         #p11Wrong{z-index:120}
     </style>
@@ -97,7 +94,6 @@
     const say = initGuideSay({ bubble: $('p11Bubble'), img: $('p11Char'), set });
     let si = 0, found = 0, busy = false, handler = null;
     const FG = { app: [-10, -20], voice: [-10, -20] };
-    // 클릭 영역 보정 [dx, dy, dw, dh] — 버튼 모양은 그대로, 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
     const HOT = { app: [0, 0, 0, 0], voice: [0, 0, 0, 0] };
     const storyNo = (i) => STEPS.slice(0, i + 1).filter((x) => x.story).length;
 
@@ -145,12 +141,7 @@
       const box = $('p11Opts');
       box.innerHTML = '';
       q.opts.forEach((o, oi) => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'card-btn';
-        b.innerHTML = o[0];
-        b.addEventListener('click', () => pick(b, o, q, oi + 1));
-        box.appendChild(b);
+        const b = makeCardBtn(o[0], '', () => pick(b, o, q, oi + 1), { html: true, parent: box });
       });
       panel.classList.remove('is-subway', 'is-lawn');
       panel.classList.add(q.cls);
@@ -194,7 +185,6 @@
     });
     next.addEventListener('click', () => { if (!BoxEdit.on) go(si + 1); });
     $('p11WrongOk').addEventListener('click', () => $('p11Wrong').classList.add('is-off'));
-    /* ?edit&step=N : 단계 N 으로 바로 열기(] [ 로 이동). 손가락(FG)·클릭 영역(HOT)을 클릭해 방향키로 조정(Alt+방향키 = 폭·높이), 오른쪽 아래 포즈판에서 포즈를 눌러 본 뒤 STEPS 줄의 pose 에 옮겨 적음 (_guide/steps.html 기준) */
     BoxEdit.stepEdit({
       key: () => STEPS[si].hot || '?',
       count: STEPS.length + 1,

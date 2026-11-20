@@ -138,7 +138,7 @@
     msg.addEventListener('pointerdown', (e) => {
       if (busy || !msg.classList.contains('is-in')) return;
       e.preventDefault();
-      const s = stage.getBoundingClientRect().width / 1920;
+      const s = currentScale;
       const sx = e.clientX, sy = e.clientY;
       const mr = document.querySelector('main').getBoundingClientRect();
       const r0 = msg.getBoundingClientRect();
@@ -171,7 +171,7 @@
           msg.style.left = '';
           msg.style.top = '';
           playDrag();
-          b.classList.remove('is-shut'); void b.offsetWidth; b.classList.add('is-shut');
+          restartAnim(b, 'is-shut');
           playCorrect();
           mi += 1;
           if (mi === MSGS.length) { setTimeout(() => $('p05Done').classList.remove('is-off'), 1000); return; }

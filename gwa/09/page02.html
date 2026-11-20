@@ -6,10 +6,6 @@
     <title>차례대로 맞추는 몸속 퍼즐 게임</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 3p 구조대로: ① 배경 일러스트(img/p02_bg.jpg) ② 맨 아래 안내문구(아로 얼굴 아이콘 + 문구) ③ 가운데 상반신 인체실루엣(img/p02_body.png, 입·위·장 자리는 흐릿한 점선)
-           ④ 오른쪽 퍼즐 조각 3개(세로로 맞물리게) ⑤ 왼쪽 위 별 게이지. 조각을 맞는 점선 칸으로 끌어 놓기, 입→위→장 순서 3문제.
-           맞으면 조각은 사라지고 그 기관이 초록빛, 게이지 30·30·40%(오답은 줄지 않음). 틀리면 조각이 흔들리고 제자리, 안내 문구가 힌트로 바뀜.
-           위치는 기획서 슬라이드 좌표를 1920 화면으로 옮긴 값. 아로 얼굴 img/p02_aro_face.png */
         .p02-gauge{left:62px;top:36px;width:757px;z-index:5}
 
         .p02-panel{position:absolute;left:90px;top:100px;width:1755px;height:598px;box-sizing:border-box;border:solid 5px var(--c-navy);border-radius:24px;background:#bfe0f7 url('img/p02_bg.jpg') center / cover no-repeat;overflow:hidden}
@@ -24,18 +20,20 @@
         .p02-zone .p02-piece{display:none}
 
         .p02-tray{position:absolute;left:1275px;top:17px;width:450px;height:554px;box-sizing:border-box;border-radius:30px;background:rgba(255,255,255,.55);border:solid 4px rgba(255,255,255,.9)}
-        .p02-piece{position:absolute;left:55px;width:340px;height:150px;--blk-hole:rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;gap:18px;padding-top:4px;cursor:grab;touch-action:none;font-size:60px}
-        .p02-piece-img{width:80px;height:80px;object-fit:contain;pointer-events:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.15))}
-        .p02-piece[data-key="mouth"]{top:52px;--blk-c:#ffd56a;z-index:9}
-        .p02-piece[data-key="stomach"]{top:202px;--blk-c:#f59a9a;z-index:8}
-        .p02-piece[data-key="intestine"]{top:352px;--blk-c:#8fdcb8;z-index:7}
-        .p02-piece.is-dragging{cursor:grabbing;z-index:60}
-        .p02-piece.is-picked{box-shadow:0 0 0 8px rgba(255,216,61,.95),inset 0 -6px 0 rgba(0,0,0,.1),inset 0 4px 0 rgba(255,255,255,.35)}
+        .p02-piece{position:absolute;left:55px;width:340px;height:150px;display:flex;align-items:center;justify-content:center;gap:18px;padding-top:4px;cursor:grab;touch-action:none;font-family:'Cafe24 Ssurround';font-size:60px;color:#141539;-webkit-text-stroke:8px #ffffff;paint-order:stroke fill;filter:drop-shadow(0 6px 0 rgba(20,21,57,.16))}
+        .p02-piece .pz-svg{position:absolute;left:0;top:0;width:340px;height:178px;transform-origin:170px 75px;transition:transform .15s ease;pointer-events:none;z-index:0}
+        .p02-piece-in{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;gap:18px;transition:transform .15s ease;pointer-events:none}
+        .p02-piece-img{width:80px;height:80px;object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,.15))}
+        .p02-piece[data-key="mouth"]{top:52px;z-index:9}
+        .p02-piece[data-key="stomach"]{top:202px;z-index:8}
+        .p02-piece[data-key="intestine"]{top:352px;z-index:7}
+        .p02-piece.is-dragging{cursor:grabbing;z-index:60;filter:drop-shadow(0 14px 12px rgba(20,21,57,.28))}
+        .p02-piece.is-dragging .pz-svg,.p02-piece.is-dragging .p02-piece-in{transform:scale(.75)}
+        .p02-piece.is-picked{filter:drop-shadow(0 0 10px rgba(255,216,61,.95)) drop-shadow(0 6px 0 rgba(20,21,57,.16))}
         .p02-piece.is-wrong{animation:fix-word-shake .3s ease}
         .p02-zone.is-pickable{cursor:pointer;box-shadow:0 0 0 6px rgba(255,216,61,.9)}
         .p02-order.is-hint{color:#d6336c}
 
-        /* 아래 줄: 과학 3차시 page09의 말풍선(흰 알약 + 왼쪽에 걸친 원형 아바타) 그대로. 아바타 그림 img/p02_aro_face.png */
         .p02-icon{position:absolute;left:40px;top:710px;width:236px;height:236px;box-sizing:border-box;border-radius:50%;border:solid 6px var(--c-purple);background:var(--c-purple) url('img/p02_aro_face.png') center bottom / contain no-repeat;box-shadow:0 12px 0 0 rgba(72,21,156,.18);z-index:1}
         .p02-order{position:absolute;left:175px;top:755px;width:1210px;height:156px;box-sizing:border-box;padding:0 40px 0 120px;display:flex;align-items:center;margin:0;
           background:var(--c-white);border:solid 6px var(--c-purple);border-radius:78px;box-shadow:0 12px 0 0 rgba(72,21,156,.18);
@@ -83,12 +81,19 @@
     const ask = $('p02Ask');
     const showAsk = (text, isHint) => { $('p02AskText').textContent = text; ask.classList.toggle('is-hint', !!isHint); };
 
+    const PZ_OPTS = {
+      w: 340, h: 178,
+      path: 'M 22,4 L 150,4 A 20,20 0 0,0 190,4 L 318,4 Q 336,4 336,22 L 336,61 A 18,18 0 0,0 336,97 L 336,136 Q 336,154 318,154 L 190,154 A 20,20 0 0,1 150,154 L 22,154 Q 4,154 4,136 L 4,97 A 18,18 0 0,0 4,61 L 4,22 Q 4,4 22,4 Z'
+    };
+    const THEMES = { mouth: PUZZLE_THEMES.yellow, stomach: PUZZLE_THEMES.blue, intestine: PUZZLE_THEMES.coral };
+
     const tray = $('p02Tray');
     const cards = STEPS.map((s) => {
       const c = document.createElement('div');
-      c.className = 'p02-piece blk';
+      c.className = 'p02-piece';
       c.dataset.key = s.key;
-      c.innerHTML = '<img class="p02-piece-img" src="img/p15_' + s.key + '.png" alt=""><span>' + s.name + '</span>';
+      c.appendChild(makePuzzleSvg('pz_' + s.key, THEMES[s.key], PZ_OPTS));
+      c.insertAdjacentHTML('beforeend', '<div class="p02-piece-in"><img class="p02-piece-img" src="img/p15_' + s.key + '.png" alt=""><span>' + s.name + '</span></div>');
       tray.appendChild(c);
       return c;
     });
@@ -108,14 +113,12 @@
     }
     function wrong(card) {
       playWrong();
-      card.classList.remove('is-wrong');
-      void card.offsetWidth;
-      card.classList.add('is-wrong');
+      restartAnim(card, 'is-wrong');
       showAsk(STEPS[step].hint, true);
     }
 
     /* 끌어 놓기(기획서 3p: 퍼즐을 알맞은 곳으로 드래그 앤 드롭) */
-    initMatchDrag({ cards, zones, slop: 40, match: isRight, onRight: right, onWrong: wrong });
+    initMatchDrag({ cards, zones, slop: 75, match: isRight, onRight: right, onWrong: wrong });
 
     /* 조각을 누르면 고른 표시, 이어서 칸을 누르면 그 칸에 놓기(터치로 쉽게 고를 수 있게) */
     cards.forEach((card) => {

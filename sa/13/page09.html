@@ -6,19 +6,14 @@
     <title>AI 지우개로 개인정보 지우기</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 기획서 19~30p. 가운데 공용 폰 틀 안에 갤러리 앱 캡처 이미지(img/p09_screen_*.png)를 그대로 깔고, 그 위에 누를 곳(투명 버튼)·손가락·강조 효과만 얹음(캡처를 부품으로 나누지 않으므로 HIT 기본 위치 표 + HOT 보정).
-           흐름: 갤러리 → 사진 고르기 → 편집 → 포토 어시스트 → AI 지우개 → 개인정보 클릭(엉뚱한 곳을 누르면 손가락 힌트) → 하이라이트 → 지우기 → 로딩 → 완료 → 다른 파일로 저장 → 결과 화면(다음)
-           누를 곳 위치는 아래 HIT 표(화면에 대한 [왼쪽%, 위%, 폭%, 높이%]) */
         .p09-img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:fill;display:block;user-select:none;-webkit-user-drag:none}
         .p09-home{position:absolute;inset:0;background:linear-gradient(180deg,#f2f2f6,#e6e8f2)}
         .p09-home img{position:absolute;left:50%;top:44%;width:120px;margin:-60px 0 0 -60px;border-radius:48px;box-shadow:0 6px 16px rgba(0,0,0,.2)}
         .p09-home>span{position:absolute;left:0;right:0;top:44%;margin-top:78px;text-align:center;font-size:22px;color:#222}
-        .p09-hot{position:absolute;border:0;padding:0;background:transparent;cursor:pointer;z-index:5}
-        .p09-hot{border-radius:8px}
+        .p09-hot{position:absolute;border:0;padding:0;border-radius:8px;background:transparent;cursor:pointer;z-index:5}
         .p09-bubble-ico{display:block;width:62px;height:62px;margin:0 auto 10px;border-radius:50%;background:linear-gradient(135deg,#7a7ee8,#c6a6e8);color:#fff;font-size:34px;line-height:62px;text-align:center;box-sizing:border-box}
         .p09-end{position:absolute;inset:0;z-index:8}
         .p09-end.is-off{display:none}
-        /* .p09-end p{position:absolute;left:0;top:50px;width:1920px;margin:0;text-align:center;font-size:56px;font-weight:500;line-height:1.35;color:var(--c-ink);letter-spacing:-0.04em} */
         .p09-end img.p09-result{position:absolute;left:50%;top:230px;width:1000px;height:558px;margin-left:-500px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.25);object-fit:cover}
         .p09-end .next-btn-center{top:auto;bottom:10px}
     </style>
@@ -61,9 +56,7 @@
   <script>
   (function () {
     const ICO = '<span class="p09-bubble-ico">✦</span>';
-    // 손가락 위치 보정 [dx, dy] — 단계의 눌러야 할 곳(hit)별. ?edit 로 손가락을 눌러 맞춘 뒤 표시줄 값을 옮겨 적음
     const FG = { gallery: [-10, -20], photo: [-10, -20], edit: [0, -10], assist: [10, -20], eraser: [10, -20], find: [0, -20], erase: [-10, -20], done: [-10, -20], save: [10, -10] };
-    // 눌러야 할 곳의 기본 위치 [x%, y%, 폭%, 높이%] — 화면이 캡처 그림이라 기준 요소가 없어서 이 표가 기준(?edit&step=N 으로 보며 맞춤)
     const HIT = {
       gallery: [37, 37.6, 26, 13], photo: [2.7, 59.8, 94.6, 24.5],
       edit: [28.5, 88, 15, 5], assist: [17.5, 89.5, 9, 4.5],
@@ -71,7 +64,6 @@
       erase: [30, 88, 40, 5], done: [12, 88.6, 36.4, 4.9],
       save: [55, 4.6, 33, 5]
     };
-    // 클릭 영역 보정 [dx, dy, dw, dh] — HIT 기본 위치에서 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
     const HOT = {
       gallery: [0, 0, 0, 0], photo: [0, 0, 0, 0], edit: [0, 0, 0, 0],
       assist: [0, 0, 0, 0], eraser: [0, 0, 0, 0], find: [0, 0, 0, 0],

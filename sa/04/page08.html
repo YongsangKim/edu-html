@@ -6,8 +6,6 @@
     <title>AI 이모티콘 문장 만들기</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 반영 - 디자인/사회4차시 10p-1. 감정 -> 표정 -> 문구 카드를 순서대로 고르면 오른쪽 '이모티콘 만들기' 슬롯에 하나씩 채워지고,
-           고른 뒤 '다음'(마지막 단계는 '만들기')이 나타남 */
         .p08-chat{left:52px;top:18px;width:1170px;height:546px;border-radius:100px}
         .p08-chat .chat-panel-body{padding:8px 40px 48px}
         .p08-line{display:flex;align-items:flex-start;gap:14px;margin-bottom:6px}
@@ -19,7 +17,6 @@
         .p08-who{display:block;font-family:'Pretendard';font-weight:600;font-size:24px;line-height:1.1;margin:0 0 4px;color:var(--c-ink)}
         .p08-bubble{display:block;background:#fff3b8;border-radius:24px;padding:10px 24px;font-family:'Pretendard';font-size:30px;line-height:1.2;font-weight:600;color:var(--c-ink);letter-spacing:-0.04em}
 
-        /* 질문 알약 + 선택지 판을 한 묶음으로: 알약은 판 위 가장자리에 반쯤 걸치게 왼쪽에서 137px */
         .p08-bottom{position:absolute;left:50px;top:570px;width:1175px;display:flex;flex-direction:column}
         .p08-ask{position:relative;left:auto;top:auto;transform:none;align-self:flex-start;margin:0 0 -50px 137px;z-index:3;box-shadow:0 12px 0 0 #2264c5}
         .p08-cardbox{position:relative;width:100%;height:320px;padding:90px 22px 0;display:flex;gap:28px;border-radius:110px 110px 80px 80px}
@@ -90,8 +87,6 @@
   <script src="../../resources/js/toc.js"></script>
   <script src="../../resources/js/common.js"></script>
   <script>
-  /* 기획서 25~28p. 정답을 고르면 슬롯에 입력되고 '다음' 버튼이 나타남.
-     마지막(문구) 단계에서는 '다음'이 아니라 '만들기'로 page11(프롬프트 화면)로 이동 */
   (function () {
     const STEPS = [
       {
@@ -154,16 +149,10 @@
       goBtn.classList.remove('is-selected');
 
       shuffleArray(step.options).forEach((opt) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'p08-card card-btn';
-        btn.textContent = opt.text;
-        btn.addEventListener('click', () => {
+        const btn = makeCardBtn(opt.text, 'p08-card', () => {
           if (!opt.correct) {
             playWrong();
-            btn.classList.remove('is-wrong');
-            void btn.offsetWidth;
-            btn.classList.add('is-wrong');
+            restartAnim(btn, 'is-wrong');
             showPopup(step.wrong);
             return;
           }
@@ -176,10 +165,8 @@
           slot.classList.add('is-filled');
           slot.querySelector('.p08-slot-value').innerHTML = opt.text;
 
-          // 마지막 단계에서는 '다음' 대신 '만들기' 버튼이 나타남(기획서 28p)
           goBtn.classList.remove('is-off');
-        });
-        cardsBox.appendChild(btn);
+        }, { parent: cardsBox });
       });
     }
 

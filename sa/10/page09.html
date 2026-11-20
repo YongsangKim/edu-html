@@ -1,14 +1,4 @@
 <!DOCTYPE html>
-<!--
-  [편집 모드 사용법] 주소 뒤에 ?edit 을 붙여 열 때만 동작(평소 화면은 그대로)
-    page09.html?edit&step=26&place=park
-      step=N     N번째 단계(1부터)에서 바로 시작. 위쪽 노란 막대의 [◀ 이전][다음 ▶], ] [ , PageDown/PageUp 으로도 이동
-      place=이름 library 도서관(기본) · mart 마트 · post 우체국 · park 공원
-    자주 쓰는 단계: 17~21 효과·블러 고르기 · 22,23 도구 탭 밀기·얼굴 트래킹 · 24 트래킹 영역 설정 · 25 트래킹 중(자동으로 안 넘어감) · 26 영상 재생 확인 · 32 저장 완료 · 33 영상 재생
-    손가락·클릭 영역: 손가락/붉은 점선 박스를 클릭 → 방향키 1px(Shift 10px) 이동, Alt+방향키 폭·높이. 노란 막대에 나오는 '이름: [값],' 를 아래 FG(손가락, 밀기 손 swipe1·swipe2) · HOT(클릭 영역) 표의 같은 이름 줄과 바꿔 넣음. 밀기 영역 swipe 박스는 STEPS 줄에 직접
-    로고 모션 위치 VL.LOGO = [x, y, 폭, 높이] (vllo-ui.js, 단계 10 같은 로딩 화면에서 맞춤)
-    얼굴 따라가기(PLACES 의 size·keys)는 7페이지 ?edit&scene=1~5 에서 영상을 멈춰 가며 맞춘 뒤 [복사]한 값을 붙여 넣음 (scene 1=library · 2=mart · 3=post · 4=park)
--->
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -16,12 +6,8 @@
     <title>뚝딱! 우리 동네 브이로그 제작소</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* VLLO로 우리 동네 브이로그 만들기 실습. 휴대폰 화면은 이미지 없이 HTML/CSS(vllo-ui.js)로 그림 — 디자인 캡처(1080x2340)의 절반인 540x1170 좌표를 폰 화면 폭에 맞춰 줄여 보여 줌. 글꼴은 전부 Pretendard.
-           영상 칸(#vlViewer)은 단계가 바뀌어도 그대로 두고(깜빡임 없음), 화면 조각(.v-layer)만 부드럽게 교체. 움직임이 필요한 단계(트래킹·확인)에서만 영상이 재생되고 그 전에는 첫 장면(썸네일)에 멈춰 있음.
-           장소별 영상(video/v1~v4.mp4, 썸네일 img/p07_thumb_N.jpg)과 얼굴 위치는 7페이지와 같은 값. 누를 곳(box)은 [왼쪽, 위, 폭, 높이] 540x1170 좌표(?edit&step=N 으로 열어 맞춤) */
         .p09-phone{left:745px;width:431px}
 
-        /* ---- 폰 화면 바탕 ---- */
         .vl{position:absolute;left:0;top:0;width:540px;height:1170px;transform-origin:0 0;background:#16171b;overflow:hidden;font-family:'Pretendard',sans-serif;font-size:14px;line-height:1.2;color:#d3d4d7;letter-spacing:-0.02em;-webkit-font-smoothing:antialiased}
         .vl *{box-sizing:border-box}
         .vl i,.vl em,.vl u,.vl b{font-style:normal;text-decoration:none}
@@ -44,7 +30,6 @@
         .v-layer.is-in{animation:v-in .24s ease both}
         @keyframes v-in{from{opacity:0}to{opacity:1}}
 
-        /* ---- 공통 조각 ---- */
         .v-ic{position:absolute;display:block;color:#cdced1}
         .v-bar{position:absolute;left:0;top:0;width:540px;height:103px;background:#232428}
         .v-ic.is-help{color:#d3d4d7}
@@ -75,9 +60,6 @@
         .v-tab-on{position:absolute;top:1118px;width:88px;height:36px;border-radius:18px}
         .v-tab{position:absolute;top:1118px;width:88px;height:36px;text-align:center;line-height:37px;font-size:18px;color:#c4c5c7}
         .v-tab.is-on{color:#1b1d22;font-weight:600}
-        .v-tpl{position:absolute;left:448px;top:1019px;width:72px;height:72px;border-radius:50%;background:linear-gradient(#f0628a,#ef3468);color:#fbe0e8;text-align:center}
-        .v-tpl .v-ic{position:relative;display:inline-block;width:26px;height:26px;margin-top:10px;color:#fbe0e8}
-        .v-tpl span{position:absolute;left:0;right:0;bottom:8px;font-size:11.3px;font-weight:600}
         .v-btn{position:absolute;border-radius:28px;color:#fff;font-size:22px;font-weight:600;display:flex;align-items:center;justify-content:center;padding-top:1px}
         .v-btn.is-done{font-size:22px}
         .v-clip{position:absolute;top:756px;height:79px;overflow:hidden;background:#3a3b3f}
@@ -89,7 +71,6 @@
         .v-wave{position:absolute;left:0;top:0;width:100%;height:100%}
         .v-wave b{position:absolute;width:1.5px;border-radius:1px}
         .v-wave.is-low{left:0;top:834px;height:118px}
-        /* 오른쪽 위 녹음 파일 줄 */
         .v-aclip{position:absolute;left:247px;top:760px;width:300px;height:71px;z-index:3}
         .v-lh{position:absolute;left:0;top:0;width:24px;height:71px;background:#fff;border-radius:6px 0 0 6px;color:#1b1c20;padding:24px 5px;display:block}
         .v-ab{position:absolute;left:24px;top:0;right:0;height:71px;background:linear-gradient(#59a5e0,#4a90cf);overflow:hidden}
@@ -118,7 +99,6 @@
         .v-act .v-ic{position:relative;display:block;width:30px;height:30px;margin:0 auto 7px}
         .v-add{position:absolute;left:17px;top:1112px;width:166px;height:54px;border-radius:27px;border:2px solid #3c3d41;color:#d3d4d7;font-size:12.5px;display:flex;align-items:center;justify-content:center;gap:9px}
         .v-rdot{display:block;width:16px;height:16px;border-radius:50%;border:2px solid #fff;background:#e0373a}
-        /* 클립 도구 */
         .v-chev{width:16px;height:18px;color:#cdced1}
         .v-tool{position:absolute;width:70px;margin-left:-35px;text-align:center;font-size:14px;color:#d3d4d7}
         .v-tool .v-ic{position:relative;display:block;width:27px;height:27px;margin:12px auto 5px}
@@ -153,7 +133,6 @@
         .v-all{position:absolute;left:100px;top:6px;width:88px;height:80px;font-size:16px;text-align:center;padding-top:12px}
         .v-row2-in2{position:absolute;left:230px;top:0;width:310px;height:80px}
         .v-new2{position:absolute;left:41px;top:4px;height:10px;padding:0 2px;font-size:7px;line-height:10px;border-radius:2px;background:#ee4374;color:#fff}
-        /* 전체 화면(목록·로딩) */
         .v-full{position:absolute;inset:0;background:#16171b;z-index:6}
         .v-pill{position:absolute;border-radius:17px;display:flex;align-items:center;justify-content:center;gap:6px;color:#fff;font-size:13px;font-weight:600}
         .v-pill.is-blue{background:#0a9cf7}
@@ -168,17 +147,12 @@
         .v-sel{position:absolute;left:489px;top:458px;font-size:18px;color:#d3d4d7}
         .v-load{position:absolute;left:22px;top:507px;width:170px;height:43px;border-radius:21px;background:#303135;color:#bfc0c3;font-size:16px;display:flex;align-items:center;gap:9px;padding-left:14px}
         .v-load .v-ic{position:relative;width:20px;height:20px}
-        .v-new{position:absolute;left:160px;top:1036px;width:220px;height:82px;border-radius:41px;background:linear-gradient(#ff5b8b,#ee2f66);color:#fff;text-align:center;padding-top:12px;z-index:3}
-        .v-new b{display:flex;align-items:center;justify-content:center;gap:6px;font-size:19px;font-weight:700;line-height:1}
-        .v-new b .v-ic{position:relative;width:26px;height:26px;color:#fff}
-        .v-new small{display:block;margin-top:5px;font-size:10.5px}
         .v-places{position:absolute;left:22px;top:570px;width:496px;display:flex;flex-wrap:wrap;gap:20px 14px}
         .v-places button{position:relative;width:241px;padding:0;border:0;background:none;cursor:pointer;text-align:left}
         .v-places img{display:block;width:241px;height:134px;object-fit:cover;border-radius:10px}
         .v-places span{display:block;margin-top:8px;font-size:20px;font-weight:700;color:#fff}
         .v-places button:hover img{box-shadow:0 0 0 4px var(--c-violet)}
         .v-places button:active img{box-shadow:0 0 0 4px var(--c-orchid)}
-        /* 로딩 */
         .v-full.is-load{background:#17181c}
         .v-logo{position:absolute;left:0;top:0;width:540px;height:100%;pointer-events:none}
         .v-logo svg{position:absolute;pointer-events:auto}
@@ -192,8 +166,6 @@
         .v-tip b{font-weight:700}
         .v-tipc{position:absolute;left:36px;top:95px;width:468px;height:96px;border-radius:9px;background:#303135;font-size:13px;color:#9fa0a3;padding:38px 20px}
         .v-todo{position:absolute;left:0;width:540px;top:700px;text-align:center;font-size:18px;color:#aaa}
-        .v-rh{position:absolute;right:0;top:0;width:22px;height:71px;background:#fff;border-radius:0 6px 6px 0;color:#1b1c20;padding:24px 4px;display:block}
-        .v-rh svg{display:block;width:100%;height:100%}
         .v-subbar{position:absolute;left:271px;top:1043px;width:269px;height:36px;background:#4f8f7c;z-index:2}
         .v-subtag{position:absolute;top:1082px;height:22px;padding:0 5px;border:1px solid #6fa890;border-radius:3px;font-size:10.5px;line-height:20px;color:#9ccbb5;z-index:2}
         .v-edbox{position:absolute;left:82px;top:1040px;width:45px;height:66px;background:#3a3b3f;z-index:2}
@@ -277,7 +249,6 @@
         .v-sv4 i{display:block;width:140px;height:1px;background:#4a4b4f}
         .v-soc{position:absolute;left:46px;top:964px;width:448px;display:flex;justify-content:space-between}
         .v-soc img{display:block;width:63px;height:63px}
-        .v-edit .v-hd{display:none}
         .v-hand{position:absolute;z-index:2;opacity:0;pointer-events:none}
         .v-hand.is-on{opacity:1}
         .v-hand i{position:absolute;width:16px;height:16px;border-radius:50%;background:#1b8cf0}
@@ -288,7 +259,6 @@
         .v-trkbox:after{content:'';position:absolute;left:50%;top:50%;width:22px;height:22px;margin:-11px;border:2px solid #3d93e6;border-radius:50%}
         .v-trkbox i{position:absolute;width:11px;height:11px;background:#3d93e6}
         .v-trkbox i.c1{left:50%;top:-6px}.v-trkbox i.c2{left:-6px;top:50%}.v-trkbox i.c3{right:-6px;top:50%}.v-trkbox i.c4{left:50%;bottom:-6px}
-        /* 오른쪽 안내(기존) */
         .p09-right{position:absolute;left:1290px;top:50%;transform:translateY(-50%);width:560px;display:flex;flex-direction:column;gap:30px}
         .p09-right.is-off{display:none}
         .p09-right .card-btn{width:100%;min-width:0;height:auto;min-height:130px;padding:18px 30px 12px;font-size:44px;line-height:1.2}
@@ -375,7 +345,6 @@
   <script src="vllo-ui.js"></script>
   <script>
   (function () {
-    /* 장소별 영상: video 는 7페이지와 같은 영상, thumb 는 영상 첫 장면 사진, size=가리개 지름(영상 폭 비율), keys=[초, 좌우, 상하] 얼굴 중심(영상 폭·높이 0~1) */
     const PLACES = {
       mart: { name: '마트', thumb: 'p07_thumb_2', video: 'video/v2.mp4', words: ['여기는', '우리', '동네', '마트'], err: '동내', bad: 2, size: 0.10,
         keys: [[0, .44, .155], [.84, .43, .165], [1.6, .4, .15], [2.4, .325, .14], [3.2, .241, .144], [4, .122, .119], [4.6, -.005, .113], [5, -.15, .12]] },
@@ -403,7 +372,6 @@
     const K = () => screen.clientWidth / 540;
     function fit() { vl.style.transform = 'scale(' + K() + ')'; }
 
-    /* 영상 안의 위치(0~1) → 영상 칸(528x248) 안 px. 칸을 꽉 채우게(cover) 깔려 있음 */
     const faceAt = (t) => {
       const KS = st.pl.keys;
       for (let i = 1; i < KS.length; i++) {
@@ -419,7 +387,6 @@
       el.style.top = ((H - dh) / 2 + f[1] * dh - d / 2) + 'px';
     }
 
-    /* ---- 화면 교체: 새 조각을 겹쳐 서서히 나타내고 이전 조각은 뒤에서 지움 ---- */
     function swap(html, instant) {
       const old = Array.from(stack.children);
       const d = document.createElement('div');
@@ -432,9 +399,6 @@
       return d;
     }
 
-    /* ---- 단계 목록 ----
-       scr: 화면 이름(vllo-ui.js) · view: 영상 칸 보이기 · sub: 'err'|'fix' 자막 · mos: 블러 · play: 영상 재생 방식
-       hit: 눌러야 할 곳 이름(TARGET 표로 요소를 찾고 FG·HOT 표의 키로 씀) · next: 다음 버튼 · swipe: 밀기 영역 */
     const STEPS = [
       { home: true, bubble: 'VLLO를 클릭해요.', hit: 'app' },
       { scr: 'list', place: true, bubble: '우리 동네를 소개하는<br>브이로그를 만들어볼까요?<br>원하는 장소를 하나 선택해요.' },
@@ -472,7 +436,6 @@
       { vlog: true, bubble: '', nochar: true }
     ];
 
-    /* ---- 렌더 ---- */
     let timer = 0, tts = null, lastScr = '';
     function clearAll() {
       document.querySelectorAll('#p09Screen > .kbd-db').forEach((k) => k.remove());
@@ -485,7 +448,6 @@
       document.querySelectorAll('.p09-swhand').forEach((h) => h.remove());
     }
     const place = (el, b) => { el.style.cssText += ';left:' + b[0] + 'px;top:' + b[1] + 'px;width:' + b[2] + 'px;height:' + b[3] + 'px'; };
-    // 눌러야 할 곳 = vllo-ui.js 가 그린 실제 요소: 이름 → [CSS 선택자, 글자(앞부분), 몇 번째(기본 0)]
     const TARGET = {
       audio: ['.v-side', '음성 녹음'], recStart: ['.v-rbtn'], recStop: ['.v-rbtn'], recDone: ['.v-btn', '완료'], autoSub: ['.v-r2', 'AI자동 자막'],
       generate: ['.v-btn', '생성하기'], edit: ['.v-r2', '편집'], fixOk: ['.v-ok'], fixDone: ['.v-btn', '완료'], fxTab: ['.v-tab', '효과'],
@@ -497,7 +459,6 @@
       const list = Array.from(stack.lastElementChild.querySelectorAll(t[0])).filter((e) => !t[1] || e.textContent.trim().indexOf(t[1]) === 0);
       return list[t[2] || 0];
     };
-    // 손가락 위치 보정 [dx, dy] — 눌러야 할 곳(hit)별. swipe1·swipe2 는 밀기 손. ?edit 로 손가락을 눌러 맞춘 뒤 표시줄 값을 옮겨 적음
     const FG = {
       app: [15, -37], audio: [10, -37.7], recStart: [0, 0],
       recStop: [0, 0], recDone: [-2, -36], autoSub: [8.5, -40],
@@ -507,7 +468,6 @@
       trackGo: [0, -18], trackDone: [-140, -29], export: [14.5, -24.7],
       export2: [-36, -47], swipe1: [0, 0], swipe2: [0, 0]
     };
-    // 클릭 영역 보정 [dx, dy, dw, dh] — 버튼 모양은 그대로, 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
     const HOT = {
       audio: [0, -6, 0, 9], recStart: [0, 0, 0, 0], recStop: [0, 0, 0, 0],
       recDone: [0, 0, 0, 0], autoSub: [2, 4, -4, -4], generate: [0, 0, 0, 0],
@@ -563,7 +523,7 @@
       st.i = n;
       render();
       if (BoxEdit.on) {
-        try { const q = /[?&]step=/.test(location.search) ? location.search.replace(/([?&]step=)\d+/, '$1' + (n + 1)) : location.search + '&step=' + (n + 1); history.replaceState(null, '', q); } catch (e) { /* 주소 갱신이 막힌 환경 */ }
+        try { const q = /[?&]step=/.test(location.search) ? location.search.replace(/([?&]step=)\d+/, '$1' + (n + 1)) : location.search + '&step=' + (n + 1); history.replaceState(null, '', q); } catch (e) {}
       }
     }
     const advance = () => go(st.i + 1);
@@ -597,7 +557,7 @@
       swap(inner, lastScr === '');
       if (s.scr === 'keyboard') $('p09Screen').insertAdjacentHTML('beforeend', kbdDbHtml());
       lastScr = s.scr;
-      if (s.opt && s.opt.msg !== undefined) { /* 로딩 */ }
+      if (s.opt && s.opt.msg !== undefined) {}
       if (s.place) placePick();
       if (s.hit && TARGET[s.hit]) {
         const el = findHit(s.hit);
@@ -619,7 +579,6 @@
       }
     }
 
-    // 장소 고르기: 내 프로젝트 자리에 장소 4개
     function placePick() {
       const w = stack.lastElementChild.querySelector('.v-full');
       const box = document.createElement('div');
@@ -644,7 +603,6 @@
       stack.style.setProperty('--thumb', "url('img/" + pl.thumb + ".jpg')");
     }
 
-    // 녹음: 장소별 소리 파일(sound/sa10_vllo_{mart,post,library,park}.mp3)이 끝나면 정지 버튼 손가락 안내
     function ttsRun(btn, key) {
       let done = false;
       const end = () => { if (done) return; done = true; if (btn.isConnected) fingerTo(btn, key); };
@@ -658,7 +616,6 @@
       } catch (e) { end(); }
       timer = setTimeout(end, 9000);
     }
-    // 로딩: 막대와 %가 차오름
     function load(ms) {
       const bar = stack.lastElementChild.querySelector('#vlLoadBar'), pct = stack.lastElementChild.querySelector('#vlLoadPct');
       const t0 = performance.now();
@@ -676,17 +633,10 @@
     function setRight(items) {
       right.innerHTML = '';
       items.forEach((it) => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'card-btn js-sfx';
-        b.dataset.sound = 'sound/click.mp3';
-        b.innerHTML = it.t;
-        b.addEventListener('click', () => it.fn());
-        right.appendChild(b);
+        const b = makeCardBtn(it.t, '', () => it.fn(), { html: true, parent: right });
       });
       right.classList.remove('is-off');
     }
-    // 음성 녹음 내용 ↔ AI 자막 비교
     function compare() {
       const pl = st.pl, ew = errWords();
       const box = document.createElement('div');
@@ -717,7 +667,6 @@
       right.appendChild(box);
       right.classList.remove('is-off');
     }
-    // 완성 영상
     function vlog() {
       showIf($('p09Phone'), false);
       showIf($('p09Vlog'), true);
@@ -749,7 +698,6 @@
       setTimeout(() => { spoke = true; finish(); }, 9000);
     });
 
-    // 하단 메뉴 밀기: 손가락 따라 줄이 왼쪽으로 밀려 자동 자막이 보이면 다음 단계
     function swipe(box) {
       const z = document.createElement('div');
       z.className = 'p09-swipe';

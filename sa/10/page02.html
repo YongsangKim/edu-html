@@ -6,9 +6,6 @@
     <title>퍼즐로 완성하는 우리 동네</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 기획서 3~13p. 사진 퍼즐 3단계(공원 4조각 → 도서관 6조각 → 향교 9조각). 사진 보기(5초 또는 [준비됐어요]) → 조각 맞추기(오른쪽 조각을 잡아 왼쪽 칸에 놓기, 힌트로 원본 보기)
-           → 완성하면 "이곳에서는 무엇을 할 수 있나요?" 3지선다 모달(정답 → 다음 단계, 오답 → 카드 흔들림) → 마지막 단계 정답 후 활동 종료 팝업. */
-
 
         .p02-frame{position:absolute;left:53px;top:202px;width:1062px;height:716px;box-sizing:border-box;background:#8eb5e8;border-radius:28px}
         .p02-tframe{position:absolute;left:1121px;top:202px;width:740px;height:716px;box-sizing:border-box;background:#8eb5e8;border-radius:28px;display:none}
@@ -31,7 +28,7 @@
         .p02-piece.is-placed{cursor:default;box-shadow:none;z-index:3;pointer-events:none}
         .p02-piece.is-back{transition:transform .25s,left .25s,top .25s}
 
-        .p02-modal{position:absolute;left:0;top:0;width:1920px;height:960px;background:rgba(27,23,56,.55);z-index:50}
+        .p02-modal{z-index:50}
         .p02-card{position:absolute;left:265px;top:43px;width:1393px;height:850px;box-sizing:border-box;background:var(--c-white);border:solid 5px var(--c-purple);border-radius:110px;box-shadow:0 14px 0 0 rgba(27,23,56,.25)}
         .p02-card-av{position:absolute;left:17px;top:15px;width:213px;height:213px;border-radius:50%;background:var(--c-purple);overflow:hidden}
         .p02-card-av img{display:block;width:100%;height:100%;object-fit:contain}
@@ -39,8 +36,7 @@
         .p02-card-tag{position:absolute;left:600px;top:-22px;padding-top:4px;--rb-w:233px;--rb-h:74px;--rb-fs:48px;--rb-color:var(--c-ink);--rb-bg:#e3c8fd;--rb-tail:#c3a0f0;--rb-fold:#9a7dea}
         .p02-card-tag:before{display:none}
         .p02-ask{position:absolute;left:0;top:608px;width:100%;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:62px;line-height:1.2;color:var(--c-purple);letter-spacing:-0.05em}
-        .p02-opts{position:absolute;left:0;top:698px;width:100%;display:flex;justify-content:center;gap:40px}
-        .p02-opts{--qb:#5b1bd6}
+        .p02-opts{position:absolute;left:0;top:698px;width:100%;display:flex;justify-content:center;gap:40px;--qb:#5b1bd6}
         .p02-opts .card-btn{min-width:0;width:370px;height:90px;padding:8px 6px 0;font-size:58px;letter-spacing:-0.08em;white-space:nowrap;box-shadow:0 10px 0 0 #a9a2ff,0 10px 0 10px var(--qb)}
         .p02-opts .card-btn.is-selected,.p02-opts .card-btn:not(.is-selected):not(:disabled):active{box-shadow:0 4px 0 0 #a9a2ff,0 3px 0 10px var(--qb)}
         .p02 .is-off{display:none}
@@ -65,7 +61,7 @@
           <button type="button" class="card-btn js-sfx p02-ready" id="p02Ready" data-sound="sound/click.mp3">준비됐어요</button>
           <button type="button" class="card-btn js-sfx p02-hint is-off" id="p02Hint" data-sound="sound/click.mp3">힌트</button>
 
-          <div class="p02-modal is-off" id="p02Quiz">
+          <div class="p02-modal is-off dim-layer" id="p02Quiz">
             <div class="p02-card">
               <div class="p02-card-av"><img src="../../resources/img/common/avatar_smile.png" alt=""></div>
               <div class="p02-card-photo" id="p02QPhoto"><p class="ribbon is-tag p02-card-tag" id="p02QTag"></p></div>
@@ -107,7 +103,7 @@
     const tray = $('p02Tray');
     let si = 0, pieces = [], placed = 0, timer = 0, busy = false;
 
-    const scale = () => main.getBoundingClientRect().width / 1920;
+    const scale = () => currentScale;
     const pos = (e) => { const r = main.getBoundingClientRect(), s = r.width / 1920; return { x: (e.clientX - r.left) / s, y: (e.clientY - r.top) / s }; };
     const url = (st) => "url('img/p02_photo_" + st.photo + ".jpg')";
 
@@ -213,12 +209,7 @@
       const box = $('p02Opts');
       box.innerHTML = '';
       st.opts.forEach((t, k) => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'card-btn';
-        b.textContent = t;
-        b.addEventListener('click', () => answer(b, k === st.ans));
-        box.appendChild(b);
+        const b = makeCardBtn(t, '', () => answer(b, k === st.ans), { parent: box });
       });
       $('p02Quiz').classList.remove('is-off');
     }

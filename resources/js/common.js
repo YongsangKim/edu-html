@@ -2095,9 +2095,7 @@ function initAnswerPickQuiz() {
             clickSound.cloneNode().play().catch((err) => console.warn('사운드 재생 실패:', err));
           }
         } else {
-          opt.classList.remove('is-wrong');
-          void opt.offsetWidth; // 강제 리플로우: 같은 오답을 연달아 눌러도 흔들림이 다시 재생되게
-          opt.classList.add('is-wrong');
+          restartAnim(opt, 'is-wrong');
           setWrongText(opt.dataset.wrong || quiz.dataset.wrong);
           showLayer(wrongLayer, wrongSound);
         }
@@ -2511,6 +2509,102 @@ function shuffleArray(arr) {
     const t = a[i]; a[i] = a[j]; a[j] = t;
   }
   return a;
+}
+
+function restartAnim(el, cls) {
+  if (!el) return;
+  el.classList.remove(cls);
+  void el.offsetWidth;
+  el.classList.add(cls);
+}
+
+function burstConfetti(opts) {
+  const COLORS = ['#ff4f8b', '#ffd83d', '#4d8bff', '#6ad17a', '#b37bff', '#ff9a3c'];
+  const fx = opts.layer;
+  const sp = opts.special;
+  const s = currentScale;
+  const main = fx.getBoundingClientRect();
+  const pt = opts.at(opts.from.getBoundingClientRect());
+  const ox = (pt[0] - main.left) / s + (opts.dx || 0);
+  const oy = (pt[1] - main.top) / s + (opts.dy || 0);
+
+  const parts = [];
+  for (let i = 0; i < sp.count + opts.count; i++) {
+    const isSp = i < sp.count;
+    const el = document.createElement('span');
+    el.className = isSp ? 'is-special' + (sp.cls ? ' ' + sp.cls : '') : 'is-paper';
+    if (isSp) el.innerHTML = sp.html;
+    else el.style.background = COLORS[i % COLORS.length];
+    fx.appendChild(el);
+    const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 0.9;
+    const speed = (isSp ? 900 : 1100) + Math.random() * 700;
+    parts.push({
+      el, isSp,
+      x: ox, y: oy,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      rot: Math.random() * 360,
+      vr: (Math.random() - 0.5) * 900,
+      sway: Math.random() * Math.PI * 2,
+      life: 1.4 + Math.random() * 0.6
+    });
+  }
+
+  let raf = null;
+  let last = performance.now();
+  let t = 0;
+  function frame(now) {
+    const dt = Math.min((now - last) / 1000, 0.05);
+    last = now;
+    t += dt;
+    let alive = 0;
+    parts.forEach((p) => {
+      if (!p.el) return;
+      p.vy += 2200 * dt;
+      p.vx *= 1 - 1.8 * dt;
+      p.vy *= 1 - (p.isSp ? 1.2 : 2.2) * dt;
+      p.x += p.vx * dt + (p.isSp ? 0 : Math.sin(t * 8 + p.sway) * 40 * dt);
+      p.y += p.vy * dt;
+      p.rot += p.vr * dt;
+      const fade = Math.max(0, Math.min(1, (p.life - t) / 0.4));
+      const scale = p.isSp ? Math.min(1, sp.scaleFrom + t * sp.scaleRate) : 1;
+      const flip = p.isSp ? 1 : Math.cos(t * 10 + p.sway);
+      p.el.style.transform = 'translate(' + p.x + 'px,' + p.y + 'px) translate(-50%,-50%) rotate(' + (p.isSp ? p.rot * 0.15 : p.rot) + 'deg) scale(' + scale + ',' + (scale * flip) + ')';
+      p.el.style.opacity = fade;
+      if (fade <= 0) {
+        p.el.remove();
+        p.el = null;
+      } else {
+        alive += 1;
+      }
+    });
+    raf = alive ? requestAnimationFrame(frame) : null;
+  }
+  raf = requestAnimationFrame(frame);
+  return () => {
+    if (raf) cancelAnimationFrame(raf);
+    raf = null;
+    fx.innerHTML = '';
+  };
+}
+
+function makeConfettiLayer() {
+  const fx = document.createElement('div');
+  fx.className = 'confetti-fx';
+  document.querySelector('main').appendChild(fx);
+  return fx;
+}
+
+function makeCardBtn(content, cls, onClick, opts) {
+  const o = opts || {};
+  const b = document.createElement(o.tag || 'button');
+  if (b.tagName === 'BUTTON') b.type = 'button';
+  b.className = 'card-btn' + (cls ? ' ' + cls : '');
+  if (o.html) b.innerHTML = content; else b.textContent = content;
+  if (o.data) Object.assign(b.dataset, o.data);
+  if (onClick) b.addEventListener('click', onClick);
+  if (o.parent) o.parent.appendChild(b);
+  return b;
 }
 
 function flashLayer(el, hideClass, ms) {
@@ -3086,9 +3180,7 @@ function initStepOrder(o) {
     },
     onWrong: (card) => {
       playWrong();
-      card.classList.remove('is-wrong');
-      void card.offsetWidth;
-      card.classList.add('is-wrong');
+      restartAnim(card, 'is-wrong');
       o.wrongText.textContent = o.steps[step].wrong;
       flashLayer(o.wrongModal);
     },
@@ -3174,9 +3266,7 @@ function initEmotionPickFlow(config) {
       btn.addEventListener('click', () => {
         if (!opt.correct) {
           playWrong();
-          btn.classList.remove('is-wrong');
-          void btn.offsetWidth;
-          btn.classList.add('is-wrong');
+          restartAnim(btn, 'is-wrong');
           if (step.kind === 'message') {
             showPopup(step.wrong);
           } else {
@@ -3436,9 +3526,7 @@ function initEmotionChatFlow(config) {
         if (EDIT) return;
         if (label !== DATA.correctEmotion) {
           play(wrongSound);
-          btn.classList.remove('is-wrong');
-          void btn.offsetWidth;
-          btn.classList.add('is-wrong');
+          restartAnim(btn, 'is-wrong');
           showPopup(DATA.wrongEmotion);
           return;
         }
@@ -3939,9 +4027,7 @@ function initJigsawPuzzle(cfg) {
     const p = PUZZLES[index];
     if (piece.cell === undefined) {
       playWrong();
-      btn.classList.remove('is-wrong');
-      void btn.offsetWidth;
-      btn.classList.add('is-wrong');
+      restartAnim(btn, 'is-wrong');
       bubble.innerHTML = '다시 생각해볼까요?';
       clearTimeout(bubbleTimer);
       bubbleTimer = setTimeout(() => { bubble.innerHTML = p.ask; }, 1000);
@@ -4250,4 +4336,63 @@ function initGeminiChat(o) {
     }
   };
   return api;
+}
+
+const PUZZLE_DEFAULT_PATH = 'M 22,4 L 275,4 A 20,20 0 0,0 315,4 L 568,4 Q 586,4 586,22 L 586,45 A 18,18 0 0,0 586,81 L 586,104 Q 586,122 568,122 L 315,122 A 20,20 0 0,1 275,122 L 22,122 Q 4,122 4,104 L 4,81 A 18,18 0 0,0 4,45 L 4,22 Q 4,4 22,4 Z';
+const PUZZLE_THEMES = {
+  yellow: { top: '#ffbf0b', bot: '#ffa20c', sh: '#53397e' },
+  blue:   { top: '#699cff', bot: '#3362ec', sh: '#112c99' },
+  coral:  { top: '#ff8159', bot: '#ea4828', sh: '#9e1c06' },
+  green:  { top: '#43d991', bot: '#18a362', sh: '#095c34' },
+  purple: { top: '#b48cff', bot: '#7d4ee0', sh: '#3b1c7a' }
+};
+
+/**
+ * 입체 퍼즐 블록 SVG 생성 공용 헬퍼
+ * @param {string} id - SVG gradient/filter 고유 ID 접두사
+ * @param {object|null} theme - { top, bot, sh } 테마 객체 (null이면 빈 슬롯)
+ * @param {object} [opts] - { path, w=590, h=146 }
+ * @returns {SVGSVGElement}
+ */
+function makePuzzleSvg(id, theme, opts) {
+  const o = opts || {};
+  const w = o.w || 590;
+  const h = o.h || 146;
+  const path = o.path || PUZZLE_DEFAULT_PATH;
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+  svg.setAttribute('class', 'pz-svg');
+  svg.setAttribute('aria-hidden', 'true');
+  if (!theme) {
+    svg.innerHTML = `<path class="pz-body" d="${path}" fill="#eef3fc" stroke="#9fb5db" stroke-width="5" stroke-linejoin="round"/>`;
+    return svg;
+  }
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="${id}g" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${theme.top}"/>
+        <stop offset="100%" stop-color="${theme.bot}"/>
+      </linearGradient>
+      <filter id="${id}e" x="-5%" y="-5%" width="110%" height="110%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur"/>
+        <feOffset in="blur" dx="5" dy="10" result="offHi"/>
+        <feComposite in="SourceAlpha" in2="offHi" operator="out" result="hiMask"/>
+        <feFlood flood-color="#ffffff" flood-opacity="0.2" result="hiCol"/>
+        <feComposite in="hiCol" in2="hiMask" operator="in" result="hi"/>
+        <feOffset in="blur" dx="-5" dy="-10" result="offSh"/>
+        <feComposite in="SourceAlpha" in2="offSh" operator="out" result="shMask"/>
+        <feFlood flood-color="${theme.sh}" flood-opacity="0.5" result="shCol"/>
+        <feComposite in="shCol" in2="shMask" operator="in" result="sh"/>
+        <feMerge>
+          <feMergeNode in="SourceGraphic"/>
+          <feMergeNode in="sh"/>
+          <feMergeNode in="hi"/>
+        </feMerge>
+      </filter>
+    </defs>
+    <path d="${path}" fill="url(#${id}g)" filter="url(#${id}e)"/>
+    <path d="${path}" fill="none" stroke="#141539" stroke-width="6" stroke-linejoin="round"/>
+  `;
+  return svg;
 }

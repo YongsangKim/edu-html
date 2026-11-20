@@ -6,10 +6,6 @@
     <title>나의 자랑거리를 소개하는 뉴스</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 42~43p. TV 목업은 img/p11_tv.png, 화면은 page08 뉴스데스크 이미지 재사용.
-           재생하기: 파란 그라데이션 자막바 안에서 기사문이 오른쪽→왼쪽으로 흐르고 음성 sound/p11_tts_{minjun|yuna}_{행동}_{결과}.m4a(page10에서 고른 목소리 × page06에서 고른 기사문 조합 18개, 없으면 sound/p11_tts.m4a)가 같이 재생.
-           자막 속도는 음성 길이에 맞추고, 음성이 없으면 8초 */
-
         .p11-title{position:absolute;left:0;top:30px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:80px;letter-spacing:-0.06em;
           background:linear-gradient(180deg,#02185c,#0362d7);-webkit-background-clip:text;background-clip:text;color:transparent}
         .p11-tv{position:absolute;left:190px;top:150px;width:1180px;height:720px;box-sizing:border-box;padding:40px;background:var(--c-ink) url('img/p11_tv.png') center / 100% 100% no-repeat;border-radius:40px}
@@ -59,7 +55,6 @@
   <script>
   (function () {
     const read = (k) => { try { return sessionStorage.getItem(k); } catch (e) { return null; } };
-    // 기사문 9가지(행동 3 × 결과 3) — page06 에서 만든 문장과 같은 순서·같은 글. 음성 파일 번호(행동_결과)가 이 순서와 같음
     const ARTICLES = [
       '오늘의 주인공은 매일 꾸준히 연습해서 스스로 세운 목표를 이뤘다고 합니다.', '오늘의 주인공은 매일 꾸준히 연습해서 대회에 출전하여 상을 받았습니다.', '오늘의 주인공은 매일 꾸준히 연습해서 부모님과 선생님께 칭찬을 받았습니다.',
       '오늘의 주인공은 친구의 이야기를 잘 들어줘서 부모님과 선생님께 칭찬을 받았습니다.', '오늘의 주인공은 친구의 이야기를 잘 들어줘서 진심을 담은 감사 인사를 받았습니다.', '오늘의 주인공은 친구의 이야기를 잘 들어줘서 친구와의 사이가 좋아졌다고 합니다.',
@@ -71,7 +66,6 @@
     const screen = document.getElementById('p11Screen');
     const caption = document.getElementById('p11CaptionText');
     const playBtn = document.getElementById('p11PlayBtn');
-    // 목소리: 10페이지에서 고른 것, 없으면 고른 아나운서(스티커 1 여자 · 2 남자)에 맞춤. 번호: 기사문 글에서 찾고(없으면 저장된 번호, 그것도 없으면 1_1)
     const voice = read('sa02_voice') || (desk.charAt(1) === '2' ? 'minjun' : 'yuna');
     const at = ARTICLES.indexOf(article);
     const pick = at >= 0 ? (Math.floor(at / 3) + 1) + '_' + (at % 3 + 1) : (read('sa02_pick') || '1_1');
@@ -88,9 +82,7 @@
       playBtn.classList.add('is-selected');
       const dur = isFinite(tts.duration) && tts.duration > 0 ? tts.duration : 8;
       caption.style.setProperty('--dur', dur + 's');
-      caption.classList.remove('is-playing');
-      void caption.offsetWidth;
-      caption.classList.add('is-playing');
+      restartAnim(caption, 'is-playing');
       tts.currentTime = 0;
       tts.play().catch(() => {});
     });

@@ -6,8 +6,6 @@
     <title>Papago로 한국 문화 안내하기</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 기획서(실습만) 16~21p. 한옥마을: 이야기 → 이미지 기능 → 촬영 버튼(번역 로딩 1초) → 안내판 번역 결과 + 다음 → 이야기.
-           이야기 삽화는 img/p12_story_{1,2}.jpg (없으면 설명 글자). 카메라 사진은 img/p12_photo_hanok.jpg, 번역 문구는 사진 속 안내판 위치(box, 폰 화면 %)에 얹음 */
         .pp-ov.is-hanok-ov{
             left: 20.5%;
             top: 18%;
@@ -68,7 +66,6 @@
     const say = initGuideSay({ bubble: $('p12Bubble'), img: $('p12Char'), set: $('p12Set') });
     let si = 0, handler = null, timer = 0;
     const FG = { image: [-10, -20], shoot: [-10, -20] };
-    // 클릭 영역 보정 [dx, dy, dw, dh] — 버튼 모양은 그대로, 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
     const HOT = { image: [0, 0, 0, 0], shoot: [0, 0, 0, 0] };
     const storyNo = (i) => STEPS.slice(0, i + 1).filter((x) => x.story).length;
 
@@ -114,7 +111,6 @@
       go(si + 1);
     });
     next.addEventListener('click', () => { if (!BoxEdit.on) go(si + 1); });
-    /* ?edit&step=N : 단계 N 으로 바로 열기(] [ 로 이동). 손가락(FG)·클릭 영역(HOT)을 클릭해 방향키로 조정(Alt+방향키 = 폭·높이), 오른쪽 아래 포즈판에서 포즈를 눌러 본 뒤 STEPS 줄의 pose 에 옮겨 적음 (_guide/steps.html 기준) */
     BoxEdit.stepEdit({
       key: () => STEPS[si].hot || '?',
       count: STEPS.length + 1,

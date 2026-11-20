@@ -6,14 +6,10 @@
     <title>우리 동네 가게를 운영하라!</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 46~61p. 손님 5명의 주문을 보고 재화/서비스 선반에서 알맞은 것 고르기.
-           맞으면 웃는 손님 + 감사 말풍선 2초 뒤 다음 손님(게이지 20%씩), 틀리면 힌트 팝업 3초(기획서 5초는 너무 길어 줄임).
-           가게 배경 img/p12_bg.jpg, 물건 img/p12_item_{key}.png */
         main{background:url('img/p12_bg.jpg') center / cover no-repeat, linear-gradient(180deg,#d9ddeb 0%,#cddcea 50%,#c2d9e9 100%)}
 
-        /* 디자인 12p: 가게 배경(img/p12_bg.jpg, 손님·선반 포함) 위에 게이지 · 주문 말풍선 · 질문 알약 · 재화/서비스 이름표 · 동그란 물건 4개 */
         .p12-guest{position:absolute;pointer-events:none}
-        .p12-front{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none}
+        .p12-front,.p12-shelf{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none}
         .p12-gauge{left:333px;top:36px;width:1292px}
 
         .p12-order{position:absolute;left:1103px;top:170px;margin:0;width:547px;min-height:218px;box-sizing:border-box;padding:24px 30px 18px;display:flex;align-items:center;justify-content:center;text-align:center;
@@ -25,7 +21,6 @@
         .p12-ask,.p12-thanks{position:absolute;left:757px;top:502px;width:1073px;height:100px;margin:0;box-sizing:border-box;display:flex;align-items:center;justify-content:center;
           background:#fdf9f6;border:solid 5px var(--c-ink);border-radius:50px;font-family:'Cafe24 Ssurround';font-size:70px;color:var(--c-ink);letter-spacing:-0.05em;white-space:nowrap;box-shadow:0 16px 0 0 rgba(86,148,231,0.2)}
         .p12-thanks{color:#2b6bd6}
-        .p12-shelf{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none}
         .p12-shelf b{position:absolute;top:610px;width:212px;height:65px;padding-top:4px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border-radius:33px;font-weight:normal;
           background:#789ce0;font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-white);letter-spacing:-0.03em;border:solid 4px #91b9e7}
         .p12-shelf-goods b{left:910px}
@@ -114,13 +109,11 @@
     let index = 0;
     let busy = false;
 
-    // 물건 그림은 p05_item_*(파란 원이 든 그림), 없는 것만 p12 전용 그림
     const P05 = ['bag', 'bread', 'clothes', 'crayon', 'delivery', 'doctor', 'haircut', 'mechanic', 'paper', 'pencil', 'shoes', 'snack', 'taxi', 'umbrella'];
     function itemImg(key) {
       return P05.includes(key) ? 'p05_item_' + key : 'p12_item_' + key;
     }
 
-    // 말풍선 문구를 바꿀 때마다 확인: 기본 크기로 두 줄을 넘어 세 줄 이상이 되면 is-small(50px)로 줄임
     function setOrder(html) {
       order.classList.remove('is-small');
       order.innerHTML = html;
@@ -155,9 +148,7 @@
       const g = GUESTS[index];
       if (key !== g.answer) {
         playWrong();
-        btn.classList.remove('is-wrong');
-        void btn.offsetWidth;
-        btn.classList.add('is-wrong');
+        restartAnim(btn, 'is-wrong');
         $('p12HintText').innerHTML = g.hint;
         flashLayer($('p12Hint'), 'is-off', 3000);
         return;

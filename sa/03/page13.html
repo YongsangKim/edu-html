@@ -6,10 +6,6 @@
     <title>마음 배달 작전</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 67~72p. 3라운드, 라운드마다 메시지 카드 10장(정답 5·오답 5, 같은 종류 3장 연속 없이 무작위)이 떨어짐.
-           좌우 방향키(터치 화면은 끌기)로 바구니를 옮겨 받음. 카드 폭 절반 이상이 바구니에 걸치면 받은 것으로 침.
-           정답 5장을 다 받아야 라운드 성공, 하나라도 놓치면 그 라운드 다시 시작(팝업 문구는 기획서에 없어 임의).
-           정답 한 장마다 마음 게이지 1/15씩. 친구 img/p13_guest1.png(모든 라운드 공통), 바구니 밑 캐릭터 img/*/
         main{overflow:hidden}
 
         .p12-panel{position:absolute;left:513px;top:40px;width:1349px;height:888px;box-sizing:border-box;background:#266cc8;border:solid 4px var(--c-ink);border-radius:20px}
@@ -129,7 +125,6 @@
       if (gh) { gh.style.left = pct + '%'; gh.style.visibility = pct ? 'visible' : 'hidden'; }
     }
 
-    // 같은 종류(정답/오답)가 3장 이상 이어지지 않게 섞기
     function makeQueue(r) {
       const cards = r.good.map((t) => ({ t, good: true })).concat(r.bad.map((t) => ({ t, good: false })));
       for (let tries = 0; tries < 200; tries++) {
@@ -253,10 +248,9 @@
       if (e.key === 'ArrowLeft') keys.left = false;
       if (e.key === 'ArrowRight') keys.right = false;
     });
-    // 터치 화면용: 바구니를 끌어서 옮김(기획서는 방향키만 있음)
     basket.addEventListener('pointerdown', (e) => {
       e.preventDefault();
-      const s = stage.getBoundingClientRect().width / 1920;
+      const s = currentScale;
       const sx = e.clientX;
       const bx = basketX;
       basket.setPointerCapture(e.pointerId);

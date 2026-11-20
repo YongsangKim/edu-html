@@ -6,13 +6,7 @@
     <title>Suno와 함께 뚝딱! 나도 경제 뮤지션</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 없음 - 기획서 27~42p. 가운데 Suno 화면은 기획서 캡처를 보고 CSS로 직접 그림(.s6, 497x1075 좌표를 폰 화면 폭에 맞춰 축소), 노래 표지 img/p09_cover.png. 이전 캡처 이미지 방식: _backup_page09.html.
-           가사는 앞 활동(sessionStorage 'sa06_lyrics'), 없으면 기획서 30p 가사. 노래는 고른 가사와 상관없이 고른 장르의 두 곡(가사 버전 1·2) — 목록의 1번째 줄 = v1, 2번째 줄 = v2. 8곡 sound/p09_song_v{1|2}_{hiphop|kpop|trot|rock}.mp3. 노래가 길어서 다른 곡을 누르거나 다운로드 단계로 넘어가면 바로 멈춤. */
 
-        
-
-
-        /* Suno 앱 화면을 CSS로 다시 그림(기획서 캡처 기준 497x1075 좌표, 공용 폰 화면 폭 450px·높이 890px에 맞춰 가로 .905배·세로 .828배) */
         .s6{position:absolute;inset:0;overflow:hidden;font-family:'Pretendard';color:#111;background:#f7f3ee}
         .s6-ui{position:absolute;left:0;top:0;width:497px;height:1075px;transform:scale(.9054,.8279);transform-origin:0 0;letter-spacing:-0.01em;--pulse-w:5.8px}
         .s6-ui .a{position:absolute;box-sizing:border-box}
@@ -31,7 +25,6 @@
         .s6-ic{position:absolute;width:48px;height:48px;border-radius:50%;background:rgba(0,0,0,.07);display:flex;align-items:center;justify-content:center;color:#222}
         .s6-ic svg{width:23px;height:23px}
         .s6-ic.is-wand{background:#14131a;color:#fff}
-        .s6-ic.is-lg{width:50px;height:50px}
         .s6-ph{position:absolute;left:18px;width:420px;font-size:18px;line-height:26px;color:rgba(0,0,0,.27)}
         .s6-tx{position:absolute;left:20px;width:420px;font-size:18px;line-height:26px;color:#1a1a1a;overflow:hidden;white-space:pre-line}
         .s6-chip{position:absolute;height:48px;border-radius:24px;background:rgba(0,0,0,.065);display:flex;align-items:center;justify-content:center;gap:9px;font-size:14px;color:#333}
@@ -99,8 +92,6 @@
         .p09-genres{position:absolute;width:480px;display:flex;flex-direction:column;gap:40px}
         .p09-genres .card-btn{width:100%;height:100px;padding:6px 30px;font-size:70px}
 
-
-        /* 마무리 화면(디자인 16p): 리본 제목 + 파란 부제 + 큰 흰 패널 안에 하늘색 상자(표지·재생 칸) + 다음 */
         .p09-final{position:absolute;box-sizing:border-box;background:#f8f6f6;border:solid 5px var(--c-ink);border-radius:14px}
         .p09-final-ribbon{--rb-w:852px;position:absolute;z-index:2}
         .p09-final-sub{position:absolute;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:62px;letter-spacing:-0.05em;color:#266cc8;z-index:2}
@@ -178,7 +169,6 @@
     let lyrics = DEFAULT_LYRICS;
     try { lyrics = sessionStorage.getItem('sa06_lyrics') || DEFAULT_LYRICS; } catch (e) {}
 
-    // 화면 요소 좌표 [x, y, 폭, 높이] (?edit 으로 열어 고친 값을 여기에 붙여 넣음). 말풍선 y 는 아래 가장자리, 폭·높이가 빠진 건 CSS 크기를 씀
     const BOX = {
       load: [1280, 430, 480],
       genres: [1280, 220, 480],
@@ -211,9 +201,7 @@
       placeBox(el);
     });
 
-    // 손가락 위치 보정 [dx, dy] — 단계의 눌러야 할 곳별. ?edit 로 손가락을 눌러 맞춘 뒤 표시줄 값을 옮겨 적음
     const FG = { home: [15, -37], lyr: [120, -50], wand: [25, 0], expand: [25, -10], check: [25, -10], prev: [28, -3], style: [120, -50], make: [100, -25], more: [49, 15], download: [0, -25] };
-    // 클릭 영역 보정 [dx, dy, dw, dh] — 버튼 모양은 그대로, 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
     const HOT = { lyr: [0, 0, 0, 0], wand: [0, 0, 0, 0], expand: [0, 0, 0, 0], wandRe: [0, 0, 0, 0], check: [0, 0, 0, 0], prev: [0, 0, 0, 0], next2: [0, 0, 0, 0], style: [0, 0, 0, 0], make: [0, 0, 0, 0], song: [0, 0, 0, 0], more: [0, 0, 0, 0], download: [0, 0, 0, 0] };
     const fgo = (key, extra) => BoxEdit.fgo(FG, key, extra);
     BoxEdit.fingerTag();
@@ -273,7 +261,6 @@
       return A('s6-sys', '', '<i style="left:99px"></i><i style="left:107px"></i><i style="left:115px"></i><b></b><u></u>');
     }
 
-    // 만들기 화면: o.lyr(가사 글), o.sty(스타일 글), o.dim(전체화면 가사 뒤 어둡게)
     function createUI(o) {
       o = o || {};
       const filled = !!o.lyr;
@@ -287,7 +274,6 @@
       h += A('s6-pill', 'left:20px;top:140px;width:223px;height:67px', IC.plus + '오디오');
       h += A('s6-pill', 'left:254px;top:140px;width:223px;height:67px', IC.plus + '목소리');
 
-      // 가사 카드
       let c1 = '<div class="chev">' + IC.chev + '</div><div class="lab">가사</div>';
       if (filled) {
         c1 += circ('', 223, 24, IC.undo) + circ('', 279, 24, IC.mark) + circ('', 337, 24, IC.trash);
@@ -302,7 +288,6 @@
       c1 += '<button type="button" id="s6Exp1" class="a s6-ic" style="left:388px;top:' + br1 + 'px;width:50px;height:50px;border:0;padding:0;background:none">' + IC.expand + '</button>';
       h += A('s6-card s6-lyr', 'left:20px;top:227px;width:457px;height:' + H1 + 'px', c1).replace('class="a s6-card s6-lyr"', 'class="a s6-card' + (o.lyrHot ? ' hit-pulse' : '') + '" id="s6Lyr"');
 
-      // 스타일 카드
       let c2 = '<div class="chev">' + IC.chev + '</div><div class="lab">스타일</div>';
       if (hasSty) {
         c2 += circ('', 223, 24, IC.undo) + circ('', 279, 24, IC.mark) + circ('', 337, 24, IC.trash);
@@ -318,10 +303,8 @@
       c2 += A('s6-ic', 'left:388px;top:178px;width:50px;height:50px;background:none', IC.expand);
       h += A('s6-card' + (o.styHot ? ' hit-pulse' : ''), 'left:20px;top:' + T2 + 'px;width:457px;height:250px', c2).replace('<div class="a s6-card', '<div id="s6Sty" class="a s6-card');
 
-      // 곡 제목
       if (!filled) h += A('s6-card', 'left:20px;top:' + T3 + 'px;width:457px;height:58px;border-radius:22px;background:rgba(140,118,115,.07)', '<div style="position:absolute;left:22px;top:17px;width:24px;height:24px;color:#222">' + IC.note + '</div><div style="position:absolute;left:60px;top:0;height:58px;display:flex;align-items:center;font-size:18px;color:rgba(0,0,0,.35)">곡 제목</div>');
 
-      // 만들기 버튼
       if (hasSty) {
         h += circ('', 20, 872, IC.trash).replace('style="', 'style="width:68px;height:68px;background:#76757a;color:#111;');
         h += '<button type="button" id="s6Make" class="a s6-make' + (o.makeHot ? ' hit-pulse' : '') + '" style="left:98px;top:872px;width:379px;background:linear-gradient(90deg,#f6b43a,#f58a3b 55%,#ee3b66);color:#fff">' + IC.noteStar + '만들기</button>';
@@ -333,7 +316,6 @@
       return h;
     }
 
-    // 전체화면 가사: v(0|1), 두 번째 버전을 비교할 때 이전·다음 버튼이 켜짐
     function fullUI(v, o) {
       o = o || {};
       let h = A('', 'left:0;top:0;width:497px;height:1075px;background:#938b90') + status('13:13');
@@ -539,7 +521,6 @@
       $('p09FinalPlay').onclick = () => { if (audio) stopSong(); else play(songN); };
     }
 
-    // ?step=N 으로 단계별 보기: 1 앱 클릭 · 2 가사 입력창 · 3 가사 불러오기 · 4 마법봉 · 5 가사 완성(전체화면) · 6 가사 확인 · 7 두 번째 가사 · 8 가사 비교 · 9 스타일 입력창 · 10 스타일 키워드 · 11 만들기 · 12 만드는 중(2초 뒤 13으로) · 13 노래 고르기 · 14 다운로드 선택 · 15 다운로드 · 16 마무리
     const wantStep = parseInt(new URLSearchParams(location.search).get('step'), 10);
     if (wantStep >= 11) state.genre = 'hiphop';
     const STEPS = [stepHome, stepLyricsField, stepLoad, stepWand, stepMade, stepReview, stepSecond, stepCompare, () => choose(0), stepGenre, stepMake, stepLoading, stepSongs,

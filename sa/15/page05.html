@@ -6,8 +6,6 @@
     <title>디지털 윤리 수칙 분류하기</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 기획서 수정본 7~10p. 행동 카드를 아래 '올바른 행동' / '주의할 행동' 상자로 끌어 넣기(공용 initMatchDrag). 1라운드 4장 → 2라운드 3장(상자는 비워서 다시 시작) → 정리 화면(7장 모두 분류, 3초) → 종료 모달 [다음].
-           맞으면 카드가 상자로 들어가 위에서 사라지고, 틀리면 카드가 흔들리며 오답 팝업(카드별 문구) 후 제자리. 카드 문구·오답 설명은 CARDS */
         :root{--p04-ink:#2b1f7e}
         .p04-panel{position:absolute;left:58px;top:73px;width:1804px;height:860px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:22px;background:#fff}
         .p04-store{position:absolute;left:94px;top:146px;width:1732px;height:313px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:22px;background:#2b6bcf}
@@ -42,7 +40,6 @@
         main.is-sum .p04-box{top:208px;height:705px;padding-top:75px;justify-content:flex-start}
         main.is-sum .p04-rb{top:146px}
         main.is-sum .p04-rb.is-ok{left:336px}
-        .p04-gone{display:none}
         #p04Wrong,#p04Done{z-index:120}
     </style>
 </head>
@@ -134,9 +131,7 @@
         onWrong: (card, zone) => {
           if (!zone) return;
           playWrong();
-          card.classList.remove('is-wrong');
-          void card.offsetWidth;
-          card.classList.add('is-wrong');
+          restartAnim(card, 'is-wrong');
           $('p04WrongText').textContent = by(card.dataset.key).why;
           setTimeout(() => $('p04Wrong').classList.remove('is-off'), 350);
         },

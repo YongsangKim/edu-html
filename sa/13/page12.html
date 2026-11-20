@@ -6,9 +6,6 @@
     <title>안전한 SNS 업로드 챌린지</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 기획서 35~37p. 사진 6장이 번호 순서대로 왼쪽 폰에 나오고(스크롤) 순서 상관없이 업로드, 6장 모두 끝나면 SNS(page13, 올린 순서대로 6장)(img/p12_photo_1~6.jpg, 개인정보가 없는 사진 1·6은 boxes 가 빈 배열). 사진을 고르면 오른쪽에 크게 뜨고, [AI 지우개]를 누른 뒤 개인정보를 하나씩 클릭하면 흰색으로 가려짐.
-           [안전하게 업로드]: 남았으면 '개인정보가 아직 남아 있어요!'(2초, 남은 곳 강조) / 다 지웠으면 사진이 사라지고 '안전하게 업로드 완료!'. 완료한 사진은 흑백·클릭 불가, 6장 모두 끝나면 폰이 가운데로 이동하며 SNS 화면(page13).
-           좌표는 사진에 대한 [왼쪽%, 위%, 폭%, 높이%] (?edit) */
         .p12-panel{position:absolute;left:28px;top:70px;width:1864px;height:865px;box-sizing:border-box;background:#266cc8;border:solid 5px var(--c-ink);border-radius:10px}
         .ask-pill.p12-pill{left:1253px;top:21px;width:1192px;min-height:104px;padding-top:14px;max-width:none;white-space:nowrap}
         .p12-sub{position:absolute;left:720px;top:128px;width:1064px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:50px;line-height:1.3;color:#dff6ff;letter-spacing:-0.1em;white-space:nowrap}
@@ -106,7 +103,7 @@
     const place = (el, b) => { el.style.cssText = 'left:' + b[0] + '%;top:' + b[1] + '%;width:' + b[2] + '%;height:' + b[3] + '%'; };
     if (BoxEdit.on) document.body.classList.add('is-edit');
 
-    const sel = (location.search.match(/[?&]p=([\d,]+)/) || [])[1];   // ?edit&p=4,5,6 : 편집 때 볼 사진 번호(기본 1,2,3)
+    const sel = (location.search.match(/[?&]p=([\d,]+)/) || [])[1];
     const picks = BoxEdit.on && sel ? sel.split(',').map((n) => PHOTOS[n - 1]).filter(Boolean) : PHOTOS;
     const slots = $('p12Slots'), view = $('p12View'), ph = $('p12Ph'), eraser = $('p12Eraser'), upload = $('p12Upload'), toast = $('p12Toast');
     const doneOrder = [];
@@ -177,7 +174,7 @@
       if (left.length) {
         playWrong();
         say('개인정보가 아직 남아 있어요!');
-        left.forEach((el) => { el.classList.remove('is-left'); void el.offsetWidth; el.classList.add('is-left'); });
+        left.forEach((el) => { restartAnim(el, 'is-left'); });
         return;
       }
       playCorrect();

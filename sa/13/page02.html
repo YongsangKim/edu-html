@@ -6,9 +6,6 @@
     <title>숨은 개인정보 찾기</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 기획서 3~7p. 사진 3장(방·현관·교실 책상) 차례로, 한 장마다 개인정보 3곳 찾기. 마우스 커서가 돋보기(렌즈 투명), 돋보기가 정답에 가까이 가면 '개인정보 탐지기' 경광등이 켜짐.
-           알맞은 곳 클릭 → 빨간 동그라미 채점, 3곳 모두 찾으면 해당 영역 강조 + [설명보기] → 정답 팝업 → 다음 사진. 개인정보가 아닌 글자 클릭(방: 수학 연습장·오늘도 즐겁게!, 현관: 취급 주의·운동화 상자 정보)은 오답 피드백 팝업
-           좌표는 사진 크기에 대한 [왼쪽%, 위%, 폭%, 높이%] (?edit 로 맞춤) */
         .ask-pill.is-fit.p02-tip{word-break:keep-all;max-width:none;padding:6px 62px 0}
         .p02-photo{cursor:none;position:absolute;left:27px;top:86px;width:1854px;height:838px;border:solid 6px var(--c-ink);border-radius:16px;box-sizing:content-box;overflow:hidden;background:#fff;z-index:1}
         .p02-photo>img{display:block;position:absolute;left:-20px;top:-22px;max-width:none;user-select:none;-webkit-user-drag:none}
@@ -139,7 +136,7 @@
 
     const hotspot = (e) => {
       const r = photo.getBoundingClientRect();
-      const s = stage.getBoundingClientRect().width / 1920;
+      const s = currentScale;
       return { s: s, x: (e.clientX - r.left) / s - 6, y: (e.clientY - r.top) / s - 6 };
     };
     const inBox = (b, x, y, pad) => {
@@ -150,7 +147,7 @@
     document.addEventListener('pointermove', (e) => {
       if (BoxEdit.on) return;
       if (e.target.closest('#p02Explain')) { lens.style.display = 'none'; siren.classList.remove('is-on'); return; }
-      const s = stage.getBoundingClientRect().width / 1920;
+      const s = currentScale;
       const mr = document.querySelector('main').getBoundingClientRect();
       const pr = photo.getBoundingClientRect();
       const inside = e.clientX >= pr.left && e.clientX <= pr.right && e.clientY >= pr.top && e.clientY <= pr.bottom;

@@ -7,24 +7,14 @@
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
         main{background:url('img/p03_bg.jpg') no-repeat}
-
-        /* 배경에 구워진 게이지 위에 실시간 DOM을 덮어 그림(page02와 동일) */
         .p03-gauge{left:62px;top:36px;width:757px}
-
-        /* 컨베이어 위를 내려오는 과일 한 개.
-           칸을 고정해 두고 그 안에서 가운데 정렬해야 과일마다 비율이 달라도 줄이 맞음.
-           벨트가 위로 갈수록 좁아지는 원근이라 위에서 작게 시작해 내려오며 커짐 */
         .p03-fruit{position:absolute;left:810px;width:300px;height:320px;padding:0;margin:0;border:none;background:none;
           display:flex;align-items:center;justify-content:center;
           transform-origin:50% 50%;cursor:grab;touch-action:none;z-index:20}
         .p03-fruit img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;pointer-events:none}
-        /* 이동 시간은 아래 스크립트의 TRAVEL_MS 한 곳에서만 정함(CSS와 어긋나지 않게) */
         .p03-fruit.is-moving{transition-property:top,transform;transition-timing-function:linear}
         .p03-fruit.is-grabbed{cursor:grabbing;z-index:60}
         .p03-fruit.is-dropped{opacity:0;transform:scale(.3);transition:opacity .3s ease,transform .3s ease;pointer-events:none}
-
-        /* 상자 드롭 영역 — 배경의 상자 위에 투명하게 겹치고 판정은 상자보다 조금 넓게.
-           상자 사이에 35px 간격을 둬 인접 상자로 잘못 인식되지 않게 함 */
         .p03-box{position:absolute;top:627px;width:367px;height:281px;border-radius:24px}
         .p03-box img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;pointer-events:none}
         .p03-box.is-wrong{animation:fix-word-shake .4s ease}
@@ -266,9 +256,7 @@
           }, 250);
         } else {
           playWrong();
-          target.classList.remove('is-wrong');
-          void target.offsetWidth;
-          target.classList.add('is-wrong');
+          restartAnim(target, 'is-wrong');
           goHome();
         }
       };

@@ -6,9 +6,6 @@
     <title>관광객 안내 표지판 완성 게임</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 기획서 59~86p. 장소 3곳(공원 잔디밭·지하철·정자)이 같은 흐름: ① 알맞은 표지판을 사진 속 빈칸으로 끌어 넣기 → ② Papago 이미지 번역으로 영어 안내문 채우기(번역 결과를 눌러 입력)
-           → ③ 안내 방송용 안내문 고르기 → ④ 음성 번역 + 확성기로 한국어·영어 안내 방송(1회 이상 누르면 다음). 마지막 장소 뒤 완성 팝업 → 다음 페이지.
-           표지판 그림: img/p16_sign_{lawn,shoes,seat}.png (없으면 글자). 사진: img/photo_*.png, 빈칸·표지판 위치는 사진 크기에 대한 %. TTS: sound/sa12_tts_*.mp3 가 있으면 그것, 없으면 브라우저 음성 */
         .p16-q{font-size:46px}
         .p16-board{left:65px;top:175px;width:1790px;height:770px}
         .p16-photo{position:absolute;left:97px;top:203px;width:1183px;height:714px;box-sizing:border-box;overflow:hidden;background:#ccd;border:solid 4px var(--c-ink);border-radius:14px}
@@ -18,8 +15,8 @@
         .drop-zone[data-key="shoes"]{font-size:1.5em !important}
         .p16-zone.is-over{background:rgba(255,230,120,.8)}
         .p16-sign{position:absolute;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border-radius:.6em;color:var(--c-purple);font-weight:800;line-height:1.2;font-family:'Pretendard'}
-                .p16-eng{position:absolute;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-align:center;border-radius:.4em;color:var(--c-purple);font-weight:700;line-height:1;font-family:'Pretendard'}
-        .p16-eng.is-blank{border-style:dashed;border-color:#888;background:rgba(255,255,255,0);color:transparent;font-weight:500;border:0}
+        .p16-eng{position:absolute;box-sizing:border-box;display:flex;align-items:center;justify-content:center;text-align:center;border-radius:.4em;color:var(--c-purple);font-weight:700;line-height:1;font-family:'Pretendard'}
+        .p16-eng.is-blank{background:rgba(255,255,255,0);color:transparent;font-weight:500;border:0}
         .p16-spk.card-btn{position:absolute;left:1088px;top:730px;width:150px;min-width:0;height:145px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:6}
         .p16-spk img{width:96px;height:96px;object-fit:contain;display:block;pointer-events:none}
         .p16-spk.card-btn:hover img{filter:brightness(2.1) saturate(1.3) hue-rotate(18deg)}
@@ -117,7 +114,6 @@
     const setQ = (t) => { $('p16Q').firstElementChild.textContent = t; };
     const R = () => ROUNDS[ri];
 
-    /* 사진: 상자를 꽉 채우게(cover) 깔고, 빈칸·표지판·영어 안내문은 사진 크기에 대한 %로 얹음. st = {zone, sign, eng: null|'blank'|글} */
     function drawPhoto(st) {
       const r = R();
       const bw = photo.clientWidth, bh = photo.clientHeight;
@@ -166,7 +162,6 @@
       $('p16Wrong').classList.remove('is-off');
     }
 
-    /* ① 표지판 끌어 넣기 */
     function stepSign() {
       setQ('다음 장소에 알맞은 표지판을 골라 빈칸에 드래그해 넣어요.');
       drawPhoto({ zone: true, eng: 'blank' });
@@ -194,7 +189,6 @@
       });
     }
 
-    /* ② 이미지 번역 */
     const signOv = (r) => ({ box: r.cam.box, html: r.right === 'seat' ? '임산부<br>배려석' : (r.right === 'lawn' ? '잔디밭 출입 금지' : '신발을<br>벗어<br>주세요'), fs: (r.right === 'shoes' ? 27 : 34), bg: 'transparent', color: 'var(--c-purple)' });
     function stepImage() {
       setQ('Papago의 이미지 번역 기능을 사용하여 영어 안내문을 추가해요.');
@@ -230,7 +224,6 @@
       };
     }
 
-    /* ③ 안내문 고르기 */
     function stepText() {
       const r = R();
       setQ('안내 방송을 위한 알맞은 안내문 골라 클릭해요.');
@@ -251,7 +244,6 @@
       });
     }
 
-    /* ④ 음성 번역 + 확성기 */
     function stepVoice() {
       setQ('Papago의 음성 번역 기능을 사용하여 안내 방송을 해요.');
       showPhone();
@@ -277,8 +269,6 @@
       finger(spk);
     }
 
-    /* ?step=N 으로 열면 그 단계 화면부터 볼 수 있음(N은 0부터, 장소마다 7단계: 0 표지판 끌기 · 1 이미지 홈 · 2 카메라 · 3 번역 결과 · 4 안내문 고르기 · 5 음성 홈 · 6 음성 결과, 21은 완성 팝업).
-       ← → 키로도 이동. 단계 번호는 화면 왼쪽 위에 표시 */
     const STAGES = 7;
     let cur = 0;
     function goStep(n) {

@@ -6,8 +6,6 @@
     <title>마음 배달 이모티콘 게임</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 디자인 반영 - 디자인/사회4차시 22p-1. 위 게이지(별) / 파란 채팅 패널(안에 STAGE 알약 + 친구 메시지 줄) / 아래 파란 선택지 판(카드 3~4개).
-           이모티콘 문제의 카드는 스티커 샘플 조각(img/stk_*.png) + 이름 */
         .p16-gauge{left:315px;top:26px;width:1290px}
         .p16-panel{left:140px;top:120px;width:1640px;height:476px;border-radius:100px;border-width:28px}
         .p16-title{position:absolute;left:50%;top:12px;margin:0;transform:translateX(-50%);z-index:4}
@@ -26,8 +24,8 @@
         .p16-opts.is-emoji .card-btn small{font-size:52px}
         .p16-opts .card-btn.is-wrong{animation:fix-word-shake .3s ease}
 
-        .p16-clear{position:absolute;left:0;top:0;width:1920px;height:960px;z-index:120;background:rgba(27,23,56,.55);display:flex;align-items:center;justify-content:center}
-        .p16-clear b{display:block;min-width:1090px;height:262px;box-sizing:border-box;padding-top:12px;display:flex;align-items:center;justify-content:center;background:#8556dc;border:solid 10px #e6dcff;border-radius:131px;font-family:'Cafe24 Ssurround';font-size:110px;font-weight:normal;color:var(--c-white);letter-spacing:-0.03em}
+        .p16-clear{z-index:120;display:flex;align-items:center;justify-content:center}
+        .p16-clear b{min-width:1090px;height:262px;box-sizing:border-box;padding-top:12px;display:flex;align-items:center;justify-content:center;background:#8556dc;border:solid 10px #e6dcff;border-radius:131px;font-family:'Cafe24 Ssurround';font-size:110px;font-weight:normal;color:var(--c-white);letter-spacing:-0.03em}
         .p16-clear.is-off{display:none}
         .chat-panel-bar:after{top:160px}
     </style>
@@ -59,7 +57,7 @@
               </div>
             </div>
           </div>
-          <div class="p16-clear is-off" id="p16Clear"></div>
+          <div class="p16-clear is-off dim-layer" id="p16Clear"></div>
         </main>
       </div>
     </div>
@@ -70,13 +68,6 @@
   <script src="../../resources/js/toc.js"></script>
   <script src="../../resources/js/common.js"></script>
   <script>
-  /* 기획서 59~71p. 한 스테이지에 감정/메시지/이모티콘 3문제, 총 9문제.
-     문제를 하나 맞힐 때마다 게이지가 11.1%씩 차고 마지막에 100%가 됨.
-     스테이지를 끝내면 STAGE CLEAR 화면이 2초 뜬 뒤 다음 스테이지로 자동 진행.
-
-     주의: 기획서 66p는 STAGE2(축하 상황)의 이모티콘 정답도 '위로 이모티콘'으로
-     적혀 있는데, 상황과 맞지 않아 앞 슬라이드에서 복사된 오기로 보고 여기서는
-     '축하 이모티콘'을 정답으로 뒀다. 기획서대로 되돌릴지는 확인 필요 */
   (function () {
     const WRONG_POPUP = '친구의 메시지를 다시 한 번 읽어봐요.';
 
@@ -194,18 +185,12 @@
       optsBox.innerHTML = '';
       optsBox.className = 'opt-panel p16-opts opts is-' + question.kind;
       shuffleArray(question.options).forEach((opt) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'card-btn';
-        btn.innerHTML = question.kind === 'emoji'
+        const btn = makeCardBtn(question.kind === 'emoji'
           ? '<img src="img/' + STK[opt.label] + '.png" alt=""><small>' + opt.label + '</small>'
-          : opt.text;
-        btn.addEventListener('click', () => {
+          : opt.text, '', () => {
           if (!opt.correct) {
             playWrong();
-            btn.classList.remove('is-wrong');
-            void btn.offsetWidth;
-            btn.classList.add('is-wrong');
+            restartAnim(btn, 'is-wrong');
             showPopup(WRONG_POPUP);
             return;
           }
@@ -215,12 +200,10 @@
           optsBox.querySelectorAll('.card-btn').forEach((b) => { b.disabled = true; });
 
           solvedCount += 1;
-          // 마지막 문제는 소수점 반올림 오차 없이 딱 100%가 되게 함
           gaugeFill.style.width = (solvedCount >= TOTAL_Q ? 100 : solvedCount * (100 / TOTAL_Q)) + '%';
 
           setTimeout(advance, 800);
-        });
-        optsBox.appendChild(btn);
+        }, { html: true, parent: optsBox });
       });
     }
 

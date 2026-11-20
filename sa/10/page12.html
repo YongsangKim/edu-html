@@ -6,9 +6,6 @@
     <title>브이로그 완성 대작전</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        /* 기획서 86~97p. 브이로그 3편(도서관·마트·공원): 장면의 자막(틀린 설명)을 눌러 알맞은 문구로 고치고, 사진 속 얼굴을 눌러 가리기 도구를 끌어 얼굴을 가림.
-           둘 다 하면 "편집 성공!" 2초 후 다음 브이로그(자막·모자이크는 순서 상관없음). 공원은 얼굴 2명 모두 가려야 함. 마지막 브이로그 뒤 page13(미션 성공).
-           사진 위에 따로 올리는 그림은 없고, 모자이크는 사진의 그 자리를 읽어 CELLS×CELLS 칸으로 줄였다 늘린 진짜 픽셀 모자이크. 얼굴 위치는 VLOGS 의 faces(사진 안 0~1 비율) */
         .p12-board{position:absolute;left:67px;top:172px;width:1785px;height:732px;box-sizing:border-box;background:#2a6ccd;border-radius:22px}
         .p12-frame{position:absolute;left:101px;top:191px;width:1083px;height:695px;box-sizing:border-box;border:solid 7px #0a2a6a;border-radius:14px;overflow:hidden;background:#fff}
         .p12-top{position:absolute;left:0;top:0;width:100%;height:62px;display:flex;align-items:center;background:#fff}
@@ -34,16 +31,15 @@
         .p12-side.is-white{background:#fff;border:solid 6px #8db4ee;border-radius:10px;overflow:hidden}
         .p12-robot{position:absolute;left:55%;bottom:0;height:570px;width:auto;transform:translateX(-50%);pointer-events:none}
         .is-white .p12-robot{height:689px;bottom:-40px}
-        .p12-side .p12-robot.is-r1{left:55%;bottom:-40px;height:689px}
-        .p12-side .p12-robot.is-r2{left:55%;bottom:-60px;height:570px}
+        .p12-side .p12-robot.is-r1{bottom:-40px;height:689px}
+        .p12-side .p12-robot.is-r2{bottom:-60px}
         .p12-bubble{position:absolute;left:48px;top:34px;width:508px;height:172px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;margin:0;background:#fff;border:solid 5px var(--c-purple);border-radius:18px;box-shadow:-7px 10px 6px 2px rgba(92,61,240,.17);font-family:'Cafe24 Ssurround';font-size:62px;color:var(--c-purple);letter-spacing:-0.05em;z-index:2}
         .p12-bubble:after{content:'';position:absolute;left:310px;bottom:-60px;width:100px;height:72px;background:url('../../resources/img/common/p_guide_tail.png') 0 0 / contain no-repeat}
         .p12-say{position:absolute;left:0;top:0;width:100%;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.2;color:#fff;letter-spacing:-0.05em;word-break:keep-all}
         .p12-opts{position:absolute;left:10px;top:190px;width:100%;display:flex;flex-direction:column;gap:26px}
         .p12-opts .card-btn{width:100%;min-width:0;height:auto;min-height:118px;padding:14px 26px 8px;font-size:46px;line-height:1.25}
-        .p12-tools{position:absolute;left:0;top:188px;width:100%;height:450px}
-        .p12-tool{position:absolute;width:208px;height:208px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:#e0f5ff;border:solid 4px #2f1f8e;border-radius:16px;cursor:grab;touch-action:none}
-        .p12-tool:nth-child(1){left:87px;top:0}.p12-tool:nth-child(2){left:341px;top:0}.p12-tool:nth-child(3){left:87px;top:244px}.p12-tool:nth-child(4){left:341px;top:244px}
+        .p12-tools{position:absolute;left:0;top:188px;width:100%;height:450px;box-sizing:border-box;padding-left:87px;display:grid;grid-template-columns:repeat(2,208px);gap:36px 46px;align-content:start}
+        .p12-tool{width:208px;height:208px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:#e0f5ff;border:solid 4px #2f1f8e;border-radius:16px;cursor:grab;touch-action:none}
         .p12-tool img{max-width:82%;max-height:82%;pointer-events:none}
         .p12-tool i{display:block;width:150px;height:150px;background:repeating-conic-gradient(#61a3bc 0 25%,#a0eaea 0 50%) 0 0 / 30px 30px;pointer-events:none}
         .p12-tool i.is-circle{border-radius:50%}
@@ -75,7 +71,6 @@
   <script src="../../resources/js/common.js"></script>
   <script>
   (function () {
-    // faces: 사진 안 얼굴 가운데 [가로, 세로] 0~1 비율, s: 모자이크 한 변(사진 가로 대비 비율)
     const VLOGS = [
       { img: 'p12_vlog_library', title: '우리 동네 도서관을 소개합니다', head: '여기는 우리 동네 도서관이고,', bad: '필요한 물건이 있으면 사러 오는 곳이에요.',
         opts: ['책을 읽으러 오는 곳이에요.', '산책을 하러 오는 곳이에요.', '편지를 부치러 오는 곳이에요.'], ans: 0, faces: [{ fx: 0.333, fy: 0.465, s: 0.085 }] },
@@ -84,12 +79,12 @@
       { img: 'p12_vlog_park', title: '햇살 좋은 날, 공원 한 바퀴', head: '동네 공원에 왔어요.', bad: '배가 아파서 진료를 받으려고요.',
         opts: ['친구에게 편지를 부치려고요.', '햇살이 좋아서 산책을 하려고요.', '생필품을 구매하려고요.'], ans: 1, faces: [{ fx: 0.654, fy: 0.508, s: 0.04 }, { fx: 0.729, fy: 0.521, s: 0.04 }] }
     ];
-    const CELLS = 10;    // 모자이크 칸 수(작을수록 굵음)
+    const CELLS = 10;
     const SW = 1069, SH = 616;
     const main = document.querySelector('main');
     const scene = $('p12Scene'), side = $('p12Side');
     const pos = (e) => { const r = main.getBoundingClientRect(), s = r.width / 1920; return { x: (e.clientX - r.left) / s, y: (e.clientY - r.top) / s }; };
-    const Q = new URLSearchParams(location.search), STATE = Q.get('state');   // ?state=white|sub|face|success&v=0~2 : 그 상태에서 멈춰 둠(좌표 맞추기용)
+    const Q = new URLSearchParams(location.search), STATE = Q.get('state');
     let vi = Math.min(Math.max(parseInt(Q.get('v'), 10) || 0, 0), 2), subDone = false, hits = [], busy = false, photo = null;
 
     function sideWhite(robot, bubble) {
@@ -135,11 +130,7 @@
       sub.innerHTML = V.head + '<br><b>' + V.bad + '</b>';
       sideBlue('<p class="p12-say">알맞은 내용을 선택해<br>편집해보세요.</p><div class="p12-opts" id="p12Opts"></div>');
       V.opts.forEach((t, k) => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'card-btn';
-        b.textContent = t;
-        b.addEventListener('click', () => {
+        const b = makeCardBtn(t, '', () => {
           if (k !== V.ans) {
             playWrong();
             b.classList.add('is-wrong');
@@ -151,8 +142,7 @@
           sub.classList.add('is-done');
           sub.innerHTML = V.head + '<br>' + t;
           if (hits.every((h) => h.done)) check(); else sideWhite(1);
-        });
-        $('p12Opts').appendChild(b);
+        }, { parent: $('p12Opts') });
       });
     }
 
@@ -193,7 +183,6 @@
       window.addEventListener('pointerup', up);
     }
 
-    // 사진(object-fit:cover)의 얼굴 자리를 읽어 CELLS×CELLS 로 줄여 그림
     function mosaic(h, round) {
       const c = document.createElement('canvas');
       c.width = c.height = CELLS;

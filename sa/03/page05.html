@@ -23,12 +23,6 @@
         .p05-gauge .gauge-fill.is-go{width:100%;transition:width 2.5s linear}
         .p05-status{position:absolute;left:0;top:775px;width:1920px;margin:0;text-align:center;font-family:'Cafe24 Ssurround';font-size:52px;color:var(--c-purple);letter-spacing:-0.04em}
 
-        .p05-fx{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none;overflow:hidden;z-index:20}
-        .p05-fx span{position:absolute;left:0;top:0;will-change:transform,opacity}
-        .p05-fx .is-paper{width:16px;height:26px;border-radius:3px}
-        .p05-fx .is-heart{width:58px;height:58px}
-        .p05-fx .is-heart img{display:block;width:100%;height:100%;object-fit:contain}
-
         .p05 .is-off{display:none}
     </style>
 </head>
@@ -66,7 +60,6 @@
   <script>
   (function () {
     const ASK = '친구에게 어떤<br>말을 해줄까요?';
-    // 기획서 24~25p 보기 '네 덕분이'는 28p와 같은 '네 덕분에'로 맞춤
     const ROUNDS = [
       { caption: '시험에서 실수로 문제를 많이 틀린 친구',
         opts: ['정말 대단해!', '다음에는 더 잘할 수 있을 거야!', '그것도 못 했어?', '축하해!'], answer: 1,
@@ -84,83 +77,30 @@
     const nextBtn = $('p05Next');
     const fill = $('p05Fill');
     const gauge = document.querySelector('.p05-gauge');
-    const fx = document.createElement('div');
-    fx.className = 'p05-fx';
-    document.querySelector('main').appendChild(fx);
-    const COLORS = ['#ff4f8b', '#ffd83d', '#4d8bff', '#6ad17a', '#b37bff', '#ff9a3c'];
+    const fx = makeConfettiLayer();
 
     let index = 0;
     let busy = false;
     let bubbleTimer = null;
-    let fxRaf = null;
+    let cancelFx = null;
 
     function clearFx() {
-      if (fxRaf) cancelAnimationFrame(fxRaf);
-      fxRaf = null;
+      if (cancelFx) cancelFx();
+      cancelFx = null;
       fx.innerHTML = '';
     }
 
     function fanfare() {
       clearFx();
-      const s = $('stage').getBoundingClientRect().width / 1920;
-      const main = fx.getBoundingClientRect();
-      const g = gauge.getBoundingClientRect();
-      const ox = (g.right - main.left) / s + 36;
-      const oy = (g.top - main.top) / s + 31.5;
-
-      const parts = [];
-      for (let i = 0; i < 36; i++) {
-        const isHeart = i < 10;
-        const el = document.createElement('span');
-        el.className = isHeart ? 'is-heart' : 'is-paper';
-        if (isHeart) el.innerHTML = '<img src="img/p13_gauge_heart.png" alt="">';
-        else el.style.background = COLORS[i % COLORS.length];
-        fx.appendChild(el);
-        const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 0.9;
-        const speed = (isHeart ? 900 : 1100) + Math.random() * 700;
-        parts.push({
-          el, isHeart,
-          x: ox, y: oy,
-          vx: Math.cos(angle) * speed,
-          vy: Math.sin(angle) * speed,
-          rot: Math.random() * 360,
-          vr: (Math.random() - 0.5) * 900,
-          sway: Math.random() * Math.PI * 2,
-          life: 1.4 + Math.random() * 0.6
-        });
-      }
-
-      let last = performance.now();
-      let t = 0;
-      function frame(now) {
-        const dt = Math.min((now - last) / 1000, 0.05);
-        last = now;
-        t += dt;
-        let alive = 0;
-        parts.forEach((p) => {
-          if (!p.el) return;
-          p.vy += 2200 * dt;
-          p.vx *= 1 - 1.8 * dt;
-          p.vy *= 1 - (p.isHeart ? 1.2 : 2.2) * dt;
-          p.x += p.vx * dt + (p.isHeart ? 0 : Math.sin(t * 8 + p.sway) * 40 * dt);
-          p.y += p.vy * dt;
-          p.rot += p.vr * dt;
-          const fade = Math.max(0, Math.min(1, (p.life - t) / 0.4));
-          const scale = p.isHeart ? Math.min(1, 0.4 + t * 5) : 1;
-          const flip = p.isHeart ? 1 : Math.cos(t * 10 + p.sway);
-          p.el.style.transform = 'translate(' + p.x + 'px,' + p.y + 'px) translate(-50%,-50%) rotate(' + (p.isHeart ? p.rot * 0.15 : p.rot) + 'deg) scale(' + scale + ',' + (scale * flip) + ')';
-          p.el.style.opacity = fade;
-          if (fade <= 0) {
-            p.el.remove();
-            p.el = null;
-          } else {
-            alive += 1;
-          }
-        });
-        if (alive) fxRaf = requestAnimationFrame(frame);
-        else fxRaf = null;
-      }
-      fxRaf = requestAnimationFrame(frame);
+      cancelFx = burstConfetti({
+        layer: fx,
+        from: gauge,
+        at: (g) => [g.right, g.top],
+        dx: 36,
+        dy: 31.5,
+        count: 26,
+        special: { count: 10, html: '<img src="img/p13_gauge_heart.png" alt="">', cls: 'is-big is-contain', scaleFrom: 0.4, scaleRate: 5 }
+      });
     }
 
     function renderPick() {
@@ -173,12 +113,7 @@
       $('p05Caption').textContent = r.caption;
       optsBox.innerHTML = '';
       r.opts.forEach((o, k) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'card-btn';
-        btn.innerHTML = o;
-        btn.addEventListener('click', () => pick(k, btn));
-        optsBox.appendChild(btn);
+        const btn = makeCardBtn(o, '', () => pick(k, btn), { html: true, parent: optsBox });
       });
       $('p05SendView').classList.add('is-off');
       $('p05Pick').classList.remove('is-off');

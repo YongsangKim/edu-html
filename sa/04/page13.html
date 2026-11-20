@@ -43,8 +43,6 @@
   <script src="../../resources/js/box-edit.js"></script>
   <script>document.getElementById('p13Input').innerHTML = cfUI.bar(false);</script>
   <script>
-  /* 디자인/사회4차시 14p-7(안내 두 단계)에 이어 19p-1~4(클릭 가이드를 따라 이모티콘 수첩 열기)를 한 페이지에서 진행. 끝나면 page20
-     ?step=N 으로 단계별 보기: 1 안내 · 2 안내(내가 사용한 이모티콘) · 3 이모티콘 버튼 클릭 · 4 이모티콘 탭 클릭 · 5 이모티콘 수첩 */
   (function () {
     const screen = document.getElementById('cfScreen');
     const guide = document.getElementById('p13Guide');
@@ -54,7 +52,6 @@
     const panel = document.getElementById('p13Panel');
     const next = document.getElementById('p13Next');
     const say = initGuideSay({ bubble: guide, img: character, set: document.getElementById('p13Set') });
-    // 단계별 말풍선 문구와 캐릭터 포즈 한 곳. 포즈 이름은 ?edit 오른쪽 아래 포즈판에서 눌러 보고 pose: 뒤에 옮겨 적음
     const SAYS = {
       intro1: { pose: 'wink_open', bubble: '이렇게 이모티콘을 사용하면<br>자신의 마음을 더 분명하게<br>전달할 수 있어요.' },
       intro2: { pose: 'main', bubble: '내가 사용한 이모티콘도<br>한 번에 모아보는 것도 가능해요.<br>함께 확인해볼까요?' },
@@ -64,13 +61,9 @@
     };
     const sayStep = (k) => say(SAYS[k].bubble, SAYS[k].pose);
     const play = makeSfx('sound/click.mp3');
-    // 상호작용에서 고른 이모티콘 중 4종만 노출
     const USED = ['stk_dog_thanks', 'stk_sad', 'stk_party', 'stk_cry', 'stk_comfort', 'stk_cheer'];
-    // 눌러야 할 곳 = 폰 화면 안의 실제 요소: 이름 → [CSS 선택자, 글자(앞부분)]
     const TARGET = { open: ['#cfScreen .cf-bar .cf-smile'], tab: ['#cfScreen .cf-tabs span', '이모티콘'] };
-    // 클릭 영역 보정 [dx, dy, dw, dh] — 버튼 모양은 그대로, 눌리는 범위만 옮기거나 키움/줄임(?edit 로 맞춘 뒤 표시줄 값을 옮겨 적음)
     const HOT = { open: [-6, -5, 10, 10], tab: [-7.3, -3, 10.3, 6] };
-    // 손가락 위치 보정 [dx, dy] — 눌러야 할 곳별. ?edit 로 손가락을 눌러 맞춘 뒤 표시줄 값을 옮겨 적음
     const FG = { open: [4, 5], tab: [3, 3] };
     let fgKey = '?';
     let hot = null;
@@ -161,7 +154,6 @@
     const STEPS = [stepIntro1, () => { stepIntro2(); }, stepOpen, () => { enterPhone(); stepTab(); }, () => { enterPhone(); stepBook(); }];
     const run = (n) => { clearHot(); (STEPS[n - 1] || stepIntro1)(); };
     const want = parseInt(new URLSearchParams(location.search).get('step'), 10);
-    /* ?edit&step=N : 단계 N 으로 바로 열기(] [ 로 이동). 손가락(FG)·클릭 영역(HOT = [x, y, 폭, 높이(, 모서리])을 클릭해 방향키로 조정, 오른쪽 아래 포즈판에서 포즈를 골라 say(문구, 포즈) 에 옮겨 적음 (_guide/steps.html 기준) */
     if (BoxEdit.on) {
       cur = want >= 1 && want <= STEPS.length ? want : 1;
       BoxEdit.stepEdit({
