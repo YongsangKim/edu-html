@@ -860,7 +860,7 @@
       height: 100%;
       object-fit: cover;
     }
-    .tm-inspect-cell.is-bad.is-hint {
+    .tm-inspect-cell.is-bad.is-pulse {
       border: solid 4px #ff3b6b;
       box-shadow: 0 0 0 4px rgba(255, 59, 107, 0.28);
       animation: tmBadPulse 1.1s ease-in-out infinite;
@@ -1804,11 +1804,14 @@
       }
 
       var badHintTimer = null;
+      var badPulseTimer = null;
       function clearBadHint() {
         clearTimeout(badHintTimer);
+        clearTimeout(badPulseTimer);
         badHintTimer = null;
+        badPulseTimer = null;
         document.querySelectorAll('.tm-inspect-cell.is-bad').forEach(function (c) {
-          c.classList.remove('is-hint');
+          c.classList.remove('is-hint', 'is-pulse');
         });
       }
       function scheduleBadHint() {
@@ -1817,6 +1820,12 @@
           if (step !== 's41') return;
           document.querySelectorAll('.tm-inspect-cell.is-bad:not(.is-deleted)').forEach(function (c) {
             c.classList.add('is-hint');
+          });
+        }, 5000);
+        badPulseTimer = setTimeout(function () {
+          if (step !== 's41') return;
+          document.querySelectorAll('.tm-inspect-cell.is-bad:not(.is-deleted)').forEach(function (c) {
+            c.classList.add('is-pulse');
           });
         }, 8000);
       }
