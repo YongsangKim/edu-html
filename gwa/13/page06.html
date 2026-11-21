@@ -92,7 +92,9 @@
     const tag = $('p06Tag');
     const pic = $('p06Pic');
     const wrong = $('p06Wrong');
+    let hlTimer = 0;
     const hlCol = (col) => {
+      clearTimeout(hlTimer);
       document.querySelectorAll('.p06-tb .is-hl').forEach((el) => el.classList.remove('is-hl'));
       if (col) document.querySelectorAll(`.p06-tb tr > *:nth-child(${col})`).forEach((el) => el.classList.add('is-hl'));
     };
@@ -106,7 +108,8 @@
           busy = true;
           playCorrect();
           tag.textContent = QUIZ[q].answer;
-          hlCol(QUIZ[q].col);
+          const col = QUIZ[q].col;
+          hlTimer = setTimeout(() => hlCol(col), 500);
           setTimeout(() => {
             q += 1;
             if (q < QUIZ.length) {
@@ -117,7 +120,7 @@
             } else {
               $('p06Fin').classList.remove('is-off');
             }
-          }, 1500);
+          }, 2000);
         } else {
           playWrong();
           restartAnim(btn, 'is-wrong');

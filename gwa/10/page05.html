@@ -8,14 +8,16 @@
     <style>
         .p05-main{background:url('img/p05_bg.jpg') center / 1920px 960px no-repeat}
         .p05-desk{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none;z-index:2}
-        .p05-stack{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none;opacity:0;z-index:3}
-        .p05-stack.is-on{opacity:1}
+        .p05-pile{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none;z-index:3}
+        .p05-pile.is-bump{animation:p05-bump .22s ease-out}
+        .p05-sheet{position:absolute;width:245px;height:141px}
+        @keyframes p05-bump{0%{transform:none}40%{transform:translateY(4px)}100%{transform:none}}
         .p05-paper{position:absolute;left:760px;top:415px;width:368px;height:212px;pointer-events:none;opacity:0;z-index:3;animation:p05-out var(--p05-dur,.9s) ease-in forwards}
         @keyframes p05-out{
             0%{opacity:0;transform:translate(0,-30px) scale(.92);filter:blur(7px)}
             18%{opacity:1;transform:translate(0,0) scale(1);filter:blur(4px)}
             55%{opacity:1;filter:blur(3px)}
-            100%{opacity:0;transform:translate(-236px,215px) scale(.55);filter:blur(5px)}
+            100%{opacity:1;transform:translate(var(--p05-tx,-236px),var(--p05-ty,215px)) scale(.666);filter:blur(0)}
         }
         .p05-rep{position:absolute;left:1371px;top:127px;width:468px;height:541px;z-index:4}
         .p05-rep img{display:block;width:100%;height:100%}
@@ -37,8 +39,8 @@
         .p05-card.is-off,.p05-run.is-off{pointer-events:none;cursor:default}
         .p05-card.hit-pulse,.p05-run.hit-pulse{--pulse-w:10px}
         .p05-pill{position:absolute;left:143px;top:810px;width:622px;height:90px;box-sizing:border-box;display:flex;border:solid 5px #1d2a66;border-radius:50px;overflow:hidden;background:#fff;z-index:7;font-family:'Cafe24 Ssurround';box-shadow:0 8px 12px rgba(0,0,0,.18)}
-        .p05-pill-l{flex:0 0 410px;background:#9cc3ee;color:#fff;font-size:56px;display:flex;align-items:center;justify-content:center;padding-top:6px;letter-spacing:-.03em}
-        .p05-pill-r{flex:1;color:#1d2a66;font-size:62px;display:flex;align-items:center;justify-content:center;padding-top:6px}
+        .p05-pill-l{flex:0 0 410px;background:#9cc3ee;color:#fff;font-size:56px;display:flex;align-items:center;justify-content:center;letter-spacing:-.03em}
+        .p05-pill-r{flex:1;color:#1d2a66;font-size:62px;display:flex;align-items:center;justify-content:center}
         .p05-set .guide-character{z-index:1}
         .p05-set .guide-bubble{z-index:8;font-size: 44px;}
         .p05-set.is-hide{display:none}
@@ -52,10 +54,7 @@
       <div id="stage" class="stage">
         <main class="p05-main">
           <img class="p05-desk" src="img/p05_desk.png" alt="">
-          <img class="p05-stack" id="p05S1" src="img/p05_stack_1.png" alt="">
-          <img class="p05-stack" id="p05S2" src="img/p05_stack_2.png" alt="">
-          <img class="p05-stack" id="p05S3" src="img/p05_stack_3.png" alt="">
-          <img class="p05-stack" id="p05S4" src="img/p05_stack_4.png" alt="">
+          <div class="p05-pile" id="p05Pile"></div>
 
           <div class="guide-set p05-set" id="p05Set" style="--gb-left:15px;--gb-w:640px;--gb-bottom:647px;--tail-x:420px;--gc-left:5px;--gc-bottom:0px">
             <p class="guide-bubble is-center is-long" id="p05Bubble"></p>
@@ -113,7 +112,7 @@
     const say = initGuideSay({ bubble, img: $('p05Char'), set, keep: true, poses: [] });
     const clickSfx = makeSfx('sound/p05_click.mp3', true);
     const printSnd = new Audio('sound/p05_print.mp3');
-    const stacks = [$('p05S1'), $('p05S2'), $('p05S3'), $('p05S4')];
+    const pile = $('p05Pile');
     const rep = $('p05Rep'), num = $('p05Num'), count = $('p05Count'), runBtn = $('p05Run');
     const blks = [$('p05B1'), $('p05B2'), $('p05B3')];
     const slots = [$('p05Slot1'), $('p05Slot2'), $('p05Slot3')];
@@ -125,7 +124,7 @@
       '숫자를 설정한 만큼 종이가 출력됐어요! 반복 횟수를 정하면 컴퓨터는 그 숫자만큼만 일하고 멈춰요.'
     ];
     const BLK_IDLE = '_over', BLK_READY = '', BLK_RUN = '_on';
-    const GAP = 900, TOTAL = 18;
+    const GAP = 900;
     let step = 0, picked = null, running = false, done = 0, printed = 0;
 
     const imgOf = (el) => el.querySelector('img');
@@ -133,7 +132,6 @@
     const cardImg = (c, state) => { imgOf(c).src = 'img/p05_btn_' + c.dataset.n + (state ? '_' + state : '') + '.png'; };
     const setRun = (state) => { imgOf(runBtn).src = 'img/p05_btn_run' + (state ? '_' + state : '') + '.png'; };
     const pulseCards = (on) => cards.forEach((c) => c.classList.toggle('hit-pulse', on && !c.classList.contains('is-used')));
-    const level = (n) => stacks.forEach((s, i) => s.classList.toggle('is-on', n > 0 && i + 1 === Math.ceil(n / TOTAL * 4)));
     const say2 = (i, next) => {
       say(TEXT[i], undefined, undefined, i === 3 ? true : undefined, next);
       if (next) bubble.querySelector('.card-btn').classList.add('is-arrow');
@@ -202,11 +200,24 @@
         p.className = 'p05-paper';
         p.src = 'img/p05_paper.png';
         p.style.setProperty('--p05-dur', Math.round(GAP * 1.1) + 'ms');
-        p.addEventListener('animationend', () => p.remove());
-        rep.parentNode.appendChild(p);
         printed++;
+        const jx = Math.random() * 6 - 3, rot = Math.random() * 3 - 1.5;
+        const sx = 600 + jx, sy = 676 - (printed - 1) * 3;
+        p.style.setProperty('--p05-tx', (sx + 122.5 - 944) + 'px');
+        p.style.setProperty('--p05-ty', (sy + 70.5 - 521) + 'px');
+        p.addEventListener('animationend', () => {
+          p.remove();
+          const sh = document.createElement('img');
+          sh.className = 'p05-sheet';
+          sh.src = 'img/p05_stack_5.png';
+          sh.style.left = sx + 'px';
+          sh.style.top = sy + 'px';
+          sh.style.transform = 'rotate(' + rot + 'deg)';
+          pile.appendChild(sh);
+          restartAnim(pile, 'is-bump');
+        });
+        rep.parentNode.appendChild(p);
         count.textContent = String(k).padStart(2, '0') + '장';
-        level(printed);
         if (k < n) { setTimeout(tick, GAP); return; }
         setTimeout(finish, GAP + 200);
       };

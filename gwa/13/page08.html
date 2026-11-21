@@ -32,6 +32,9 @@
         .p08-op{position:absolute;left:1120px;top:360px;width:650px;display:grid;grid-template-columns:1fr 1fr;gap:30px}
         .p08-op .card-btn{min-width:0;width:100%;height:95px;margin:0;font-size:48px;display:flex;align-items:center;justify-content:center;padding:0}
         .p08-nx{position:absolute;right:30px;top:615px}
+        .p08-pn .card-btn.is-mini.is-arrow.p08-pv,.p08-pn .card-btn.is-mini.is-arrow.p08-fw{width:80px;height:80px;border-radius:100px;padding:0 0 6px;font-size:56px;letter-spacing:0;display:flex;align-items:center;justify-content:center}
+        .p08-pv{position:absolute;left:1144px;top:54px;z-index:5}
+        .p08-fw{position:absolute;right:54px;top:54px;z-index:5}
         .is-gone{display:none}
         .p08-wrong{z-index:30}
     </style>
@@ -63,6 +66,8 @@
               <a href="javascript:;" class="card-btn" data-n="오렌지 주스">오렌지 주스</a>
               <a href="javascript:;" class="card-btn" data-n="사이다">사이다</a>
             </div>
+            <a href="javascript:;" class="card-btn is-mini is-arrow p08-pv is-off" id="p08Prev" aria-label="이전 문제">←</a>
+            <a href="javascript:;" class="card-btn is-mini is-arrow p08-fw is-off" id="p08Fwd" aria-label="다음 문제">→</a>
             <a href="javascript:;" class="next-btn card-btn is-start p08-nx is-disabled is-off" id="p08Next">다음</a>
           </div>
 
@@ -115,13 +120,15 @@
   <script src="../../resources/js/common.js"></script>
   <script>
   (function () {
+    const ROUND_NAV_ON = false;
+    const ROUND_NAV = ROUND_NAV_ON || /[?&]edit(=|&|$)/.test(location.search);
     const ROUNDS = [
       { row: 2, ans: '우유', bottles: ['p08_milk_b.png'] },
       { row: 3, ans: '오렌지 주스', bottles: ['p08_oj_b.png'] },
       { row: 4, ans: '사이다', bottles: ['p08_cider_b.png'] },
       { row: 1, ans: '물', bottles: ['p08_water_b.png', 'p08_vinegar_b.png'], two: true },
     ];
-    const pill = $('p08Pill'), ph = $('p08Ph'), cl = $('p08Cl'), op = $('p08Op'), next = $('p08Next'), tb = $('p08Tb');
+    const pill = $('p08Pill'), ph = $('p08Ph'), cl = $('p08Cl'), op = $('p08Op'), next = $('p08Next'), prev = $('p08Prev'), fwd = $('p08Fwd'), tb = $('p08Tb');
     const rows = Array.from(cl.querySelectorAll('.check-row'));
     const opts = Array.from(op.querySelectorAll('.card-btn'));
     let r = 0, phase = 'A', solved = false;
@@ -147,6 +154,12 @@
       cl.classList.remove('is-gone');
       op.classList.add('is-gone');
       next.classList.add('is-off', 'is-disabled');
+      if (ROUND_NAV) {
+        prev.classList.remove('is-off');
+        fwd.classList.remove('is-off');
+        prev.classList.toggle('is-disabled', r === 0);
+        fwd.classList.toggle('is-disabled', r === ROUNDS.length - 1);
+      }
       pill.textContent = ROUNDS[r].two ? '두 액체의 특징을 먼저 살펴볼까요?' : '액체의 특징을 먼저 살펴볼까요?';
       drawPh();
       pulseNext();
@@ -191,6 +204,18 @@
       playClick();
       if (r < ROUNDS.length - 1) { r++; startRound(); }
       else $('p08Done').classList.remove('is-off');
+    });
+
+    prev.addEventListener('click', () => {
+      if (!ROUND_NAV || r === 0 || prev.classList.contains('is-disabled')) return;
+      playClick();
+      r--; startRound();
+    });
+
+    fwd.addEventListener('click', () => {
+      if (!ROUND_NAV || r === ROUNDS.length - 1 || fwd.classList.contains('is-disabled')) return;
+      playClick();
+      r++; startRound();
     });
 
     startRound();

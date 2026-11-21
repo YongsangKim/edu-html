@@ -220,6 +220,17 @@
     { ask: ASK1, hl: [2], img: 'img/p07_room_stage3.jpg', ring: false, ok: 1 },
     { ask: '먼지가 없어 깨끗해요. 로봇청소기가 어떤 일을 해야 할까요?', hl: [3, 4], img: 'img/p07_room_stage3.jpg', ring: false, ok: 2 },
   ];
+  QUIZ.map(q => q.img).concat('img/p07_room_stage4.jpg').forEach(src => { new Image().src = src; });
+  let illReq = 0;
+  function swapIll(imgEl, src) {
+    if (imgEl.getAttribute('src') === src) return;
+    const req = ++illReq;
+    const pre = new Image();
+    pre.src = src;
+    const apply = () => { if (req === illReq) imgEl.src = src; };
+    if (pre.decode) pre.decode().then(apply, apply);
+    else pre.onload = pre.onerror = apply;
+  }
   const FIN = [
     '순서도의 화살표를 따라 로봇청소기가 할 일을 골랐어요.',
     'Canva를 통해 달리기 순서도를 완성해볼까요?',
@@ -235,11 +246,21 @@
     $('p07Chart').innerHTML = chart(q.hl);
     
     // 3단계 고품질 거실 일러스트 & 남은 먼지 강조 링
-    let illHtml = '<img src="' + q.img + '" class="p07-ill-img" alt="거실 일러스트">';
-    if (q.ring) {
-      illHtml += '<div class="p07-ring"></div>';
+    const ill = $('p07Ill');
+    let illImg = ill.querySelector('.p07-ill-img');
+    if (!illImg) {
+      ill.innerHTML = '<img src="' + q.img + '" class="p07-ill-img" alt="거실 일러스트">';
+    } else {
+      swapIll(illImg, q.img);
     }
-    $('p07Ill').innerHTML = illHtml;
+    const ring = ill.querySelector('.p07-ring');
+    if (q.ring && !ring) {
+      const r = document.createElement('div');
+      r.className = 'p07-ring';
+      ill.appendChild(r);
+    } else if (!q.ring && ring) {
+      ring.remove();
+    }
 
     // 하단 심플 PNG 아이콘 옵션 카드
     const wrap = $('p07Opts');
@@ -255,7 +276,7 @@
           playCorrect();
           if (qi === QUIZ.length - 1) {
             const imgEl = $('p07Ill').querySelector('.p07-ill-img');
-            if (imgEl) imgEl.src = 'img/p07_room_stage4.jpg';
+            if (imgEl) swapIll(imgEl, 'img/p07_room_stage4.jpg');
             setTimeout(next, 1200);
           } else {
             setTimeout(next, 600);

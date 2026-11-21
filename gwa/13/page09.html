@@ -35,12 +35,15 @@
         .p09-start .s{position:absolute;left:0;right:0;top:410px;margin:0;font-size:44px}
         .p09-ok{position:absolute;left:50%;top:500px;transform:translateX(-50%);width:300px;height:76px;box-sizing:content-box;display:flex;align-items:center;justify-content:center;background:#2fa84f;border-bottom:solid 10px #1d7a37;box-shadow:10px 10px 0 #e2b92c;font-size:40px;color:#fff;text-decoration:none;cursor:pointer}
         .p09-gd{position:absolute;left:0;right:0;bottom:0;height:200px;background:var(--c-pale);border-top:solid 5px var(--c-navy);z-index:5}
-        .p09-ch{position:absolute;left:40px;bottom:0;height:430px;z-index:6}
-        .p09-tx{position:absolute;left:340px;right:420px;top:0;bottom:0;margin:0;display:flex;align-items:center;font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.25;color:var(--c-purple);letter-spacing:-0.04em;word-break:keep-all}
-        .p09-tx.is-small{font-size:40px}
+        .p09-ch{position:absolute;left:0;bottom:0;height:360px;z-index:6}
+        .p09-tx{position:absolute;left:300px;right:420px;top:0;bottom:0;margin:0;display:flex;align-items:center;font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.25;color:var(--c-purple);letter-spacing:-0.04em;word-break:keep-all}
+        .p09-tx.is-small{font-size:46px;letter-spacing:-0.06em}
         .p09-btn{position:absolute;right:40px;top:50%;transform:translateY(-50%);margin:0}
         .p09-btn[hidden]{display:none}
         .p09-ai[hidden]{display:none}
+        .p09-guide{display:none}
+        .p09-cv.is-fish .p09-guide{display:inline}
+        .p09-cv .p09-guide path{visibility:visible;stroke:#c9c9d6;stroke-width:6;stroke-dasharray:14 14;stroke-dashoffset:0;fill:none;stroke-linecap:round}
         .p09-pk{width:1700px;max-width:1700px;padding:60px 50px 60px}
         .p09-pk .avatar-card-title{margin-bottom:30px}
         .p09-pk .avatar-card-text{font-size:66px}
@@ -60,7 +63,12 @@
             <svg class="p09-cv" id="p09Cv" viewBox="0 0 1828 608">
               <path id="p09Circle" transform="translate(0 54)" pathLength="1" d="M914 52 C1010 42 1075 117 1068 207 C1062 297 990 354 905 352 C815 350 755 287 760 200 C765 117 825 62 920 54 C940 53 950 58 960 64"/>
               <path id="p09Stem" transform="translate(0 54)" pathLength="1" d="M905 50 C912 25 922 5 936 -8"/>
-              <path id="p09Banana" pathLength="1" d="M760 110 C790 235 920 325 1100 140 C1112 127 1096 110 1082 117 C940 235 840 195 800 95 C792 77 764 90 760 110"/>
+              <path id="p09Banana" transform="translate(-20 90)" pathLength="1" d="M760 110 C790 235 920 325 1100 140 C1112 127 1096 110 1082 117 C940 235 840 195 800 95 C792 77 764 90 760 110"/>
+              <g id="p09Fish" class="p09-guide">
+                <path id="p09FishBody" d="M634 260 a190 130 0 1 0 380 0 a190 130 0 1 0 -380 0 Z"/>
+                <path id="p09FishTail" d="M994 260 L1194 130 L1194 390 Z"/>
+                <path id="p09FishEye" d="M714 225 a10 10 0 1 0 20 0 a10 10 0 1 0 -20 0 Z"/>
+              </g>
               <g id="p09Free"></g>
             </svg>
             <div class="p09-ai" id="p09Ai" hidden></div>
@@ -128,8 +136,10 @@
   <script src="../../resources/js/common.js"></script>
   <script>
   (function () {
+    const FISH_GUIDE_ON = false;
+    const FISH = FISH_GUIDE_ON || /[?&]fish(=|&|$)/.test(location.search);
     const INTRO = [
-      '퀵 드로우는 그림을 보고 무엇인지 알아맞히는 AI예요. 전 세계 사람들이 그린 그림을 아주 많이 공부 했다고 해요.',
+      '퀵 드로우는 그림을 보고 무엇인지 알아맞히는 AI예요.<br>전 세계 사람들이 그린 그림을 아주 많이 공부 했다고 해요.',
       '문제가 나오면 특징이 무엇인지 잘 생각해보세요.',
       '그림을 잘 그리지 못해도, 물건의 특징이 잘 드러나면 AI가 알아볼 수 있어요!'
     ];
@@ -163,6 +173,12 @@
       12: { title: '아무 선이나 마구 그려 보세요', ai: '...', draws: [], free: true, text: '아무 선이나 마구 그려 보세요.' },
       13: { done: true }
     };
+    if (FISH) {
+      STEPS[11].item = '물고기를 따라 그려 보세요';
+      STEPS[11].text = '이번에는 점선을 따라 물고기를 그려 볼까요?';
+      STEPS[12].title = '물고기를 따라 그려 보세요';
+      STEPS[12].text = '점선을 따라 물고기를 그려 보세요.';
+    }
     const FEATURES = [['동그란 모양', 250], ['위에 짧은 꼭지', 1240]];
     const FREE_WORDS = ['구름? 실?', '잘 모르겠어요…', '?'];
 
@@ -190,12 +206,15 @@
       tmId = setInterval(() => {
         if (tmLeft > 0) tmLeft--;
         showTm();
-        if (tmLeft === 0) stopTm();
+        if (tmLeft === 0) {
+          stopTm();
+          if (FISH && free && !free.done && !free.judged) freeWord(2);
+        }
       }, 1000);
     };
     const clearTimers = () => { while (timers.length) clearTimeout(timers.pop()); stopTm(); };
     const setText = (t) => {
-      tx.textContent = t;
+      tx.innerHTML = '<span>' + t + '</span>';
       tx.classList.toggle('is-small', t.length > 45);
     };
     const setBtn = (label, fn) => {
@@ -216,6 +235,7 @@
       freeG.innerHTML = '';
       $('p09Cards').innerHTML = '';
       cv.classList.remove('is-free');
+      cv.classList.remove('is-fish');
     };
     const showDraws = (ids) => ids.forEach((id) => {
       const p = $(id);
@@ -297,6 +317,49 @@
     const startFree = () => {
       free = { stage: 0, ms: 0, last: 0, line: null, down: false, done: false };
       cv.classList.add('is-free');
+      if (FISH) {
+        cv.classList.add('is-fish');
+        free.pts = [];
+        free.lemon = false;
+        free.gd = {};
+        ['Body', 'Tail', 'Eye'].forEach((k) => {
+          const p = $('p09Fish' + k);
+          const len = p.getTotalLength();
+          const n = Math.max(2, Math.round(len / 12));
+          const a = [];
+          for (let i = 0; i < n; i++) { const q = p.getPointAtLength(len * i / n); a.push([q.x, q.y]); }
+          free.gd[k] = a;
+        });
+      }
+    };
+    const xy = (e) => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * 1828 / r.width, (e.clientY - r.top) * 608 / r.height]; };
+    const near = (a, list, d) => list.some((q) => Math.hypot(a[0] - q[0], a[1] - q[1]) <= d);
+    const cover = (list) => list.filter((q) => near(q, free.pts, 40)).length / list.length;
+    const fishEval = () => {
+      const all = free.gd.Body.concat(free.gd.Tail, free.gd.Eye);
+      const body = cover(free.gd.Body);
+      const tail = cover(free.gd.Tail);
+      const prec = free.pts.filter((a) => near(a, all, 50)).length / free.pts.length;
+      const offCount = free.pts.filter((a) => !near(a, all, 50)).length;
+      if (offCount > 25) free.failed = true;
+      if (!free.failed && body >= 0.8 && tail >= 0.8 && prec >= 0.6) {
+        setAi('아, 물고기예요!');
+        playCorrect();
+        free.judged = true;
+        stopTm();
+        setText('특징을 따라 그리니 AI가 물고기를 알아봤어요!');
+        setBtn('다음', () => go(13));
+        return;
+      }
+      if (free.pts.length >= 30 && prec < 0.5) free.failed = true;
+      if (free.failed) {
+        if (free.stage === 0) freeWord(0);
+        else if (free.stage === 1 && free.ms > 1500) freeWord(1);
+        else if (free.stage === 2 && free.ms > 3000) freeWord(2);
+      } else if (body >= 0.6 && !free.lemon && free.stage <= 1) {
+        free.lemon = true;
+        setAi('동그라미? 레몬?');
+      }
     };
     const pt = (e) => {
       const r = cv.getBoundingClientRect();
@@ -306,8 +369,8 @@
       free.stage = i + 1;
       setAi(FREE_WORDS[i]);
       if (i === 2) {
-        free.done = true;
-        free.down = false;
+        if (FISH) { free.judged = true; if (!free.down) free.done = true; }
+        else { free.done = true; free.down = false; }
         stopTm();
         setText('특징이 없으면 AI도 정답을 찾을 수 없어요.');
         setBtn('다음', () => go(13));
@@ -321,7 +384,8 @@
       free.line.setAttribute('points', pt(e));
       freeG.appendChild(free.line);
       cv.setPointerCapture(e.pointerId);
-      if (free.stage === 0) freeWord(0);
+      if (FISH) { free.pts.push(xy(e)); if (free.stage === 0 && !free.lemon) setAi('...'); }
+      else if (free.stage === 0) freeWord(0);
       e.preventDefault();
     });
     cv.addEventListener('pointermove', (e) => {
@@ -330,10 +394,20 @@
       free.ms += Math.min(now - free.last, 100);
       free.last = now;
       free.line.setAttribute('points', free.line.getAttribute('points') + ' ' + pt(e));
-      if (free.stage === 1 && free.ms > 1500) freeWord(1);
+      if (FISH) {
+        if (free.judged) return;
+        const c = xy(e);
+        const l = free.pts[free.pts.length - 1];
+        if (l) {
+          const d = Math.hypot(c[0] - l[0], c[1] - l[1]);
+          for (let t = 10; t < d; t += 10) free.pts.push([l[0] + (c[0] - l[0]) * t / d, l[1] + (c[1] - l[1]) * t / d]);
+        }
+        free.pts.push(c);
+        fishEval();
+      } else if (free.stage === 1 && free.ms > 1500) freeWord(1);
       else if (free.stage === 2 && free.ms > 3000) freeWord(2);
     });
-    const endFree = () => { if (free) free.down = false; };
+    const endFree = () => { if (free) { free.down = false; if (free.judged) free.done = true; } };
     cv.addEventListener('pointerup', endFree);
     cv.addEventListener('pointercancel', endFree);
 

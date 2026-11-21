@@ -36,6 +36,10 @@
       transform: translateX(-140px);
       opacity: 0;
     }
+    .p02-guest-wrap.is-leave {
+      transform: translateX(140px);
+      opacity: 0;
+    }
     .p02-guest-card {
       position: relative;
       width: 100%;
@@ -72,7 +76,10 @@
       letter-spacing: -0.04em;
       word-break: keep-all;
       z-index: 4;
-      transition: transform .2s;
+      transition: transform .2s, opacity .3s;
+    }
+    .p02-order-bubble.p02-hide {
+      opacity: 0;
     }
     .p02-order-bubble.is-center {
       justify-content: center;
@@ -223,6 +230,10 @@
       width: 100%;
       height: 100%;
       display: block;
+    }
+    .p02-brew-btn:disabled {
+      filter: grayscale(0.5) brightness(.5);
+      pointer-events: none;
     }
     .p02-shot-cup {
       position: absolute;
@@ -406,9 +417,9 @@
             <div class="p02-shot-beans" id="p02Beans"></div>
           </div>
 
-          <div class="p02-guest-wrap" id="p02GuestWrap">
+          <div class="p02-guest-wrap is-enter" id="p02GuestWrap">
             <div class="p02-guest-card" id="p02GuestCard">
-              <img id="p02GuestImg" src="img/p02_guest_1.png" alt="손님">
+              <img id="p02GuestImg" alt="손님">
             </div>
           </div>
 
@@ -521,6 +532,10 @@
       }
     ]);
 
+    GUESTS.forEach((g) => { new Image().src = 'img/p02_guest_' + g.id + '.png'; });
+    for (let i = 0; i < 4; i++) new Image().src = 'img/p02_cup_' + i + '.png';
+    new Image().src = 'img/p02_machine_on.png';
+
     const HOME_LEFT = 1552;
     const HOME_TOP = 729;
 
@@ -600,11 +615,10 @@
       glassImg.src = 'img/p02_cup_' + shots + '.png';
     };
 
-    const startGuest = (animateIn) => {
+    const resetGuestState = () => {
       const g = GUESTS[idx];
       shots = 0;
       shotReady = false;
-      busy = false;
       shotCup.classList.remove('is-ready', 'is-pouring');
       shotCup.classList.add('is-off');
       shotCup.style.left = HOME_LEFT + 'px';
@@ -616,26 +630,53 @@
       renderBeans();
       renderGuest();
       renderGlass();
-      if (animateIn) {
-        guestWrap.classList.add('is-enter');
+    };
+
+    const enterGuest = () => {
+      const ready = guestImg.decode ? guestImg.decode().catch(() => {}) : Promise.resolve();
+      ready.then(() => {
         requestAnimationFrame(() => {
-          requestAnimationFrame(() => guestWrap.classList.remove('is-enter'));
+          guestWrap.classList.remove('is-enter');
+          bubbleEl.classList.remove('p02-hide');
+          setTimeout(() => {
+            busy = false;
+            brewBtn.disabled = false;
+          }, 450);
         });
+      });
+    };
+
+    const startGuest = (animateIn) => {
+      if (!animateIn) {
+        resetGuestState();
+        busy = false;
+        brewBtn.disabled = false;
+        return;
       }
+      busy = true;
+      brewBtn.disabled = true;
+      guestWrap.classList.add('is-leave');
+      bubbleEl.classList.add('p02-hide');
+      setTimeout(() => {
+        guestWrap.style.transition = 'none';
+        guestWrap.classList.remove('is-leave');
+        guestWrap.classList.add('is-enter');
+        void guestWrap.offsetWidth;
+        guestWrap.style.transition = '';
+        resetGuestState();
+        enterGuest();
+      }, 350);
     };
 
     brewBtn.addEventListener('click', () => {
       if (busy) return;
-      if (shotReady) {
-        pointFingerAt(shotCup, { dx: -20, dy: -20 });
-        return;
-      }
       if (shots >= 3) {
         playWrong();
         flashLayer(limitModal, 'is-off', 2000);
         return;
       }
       busy = true;
+      brewBtn.disabled = true;
       clearFingers();
       machineImg.src = 'img/p02_machine_on.png';
       setTimeout(() => {
@@ -697,7 +738,7 @@
           shotCup.style.top = HOME_TOP + 'px';
           renderBeans();
           renderGlass();
-          setTimeout(() => { busy = false; }, 200);
+          setTimeout(() => { busy = false; brewBtn.disabled = false; }, 200);
         }, 450);
       } else {
         shotCup.style.left = HOME_LEFT + 'px';
@@ -747,7 +788,10 @@
       }, 100);
     });
 
-    startGuest(false);
+    busy = true;
+    brewBtn.disabled = true;
+    resetGuestState();
+    enterGuest();
   })();
   </script>
 </body>

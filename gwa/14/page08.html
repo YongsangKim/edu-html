@@ -6,643 +6,98 @@
   <title>Canva로 그리는 의사결정 나무</title>
   <link rel="stylesheet" href="../../resources/css/common.css">
   <style>
-    :root {
-      --cv-cyan: #00c4cc;
-      --cv-blue: #5a68d8;
-      --cv-purple: #7d2ae8;
-      --cv-purple-soft: #ece6ff;
-      --cv-navy: #1b1640;
-      --cv-border: #e2e4ea;
-      --cv-bg-dot: #d5d8e2;
-      --cv-mint-bg: #e6f4ee;
-      --cv-mint-border: #569480;
-      --cv-mint-text: #0c614b;
-    }
-    .p08-pc {
-      position: absolute;
-      left: 40px;
-      top: 20px;
-      width: 1840px;
-      height: 920px;
-      box-sizing: border-box;
-      border: solid 6px var(--c-navy);
-      border-radius: 24px;
-      background: #fff;
-      overflow: hidden;
-      font-family: 'Pretendard', sans-serif;
-    }
-    .p08-view {
-      position: absolute;
-      left: 0;
-      top: 0;
-      right: 0;
-      bottom: 200px;
-      background: #fff;
-      overflow: hidden;
-    }
-    .desktop-view {
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(160deg, #9fd8f0, #b9a8f5 55%, #f3b6d8);
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      overflow: hidden;
-    }
-    .desktop-bg-shapes {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      overflow: hidden;
-    }
-    .desktop-blob {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.25;
-    }
-    .desktop-blob.b1 {
-      width: 500px;
-      height: 500px;
-      left: 10%;
-      top: -100px;
-      background: #ffffff;
-    }
-    .desktop-blob.b2 {
-      width: 600px;
-      height: 600px;
-      right: 15%;
-      top: 20%;
-      background: #c2a8f8;
-    }
-    .desktop-center-stage {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      z-index: 2;
-    }
-    .desktop-app-card {
-      position: relative;
-      width: 130px;
-      padding: 16px 10px;
-      border-radius: 30px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.4, 1);
-      user-select: none;
-    }
-    .desktop-app-card:hover {
-      background: rgba(255, 255, 255, 0.25);
-      transform: translateY(-4px);
-    }
-    .desktop-app-icon {
-      width: 110px;
-      height: 110px;
-      border-radius: 28px;
-      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #fff;
-    }
-    .desktop-app-icon img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .desktop-app-name {
-      font-size: 20px;
-      font-weight: 800;
-      color: #1b1640;
-      letter-spacing: -0.02em;
-      text-shadow: 0 2px 6px rgba(255, 255, 255, 0.8);
-    }
-    .desktop-taskbar {
-      height: 54px;
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(20px);
-      border-top: 1px solid rgba(255, 255, 255, 0.6);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-      z-index: 10;
-    }
-    .taskbar-left, .taskbar-center, .taskbar-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .taskbar-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      border: none;
-      background: transparent;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .taskbar-btn:hover {
-      background: rgba(0, 0, 0, 0.06);
-    }
-    .taskbar-right {
-      font-size: 16px;
-      color: #333;
-      font-weight: 600;
-      gap: 16px;
-    }
-    .cv-topbar {
-      height: 52px;
-      background: #fff;
-      border-bottom: 1px solid var(--cv-border);
-      display: flex;
-      align-items: center;
-      padding: 0 16px;
-      gap: 12px;
-      font-size: 16px;
-      color: #4b5262;
-      flex-shrink: 0;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-    }
-    .cv-topbar .home-ico {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      background: #f1f3f8;
-      border: none;
-      color: var(--cv-purple);
-    }
-    .cv-topbar .home-ico svg {
-      width: 18px;
-      height: 18px;
-      fill: currentColor;
-    }
-    .cv-topbar .sep {
-      width: 1px;
-      height: 18px;
-      background: var(--cv-border);
-      margin: 0 4px;
-    }
-    .cv-topbar .doc-title {
-      font-weight: 700;
-      color: var(--cv-navy);
-      font-size: 16px;
-    }
-    .cv-tb-btn-icon {
-      width: 30px;
-      height: 30px;
-      border: none;
-      background: transparent;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      color: #555d6e;
-    }
-    .cv-tb-btn-icon:hover {
-      background: #f1f3f8;
-    }
-    .cv-tb-btn-icon svg {
-      width: 18px;
-      height: 18px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2;
-    }
-    .cv-tb-btn-icon.is-dim {
-      opacity: 0.35;
-      cursor: default;
-    }
-    .top-cloud-status {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      color: #10b981;
-      font-size: 16px;
-      font-weight: 600;
-      margin-left: 4px;
-    }
-    .top-cloud-status svg {
-      width: 15px;
-      height: 15px;
-    }
-    .topbar-right {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .share-btn {
-      background: var(--cv-purple);
-      color: #fff;
-      border: none;
-      padding: 7px 18px;
-      border-radius: 8px;
-      font-weight: 500;
-      font-size: 20px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      box-shadow: 0 2px 8px rgba(125, 42, 232, 0.25);
-    }
-    .share-btn svg {
-      width: 24px;
-      height: 24px;
-      fill: currentColor;
-    }
-    .cv-editor-layout {
-      flex: 1;
-      display: flex;
-      overflow: hidden;
-      position: relative;
-    }
-    .cv-rail {
-      width: 72px;
-      background: #fff;
-      border-right: 1px solid var(--cv-border);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding-top: 10px;
-      gap: 4px;
-      flex-shrink: 0;
-      z-index: 5;
-    }
-    .cv-rail-item {
-      width: 60px;
-      height: 56px;
-      border-radius: 10px;
-      border: none;
-      background: transparent;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 0;
-      font-size: 16px;
-      font-weight: 700;
-      color: #636b78;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .cv-rail-item:hover {
-      background: #f4f6fa;
-      color: var(--cv-purple);
-    }
-    .cv-rail-item.is-active {
-      background: var(--cv-purple-soft);
-      color: var(--cv-purple);
-    }
-    .cv-rail-item.is-target-pulse {
-      background: #fff7ed;
-      color: #d97706;
-      box-shadow: inset 0 0 0 2px #f59e0b, 0 0 14px rgba(245, 158, 11, 0.45);
-      animation: cvGlowPulse 1.4s infinite ease-in-out;
-    }
-    .cv-canvas-wrap {
-      flex: 1;
-      position: relative;
-      background-color: #fafbfc;
-      background-image: radial-gradient(var(--cv-bg-dot) 1.2px, transparent 1.2px);
-      background-size: 22px 22px;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 10px;
-    }
-    .p08-wb, #p08TreeSvg, #p08DragBranch, .p08-drag-branch {
-      touch-action: none !important;
-      user-select: none;
-      -webkit-user-select: none;
-      -webkit-touch-callout: none;
-    }
-    .cv-lpanel {
-      width: 260px;
-      background: #fff;
-      border-right: 1px solid var(--cv-border);
-      padding: 18px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      flex-shrink: 0;
-      box-shadow: 4px 0 16px rgba(0, 0, 0, 0.04);
-      z-index: 5;
-    }
-    .cv-lpanel-hd {
-      margin: 0;
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--cv-navy);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .cv-tcard-main {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-    }
-    .cv-tcard-thumb {
-      width: 44px;
-      height: 52px;
-      border-radius: 8px;
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      padding: 2px;
-    }
-    .cv-tcard-thumb svg {
-      width: 36px;
-      height: 44px;
-      display: block;
-    }
-    .cv-tcard {
-      border: 2px solid #e2e4ea;
-      border-radius: 12px;
-      padding: 12px 14px;
-      font-size: 20px;
-      font-weight: 700;
-      color: #333;
-      word-break: keep-all;
-      background: #f8fafc;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      user-select: none;
-    }
-    .cv-tcard:hover, .cv-tcard.is-now {
-      border-color: var(--cv-purple);
-      background: #f5f0ff;
-      color: var(--cv-purple);
-      box-shadow: 0 4px 12px rgba(125, 42, 232, 0.15);
-    }
-    .cv-tcard.is-done {
-      border-color: #10b981;
-      background: #ecfdf5;
-      color: #065f46;
-      cursor: default;
-    }
-    .cv-tcard.is-pending {
-      opacity: 0.45;
-      cursor: not-allowed;
-      border-style: dashed;
-    }
-    .cv-tcard-badge {
-      display: inline-block;
-      padding: 5px 8px;
-      border-radius: 10px;
-      font-size: 18px;
-      font-weight: 500;
-      white-space:nowrap;
-      margin-left: 6px;
-    }
-    .cv-tcard.is-now .cv-tcard-badge {
-      background: #7d2ae8;
-      color: #fff;
-    }
-    .cv-tcard.is-draggable {
-      cursor: grab;
-      touch-action: none;
-    }
-    .cv-tcard.is-dragging-src {
-      opacity: 0.35;
-    }
-    .cv-elem-ghost {
-      position: absolute;
-      z-index: 40;
-      pointer-events: none;
-      width: 96px;
-      height: 112px;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.96);
-      border: 2.5px solid #7d2ae8;
-      box-shadow: 0 12px 28px rgba(125, 42, 232, 0.32);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      will-change: transform;
-    }
-    .cv-elem-ghost svg {
-      width: 76px;
-      height: 92px;
-      display: block;
-    }
-    .p08-elem-target {
-      transition: filter 0.12s ease;
-    }
-    .p08-elem-target.is-drag-over {
-      filter: drop-shadow(0 0 20px rgba(125, 42, 232, 0.9)) brightness(1.04);
-    }
-    .cv-tcard.is-done .cv-tcard-badge {
-      background: #10b981;
-      color: #fff;
-    }
-    .cv-tnote {
-      margin-top: auto;
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      border-radius: 10px;
-      padding: 10px 12px;
-      font-size: 16px;
-      color: #1e40af;
-      line-height: 1.3;
-    }
-    .p08-gd {
-      position: absolute;
-      left: 160px;
-      bottom: 20px;
-      width: 1520px;
-      height: 160px;
-      box-sizing: border-box;
-      border: solid 4px #000;
-      border-radius: 20px;
-      background: #f7f3ee;
-      padding: 24px 36px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-      z-index: 20;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    }
-    .p08-gd-tx {
-      font-family: 'Cafe24 Ssurround', sans-serif;
-      font-size: 46px;
-      font-weight: 700;
-      color: #222;
-      margin: 0;
-      line-height: 1.2;
-      flex: 1;
-    }
-    .p08-gd-ch {
-      position: absolute;
-      left: 8px;
-      bottom: 17px;
-      width: 164px;
-      height: auto;
-      z-index: 25;
-      filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.15));
-      pointer-events: none;
-    }
-    .p08-fg {
-      position: absolute;
-      width: 96px;
-      height: 96px;
-      z-index: 30;
-      pointer-events: none;
-      filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.3));
-      transition: transform 0.12s ease-out;
-    }
-    .p08-fg.is-tap {
-      transform: scale(0.92) translate(-3px, -3px);
-    }
-    .p08-gd-btn {
-      margin-top: -13px;
-      min-width: 140px;
-      padding: 10px 32px;
-      font-family: 'Cafe24 Ssurround', sans-serif;
-      font-size: 24px;
-      white-space: nowrap;
-      cursor: pointer;
-    }
-    @keyframes cvGlowPulse {
-      0%, 100% {
-        opacity: 0.9;
-        filter: drop-shadow(0 0 8px rgba(255, 204, 0, 0.65));
+      :root{--cv-cyan:#00c4cc;--cv-blue:#5a68d8;--cv-purple:#7d2ae8;--cv-purple-soft:#ece6ff;--cv-navy:#1b1640;--cv-border:#e2e4ea;--cv-bg-dot:#d5d8e2;--cv-mint-bg:#e6f4ee;--cv-mint-border:#569480;--cv-mint-text:#0c614b}
+      .p08-pc{position:absolute;left:40px;top:20px;width:1840px;height:920px;box-sizing:border-box;border:solid 6px var(--c-navy);border-radius:24px;background:#fff;overflow:hidden;font-family:'Pretendard', sans-serif}
+      .p08-view{position:absolute;left:0;top:0;right:0;bottom:200px;background:#fff;overflow:hidden}
+      .desktop-view{width:100%;height:100%;background:linear-gradient(160deg, #9fd8f0, #b9a8f5 55%, #f3b6d8);position:relative;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
+      .desktop-bg-shapes{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+      .desktop-blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.25}
+      .desktop-blob.b1{width:500px;height:500px;left:10%;top:-100px;background:#ffffff}
+      .desktop-blob.b2{width:600px;height:600px;right:15%;top:20%;background:#c2a8f8}
+      .desktop-center-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;z-index:2}
+      .desktop-app-card{position:relative;width:130px;padding:16px 10px;border-radius:30px;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;transition:all 0.25s cubic-bezier(0.2, 0.8, 0.4, 1);user-select:none}
+      .desktop-app-card:hover{background:rgba(255, 255, 255, 0.25);transform:translateY(-4px)}
+      .desktop-app-icon{width:110px;height:110px;border-radius:28px;box-shadow:0 6px 14px rgba(0, 0, 0, 0.2);overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fff}
+      .desktop-app-icon img{width:100%;height:100%;object-fit:cover;display:block}
+      .desktop-app-name{font-size:20px;font-weight:800;color:#1b1640;letter-spacing:-0.02em;text-shadow:0 2px 6px rgba(255, 255, 255, 0.8)}
+      .desktop-taskbar{height:54px;background:rgba(255, 255, 255, 0.85);backdrop-filter:blur(20px);border-top:1px solid rgba(255, 255, 255, 0.6);display:flex;align-items:center;justify-content:space-between;padding:0 20px;box-shadow:0 -2px 10px rgba(0, 0, 0, 0.05);z-index:10}
+      .taskbar-left,.taskbar-center,.taskbar-right{display:flex;align-items:center;gap:12px}
+      .taskbar-btn{width:40px;height:40px;border-radius:8px;border:none;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s}
+      .taskbar-btn:hover{background:rgba(0, 0, 0, 0.06)}
+      .taskbar-right{font-size:16px;color:#333;font-weight:600;gap:16px}
+      .cv-topbar{height:52px;background:#fff;border-bottom:1px solid var(--cv-border);display:flex;align-items:center;padding:0 16px;gap:12px;font-size:16px;color:#4b5262;flex-shrink:0;box-shadow:0 1px 3px rgba(0, 0, 0, 0.02)}
+      .cv-topbar .home-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#f1f3f8;border:none;color:var(--cv-purple)}
+      .cv-topbar .home-ico svg{width:18px;height:18px;fill:currentColor}
+      .cv-topbar .sep{width:1px;height:18px;background:var(--cv-border);margin:0 4px}
+      .cv-topbar .doc-title{font-weight:700;color:var(--cv-navy);font-size:16px}
+      .cv-tb-btn-icon{width:30px;height:30px;border:none;background:transparent;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#555d6e}
+      .cv-tb-btn-icon:hover{background:#f1f3f8}
+      .cv-tb-btn-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2}
+      .cv-tb-btn-icon.is-dim{opacity:0.35;cursor:default}
+      .top-cloud-status{display:flex;align-items:center;gap:5px;color:#10b981;font-size:16px;font-weight:600;margin-left:4px}
+      .top-cloud-status svg{width:15px;height:15px}
+      .topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+      .share-btn{background:var(--cv-purple);color:#fff;border:none;padding:7px 18px;border-radius:8px;font-weight:500;font-size:20px;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(125, 42, 232, 0.25)}
+      .share-btn svg{width:24px;height:24px;fill:currentColor}
+      .cv-editor-layout{flex:1;display:flex;overflow:hidden;position:relative}
+      .cv-rail{width:72px;background:#fff;border-right:1px solid var(--cv-border);display:flex;flex-direction:column;align-items:center;padding-top:10px;gap:4px;flex-shrink:0;z-index:5}
+      .cv-rail-item{width:60px;height:56px;border-radius:10px;border:none;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;font-size:16px;font-weight:700;color:#636b78;cursor:pointer;transition:all 0.15s}
+      .cv-rail-item:hover{background:#f4f6fa;color:var(--cv-purple)}
+      .cv-rail-item.is-active{background:var(--cv-purple-soft);color:var(--cv-purple)}
+      .cv-rail-item.is-target-pulse{background:#fff7ed;color:#d97706;box-shadow:inset 0 0 0 2px #f59e0b, 0 0 14px rgba(245, 158, 11, 0.45);animation:cvGlowPulse 1.4s infinite ease-in-out}
+      .cv-canvas-wrap{flex:1;position:relative;background-color:#fafbfc;background-image:radial-gradient(var(--cv-bg-dot) 1.2px, transparent 1.2px);background-size:22px 22px;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:10px}
+      .p08-wb,#p08TreeSvg,#p08DragBranch,.p08-drag-branch{touch-action:none !important;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+      .cv-lpanel{width:260px;background:#fff;border-right:1px solid var(--cv-border);padding:18px 16px;display:flex;flex-direction:column;gap:12px;flex-shrink:0;box-shadow:4px 0 16px rgba(0, 0, 0, 0.04);z-index:5}
+      .cv-lpanel-hd{margin:0;font-size:20px;font-weight:700;color:var(--cv-navy);display:flex;align-items:center;gap:6px}
+      .cv-tcard-main{display:flex;align-items:center;gap:10px;min-width:0}
+      .cv-tcard-thumb{width:44px;height:52px;border-radius:8px;background:#fff;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:2px}
+      .cv-tcard-thumb svg{width:36px;height:44px;display:block}
+      .cv-tcard{border:2px solid #e2e4ea;border-radius:12px;padding:12px 14px;font-size:20px;font-weight:700;color:#333;word-break:keep-all;background:#f8fafc;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:space-between;user-select:none}
+      .cv-tcard:hover,.cv-tcard.is-now{border-color:var(--cv-purple);background:#f5f0ff;color:var(--cv-purple);box-shadow:0 4px 12px rgba(125, 42, 232, 0.15)}
+      .cv-tcard.is-done{border-color:#10b981;background:#ecfdf5;color:#065f46;cursor:default}
+      .cv-tcard.is-pending{opacity:0.45;cursor:not-allowed;border-style:dashed}
+      .cv-tcard-badge{display:inline-block;padding:5px 8px;border-radius:10px;font-size:18px;font-weight:500;white-space:nowrap;margin-left:6px}
+      .cv-tcard.is-now .cv-tcard-badge{background:#7d2ae8;color:#fff}
+      .cv-tcard.is-draggable{cursor:grab;touch-action:none}
+      .cv-tcard.is-dragging-src{opacity:0.35}
+      .cv-elem-ghost{position:absolute;z-index:40;pointer-events:none;width:96px;height:112px;border-radius:14px;background:rgba(255, 255, 255, 0.96);border:2.5px solid #7d2ae8;box-shadow:0 12px 28px rgba(125, 42, 232, 0.32);display:flex;align-items:center;justify-content:center;will-change:transform}
+      .cv-elem-ghost svg{width:76px;height:92px;display:block}
+      .p08-elem-target{transition:filter 0.12s ease}
+      .p08-elem-target.is-drag-over{filter:drop-shadow(0 0 20px rgba(125, 42, 232, 0.9)) brightness(1.04)}
+      .cv-tcard.is-done .cv-tcard-badge{background:#10b981;color:#fff}
+      .cv-tnote{margin-top:auto;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 12px;font-size:21px;color:#1e40af;line-height:1.3}
+      .p08-gd{position:absolute;left:160px;bottom:20px;width:1520px;height:160px;box-sizing:border-box;border:solid 4px #000;border-radius:20px;background:#f7f3ee;padding:24px 36px;display:flex;align-items:center;justify-content:space-between;gap:20px;z-index:20;box-shadow:0 8px 24px rgba(0, 0, 0, 0.08)}
+      .p08-gd-tx{font-family:'Cafe24 Ssurround', sans-serif;font-size:46px;font-weight:700;color:#222;margin:0;line-height:1.2;flex:1}
+      .p08-gd-ch{position:absolute;left:8px;bottom:17px;width:164px;height:auto;z-index:25;filter:drop-shadow(0 6px 12px rgba(0, 0, 0, 0.15));pointer-events:none}
+      .p08-fg{position:absolute;width:96px;height:96px;z-index:30;pointer-events:none;filter:drop-shadow(0 6px 14px rgba(0, 0, 0, 0.3));transition:transform 0.12s ease-out}
+      .p08-fg.is-tap{transform:scale(0.92) translate(-3px, -3px)}
+      .p08-gd-btn{margin-top:-13px;min-width:140px;padding:10px 32px;font-family:'Cafe24 Ssurround', sans-serif;font-size:24px;white-space:nowrap;cursor:pointer}
+      @keyframes cvGlowPulse{
+        0%,100%{opacity:0.9;filter:drop-shadow(0 0 8px rgba(255, 204, 0, 0.65))}
+        50%{opacity:1;filter:drop-shadow(0 0 20px rgba(255, 204, 0, 0.95))}
       }
-      50% {
-        opacity: 1;
-        filter: drop-shadow(0 0 20px rgba(255, 204, 0, 0.95));
+      .pulse-glow{animation:cvGlowPulse 1.6s infinite ease-in-out}
+      .is-drag-over{stroke:#00c4cc !important;fill:rgba(0, 196, 204, 0.16) !important;stroke-width:4 !important;filter:drop-shadow(0 0 22px rgba(0, 196, 204, 0.85)) !important}
+      @keyframes treeGlowShimmer{
+        0%,100%{filter:drop-shadow(0 0 8px rgba(0, 196, 204, 0.35)) drop-shadow(0 0 16px rgba(245, 158, 11, 0.2))}
+        50%{filter:drop-shadow(0 0 18px rgba(0, 196, 204, 0.6)) drop-shadow(0 0 28px rgba(245, 158, 11, 0.4))}
       }
-    }
-    .pulse-glow {
-      animation: cvGlowPulse 1.6s infinite ease-in-out;
-    }
-    .is-drag-over {
-      stroke: #00c4cc !important;
-      fill: rgba(0, 196, 204, 0.16) !important;
-      stroke-width: 4 !important;
-      filter: drop-shadow(0 0 22px rgba(0, 196, 204, 0.85)) !important;
-    }
-    @keyframes treeGlowShimmer {
-      0%, 100% {
-        filter: drop-shadow(0 0 8px rgba(0, 196, 204, 0.35)) drop-shadow(0 0 16px rgba(245, 158, 11, 0.2));
+      .tree-glow-finished{animation:treeGlowShimmer 2.8s infinite ease-in-out}
+      @keyframes cvSparkleTwinkle{
+        0%,100%{transform:scale(0.75) rotate(0deg);opacity:0.65}
+        50%{transform:scale(1.18) rotate(15deg);opacity:1}
       }
-      50% {
-        filter: drop-shadow(0 0 18px rgba(0, 196, 204, 0.6)) drop-shadow(0 0 28px rgba(245, 158, 11, 0.4));
+      .cv-sparkle-node{transform-box:fill-box;transform-origin:center;animation:cvSparkleTwinkle 2.4s infinite ease-in-out}
+      .cv-complete-badge{position:absolute;top:14px;left:50%;transform:translateX(-50%);background:rgba(255, 255, 255, 0.96);border:1.5px solid #00c4cc;padding:6px 18px 6px 10px;border-radius:40px;box-shadow:0 8px 24px rgba(0, 196, 204, 0.22), 0 2px 8px rgba(125, 42, 232, 0.12);z-index:10;display:flex;align-items:center;gap:12px;backdrop-filter:blur(8px);animation:badgeShimmer 3s infinite ease-in-out}
+      @keyframes badgeShimmer{
+        0%,100%{box-shadow:0 8px 24px rgba(0, 196, 204, 0.22), 0 2px 8px rgba(125, 42, 232, 0.12);border-color:#00c4cc}
+        50%{box-shadow:0 10px 28px rgba(125, 42, 232, 0.28), 0 2px 12px rgba(245, 158, 11, 0.25);border-color:#7d2ae8}
       }
-    }
-    .tree-glow-finished {
-      animation: treeGlowShimmer 2.8s infinite ease-in-out;
-    }
-    @keyframes cvSparkleTwinkle {
-      0%, 100% {
-        transform: scale(0.75) rotate(0deg);
-        opacity: 0.65;
-      }
-      50% {
-        transform: scale(1.18) rotate(15deg);
-        opacity: 1;
-      }
-    }
-    .cv-sparkle-node {
-      transform-box: fill-box;
-      transform-origin: center;
-      animation: cvSparkleTwinkle 2.4s infinite ease-in-out;
-    }
-    .cv-complete-badge {
-      position: absolute;
-      top: 14px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(255, 255, 255, 0.96);
-      border: 1.5px solid #00c4cc;
-      padding: 6px 18px 6px 10px;
-      border-radius: 40px;
-      box-shadow: 0 8px 24px rgba(0, 196, 204, 0.22), 0 2px 8px rgba(125, 42, 232, 0.12);
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      backdrop-filter: blur(8px);
-      animation: badgeShimmer 3s infinite ease-in-out;
-    }
-    @keyframes badgeShimmer {
-      0%, 100% {
-        box-shadow: 0 8px 24px rgba(0, 196, 204, 0.22), 0 2px 8px rgba(125, 42, 232, 0.12);
-        border-color: #00c4cc;
-      }
-      50% {
-        box-shadow: 0 10px 28px rgba(125, 42, 232, 0.28), 0 2px 12px rgba(245, 158, 11, 0.25);
-        border-color: #7d2ae8;
-      }
-    }
-    .cv-badge-pill {
-      background: linear-gradient(135deg, #7d2ae8, #00c4cc);
-      color: #fff;
-      border-radius: 20px;
-      padding: 4px 12px;
-      font-family: 'Cafe24 Ssurround', sans-serif;
-      font-size: 22px;
-      font-weight: 700;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .cv-badge-title {
-      font-family: 'Cafe24 Ssurround', sans-serif;
-      font-size: 24px;
-      font-weight: 700;
-      color: #1b1640;
-      letter-spacing: -0.02em;
-    }
-    .cv-badge-divider {
-      width: 1px;
-      height: 16px;
-      background: #d5d8e2;
-    }
-    .cv-badge-sub {
-      font-family: 'Pretendard', sans-serif;
-      font-size: 20px;
-      font-weight: 700;
-      color: #5a68d8;
-    }
-    .cv-badge-check {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      background: #e6f4ee;
-      color: #0c614b;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
+      .cv-badge-pill{background:linear-gradient(135deg, #7d2ae8, #00c4cc);color:#fff;border-radius:20px;padding:4px 12px;font-family:'Cafe24 Ssurround', sans-serif;font-size:22px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+      .cv-badge-title{font-family:'Cafe24 Ssurround', sans-serif;font-size:24px;font-weight:700;color:#1b1640;letter-spacing:-0.02em}
+      .cv-badge-divider{width:1px;height:16px;background:#d5d8e2}
+      .cv-badge-sub{font-family:'Pretendard', sans-serif;font-size:20px;font-weight:700;color:#5a68d8}
+      .cv-badge-check{width:30px;height:30px;border-radius:50%;background:#e6f4ee;color:#0c614b;display:inline-flex;align-items:center;justify-content:center}
   </style>
 </head>
 <body>
@@ -680,13 +135,14 @@
   <script src="../../resources/js/header.js" data-title="Canva로 그리는 의사결정 나무" data-prev="page07.html" data-next="page09.html"></script>
   <script src="../../resources/js/toc-gwa.js"></script>
   <script src="../../resources/js/common.js"></script>
+  <script src="../../resources/js/box-edit.js"></script>
   <script>
     (function () {
       var urlParams = new URLSearchParams(window.location.search);
       var paramStep = parseInt(urlParams.get('step'), 10);
       var currentStep = (!isNaN(paramStep) && paramStep >= 0 && paramStep <= 6) ? paramStep : 0;
       var paramSub = parseInt(urlParams.get('sub'), 10);
-      var step5Sub = (!isNaN(paramSub) && paramSub >= 1 && paramSub <= 7) ? paramSub : 2;
+      var step5Sub = (!isNaN(paramSub) && paramSub >= 2 && paramSub <= 7) ? paramSub : 2;
       var stageEl = document.getElementById('p08View');
       var gdTextEl = document.getElementById('p08GuideText');
       var nextBtnEl = document.getElementById('p08NextBtn');
@@ -717,41 +173,49 @@
         }, 400);
       }
 
+      var FG = {
+        s0: [960, 345],
+        s1: [590, 610],
+        s2: [490, 210],
+        s3: [990, 560],
+        s4: [1420, 410],
+        s5_2: [300, 140],
+        s5_3: [300, 210],
+        s5_4: [300, 280],
+        s5_5: [58, 225],
+        s5_6: [300, 215],
+        s5_7: [300, 310]
+      };
+      var FG_KEYS = ['s0', 's1', 's2', 's3', 's4', 's5_2', 's5_3', 's5_4', 's5_5', 's5_6', 's5_7'];
+
       var stepsData = [
         {
           step: 0,
-          guide: '‘캔바’를 클릭하세요.',
-          finger: { left: 960, top: 405 }
+          guide: '‘캔바’를 클릭하세요.'
         },
         {
           step: 1,
-          guide: '의사결정 나무의 맨 아래 한 가지가 비었어요. 왼쪽 가지 묶음을 클릭하세요.',
-          finger: { left: 590, top: 610 }
+          guide: '의사결정 나무의 맨 아래 한 가지가 비었어요. 왼쪽 가지 묶음을 클릭하세요.'
         },
         {
           step: 2,
-          guide: '플로팅 툴바의 ‘복제’ 버튼을 클릭하세요.',
-          finger: { left: 490, top: 210 }
+          guide: '플로팅 툴바의 ‘복제’ 버튼을 클릭하세요.'
         },
         {
           step: 3,
-          guide: '복제된 가지를 오른쪽 점선 자리로 끌어 놓아요.',
-          finger: { left: 990, top: 560 }
+          guide: '복제된 가지를 오른쪽 점선 자리로 끌어 놓아요.'
         },
         {
           step: 4,
-          guide: '오른쪽 자리에 딱 맞게 붙었어요! ‘공기 방울이 있나요?’를 눌러 내용을 수정해 볼까요?',
-          finger: { left: 1420, top: 410 }
+          guide: '오른쪽 자리에 딱 맞게 붙었어요! ‘공기 방울이 있나요?’를 눌러 내용을 수정해 볼까요?'
         },
         {
           step: 5,
-          guide: '새 질문 카드로 교체해 보세요.',
-          finger: { left: 1730, top: 180 }
+          guide: '새 질문 카드로 교체해 보세요.'
         },
         {
           step: 6,
-          guide: '캔바로 의사결정 나무를 완성했어요! AI도 이런 나무를 따라가며 정답을 정해요.',
-          finger: null
+          guide: '캔바로 의사결정 나무를 완성했어요! AI도 이런 나무를 따라가며 정답을 정해요.'
         }
       ];
 
@@ -949,7 +413,7 @@
           var card1Html = '';
           var card2Html = '';
 
-          if (step5Sub === 1 || step5Sub === 2) {
+          if (step5Sub === 2) {
             diaHtml = '<g>' +
               '<polygon points="1077,254 1172,288 1077,322 982,288" fill="#fffbe6" stroke="#f59e0b" stroke-width="3.2" stroke-dasharray="6 4" filter="drop-shadow(0 0 14px rgba(245,158,11,0.6))"/>' +
               '<text x="1077" y="288" text-anchor="middle" dominant-baseline="middle" style="font-family:Pretendard,sans-serif;font-weight:700;font-size:16px;fill:#b45309;">공기 방울이 있나요?</text>' +
@@ -1200,10 +664,7 @@
         var textRailClick = '';
 
         if (stepIdx === 5) {
-          if (step5Sub === 1) {
-            textRailClass += ' is-target-pulse';
-            textRailClick = 'onclick="handleStep5Sub(1)"';
-          } else if (step5Sub >= 2 && step5Sub <= 4) {
+          if (step5Sub >= 2 && step5Sub <= 4) {
             textRailClass += ' is-active';
           } else if (step5Sub === 5) {
             elemRailClass += ' is-target-pulse';
@@ -1241,7 +702,7 @@
             '<div class="' + t1Class + '" ' + t1Click + '><span>아주 천천히 흐르나요?</span>' + t1Badge + '</div>' +
             '<div class="' + t2Class + '" ' + t2Click + '><span>꿀</span>' + t2Badge + '</div>' +
             '<div class="' + t3Class + '" ' + t3Click + '><span>식용유</span>' + t3Badge + '</div>' +
-            '<div class="cv-tnote"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="vertical-align:-2px;margin-right:4px;"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7zm-4 17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-1H8v1z"/></svg>글자를 차례대로 눌러<br>나무의 내용을 바꿔요!</div>' +
+            '<div class="cv-tnote"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="vertical-align:-2px;margin-right:4px;"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7zm-4 17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-1H8v1z"/></svg>글자를 차례대로 눌러<br>나무의 내용을 바꿔요!</div>' +
           '</div>';
         } else if (stepIdx === 5 && (step5Sub === 6 || step5Sub === 7)) {
           var searchWord = (step5Sub === 6) ? '꿀' : '식용유';
@@ -1258,7 +719,7 @@
             '<div style="border:1.5px solid #cbd5e1;border-radius:999px;padding:7px 14px;font-size:16px;font-weight:700;color:#1e293b;background:#f8fafc;">🔍 ' + searchWord + '</div>' +
             '<div class="' + e1Class + '" ' + e1Id + '><span class="cv-tcard-main"><span class="cv-tcard-thumb">' + getCupSvg('honey') + '</span><span>꿀</span></span>' + e1Badge + '</div>' +
             '<div class="' + e2Class + '" ' + e2Id + '><span class="cv-tcard-main"><span class="cv-tcard-thumb">' + getCupSvg('oil') + '</span><span>식용유</span></span>' + e2Badge + '</div>' +
-            '<div class="cv-tnote"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="vertical-align:-2px;margin-right:4px;"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7zm-4 17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-1H8v1z"/></svg>원하는 그림을 알맞은<br>자리에 끌어 놓으세요!</div>' +
+            '<div class="cv-tnote"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="vertical-align:-2px;margin-right:4px;"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7zm-4 17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-1H8v1z"/></svg>원하는 그림을 알맞은<br>자리에 끌어 놓으세요!</div>' +
           '</div>';
         }
 
@@ -1300,40 +761,37 @@
         stageEl.innerHTML = getStepHtml(currentStep);
 
         var guideText = d.guide;
-        var fingerPos = d.finger;
 
         if (currentStep === 5) {
-          if (step5Sub === 1) {
-            guideText = '왼쪽 ‘텍스트’를 눌러 글자를 수정해 보세요.';
-            fingerPos = { left: 48, top: 205 };
-          } else if (step5Sub === 2) {
+          if (step5Sub === 2) {
             guideText = '‘아주 천천히 흐르나요?’를 눌러 질문 글자를 바꾸세요.';
-            fingerPos = { left: 260, top: 140 };
           } else if (step5Sub === 3) {
             guideText = '‘꿀’을 눌러 첫 번째 카드의 글자를 바꾸세요.';
-            fingerPos = { left: 260, top: 210 };
           } else if (step5Sub === 4) {
             guideText = '‘식용유’를 눌러 두 번째 카드의 글자를 바꾸세요.';
-            fingerPos = { left: 260, top: 280 };
           } else if (step5Sub === 5) {
             guideText = '이제 왼쪽 ‘요소’를 눌러 꿀과 식용유 그림을 넣어 보세요.';
-            fingerPos = { left: 48, top: 195 };
           } else if (step5Sub === 6) {
             guideText = '왼쪽 요소에서 ‘꿀’ 그림을 꿀 자리로 끌어 놓으세요.';
-            fingerPos = { left: 260, top: 215 };
           } else if (step5Sub === 7) {
             guideText = '왼쪽 요소에서 ‘식용유’ 그림을 식용유 자리로 끌어 놓으세요.';
-            fingerPos = { left: 260, top: 310 };
           }
         }
 
         gdTextEl.textContent = guideText;
 
-        if (fingerPos) {
+        var fgKey = fgName();
+        if (fgKey) {
+          var fgBox = FG[fgKey];
           fingerEl.style.display = 'block';
-          fingerEl.style.left = fingerPos.left + 'px';
-          fingerEl.style.top = fingerPos.top + 'px';
-          updateFingerTap();
+          fingerEl.style.left = fgBox[0] + 'px';
+          fingerEl.style.top = fgBox[1] + 'px';
+          if (BoxEdit.on) {
+            fingerEl.style.pointerEvents = 'auto';
+            BoxEdit.tag(fingerEl, fgBox);
+          } else {
+            updateFingerTap();
+          }
         } else {
           fingerEl.style.display = 'none';
           if (fingerTimer) {
@@ -1480,6 +938,8 @@
             var elemStart = { x: 0, y: 0 };
             var elemScale = 1;
             var elemGhost = null;
+            var elemBack = { x: 0, y: 0 };
+            var elemGoal = { x: 0, y: 0 };
 
             function getElemPos(e) {
               if (e.touches && e.touches[0]) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
@@ -1535,20 +995,34 @@
 
               if (over) {
                 isElemDone = true;
-                if (elemGhost && elemGhost.parentNode) elemGhost.parentNode.removeChild(elemGhost);
-                elemGhost = null;
                 if (typeof playDrag === 'function') playDrag();
-                handleStep5Sub(step5Sub);
+                if (elemGhost) {
+                  var vr = stageEl.getBoundingClientRect();
+                  var gr = elemTarget.getBoundingClientRect();
+                  var gx = (gr.left + gr.width / 2 - vr.left) / elemScale - elemGoal.x;
+                  var gy = (gr.top + gr.height / 2 - vr.top) / elemScale - elemGoal.y;
+                  var doneGhost = elemGhost;
+                  elemGhost = null;
+                  doneGhost.style.transition = 'transform 0.25s ease-in, opacity 0.25s ease-in';
+                  doneGhost.style.transform = 'translate3d(' + gx + 'px, ' + gy + 'px, 0) scale(0.4)';
+                  doneGhost.style.opacity = '0';
+                  setTimeout(function () {
+                    if (doneGhost.parentNode) doneGhost.parentNode.removeChild(doneGhost);
+                    handleStep5Sub(step5Sub);
+                  }, 250);
+                } else {
+                  handleStep5Sub(step5Sub);
+                }
               } else {
                 if (elemGhost) {
-                  elemGhost.style.transition = 'transform 0.16s ease-out';
-                  elemGhost.style.transform = 'translate3d(0, 0, 0)';
+                  elemGhost.style.transition = 'transform 0.2s ease-out';
+                  elemGhost.style.transform = 'translate3d(' + elemBack.x + 'px, ' + elemBack.y + 'px, 0)';
                   setTimeout(function () {
                     if (elemGhost && elemGhost.parentNode) elemGhost.parentNode.removeChild(elemGhost);
                     elemGhost = null;
                     if (elemDrag) elemDrag.classList.remove('is-dragging-src');
                     if (fingerEl) fingerEl.style.display = 'block';
-                  }, 170);
+                  }, 210);
                 } else {
                   elemDrag.classList.remove('is-dragging-src');
                   if (fingerEl) fingerEl.style.display = 'block';
@@ -1566,8 +1040,10 @@
               elemScale = (viewRect.width / stageEl.offsetWidth) || 1;
               var thumbEl = elemDrag.querySelector('.cv-tcard-thumb') || elemDrag;
               var thumbRect = thumbEl.getBoundingClientRect();
-              var startLeft = (thumbRect.left + thumbRect.width / 2 - viewRect.left) / elemScale - 48;
-              var startTop = (thumbRect.top + thumbRect.height / 2 - viewRect.top) / elemScale - 56;
+              var startLeft = (elemStart.x - viewRect.left) / elemScale - 48;
+              var startTop = (elemStart.y - viewRect.top) / elemScale - 56;
+              elemBack = { x: (thumbRect.left + thumbRect.width / 2 - viewRect.left) / elemScale - 48 - startLeft, y: (thumbRect.top + thumbRect.height / 2 - viewRect.top) / elemScale - 56 - startTop };
+              elemGoal = { x: startLeft + 48, y: startTop + 56 };
 
               elemGhost = document.createElement('div');
               elemGhost.className = 'cv-elem-ghost';
@@ -1629,6 +1105,48 @@
           doneModal.classList.remove('is-off');
         }
       };
+
+      function fgName() {
+        if (currentStep === 6) return '';
+        return FG_KEYS[currentStep < 5 ? currentStep : 3 + step5Sub];
+      }
+
+      BoxEdit.init({
+        apply: function (el) {
+          el.style.left = el._ref[0] + 'px';
+          el.style.top = el._ref[1] + 'px';
+        },
+        format: function (el) {
+          return fgName() + ': [' + el._ref.join(', ') + '],';
+        },
+        name: fgName,
+        step: {
+          count: 12,
+          get: function () {
+            if (currentStep === 6) return 11;
+            return currentStep < 5 ? currentStep : 3 + step5Sub;
+          },
+          set: function (n) {
+            if (n >= 11) {
+              currentStep = 6;
+            } else if (n >= 5) {
+              currentStep = 5;
+              step5Sub = n - 3;
+            } else {
+              currentStep = n;
+            }
+          },
+          go: function (n) {
+            this.set(n);
+            renderStep();
+            BoxEdit.syncStep(n);
+          },
+          label: function (n) {
+            var txt = n === 11 ? '완료' : FG_KEYS[n];
+            return '단계 ' + n + ' · ' + txt;
+          }
+        }
+      });
 
       renderStep();
       if (urlParams.get('modal') === '1') {
