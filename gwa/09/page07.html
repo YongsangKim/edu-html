@@ -10,6 +10,7 @@
     .so-char{left:30px;top:400px;width:560px;height:540px}
     .so-scene{position:absolute;left:620px;top:30px;width:590px;height:550px;box-sizing:border-box;border:solid 6px var(--c-purple);border-radius:30px;background:var(--c-mist) center / cover no-repeat}
     .so-badge{position:absolute;left:18px;top:14px;width:70px;height:70px;border-radius:50%;background:#e8605f;border:solid 4px var(--c-white);box-sizing:border-box;padding-top:4px;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:44px;color:var(--c-white);z-index:2}
+    .so-badge:empty{display:none}
     .so-board{position:absolute;left:1254px;top:30px;width:636px;height:550px;box-sizing:border-box;padding:28px 23px 0;border-radius:30px;background:var(--c-white);box-shadow:0 10px 0 0 rgba(86,148,231,.2)}
     .so-slots{position:relative;width:590px;display:flex;flex-direction:column}
     .so-slot{position:relative;width:590px;height:118px;box-sizing:border-box}
@@ -43,7 +44,7 @@
           <p class="guide-bubble so-bubble is-center" id="soBubble">물 없는 냄비에 라면을 넣으면 안 되듯이, 양치질도 순서가 중요해! 양치하는 과정을 차례대로 놓아 보자!</p>
           <div class="char-box so-char"><img src="../img/character/gwa_main.png" alt="메인 캐릭터"></div>
 
-          <div class="so-scene" id="soScene"><span class="so-badge" id="soBadge">1</span></div>
+          <div class="so-scene" id="soScene"><span class="so-badge" id="soBadge"></span></div>
 
           <div class="so-board">
             <div class="so-slots" id="soSlots">
@@ -126,6 +127,7 @@
     ];
     const scene = $('soScene');
     const setScene = (n) => { scene.style.backgroundImage = "url('img/p07_scene_" + n + ".png')"; };
+    for (let i = 0; i <= 4; i++) { new Image().src = 'img/p07_scene_' + i + '.png'; }
     setScene(0);
     setTimeout(() => { $('soBubble').innerHTML = BUBBLES[1]; }, 5000);
 
@@ -146,7 +148,7 @@
         zone.classList.add('is-filled');
         step += 1;
         setScene(step);
-        $('soBadge').textContent = Math.min(step + 1, WRONG.length);
+        $('soBadge').textContent = step;
         if (step < zones.length) zones[step].classList.add('is-now');
       },
       onWrong: (card) => {
@@ -155,7 +157,7 @@
         $('soWrongText').textContent = WRONG[step];
         flashLayer($('soWrong'));
       },
-      onDone: () => setTimeout(() => $('soDone').classList.remove('is-off'), 900)
+      onDone: () => setTimeout(() => $('soDone').classList.remove('is-off'), 2000)
     });
   })();
   </script>

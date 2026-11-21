@@ -8,21 +8,21 @@
     <style>
         .p03-gauge{left:62px;top:36px;width:757px;z-index:5}
 
-        .p03-panel{position:absolute;left:90px;top:100px;width:1755px;height:598px;box-sizing:border-box;border:solid 5px var(--c-navy);border-radius:24px;background:#bfe0f7 url('img/p02_bg.jpg') center / cover no-repeat;overflow:hidden}
-        .p03-body{position:absolute;left:565px;top:22px;width:591px;height:540px}
-        .p03-body:before{content:'';position:absolute;left:0;top:0;width:100%;height:100%;background:url('img/p15_mouth.png') 293px 122px / 56px 68px no-repeat,url('img/p02_body.png') center / contain no-repeat}
+        main.bg-default{background:#bfe0f7 url('img/p02_bg_full.jpg') center top / cover no-repeat}
+        .p03-panel{position:absolute;inset:0;overflow:hidden}
+        .p03-body{position:absolute;inset:0}
         .p03-zone{position:absolute;box-sizing:border-box;border:dashed 5px var(--c-purple);border-radius:22px;background:rgba(72,21,156,.12);transition:all .4s;
           display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:36px;color:rgba(72,21,156,.45)}
-        .p03-zone[data-key="mouth"]{left:269px;top:126px;width:104px;height:60px}
-        .p03-zone[data-key="stomach"]{left:306px;top:298px;width:90px;height:90px}
-        .p03-zone[data-key="intestine"]{left:239px;top:391px;width:164px;height:142px}
+        .p03-zone[data-key="mouth"]{left:888px;top:288px;width:82px;height:56px}
+        .p03-zone[data-key="stomach"]{left:938px;top:452px;width:88px;height:82px}
+        .p03-zone[data-key="intestine"]{left:888px;top:536px;width:150px;height:136px}
         .p03-zone.is-done{border-color:#2fbf71;border-style:solid;background:rgba(47,191,113,.3);color:#1f9d5a;box-shadow:0 0 30px 8px rgba(47,191,113,.65)}
-        .p03-svg{position:absolute;left:0;top:0;width:591px;height:540px;pointer-events:none}
+        .p03-svg{position:absolute;left:0;top:0;width:1920px;height:960px;pointer-events:none}
         .p03-svg path{fill:none;stroke:#2fbf71;stroke-width:12;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 8px rgba(47,191,113,.9));stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.2s ease}
-        .p03-food{position:absolute;left:276px;top:-10px;width:90px;height:90px;display:flex;align-items:center;justify-content:center;font-size:76px;line-height:1;filter:drop-shadow(0 6px 4px rgba(0,0,0,.25));transition:left 1s ease,top 1.2s ease,opacity .5s;z-index:3}
+        .p03-food{position:absolute;left:884px;top:-10px;width:90px;height:90px;box-sizing:border-box;padding:10px;border-radius:50%;background:rgba(255,255,255,.95);border:4px solid #2fbf71;box-shadow:0 6px 18px rgba(47,191,113,.45);display:flex;align-items:center;justify-content:center;font-size:56px;line-height:1;transition:left 1s ease,top 1.2s ease,opacity .5s;z-index:3}
         .p03-food img{width:100%;height:100%;object-fit:contain}
 
-        .p03-flow{position:absolute;left:1397px;top:17px;width:330px;height:554px;box-sizing:border-box;border-radius:30px;background:rgba(255,255,255,.55);border:solid 4px rgba(255,255,255,.9)}
+        .p03-flow{position:absolute;left:1487px;top:117px;width:330px;height:554px;box-sizing:border-box;border-radius:30px;background:rgba(255,255,255,.65);border:solid 4px rgba(255,255,255,.9)}
         .p03-chip{position:absolute;left:45px;width:240px;height:110px;box-sizing:border-box;padding-top:6px;display:flex;align-items:center;justify-content:center;border:solid 5px var(--c-purple);border-radius:26px;background:var(--c-white);
           font-family:'Cafe24 Ssurround';font-size:54px;color:var(--c-ink);opacity:0;transform:translateY(20px);transition:opacity .5s,transform .5s}
         .p03-chip.is-on{opacity:1;transform:none}
@@ -48,7 +48,7 @@
               <div class="p03-zone" data-key="mouth" id="p03Mouth"></div>
               <div class="p03-zone" data-key="stomach" id="p03Stomach"></div>
               <div class="p03-zone" data-key="intestine" id="p03Intestine"></div>
-              <svg class="p03-svg" viewBox="0 0 591 540"><path id="p03Path" d="M321 156 L351 342 L322 462" pathLength="1"/></svg>
+              <svg class="p03-svg" viewBox="0 0 1920 960"><path id="p03Path" d="M929 316 L982 493 L963 604" pathLength="1"/></svg>
               <div class="p03-food" id="p03Food"><img src="img/p03_food.png" alt="" onerror="this.replaceWith(document.createTextNode('🍎'))"></div>
             </div>
             <div class="p03-flow">
@@ -99,11 +99,11 @@
     const at = (ms, fn) => setTimeout(fn, ms);
     const go = (cx, cy) => { food.style.left = (cx - 45) + 'px'; food.style.top = (cy - 45) + 'px'; };
 
-    at(600, () => go(321, 156));
+    at(600, () => go(929, 316));
     at(1700, () => $('p03Mouth').classList.add('is-done'));
-    at(2000, () => { path.style.strokeDashoffset = '0.39'; go(351, 342); });
+    at(2000, () => { path.style.strokeDashoffset = '0.38'; go(982, 493); });
     at(3400, () => $('p03Stomach').classList.add('is-done'));
-    at(4400, () => { path.style.strokeDashoffset = '0'; go(322, 462); });
+    at(4400, () => { path.style.strokeDashoffset = '0'; go(963, 604); });
     at(5800, () => { $('p03Intestine').classList.add('is-done'); food.style.opacity = '0'; });
     at(8300, () => { $('p03C1').classList.add('is-on'); });
     at(9100, () => { $('p03A1').classList.add('is-on'); $('p03C2').classList.add('is-on'); });
