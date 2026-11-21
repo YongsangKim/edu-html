@@ -180,6 +180,9 @@
       pointer-events: none;
       animation: p02SmokeRise 1.2s ease-out forwards;
     }
+    .p02-banner.is-off { display: none; }
+    .p02-banner { position: absolute; left: 0; top: 410px; width: 1920px; margin: 0; text-align: center; z-index: 30; pointer-events: none; }
+    .p02-banner span { display: inline-block; min-width: 560px; box-sizing: border-box; padding: 18px 60px 10px; border: solid 9px #e4f4ff; border-radius: 80px; background: #043f9b; font-family: 'Cafe24 Ssurround'; font-size: 76px; color: var(--c-white); letter-spacing: -0.03em; }
     @keyframes p02SmokeRise {
       0% { opacity: 0.8; transform: translate(-50%, 0) scale(0.6); }
       50% { opacity: 0.6; transform: translate(-70%, -40px) scale(1.5); }
@@ -598,6 +601,9 @@
             </div>
           </div>
 
+          <!-- 레벨 배너 -->
+          <p class="p02-banner is-off" id="p02Banner"><span id="p02BannerText"></span></p>
+
           <!-- 전체 성공 모달 -->
           <div class="avatar-modal is-off" id="p02Done">
             <div class="avatar-card">
@@ -775,16 +781,23 @@
       girlImg.src = 'img/p02_girl.png';
       if (remain <= 0) {
         playCorrect();
-        setTimeout(() => {
-          if (level >= ROUNDS.length - 1) {
+        if (level >= ROUNDS.length - 1) {
+          setTimeout(() => {
             clearSfx();
             $('p02Done').classList.remove('is-off');
-          } else {
+          }, 1800);
+        } else {
+          const showBanner = (text, ms, then) => {
+            $('p02BannerText').textContent = text;
+            $('p02Banner').classList.remove('is-off');
+            setTimeout(() => { $('p02Banner').classList.add('is-off'); if (then) then(); }, ms);
+          };
+          setTimeout(() => showBanner('Level ' + (level + 1) + ' 종료!', 1500, () => {
             level++;
             draw();
-            busy = false;
-          }
-        }, 1800);
+            showBanner('Level ' + (level + 1) + ' 시작!', 1200, () => { busy = false; });
+          }), 600);
+        }
         return;
       }
       const hint = HINT_ONCE ? (attempts === HINT_AT && !hintShown) : attempts >= HINT_AT;
@@ -809,7 +822,7 @@
       }
       busy = true;
       attempts++;
-      const k = Math.min(remain, Math.max(1, Math.ceil(depth * 5)));
+      const k = Math.min(remain, Math.floor(depth * 5));
       const blowMs = BLOW_MIN + depth * (BLOW_MAX - BLOW_MIN);
       const gaugeRatio = (depth * 5) / 15;
       if (gaugeRatio > best) {

@@ -22,17 +22,17 @@
         .p11-info.is-hide{display:none}
         .p11-info span{padding:0 14px}
         .p11-info em{font-style:normal;font-weight:700;font-family:'Pretendard',sans-serif}
-        .p11-info span:nth-child(odd){background:var(--c-navy);color:var(--c-white);padding:0 10px 0 18px}
+        .p11-info span:nth-child(odd){background:var(--c-navy);color:var(--c-white);padding:0 10px 0 18px;box-shadow:-2px 0 0 var(--c-navy),0 2px 0 var(--c-navy)}
         .p11-info span:nth-child(1){padding-top:14px;border-top-left-radius:14px}
-        .p11-info span:nth-child(7){padding-bottom:14px;border-bottom-left-radius:14px}
+        .p11-info span:nth-child(7){padding-bottom:14px;border-bottom-left-radius:14px;box-shadow:-2px 0 0 var(--c-navy)}
         .p11-info span:nth-child(2){padding-top:14px}
         .p11-info span:nth-child(8){padding-bottom:14px}
         .p11-info span.is-bad{color:var(--c-hotpink)}
         .p11-info:before{content:'';position:absolute;top:50%;margin-top:-22px;border:22px solid transparent}
-        .p11-info.is-right:before{left:-48px;border-right-color:var(--c-navy)}
-        .p11-info.is-left:before{right:-48px;border-left-color:var(--c-navy)}
+        .p11-info.is-right:before{left:-46px;border-right-color:var(--c-navy)}
+        .p11-info.is-left:before{right:-46px;border-left-color:var(--c-navy)}
         .p11-panel{left:1282px;top:88px;width:608px;height:840px;--board-floor:327px}
-        .p11-phone{position:absolute;left:1305px;top:18px;width:490px;height:390px;padding:0;border:0;background:url(img/p11_phone.png) center/contain no-repeat;z-index:2}
+        .p11-phone{position:absolute;left:1320px;top:18px;width:490px;height:390px;padding:0;border:0;background:url(img/p11_phone.png) center/contain no-repeat;cursor:pointer;z-index:2}
         .p11-phone.is-ring{background-image:url(img/p11_phone_on.png);animation:p11-ring .15s ease-in-out 8 alternate;transform-origin:50% 80%}
         .p11-phone:disabled{cursor:default}
         @keyframes p11-ring{from{transform:rotate(-3deg)}to{transform:rotate(3deg)}}
@@ -63,6 +63,9 @@
         .p11-txt{position:absolute;margin:0;font-family:'Cafe24 Ssurround';font-size:70px;line-height:1;color:var(--c-white);z-index:2}
         .p11-submit{position:absolute;left:1575px;top:815px;min-width:0;width:300px;height:90px;padding:6px 10px 0;font-size:50px;z-index:2}
         .p11-btns{display:flex;justify-content:center;gap:50px;margin-top:50px}
+        .p11-banner.is-off{display:none}
+        .p11-banner{position:absolute;left:0;top:420px;width:1920px;margin:0;text-align:center;pointer-events:none;z-index:20}
+        .p11-banner span{display:inline-block;min-width:560px;box-sizing:border-box;padding:18px 60px 10px;border:solid 9px #e4f4ff;border-radius:80px;background:#043f9b;font-family:'Cafe24 Ssurround';font-size:76px;color:var(--c-white);letter-spacing:-0.03em}
     </style>
 </head>
 <body>
@@ -88,6 +91,7 @@
           <div class="p11-dd" id="p11Case"><button type="button" class="p11-dd-field" disabled aria-label="상황"></button><ul class="p11-dd-list p11-dd-cases" hidden><li class="p11-dd-item" data-value="gas">가스가 새는 것 같아요.</li><li class="p11-dd-item" data-value="motion">도둑이 든 것 같아요.</li><li class="p11-dd-item" data-value="temp">불이 난 것 같아요.</li><li class="p11-dd-item" data-value="flood">물이 새는 것 같아요.</li></ul></div>
           <p class="p11-txt" style="left:1322px;top:712px">도와주세요.</p>
           <button type="button" class="card-btn is-popup p11-submit is-disabled" id="p11Submit" disabled>신고하기</button>
+          <p class="p11-banner is-off" id="p11Banner"><span id="p11BannerText"></span></p>
 
           <div class="ox-result-correct is-avatar is-off" id="p11Right">
             <div class="avatar-popup-panel">
@@ -278,6 +282,14 @@
       checkReady();
     });
 
+    let bannerTimer = null;
+    function showBanner(text, ms) {
+      clearTimeout(bannerTimer);
+      $('p11BannerText').textContent = text;
+      $('p11Banner').classList.remove('is-off');
+      bannerTimer = setTimeout(() => $('p11Banner').classList.add('is-off'), ms || 1500);
+    }
+
     submit.addEventListener('click', () => {
       if (submit.disabled) return;
       const right = Number(selHouse.value) === target && selCase.value === kind;
@@ -293,6 +305,7 @@
           newProblem();
           hideInfo();
           resetPhone();
+          showBanner((round + 1) + '라운드 시작!', 1500);
         }, 2000);
       } else {
         playWrong();
@@ -309,6 +322,7 @@
 
     newProblem();
     renderHearts();
+    showBanner('1라운드 시작!', 1500);
   })();
   </script>
 </body>

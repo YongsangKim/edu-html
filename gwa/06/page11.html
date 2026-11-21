@@ -6,32 +6,34 @@
     <title>마이크가 듣는 소리파도를 해석하라!</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
+        .p11-bg{background:url(img/p11_bg.jpg) center bottom / cover no-repeat}
         .p11-step{width:1500px}
         .p11-step>i{width:340px}
         .p11-step>span{justify-content:center;padding:8px 20px 0;white-space:nowrap}
-        .p11-graph{position:absolute;left:560px;top:166px;width:800px;height:130px;box-sizing:border-box;border:solid 8px var(--c-ink);border-radius:24px;background:var(--c-white)}
+        .p11-graph{position:absolute;left:560px;top:155px;width:800px;height:130px;box-sizing:border-box;border:solid 8px var(--c-ink);border-radius:24px;background:var(--c-white)}
         .p11-graph svg{width:100%;height:100%;display:block}
         .p11-graph.is-off{display:none}
 
         .p11-doors{position:absolute;left:0;top:320px;width:1920px;display:flex;justify-content:center;gap:120px;perspective:1400px}
-        .p11-door{position:relative;width:380px;height:580px;padding:0;border:0;background:#3b2414;border-radius:190px 190px 10px 10px;cursor:pointer;box-shadow:0 0 0 14px #8b5a3c}
-        .p11-door:hover{box-shadow:0 0 0 14px #8b5a3c,0 0 0 24px var(--c-yellow)}
-        .p11-leaf{position:absolute;inset:0;border-radius:190px 190px 10px 10px;background:linear-gradient(90deg,#a86f45,#c98a58 50%,#a86f45);transform-origin:left center;transition:transform 1s ease;
-          display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px}
-        .p11-leaf:after{content:'';position:absolute;right:30px;top:72%;width:30px;height:30px;border-radius:50%;background:var(--c-yellow);box-shadow:0 0 0 5px #7a4a26}
+        .p11-door{position:relative;width:380px;height:580px;padding:0;border:0;background:#3b2414;border-radius:190px 190px 10px 10px;cursor:pointer;perspective:1400px;isolation:isolate}
+        .p11-door:after{content:'';position:absolute;z-index:1;left:-24px;right:-24px;top:-24px;bottom:0;border-radius:214px 214px 0 0;background:url(img/p11_door_frame.svg) center / 100% 100% no-repeat;transition:box-shadow .2s;pointer-events:none}
+        .p11-door:hover:after{box-shadow:0 0 0 10px var(--c-yellow)}
+        .p11-leaf{position:absolute;z-index:2;inset:0;border-radius:190px 190px 10px 10px;background:url(img/p11_door.svg) center / 100% 100% no-repeat;transform-origin:left center;transition:transform 1s ease;
+          display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
         .p11-door.is-open .p11-leaf{transform:rotateY(-105deg)}
         .p11-leaf > *{backface-visibility:hidden;transition:opacity .3s .35s}
         .p11-door.is-open .p11-leaf > *{opacity:0}
-        .p11-door.is-open{background:#fff8d6;box-shadow:0 0 0 14px #8b5a3c,0 0 60px 20px rgba(255,236,150,.8)}
+        .p11-door.is-open{background:#171617}
         .p11-plate{width:300px;height:200px;box-sizing:border-box;padding:12px;border:solid 6px var(--c-ink);border-radius:20px;background:var(--c-white)}
         .p11-plate svg{width:100%;height:100%;display:block}
-        .p11-plate.is-pic{background:var(--c-mist) center / contain no-repeat;background-origin:content-box}
-        .p11-sound{width:110px;height:110px;border:solid 6px var(--c-ink);border-radius:50%;background:var(--c-white);font-size:54px;cursor:pointer;line-height:2}
+        .p11-plate.is-pic{padding:0;overflow:hidden;background:var(--c-mist) center / cover no-repeat}
+        .p11-sound{width:110px;height:110px;border:solid 6px var(--c-blue);border-radius:50%;background:var(--c-white);color:var(--c-ink);display:flex;align-items:center;justify-content:center;cursor:pointer}
+        .p11-sound svg{width:64px;height:64px;fill:currentColor;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
         .p11-sound:hover{background:#fff3c9}
         .p11-sound:disabled{opacity:.5;cursor:default}
         .p11-doors.is-locked{pointer-events:none}
-        .p11-flash{position:absolute;inset:0;background:radial-gradient(circle,var(--c-white) 0%,rgba(255,255,255,0) 70%);opacity:0;pointer-events:none;transition:opacity 1.5s}
-        .p11-flash.is-on{opacity:1}
+        .p11-tbox{position:absolute;left:30px;bottom:30px;width:320px;-webkit-mask-image:radial-gradient(ellipse 65% 65% at center,#000 75%,transparent 100%);mask-image:radial-gradient(ellipse 65% 65% at center,#000 75%,transparent 100%);opacity:0;transform:scale(.3);transform-origin:center bottom;transition:opacity .3s,transform .6s cubic-bezier(.34,1.56,.64,1);pointer-events:none}
+        .p11-door.is-found .p11-tbox{opacity:1;transform:scale(1)}
     </style>
 </head>
 <body>
@@ -39,11 +41,10 @@
   <div id="viewport" class="viewport">
     <div id="stage-spacer">
       <div id="stage" class="stage">
-        <main class="bg-default">
+        <main class="bg-default p11-bg">
           <p class="ask-pill has-stage p11-step"><i id="p11Round"></i><span id="p11Q"></span></p>
           <div class="p11-graph is-off" id="p11Graph"></div>
           <div class="p11-doors" id="p11Doors"></div>
-          <div class="p11-flash" id="p11Flash"></div>
 
           <div class="ox-result-wrong is-avatar is-off" id="p11Wrong">
             <div class="avatar-popup-panel">
@@ -82,12 +83,9 @@
     const doorsBox = $('p11Doors');
     let round = 0;
     let voice = null;
-    let voiceTimer = null;
     let activeSound = null;
     // 다른 소리를 켜거나 문을 고르면 재생 중인 소리를 멈추고, 눌려 있던 소리 아이콘도 다시 켜 줌
     function stopVoice() {
-      clearTimeout(voiceTimer);
-      voiceTimer = null;
       if (voice) { voice.pause(); voice = null; }
       if (activeSound) { delete activeSound.dataset.busy; activeSound.style.opacity = ''; activeSound = null; }
     }
@@ -107,10 +105,10 @@
         if (d.wave) {
           inner = '<span class="p11-plate">' + waveSvg(d.wave[0], d.wave[1], { width: 276, height: 176, stroke: 5, axis: true }) + '</span>';
         } else {
-          inner = '<span class="p11-plate is-pic" style="background-image:url(\'img/p11_' + d.key + '.png\')"></span>' +
-            '<span class="p11-sound" role="button" aria-label="소리 듣기">🔊</span>';
+          inner = '<span class="p11-plate is-pic" style="background-image:url(\'img/p11_' + d.key + '.jpg\')"></span>' +
+            '<span class="p11-sound" role="button" aria-label="소리 듣기"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12" fill="none"/></svg></span>';
         }
-        door.innerHTML = '<span class="p11-leaf">' + inner + '</span>';
+        door.innerHTML = (d.right ? '<img class="p11-tbox" src="img/p11_treasure.png" alt="보물 상자">' : '') + '<span class="p11-leaf">' + inner + '</span>';
         const sound = door.querySelector('.p11-sound');
         if (sound) {
           sound.addEventListener('click', (e) => {
@@ -123,17 +121,13 @@
             const key = d.sound || d.key;
             voice = new Audio('sound/p11_' + key + '.mp3');
             const done = () => {
-              clearTimeout(voiceTimer);
-              voiceTimer = null;
               delete sound.dataset.busy;
               sound.style.opacity = '';
               if (activeSound === sound) activeSound = null;
             };
             voice.addEventListener('ended', done);
             voice.addEventListener('error', done);
-            voice.play().then(() => {
-              if (key === 'whisper') voiceTimer = setTimeout(stopVoice, 3000);
-            }).catch(done);
+            voice.play().catch(done);
           });
         }
         door.addEventListener('click', () => pick(door, d.right));
@@ -153,26 +147,33 @@
       makeSfx('sound/p11_door.mp3', true)();
       const last = round === ROUNDS.length - 1;
       const steps = new Audio('sound/p11_walk.mp3');
-      if (last) {
-        // 마지막: 발소리가 끝난 뒤에 빛이 번쩍하고, 빛이 퍼지면 다음 페이지로(소리가 안 나거나 끝나지 않아도 8초 뒤엔 진행)
-        let finished = false;
-        const finish = () => {
-          if (finished) return;
-          finished = true;
-          $('p11Flash').classList.add('is-on');
-          setTimeout(() => navigateTo('page12.html'), 2000);
+      // 매 라운드: 문 열림 → 발소리가 끝나면 문 안에 보물 상자 + 성공 효과음 → 효과음이 끝나면 다음 라운드(마지막은 다음 페이지). 소리가 안 나도 일정 시간 뒤 진행
+      let finished = false;
+      const finish = () => {
+        if (finished) return;
+        finished = true;
+        door.classList.add('is-found');
+        const success = new Audio('sound/p11_success.mp3');
+        let moved = false;
+        const next = () => {
+          if (moved) return;
+          moved = true;
+          if (last) {
+            navigateTo('page12.html');
+            return;
+          }
+          round += 1;
+          show();
         };
-        steps.addEventListener('ended', finish);
-        steps.addEventListener('error', finish);
-        setTimeout(() => steps.play().catch(finish), 800);
-        setTimeout(finish, 8000);
-        return;
-      }
-      setTimeout(() => steps.play().catch(() => {}), 800);
-      setTimeout(() => {
-        round += 1;
-        show();
-      }, 5000);
+        success.addEventListener('ended', () => setTimeout(next, 2000));
+        success.addEventListener('error', () => setTimeout(next, 3000));
+        success.play().catch(() => setTimeout(next, 3000));
+        setTimeout(next, 8000);
+      };
+      steps.addEventListener('ended', finish);
+      steps.addEventListener('error', finish);
+      setTimeout(() => steps.play().catch(finish), 800);
+      setTimeout(finish, 8000);
     }
 
     show();
