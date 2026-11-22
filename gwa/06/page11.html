@@ -6,33 +6,36 @@
     <title>마이크가 듣는 소리파도를 해석하라!</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        .p11-bg{background:url(img/p11_bg.jpg) center bottom / cover no-repeat}
+        .p11-bg{background:url(img/p11_bg.png) center bottom / cover no-repeat}
         .p11-step{width:1500px}
         .p11-step>i{width:340px}
         .p11-step>span{justify-content:center;padding:8px 20px 0;white-space:nowrap}
-        .p11-graph{position:absolute;left:560px;top:155px;width:800px;height:130px;box-sizing:border-box;border:solid 8px var(--c-ink);border-radius:24px;background:var(--c-white)}
+        .p11-graph{position:absolute;left:560px;top:155px;width:800px;height:130px;box-sizing:border-box;border:solid 6px #c99c4a;border-radius:20px;background:linear-gradient(180deg,#fbf3df 0%,#f1e3c4 100%);box-shadow:0 6px 14px rgba(0,0,0,.45),inset 0 2px 6px rgba(122,82,18,.22)}
         .p11-graph svg{width:100%;height:100%;display:block}
+        .p11-graph svg line{stroke:#bfa77a}
         .p11-graph.is-off{display:none}
 
         .p11-doors{position:absolute;left:0;top:320px;width:1920px;display:flex;justify-content:center;gap:120px;perspective:1400px}
         .p11-door{position:relative;width:380px;height:580px;padding:0;border:0;background:#3b2414;border-radius:190px 190px 10px 10px;cursor:pointer;perspective:1400px;isolation:isolate}
         .p11-door:after{content:'';position:absolute;z-index:1;left:-24px;right:-24px;top:-24px;bottom:0;border-radius:214px 214px 0 0;background:url(img/p11_door_frame.svg) center / 100% 100% no-repeat;transition:box-shadow .2s;pointer-events:none}
-        .p11-door:hover:after{box-shadow:0 0 0 10px var(--c-yellow)}
+        .p11-door:hover:after{box-shadow:0 0 0 6px #d4a449,0 0 20px rgba(224,169,58,.6)}
         .p11-leaf{position:absolute;z-index:2;inset:0;border-radius:190px 190px 10px 10px;background:url(img/p11_door.svg) center / 100% 100% no-repeat;transform-origin:left center;transition:transform 1s ease;
           display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
         .p11-door.is-open .p11-leaf{transform:rotateY(-105deg)}
         .p11-leaf > *{backface-visibility:hidden;transition:opacity .3s .35s}
         .p11-door.is-open .p11-leaf > *{opacity:0}
         .p11-door.is-open{background:#171617}
-        .p11-plate{width:300px;height:200px;box-sizing:border-box;padding:12px;border:solid 6px var(--c-ink);border-radius:20px;background:var(--c-white)}
+        .p11-plate{width:300px;height:200px;box-sizing:border-box;padding:12px;border:solid 6px #c99c4a;border-radius:20px;background:linear-gradient(180deg,#fbf3df 0%,#f1e3c4 100%);box-shadow:0 6px 12px rgba(0,0,0,.42),inset 0 2px 6px rgba(122,82,18,.22)}
         .p11-plate svg{width:100%;height:100%;display:block}
+        .p11-plate svg line{stroke:#bfa77a}
         .p11-plate.is-pic{padding:0;overflow:hidden;background:var(--c-mist) center / cover no-repeat}
-        .p11-sound{width:110px;height:110px;border:solid 6px var(--c-blue);border-radius:50%;background:var(--c-white);color:var(--c-ink);display:flex;align-items:center;justify-content:center;cursor:pointer}
-        .p11-sound svg{width:64px;height:64px;fill:currentColor;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
-        .p11-sound:hover{background:#fff3c9}
-        .p11-sound:disabled{opacity:.5;cursor:default}
+        .p11-sound.card-btn{position:relative;width:110px;min-width:0;height:106px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:translate .15s ease,box-shadow .15s ease,opacity .3s .35s}
+        .p11-sound img{width:62px;height:62px;object-fit:contain;display:block;pointer-events:none}
+        .p11-sound.card-btn:hover img{filter:brightness(2.1) saturate(1.3) hue-rotate(18deg)}
+        .p11-sound.card-btn.is-on{translate:0 8px;box-shadow:0 4px 0 0 #a9a2ff,0 3px 0 10px #035fd3}
+        .p11-sound.card-btn.is-on img{filter:brightness(0) saturate(100%) invert(37%) sepia(100%) saturate(459%) hue-rotate(263deg) brightness(120%) contrast(130%) brightness(1.5) drop-shadow(0 0 5px rgba(236,190,255,0.5)) drop-shadow(0 0 12px rgba(236,190,255,0.5)) drop-shadow(0 0 24px rgba(236,190,255,0.5))}
         .p11-doors.is-locked{pointer-events:none}
-        .p11-tbox{position:absolute;left:30px;bottom:30px;width:320px;-webkit-mask-image:radial-gradient(ellipse 65% 65% at center,#000 75%,transparent 100%);mask-image:radial-gradient(ellipse 65% 65% at center,#000 75%,transparent 100%);opacity:0;transform:scale(.3);transform-origin:center bottom;transition:opacity .3s,transform .6s cubic-bezier(.34,1.56,.64,1);pointer-events:none}
+        .p11-tbox{position:absolute;left:30px;bottom:30px;width:320px;-webkit-mask-image:radial-gradient(ellipse 54% 52% at center,#000 60%,transparent 98%);mask-image:radial-gradient(ellipse 54% 52% at center,#000 60%,transparent 98%);opacity:0;transform:scale(.3);transform-origin:center bottom;transition:opacity .3s,transform .6s cubic-bezier(.34,1.56,.64,1);pointer-events:none}
         .p11-door.is-found .p11-tbox{opacity:1;transform:scale(1)}
     </style>
 </head>
@@ -87,7 +90,7 @@
     // 다른 소리를 켜거나 문을 고르면 재생 중인 소리를 멈추고, 눌려 있던 소리 아이콘도 다시 켜 줌
     function stopVoice() {
       if (voice) { voice.pause(); voice = null; }
-      if (activeSound) { delete activeSound.dataset.busy; activeSound.style.opacity = ''; activeSound = null; }
+      if (activeSound) { delete activeSound.dataset.busy; activeSound.classList.remove('is-on'); activeSound = null; }
     }
 
     function show() {
@@ -106,7 +109,7 @@
           inner = '<span class="p11-plate">' + waveSvg(d.wave[0], d.wave[1], { width: 276, height: 176, stroke: 5, axis: true }) + '</span>';
         } else {
           inner = '<span class="p11-plate is-pic" style="background-image:url(\'img/p11_' + d.key + '.jpg\')"></span>' +
-            '<span class="p11-sound" role="button" aria-label="소리 듣기"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 010 7M19 6a8.5 8.5 0 010 12" fill="none"/></svg></span>';
+            '<span class="card-btn p11-sound js-sfx" role="button" data-sound="sound/click.mp3" aria-label="소리 듣기"><img src="img/p11_icon_speaker.png" alt=""></span>';
         }
         door.innerHTML = (d.right ? '<img class="p11-tbox" src="img/p11_treasure.png" alt="보물 상자">' : '') + '<span class="p11-leaf">' + inner + '</span>';
         const sound = door.querySelector('.p11-sound');
@@ -117,12 +120,12 @@
             stopVoice();
             activeSound = sound;
             sound.dataset.busy = '1';
-            sound.style.opacity = '.5';
+            sound.classList.add('is-on');
             const key = d.sound || d.key;
             voice = new Audio('sound/p11_' + key + '.mp3');
             const done = () => {
               delete sound.dataset.busy;
-              sound.style.opacity = '';
+              sound.classList.remove('is-on');
               if (activeSound === sound) activeSound = null;
             };
             voice.addEventListener('ended', done);

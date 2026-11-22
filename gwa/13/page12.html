@@ -24,8 +24,13 @@
         .bt-glass-unit{position:relative;width:100%;height:100%;z-index:3;filter:drop-shadow(0 10px 14px rgba(0,0,0,.15));transition:filter .2s}
         .bt-glass-unit img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}
         .p12-bt.is-over .bt-glass-unit{filter:drop-shadow(0 0 16px #ffea00) drop-shadow(0 0 6px #ffea00) drop-shadow(0 10px 14px rgba(0,0,0,.25))}
-        .p12-stick{position:absolute;left:50%;top:58%;transform:translateX(-50%);padding:8px 20px 4px;box-sizing:border-box;border-radius:14px;border:solid 4px #1b4fb8;background:#fff;font-family:'Cafe24 Ssurround';font-size:26px;line-height:1.1;color:#1b4fb8;white-space:nowrap;z-index:10;box-shadow:0 6px 12px rgba(0,0,0,.2);animation:p12Stick .35s cubic-bezier(0.18, 0.89, 0.32, 1.28)}
-        @keyframes p12Stick{0%{opacity:0;transform:translateX(-50%) translateY(-50px) scale(0.6)}100%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
+        .p12-stick{--lbl-c:#1b4fb8;position:absolute;left:50%;top:56%;width:122px;transform:translateX(-50%);padding:9px 6px 8px;box-sizing:border-box;border-top:4px solid var(--lbl-c);border-bottom:4px solid var(--lbl-c);background:linear-gradient(90deg,#d8e3f5 0%,#f3f7ff 15%,#fff 32%,#fff 68%,#f3f7ff 85%,#d8e3f5 100%);font-family:'Cafe24 Ssurround';font-size:21px;letter-spacing:-0.05em;line-height:1.1;color:var(--lbl-c);text-align:center;white-space:nowrap;z-index:10;box-shadow:0 5px 10px rgba(0,0,0,.22),inset 6px 0 8px -6px rgba(15,35,90,.16),inset -6px 0 8px -6px rgba(15,35,90,.16);animation:p12Stick .35s cubic-bezier(0.22,1,0.36,1)}
+        .p12-stick[data-key="soy"]{--lbl-c:#1b7fd4}
+        .p12-stick[data-key="oj"]{--lbl-c:#e07800}
+        .p12-stick[data-key="cider"]{--lbl-c:#d628ad}
+        .p12-stick[data-key="cola"]{--lbl-c:#5356d6}
+        .p12-stick[data-key="water"]{--lbl-c:#2e9b20}
+        @keyframes p12Stick{0%{opacity:0;transform:translateX(-50%) scaleX(1.55)}25%{opacity:1;transform:translateX(-50%) scaleX(1.35)}100%{opacity:1;transform:translateX(-50%) scaleX(1)}}
         .p12-arm-wrap{position:absolute;left:846px;top:112px;width:310px;height:467px;z-index:2;pointer-events:none}
         .p12-arm-wrap img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:contain;opacity:0;visibility:hidden}
         .p12-arm-wrap[data-pose="1"] .p12-arm-1,.p12-arm-wrap[data-pose="2"] .p12-arm-2,.p12-arm-wrap[data-pose="3"] .p12-arm-3{opacity:1;visibility:visible}
@@ -282,12 +287,14 @@
       busy = true;
       tray.classList.add('p12-lock');
       mg.classList.add('is-off');
-      const name = DRINKS[LEVELS[level].bottles[idx][0]].name;
+      const key = LEVELS[level].bottles[idx][0];
+      const name = DRINKS[key].name;
       const old = cur;
       setArmPose(2);
       setTimeout(() => {
         const s = document.createElement('span');
         s.className = 'p12-stick';
+        s.dataset.key = key;
         s.textContent = name;
         cur.appendChild(s);
         labelSfx();
