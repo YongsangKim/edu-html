@@ -6,69 +6,65 @@
     <title>식품공장 라벨 로봇</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        .p12-lv{position:absolute;left:50px;top:40px;height:84px;margin:0;padding:0 36px;box-sizing:border-box;display:flex;align-items:center;border-radius:42px;background:var(--c-navy);font-family:'Cafe24 Ssurround';font-size:50px;color:#fff;z-index:20}
-        .p12-gauge{left:350px;top:50px;width:900px;z-index:20}
-        .p12-mg{position:absolute;right:50px;top:30px;width:120px;height:120px;padding:0;border-radius:50%;border:0;background:transparent;box-sizing:border-box;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:20;transition:opacity .2s,filter .2s}
-        .p12-mg img{width:120px;height:120px;object-fit:contain;display:block;pointer-events:none}
-        .p12-mg.is-off{opacity:.35;filter:grayscale(1);cursor:default}
-
+        .p12-lv{position:absolute;left:69px;top:34px;width:356px;height:94px;margin:0;padding:0px 20px 0 80px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#91b9f9 0%,#6d99ec 100%);border:4px solid #91b9e7;border-radius:47px;box-shadow:0 10px 24px rgba(34,63,191,.28);font-family:'Cafe24 Ssurround';font-size:56px;color:#fff;text-shadow:0 3px 6px rgba(30,58,138,.35);letter-spacing:-1px;z-index:20}
+        .p12-lv-ico{position:absolute;left:-51px;top:-30px;width:136px;height:153px;pointer-events:none;filter:drop-shadow(0 6px 10px rgba(30,41,59,.22))}
+        .p12-gauge{left:513px;top:42px;width:1135px;height:67px;z-index:20}
+        .p12-mg.card-btn{position:absolute;left:1699px;top:34px;width:150px;min-width:0;height:150px;padding:4px 0 0;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;z-index:20}
+        .p12-mg img{width:88px;height:88px;object-fit:contain;display:block;pointer-events:none}
+        .p12-mg b{font-weight:400;font-size:38px;line-height:1;letter-spacing:-0.04em;pointer-events:none}
+        .p12-mg.card-btn:hover img{filter:url(#p12ScrHover)}
+        .p12-mg.card-btn:active img,.p12-mg.card-btn.is-selected img,.p12-mg.card-btn.is-pressed img{filter:url(#p12ScrActive) drop-shadow(0 0 10px #ecbeff) drop-shadow(0 0 4px #ecbeff)}
+        .p12-mg.is-off{opacity:.35;filter:grayscale(1);pointer-events:none}
         .factory-bg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;background:url('img/p12_factory_bg.jpg') center top/cover no-repeat}
-
-        .conveyor-wrap{position:absolute;left:0;top:465px;width:1920px;height:220px;background:url('img/p12_belt.png') 0 0/100% 100% no-repeat;pointer-events:none;z-index:3}
-
-        .p12-bt{--h:314px;position:absolute;top:241px;width:180px;height:314px;display:flex;align-items:flex-end;justify-content:center;transform-origin:bottom center;transition:left .9s ease,top .9s ease,transform .9s ease,opacity .9s ease;z-index:5}
+        .conveyor-wrap{position:absolute;left:0;top:468px;width:1322px;height:220px;background:url('img/p12_belt.png') 0 0/100% 100% no-repeat;pointer-events:none;z-index:3}
+        .p12-bt{position:absolute;top:241px;width:169px;height:308px;display:flex;align-items:flex-end;justify-content:center;transform-origin:bottom center;transition:left .9s ease,top .9s ease,transform .9s ease,opacity .9s ease;z-index:5}
         .p12-bt.is-view{position:relative;top:auto;left:auto;transition:none}
-        .p12-bt.is-wait{transform:scale(.8);opacity:.6}
-        .p12-bt.is-drop{z-index:12;transform:scale(.45);opacity:0;transition:left .5s ease-in,top .55s ease-in .3s,transform .55s ease-in .3s,opacity .25s ease-in .55s}
-
-        .bt-star-sheet{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);width:210px;height:245px;background:#ffffff;border:3px solid #c8d8ec;border-radius:20px;box-shadow:0 8px 18px rgba(35,80,165,.12);display:flex;align-items:center;justify-content:center;box-sizing:border-box;z-index:1}
-        .sheet-star{width:140px;height:140px}
-        .sheet-star svg{width:100%;height:100%;filter:drop-shadow(0 4px 6px rgba(255,185,0,.45))}
-
-        .bt-glass-unit{position:relative;width:180px;height:314px;z-index:3;filter:drop-shadow(0 10px 14px rgba(0,0,0,.15));transition:filter .2s}
-        .bt-glass-unit svg{width:100%;height:100%;display:block}
+        .p12-bt.is-carry{z-index:12;transition:left .22s cubic-bezier(.2,.85,.35,1),top .22s cubic-bezier(.2,.85,.35,1),transform .22s ease-out}
+        .p12-bt.is-drop{z-index:12;transform:scale(.45);opacity:0;transition:left .25s ease-out,top .38s ease-in,transform .38s ease-in,opacity .22s ease-in .16s}
+        .bt-glass-unit{position:relative;width:100%;height:100%;z-index:3;filter:drop-shadow(0 10px 14px rgba(0,0,0,.15));transition:filter .2s}
+        .bt-glass-unit img{width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}
         .p12-bt.is-over .bt-glass-unit{filter:drop-shadow(0 0 16px #ffea00) drop-shadow(0 0 6px #ffea00) drop-shadow(0 10px 14px rgba(0,0,0,.25))}
-
         .p12-stick{position:absolute;left:50%;top:58%;transform:translateX(-50%);padding:8px 20px 4px;box-sizing:border-box;border-radius:14px;border:solid 4px #1b4fb8;background:#fff;font-family:'Cafe24 Ssurround';font-size:26px;line-height:1.1;color:#1b4fb8;white-space:nowrap;z-index:10;box-shadow:0 6px 12px rgba(0,0,0,.2);animation:p12Stick .35s cubic-bezier(0.18, 0.89, 0.32, 1.28)}
         @keyframes p12Stick{0%{opacity:0;transform:translateX(-50%) translateY(-50px) scale(0.6)}100%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
-
-        .p12-arm-wrap{position:absolute;left:1200px;top:0;width:340px;height:250px;z-index:6;pointer-events:none;transition:transform .4s cubic-bezier(0.2, 0.8, 0.3, 1)}
-        .p12-arm-wrap.is-down{transform:translateY(110px)}
-        .arm-base{position:absolute;left:50%;top:0;transform:translateX(-50%);width:160px;height:34px;background:#2a3442;border-radius:0 0 14px 14px;border:3px solid #161c24;border-top:none;display:flex;align-items:center;justify-content:center}
-        .arm-led{width:16px;height:16px;border-radius:50%;background:#00e862;box-shadow:0 0 12px #00e862}
-        .arm-mech{position:absolute;left:50%;top:34px;transform:translateX(-50%);width:180px;height:210px}
-
-        .box-station{position:absolute;left:1410px;top:625px;width:450px;height:286px;pointer-events:none}
+        .p12-arm-wrap{position:absolute;left:846px;top:112px;width:310px;height:467px;z-index:2;pointer-events:none}
+        .p12-arm-wrap img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:contain;opacity:0;visibility:hidden}
+        .p12-arm-wrap[data-pose="1"] .p12-arm-1,.p12-arm-wrap[data-pose="2"] .p12-arm-2,.p12-arm-wrap[data-pose="3"] .p12-arm-3{opacity:1;visibility:visible}
+        .p12-arm-wrap[data-pose="2"]{left:874px;top:195px;width:282px;height:369px}
+        .p12-arm-wrap[data-pose="3"]{left:895px;top:201px;width:500px;height:349px;z-index:14;clip-path:inset(0 0 23.5% 0)}
+        .box-station{position:absolute;left:1253px;top:320px;width:513px;height:503px;pointer-events:none}
         .box-back,.box-front{position:absolute;inset:0}
         .box-back{z-index:11}
         .box-front{z-index:13}
         .box-img{width:100%;height:100%;display:block;object-fit:contain}
         .box-back .box-img{filter:drop-shadow(0 12px 18px rgba(0,0,0,.28))}
-        .box-front .box-img{clip-path:inset(53.5% 0 0 0)}
-        .box-stamp{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);border:3px dashed #733f11;border-radius:10px;padding:4px 20px 2px;background:rgba(255,248,235,.78);font-family:'Cafe24 Ssurround';font-size:26px;line-height:1.2;color:#4a2507;letter-spacing:-0.04em;white-space:nowrap}
-
-        .p12-tray{position:absolute;left:0;top:685px;width:1920px;height:275px;background:linear-gradient(180deg,#193b70 0%,#0c2142 100%);border-top:8px solid #3775de;box-shadow:0 -10px 30px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:flex-start;gap:26px;padding:12px 55px 20px;box-sizing:border-box;z-index:10}
-
-        .p12-st{width:415px;height:215px;box-sizing:border-box;background:#fff;border:6px solid #2d5ec7;border-radius:24px;box-shadow:0 10px 0 0 #13337a,0 16px 20px rgba(0,0,0,.25);display:flex;flex-direction:column;cursor:grab;padding:14px 22px;transition:transform .15s,box-shadow .15s;user-select:none;touch-action:none}
+        .box-front .box-img{clip-path:polygon(0 16%,23.2% 30.2%,18.5% 51.3%,100% 51.3%,100% 100%,0 100%)}
+        .p12-tray-wrap{position:absolute;left:55px;top:653px;width:1810px;height:291px;box-sizing:border-box;background:#023186;border:5px solid #91b9e7;border-radius:0 28px 28px 28px;box-shadow:0 10px 0 rgba(13,16,77,.17);z-index:15}
+        .p12-tray-tab{position:absolute;left:-5px;top:-85px;width:430px;height:86px;box-sizing:border-box;background:#023186;border:5px solid #91b9e7;border-bottom:none;border-radius:28px 28px 0 0;display:flex;align-items:center;justify-content:center;padding-top:10px;font-family:'Cafe24 Ssurround';font-size:60px;color:#fff;letter-spacing:-0.04em;z-index:16}
+        .p12-tray{width:100%;height:100%;display:flex;align-items:center;justify-content:center;gap:22px;padding:0 28px;box-sizing:border-box}
+        .p12-st{position:relative;width:565px;height:203px;box-sizing:border-box;border:5px solid #fff;border-radius:24px;box-shadow:0 8px 0 rgba(9,24,50,.17);display:flex;align-items:center;gap:26px;padding:20px 20px 20px 22px;cursor:grab;user-select:none;touch-action:none;transition:transform .15s,box-shadow .15s}
+        .p12-st::after{content:'';position:absolute;inset:5px;border:3px dashed #fff;border-radius:18px;pointer-events:none}
+        .p12-st[data-key="soy"]{background:#5bbfff}
+        .p12-st[data-key="oj"]{background:#ffbf5b}
+        .p12-st[data-key="cider"]{background:#f95ed6}
+        .p12-st[data-key="cola"]{background:#989aff}
+        .p12-st[data-key="water"]{background:#91de76}
         .p12-st:hover{transform:translateY(-6px)}
         .p12-st.is-home{opacity:.35}
         .p12-st.is-lift{position:absolute;margin:0;transform:rotate(-3deg) scale(.95);z-index:50;box-shadow:0 20px 32px rgba(0,0,0,.35);cursor:grabbing;pointer-events:none}
         .p12-lock .p12-st{pointer-events:none}
-
-        .sticker-head{display:flex;align-items:center;justify-content:space-between;border-bottom:3px dashed #d5e0ee;padding-bottom:8px;margin-bottom:8px}
-        .sticker-name{font-family:'Cafe24 Ssurround';font-size:36px;color:#1c3d7e;letter-spacing:-0.04em}
-        .sticker-badge{background:#edf3fc;border:2px solid #ccdcee;border-radius:12px;padding:2px 12px;font-family:'Cafe24 Ssurround';font-size:18px;color:#3b66b2;white-space:nowrap}
-        .sticker-traits{display:flex;flex-direction:column;gap:5px}
-        .trait-row{display:flex;align-items:center;gap:8px;font-family:'Cafe24 Ssurround';font-size:23px;color:#2d3848;letter-spacing:-0.04em}
-        .trait-dot{width:12px;height:12px;border-radius:50%;background:#3b74db;flex-shrink:0}
-
+        .sticker-pic{width:218px;height:154px;border-radius:16px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
+        .sticker-pic img{max-width:92%;max-height:92%;object-fit:contain;display:block;pointer-events:none}
+        .sticker-info{display:flex;flex-direction:column;justify-content:center;min-width:0}
+        .sticker-name{font-family:'Cafe24 Ssurround';font-size:50px;line-height:1.05;color:#032a5d;letter-spacing:-0.04em;margin-bottom:8px}
+        .sticker-traits{display:flex;flex-direction:column;gap:0px}
+        .trait-row{font-family:'Cafe24 Ssurround';font-size:30px;line-height:1.12;color:#31248a;letter-spacing:-0.04em;white-space:nowrap}
         .p12-hm{width:1400px;padding:50px 60px;border-radius:30px}
         .p12-hm .hint-title{width:max-content;margin:0 auto 20px}
         .p12-hm-t{font-size:52px}
         .p12-hm-x{position:absolute;right:30px;top:30px;width:90px;cursor:pointer}
         .p12-hm-b{display:flex;align-items:center;justify-content:center;gap:80px;margin-top:30px}
         .p12-hm-big{position:relative;width:420px;height:460px;border-radius:60px;background:#eef3fb;display:flex;align-items:center;justify-content:center;overflow:hidden;border:solid 8px var(--c-sky)}
-        .p12-hm-big .p12-bt{transition:none;z-index:auto;position:relative;top:auto;left:auto;transform:scale(1.28)}
+        .p12-hm-big .p12-bt{transition:none;z-index:auto;position:relative;top:auto;left:auto;transform-origin:center;transform:scale(1.28)}
         .p12-hm-big i{position:absolute;right:26px;bottom:26px;font-style:normal;line-height:0}
         .p12-hm-big i img{width:76px;height:76px;object-fit:contain;display:block;pointer-events:none}
         .p12-hm-l{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:24px;counter-reset:n}
@@ -76,57 +72,37 @@
         .p12-hm-l li:before{content:counter(n);width:64px;height:64px;border-radius:50%;background:var(--c-violet);color:#fff;display:flex;align-items:center;justify-content:center;padding-top:4px;box-sizing:border-box;font-size:38px}
         .p12-hm-l b{font-weight:400;min-width:200px;height:70px;padding:6px 20px 0;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border-radius:35px;background:var(--c-navy);color:#fff;font-size:38px}
         .p12-modal{z-index:30}
-</style>
+    </style>
 </head>
 <body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+    <filter id="p12ScrHover" color-interpolation-filters="sRGB"><feFlood flood-color="#8278ff" flood-opacity="0.5" result="c"/><feComposite in="c" in2="SourceAlpha" operator="in" result="m"/><feBlend in="SourceGraphic" in2="m" mode="screen"/></filter>
+    <filter id="p12ScrActive" color-interpolation-filters="sRGB"><feFlood flood-color="#d168fb" flood-opacity="0.5" result="c"/><feComposite in="c" in2="SourceAlpha" operator="in" result="m"/><feBlend in="SourceGraphic" in2="m" mode="screen"/></filter>
+  </defs></svg>
   <div id="page-fade"></div>
   <div id="viewport" class="viewport">
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default" id="p12Main">
-
-          <!-- 1. 공장 배경 -->
           <div class="factory-bg"></div>
-
-          <!-- [기존 UI 보존] Level 1 표시, gauge is-thin 게이지 바, 돋보기 -->
-          <p class="p12-lv" id="p12Lv">Level 1</p>
-          <div class="gauge is-thin p12-gauge"><div class="gauge-fill" id="p12Fill" style="width:0%"></div></div>
-          <button type="button" class="p12-mg is-off" id="p12Mg"><img src="img/p12_magnifier.png" alt="돋보기"></button>
-
-          <!-- 2. 컨베이어 벨트 -->
+          <p class="p12-lv" id="p12Lv"><img class="p12-lv-ico" src="img/p12_lv_water.png" alt=""><span id="p12LvTx">Level 1</span></p>
+          <div class="gauge is-thin is-star-on p12-gauge"><div class="gauge-fill" id="p12Fill" style="width:0%"></div></div>
+          <button type="button" class="card-btn p12-mg is-off" id="p12Mg"><img src="img/p12_magnifier.png" alt=""><b>힌트</b></button>
           <div class="conveyor-wrap"></div>
-
-          <!-- 3. 음료 병 컨테이너 -->
           <div id="p12Bottles"></div>
-
-          <!-- 4. 스마트 로봇 팔 -->
-          <div class="p12-arm-wrap" id="p12Arm">
-            <div class="arm-base"><div class="arm-led"></div></div>
-            <svg class="arm-mech" viewBox="0 0 180 210">
-              <rect x="75" y="0" width="30" height="55" fill="#4a586d" rx="4" />
-              <circle cx="90" cy="65" r="22" fill="#2d3848" stroke="#687c97" stroke-width="5" />
-              <circle cx="90" cy="65" r="8" fill="#00e862" />
-              <rect x="78" y="75" width="24" height="70" fill="#5c6e88" rx="6" />
-              <path d="M74,60 Q50,110 74,155" fill="none" stroke="#ffaa00" stroke-width="5" />
-              <rect x="65" y="155" width="50" height="20" fill="#2d3848" rx="4" />
-              <rect x="42" y="175" width="96" height="18" fill="#1b4fb8" rx="6" stroke="#fff" stroke-width="3" />
-              <text x="90" y="188" font-family="'Cafe24 Ssurround'" font-size="12" fill="#fff" text-anchor="middle">LABEL STAMP</text>
-            </svg>
+          <div class="p12-arm-wrap" id="p12Arm" data-pose="1">
+            <img class="p12-arm-1" src="img/p12_arm_1.png" alt="">
+            <img class="p12-arm-2" src="img/p12_arm_2.png" alt="">
+            <img class="p12-arm-3" src="img/p12_arm_3.png" alt="">
           </div>
-
-          <!-- 5. 완성품 상자 -->
           <div class="box-station">
             <div class="box-back"><img class="box-img" src="img/p12_box.png" alt="완성품 상자"></div>
-            <div class="box-front">
-              <img class="box-img" src="img/p12_box.png" alt="">
-              <div class="box-stamp">완성품 상자</div>
-            </div>
+            <div class="box-front"><img class="box-img" src="img/p12_box.png" alt=""></div>
           </div>
-
-          <!-- 6. 하단 라벨 스티커 트레이 -->
-          <div class="p12-tray" id="p12Tray"></div>
-
-          <!-- 7. 힌트 모달 -->
+          <div class="p12-tray-wrap">
+            <div class="p12-tray-tab">라벨 목록</div>
+            <div class="p12-tray" id="p12Tray"></div>
+          </div>
           <div class="avatar-modal is-off p12-modal" id="p12Hint">
             <div class="avatar-card p12-hm">
               <img class="p12-hm-x js-sfx" id="p12HintX" data-sound="sound/click.mp3" src="../../resources/img/common/pop_btn_close.png" alt="">
@@ -137,8 +113,6 @@
               </div>
             </div>
           </div>
-
-          <!-- 8. 레벨 완료 모달들 -->
           <div class="avatar-modal is-off p12-modal" id="p12End1">
             <div class="avatar-card">
               <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
@@ -148,7 +122,6 @@
               <a href="javascript:;" class="avatar-card-btn card-btn is-popup js-sfx p12-go" data-sound="sound/click.mp3">시작하기</a>
             </div>
           </div>
-
           <div class="avatar-modal is-off p12-modal" id="p12End2">
             <div class="avatar-card">
               <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
@@ -168,7 +141,6 @@
               </div>
             </div>
           </div>
-
           <div class="avatar-modal is-off p12-modal" id="p12End3">
             <div class="avatar-card">
               <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
@@ -183,21 +155,18 @@
     </div>
   </div>
   <div class="zoom-info" id="zoomInfo"></div>
-
   <script src="../../resources/js/header.js" data-title="식품공장 라벨 로봇" data-next="page13.html"></script>
   <script src="../../resources/js/toc-gwa.js"></script>
   <script src="../../resources/js/common.js"></script>
   <script>
   (function () {
     const DRINKS = {
-      soy:   { name: '간장',        liq: '#381c0e',               surf: '#522915', clear: false, air: false, lines: ['진한 갈색', '투명하지 않아요', '공기 방울이 없어요'] },
-      oj:    { name: '오렌지 주스', liq: '#ff9000',               surf: '#ffb833', clear: false, air: false, lines: ['주황색', '투명하지 않아요', '공기 방울이 없어요'] },
-      cider: { name: '사이다',      liq: 'rgba(215,238,255,.35)', surf: null,     clear: true,  air: true,  lines: ['색이 없어요', '투명해요', '공기 방울이 있어요'] },
-      cola:  { name: '콜라',        liq: '#230e06',               surf: '#421a0d', clear: false, air: true,  lines: ['진한 갈색', '투명하지 않아요', '공기 방울이 있어요'] },
-      osoda: { name: '오렌지 탄산음료', liq: 'rgba(255,140,20,.52)', surf: null,     clear: true,  air: true,  lines: ['주황색', '투명해요', '공기 방울이 있어요'] },
-      water: { name: '물',          liq: 'rgba(215,238,255,.3)',  surf: null,     clear: true,  air: false, lines: ['색이 없어요', '투명해요', '공기 방울이 없어요'] },
+      soy:   { name: '간장',        air: false, lines: ['진한 갈색', '투명하지 않아요', '공기 방울이 없어요'] },
+      oj:    { name: '오렌지 주스', air: false, lines: ['주황색', '투명하지 않아요', '공기 방울이 없어요'] },
+      cider: { name: '사이다',      air: true,  lines: ['색이 없어요', '투명해요', '공기 방울이 있어요'] },
+      cola:  { name: '콜라',        air: true,  lines: ['진한 갈색', '투명하지 않아요', '공기 방울이 있어요'] },
+      water: { name: '물',          air: false, lines: ['색이 없어요', '투명해요', '공기 방울이 없어요'] },
     };
-
     const LEVELS = [
       { bottles: [['oj', ['soy', 'oj', 'cider']], ['cider', ['soy', 'oj', 'cider']], ['soy', ['soy', 'oj', 'cider']]] },
       { bottles: [['cola', ['cola', 'soy']], ['soy', ['cola', 'soy']]] },
@@ -209,96 +178,30 @@
         ['oj',    ['water', 'cola', 'oj']],
       ] },
     ];
-
     const HINT_AT = 2;
-    const STOP_X = 1280, WAIT_X = 480, START_X = -260, BOX_X = 1635;
-
+    const STOP_X = 983, START_X = -260, BOX_X = 1510;
     const main = $('p12Main');
     const bottlesEl = $('p12Bottles');
     const tray = $('p12Tray');
     const fill = $('p12Fill');
     const mg = $('p12Mg');
     const arm = $('p12Arm');
-
     let level = 0;
     let idx = 0;
     let cur = null;
-    let next = null;
     let wrongs = 0;
     let busy = true;
     const labelSfx = makeSfx('sound/13차시_라벨 붙이는 효과음.mp3', true);
     const clearSfx = makeSfx('sound/13차시_클리어 효과음.mp3', true);
-
+    const setArmPose = (n) => { arm.dataset.pose = String(n); };
     const makeBottle = (key) => {
       const d = DRINKS[key];
       const el = document.createElement('div');
       el.className = 'p12-bt' + (d.air ? ' has-air' : '');
-      const clipId = 'cavity_' + Math.random().toString(36).substr(2, 9);
-      
-      let html = '';
-      // 1) 관찰용 별 종이판 (배경)
-      html += '<div class="bt-star-sheet">';
-      html += '<div class="sheet-star">';
-      html += '<svg viewBox="0 0 100 100"><polygon points="50,5 64,36 98,36 70,57 81,91 50,70 19,91 30,57 2,36 36,36" fill="#ffd528" stroke="#e09c00" stroke-width="4" /></svg>';
-      html += '</div></div>';
-
-      // 2) 완벽한 일체형 SVG 유리병 (전면)
-      html += '<div class="bt-glass-unit">';
-      html += '<svg viewBox="0 0 180 314">';
-      html += '<defs>';
-      html += '<clipPath id="' + clipId + '">';
-      html += '<path d="M 75,50 L 75,68 C 75,90 40,98 40,118 L 40,292 Q 40,308 54,308 L 126,308 Q 140,308 140,292 L 140,118 C 140,98 105,90 105,68 L 105,50 Z" />';
-      html += '</clipPath>';
-      html += '<linearGradient id="glassGloss_' + clipId + '" x1="0" y1="0" x2="1" y2="0">';
-      html += '<stop offset="0%" stop-color="#ffffff" stop-opacity="0.55"/>';
-      html += '<stop offset="14%" stop-color="#ffffff" stop-opacity="0.1"/>';
-      html += '<stop offset="85%" stop-color="#ffffff" stop-opacity="0.05"/>';
-      html += '<stop offset="100%" stop-color="#7eaee8" stop-opacity="0.32"/>';
-      html += '</linearGradient>';
-      html += '</defs>';
-
-      // 액체 채움 (불투명/투명)
-      html += '<g clip-path="url(#' + clipId + ')">';
-      html += '<rect x="0" y="84" width="180" height="231" fill="' + d.liq + '"/>';
-      if (!d.clear && d.surf) {
-        html += '<ellipse cx="90" cy="84" rx="25" ry="4.5" fill="' + d.surf + '" />';
-      }
-      if (d.air) {
-        html += '<circle cx="50" cy="270" r="4.5" fill="#ffffff" opacity="0.9"/>';
-        html += '<circle cx="90" cy="250" r="3" fill="#ffffff" opacity="0.9"/>';
-        html += '<circle cx="130" cy="260" r="5" fill="#ffffff" opacity="0.9"/>';
-        html += '<circle cx="70" cy="210" r="3.5" fill="#ffffff" opacity="0.85"/>';
-        html += '<circle cx="110" cy="190" r="4" fill="#ffffff" opacity="0.85"/>';
-        html += '<circle cx="55" cy="150" r="3" fill="#ffffff" opacity="0.8"/>';
-        html += '<circle cx="100" cy="140" r="4" fill="#ffffff" opacity="0.8"/>';
-        html += '<circle cx="125" cy="170" r="3" fill="#ffffff" opacity="0.8"/>';
-        html += '<circle cx="80" cy="110" r="3.5" fill="#ffffff" opacity="0.85"/>';
-      }
-      html += '</g>';
-
-      // 일체형 유리 외곽선
-      html += '<path d="M 75,50 L 75,68 C 75,90 40,98 40,118 L 40,292 Q 40,308 54,308 L 126,308 Q 140,308 140,292 L 140,118 C 140,98 105,90 105,68 L 105,50 Z" fill="url(#glassGloss_' + clipId + ')" stroke="#225bbd" stroke-width="5" />';
-
-      // 도톰한 유리 바닥층
-      html += '<path d="M 44,294 Q 90,301 136,294" stroke="#ffffff" stroke-width="5" fill="none" opacity="' + (d.clear ? '0.8' : '0.6') + '" />';
-      html += '<path d="M 48,301 Q 90,305 132,301" stroke="#225bbd" stroke-width="2.5" fill="none" opacity="0.45" />';
-
-      // 세로 유리 반사광
-      html += '<path d="M 52,126 L 52,280" stroke="#ffffff" stroke-width="7" stroke-linecap="round" opacity="0.8" />';
-      html += '<path d="M 62,136 L 62,260" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" opacity="0.55" />';
-      html += '<path d="M 81,55 L 81,66" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" opacity="0.75" />';
-
-      // 병 뚜껑
-      html += '<rect x="68" y="32" width="44" height="20" rx="6" fill="#1b4fb8" stroke="#0f3075" stroke-width="3" />';
-      html += '<line x1="77" y1="38" x2="103" y2="38" stroke="#6898f5" stroke-width="2" stroke-linecap="round" />';
-
-      html += '</svg></div>';
-
-      el.innerHTML = html;
+      el.innerHTML = '<div class="bt-glass-unit"><img src="img/p12_bt_' + key + '.png" alt=""></div>';
       return el;
     };
-
-    const spawn = (i, x, wait) => {
+    const spawn = (i) => {
       const L = LEVELS[level];
       if (i >= L.bottles.length) return null;
       const el = makeBottle(L.bottles[i][0]);
@@ -307,11 +210,9 @@
       bottlesEl.appendChild(el);
       void el.offsetWidth;
       el.style.transition = '';
-      el.style.left = x + 'px';
-      if (wait) el.classList.add('is-wait');
+      el.style.left = STOP_X + 'px';
       return el;
     };
-
     const renderTray = () => {
       const labels = LEVELS[level].bottles[idx][1];
       tray.innerHTML = '';
@@ -322,26 +223,23 @@
         st.dataset.key = k;
         let traitsHtml = '';
         d.lines.forEach((line) => {
-          traitsHtml += '<div class="trait-row"><span class="trait-dot"></span>' + line + '</div>';
+          traitsHtml += '<div class="trait-row">' + line + '</div>';
         });
-        st.innerHTML = '<div class="sticker-head">' +
+        st.innerHTML = '<div class="sticker-pic"><img src="img/p12_lbl_' + k + '.png" alt=""></div>' +
+          '<div class="sticker-info">' +
           '<span class="sticker-name">' + d.name + '</span>' +
-          '<span class="sticker-badge">라벨 스티커</span>' +
-          '</div>' +
-          '<div class="sticker-traits">' + traitsHtml + '</div>';
+          '<div class="sticker-traits">' + traitsHtml + '</div>' +
+          '</div>';
         tray.appendChild(st);
       });
     };
-
     const setMg = () => {
       mg.classList.toggle('is-off', wrongs < HINT_AT);
     };
-
     const setFill = () => {
       const n = LEVELS[level].bottles.length;
       fill.style.width = (idx / n * 100) + '%';
     };
-
     const startBottle = () => {
       wrongs = 0;
       setMg();
@@ -349,30 +247,26 @@
       busy = false;
       tray.classList.remove('p12-lock');
     };
-
     const startLevel = (n) => {
       level = n;
       idx = 0;
       bottlesEl.innerHTML = '';
-      $('p12Lv').textContent = 'Level ' + (n + 1);
+      $('p12LvTx').textContent = 'Level ' + (n + 1);
       fill.style.transition = 'none';
       fill.style.width = '0%';
       void fill.offsetWidth;
       fill.style.transition = '';
-      cur = spawn(0, STOP_X, false);
-      next = spawn(1, WAIT_X, true);
+      cur = spawn(0);
       setTimeout(startBottle, 950);
       busy = true;
       tray.classList.add('p12-lock');
     };
-
     const endLevel = () => {
       clearSfx();
       setTimeout(() => {
         $('p12End' + (level + 1)).classList.remove('is-off');
       }, 1200);
     };
-
     const advance = () => {
       idx++;
       setFill();
@@ -380,47 +274,47 @@
         endLevel();
         return;
       }
-      cur = next;
-      cur.classList.remove('is-wait');
-      cur.style.left = STOP_X + 'px';
-      next = spawn(idx + 1, WAIT_X, true);
+      cur = spawn(idx);
       setTimeout(startBottle, 950);
     };
-
     const stickAndDrop = () => {
       busy = true;
       tray.classList.add('p12-lock');
       mg.classList.add('is-off');
       const name = DRINKS[LEVELS[level].bottles[idx][0]].name;
-      arm.classList.add('is-down');
+      const old = cur;
+      setArmPose(2);
       setTimeout(() => {
         const s = document.createElement('span');
         s.className = 'p12-stick';
         s.textContent = name;
         cur.appendChild(s);
         labelSfx();
-      }, 450);
-      setTimeout(() => arm.classList.remove('is-down'), 900);
+      }, 350);
       setTimeout(() => {
-        const old = cur;
+        setArmPose(3);
+        old.classList.add('is-carry');
+        old.style.left = (BOX_X - 85) + 'px';
+      }, 750);
+      setTimeout(() => {
+        old.classList.remove('is-carry');
         old.classList.add('is-drop');
-        old.style.left = (BOX_X - 90) + 'px';
-        old.style.top = '570px';
-        setTimeout(() => old.remove(), 1400);
-        setTimeout(advance, 700);
-      }, 1500);
+        old.style.top = '480px';
+        setTimeout(() => old.remove(), 500);
+      }, 1000);
+      setTimeout(() => {
+        setArmPose(1);
+        advance();
+      }, 1450);
     };
-
     const onCorrect = () => {
       stickAndDrop();
     };
-
     const onWrong = () => {
       playWrong();
       wrongs++;
       setMg();
     };
-
     tray.addEventListener('pointerdown', (e) => {
       if (busy) return;
       const st = e.target.closest('.p12-st');
@@ -459,7 +353,6 @@
       window.addEventListener('pointerup', done);
       window.addEventListener('pointercancel', done);
     });
-
     mg.addEventListener('click', () => {
       if (mg.classList.contains('is-off') || busy) return;
       playClick();
@@ -471,18 +364,16 @@
       z.appendChild(b);
       $('p12Hint').classList.remove('is-off');
     });
-
     $('p12HintX').addEventListener('click', () => {
       $('p12Hint').classList.add('is-off');
     });
-
     document.querySelectorAll('.p12-go').forEach((btn) => {
       btn.addEventListener('click', () => {
         btn.closest('.avatar-modal').classList.add('is-off');
         startLevel(level + 1);
       });
     });
-
+    arm.querySelectorAll('img').forEach((im) => im.decode && im.decode().catch(() => {}));
     const q = parseInt(new URLSearchParams(location.search).get('level'), 10);
     startLevel(q >= 1 && q <= 3 ? q - 1 : 0);
   })();

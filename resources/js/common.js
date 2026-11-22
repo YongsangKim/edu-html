@@ -1154,6 +1154,7 @@ function attachVideoFullscreen(box, video) {
     showFsUi();
   };
   box.addEventListener('pointerdown', showFsUi);
+  box.addEventListener('mousemove', showFsUi);
   fsBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     if (isFsNow()) {
@@ -1240,12 +1241,18 @@ function initVideoPlay() {
     });
     box.addEventListener('mouseenter', () => {
       if (isTouch) return;
-      if (isPlaying()) pauseBtn.classList.remove('is-hidden');
+      if (isPlaying()) showPauseTimed();
+    });
+    box.addEventListener('mousemove', () => {
+      if (isTouch) return;
+      if (isPlaying()) showPauseTimed();
     });
     box.addEventListener('mouseleave', hidePause);
     video.addEventListener('play', () => {
-      if (isTouch) showPauseTimed();
-      else if (box.matches(':hover')) pauseBtn.classList.remove('is-hidden');
+      if (isTouch || box.matches(':hover')) showPauseTimed();
+    });
+    document.addEventListener('fullscreenchange', () => {
+      if (isPlaying() && (isTouch || box.matches(':hover'))) showPauseTimed();
     });
     ['pause', 'ended'].forEach((ev) => video.addEventListener(ev, hidePause));
   });
