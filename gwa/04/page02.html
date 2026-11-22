@@ -6,16 +6,16 @@
     <title>AI 그림 전시회의 비밀</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        .p02-prog{position:absolute;right:60px;top:30px;margin:0;display:flex;align-items:center;min-height:96px;padding:6px 44px 0;border:solid 6px var(--c-blue);border-radius:60px;background:#fff;white-space:nowrap}
-        .p02-prog span{display:flex;align-items:center;gap:12px;padding:0}
-        .p02-prog b{font-family:'Cafe24 Ssurround';font-weight:400;font-size:52px;color:var(--c-navy);margin-right:10px;letter-spacing:-0.05em}
-        .p02-prog i{font-style:normal;font-size:56px;line-height:1;filter:grayscale(1);opacity:.45;padding-bottom:8px}
+        .p02-prog{position:absolute;right:60px;top:24px;margin:0;display:flex;align-items:center;min-height:92px;padding:0;border:solid 6px var(--c-blue);border-radius:60px;background:#fff;overflow:hidden;white-space:nowrap;box-shadow:0 6px 0 0 rgba(1,24,92,.2)}
+        .p02-prog span{display:flex;align-items:center;gap:14px;padding:0 32px 0 0}
+        .p02-prog b{display:flex;align-items:center;justify-content:center;height:92px;padding:6px 34px 0 38px;margin-right:10px;background:#7eb3f2;font-family:'Cafe24 Ssurround';font-weight:400;font-size:48px;color:#fff;letter-spacing:-0.05em;box-sizing:border-box}
+        .p02-prog i{font-style:normal;font-size:56px;line-height:1;filter:grayscale(1) drop-shadow(2.5px 0 0 #6c6a7f) drop-shadow(-2.5px 0 0 #6c6a7f) drop-shadow(0 2.5px 0 #6c6a7f) drop-shadow(0 -2.5px 0 #6c6a7f);opacity:.55;padding-bottom:4px}
         .p02-prog i img{display:block;height:62px;width:auto}
-        .p02-prog i.is-on{filter:none;opacity:1}
+        .p02-prog i.is-on{filter:drop-shadow(2.5px 0 0 #266cc8) drop-shadow(-2.5px 0 0 #266cc8) drop-shadow(0 2.5px 0 #266cc8) drop-shadow(0 -2.5px 0 #266cc8);opacity:1}
 
         .p02-board{position:absolute;left:60px;top:160px;width:1800px;height:760px;border-radius:20px;background:#2a6bd0}
         .p02-gallery{position:absolute;left:60px;top:160px;width:1800px;height:760px}
-        .p02-art{position:absolute;width:540px;height:335px;box-sizing:border-box;padding:0;border:solid 6px var(--c-ink);border-radius:24px;background:var(--c-white);overflow:hidden;display:flex;flex-direction:column;cursor:pointer;box-shadow:0 8px 0 0 rgba(1,24,92,.35)}
+        .p02-art{position:absolute;width:540px;height:335px;box-sizing:border-box;padding:0;border:solid 6px #fff;border-radius:24px;background:var(--c-white);overflow:hidden;display:flex;flex-direction:column;cursor:pointer;box-shadow:0 8px 0 0 rgba(1,24,92,.35)}
         .p02-art .p02-frame{position:relative;flex:1 1 auto;display:flex;align-items:center;justify-content:center;background:#dff2ff;font-size:120px;line-height:1}
         .p02-art .p02-cap{flex:0 0 78px;display:flex;align-items:center;justify-content:center;padding-top:6px;background:var(--c-white);font-family:'Cafe24 Ssurround';font-size:50px;line-height:1;color:var(--c-ink);letter-spacing:-0.05em}
         .p02-art .p02-frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(6px);transform:scale(1.15)}
@@ -25,7 +25,7 @@
         .p02-art:active:not(.is-found){border-color:var(--c-orchid)}
         .p02-art.is-found{pointer-events:none}
         .p02-art.is-found .p02-frame:before{content:'';position:absolute;inset:0;background:rgba(27,23,56,.55)}
-        .p02-art.is-found .p02-frame:after{content:'찾았다!';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-10deg);padding:6px 20px 0;border:solid 8px #e8353a;border-radius:16px;background:rgba(255,255,255,.92);font-family:'Cafe24 Ssurround';font-size:60px;line-height:1.1;color:#e8353a;white-space:nowrap}
+        .p02-art.is-found .p02-frame:after{content:'찾았다!';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-10deg);padding:8px 24px 2px;border:solid 8px #ff5a79;border-radius:18px;background:rgba(255,255,255,.94);font-family:'Cafe24 Ssurround';font-size:58px;line-height:1.1;color:#ff3b63;white-space:nowrap}
         .p02-art.a1{left:40px;top:30px}
         .p02-art.a2{left:630px;top:30px}
         .p02-art.a3{left:1220px;top:30px}
@@ -35,16 +35,23 @@
         .p02-detail{position:absolute;inset:0;z-index:10}
         .p02-detail.is-off{display:none}
         .p02-dboard{position:absolute;left:60px;top:80px;width:1800px;height:800px;border-radius:20px;background:#2a6bd0}
-        .p02-view{position:absolute;left:100px;top:120px;width:1190px;height:720px;box-sizing:border-box;border:solid 6px var(--c-ink);border-radius:24px;background:#dff2ff;display:flex;align-items:center;justify-content:center;font-size:300px;cursor:pointer;box-shadow:0 8px 0 0 rgba(1,24,92,.35)}
+        .p02-view{position:absolute;left:100px;top:120px;width:1190px;height:720px;box-sizing:border-box;border:solid 6px #fff;border-radius:24px;background:#dff2ff;display:flex;align-items:center;justify-content:center;font-size:300px;cursor:pointer;box-shadow:0 8px 0 0 rgba(1,24,92,.35)}
         .p02-view.is-fixed{border-color:#33b560}
         .p02-view.is-shake{animation:fix-word-shake .3s ease}
         .p02-hot{position:absolute;width:200px;height:200px;border-radius:50%;box-sizing:border-box}
-        .p02-hintbtn{position:absolute;left:1640px;top:120px;min-width:0;width:180px;height:76px;padding:6px 10px 0;font-size:40px}
-        .p02-info{position:absolute;left:1320px;bottom:120px;width:500px;box-sizing:border-box;padding:80px 20px 15px;border:solid 6px var(--c-ink);border-radius:24px;background:#dff6ff;box-shadow:0 8px 0 0 rgba(1,24,92,.35);font-family:'Cafe24 Ssurround';letter-spacing:-0.05em;color:var(--c-ink);display:flex;flex-direction:column;gap:10px}
-        .p02-info p{margin:0;font-size:38px;line-height:1.2;word-break:keep-all;letter-spacing:-0.06em}
-        .p02-info b{color:var(--c-purple);font-weight:400;margin-right:10px}
-        .p02-speak{position:absolute;right:14px;top:12px;width:62px;height:62px;padding:0;border:solid 5px var(--c-navy);border-radius:50%;background:var(--c-white);font-size:32px;line-height:1;cursor:pointer}
-        .p02-speak.is-on{background:var(--c-sky-pale)}
+        .p02-hintbtn.card-btn{position:absolute;left:1670px;top:120px;min-width:0;width:140px;height:70px;padding:0 10px;font-size:50px}
+        .p02-info{position:absolute;left:1320px;top:220px;width:502px;height:620px;box-sizing:border-box;border:solid 5px #91b9e7;border-radius:24px;background:#fff;overflow:hidden;box-shadow:0 8px 0 0 rgba(1,24,92,.35);font-family:'Cafe24 Ssurround';letter-spacing:-0.05em;color:var(--c-ink);display:flex;flex-direction:column}
+        .p02-info-row{display:flex;align-items:stretch;min-height:66px}
+        .p02-info-row.is-intent{flex:1 1 auto;min-height:0}
+        .p02-info-th{flex:0 0 120px;display:flex;align-items:center;justify-content:center;text-align:center;padding:8px 8px 4px;box-sizing:border-box;background:#c5e7ff;color:#266cc8;font-size:36px;line-height:1.15}
+        .p02-info-row.is-author .p02-info-th{background:#e2f3ff}
+        .p02-info-td{flex:1 1 auto;display:flex;align-items:center;padding:12px 18px 8px;box-sizing:border-box;background:#eaf6ff;color:var(--c-ink);font-size:34px;line-height:1.2;word-break:keep-all;letter-spacing:-0.05em}
+        .p02-info-row.is-author .p02-info-td{background:#fff}
+        .p02-info-foot{flex:0 0 115px;display:flex;align-items:center;justify-content:flex-end;padding:0 18px 4px;background:#fff}
+        .p02-speak.card-btn{position:relative;width:78px;min-width:0;height:74px;margin:-10px 0 0;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center}
+        .p02-speak img{width:46px;height:46px;object-fit:contain;display:block;pointer-events:none}
+        .p02-speak.card-btn:hover img{filter:brightness(2.1) saturate(1.3) hue-rotate(18deg)}
+        .p02-speak.card-btn.is-on img{filter:brightness(0) saturate(100%) invert(37%) sepia(100%) saturate(459%) hue-rotate(263deg) brightness(120%) contrast(130%) brightness(1.5) drop-shadow(0 0 5px rgba(236,190,255,0.5)) drop-shadow(0 0 12px rgba(236,190,255,0.5)) drop-shadow(0 0 24px rgba(236,190,255,0.5))}
         .p02-detail.is-speaking .p02-view,.p02-detail.is-speaking .p02-hintbtn{pointer-events:none}
         #p02Fix,#p02End,#p02Hint{z-index:120}
     </style>
@@ -62,10 +69,12 @@
           <div class="p02-detail opts is-off" id="p02Detail">
             <div class="p02-dboard"></div>
             <div class="p02-info">
-              <button type="button" class="p02-speak js-sfx" id="p02Speak" data-sound="sound/click.mp3" aria-label="작품 정보 듣기">🔊</button>
-              <p><b>제목:</b><span id="p02Title"></span></p>
-              <p><b>작가:</b><span id="p02Author"></span></p>
-              <p><b>작품 의도:</b><span id="p02Intent"></span></p>
+              <div class="p02-info-row"><div class="p02-info-th">제목</div><div class="p02-info-td" id="p02Title"></div></div>
+              <div class="p02-info-row is-author"><div class="p02-info-th">작가</div><div class="p02-info-td" id="p02Author"></div></div>
+              <div class="p02-info-row is-intent"><div class="p02-info-th">작품<br>의도</div><div class="p02-info-td" id="p02Intent"></div></div>
+              <div class="p02-info-foot">
+                <button type="button" class="card-btn p02-speak js-sfx" id="p02Speak" data-sound="sound/click.mp3" aria-label="작품 정보 듣기"><img src="img/p02_icon_speaker.png" alt=""></button>
+              </div>
             </div>
             <button type="button" class="card-btn is-popup p02-hintbtn js-sfx" id="p02HintBtn" data-sound="sound/click.mp3">힌트</button>
             <div class="p02-view" id="p02View"><img id="p02Pic" alt=""><span class="p02-hot" id="p02Hot"></span></div>
