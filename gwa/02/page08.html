@@ -44,7 +44,7 @@
         .p08-col.is-answer .p08-bar{border-width:0;box-shadow:0 0 0 5px #ff7a1a}
         .p08-val{position:absolute;left:-20px;width:118px;text-align:center;font-family:'Cafe24 Ssurround';font-size:28px;line-height:1;color:var(--c-ink);letter-spacing:-0.04em}
         .p08-x{position:absolute;bottom:-46px;left:-20px;width:118px;text-align:center;font-family:'Cafe24 Ssurround';font-size:23px;color:var(--c-ink);letter-spacing:-0.06em;white-space:nowrap}
-        .deg{font-family:'Pretendard', sans-serif;line-height:1;font-weight:500}
+        .deg{font-family:'Pretendard', sans-serif;line-height:1;font-weight:700;vertical-align:-1px}
 
         .p08-band{position:absolute;left:100px;top:632px;width:1062px;height:110px;box-sizing:border-box;border-radius:18px;background:#2a6dd0}
         .p08-ctrl{position:absolute;left:10px;top:8px;width:552px;height:94px;box-sizing:border-box;border-radius:14px;background:#0a3190}
@@ -53,7 +53,7 @@
         .p08-ctrl button + button{left:290px}
         .p08-ctrl button:disabled{opacity:.55}
         .p08-ctrl .p08-ic{margin:0 0 6px;width:42px}
-        .p08-start{position:absolute;top:18px;width:96px;height:64px;margin-left:-48px;min-width:0;padding:4px 0 0;font-size:30px;box-sizing:border-box}
+        .p08-start{position:absolute;top:18px;width:96px;height:64px;margin-left:-48px;min-width:0;padding:0;font-size:32px;box-sizing:border-box}
         .p08-start.is-selected{pointer-events:none}
         .p08-start:disabled{opacity:.45;cursor:default}
     </style>
@@ -139,8 +139,8 @@
     const minus = $('p08Minus');
 
     const ic = (sign, color) => '<svg class="p08-ic" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="20" fill="' + color + '"/><rect x="9" y="17" width="22" height="6" rx="3" fill="#fff"/>' + (sign === '+' ? '<rect x="17" y="9" width="6" height="22" rx="3" fill="#fff"/>' : '') + '</svg>';
-    plus.innerHTML = '<span>1도</span>' + ic('+', '#1b2f8f');
-    minus.innerHTML = '<span>1도</span>' + ic('-', '#1b2f8f');
+    plus.innerHTML = '<span>1<span class="deg">℃</span></span>' + ic('+', '#1b2f8f');
+    minus.innerHTML = '<span>1<span class="deg">℃</span></span>' + ic('-', '#1b2f8f');
     $('p08Sub').innerHTML = '<span>시작버튼을 누른 뒤</span><span>' + ic('+', '#48159c') + ic('-', '#48159c') + ' 버튼을 클릭해요.</span>';
 
     for (let v = 0; v <= MAX; v += 5) {
@@ -175,7 +175,7 @@
     const draw = (c) => {
       c.fill.style.height = (c.now * PX) + 'px';
       c.val.style.bottom = c.now ? (c.now * PX + 6) + 'px' : '8px';
-      c.val.textContent = c.now + '도';
+      c.val.innerHTML = c.now + '<span class="deg">℃</span>';
     };
     cols.forEach(draw);
 

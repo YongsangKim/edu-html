@@ -403,7 +403,7 @@
     }
     .gauge.is-vertical .p02-gauge-fill.gauge-fill {
       border-radius: 30px;
-      transition: none;
+      transition: height 0.25s ease-out;
     }
     .p02-mark {
       position: absolute;
@@ -578,15 +578,8 @@
 
           <!-- 우측 끝: 공기 게이지 -->
           <div class="p02-gauge-wrap">
-            <!-- <div class="p02-gauge-label">공기 게이지</div> -->
-            <!-- <p class="p02-max" id="p02Max" hidden style="display:none">최대</p> -->
             <div class="gauge is-thin is-vertical p02-gauge-tube">
               <div class="gauge-fill p02-gauge-fill" id="p02Fill"></div>
-            </div>
-            <div class="p02-mark" id="p02Mark" hidden>
-              <div class="p02-marker-tag">
-                <span>여기까지</span>
-              </div>
             </div>
           </div>
 
@@ -681,8 +674,7 @@
       }
     ];
 
-    const PULL_PX = 260, MIN_PULL = 0.08, BLOW_MIN = 550, BLOW_MAX = 2200;
-    const GAUGE_H = 822, GAUGE_TOP_BASE = 200;
+    const PULL_PX = 260, MIN_PULL = 0.08, BLOW_MIN = 550, BLOW_MAX = 2200, MAX_BLOW = 4;
 
     const candlesEl = $('p02Candles');
     const pull = $('p02Pull');
@@ -694,18 +686,21 @@
     const girlWrap = $('p02GirlWrap');
     const girlImg = $('p02Girl');
     const wind = $('p02Wind');
-    const mark = $('p02Mark');
 
     let level = 0;
     let candles = [];
     let remain = 0;
     let attempts = 0;
     let hintShown = false;
-    let best = 0;
     let busy = false;
     let dragging = false;
     let startY = 0;
     let p = 0;
+
+    const updateGauge = () => {
+      const blown = ROUNDS[level].n - remain;
+      fill.style.height = ((blown / 15) * 100) + '%';
+    };
 
     const draw = () => {
       const r = ROUNDS[level];
@@ -729,18 +724,11 @@
       remain = r.n;
       attempts = 0;
       hintShown = false;
-      best = 0;
       $('p02LvTx').textContent = 'Level ' + (level + 1);
       $('p02Cnt').textContent = remain;
-      const maxEl = $('p02Max');
-      if (maxEl) {
-        maxEl.hidden = level !== 2;
-        maxEl.style.display = level === 2 ? 'inline-flex' : 'none';
-      }
-      mark.hidden = true;
       girlWrap.classList.remove('is-blowing');
       girlImg.src = 'img/p02_girl.png';
-      fill.style.height = '0%';
+      updateGauge();
     };
 
     const snuff = () => {
@@ -756,6 +744,7 @@
 
       remain--;
       $('p02Cnt').textContent = remain;
+      updateGauge();
     };
 
     const setPull = (v) => {
@@ -767,9 +756,6 @@
       const s = 0.64 + v * 0.36;
       lungL.style.transform = 'scale(' + s + ')';
       lungR.style.transform = 'scale(' + s + ')';
-
-      const ratio = (v * 5) / 15;
-      fill.style.height = (ratio * 100) + '%';
     };
 
     const afterBlow = () => {
@@ -819,15 +805,8 @@
       }
       busy = true;
       attempts++;
-      const k = Math.min(remain, Math.floor(depth * 5));
+      const k = Math.min(remain, MAX_BLOW, Math.floor(depth * 4.2));
       const blowMs = BLOW_MIN + depth * (BLOW_MAX - BLOW_MIN);
-      const gaugeRatio = (depth * 5) / 15;
-      if (gaugeRatio > best) {
-        best = gaugeRatio;
-        const topPx = 4 + GAUGE_H * (1 - gaugeRatio);
-        mark.style.top = topPx + 'px';
-        mark.hidden = false;
-      }
 
       pull.style.transform = 'translate(-50%, 0)';
       pullStr.style.height = '50px';
@@ -837,11 +816,9 @@
 
       lungL.style.transition = 'transform ' + blowMs + 'ms linear';
       lungR.style.transition = 'transform ' + blowMs + 'ms linear';
-      fill.style.transition = 'transform ' + blowMs + 'ms linear';
 
       lungL.style.transform = 'scale(0.64)';
       lungR.style.transform = 'scale(0.64)';
-      fill.style.height = '0%';
       p = 0;
 
       wind.classList.add('is-on');
@@ -854,7 +831,6 @@
       setTimeout(() => {
         lungL.style.transition = '';
         lungR.style.transition = '';
-        fill.style.transition = 'none';
         afterBlow();
       }, blowMs + 300);
     };
@@ -869,7 +845,6 @@
       lungL.style.transition = 'none';
       lungR.style.transition = 'none';
       mem.style.transition = 'none';
-      fill.style.transition = 'none';
       pull.setPointerCapture(e.pointerId);
       playClick();
       e.preventDefault();

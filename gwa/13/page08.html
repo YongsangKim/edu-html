@@ -24,6 +24,9 @@
         .p08-ph.is-two .p08-bt{flex-direction:column;gap:10px}
         .p08-ph.is-two .p08-bt img{height:230px}
         .p08-ph.is-two .p08-tag{position:static;min-width:140px;height:70px;font-size:46px}
+        .p08-ph.is-two.is-solved{flex-direction:column;gap:10px}
+        .p08-ph.is-two.is-solved .p08-bottles{display:flex;align-items:center;justify-content:center;gap:30px}
+        .p08-ph.is-two.is-solved .p08-tag{padding:0 36px;font-size:40px}
         .p08-cl{position:absolute;left:1120px;top:445px;width:650px;display:flex;flex-direction:column;gap:14px}
         .p08-cl .check-row{min-height:0;height:86px;font-size:44px}
         .p08-op{position:absolute;left:1120px;top:445px;width:650px;display:grid;grid-template-columns:1fr 1fr;gap:30px}
@@ -76,16 +79,20 @@
             </div>
           </div>
 
+          <div class="avatar-modal is-off" id="p08TwoIntro" style="z-index:30">
+            <div class="avatar-card">
+              <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
+              <div class="avatar-card-body">
+                <p class="avatar-card-text">알 수 없는 두 가지 액체가 있어요. 배운 특징으로 어떤 액체인지 맞춰 봅시다.</p>
+              </div>
+              <a href="javascript:;" class="avatar-card-btn card-btn is-popup js-sfx" id="p08TwoGo" data-sound="sound/click.mp3">다음</a>
+            </div>
+          </div>
+
           <div class="avatar-modal is-off" id="p08Done" style="z-index:30">
             <div class="avatar-card">
               <img class="avatar-card-avatar" src="../../resources/img/common/avatar_finish.png" alt="">
               <div class="step-flow">
-                <div class="step-panel">
-                  <div class="avatar-card-body">
-                    <p class="avatar-card-text">알 수 없는 두 가지 액체가 있어요. 배운 특징으로 어떤 액체인지 맞춰 봅시다.</p>
-                  </div>
-                  <a href="javascript:;" class="avatar-card-btn card-btn is-popup js-nav-effect js-sfx" data-sound="sound/click.mp3">다음</a>
-                </div>
                 <div class="step-panel">
                   <div class="avatar-card-body">
                     <p class="avatar-card-text">이 두 가지 액체는 사실 물과 식초였어요.<br>두 액체는 보이는 특징이 같아서 구별하기 어려웠어요.<br>보이는 특징이 같으면, 다른 특징이 필요해요.</p>
@@ -133,8 +140,12 @@
 
     const drawPh = () => {
       const R = ROUNDS[r];
-      ph.className = 'p08-ph' + (R.two ? ' is-two' : '');
-      ph.innerHTML = R.bottles.map((b) => '<div class="p08-bt"><img src="img/' + b + '" alt=""><p class="p08-tag">' + (solved ? (R.two ? R.ans + '?' : R.ans) : '?') + '</p></div>').join('');
+      ph.className = 'p08-ph' + (R.two ? ' is-two' : '') + (R.two && solved ? ' is-solved' : '');
+      if (R.two && solved) {
+        ph.innerHTML = '<div class="p08-bottles">' + R.bottles.map((b) => '<div class="p08-bt"><img src="img/' + b + '" alt=""></div>').join('') + '</div><p class="p08-tag">두 액체 모두 물일까요?</p>';
+      } else {
+        ph.innerHTML = R.bottles.map((b) => '<div class="p08-bt"><img src="img/' + b + '" alt=""><p class="p08-tag">' + (solved ? R.ans : '?') + '</p></div>').join('');
+      }
     };
     const markCell = (c) => {
       tb.rows[ROUNDS[r].row].cells[c].classList.add('on');
@@ -205,8 +216,16 @@
     next.addEventListener('click', () => {
       if (!solved) return;
       playClick();
-      if (r < ROUNDS.length - 1) { r++; startRound(); }
+      if (r === ROUNDS.length - 2) {
+        $('p08TwoIntro').classList.remove('is-off');
+      } else if (r < ROUNDS.length - 1) { r++; startRound(); }
       else $('p08Done').classList.remove('is-off');
+    });
+
+    $('p08TwoGo').addEventListener('click', () => {
+      $('p08TwoIntro').classList.add('is-off');
+      r++;
+      startRound();
     });
 
     prev.addEventListener('click', () => {

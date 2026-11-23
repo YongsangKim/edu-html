@@ -64,19 +64,19 @@ const Entry = (() => {
   }
 
   const tab = (x, y, dir) => dir > 0 ? ` L${x + 12},${y + 14} H${x - 12} L${x - 16},${y}` : ` L${x - 12},${y + 14} H${x + 12} L${x + 16},${y}`;
-  const top = (W) => { const cx = W / 2; return `M0,0 H${cx - 16} L${cx - 12},14 H${cx + 12} L${cx + 16},0 H${W}`; };
+  const top = (W) => { const cx = 36; return `M0,0 H${cx - 16} L${cx - 12},14 H${cx + 12} L${cx + 16},0 H${W}`; };
   const path = {
     cpath(W, H) {
-      const hh = 74, aw = 30, fh = 30, cx = W / 2, ci = aw + (W - aw) / 2, yF = hh + H, yB = yF + fh;
+      const hh = 74, aw = 30, fh = 30, cx = 36, ci = aw + 36, yF = hh + H, yB = yF + fh;
       return top(W) + ` V${hh} H${ci + 16}` + tab(ci, hh, 1) + ` H${aw} V${yF} H${ci - 16}` + tab(ci, yF, -1) + ` H${W} V${yB} H${cx + 16}` + tab(cx, yB, 1) + ' H0 Z';
     },
     ipath(W, H1, H2) {
-      const hh = 74, mh = 56, aw = 30, fh = 30, cx = W / 2, ci = aw + (W - aw) / 2, yA = hh + H1, yM = yA + mh, yB = yM + H2, yE = yB + fh;
+      const hh = 74, mh = 56, aw = 30, fh = 30, cx = 36, ci = aw + 36, yA = hh + H1, yM = yA + mh, yB = yM + H2, yE = yB + fh;
       return top(W) + ` V${hh} H${ci + 16}` + tab(ci, hh, 1) + ` H${aw} V${yA} H${ci - 16}` + tab(ci, yA, -1) + ` H${W} V${yM} H${ci + 16}` + tab(ci, yM, 1)
         + ` H${aw} V${yB} H${ci - 16}` + tab(ci, yB, -1) + ` H${W} V${yE} H${cx + 16}` + tab(cx, yE, 1) + ' H0 Z';
     },
     spath(W, start) {
-      const cx = W / 2;
+      const cx = 36;
       return 'M0,0 ' + (start ? `H${W}` : `H${cx - 16} L${cx - 12},14 H${cx + 12} L${cx + 16},0 H${W}`) + ` V74 H${cx + 16} L${cx + 12},88 H${cx - 12} L${cx - 16},74 H0 Z`;
     },
     hexPts: (w, h) => `0,${h / 2} 14,0 ${w - 14},0 ${w},${h / 2} ${w - 14},${h} 14,${h}`

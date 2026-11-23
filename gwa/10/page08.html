@@ -82,7 +82,7 @@
     };
     const st = { step: 0, loop: null, kids: [], slot: null, loose: null, frame: false, beat: null, busy: false };
     const say = (t) => { text.innerHTML = t; };
-    const setNext = (fn) => { nextBtn.classList.toggle('is-off', !fn); nextBtn.onclick = fn ? () => { playClick(); fn(); } : null; hint(); };
+    const setNext = (fn) => { nextBtn.classList.toggle('is-off', !fn); nextBtn.onclick = fn || null; hint(); };
     const { toMain, rectMain, trackDrag, trashZone, trashHint } = Entry;
     const hint = Entry.hinter(() =>
       !nextBtn.classList.contains('is-off') ? [nextBtn]
@@ -93,12 +93,12 @@
       : st.step === 4 || st.step === 7 ? [runBtn] : null);
 
     const cpath = (W, H) => {
-      const hh = 74, aw = 30, fh = 30, nd = 14, nh = 16, cx = W / 2, ci = aw + (W - aw) / 2, yF = hh + H, yB = yF + fh;
+      const hh = 74, aw = 30, fh = 30, nd = 14, nh = 16, cx = 36, ci = aw + 36, yF = hh + H, yB = yF + fh;
       const tab = (x, y, dir) => dir > 0 ? ` L${x + nh - 4},${y + nd} H${x - nh + 4} L${x - nh},${y}` : ` L${x - nh + 4},${y + nd} H${x + nh - 4} L${x + nh},${y}`;
       return `M0,0 H${cx - nh} L${cx - nh + 4},${nd} H${cx + nh - 4} L${cx + nh},0 H${W} V${hh} H${ci + nh}` + tab(ci, hh, 1) + ` H${aw} V${yF} H${ci - nh}` + tab(ci, yF, -1) + ` H${W} V${yB} H${cx + nh}` + tab(cx, yB, 1) + ' H0 Z';
     };
     const spath = (W, start) => {
-      const nd = 14, nh = 16, cx = W / 2;
+      const nd = 14, nh = 16, cx = 36;
       return 'M0,0 ' + (start ? `H${W}` : `H${cx - nh} L${cx - nh + 4},${nd} H${cx + nh - 4} L${cx + nh},0 H${W}`) + ` V74 H${cx + nh} L${cx + nh - 4},${74 + nd} H${cx - nh + 4} L${cx - nh},74 H0 Z`;
     };
     const STROKE = 'stroke="rgba(20,10,60,.38)" stroke-width="2.5" stroke-linejoin="round"';
