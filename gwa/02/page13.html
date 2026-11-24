@@ -6,13 +6,17 @@
     <title>그래프 해석 왕!</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        .p13-q{position:absolute;left:40px;top:28px;width:1494px;height:178px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:100px;background:#fefbf9;box-shadow:0 12px 0 0 rgba(86,148,231,.2);overflow:hidden;font-family:'Cafe24 Ssurround';color:var(--c-ink)}
-        .p13-q b{position:absolute;left:0;top:0;bottom:0;width:234px;display:flex;align-items:center;justify-content:center;padding-top:4px;background:#91b9e7;color:var(--c-white);font-weight:normal;font-size:70px;letter-spacing:-0.04em}
-        .p13-q p{position:absolute;left:262px;right:30px;top:0;bottom:0;margin:0;display:flex;align-items:center;font-size:52px;line-height:1.15;letter-spacing:-0.08em;word-break:keep-all}
+        .p13-q{position:absolute;left:40px;top:28px;width:1375px;height:178px;box-sizing:border-box;border:solid 5px var(--c-ink);border-radius:60px;background:#fefbf9;box-shadow:0 12px 0 0 rgba(86,148,231,.2);overflow:hidden;font-family:'Cafe24 Ssurround';color:var(--c-ink)}
+        .p13-q b{position:absolute;left:0;top:0;bottom:0;width:185px;display:flex;align-items:center;justify-content:center;background:#91b9e7;color:var(--c-white);font-weight:normal;font-size:60px;letter-spacing:-0.04em}
+        .p13-q p{position:absolute;left:215px;right:25px;top:50%;transform:translateY(-50%);margin:0;font-size:52px;line-height:1.15;letter-spacing:-0.08em;word-break:keep-all}
+
+        .p13-pause{position:absolute;left:1430px;top:65px;width:100px;height:100px;box-sizing:border-box;padding:0;display:flex;align-items:center;justify-content:center;border:solid 5px var(--c-ink);border-radius:28px;background:linear-gradient(180deg,#fff 0%,#e5ecff 100%);box-shadow:0 10px 0 0 rgba(86,148,231,.25);color:var(--c-ink);cursor:pointer;transition:transform .1s,background .15s}
+        .p13-pause:active{transform:translateY(3px)}
+        .p13-pause svg{width:78px;height:78px;fill:currentColor;display:block}
 
         .p13-timer{position:absolute;left:1543px;top:20px;width:342px;height:195px;margin:0}
         .p13-timer img{display:block;width:100%;height:100%}
-        .p13-timer span{position:absolute;left:112px;top:50px;width:200px;height:90px;display:flex;align-items:center;justify-content:center;padding-top:6px;font-family:'Cafe24 Ssurround';font-size:90px;line-height:1;color:var(--c-white);text-shadow:0 0 10px #4cc3ff,0 0 24px #1e8cff}
+        .p13-timer span{position:absolute;left:112px;top:50px;width:200px;height:90px;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:90px;line-height:1;color:var(--c-white);text-shadow:0 0 10px #4cc3ff,0 0 24px #1e8cff}
         .p13-timer.is-hurry span{color:#ffd1d1;text-shadow:0 0 10px #ff5a5a,0 0 24px #e5252a;animation:p13-beat 1s ease infinite}
         @keyframes p13-beat{50%{transform:scale(1.1)}}
 
@@ -25,7 +29,10 @@
         @keyframes p13-star{to{transform:translate(-50%,-70%) scale(1.2)}}
 
         .p13-opts{position:absolute;left:1260px;top:226px;width:623px;height:707px;box-sizing:border-box;padding-top:65px;display:flex;flex-direction:column;align-items:center;gap:40px;border-radius:16px;background:#266cc8}
+        .p13-opts.is-paused{pointer-events:none}
+        .p13-opts.is-paused .p13-opt{opacity:.55}
         .p13-opt.card-btn{width:486px;min-width:0;height:110px;padding:6px 0 0;font-size:62px;letter-spacing:-0.04em}
+        .deg{font-family:'Pretendard', sans-serif;line-height:1;font-weight:700;vertical-align:-1px}
     </style>
 </head>
 <body>
@@ -35,6 +42,9 @@
       <div id="stage" class="stage">
         <main class="bg-default">
           <div class="p13-q"><b id="p13No"></b><p id="p13Ask"></p></div>
+          <button type="button" class="p13-pause js-sfx" id="p13Pause" data-sound="sound/click.mp3" aria-label="일시정지">
+            <svg id="p13PauseIcon" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+          </button>
           <div class="p13-timer" id="p13TimerBox"><img src="img/p13_timer.png" alt=""><span id="p13Timer">15</span></div>
 
           <div class="p13-side"></div>
@@ -70,7 +80,7 @@
     const QUIZ = [
       { ask: '하루 중 기온이 가장 높은 시간은 언제일까요?', type: 'bar', opts: ['오전 6시', '오전 9시', '오후 3시', '오후 9시'], answer: 2, mark: 5 },
       { ask: '오전 9시부터 오후 3시까지 기온은 어떻게 변하고 있나요?', type: 'line', opts: ['올라간다', '내려간다', '그대로다', '알 수 없다'], answer: 0, ball: [3, 5] },
-      { ask: '오후 3시(30℃)와 오후 9시(15℃) 사이에 위치한|오후 6시의 기온으로 가장 알맞게 예측한 것은 무엇일까요?', type: 'line', opts: ['40℃', '20℃', '5℃', '0℃'], answer: 1, hide: 6, mark: 6 },
+      { ask: '오후 3시(30<span class="deg">℃</span>)와 오후 9시(15<span class="deg">℃</span>) 사이에 위치한 오후 6시의 기온으로 가장 알맞게 예측한 것은 무엇일까요?', type: 'line', opts: ['40<span class="deg">℃</span>', '20<span class="deg">℃</span>', '5<span class="deg">℃</span>', '0<span class="deg">℃</span>'], answer: 1, hide: 6, mark: 6 },
       { ask: '기온이 두 번째로 높은 시간은?', type: 'bar', opts: ['오전 3시', '오전 6시', '오후 12시', '오전 12시'], answer: 2, mark: 4 }
     ];
     const W = 946;
@@ -81,18 +91,44 @@
     const graph = $('p13Graph');
     const timerEl = $('p13Timer');
     const timerBox = $('p13TimerBox');
+    const pauseBtn = $('p13Pause');
+    const pauseIcon = $('p13PauseIcon');
     let index = 0;
     let score = 0;
     let remain = LIMIT;
     let tick = null;
     let lockTimer = null;
+    let paused = false;
+    let wrongLock = false;
+    let resolving = false;
 
     const draw = (q, opt) => { graph.innerHTML = chartSvg(DATA, Object.assign({ type: q.type, width: W, height: H, color: '#ff7a1a', pad: PAD, max: MAXV, fs: 20, fsUnit: 22 }, opt)); };
     const stopClock = () => { clearInterval(tick); };
+    const startClock = () => {
+      clearInterval(tick);
+      tick = setInterval(() => {
+        remain -= 1;
+        timerEl.textContent = remain;
+        timerBox.classList.toggle('is-hurry', remain <= 5);
+        if (remain <= 0) wrong(true);
+      }, 1000);
+    };
     const setDisabled = (on) => { opts.querySelectorAll('.p13-opt').forEach((b) => b.classList.toggle('is-disabled', on)); };
+    const setPauseUi = (on) => {
+      paused = on;
+      pauseBtn.classList.toggle('is-paused', on);
+      pauseBtn.setAttribute('aria-label', on ? '재생' : '일시정지');
+      pauseIcon.innerHTML = on
+        ? '<polygon points="8,5 20,12 8,19"/>'
+        : '<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>';
+      opts.classList.toggle('is-paused', on);
+    };
 
     function start() {
       const q = QUIZ[index];
+      resolving = false;
+      wrongLock = false;
+      setPauseUi(false);
       $('p13No').textContent = '질문' + (index + 1);
       $('p13Ask').innerHTML = q.ask.replace('|', '<br>');
       draw(q, { hide: q.hide === undefined ? -1 : q.hide });
@@ -101,13 +137,7 @@
       remain = LIMIT;
       timerEl.textContent = remain;
       timerBox.classList.remove('is-hurry');
-      clearInterval(tick);
-      tick = setInterval(() => {
-        remain -= 1;
-        timerEl.textContent = remain;
-        timerBox.classList.toggle('is-hurry', remain <= 5);
-        if (remain <= 0) wrong(true);
-      }, 1000);
+      startClock();
     }
 
     function next() {
@@ -122,13 +152,15 @@
       clearTimeout(lockTimer);
       playWrong();
       if (timeout) {
+        resolving = true;
         stopClock();
         setTimeout(next, 2000);
         return;
       }
+      wrongLock = true;
       $('p13WrongText').textContent = (QUIZ[index].type === 'bar' ? '막대' : '꺾은선') + ' 그래프를 다시 살펴볼까요?';
       flashLayer($('p13Wrong'));
-      lockTimer = setTimeout(() => { setDisabled(false); }, 2000);
+      lockTimer = setTimeout(() => { wrongLock = false; if (!paused) setDisabled(false); }, 2000);
     }
 
     function effect(q) {
@@ -151,11 +183,25 @@
       }
     }
 
+    pauseBtn.addEventListener('click', () => {
+      if (resolving) return;
+      setPauseUi(!paused);
+      if (paused) {
+        stopClock();
+        setDisabled(true);
+      } else {
+        startClock();
+        if (!wrongLock) setDisabled(false);
+      }
+    });
+
     opts.addEventListener('click', (e) => {
+      if (paused) return;
       const b = e.target.closest('.p13-opt');
       if (!b) return;
       const q = QUIZ[index];
       if (Number(b.dataset.i) !== q.answer) { wrong(false); return; }
+      resolving = true;
       clearTimeout(lockTimer);
       stopClock();
       setDisabled(true);
