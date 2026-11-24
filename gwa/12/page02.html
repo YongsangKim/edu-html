@@ -98,14 +98,24 @@
       line-height: 1;
     }
 
-    .p02-right-box {
+    .p02-right-box-wrap {
       position: absolute;
-      left: 1292px;
+      left: 1360px;
       top: 118px;
-      width: 583px;
+      width: 440px;
       height: 830px;
+      overflow: hidden;
+      border-radius: 20px 0 0 20px;
+      border-right: 5px solid #91b9e7;
+      box-sizing: border-box;
       z-index: 13;
       pointer-events: none;
+    }
+    .p02-right-box {
+      display: block;
+      width: 583px;
+      height: 830px;
+      max-width: none;
     }
 
     .p02-cake-wrap {
@@ -234,7 +244,7 @@
 
     .p02-lung-apparatus {
       position: absolute;
-      left: 1310px;
+      left: 1378px;
       top: 150px;
       width: 340px;
       height: 700px;
@@ -370,7 +380,7 @@
 
     .p02-gauge-wrap {
       position: absolute;
-      left: 1661px;
+      left: 1729px;
       top: 118px;
       width: 214px;
       height: 830px;
@@ -500,7 +510,9 @@
           </p>
 
           <!-- 우측 감싸는 영역 이미지 -->
-          <img class="p02-right-box" src="img/p02_box.png" alt="">
+          <div class="p02-right-box-wrap">
+            <img class="p02-right-box" src="img/p02_box.png" alt="">
+          </div>
 
           <!-- 좌측: 고화질 생일 케이크 (PNG 이미지) -->
           <div class="p02-cake-wrap">
@@ -697,9 +709,8 @@
     let startY = 0;
     let p = 0;
 
-    const updateGauge = () => {
-      const blown = ROUNDS[level].n - remain;
-      fill.style.height = ((blown / 15) * 100) + '%';
+    const updateGauge = (n) => {
+      fill.style.height = ((n / MAX_BLOW) * 100) + '%';
     };
 
     const draw = () => {
@@ -728,7 +739,7 @@
       $('p02Cnt').textContent = remain;
       girlWrap.classList.remove('is-blowing');
       girlImg.src = 'img/p02_girl.png';
-      updateGauge();
+      updateGauge(0);
     };
 
     const snuff = () => {
@@ -744,7 +755,6 @@
 
       remain--;
       $('p02Cnt').textContent = remain;
-      updateGauge();
     };
 
     const setPull = (v) => {
@@ -756,6 +766,9 @@
       const s = 0.64 + v * 0.36;
       lungL.style.transform = 'scale(' + s + ')';
       lungR.style.transform = 'scale(' + s + ')';
+
+      const k = v < MIN_PULL ? 0 : Math.min(remain, MAX_BLOW, Math.floor(v * 4.2));
+      updateGauge(k);
     };
 
     const afterBlow = () => {
@@ -816,9 +829,11 @@
 
       lungL.style.transition = 'transform ' + blowMs + 'ms linear';
       lungR.style.transition = 'transform ' + blowMs + 'ms linear';
+      fill.style.transition = 'height ' + blowMs + 'ms linear';
 
       lungL.style.transform = 'scale(0.64)';
       lungR.style.transform = 'scale(0.64)';
+      updateGauge(0);
       p = 0;
 
       wind.classList.add('is-on');
@@ -831,6 +846,7 @@
       setTimeout(() => {
         lungL.style.transition = '';
         lungR.style.transition = '';
+        fill.style.transition = '';
         afterBlow();
       }, blowMs + 300);
     };
@@ -845,6 +861,7 @@
       lungL.style.transition = 'none';
       lungR.style.transition = 'none';
       mem.style.transition = 'none';
+      fill.style.transition = 'height 0.15s ease-out';
       pull.setPointerCapture(e.pointerId);
       playClick();
       e.preventDefault();

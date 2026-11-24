@@ -4372,7 +4372,11 @@ function makePuzzleSvg(id, theme, opts) {
   svg.setAttribute('class', 'pz-svg');
   svg.setAttribute('aria-hidden', 'true');
   if (!theme) {
-    svg.innerHTML = `<path class="pz-body" d="${path}" fill="#eef3fc" stroke="#9fb5db" stroke-width="5" stroke-linejoin="round"/>`;
+    if (o.hint) {
+      svg.innerHTML = `<path d="${path}" fill="#ffffff"/><path class="pz-body" d="${path}" fill="${o.hint.top}" fill-opacity="0.28" stroke="${o.hint.bot}" stroke-opacity="0.7" stroke-width="5" stroke-linejoin="round"/>`;
+    } else {
+      svg.innerHTML = `<path class="pz-body" d="${path}" fill="#eef3fc" stroke="#9fb5db" stroke-width="5" stroke-linejoin="round"/>`;
+    }
     return svg;
   }
   svg.innerHTML = `

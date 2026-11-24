@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>컴퓨터도 순서대로, 알고리즘 순차 따라</title>
+    <title>컴퓨터도 알고리즘 순차대로</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
         main.bg-default .ask-pill{z-index:20}
@@ -111,20 +111,21 @@
   </div>
   <div class="zoom-info" id="zoomInfo"></div>
 
-  <script src="../../resources/js/header.js" data-title="컴퓨터도 순서대로, 알고리즘 순차 따라" data-next="page11.html"></script>
+  <script src="../../resources/js/header.js" data-title="컴퓨터도 알고리즘 순차대로" data-next="page11.html"></script>
   <script src="../../resources/js/toc-gwa.js"></script>
   <script src="../../resources/js/common.js"></script>
   <script>
   (function () {
     const SLOT_THEMES = [PUZZLE_THEMES.yellow, null, PUZZLE_THEMES.green, PUZZLE_THEMES.purple, null];
     const CARD_THEMES = { text: PUZZLE_THEMES.coral, signal: PUZZLE_THEMES.blue };
+    const SLOT_HINTS = [null, CARD_THEMES.text, null, null, CARD_THEMES.signal];
 
     const HINTS = {"text":"스피커가 들은 목소리를 먼저 글자로 바꾸어야 해요.","signal":"마지막에는 TV로 전원을 켜라는 신호를 보내야 해요."};
     const slots = Array.from(document.querySelectorAll('#fiSlots .fi-slot'));
     const blanks = slots.filter((s) => s.dataset.key);
     const snapSfx = makeSfx('sound/9차시_딸각 효과음(엔트리용).mp3', true);
 
-    slots.forEach((slot, i) => slot.prepend(makePuzzleSvg('fis' + i, SLOT_THEMES[i])));
+    slots.forEach((slot, i) => slot.prepend(makePuzzleSvg('fis' + i, SLOT_THEMES[i], { hint: SLOT_HINTS[i] })));
     document.querySelectorAll('#fiCards .fi-card').forEach((card) => {
       const key = card.dataset.key;
       card.prepend(makePuzzleSvg('fic_' + key, CARD_THEMES[key]));

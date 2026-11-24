@@ -36,14 +36,16 @@
         .p09-ok{position:absolute;left:50%;top:500px;transform:translateX(-50%);width:300px;height:76px;box-sizing:content-box;display:flex;align-items:center;justify-content:center;background:#2fa84f;border-bottom:solid 10px #1d7a37;box-shadow:10px 10px 0 #e2b92c;font-size:40px;color:#fff;text-decoration:none;cursor:pointer}
         .p09-gd{position:absolute;left:0;right:0;bottom:0;height:200px;background:var(--c-pale);border-top:solid 5px var(--c-navy);z-index:5}
         .p09-ch{position:absolute;left:0;bottom:0;height:360px;z-index:6}
-        .p09-tx{position:absolute;left:300px;right:420px;top:0;bottom:0;margin:0;display:flex;align-items:center;font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.25;color:var(--c-purple);letter-spacing:-0.04em;word-break:keep-all}
+        .p09-tx{position:absolute;left:300px;right:460px;top:0;bottom:0;margin:0;display:flex;align-items:center;font-family:'Cafe24 Ssurround';font-size:46px;line-height:1.25;color:var(--c-purple);letter-spacing:-0.04em;word-break:keep-all}
         .p09-tx.is-small{font-size:46px;letter-spacing:-0.06em}
-        .p09-btn{position:absolute;right:40px;top:50%;transform:translateY(-50%);margin:0}
+        .p09-btn{position:absolute;right:40px;top:50%;transform:translateY(-50%);margin:0;white-space:nowrap}
         .p09-btn[hidden]{display:none}
         .p09-ai[hidden]{display:none}
         .p09-guide{display:none}
         .p09-cv.is-fish .p09-guide{display:inline}
         .p09-cv .p09-guide path{visibility:visible;stroke:#c9c9d6;stroke-width:6;stroke-dasharray:14 14;stroke-dashoffset:0;fill:none;stroke-linecap:round}
+        .p09-cv path.p09-trace-guide{display:none;visibility:visible;stroke:#c9c9d6;stroke-width:10;stroke-dasharray:14 14;stroke-dashoffset:0;fill:none;stroke-linecap:round;stroke-linejoin:round}
+        .p09-cv.is-trace path.p09-trace-guide{display:inline}
         .p09-pk{width:1700px;max-width:1700px;padding:60px 50px 60px}
         .p09-pk .avatar-card-title{margin-bottom:30px}
         .p09-pk .avatar-card-text{font-size:66px}
@@ -61,9 +63,11 @@
           <div class="p09-qd">
             <div class="p09-bar"><span class="t" id="p09Title"></span><span class="tm">00:20</span><span class="ic" style="right:162px">✎</span><span class="ic" style="right:90px">»</span><span class="ic" style="right:18px">✕</span></div>
             <svg class="p09-cv" id="p09Cv" viewBox="0 0 1828 608">
+              <path id="p09TraceGuide" class="p09-trace-guide"/>
               <path id="p09Circle" transform="translate(0 54)" pathLength="1" d="M914 52 C1010 42 1075 117 1068 207 C1062 297 990 354 905 352 C815 350 755 287 760 200 C765 117 825 62 920 54 C940 53 950 58 960 64"/>
               <path id="p09Stem" transform="translate(0 54)" pathLength="1" d="M905 50 C912 25 922 5 936 -8"/>
               <path id="p09Banana" transform="translate(-20 90)" pathLength="1" d="M760 110 C790 235 920 325 1100 140 C1112 127 1096 110 1082 117 C940 235 840 195 800 95 C792 77 764 90 760 110"/>
+              <path id="p09Scribble" pathLength="1" d="M740 310 C680 230 760 150 880 180 C1020 215 1090 140 970 120 C840 100 790 260 930 285 C1060 310 1120 210 1010 175 C910 145 810 220 850 320 C885 405 1020 390 1060 310 C1095 240 980 210 920 250"/>
               <g id="p09Fish" class="p09-guide">
                 <path id="p09FishBody" d="M634 260 a190 130 0 1 0 380 0 a190 130 0 1 0 -380 0 Z"/>
                 <path id="p09FishTail" d="M994 260 L1194 130 L1194 390 Z"/>
@@ -136,7 +140,7 @@
   <script src="../../resources/js/common.js"></script>
   <script>
   (function () {
-    const FISH_GUIDE_ON = true;
+    const FISH_GUIDE_ON = false;
     const FISH = FISH_GUIDE_ON || /[?&]fish(=|&|$)/.test(location.search);
     const INTRO = [
       '퀵 드로우는 그림을 보고 무엇인지 알아맞히는 AI예요.<br>전 세계 사람들이 그린 그림을 아주 많이 공부 했다고 해요.',
@@ -161,16 +165,16 @@
     const STEPS = {
       1: { screen: 'start', n: '그림 1/6', item: '사과', text: '먼저, 사과를 그려볼까요? ‘알겠어요!’ 버튼을 클릭하세요.', to: 2 },
       2: { pick: 'apple' },
-      3: { title: '사과 그리기', ai: '...', draws: [], text: '화이트보드에 사과를 그려보세요. 먼저 동그라미를 그려볼까요?', btn: '동그라미 그리기', act: () => drawCircle() },
-      4: { title: '사과 그리기', ai: '동그라미? 공? 시계?', draws: ['p09Circle'], text: '이제 동그라미 위에 짧은 꼭지를 그려보세요.', btn: '짧은 꼭지 그리기', act: () => drawStem() },
-      5: { title: '사과 그리기', ai: '아, 사과예요! 맞았어요.', draws: ['p09Circle', 'p09Stem'], text: '두 가지 특징을 그리니까 바로 맞혔어요!', btn: '다음', act: () => go(6) },
+      3: { title: '사과 그리기', ai: '...', draws: [], text: '화이트보드에 사과를 그려보세요. 먼저 동그라미를 그려볼까요?', trace: { id: 'p09Circle', tx: 0, ty: 54, tol: 44, next: 4, ai: [[0.2, '동그라미?'], [0.45, '동그라미? 공?'], [0.65, '동그라미? 공? 시계?']] } },
+      4: { title: '사과 그리기', ai: '동그라미? 공? 시계?', draws: ['p09Circle'], text: '이제 동그라미 위에 짧은 꼭지를 그려보세요.', trace: { id: 'p09Stem', tx: 0, ty: 54, tol: 48, next: 5 } },
+      5: { title: '사과 그리기', ai: '아, 사과예요! 맞았어요.', draws: ['p09Circle', 'p09Stem'], text: '두 가지 특징을 그리니까 바로 맞혔어요!', btn: '다음', act: () => go(6, true) },
       6: { title: '사과 그리기', ai: '아, 사과예요! 맞았어요.', draws: ['p09Circle', 'p09Stem'], cards: true, text: '동그란 모양과 꼭지가 함께 보이면, 미리 공부한 사과의 특징과 같아서 정답을 찾을 수 있어요.', btn: '다음', act: () => go(7) },
       7: { screen: 'start', n: '그림 2/6', item: '바나나', text: '이번에는 특징을 생각하며 바나나를 그려볼까요?', to: 8 },
       8: { pick: 'banana' },
-      9: { title: '바나나 그리기', ai: '...', draws: [], text: '화이트보드에 바나나를 그려보세요.', btn: '바나나 그리기', act: () => drawBanana() },
+      9: { title: '바나나 그리기', ai: '...', draws: [], text: '화이트보드에 바나나를 그려보세요.', trace: { id: 'p09Banana', tx: -20, ty: 90, tol: 44, next: 10, ai: [[0.25, '막대기?'], [0.55, '자?']] } },
       10: { title: '바나나 그리기', ai: '아, 바나나예요!', draws: ['p09Banana'], text: '두 가지 특징을 그리니까 바로 맞혔어요!', btn: '다음', act: () => go(11) },
       11: { screen: 'start', n: '그림 3/6', item: '아무 선이나 마구 그려 보세요', text: '만약 특징이 없는 그림을 그리면 퀵 드로우는 알아 맞힐 수 있을까요?', to: 12 },
-      12: { title: '아무 선이나 마구 그려 보세요', ai: '...', draws: [], free: true, text: '아무 선이나 마구 그려 보세요.' },
+      12: { title: '아무 선 그리기', ai: '...', draws: [], text: '아무 선이나 마구 그려 보세요.', btn: '아무 선 그리기', act: () => drawScribble() },
       13: { done: true }
     };
     if (FISH) {
@@ -194,6 +198,7 @@
     let locked = false;
     let picked = {};
     let free = null;
+    let trace = null;
 
     const later = (fn, ms) => { timers.push(setTimeout(fn, ms)); };
     const tmEl = document.querySelector('.p09-bar .tm');
@@ -227,7 +232,7 @@
       ai.textContent = t || '';
     };
     const resetDraws = () => {
-      ['p09Circle', 'p09Stem', 'p09Banana'].forEach((id) => {
+      ['p09Circle', 'p09Stem', 'p09Banana', 'p09Scribble'].forEach((id) => {
         const p = $(id);
         p.style.transition = 'none';
         p.classList.remove('is-on');
@@ -236,6 +241,7 @@
       $('p09Cards').innerHTML = '';
       cv.classList.remove('is-free');
       cv.classList.remove('is-fish');
+      cv.classList.remove('is-trace');
     };
     const showDraws = (ids) => ids.forEach((id) => {
       const p = $(id);
@@ -249,25 +255,77 @@
       p.classList.add('is-on');
     };
 
-    const drawCircle = () => {
+    const drawScribble = () => {
       setBtn(null);
-      strokeIn('p09Circle', 2000);
-      later(() => setAi('동그라미?'), 300);
-      later(() => setAi('동그라미? 공?'), 1000);
-      later(() => setAi('동그라미? 공? 시계?'), 1700);
-      later(() => go(4, true), 2300);
+      strokeIn('p09Scribble', 3200);
+      later(() => setAi('구름? 실?'), 500);
+      later(() => setAi('잘 모르겠어요…'), 1700);
+      later(() => {
+        setAi('?');
+        stopTm();
+        setText('특징이 없으면 AI도 정답을 찾을 수 없어요.');
+        setBtn('다음', () => go(13));
+      }, 3300);
     };
-    const drawStem = () => {
-      setBtn(null);
-      strokeIn('p09Stem', 900);
-      later(() => go(5, true), 1100);
+    const startTrace = (cfg) => {
+      const src = $(cfg.id);
+      const gd = $('p09TraceGuide');
+      gd.setAttribute('d', src.getAttribute('d'));
+      gd.setAttribute('transform', src.getAttribute('transform') || '');
+      cv.classList.add('is-trace');
+      const len = src.getTotalLength();
+      const count = Math.max(8, Math.round(len / 10));
+      const pts = [];
+      for (let i = 0; i <= count; i++) {
+        const q = src.getPointAtLength((len * i) / count);
+        pts.push([q.x + (cfg.tx || 0), q.y + (cfg.ty || 0)]);
+      }
+      trace = { cfg: cfg, pts: pts, hit: new Array(pts.length).fill(false), line: null, down: false, judged: false, done: false, aiIdx: 0 };
+      cv.classList.add('is-trace');
+      cv.classList.add('is-free');
     };
-    const drawBanana = () => {
-      setBtn(null);
-      strokeIn('p09Banana', 2000);
-      later(() => setAi('막대기?'), 400);
-      later(() => setAi('자?'), 1200);
-      later(() => go(10, true), 2200);
+    const finishTrace = () => {
+      if (!trace || trace.done) return;
+      trace.done = true;
+      trace.down = false;
+      cv.classList.remove('is-trace');
+      cv.classList.remove('is-free');
+      later(() => go(trace.cfg.next, true), 400);
+    };
+    const handleTracePoint = (e) => {
+      if (!trace || trace.done) return;
+      const pos = xy(e);
+      const tol = trace.cfg.tol || 42;
+      let inside = false;
+      for (let i = 0; i < trace.pts.length; i++) {
+        if (Math.hypot(pos[0] - trace.pts[i][0], pos[1] - trace.pts[i][1]) <= tol) {
+          inside = true;
+          trace.hit[i] = true;
+        }
+      }
+      if (!inside) {
+        trace.line = null;
+        return;
+      }
+      if (!trace.line) {
+        trace.line = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+        trace.line.setAttribute('points', pos[0].toFixed(1) + ',' + pos[1].toFixed(1));
+        freeG.appendChild(trace.line);
+      } else {
+        trace.line.setAttribute('points', trace.line.getAttribute('points') + ' ' + pos[0].toFixed(1) + ',' + pos[1].toFixed(1));
+      }
+      const ratio = trace.hit.filter(Boolean).length / trace.hit.length;
+      const aiList = trace.cfg.ai;
+      if (aiList) {
+        while (trace.aiIdx < aiList.length && ratio >= aiList[trace.aiIdx][0]) {
+          setAi(aiList[trace.aiIdx][1]);
+          trace.aiIdx += 1;
+        }
+      }
+      if (!trace.judged && ratio >= 0.8) {
+        trace.judged = true;
+        if (!trace.down) finishTrace();
+      }
     };
 
     const showCards = () => {
@@ -377,6 +435,14 @@
       }
     };
     cv.addEventListener('pointerdown', (e) => {
+      if (trace && !trace.done) {
+        trace.down = true;
+        trace.line = null;
+        cv.setPointerCapture(e.pointerId);
+        handleTracePoint(e);
+        e.preventDefault();
+        return;
+      }
       if (!free || free.done) return;
       free.down = true;
       free.last = performance.now();
@@ -389,6 +455,10 @@
       e.preventDefault();
     });
     cv.addEventListener('pointermove', (e) => {
+      if (trace && trace.down && !trace.done) {
+        handleTracePoint(e);
+        return;
+      }
       if (!free || !free.down || free.done) return;
       const now = performance.now();
       free.ms += Math.min(now - free.last, 100);
@@ -407,7 +477,14 @@
       } else if (free.stage === 1 && free.ms > 1500) freeWord(1);
       else if (free.stage === 2 && free.ms > 3000) freeWord(2);
     });
-    const endFree = () => { if (free) { free.down = false; if (free.judged) free.done = true; } };
+    const endFree = () => {
+      if (trace) {
+        trace.down = false;
+        trace.line = null;
+        if (trace.judged && !trace.done) finishTrace();
+      }
+      if (free) { free.down = false; if (free.judged) free.done = true; }
+    };
     cv.addEventListener('pointerup', endFree);
     cv.addEventListener('pointercancel', endFree);
 
@@ -423,6 +500,7 @@
       cur = n;
       sub = 0;
       free = null;
+      trace = null;
       locked = false;
       $('p09Pick').classList.add('is-off');
       $('p09Wrong').classList.add('is-off');
@@ -471,6 +549,7 @@
       if (s.cards) showCards();
       setText(s.text);
       setBtn(s.btn, s.act);
+      if (s.trace) startTrace(s.trace);
       if (s.free) startFree();
       if (n !== 5 && n !== 6 && n !== 10 && tmLeft > 0) startTm();
       if (keep && (n === 5 || n === 10)) playCorrect();

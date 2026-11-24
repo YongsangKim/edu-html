@@ -6,19 +6,22 @@
     <title>AI의 이미지 분석 정보 알아보기</title>
     <link rel="stylesheet" href="../../resources/css/common.css">
     <style>
-        .p07-obj{position:absolute;left:400px;top:160px;width:1121px;height:425px;box-sizing:border-box;border:solid 4px #0a3a8a;border-radius:16px;background:var(--c-white);overflow:hidden;display:flex;flex-direction:column}
-        .p07-pic{flex:0 0 310px;background:#dff3fd;display:flex;align-items:center;justify-content:center}
-        .p07-pic img{display:block;height:280px}
-        .p07-text{flex:1 1 auto;margin:0;padding-top:6px;display:flex;align-items:center;justify-content:center;font-family:'Cafe24 Ssurround';font-size:70px;letter-spacing:-0.05em;color:var(--c-ink);word-break:keep-all}
-        .p07-tiles{position:absolute;left:425px;top:230px;width:1067px;display:flex;justify-content:space-between}
-        .p07-tile{width:337px;height:280px;box-sizing:border-box;border:solid 4px #2a6bd0;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;background:var(--c-white)}
-        .p07-tile span{flex:1 1 auto;display:flex;align-items:center;justify-content:center}
-        .p07-tile span img{display:block}
-        .p07-tile b{flex:0 0 73px;display:flex;align-items:center;justify-content:center;padding-top:4px;background:#91b7e8;font-family:'Cafe24 Ssurround';font-weight:400;font-size:46px;color:var(--c-white);letter-spacing:-0.07em;white-space:nowrap}
+        .p07-tiles{position:absolute;left:425px;top:200px;width:1067px;display:flex;justify-content:space-between}
+        .p07-tile{width:337px;height:370px;box-sizing:border-box;padding:0;border:solid 4px #2a6bd0;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;background:var(--c-white)}
+        .p07-tile.is-q{cursor:pointer;border-color:#5f6f89}
+        .p07-tile.is-q:hover{border-color:#2a6bd0;box-shadow:0 6px 16px rgba(42,107,208,.2)}
+        .p07-head{flex:0 0 64px;width:100%;display:flex;align-items:center;justify-content:center;padding-top:4px;background:#91b7e8;font-family:'Cafe24 Ssurround';font-weight:400;font-size:56px;color:var(--c-white);letter-spacing:-0.07em}
+        .p07-body{flex:1 1 auto;width:100%;display:flex;flex-direction:column;overflow:hidden}
+        .p07-tile.is-q .p07-body{background:#dff3fd;align-items:center;justify-content:center}
+        .p07-tile.is-q .p07-body img{height:240px;width:auto}
+        .p07-body span{flex:1 1 auto;width:100%;display:flex;align-items:center;justify-content:center}
+        .p07-body span img{display:block;max-height:185px}
+        .p07-body b{flex:0 0 64px;width:100%;display:flex;align-items:center;justify-content:center;padding-bottom:8px;background:none;font-family:'Cafe24 Ssurround';font-weight:700;font-size:44px;color:var(--c-ink);letter-spacing:-0.07em;white-space:nowrap}
         .p07-cards{position:absolute;left:107px;top:645px;width:1707px;display:flex;justify-content:space-between}
         .p07-cards .card-btn{width:515px;min-width:0;height:225px;display:flex;align-items:center;justify-content:center;gap:14px;padding:10px 10px 0;font-size:70px}
         .p07-cards .card-btn img{display:block;flex:0 0 auto;max-height:200px}
-        #p07Next{left:1540px;top:475px;right:auto;bottom:auto;width:320px;height:90px;margin:0;font-size:60px}
+        .p07-cards .card-btn:hover img{filter:url(#p07ScrHover)}
+        .p07-cards .card-btn:active img,.p07-cards .card-btn.is-selected img,.p07-cards .card-btn.is-pressed img{filter:url(#p07ScrActive) drop-shadow(0 0 10px #ecbeff) drop-shadow(0 0 4px #ecbeff)}
         .p07-rcard{border-radius:50px}
         .p07-rcard .photo-card-title{font-size:80px;margin:0 0 20px}
         .photo-card.p07-rcard .photo-card-img{width:auto;height:auto;max-width:700px;max-height:330px}
@@ -30,19 +33,28 @@
 </head>
 <body>
   <div id="page-fade"></div>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <filter id="p07ScrHover" color-interpolation-filters="sRGB">
+        <feFlood flood-color="#8278ff" flood-opacity="0.5" result="c"/>
+        <feComposite in="c" in2="SourceAlpha" operator="in" result="m"/>
+        <feBlend in="SourceGraphic" in2="m" mode="screen"/>
+      </filter>
+      <filter id="p07ScrActive" color-interpolation-filters="sRGB">
+        <feFlood flood-color="#d168fb" flood-opacity="0.5" result="c"/>
+        <feComposite in="c" in2="SourceAlpha" operator="in" result="m"/>
+        <feBlend in="SourceGraphic" in2="m" mode="screen"/>
+      </filter>
+    </defs>
+  </svg>
   <div id="viewport" class="viewport">
     <div id="stage-spacer">
       <div id="stage" class="stage">
         <main class="bg-default">
           <div class="stage-board has-floor"></div>
           <p class="ask-pill is-fit"><span id="p07Ask">AI가 분석한 이미지 속 사물의 특징을 살펴볼까요?</span></p>
-          <div class="p07-obj" id="p07Obj">
-            <div class="p07-pic"><img src="img/p07_question.png" alt=""></div>
-            <p class="p07-text" id="p07Text"></p>
-          </div>
-          <div class="p07-tiles p07-hide" id="p07Tiles"></div>
+          <div class="p07-tiles" id="p07Tiles"></div>
           <div class="p07-cards opts" id="p07Cards"></div>
-          <button class="card-btn is-start next-btn p07-hide js-sfx" id="p07Next" data-sound="sound/click.mp3">다음</button>
 
           <div class="photo-modal is-middle is-off" id="p07Right">
             <div class="photo-card is-small is-contain p07-rcard">
@@ -94,49 +106,48 @@
   <script>
   (function () {
     const QS = [
-      { texts: ['동그란 모양이에요.', '빨간색이에요.', '꼭지와 잎이 있어요.'], chips: ['둥근 모양', '빨간색', '꼭지와 잎'],
+      { chips: ['둥근 모양', '빨간색', '꼭지와 잎'],
         opts: [['사과', true], ['토마토'], ['공']], fb: 'AI가 분석한 이미지는 사과였어요.' },
-      { texts: ['길쭉하고 휘어진 모양이에요.', '노란색이에요.', '양 끝이 가늘고 꼭지가 있어요.'], chips: ['길쭉하고 휘어진 모양', '노란색', '꼭지'],
+      { chips: ['길쭉하고 휘어진 모양', '노란색', '꼭지'],
         opts: [['레몬'], ['초승달'], ['바나나', true]], fb: 'AI가 분석한 이미지는 바나나였어요.' },
-      { texts: ['길쭉한 네모 모양이에요.', '파란색이에요.', '많은 창문과 큰 문이 있어요.'], chips: ['길쭉한 네모 모양', '파란색', '많은 창문과 큰 문'],
+      { chips: ['길쭉한 네모 모양', '파란색', '많은 창문과 큰 문'],
         opts: [['트럭'], ['버스', true], ['승용차']], fb: 'AI가 분석한 이미지는 버스였어요.' }
     ];
     const KINDS = ['shape', 'color', 'feat'];
     const LABELS = ['모양', '색깔', '특징'];
     const img = (n) => '<img src="img/p07_q' + (q + 1) + '_' + n + '.png" alt="">';
-    const show = (el, on) => el.classList.toggle('p07-hide', !on);
     let q = 0;
 
     function fit(el) {
-      let f = 46;
+      let f = 44;
       el.style.fontSize = f + 'px';
-      while (el.scrollWidth > el.clientWidth && f > 26) { f -= 2; el.style.fontSize = f + 'px'; }
+      while (el.scrollWidth > el.clientWidth && f > 24) { f -= 2; el.style.fontSize = f + 'px'; }
     }
 
     function startQ() {
-      $('p07Ask').textContent = 'AI가 분석한 이미지 속 사물의 특징을 살펴볼까요?';
-      $('p07Text').textContent = '';
-      show($('p07Obj'), true); show($('p07Tiles'), false);
-      $('p07Cards').innerHTML = '';
-      LABELS.forEach((t, i) => {
-        const b = makeCardBtn(t, '', () => {
-          playClick();
-          $('p07Text').textContent = QS[q].texts[i];
-          Array.from($('p07Cards').children).forEach((o) => o.classList.toggle('is-selected', o === b));
-        }, { parent: $('p07Cards') });
-      });
-      show($('p07Next'), true);
-    }
-
-    function startAnswer() {
       const d = QS[q];
-      $('p07Ask').textContent = 'AI가 분석한 특징을 보고, 어떤 사물인지 맞혀 볼까요?';
-      show($('p07Obj'), false); show($('p07Tiles'), true); show($('p07Next'), false);
-      $('p07Tiles').innerHTML = d.chips.map((c, i) => '<div class="p07-tile"><span>' + img(KINDS[i]) + '</span><b>' + c + '</b></div>').join('');
-      Array.from($('p07Tiles').querySelectorAll('b')).forEach(fit);
+      const tiles = $('p07Tiles');
+      tiles.innerHTML = '';
+      LABELS.forEach((label, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'p07-tile is-q';
+        btn.innerHTML = '<div class="p07-head">' + label + '</div><div class="p07-body"><img src="img/p07_question.png" alt="' + label + ' 확인하기"></div>';
+        btn.addEventListener('click', () => {
+          if (!btn.classList.contains('is-q')) return;
+          playClick();
+          btn.classList.remove('is-q');
+          btn.disabled = true;
+          const body = btn.querySelector('.p07-body');
+          body.innerHTML = '<span>' + img(KINDS[i]) + '</span><b>' + d.chips[i] + '</b>';
+          fit(body.querySelector('b'));
+        });
+        tiles.appendChild(btn);
+      });
+
       $('p07Cards').innerHTML = '';
       d.opts.forEach((o, i) => {
-        const b = makeCardBtn(img('c' + (i + 1)) + '<span>' + o[0] + '</span>', '', () => pick(!!o[1]), { html: true, parent: $('p07Cards') });
+        makeCardBtn(img('c' + (i + 1)) + '<span>' + o[0] + '</span>', '', () => pick(!!o[1]), { html: true, parent: $('p07Cards') });
       });
     }
 
@@ -160,7 +171,6 @@
       else $('p07Done').classList.remove('is-off');
     });
 
-    $('p07Next').addEventListener('click', startAnswer);
     startQ();
   })();
   </script>
