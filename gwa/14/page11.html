@@ -19,10 +19,19 @@
         0%,100%{transform:translateY(0)}
         50%{transform:translateY(-3px)}
       }
+      @keyframes p11KartBrake{
+        0%{transform:translateY(0) rotate(0deg) scale(1)}
+        25%{transform:translateY(-10px) rotate(-5deg) scale(1.04,.96)}
+        55%{transform:translateY(6px) rotate(4deg) scale(.97,1.03)}
+        80%{transform:translateY(-3px) rotate(-2deg) scale(1.01,.99)}
+        100%{transform:translateY(0) rotate(0deg) scale(1)}
+      }
       .p11-cart{position:absolute;left:50%;top:470px;transform:translateX(-50%);width:380px;height:380px;z-index:5;transition:all .7s cubic-bezier(.25,1,.5,1);pointer-events:none}
       .p11-cart.go-left{left:28%;top:385px;transform:translateX(-50%) scale(.78)}
       .p11-cart.go-right{left:72%;top:385px;transform:translateX(-50%) scale(.78)}
+      .p11-cart.go-right-half{left:61%;top:427.5px;transform:translateX(-50%) scale(.89)}
       .p11-cart-inner{position:relative;width:100%;height:100%;animation:p11KartVibe .32s ease-in-out infinite}
+      .p11-cart-inner.is-brake{animation:p11KartBrake .38s ease-out}
       .p11-cart-vehicle{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;display:block;z-index:1}
       .p11-cart-item{position:absolute;left:50%;top:155px;transform:translateX(-50%);width:135px;height:180px;object-fit:contain;z-index:2;filter:drop-shadow(0 4px 8px rgba(0,0,0,.45))}
       .p11-cart-item.is-pulse{animation:p11ItemPulse .75s ease-in-out 3}
@@ -386,8 +395,8 @@
         roundBadge.textContent = '3 ROUND';
         raceBg.className = 'p11-race-bg is-r3';
         station.className = 'p11-station';
-        station.src = 'img/p11_bin_carton.png';
-        station.alt = '종이팩 분리배출함';
+        station.src = 'img/p11_bin_pet.png';
+        station.alt = '페트병 분리배출함';
         cartItem.className = 'p11-cart-item';
         cartItem.src = 'img/p11_item_carton.png';
         cartItem.style.opacity = '1';
@@ -563,6 +572,9 @@
               animatePinAlongTrack(PIN_CHECKPOINTS.R3_CURVE2, 700);
               setTimeout(function () {
                 cart.className = 'p11-cart';
+                station.className = 'p11-station';
+                station.src = 'img/p11_bin_glass.png';
+                station.alt = '유리병 분리배출함';
                 curStep = 2;
                 qsign.textContent = '유리로 만들어졌나요?';
               }, 700);
@@ -573,12 +585,25 @@
             }
           } else if (curStep === 2) {
             if (ans === 'no') {
+              var cartInner = cart.querySelector('.p11-cart-inner');
               btnYes.disabled = true;
               btnNo.disabled = true;
-              try {
-                sndBrake.currentTime = 0;
-                sndBrake.play();
-              } catch (e) {}
+              btnYes.style.pointerEvents = 'none';
+              btnNo.style.pointerEvents = 'none';
+              cart.classList.add('go-right-half');
+              animatePinAlongTrack(PIN_CHECKPOINTS.R3_CURVE2 + 22, 350);
+              setTimeout(function () {
+                try {
+                  sndBrake.currentTime = 0;
+                  sndBrake.play();
+                } catch (e) {}
+                if (cartInner) cartInner.classList.add('is-brake');
+              }, 350);
+              setTimeout(function () {
+                if (cartInner) cartInner.classList.remove('is-brake');
+                cart.classList.remove('go-right-half');
+                animatePinAlongTrack(PIN_CHECKPOINTS.R3_CURVE2, 450);
+              }, 750);
               setTimeout(function () {
                 try {
                   sndWarn.currentTime = 0;
@@ -587,7 +612,9 @@
                 r3WarnModal.classList.remove('is-off');
                 btnYes.disabled = false;
                 btnNo.disabled = false;
-              }, 700);
+                btnYes.style.pointerEvents = '';
+                btnNo.style.pointerEvents = '';
+              }, 1250);
             } else {
               SFX.play('wrong');
               wrongMsg.innerHTML = '우유갑은 유리가 아니에요!<br>‘아니오’를 선택해 볼까요?';

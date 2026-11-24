@@ -188,6 +188,7 @@
     const slots = Array.from(document.querySelectorAll('.p12-slot'));
     let ri = 0;
     let wrong = 0;
+    let lockPlayed = false;
 
     const slotAt = (x, y) => slots.find((s) => !s.dataset.full && (() => { const r = s.getBoundingClientRect(); return x >= r.left - 20 && x <= r.right + 20 && y >= r.top - 20 && y <= r.bottom + 20; })()) || null;
     const inMan = (x, y) => { const r = document.querySelector('.p12-man').getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; };
@@ -223,13 +224,9 @@
       $('p12Cards').innerHTML = '';
       slots.forEach((s) => { s.innerHTML = ''; delete s.dataset.full; });
       $('p12Ok').disabled = true;
-      if (ri === 0) {
+      if (ri === 0 && !lockPlayed) {
         $('p12L1').src = 'img/p13_lock1_on.png';
         $('p12L2').src = 'img/p13_lock2_on.png';
-        lockTimers = [
-          setTimeout(() => { $('p12L1').src = 'img/p13_lock1_off.png'; playLock(); }, 600),
-          setTimeout(() => { $('p12L2').src = 'img/p13_lock2_off.png'; playLock(); }, 1200)
-        ];
       }
       const cards = shuffleArray(r.cards.map((c) => ({ src: c, ord: c[2] }))).map((c) => {
         const el = document.createElement('div');
@@ -322,7 +319,16 @@
       $('p12Ans').classList.remove('is-off');
     });
     $('p12AnsOk').addEventListener('click', () => $('p12Ans').classList.add('is-off'));
-    $('p12InfoOk').addEventListener('click', () => $('p12Info').classList.add('is-off'));
+    $('p12InfoOk').addEventListener('click', () => {
+      $('p12Info').classList.add('is-off');
+      if (ri === 0 && !lockPlayed) {
+        lockPlayed = true;
+        lockTimers = [
+          setTimeout(() => { $('p12L1').src = 'img/p13_lock1_off.png'; playLock(); }, 400),
+          setTimeout(() => { $('p12L2').src = 'img/p13_lock2_off.png'; playLock(); }, 1200)
+        ];
+      }
+    });
     $('p12Next').addEventListener('click', () => {
       if (ri === ROUNDS.length - 1) { location.href = 'page14.html'; return; }
       ri += 1;

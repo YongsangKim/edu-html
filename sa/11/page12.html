@@ -81,8 +81,9 @@
     const node = (i, j) => [XS[i], YS[j]];
     const CHAR = {
       start: { src: 'img/p12_char_start.png', h: 185, dx: 120, dy: 32 },
+      idle: { src: 'img/p12_char_start.png', h: 185, dx: 0, dy: 32 },
       move: { src: 'img/p12_char_move.png', h: 185, dx: 0, dy: 32 },
-      goal: { src: 'img/p12_char_goal.png', h: 205, dx: -77, dy: 45 }
+      goal: { src: 'img/p12_char_goal.png', h: 205, dx: 0, dy: 32 }
     };
     const MOVES = ['R', 'U', 'R', 'U', 'U', 'R', 'R'];
     const PTS = [[0, 3]];
@@ -176,9 +177,10 @@
       const a = node(...PTS[step - 1]), c = node(...PTS[step]);
       $('p12Trail').insertAdjacentHTML('beforeend', '<path class="p12-trail" pathLength="1" d="M' + a[0] + ',' + a[1] + ' L' + c[0] + ',' + c[1] + '" fill="none" stroke="#4b1fb8" stroke-width="12" stroke-linecap="round"/>');
       $('p12Dots').insertAdjacentHTML('beforeend', '<circle class="p12-dot" cx="' + c[0] + '" cy="' + c[1] + '" r="11" fill="#4b1fb8"/>');
-      setChar(step < QUESTIONS.length ? 'move' : 'goal', c);
+      setChar('move', c);
       setTimeout(() => {
-        if (step < QUESTIONS.length) { showQuestion(); return; }
+        if (step < QUESTIONS.length) { setChar('idle'); showQuestion(); return; }
+        setChar('goal');
         qBox.classList.add('is-off');
         optsBox.classList.add('is-off');
         $('p12Arrive').classList.remove('is-off');
