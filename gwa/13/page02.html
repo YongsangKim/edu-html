@@ -8,8 +8,7 @@
     <style>
         .p02-ask.ask-pill{position:absolute;left:60px;top:38px;transform:none;width:1300px;height:100px;margin:0;padding:0 28px;box-sizing:border-box;display:flex;align-items:center;justify-content:center}
         .p02-ask.ask-pill span{font-size:58px;line-height:1;letter-spacing:-0.06em;white-space:nowrap}
-        .p02-stars.jh-stars{left:auto;right:60px;top:38px;width:460px;height:100px;gap:14px;border-radius:50px}
-        .p02-stars .find-star{width:64px;height:62px}
+        .p02-stars.jh-stars{left:auto;right:60px;top:38px;width:460px;height:100px;gap:10px;border-radius:50px;background:#023b95;border-color:#91b9e7}
         .p02-hints{position:absolute;left:60px;top:190px;width:1800px;height:210px;display:flex;gap:34px}
         .p02-hc{flex:1;position:relative;box-sizing:border-box;border-radius:28px;border:solid 6px var(--c-ink);background:var(--c-white);box-shadow:0 8px 0 rgba(13,16,77,.12);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 24px 16px;font-family:'Cafe24 Ssurround';color:var(--c-ink);letter-spacing:-0.04em;transition:transform .2s,box-shadow .2s}
         .p02-hc b{position:absolute;left:50%;top:-3px;transform:translate(-50%,-50%);height:62px;padding:0 36px;box-sizing:border-box;display:flex;align-items:center;border-radius:31px;background:var(--c-navy);color:#fff;font-weight:400;font-size:42px;border:solid 5px var(--c-ink);white-space:nowrap}
@@ -23,9 +22,11 @@
         .p02-hc.is-back::before{content:'';position:absolute;left:50%;top:50%;width:198px;height:566px;transform:translate(-50%,-50%) rotate(90deg);background:url('../../sa/08/img/p02_card_back.png') center/cover no-repeat;border-radius:22px;pointer-events:none;z-index:0}
         .p02-hc.is-back b{top:-3px;background:#48159c;color:#fff;border-color:#c7c3ff;z-index:2}
         .p02-hc.is-back p{position:relative;z-index:1;padding:0;background:none;color:#48159c;font-size:50px;-webkit-text-stroke:10px #fff;paint-order:stroke fill}
-        .p02-pn{position:absolute;left:60px;top:436px;width:1800px;height:494px;box-sizing:border-box;border-radius:30px;background:#266cc8;border:solid 5px #8db4ea;box-shadow:0 10px 0 rgba(13,16,77,.16);display:flex;align-items:center;justify-content:center;gap:42px;padding:0 44px}
+        .p02-pn{position:absolute;left:60px;top:436px;width:1800px;height:494px;box-sizing:border-box;border-radius:30px;background:#266cc8;border:solid 5px var(--c-navy);box-shadow:0 10px 0 rgba(13,16,77,.16);display:flex;align-items:center;justify-content:center;gap:42px;padding:0 44px}
         .p02-ob{flex:1;min-width:0;height:404px;padding:24px 10px 18px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;font-size:58px;line-height:1.05;letter-spacing:-0.06em}
         .p02-ob img{width:236px;height:236px;object-fit:contain;pointer-events:none;margin:auto 0}
+        .p02-ob:hover img{filter:url(#p02ScrHover)}
+        .p02-ob:active img,.p02-ob.is-selected img,.p02-ob.is-pressed img{filter:url(#p02ScrActive) drop-shadow(0 0 10px #ecbeff) drop-shadow(0 0 4px #ecbeff)}
         .p02-ob span{font-size:58px;line-height:1.05;color:inherit;white-space:nowrap}
         .p02-ob.is-off{opacity:.35;filter:grayscale(1);cursor:default;pointer-events:none}
         .p02-wrong,.p02-done{z-index:30}
@@ -33,6 +34,20 @@
 </head>
 <body>
   <div id="page-fade"></div>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <filter id="p02ScrHover" color-interpolation-filters="sRGB">
+        <feFlood flood-color="#8278ff" flood-opacity="0.5" result="c"/>
+        <feComposite in="c" in2="SourceAlpha" operator="in" result="m"/>
+        <feBlend in="SourceGraphic" in2="m" mode="screen"/>
+      </filter>
+      <filter id="p02ScrActive" color-interpolation-filters="sRGB">
+        <feFlood flood-color="#d168fb" flood-opacity="0.5" result="c"/>
+        <feComposite in="c" in2="SourceAlpha" operator="in" result="m"/>
+        <feBlend in="SourceGraphic" in2="m" mode="screen"/>
+      </filter>
+    </defs>
+  </svg>
   <div id="viewport" class="viewport">
     <div id="stage-spacer">
       <div id="stage" class="stage">
